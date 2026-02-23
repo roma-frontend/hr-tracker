@@ -79,7 +79,7 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
         </div>
 
         {/* Label */}
-        <div className="text-sm text-blue-200/70 font-medium">{label}</div>
+        <div className="text-sm text-[#f7e7ce]/70 font-medium">{label}</div>
 
         {/* Background decoration */}
         <div

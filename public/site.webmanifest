@@ -1,0 +1,27 @@
+{
+  "name": "HR Leave Monitor",
+  "short_name": "HRLeave",
+  "description": "Modern HR Leave Monitoring System for managing vacations, sick leaves, and more",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020817",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "orientation": "portrait-primary"
+}

@@ -1,82 +1,121 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial, Ring } from '@react-three/drei';
 import * as THREE from 'three';
 
 export function SphereMesh() {
-  const sphereRef = useRef<THREE.Mesh>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
-  const ring2Ref = useRef<THREE.Mesh>(null);
+  const particlesRef = useRef<THREE.Points>(null);
+  const starsRef = useRef<THREE.Points>(null);
+
+  // Create floating golden particles
+  const particles = useMemo(() => {
+    const count = 80;
+    const positions = new Float32Array(count * 3);
+    const sizes = new Float32Array(count);
+    const colors = new Float32Array(count * 3);
+    
+    const goldColor = new THREE.Color('#d4af37');
+    const champagneColor = new THREE.Color('#f4e5a8');
+    const bronzeColor = new THREE.Color('#cd7f32');
+    
+    for (let i = 0; i < count; i++) {
+      // Random positions in a volume
+      const radius = 2 + Math.random() * 3;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      
+      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = radius * Math.cos(phi);
+      
+      // Random sizes
+      sizes[i] = Math.random() * 0.06 + 0.02;
+      
+      // Mix of gold tones
+      const colorChoice = Math.random();
+      const color = colorChoice < 0.5 ? goldColor : colorChoice < 0.8 ? champagneColor : bronzeColor;
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
+    
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    
+    return geometry;
+  }, []);
+
+  // Create distant stars
+  const stars = useMemo(() => {
+    const count = 200;
+    const positions = new Float32Array(count * 3);
+    
+    for (let i = 0; i < count; i++) {
+      const radius = 8 + Math.random() * 10;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      
+      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = radius * Math.cos(phi);
+    }
+    
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    return geometry;
+  }, []);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    if (sphereRef.current) {
-      sphereRef.current.rotation.y = t * 0.15;
-      sphereRef.current.rotation.x = Math.sin(t * 0.1) * 0.1;
+    
+    // Slow rotation for particles
+    if (particlesRef.current) {
+      particlesRef.current.rotation.y = t * 0.03;
+      particlesRef.current.rotation.x = Math.sin(t * 0.02) * 0.1;
     }
-    if (ringRef.current) {
-      ringRef.current.rotation.z = t * 0.2;
-      ringRef.current.rotation.x = Math.PI / 3 + Math.sin(t * 0.05) * 0.05;
-    }
-    if (ring2Ref.current) {
-      ring2Ref.current.rotation.z = -t * 0.15;
-      ring2Ref.current.rotation.x = Math.PI / 5 + Math.sin(t * 0.07) * 0.05;
+    
+    // Very slow rotation for stars
+    if (starsRef.current) {
+      starsRef.current.rotation.y = t * 0.01;
     }
   });
 
   return (
     <>
-      {/* Ambient + point lights */}
-      <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={2} color="#60a5fa" />
-      <pointLight position={[-10, -10, -5]} intensity={1.5} color="#a78bfa" />
-      <pointLight position={[0, 5, -10]} intensity={1} color="#34d399" />
+      {/* Soft ambient lighting */}
+      <ambientLight intensity={0.2} />
+      
+      {/* Subtle golden accent lights */}
+      <pointLight position={[3, 3, 3]} intensity={0.5} color="#d4af37" />
+      <pointLight position={[-3, -3, -3]} intensity={0.3} color="#f4e5a8" />
 
-      {/* Main distorted sphere */}
-      <Sphere ref={sphereRef} args={[1.8, 128, 128]}>
-        <MeshDistortMaterial
-          color="#1e3a8a"
-          attach="material"
-          distort={0.35}
-          speed={1.5}
-          roughness={0.1}
-          metalness={0.9}
-          emissive="#1d4ed8"
-          emissiveIntensity={0.4}
-        />
-      </Sphere>
-
-      {/* Glowing wireframe overlay */}
-      <Sphere args={[1.85, 32, 32]}>
-        <meshBasicMaterial
-          color="#60a5fa"
-          wireframe
+      {/* Floating golden particles */}
+      <points ref={particlesRef} geometry={particles}>
+        <pointsMaterial
+          size={0.05}
+          vertexColors
           transparent
-          opacity={0.08}
+          opacity={0.8}
+          sizeAttenuation
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
         />
-      </Sphere>
+      </points>
 
-      {/* Outer glow sphere */}
-      <Sphere args={[2.1, 32, 32]}>
-        <meshBasicMaterial
-          color="#7c3aed"
+      {/* Distant stars - very subtle */}
+      <points ref={starsRef} geometry={stars}>
+        <pointsMaterial
+          size={0.015}
+          color="#f4e5a8"
           transparent
-          opacity={0.04}
-          side={THREE.BackSide}
+          opacity={0.3}
+          sizeAttenuation
         />
-      </Sphere>
-
-      {/* Orbiting ring 1 */}
-      <Ring ref={ringRef} args={[2.4, 2.6, 64]} rotation={[Math.PI / 3, 0, 0]}>
-        <meshBasicMaterial color="#60a5fa" transparent opacity={0.3} side={THREE.DoubleSide} />
-      </Ring>
-
-      {/* Orbiting ring 2 */}
-      <Ring ref={ring2Ref} args={[2.8, 2.95, 64]} rotation={[Math.PI / 5, 0.5, 0]}>
-        <meshBasicMaterial color="#a78bfa" transparent opacity={0.2} side={THREE.DoubleSide} />
-      </Ring>
+      </points>
     </>
   );
 }

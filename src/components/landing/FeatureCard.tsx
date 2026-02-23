@@ -91,7 +91,7 @@ export default function FeatureCard({
             <h3 className="text-xl font-bold text-white mb-2 group-hover:text-white transition-colors">
               {title}
             </h3>
-            <p className="text-blue-200/60 text-sm leading-relaxed group-hover:text-blue-100/70 transition-colors">
+            <p className="text-[#f7e7ce]/60 text-sm leading-relaxed group-hover:text-[#f7e7ce]/80 transition-colors">
               {description}
             </p>
           </div>

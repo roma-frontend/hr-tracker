@@ -1,0 +1,11 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin and private sections
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /settings/
+
+# Sitemap
+Sitemap: https://hrleave.com/sitemap.xml

@@ -46,11 +46,18 @@ const ORB_SIZES = [5, 7, 4, 8, 6, 5, 7, 4];
 
 export default function FloatingParticles() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const [isReduced, setIsReduced] = useState(false);
+  
+  useEffect(() => { 
+    setMounted(true);
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setIsReduced(mediaQuery.matches);
+  }, []);
 
-  const particles = generateParticles(60);
+  const particles = generateParticles(isReduced ? 20 : 60);
 
-  if (!mounted) return null;
+  if (!mounted || isReduced) return null;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">

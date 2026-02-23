@@ -1,5 +1,47 @@
 @import "tailwindcss";
 
+/* Premium Restaurant Theme - Deep Black & Gold */
+:root {
+  --color-premium-black: #000000;
+  --color-rich-black: #0a0a0a;
+  --color-deep-charcoal: #0f0f0f;
+  --color-gold: #d4af37;
+  --color-gold-light: #f4e5a8;
+  --color-gold-dark: #aa8b2e;
+  --color-bronze: #cd7f32;
+  --color-silver: #c0c0c0;
+  --color-champagne: #f7e7ce;
+}
+
+body {
+  background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #0f0f0f 100%);
+  background-attachment: fixed;
+}
+
+/* Skip to content link - hidden by default, visible on focus */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
 /* ── Color Scheme ──────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
