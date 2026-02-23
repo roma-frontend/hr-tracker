@@ -10,6 +10,7 @@
 
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
+import type * as faceRecognition from "../faceRecognition.js";
 import type * as leaves from "../leaves.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
@@ -24,6 +25,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   auth: typeof auth;
+  faceRecognition: typeof faceRecognition;
   leaves: typeof leaves;
   migrations: typeof migrations;
   notifications: typeof notifications;

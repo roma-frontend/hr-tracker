@@ -105,18 +105,31 @@ export async function registerAction(formData: FormData) {
   };
 }
 
-export async function loginAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+export async function loginAction(formData: FormData | { email: string; password: string; isFaceLogin?: boolean }) {
+  let email: string;
+  let password: string;
+  let isFaceLogin = false;
 
-  if (!email || !password) throw new Error("Email and password required");
+  if (formData instanceof FormData) {
+    email = formData.get("email") as string;
+    password = formData.get("password") as string;
+  } else {
+    email = formData.email;
+    password = formData.password;
+    isFaceLogin = formData.isFaceLogin || false;
+  }
+
+  // For Face ID login, we don't need password validation
+  if (!isFaceLogin && (!email || !password)) {
+    throw new Error("Email and password required");
+  }
 
   const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
   const result = await convexMutation("auth:login", {
     email,
-    password, // Convex handles hashing internally
+    password: password || "face-login-bypass", // Convex handles hashing internally
     sessionToken,
     sessionExpiry,
   });

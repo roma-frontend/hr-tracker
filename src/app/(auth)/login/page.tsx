@@ -4,10 +4,11 @@ import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, Loader2, Fingerprint, AlertCircle, Building2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2, Fingerprint, AlertCircle, Building2, ScanFace } from "lucide-react";
 import { loginAction } from "@/actions/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
+import { FaceLogin } from "@/components/auth/FaceLogin";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loginMode, setLoginMode] = useState<"email" | "face">("email");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,21 +115,66 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* WebAuthn */}
-          <div className="mb-6">
-            <WebAuthnButton mode="login" onSuccess={handleWebAuthnSuccess} />
+          {/* Login Mode Tabs */}
+          <div className="flex gap-2 mb-6 p-1 rounded-xl" style={{ background: "var(--muted)" }}>
+            <button
+              type="button"
+              onClick={() => setLoginMode("email")}
+              className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                loginMode === "email" ? "shadow-sm" : ""
+              }`}
+              style={{
+                background: loginMode === "email" ? "var(--background)" : "transparent",
+                color: loginMode === "email" ? "var(--text-primary)" : "var(--text-muted)",
+              }}
+            >
+              <Mail className="w-4 h-4 inline mr-2" />
+              Email
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoginMode("face")}
+              className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                loginMode === "face" ? "shadow-sm" : ""
+              }`}
+              style={{
+                background: loginMode === "face" ? "var(--background)" : "transparent",
+                color: loginMode === "face" ? "var(--text-primary)" : "var(--text-muted)",
+              }}
+            >
+              <ScanFace className="w-4 h-4 inline mr-2" />
+              Face ID
+            </button>
           </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-            <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              or continue with email
-            </span>
-            <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-          </div>
+          {/* Face ID Login */}
+          {loginMode === "face" && (
+            <div className="mb-6">
+              <FaceLogin />
+            </div>
+          )}
 
-          {/* Form */}
+          {/* Email Login */}
+          {loginMode === "email" && (
+            <>
+              {/* WebAuthn */}
+              <div className="mb-6">
+                <WebAuthnButton mode="login" onSuccess={handleWebAuthnSuccess} />
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+                <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+                  or continue with email
+                </span>
+                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+              </div>
+            </>
+          )}
+
+          {/* Form - Only show for email mode */}
+          {loginMode === "email" && (
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-1.5">
@@ -234,6 +281,7 @@ export default function LoginPage() {
               )}
             </motion.button>
           </form>
+          )}
 
           {/* Footer */}
           <p className="text-center text-sm mt-6" style={{ color: "var(--text-muted)" }}>

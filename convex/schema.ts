@@ -26,6 +26,10 @@ export default defineSchema({
     familyLeaveBalance: v.number(),
     // WebAuthn
     webauthnChallenge: v.optional(v.string()),
+    // Face Recognition
+    faceDescriptor: v.optional(v.array(v.number())), // 128-dimensional face embedding
+    faceImageUrl: v.optional(v.string()), // Reference image for face
+    faceRegisteredAt: v.optional(v.number()),
     // Sessions
     sessionToken: v.optional(v.string()),
     sessionExpiry: v.optional(v.number()),

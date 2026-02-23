@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Save, Bell, Shield, Palette, Globe } from "lucide-react";
+import { Save, Bell, Shield, Palette, Globe, ScanFace } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,9 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
+import { FaceRegistration } from "@/components/auth/FaceRegistration";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
@@ -20,6 +23,14 @@ export default function SettingsPage() {
   const [pushNotifs, setPushNotifs] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showFaceRegistration, setShowFaceRegistration] = useState(false);
+
+  // Get face descriptor status
+  const faceData = useQuery(
+    api.faceRecognition.getFaceDescriptor,
+    user?.id ? { userId: user.id as any } : "skip"
+  );
+  const removeFaceRegistration = useMutation(api.faceRecognition.removeFaceRegistration);
 
   const handleSave = async () => {
     setSaving(true);
@@ -118,19 +129,19 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Security - Face ID */}
+      {/* Security - WebAuthn */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-[var(--primary)]" />
-            <CardTitle className="text-base">Security & Authentication</CardTitle>
+            <CardTitle className="text-base">Touch ID / Fingerprint</CardTitle>
           </div>
-          <CardDescription>Manage biometric authentication for quick login</CardDescription>
+          <CardDescription>Register Touch ID or fingerprint for quick login</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <p className="text-sm text-[var(--text-muted)]">
-              Enable Face ID or Touch ID for faster and more secure login
+              Enable Touch ID or fingerprint for faster and more secure login
             </p>
             <WebAuthnButton
               mode="register"
@@ -139,6 +150,82 @@ export default function SettingsPage() {
                 toast.success("Biometric authentication registered successfully!");
               }}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Face ID Registration */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ScanFace className="w-4 h-4 text-[var(--primary)]" />
+            <CardTitle className="text-base">Face ID</CardTitle>
+          </div>
+          <CardDescription>Register your face for secure login</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {faceData?.faceDescriptor ? (
+              <>
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-[var(--surface-hover)]">
+                    {faceData.faceImageUrl && (
+                      <img
+                        src={faceData.faceImageUrl}
+                        alt="Registered face"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                      ✓ Face ID Registered
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">
+                      Registered on {new Date(faceData.faceRegisteredAt || 0).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to remove Face ID registration?")) {
+                      await removeFaceRegistration({ userId: user?.id as any });
+                      toast.success("Face ID removed successfully");
+                    }
+                  }}
+                  className="w-full"
+                >
+                  Remove Face ID
+                </Button>
+              </>
+            ) : (
+              <>
+                {!showFaceRegistration ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Register your face to enable quick and secure login with Face ID
+                    </p>
+                    <Button
+                      onClick={() => setShowFaceRegistration(true)}
+                      className="w-full"
+                    >
+                      <ScanFace className="w-4 h-4 mr-2" />
+                      Register Face ID
+                    </Button>
+                  </div>
+                ) : (
+                  <FaceRegistration
+                    userId={user?.id as any}
+                    onSuccess={() => {
+                      setShowFaceRegistration(false);
+                      toast.success("Face ID registered successfully!");
+                    }}
+                    onCancel={() => setShowFaceRegistration(false)}
+                  />
+                )}
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
