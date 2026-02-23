@@ -24,6 +24,8 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
   const [faceDetected, setFaceDetected] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<string>("");
 
   const registerFace = useMutation(api.faceRecognition.registerFace);
 
@@ -33,6 +35,22 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
       console.error("Failed to load face models:", err);
       toast.error("Failed to load face recognition models");
     });
+
+    // Get available cameras
+    async function getCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        console.log("Available cameras:", videoDevices);
+        setCameras(videoDevices);
+        if (videoDevices.length > 0) {
+          setSelectedCamera(videoDevices[0].deviceId);
+        }
+      } catch (err) {
+        console.error("Failed to enumerate devices:", err);
+      }
+    }
+    getCameras();
 
     return () => {
       // Cleanup webcam on unmount
@@ -44,21 +62,54 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
 
   const startWebcam = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480, facingMode: "user" },
-      });
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error("Camera access is not supported in this browser. Please use Chrome, Edge, or Firefox.");
+        return;
+      }
+
+      console.log("🎥 Requesting camera access...");
+      console.log("Selected camera:", selectedCamera);
+      
+      const constraints: MediaStreamConstraints = {
+        video: selectedCamera ? {
+          deviceId: { exact: selectedCamera },
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+        } : {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: "user" 
+        },
+      };
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      console.log("✅ Camera access granted");
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setIsWebcamActive(true);
         
-        // Start face detection loop
-        detectFaceLoop();
+        // Wait for video to load before starting detection
+        videoRef.current.onloadedmetadata = () => {
+          console.log("✅ Video metadata loaded, starting detection");
+          detectFaceLoop();
+        };
       }
-    } catch (error) {
-      console.error("Error accessing webcam:", error);
-      toast.error("Unable to access webcam. Please grant camera permissions.");
+    } catch (error: any) {
+      console.error("❌ Error accessing webcam:", error);
+      
+      if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
+        toast.error("Camera permission denied. Please allow camera access in your browser settings.");
+      } else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
+        toast.error("No camera found. Please connect a camera and try again.");
+      } else if (error.name === "NotReadableError" || error.name === "TrackStartError") {
+        toast.error("Camera is already in use by another application.");
+      } else {
+        toast.error(`Unable to access camera: ${error.message || "Unknown error"}`);
+      }
     }
   };
 
@@ -197,6 +248,26 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
             />
           )}
         </div>
+
+        {/* Camera Selection */}
+        {!isWebcamActive && !capturedImage && cameras.length > 1 && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[var(--text-secondary)]">
+              Select Camera:
+            </label>
+            <select
+              value={selectedCamera}
+              onChange={(e) => setSelectedCamera(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-base)] text-[var(--text-primary)]"
+            >
+              {cameras.map((camera) => (
+                <option key={camera.deviceId} value={camera.deviceId}>
+                  {camera.label || `Camera ${cameras.indexOf(camera) + 1}`}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Controls */}
         <div className="flex gap-3">

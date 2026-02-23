@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        video {
+            width: 100%;
+            max-width: 640px;
+            background: black;
+            border-radius: 8px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #0070f3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0051cc;
+        }
+        .log {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <h1>🎥 Camera Test Tool</h1>
+    <p>Простой тест для проверки доступа к камере</p>
+    
+    <button onclick="startCamera()">Start Camera</button>
+    <button onclick="stopCamera()">Stop Camera</button>
+    <button onclick="listDevices()">List Devices</button>
+    <button onclick="clearLog()">Clear Log</button>
+    
+    <div style="margin-top: 20px;">
+        <video id="video" autoplay playsinline></video>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        const video = document.getElementById('video');
+        const logDiv = document.getElementById('log');
+        let stream = null;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            logDiv.innerHTML = '';
+        }
+        
+        async function listDevices() {
+            try {
+                log('📋 Listing all media devices...', 'info');
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                
+                log(`Found ${devices.length} total devices`, 'success');
+                log(`Found ${videoDevices.length} video input devices (cameras)`, 'success');
+                
+                videoDevices.forEach((device, i) => {
+                    log(`Camera ${i + 1}: ${device.label || 'Unknown camera'} (${device.deviceId})`, 'info');
+                });
+                
+                if (videoDevices.length === 0) {
+                    log('❌ No cameras found! Please connect a camera.', 'error');
+                }
+            } catch (error) {
+                log(`❌ Error listing devices: ${error.message}`, 'error');
+            }
+        }
+        
+        async function startCamera() {
+            try {
+                log('🎥 Requesting camera access...', 'info');
+                
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    log('❌ getUserMedia not supported in this browser', 'error');
+                    return;
+                }
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    }
+                });
+                
+                log('✅ Camera access granted!', 'success');
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    log('✅ Video stream loaded successfully', 'success');
+                    log(`Video dimensions: ${video.videoWidth}x${video.videoHeight}`, 'info');
+                };
+                
+            } catch (error) {
+                log(`❌ Error: ${error.name} - ${error.message}`, 'error');
+                
+                if (error.name === 'NotAllowedError') {
+                    log('💡 Solution: Allow camera access in browser settings', 'info');
+                } else if (error.name === 'NotFoundError') {
+                    log('💡 Solution: Connect a camera or check camera connection', 'info');
+                } else if (error.name === 'NotReadableError') {
+                    log('💡 Solution: Close other apps using the camera', 'info');
+                }
+            }
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                stream = null;
+                log('🛑 Camera stopped', 'info');
+            } else {
+                log('ℹ️ Camera is not running', 'info');
+            }
+        }
+        
+        // Auto-list devices on load
+        window.onload = () => {
+            log('🚀 Camera Test Tool initialized', 'success');
+            log('Click "List Devices" to see available cameras', 'info');
+            log('Click "Start Camera" to test camera access', 'info');
+        };
+    </script>
+</body>
+</html>
