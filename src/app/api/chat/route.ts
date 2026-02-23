@@ -1,0 +1,90 @@
+import { openai } from '@ai-sdk/openai';
+import { streamText } from 'ai';
+
+// Remove edge runtime to see better errors
+// export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  try {
+    console.log('🤖 AI Chat request received');
+    const { messages } = await req.json();
+    console.log('📝 Messages count:', messages.length);
+
+  // Fetch user context
+  let userContext = '';
+  try {
+    const contextRes = await fetch(`${req.headers.get('origin')}/api/chat/context`, {
+      headers: {
+        cookie: req.headers.get('cookie') || '',
+      },
+    });
+    
+    if (contextRes.ok) {
+      const context = await contextRes.json();
+      userContext = `
+
+USER CONTEXT:
+- Name: ${context.user.name}
+- Role: ${context.user.role}
+- Department: ${context.user.department}
+
+LEAVE BALANCES:
+- Paid Leave: ${context.leaveBalances.paid} days
+- Sick Leave: ${context.leaveBalances.sick} days
+- Family Leave: ${context.leaveBalances.family} days
+
+STATISTICS:
+- Total days taken: ${context.stats.totalDaysTaken}
+- Pending requests: ${context.stats.pendingDays} days
+
+RECENT LEAVES:
+${context.recentLeaves.map((l: any) => `- ${l.type}: ${l.startDate} to ${l.endDate} (${l.status})`).join('\n')}
+
+TEAM AVAILABILITY (Next 30 days):
+${context.teamAvailability.map((l: any) => `- ${l.userName} (${l.department}): ${l.startDate} to ${l.endDate}`).join('\n')}
+`;
+    }
+  } catch (error) {
+    console.error('Failed to fetch context:', error);
+  }
+
+    console.log('🧠 Calling OpenAI...');
+    const result = await streamText({
+      model: openai('gpt-3.5-turbo'),
+      system: `You are an HR AI assistant for an office leave monitoring system.${userContext}
+
+Your role is to help employees with:
+- Information about their leave balances (use the data above!)
+- Questions about leave policies
+- Recommendations for optimal leave dates
+- Information about team availability
+- General HR questions
+
+IMPORTANT:
+- Always use the USER CONTEXT data when answering questions about the user's leave balance
+- Be specific with numbers from the context
+- Mention team members on leave when relevant
+- Be helpful, concise, and professional
+- Use emojis occasionally to be friendly 😊
+
+When user asks about their leave balance, you MUST use the exact numbers from LEAVE BALANCES above.
+When user asks who's on leave, you MUST check TEAM AVAILABILITY above.`,
+      messages,
+    });
+
+    console.log('✅ OpenAI response received');
+    return result.toTextStreamResponse();
+  } catch (error) {
+    console.error('❌ Chat API error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: error 
+      }), 
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+}
