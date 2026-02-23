@@ -81,7 +81,7 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
     >
       {/* Popular badge */}
       {tier.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#d4af37] to-[#f4e5a8] text-black text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#d4af37]/30">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#d4af37] to-[#f4e5a8] text-black text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#d4af37]/30 z-20">
           Most Popular
         </div>
       )}
@@ -178,7 +178,7 @@ export default function PricingPreview() {
       </motion.div>
 
       {/* Pricing cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto pt-8">
         {pricingTiers.map((tier, i) => (
           <PricingCard key={tier.name} tier={tier} delay={i * 0.15} />
         ))}
