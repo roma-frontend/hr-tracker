@@ -40,28 +40,32 @@ export function AttendanceDashboard() {
       value: monthlyStats.totalDays,
       icon: Calendar,
       color: "text-blue-500",
-      bgColor: "bg-blue-50 dark:bg-blue-950",
+      borderColor: "border-blue-500/30",
+      iconBg: "bg-blue-500/10",
     },
     {
       label: "Total Hours",
       value: `${monthlyStats.totalWorkedHours}h`,
       icon: Clock,
       color: "text-green-500",
-      bgColor: "bg-green-50 dark:bg-green-950",
+      borderColor: "border-green-500/30",
+      iconBg: "bg-green-500/10",
     },
     {
       label: "Punctuality",
       value: `${monthlyStats.punctualityRate}%`,
       icon: Target,
       color: "text-purple-500",
-      bgColor: "bg-purple-50 dark:bg-purple-950",
+      borderColor: "border-purple-500/30",
+      iconBg: "bg-purple-500/10",
     },
     {
       label: "Overtime",
       value: `${monthlyStats.totalOvertimeHours}h`,
       icon: Award,
       color: "text-orange-500",
-      bgColor: "bg-orange-50 dark:bg-orange-950",
+      borderColor: "border-orange-500/30",
+      iconBg: "bg-orange-500/10",
     },
   ];
 
@@ -80,14 +84,16 @@ export function AttendanceDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className={stat.bgColor}>
+              <Card className={`border ${stat.borderColor}`} style={{ background: "var(--background-card)" }}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-[var(--text-muted)] mb-1">{stat.label}</p>
                       <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
                     </div>
-                    <stat.icon className={`w-10 h-10 ${stat.color} opacity-50`} />
+                    <div className={`p-3 rounded-xl ${stat.iconBg}`}>
+                      <stat.icon className={`w-7 h-7 ${stat.color}`} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -98,9 +104,9 @@ export function AttendanceDashboard() {
 
       {/* Issues Alert */}
       {(Number(monthlyStats.lateDays) > 0 || Number(monthlyStats.earlyLeaveDays) > 0) && (
-        <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950 dark:border-orange-900">
+        <Card className="border border-orange-500/30" style={{ background: "var(--background-card)" }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
+            <CardTitle className="flex items-center gap-2 text-orange-500">
               <AlertTriangle className="w-5 h-5" />
               Attendance Issues
             </CardTitle>
@@ -108,12 +114,12 @@ export function AttendanceDashboard() {
           <CardContent>
             <div className="space-y-2">
               {Number(monthlyStats.lateDays) > 0 && (
-                <p className="text-orange-700 dark:text-orange-300">
+                <p className="text-orange-500">
                   • {monthlyStats.lateDays} late arrival(s) this month
                 </p>
               )}
               {Number(monthlyStats.earlyLeaveDays) > 0 && (
-                <p className="text-orange-700 dark:text-orange-300">
+                <p className="text-orange-500">
                   • {monthlyStats.earlyLeaveDays} early leave(s) this month
                 </p>
               )}
