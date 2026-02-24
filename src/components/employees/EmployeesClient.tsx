@@ -8,13 +8,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Filter, MoreVertical, Edit2, Trash2,
   Shield, Users, Briefcase, Mail, Phone, Building2,
-  Crown, UserCheck, User, AlertTriangle,
+  Crown, UserCheck, User, AlertTriangle, Eye,
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { EditEmployeeModal } from "./EditEmployeeModal";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const ROLE_CONFIG = {
   admin: { label: "Admin", icon: Crown, color: "#6366f1", bg: "rgba(99,102,241,0.1)" },
@@ -29,6 +30,7 @@ const TYPE_CONFIG = {
 
 export function EmployeesClient() {
   const { user } = useAuthStore();
+  const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
@@ -187,7 +189,8 @@ export function EmployeesClient() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: i * 0.03 }}
-                className="relative p-5 rounded-2xl border group"
+                onClick={() => router.push(`/employees/${emp._id}`)}
+                className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
                 style={{
                   background: "var(--card)",
                   borderColor: emp.isActive ? "var(--border)" : "rgba(239,68,68,0.2)",
@@ -198,7 +201,7 @@ export function EmployeesClient() {
                 {canManage && emp.email !== "romangulanyan@gmail.com" || isAdmin ? (
                   <div className="absolute top-4 right-4">
                     <button
-                      onClick={() => setOpenMenuId(openMenuId === emp._id ? null : emp._id)}
+                      onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === emp._id ? null : emp._id); }}
                       className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                       style={{ color: "var(--text-muted)", background: "var(--background-subtle)" }}
                     >
@@ -214,7 +217,14 @@ export function EmployeesClient() {
                           style={{ background: "var(--card)", borderColor: "var(--border)" }}
                         >
                           <button
-                            onClick={() => { setEditEmployee(emp as any); setOpenMenuId(null); }}
+                            onClick={(e) => { e.stopPropagation(); router.push(`/employees/${emp._id}`); setOpenMenuId(null); }}
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:opacity-80"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            <Eye className="w-3.5 h-3.5" /> View Profile
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setEditEmployee(emp as any); setOpenMenuId(null); }}
                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:opacity-80"
                             style={{ color: "var(--text-primary)" }}
                           >
@@ -222,7 +232,7 @@ export function EmployeesClient() {
                           </button>
                           {isAdmin && emp.role !== "admin" && (
                             <button
-                              onClick={() => { setDeleteConfirm(emp._id); setOpenMenuId(null); }}
+                              onClick={(e) => { e.stopPropagation(); setDeleteConfirm(emp._id); setOpenMenuId(null); }}
                               className="w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:opacity-80"
                               style={{ color: "#ef4444" }}
                             >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -59,14 +59,16 @@ export function ChatWidget() {
       
       if (!reader) throw new Error('No reader');
 
+      const assistantMessageId = (Date.now() + 1).toString();
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: assistantMessageId,
         role: 'assistant',
         content: '',
       };
 
       setMessages(prev => [...prev, assistantMessage]);
 
+      let accumulatedContent = ''; // Track accumulated content
       let previousChunk = '';
       let previousText = ''; // Track previous extracted text to avoid duplicates
 
@@ -135,24 +137,22 @@ export function ChatWidget() {
             }
             previousText = text;
             
-            // Update the message content immutably
-            setMessages(prev => {
-              const updated = prev.map(m => {
-                if (m.id === assistantMessage.id) {
-                  const newContent = m.content + text;
-                  // Also update the local reference
-                  assistantMessage.content = newContent;
-                  return { ...m, content: newContent };
-                }
-                return m;
-              });
-              return updated;
-            });
+            // Accumulate content locally
+            accumulatedContent += text;
+            
+            // Update the message content immutably with accumulated content
+            setMessages(prev => 
+              prev.map(m => 
+                m.id === assistantMessageId 
+                  ? { ...m, content: accumulatedContent }
+                  : m
+              )
+            );
           }
         }
       }
       
-      console.log('🏁 Final message:', assistantMessage.content);
+      console.log('🏁 Final message:', accumulatedContent);
     } catch (err) {
       console.error('❌ Chat error:', err);
       setError(err instanceof Error ? err.message : 'Failed to send message');

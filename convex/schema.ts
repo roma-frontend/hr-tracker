@@ -109,4 +109,195 @@ export default defineSchema({
     ip: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_user", ["userId"]),
+
+  // SLA Configuration
+  slaConfig: defineTable({
+    // SLA targets in hours
+    targetResponseTime: v.number(), // e.g., 24 hours
+    warningThreshold: v.number(), // e.g., 18 hours (75% of target)
+    criticalThreshold: v.number(), // e.g., 22 hours (90% of target)
+    // Business hours configuration
+    businessHoursOnly: v.boolean(),
+    businessStartHour: v.number(), // e.g., 9
+    businessEndHour: v.number(), // e.g., 17
+    excludeWeekends: v.boolean(),
+    // Notification settings
+    notifyOnWarning: v.boolean(),
+    notifyOnCritical: v.boolean(),
+    notifyOnBreach: v.boolean(),
+    // Metadata
+    updatedBy: v.id("users"),
+    updatedAt: v.number(),
+  }),
+
+  // SLA Metrics History
+  slaMetrics: defineTable({
+    leaveRequestId: v.id("leaveRequests"),
+    submittedAt: v.number(),
+    respondedAt: v.optional(v.number()),
+    responseTimeHours: v.optional(v.number()),
+    targetResponseTime: v.number(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("on_time"),
+      v.literal("breached")
+    ),
+    slaScore: v.optional(v.number()),
+    warningTriggered: v.boolean(),
+    criticalTriggered: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_leave", ["leaveRequestId"])
+    .index("by_status", ["status"])
+    .index("by_submitted", ["submittedAt"]),
+
+  // Employee Profiles
+  employeeProfiles: defineTable({
+    userId: v.id("users"),
+    biography: v.optional(v.object({
+      education: v.optional(v.array(v.string())),
+      certifications: v.optional(v.array(v.string())),
+      workHistory: v.optional(v.array(v.string())),
+      skills: v.optional(v.array(v.string())),
+      languages: v.optional(v.array(v.string())),
+    })),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  // Employee Documents
+  employeeDocuments: defineTable({
+    userId: v.id("users"),
+    uploaderId: v.id("users"),
+    category: v.union(
+      v.literal("resume"),
+      v.literal("contract"),
+      v.literal("certificate"),
+      v.literal("performance_review"),
+      v.literal("id_document"),
+      v.literal("other")
+    ),
+    fileName: v.string(),
+    fileUrl: v.string(),
+    fileSize: v.number(),
+    description: v.optional(v.string()),
+    uploadedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  // Employee Notes (Manager feedback)
+  employeeNotes: defineTable({
+    employeeId: v.id("users"),
+    authorId: v.id("users"),
+    type: v.union(
+      v.literal("performance"),
+      v.literal("behavior"),
+      v.literal("achievement"),
+      v.literal("concern"),
+      v.literal("general")
+    ),
+    visibility: v.union(
+      v.literal("private"),
+      v.literal("hr_only"),
+      v.literal("manager_only"),
+      v.literal("employee_visible")
+    ),
+    content: v.string(),
+    sentiment: v.union(
+      v.literal("positive"),
+      v.literal("neutral"),
+      v.literal("negative")
+    ),
+    tags: v.array(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_employee", ["employeeId"])
+    .index("by_author", ["authorId"]),
+
+  // Performance Metrics
+  performanceMetrics: defineTable({
+    userId: v.id("users"),
+    updatedBy: v.id("users"),
+    // Attendance metrics
+    punctualityScore: v.number(),
+    absenceRate: v.number(),
+    lateArrivals: v.number(),
+    // Performance metrics
+    kpiScore: v.number(),
+    projectCompletion: v.number(),
+    deadlineAdherence: v.number(),
+    // Collaboration metrics
+    teamworkRating: v.number(),
+    communicationScore: v.number(),
+    conflictIncidents: v.number(),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  // Time Tracking (Check-In/Check-Out)
+  timeTracking: defineTable({
+    userId: v.id("users"),
+    checkInTime: v.number(), // timestamp when employee arrived
+    checkOutTime: v.optional(v.number()), // timestamp when employee left
+    scheduledStartTime: v.number(), // 9:00 AM in timestamp
+    scheduledEndTime: v.number(), // 6:00 PM in timestamp
+    // Calculated fields
+    isLate: v.boolean(), // arrived after 9:00
+    lateMinutes: v.optional(v.number()), // how many minutes late
+    isEarlyLeave: v.boolean(), // left before 18:00
+    earlyLeaveMinutes: v.optional(v.number()), // how many minutes early
+    overtimeMinutes: v.optional(v.number()), // worked extra hours
+    totalWorkedMinutes: v.optional(v.number()), // total time worked
+    status: v.union(
+      v.literal("checked_in"), // currently at work
+      v.literal("checked_out"), // finished for the day
+      v.literal("absent") // didn't show up
+    ),
+    date: v.string(), // "2026-02-24" for easy querying by day
+    notes: v.optional(v.string()), // any notes about the day
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_date", ["date"])
+    .index("by_user_date", ["userId", "date"])
+    .index("by_status", ["status"]),
+
+  // Supervisor Ratings
+  supervisorRatings: defineTable({
+    employeeId: v.id("users"),
+    supervisorId: v.id("users"),
+    // Rating categories (1-5 scale)
+    qualityOfWork: v.number(), // 1-5
+    efficiency: v.number(), // 1-5
+    teamwork: v.number(), // 1-5
+    initiative: v.number(), // 1-5
+    communication: v.number(), // 1-5
+    reliability: v.number(), // 1-5
+    // Overall
+    overallRating: v.number(), // calculated average
+    // Text feedback
+    strengths: v.optional(v.string()),
+    areasForImprovement: v.optional(v.string()),
+    generalComments: v.optional(v.string()),
+    // Period
+    ratingPeriod: v.string(), // e.g., "2026-02" for February 2026
+    createdAt: v.number(),
+  })
+    .index("by_employee", ["employeeId"])
+    .index("by_supervisor", ["supervisorId"])
+    .index("by_period", ["ratingPeriod"]),
+
+  // Work Schedule Configuration
+  workSchedule: defineTable({
+    userId: v.id("users"),
+    // Default work hours
+    startTime: v.string(), // "09:00"
+    endTime: v.string(), // "18:00"
+    // Working days (0 = Sunday, 1 = Monday, etc.)
+    workingDays: v.array(v.number()), // e.g., [1,2,3,4,5] for Mon-Fri
+    // Timezone
+    timezone: v.string(), // e.g., "Asia/Yerevan"
+    isActive: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
 });

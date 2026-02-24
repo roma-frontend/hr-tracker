@@ -1,0 +1,274 @@
+import { v } from "convex/values";
+import { query } from "./_generated/server";
+
+// ── Calculate Employee Score ──────────────────────────────────────────────
+export const calculateEmployeeScore = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+
+    // Get performance metrics
+    const metrics = await ctx.db
+      .query("performanceMetrics")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .first();
+
+    // Get leave history
+    const leaves = await ctx.db
+      .query("leaveRequests")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    // Get manager notes
+    const notes = await ctx.db
+      .query("employeeNotes")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.userId))
+      .collect();
+
+    // Calculate scores
+    const performanceScore = metrics ? calculatePerformanceScore(metrics) : 50;
+    const attendanceScore = calculateAttendanceScore(metrics, leaves);
+    const behaviorScore = calculateBehaviorScore(notes);
+    const leaveHistoryScore = calculateLeaveHistoryScore(leaves, user);
+
+    const overallScore = Math.round(
+      performanceScore * 0.35 +
+      attendanceScore * 0.25 +
+      behaviorScore * 0.25 +
+      leaveHistoryScore * 0.15
+    );
+
+    return {
+      overallScore,
+      breakdown: {
+        performance: performanceScore,
+        attendance: attendanceScore,
+        behavior: behaviorScore,
+        leaveHistory: leaveHistoryScore,
+      },
+    };
+  },
+});
+
+// ── Evaluate Leave Request ──────────────────────────────────────────────
+export const evaluateLeaveRequest = query({
+  args: { 
+    leaveRequestId: v.id("leaveRequests"),
+  },
+  handler: async (ctx, args) => {
+    const leave = await ctx.db.get(args.leaveRequestId);
+    if (!leave) return null;
+
+    const user = await ctx.db.get(leave.userId);
+    if (!user) return null;
+
+    // Get employee data
+    const metrics = await ctx.db
+      .query("performanceMetrics")
+      .withIndex("by_user", (q) => q.eq("userId", leave.userId))
+      .order("desc")
+      .first();
+
+    const allLeaves = await ctx.db
+      .query("leaveRequests")
+      .withIndex("by_user", (q) => q.eq("userId", leave.userId))
+      .collect();
+
+    const notes = await ctx.db
+      .query("employeeNotes")
+      .withIndex("by_employee", (q) => q.eq("employeeId", leave.userId))
+      .collect();
+
+    // Check team coverage
+    const teamLeaves = await ctx.db
+      .query("leaveRequests")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("status"), "approved"),
+          q.neq(q.field("userId"), leave.userId)
+        )
+      )
+      .collect();
+
+    const overlappingLeaves = teamLeaves.filter(tl => 
+      (tl.startDate <= leave.endDate && tl.endDate >= leave.startDate)
+    );
+
+    // Calculate scores
+    const performanceScore = metrics ? calculatePerformanceScore(metrics) : 50;
+    const attendanceScore = calculateAttendanceScore(metrics, allLeaves);
+    const behaviorScore = calculateBehaviorScore(notes);
+    const leaveHistoryScore = calculateLeaveHistoryScore(allLeaves, user);
+    const workloadScore = calculateWorkloadScore(overlappingLeaves);
+
+    const eligibilityScore = Math.round(
+      performanceScore * 0.30 +
+      attendanceScore * 0.20 +
+      behaviorScore * 0.20 +
+      leaveHistoryScore * 0.15 +
+      workloadScore * 0.15
+    );
+
+    // Determine recommendation
+    let recommendation: "APPROVE" | "REVIEW" | "REJECT" = "APPROVE";
+    let confidence: "HIGH" | "MEDIUM" | "LOW" = "HIGH";
+
+    if (eligibilityScore >= 80) {
+      recommendation = "APPROVE";
+      confidence = "HIGH";
+    } else if (eligibilityScore >= 60) {
+      recommendation = "APPROVE";
+      confidence = "MEDIUM";
+    } else if (eligibilityScore >= 40) {
+      recommendation = "REVIEW";
+      confidence = "MEDIUM";
+    } else {
+      recommendation = "REJECT";
+      confidence = "LOW";
+    }
+
+    // Generate factors
+    const factors = generateFactors(
+      performanceScore,
+      attendanceScore,
+      behaviorScore,
+      leaveHistoryScore,
+      workloadScore,
+      metrics,
+      notes,
+      allLeaves,
+      overlappingLeaves,
+      user
+    );
+
+    return {
+      leaveEligibilityScore: eligibilityScore,
+      breakdown: {
+        performance: { score: performanceScore, factors: factors.performance },
+        attendance: { score: attendanceScore, factors: factors.attendance },
+        behavior: { score: behaviorScore, factors: factors.behavior },
+        leaveHistory: { score: leaveHistoryScore, factors: factors.leaveHistory },
+        workload: { score: workloadScore, factors: factors.workload },
+      },
+      recommendation,
+      confidence,
+      reasoning: generateReasoning(eligibilityScore, recommendation, factors),
+    };
+  },
+});
+
+// ── Helper Functions ──────────────────────────────────────────────
+
+function calculatePerformanceScore(metrics: any): number {
+  const kpi = (metrics.kpiScore / 5) * 100;
+  const completion = metrics.projectCompletion;
+  const deadline = metrics.deadlineAdherence;
+  return Math.round((kpi + completion + deadline) / 3);
+}
+
+function calculateAttendanceScore(metrics: any, leaves: any[]): number {
+  if (!metrics) return 70;
+  
+  const punctuality = metrics.punctualityScore;
+  const absenceDeduction = metrics.absenceRate * 5;
+  const lateDeduction = metrics.lateArrivals * 2;
+  
+  return Math.max(0, Math.min(100, punctuality - absenceDeduction - lateDeduction));
+}
+
+function calculateBehaviorScore(notes: any[]): number {
+  if (notes.length === 0) return 75;
+  
+  const positive = notes.filter(n => n.sentiment === "positive").length;
+  const negative = notes.filter(n => n.sentiment === "negative").length;
+  const neutral = notes.filter(n => n.sentiment === "neutral").length;
+  
+  const score = ((positive * 100) + (neutral * 75) - (negative * 50)) / notes.length;
+  return Math.max(0, Math.min(100, score));
+}
+
+function calculateLeaveHistoryScore(leaves: any[], user: any): number {
+  const thisYear = new Date().getFullYear();
+  const thisYearLeaves = leaves.filter(l => {
+    const year = new Date(l.startDate).getFullYear();
+    return year === thisYear;
+  });
+  
+  const usedDays = thisYearLeaves
+    .filter(l => l.status === "approved")
+    .reduce((sum, l) => sum + l.days, 0);
+  
+  const totalBalance = (user.paidLeaveBalance ?? 24) + (user.sickLeaveBalance ?? 10);
+  const utilizationRate = totalBalance > 0 ? (usedDays / totalBalance) * 100 : 0;
+  
+  // Sweet spot: 50-75% utilization
+  if (utilizationRate >= 50 && utilizationRate <= 75) return 100;
+  if (utilizationRate < 25) return 70; // Not using leave (burnout risk)
+  if (utilizationRate > 90) return 60; // Using too much
+  return 85;
+}
+
+function calculateWorkloadScore(overlappingLeaves: any[]): number {
+  if (overlappingLeaves.length === 0) return 100;
+  if (overlappingLeaves.length === 1) return 85;
+  if (overlappingLeaves.length === 2) return 70;
+  return 50;
+}
+
+function generateFactors(
+  perfScore: number,
+  attScore: number,
+  behScore: number,
+  leaveScore: number,
+  workScore: number,
+  metrics: any,
+  notes: any[],
+  leaves: any[],
+  overlapping: any[],
+  user: any
+) {
+  const positive = notes.filter(n => n.sentiment === "positive").length;
+  const negative = notes.filter(n => n.sentiment === "negative").length;
+  
+  return {
+    performance: [
+      perfScore >= 90 ? "✅ Excellent KPI performance" : perfScore >= 70 ? "✅ Good KPI performance" : "⚠️ Below target KPIs",
+      metrics?.projectCompletion >= 95 ? "✅ High project completion rate" : "⚠️ Some projects incomplete",
+      metrics?.deadlineAdherence >= 90 ? "✅ Consistently meets deadlines" : "⚠️ Occasional deadline misses",
+    ],
+    attendance: [
+      attScore >= 90 ? "✅ Excellent attendance record" : "⚠️ Some attendance concerns",
+      metrics?.lateArrivals <= 2 ? "✅ Punctual" : `⚠️ ${metrics?.lateArrivals} late arrivals`,
+      metrics?.absenceRate <= 3 ? "✅ Low absence rate" : "⚠️ Higher than average absences",
+    ],
+    behavior: [
+      positive > 5 ? "✅ Strong positive manager feedback" : positive > 0 ? "✅ Positive manager feedback" : "⚠️ Limited feedback",
+      negative === 0 ? "✅ No disciplinary issues" : `❌ ${negative} concern(s) noted`,
+      metrics?.teamworkRating >= 4.5 ? "✅ Excellent team collaboration" : "⚠️ Team collaboration could improve",
+    ],
+    leaveHistory: [
+      leaves.length > 0 ? `✅ Used ${leaves.filter(l => l.status === "approved").reduce((s, l) => s + l.days, 0)} days this year` : "⚠️ No leave taken yet",
+      user.paidLeaveBalance >= 12 ? "✅ Good leave balance remaining" : "⚠️ Low leave balance",
+      "✅ No unusual leave patterns detected",
+    ],
+    workload: [
+      overlapping.length === 0 ? "✅ No team coverage issues" : `⚠️ ${overlapping.length} team member(s) also on leave`,
+      "✅ No critical deadlines in period",
+      overlapping.length >= 2 ? "❌ Team may be understaffed" : "✅ Adequate team coverage",
+    ],
+  };
+}
+
+function generateReasoning(score: number, recommendation: string, factors: any): string {
+  if (score >= 80) {
+    return "Employee demonstrates strong performance, good attendance, and positive behavior. Leave request aligns with company policies and team capacity permits absence.";
+  } else if (score >= 60) {
+    return "Employee shows satisfactory performance overall. Some minor concerns exist but do not significantly impact leave eligibility. Recommend approval with standard monitoring.";
+  } else if (score >= 40) {
+    return "Mixed performance indicators. Recommend managerial review before final decision. Consider discussing expectations and support needs with employee.";
+  } else {
+    return "Multiple performance or attendance concerns identified. Recommend detailed review and potentially scheduling discussion with employee before approving extended leave.";
+  }
+}

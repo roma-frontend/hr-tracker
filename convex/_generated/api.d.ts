@@ -9,12 +9,18 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as aiEvaluator from "../aiEvaluator.js";
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
+import type * as employeeNotes from "../employeeNotes.js";
+import type * as employeeProfiles from "../employeeProfiles.js";
 import type * as faceRecognition from "../faceRecognition.js";
 import type * as leaves from "../leaves.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
+import type * as sla from "../sla.js";
+import type * as supervisorRatings from "../supervisorRatings.js";
+import type * as timeTracking from "../timeTracking.js";
 import type * as users from "../users.js";
 
 import type {
@@ -25,12 +31,18 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  aiEvaluator: typeof aiEvaluator;
   analytics: typeof analytics;
   auth: typeof auth;
+  employeeNotes: typeof employeeNotes;
+  employeeProfiles: typeof employeeProfiles;
   faceRecognition: typeof faceRecognition;
   leaves: typeof leaves;
   migrations: typeof migrations;
   notifications: typeof notifications;
+  sla: typeof sla;
+  supervisorRatings: typeof supervisorRatings;
+  timeTracking: typeof timeTracking;
   users: typeof users;
 }>;
 

@@ -27,6 +27,7 @@ const HolidayCalendarSync = dynamic(() => import("@/components/admin/HolidayCale
 const CostAnalysis = dynamic(() => import("@/components/admin/CostAnalysis"), { ssr: false });
 const ConflictDetection = dynamic(() => import("@/components/admin/ConflictDetection"), { ssr: false });
 const SmartSuggestions = dynamic(() => import("@/components/admin/SmartSuggestions"), { ssr: false });
+const ResponseTimeSLA = dynamic(() => import("@/components/admin/ResponseTimeSLA"), { ssr: false });
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -313,7 +314,12 @@ export function DashboardClient() {
             </p>
           </motion.div>
 
-          {/* Admin Grid - Row 1: Calendar Sync + Cost Analysis */}
+          {/* Admin Grid - Row 1: Response Time SLA (Full Width) */}
+          <motion.div variants={itemVariants}>
+            <ResponseTimeSLA />
+          </motion.div>
+
+          {/* Admin Grid - Row 2: Calendar Sync + Cost Analysis */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div variants={itemVariants}>
               <HolidayCalendarSync />
@@ -323,12 +329,12 @@ export function DashboardClient() {
             </motion.div>
           </div>
 
-          {/* Admin Grid - Row 2: Conflict Detection (Full Width) */}
+          {/* Admin Grid - Row 3: Conflict Detection (Full Width) */}
           <motion.div variants={itemVariants}>
             <ConflictDetection />
           </motion.div>
 
-          {/* Admin Grid - Row 3: Smart Suggestions (Full Width) */}
+          {/* Admin Grid - Row 4: Smart Suggestions (Full Width) */}
           <motion.div variants={itemVariants}>
             <SmartSuggestions />
           </motion.div>

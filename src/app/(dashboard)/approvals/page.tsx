@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import dynamic from "next/dynamic";
+
+const AILeaveAssistant = dynamic(() => import("@/components/leaves/AILeaveAssistant"), { ssr: false });
 
 export default function ApprovalsPage() {
   const { user } = useAuthStore();

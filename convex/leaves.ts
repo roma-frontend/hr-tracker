@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 // ── Get all leaves with user info ──────────────────────────────────────────
 export const getAllLeaves = query({
@@ -113,6 +114,17 @@ export const createLeave = mutation({
       });
     }
 
+    // Create SLA metric for tracking
+    await ctx.db.insert("slaMetrics", {
+      leaveRequestId: leaveId,
+      submittedAt: Date.now(),
+      targetResponseTime: 24, // Will be updated from config if exists
+      status: "pending",
+      warningTriggered: false,
+      criticalTriggered: false,
+      createdAt: Date.now(),
+    });
+
     return leaveId;
   },
 });
@@ -168,6 +180,26 @@ export const approveLeave = mutation({
       }
     }
 
+    // Update SLA metric
+    const metric = await ctx.db
+      .query("slaMetrics")
+      .withIndex("by_leave", (q) => q.eq("leaveRequestId", leaveId))
+      .first();
+    
+    if (metric && leave.reviewedAt) {
+      const responseTimeHours = (leave.reviewedAt - metric.submittedAt) / (1000 * 60 * 60);
+      const slaScore = responseTimeHours <= metric.targetResponseTime 
+        ? Math.max(80, 100 - ((responseTimeHours / metric.targetResponseTime) * 20))
+        : Math.max(0, 79 - (((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40));
+      
+      await ctx.db.patch(metric._id, {
+        respondedAt: leave.reviewedAt,
+        responseTimeHours: Math.round(responseTimeHours * 10) / 10,
+        slaScore: Math.round(slaScore * 10) / 10,
+        status: responseTimeHours <= metric.targetResponseTime ? "on_time" : "breached",
+      });
+    }
+
     return leaveId;
   },
 });
@@ -204,6 +236,26 @@ export const rejectLeave = mutation({
       relatedId: leaveId,
       createdAt: Date.now(),
     });
+
+    // Update SLA metric
+    const metric = await ctx.db
+      .query("slaMetrics")
+      .withIndex("by_leave", (q) => q.eq("leaveRequestId", leaveId))
+      .first();
+    
+    if (metric && leave.reviewedAt) {
+      const responseTimeHours = (leave.reviewedAt - metric.submittedAt) / (1000 * 60 * 60);
+      const slaScore = responseTimeHours <= metric.targetResponseTime 
+        ? Math.max(80, 100 - ((responseTimeHours / metric.targetResponseTime) * 20))
+        : Math.max(0, 79 - (((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40));
+      
+      await ctx.db.patch(metric._id, {
+        respondedAt: leave.reviewedAt,
+        responseTimeHours: Math.round(responseTimeHours * 10) / 10,
+        slaScore: Math.round(slaScore * 10) / 10,
+        status: responseTimeHours <= metric.targetResponseTime ? "on_time" : "breached",
+      });
+    }
 
     return leaveId;
   },

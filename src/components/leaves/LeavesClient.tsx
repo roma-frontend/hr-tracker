@@ -18,6 +18,9 @@ import {
 import { LeaveRequestModal } from "@/components/leaves/LeaveRequestModal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { LEAVE_TYPE_LABELS, DEPARTMENTS, type LeaveType, type LeaveStatus } from "@/lib/types";
+import dynamic from "next/dynamic";
+
+const AILeaveAssistant = dynamic(() => import("@/components/leaves/AILeaveAssistant"), { ssr: false });
 
 function StatusBadge({ status }: { status: LeaveStatus }) {
   const map: Record<LeaveStatus, { variant: "warning" | "success" | "destructive"; label: string }> = {
@@ -51,6 +54,7 @@ export function LeavesClient() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [mounted, setMounted] = useState(false);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   React.useEffect(() => { setMounted(true); }, []);
 
@@ -228,13 +232,14 @@ export function LeavesClient() {
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">
                     {filtered.map((req, i) => (
-                      <motion.tr
-                        key={req._id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.03 }}
-                        className="hover:bg-[var(--background-subtle)] transition-colors"
-                      >
+                      <React.Fragment key={req._id}>
+                        <motion.tr
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.03 }}
+                          className="hover:bg-[var(--background-subtle)] transition-colors cursor-pointer"
+                          onClick={() => isAdmin && req.status === "pending" && setExpandedRow(expandedRow === req._id ? null : req._id)}
+                        >
                         <td className="px-6 py-3">
                           <div>
                             <p className="text-sm font-medium text-[var(--text-primary)]">{req.userName}</p>
@@ -260,23 +265,42 @@ export function LeavesClient() {
                               {req.status === "pending" && (
                                 <>
                                   <Button size="icon-sm" variant="ghost" className="text-emerald-500 hover:text-emerald-400"
-                                    onClick={() => handleApprove(req._id)}>
+                                    onClick={(e) => { e.stopPropagation(); handleApprove(req._id); }}>
                                     <CheckCircle className="w-4 h-4" />
                                   </Button>
                                   <Button size="icon-sm" variant="ghost" className="text-red-500 hover:text-red-400"
-                                    onClick={() => handleReject(req._id)}>
+                                    onClick={(e) => { e.stopPropagation(); handleReject(req._id); }}>
                                     <XCircle className="w-4 h-4" />
                                   </Button>
                                 </>
                               )}
                               <Button size="icon-sm" variant="ghost" className="text-[var(--text-muted)] hover:text-red-400"
-                                onClick={() => handleDelete(req._id)}>
+                                onClick={(e) => { e.stopPropagation(); handleDelete(req._id); }}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
                           </td>
                         )}
                       </motion.tr>
+                      
+                      {/* AI Assistant Expandable Row */}
+                      {isAdmin && req.status === "pending" && expandedRow === req._id && (
+                        <motion.tr
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                        >
+                          <td colSpan={7} className="px-6 py-4 bg-[var(--background-subtle)]">
+                            <AILeaveAssistant
+                              leaveRequestId={req._id}
+                              userId={req.userId}
+                              onApprove={(comment?: string) => handleApprove(req._id, comment)}
+                              onReject={(comment?: string) => handleReject(req._id, comment)}
+                            />
+                          </td>
+                        </motion.tr>
+                      )}
+                    </React.Fragment>
                     ))}
                   </tbody>
                 </table>

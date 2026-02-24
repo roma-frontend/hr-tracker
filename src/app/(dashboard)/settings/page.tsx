@@ -16,6 +16,9 @@ import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
 import { FaceRegistration } from "@/components/auth/FaceRegistration";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import dynamic from "next/dynamic";
+
+const SLASettings = dynamic(() => import("@/components/admin/SLASettings"), { ssr: false });
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
@@ -256,6 +259,17 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Admin-Only: SLA Settings */}
+      {user?.role === "admin" && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <SLASettings />
+        </motion.div>
+      )}
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>

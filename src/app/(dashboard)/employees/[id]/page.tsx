@@ -1,0 +1,75 @@
+"use client";
+
+import React from "react";
+import { useParams } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
+import EmployeeProfileDetail from "@/components/employees/EmployeeProfileDetail";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { motion } from "framer-motion";
+
+export default function EmployeeProfilePage() {
+  const params = useParams();
+  const employeeId = params.id as string;
+
+  const employee = useQuery(
+    api.users.getUserById,
+    employeeId ? { userId: employeeId as Id<"users"> } : "skip"
+  );
+
+  if (employee === undefined) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--primary)]"></div>
+      </div>
+    );
+  }
+
+  if (employee === null) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <Link href="/employees">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Employees
+          </Button>
+        </Link>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="w-12 h-12 text-orange-500 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
+              Employee Not Found
+            </h3>
+            <p className="text-sm text-[var(--text-muted)]">
+              The employee you're looking for doesn't exist or has been removed.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
+      <Link href="/employees">
+        <Button variant="ghost" size="sm">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Employees
+        </Button>
+      </Link>
+      <EmployeeProfileDetail employeeId={employeeId as Id<"users">} />
+    </motion.div>
+  );
+}

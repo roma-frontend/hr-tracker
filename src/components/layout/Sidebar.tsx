@@ -16,6 +16,7 @@ import {
   Building2,
   UserCheck,
   BarChart3,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
@@ -25,6 +26,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "supervisor", "employee"] },
+  { href: "/attendance", label: "Attendance", icon: Clock, roles: ["admin", "supervisor", "employee"] },
   { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["admin", "supervisor"] },
   { href: "/leaves", label: "Leaves", icon: ClipboardList, roles: ["admin", "supervisor", "employee"] },
   { href: "/employees", label: "Employees", icon: Users, roles: ["admin", "supervisor"] },

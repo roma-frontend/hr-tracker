@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Clock, CheckCircle, XCircle, Plus, Calendar as CalendarIcon, TrendingUp } from "lucide-react";
+import { Clock, CheckCircle, XCircle, Plus, Calendar as CalendarIcon, TrendingUp, Star } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from "@/lib/types";
+import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
+import { AttendanceDashboard } from "@/components/attendance/AttendanceDashboard";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -38,12 +40,29 @@ export function EmployeeDashboard() {
     api.users.getUserById,
     user?.id ? { userId: user.id as any } : "skip"
   );
+  const latestRating = useQuery(
+    api.supervisorRatings.getLatestRating,
+    user?.id ? { employeeId: user.id as any } : "skip"
+  );
+  const monthlyStats = useQuery(
+    api.timeTracking.getMonthlyStats,
+    user?.id ? { userId: user.id as any, month: new Date().toISOString().slice(0, 7) } : "skip"
+  );
 
   const today = new Date();
   const myLeaves = leaves?.filter((l) => l.userId === user?.id) ?? [];
   const pendingLeaves = myLeaves.filter((l) => l.status === "pending");
   const approvedLeaves = myLeaves.filter((l) => l.status === "approved");
   const rejectedLeaves = myLeaves.filter((l) => l.status === "rejected");
+
+  const renderStars = (rating: number) => {
+    return [1, 2, 3, 4, 5].map((i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+      />
+    ));
+  };
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
@@ -56,6 +75,126 @@ export function EmployeeDashboard() {
           {format(today, "EEEE, MMMM d, yyyy")}
         </p>
       </motion.div>
+
+      {/* Check-In / Check-Out Widget */}
+      <motion.div variants={itemVariants}>
+        <CheckInOutWidget />
+      </motion.div>
+
+      {/* This Month Attendance Quick Stats */}
+      {monthlyStats && (
+        <motion.div variants={itemVariants}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Days Worked</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-green-500">{monthlyStats.totalWorkedHours}h</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Total Hours</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-purple-500">{monthlyStats.punctualityRate}%</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Punctuality</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? "text-red-500" : "text-green-500"}`}>
+                  {monthlyStats.lateDays}
+                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Late Days</p>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+      )}
+
+      {/* My Performance Scores (from supervisor) */}
+      {latestRating && (
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                  My Performance Score
+                </CardTitle>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-[var(--primary)]">
+                    {latestRating.overallRating.toFixed(1)}
+                    <span className="text-sm font-normal text-[var(--text-muted)]">/5</span>
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    by {latestRating.supervisor?.name ?? "Supervisor"} · {latestRating.ratingPeriod}
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {[
+                { label: "Quality of Work", value: latestRating.qualityOfWork },
+                { label: "Efficiency", value: latestRating.efficiency },
+                { label: "Teamwork", value: latestRating.teamwork },
+                { label: "Initiative", value: latestRating.initiative },
+                { label: "Communication", value: latestRating.communication },
+                { label: "Reliability", value: latestRating.reliability },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--text-muted)] w-36">{label}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex">{renderStars(value)}</div>
+                    <span className="text-sm font-semibold w-6 text-right" style={{ color: "var(--text-primary)" }}>
+                      {value}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {latestRating.strengths && (
+                <div className="mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-950">
+                  <p className="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">💪 Strengths</p>
+                  <p className="text-sm text-green-700 dark:text-green-300">{latestRating.strengths}</p>
+                </div>
+              )}
+              {latestRating.areasForImprovement && (
+                <div className="mt-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
+                  <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 mb-1">📈 Areas for Improvement</p>
+                  <p className="text-sm text-orange-700 dark:text-orange-300">{latestRating.areasForImprovement}</p>
+                </div>
+              )}
+              {latestRating.generalComments && (
+                <div className="mt-2 p-3 rounded-lg bg-[var(--background-subtle)]">
+                  <p className="text-xs font-semibold text-[var(--text-muted)] mb-1">💬 Comments</p>
+                  <p className="text-sm text-[var(--text-primary)]">{latestRating.generalComments}</p>
+                </div>
+              )}
+
+              <Button asChild variant="ghost" size="sm" className="w-full mt-2">
+                <Link href="/attendance">View Full Attendance History →</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* No rating yet message */}
+      {latestRating === null && (
+        <motion.div variants={itemVariants}>
+          <Card className="border-dashed">
+            <CardContent className="p-6 text-center">
+              <Star className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
+              <p className="text-sm text-[var(--text-muted)]">No performance rating yet</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Your supervisor will rate your performance</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Leave Balances */}
       <motion.div variants={itemVariants}>
@@ -82,7 +221,7 @@ export function EmployeeDashboard() {
         </Card>
       </motion.div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Leave */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <motion.div variants={itemVariants}>
           <Card>
