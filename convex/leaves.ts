@@ -261,10 +261,105 @@ export const rejectLeave = mutation({
   },
 });
 
-// ── Delete leave ───────────────────────────────────────────────────────────
+// ── Update leave (with role check) ────────────────────────────────────────
+export const updateLeave = mutation({
+  args: {
+    leaveId: v.id("leaveRequests"),
+    requesterId: v.id("users"),
+    startDate: v.optional(v.string()),
+    endDate: v.optional(v.string()),
+    days: v.optional(v.number()),
+    reason: v.optional(v.string()),
+    type: v.optional(v.union(
+      v.literal("paid"), v.literal("unpaid"), v.literal("sick"),
+      v.literal("family"), v.literal("doctor")
+    )),
+  },
+  handler: async (ctx, { leaveId, requesterId, ...updates }) => {
+    const leave = await ctx.db.get(leaveId);
+    if (!leave) throw new Error("Leave request not found");
+
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error("Requester not found");
+
+    // Admin can edit anyone; others can only edit their own pending leaves
+    const isAdmin = requester.role === "admin";
+    const isOwner = leave.userId === requesterId;
+
+    if (!isAdmin && !isOwner) {
+      throw new Error("You can only edit your own leave requests");
+    }
+    if (!isAdmin && leave.status !== "pending") {
+      throw new Error("You can only edit pending leave requests. Already approved/rejected leaves cannot be changed.");
+    }
+
+    await ctx.db.patch(leaveId, { ...updates, updatedAt: Date.now() });
+
+    // Notify employee if admin edited their leave
+    if (isAdmin && !isOwner) {
+      await ctx.db.insert("notifications", {
+        userId: leave.userId,
+        type: "leave_request",
+        title: "✏️ Leave Request Updated",
+        message: `Your leave request (${leave.startDate} → ${leave.endDate}) was updated by admin.`,
+        isRead: false,
+        relatedId: leaveId,
+        createdAt: Date.now(),
+      });
+    }
+
+    return leaveId;
+  },
+});
+
+// ── Delete leave (with role check) ────────────────────────────────────────
 export const deleteLeave = mutation({
-  args: { leaveId: v.id("leaveRequests") },
-  handler: async (ctx, { leaveId }) => {
+  args: {
+    leaveId: v.id("leaveRequests"),
+    requesterId: v.id("users"),
+  },
+  handler: async (ctx, { leaveId, requesterId }) => {
+    const leave = await ctx.db.get(leaveId);
+    if (!leave) throw new Error("Leave request not found");
+
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error("Requester not found");
+
+    // Admin can delete anyone's leave; others only their own
+    const isAdmin = requester.role === "admin";
+    const isOwner = leave.userId === requesterId;
+
+    if (!isAdmin && !isOwner) {
+      throw new Error("You can only delete your own leave requests");
+    }
+
+    // Restore balance if approved leave is deleted
+    if (leave.status === "approved") {
+      const user = await ctx.db.get(leave.userId);
+      if (user) {
+        if (leave.type === "paid") {
+          await ctx.db.patch(leave.userId, { paidLeaveBalance: (user.paidLeaveBalance ?? 0) + leave.days });
+        } else if (leave.type === "sick") {
+          await ctx.db.patch(leave.userId, { sickLeaveBalance: (user.sickLeaveBalance ?? 0) + leave.days });
+        } else if (leave.type === "family") {
+          await ctx.db.patch(leave.userId, { familyLeaveBalance: (user.familyLeaveBalance ?? 0) + leave.days });
+        }
+      }
+    }
+
+    // Notify employee if admin deleted their leave
+    if (isAdmin && !isOwner) {
+      await ctx.db.insert("notifications", {
+        userId: leave.userId,
+        type: "leave_request",
+        title: "🗑️ Leave Request Deleted",
+        message: `Your ${leave.type} leave request (${leave.startDate} → ${leave.endDate}) was deleted by admin.`,
+        isRead: false,
+        relatedId: leaveId,
+        createdAt: Date.now(),
+      });
+    }
+
     await ctx.db.delete(leaveId);
     return leaveId;
   },

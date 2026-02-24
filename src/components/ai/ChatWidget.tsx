@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Sparkles, Loader2, CheckCircle, AlertCircle, Calendar } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, Loader2, CheckCircle, AlertCircle, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -15,7 +15,7 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  actions?: BookLeaveAction[];
+  actions?: AnyAction[];
   bookingStates?: Record<number, BookingState>;
 }
 
@@ -28,14 +28,36 @@ interface BookLeaveAction {
   reason: string;
 }
 
-function parseActions(content: string): { cleanContent: string; actions: BookLeaveAction[] } {
+interface EditLeaveAction {
+  type: 'EDIT_LEAVE';
+  leaveId: string;
+  employeeName: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  reason?: string;
+  leaveType: string;
+}
+
+interface DeleteLeaveAction {
+  type: 'DELETE_LEAVE';
+  leaveId: string;
+  employeeName: string;
+  leaveType: string;
+  startDate: string;
+  endDate: string;
+}
+
+type AnyAction = BookLeaveAction | EditLeaveAction | DeleteLeaveAction;
+
+function parseActions(content: string): { cleanContent: string; actions: AnyAction[] } {
   const actionMatches = [...content.matchAll(/<ACTION>([\s\S]*?)<\/ACTION>/g)];
   if (actionMatches.length === 0) return { cleanContent: content, actions: [] };
 
-  const actions: BookLeaveAction[] = [];
+  const actions: AnyAction[] = [];
   for (const match of actionMatches) {
     try {
-      const action = JSON.parse(match[1].trim()) as BookLeaveAction;
+      const action = JSON.parse(match[1].trim()) as AnyAction;
       actions.push(action);
     } catch {
       // skip invalid JSON
@@ -73,11 +95,11 @@ export function ChatWidget() {
     scrollToBottom();
   }, [messages, isLoading, scrollToBottom]);
 
-  const handleBookLeave = async (messageId: string, action: BookLeaveAction, actionIndex: number) => {
+  const handleAction = async (messageId: string, action: AnyAction, actionIndex: number) => {
     if (!user?.id) {
       setMessages(prev => prev.map(m =>
         m.id === messageId
-          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: 'You must be logged in to book a leave.' } } }
+          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: 'You must be logged in.' } } }
           : m
       ));
       return;
@@ -90,39 +112,37 @@ export function ChatWidget() {
     ));
 
     try {
-      const res = await fetch('/api/chat/book-leave', {
+      let url = '';
+      let body: any = {};
+
+      if (action.type === 'BOOK_LEAVE') {
+        url = '/api/chat/book-leave';
+        body = { userId: user.id, type: action.leaveType, startDate: action.startDate, endDate: action.endDate, days: action.days, reason: action.reason };
+      } else if (action.type === 'EDIT_LEAVE') {
+        url = '/api/chat/edit-leave';
+        body = { leaveId: action.leaveId, requesterId: user.id, startDate: action.startDate, endDate: action.endDate, days: action.days, reason: action.reason, type: action.leaveType };
+      } else if (action.type === 'DELETE_LEAVE') {
+        url = '/api/chat/delete-leave';
+        body = { leaveId: action.leaveId, requesterId: user.id };
+      }
+
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          type: action.leaveType,
-          startDate: action.startDate,
-          endDate: action.endDate,
-          days: action.days,
-          reason: action.reason,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
 
       setMessages(prev => prev.map(m =>
         m.id === messageId
-          ? {
-              ...m,
-              bookingStates: {
-                ...m.bookingStates,
-                [actionIndex]: {
-                  status: data.success ? 'booked' : 'conflict',
-                  result: data.message,
-                },
-              },
-            }
+          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: data.success ? 'booked' : 'conflict', result: data.message } } }
           : m
       ));
     } catch {
       setMessages(prev => prev.map(m =>
         m.id === messageId
-          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: 'Failed to submit. Please try again.' } } }
+          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: 'Failed. Please try again.' } } }
           : m
       ));
     }
@@ -334,34 +354,47 @@ export function ChatWidget() {
                         )}
                         {m.actions.map((action, idx) => {
                           const state = m.bookingStates?.[idx] ?? { status: 'pending' };
+                          const isDelete = action.type === 'DELETE_LEAVE';
+                          const isEdit = action.type === 'EDIT_LEAVE';
+                          const borderColor = isDelete ? 'border-red-500/30' : isEdit ? 'border-yellow-500/30' : 'border-[#6366f1]/30';
                           return (
                             <motion.div
                               key={idx}
                               initial={{ opacity: 0, y: 8 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: idx * 0.08 }}
-                              className="p-3 rounded-xl border border-[#6366f1]/30 bg-[var(--background-subtle)]"
+                              className={`p-3 rounded-xl border ${borderColor} bg-[var(--background-subtle)]`}
                             >
                               <div className="flex items-center gap-2 mb-2">
-                                <Calendar className="w-4 h-4 text-[#6366f1]" />
+                                {isDelete ? <Trash2 className="w-4 h-4 text-red-500" /> : isEdit ? <Pencil className="w-4 h-4 text-yellow-500" /> : <Calendar className="w-4 h-4 text-[#6366f1]" />}
                                 <span className="text-xs font-semibold text-[var(--text-primary)]">
-                                  {m.actions!.length > 1 ? `Option ${idx + 1}` : 'Leave Request'}
+                                  {isDelete ? '🗑️ Delete Leave' : isEdit ? '✏️ Edit Leave' : m.actions!.length > 1 ? `Option ${idx + 1}` : 'Leave Request'}
                                 </span>
+                                {(isDelete || isEdit) && (action as EditLeaveAction | DeleteLeaveAction).employeeName && (
+                                  <span className="text-xs text-[var(--text-muted)] ml-auto">{(action as any).employeeName}</span>
+                                )}
                               </div>
                               <div className="text-xs text-[var(--text-muted)] space-y-1 mb-3">
-                                <p><span className="font-medium">Type:</span> {LEAVE_TYPE_LABELS[action.leaveType] ?? action.leaveType}</p>
+                                {(action as any).leaveType && <p><span className="font-medium">Type:</span> {LEAVE_TYPE_LABELS[(action as any).leaveType] ?? (action as any).leaveType}</p>}
                                 <p><span className="font-medium">From:</span> {action.startDate}</p>
                                 <p><span className="font-medium">To:</span> {action.endDate}</p>
-                                <p><span className="font-medium">Days:</span> {action.days}</p>
-                                {action.reason && <p><span className="font-medium">Reason:</span> {action.reason}</p>}
+                                {(action as any).days && <p><span className="font-medium">Days:</span> {(action as any).days}</p>}
+                                {(action as any).reason && <p><span className="font-medium">Reason:</span> {(action as any).reason}</p>}
+                                {isDelete && <p className="text-red-500 font-medium mt-1">⚠️ This action cannot be undone</p>}
                               </div>
 
                               {state.status === 'pending' && (
                                 <button
-                                  onClick={() => handleBookLeave(m.id, action, idx)}
-                                  className="w-full py-2 px-3 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                                  onClick={() => handleAction(m.id, action, idx)}
+                                  className={`w-full py-2 px-3 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity ${
+                                    isDelete
+                                      ? 'bg-gradient-to-r from-red-500 to-red-600'
+                                      : isEdit
+                                      ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                                      : 'bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]'
+                                  }`}
                                 >
-                                  ✅ Confirm & Send to Admin
+                                  {isDelete ? '🗑️ Confirm Delete' : isEdit ? '✏️ Confirm Update' : '✅ Confirm & Send to Admin'}
                                 </button>
                               )}
 
