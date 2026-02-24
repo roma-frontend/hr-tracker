@@ -46,21 +46,42 @@ export async function GET() {
         } : null,
         // Leave balances
         leaveBalance: u.leaveBalance ?? { paid: 20, sick: 10, family: 5, unpaid: 30 },
-        // Currently on leave
+        // Currently on leave — include real leaveId for edit/delete!
         currentLeave: activeLeave ? {
+          leaveId: activeLeave._id,
           type: activeLeave.type,
           startDate: activeLeave.startDate,
           endDate: activeLeave.endDate,
           reason: activeLeave.reason,
+          status: activeLeave.status,
         } : null,
-        // Upcoming leaves
-        upcomingLeaves,
-        // Pending requests
-        pendingLeaves: pendingLeaves.map((l: any) => ({
+        // Upcoming leaves — include real leaveId!
+        upcomingLeaves: upcomingLeaves.map((l: any) => ({
+          leaveId: l._id,
           type: l.type,
           startDate: l.startDate,
           endDate: l.endDate,
           days: l.days,
+          status: l.status,
+        })),
+        // Pending requests — include real leaveId!
+        pendingLeaves: pendingLeaves.map((l: any) => ({
+          leaveId: l._id,
+          type: l.type,
+          startDate: l.startDate,
+          endDate: l.endDate,
+          days: l.days,
+          status: l.status,
+        })),
+        // ALL leaves for this employee (for edit/delete)
+        allLeaves: userLeaves.map((l: any) => ({
+          leaveId: l._id,
+          type: l.type,
+          startDate: l.startDate,
+          endDate: l.endDate,
+          days: l.days,
+          status: l.status,
+          reason: l.reason,
         })),
         // Leave history summary
         totalLeavesTaken: approvedLeaves.reduce((sum: number, l: any) => sum + (l.days ?? 0), 0),

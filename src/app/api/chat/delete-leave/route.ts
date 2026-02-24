@@ -5,18 +5,43 @@ import type { Id } from '../../../../../convex/_generated/dataModel';
 
 export async function POST(req: Request) {
   try {
-    const { leaveId, requesterId } = await req.json();
+    const { leaveId, requesterId, employeeName, startDate, endDate, leaveType } = await req.json();
 
-    if (!leaveId || !requesterId) {
-      return NextResponse.json({ success: false, message: 'Missing leaveId or requesterId' }, { status: 400 });
+    if (!requesterId) {
+      return NextResponse.json({ success: false, message: 'Missing requesterId' }, { status: 400 });
     }
 
-    // Get the leave to show details in response
+    // Get all leaves
     const leaves = await fetchQuery(api.leaves.getAllLeaves, {});
-    const leave = (leaves as any[]).find((l: any) => l._id === leaveId);
+    const users = await fetchQuery(api.users.getAllUsers, {});
+
+    // Try to find leave by ID first, then by employee name + dates
+    let leave = (leaves as any[]).find((l: any) => l._id === leaveId);
+
+    // If not found by ID, search by employee name + dates
+    if (!leave && (employeeName || startDate)) {
+      leave = (leaves as any[]).find((l: any) => {
+        const user = (users as any[]).find((u: any) => u._id === l.userId);
+        const nameMatch = employeeName
+          ? user?.name?.toLowerCase().includes(employeeName.toLowerCase())
+          : true;
+        const startMatch = startDate ? l.startDate === startDate : true;
+        const endMatch = endDate ? l.endDate === endDate : true;
+        const typeMatch = leaveType ? l.type === leaveType : true;
+        return nameMatch && startMatch && endMatch && typeMatch;
+      });
+    }
 
     if (!leave) {
-      return NextResponse.json({ success: false, message: 'Leave request not found' });
+      // List available leaves for this context to help AI
+      const availableLeaves = (leaves as any[]).slice(0, 10).map((l: any) => {
+        const user = (users as any[]).find((u: any) => u._id === l.userId);
+        return `${user?.name}: ${l.type} ${l.startDate}→${l.endDate} (${l.status}) id:${l._id}`;
+      }).join('\n');
+      return NextResponse.json({
+        success: false,
+        message: `Leave request not found. Available leaves:\n${availableLeaves}`
+      });
     }
 
     // Get requester

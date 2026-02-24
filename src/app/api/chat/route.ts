@@ -99,16 +99,22 @@ ${insights.teamConflicts?.length ? `⚠️ TEAM CONFLICTS (people already on lea
             lines.push(`  Today: not checked in`);
           }
           if (e.currentLeave) {
-            lines.push(`  🏖 ON LEAVE NOW: ${e.currentLeave.type} (${e.currentLeave.startDate} → ${e.currentLeave.endDate})`);
+            lines.push(`  🏖 ON LEAVE NOW: ${e.currentLeave.type} (${e.currentLeave.startDate} → ${e.currentLeave.endDate}) [leaveId: ${e.currentLeave.leaveId}]`);
           }
           if (e.upcomingLeaves?.length) {
             e.upcomingLeaves.forEach((l: any) => {
-              lines.push(`  📅 Upcoming: ${l.type} ${l.startDate} → ${l.endDate}`);
+              lines.push(`  📅 Upcoming: ${l.type} ${l.startDate} → ${l.endDate} [leaveId: ${l.leaveId}]`);
             });
           }
           if (e.pendingLeaves?.length) {
             e.pendingLeaves.forEach((l: any) => {
-              lines.push(`  ⏳ Pending approval: ${l.type} ${l.startDate} → ${l.endDate} (${l.days} days)`);
+              lines.push(`  ⏳ Pending: ${l.type} ${l.startDate} → ${l.endDate} (${l.days}d) [leaveId: ${l.leaveId}]`);
+            });
+          }
+          if (e.allLeaves?.length) {
+            lines.push(`  All leaves:`);
+            e.allLeaves.forEach((l: any) => {
+              lines.push(`    - ${l.type} ${l.startDate}→${l.endDate} status:${l.status} [leaveId: ${l.leaveId}]`);
             });
           }
           lines.push(`  Leave balance: Paid: ${e.leaveBalance?.paid ?? '?'}d, Sick: ${e.leaveBalance?.sick ?? '?'}d, Family: ${e.leaveBalance?.family ?? '?'}d`);
@@ -180,7 +186,7 @@ When a user asks to edit/change/update a leave request, respond with:
 <ACTION>
 {
   "type": "EDIT_LEAVE",
-  "leaveId": "<exact _id from COMPLETE SYSTEM DATA>",
+  "leaveId": "<MUST use exact leaveId from [leaveId: xxx] in COMPLETE SYSTEM DATA above>",
   "employeeName": "<name of employee>",
   "startDate": "YYYY-MM-DD",
   "endDate": "YYYY-MM-DD",
@@ -195,13 +201,15 @@ When a user asks to delete/cancel/remove a leave request, respond with:
 <ACTION>
 {
   "type": "DELETE_LEAVE",
-  "leaveId": "<exact _id from COMPLETE SYSTEM DATA>",
+  "leaveId": "<MUST use exact leaveId from [leaveId: xxx] in COMPLETE SYSTEM DATA above>",
   "employeeName": "<name of employee>",
   "leaveType": "<type>",
   "startDate": "YYYY-MM-DD",
   "endDate": "YYYY-MM-DD"
 }
 </ACTION>
+
+CRITICAL: Always use the real leaveId values shown as [leaveId: xxx] in the employee data above. Never generate or guess leaveIds.
 
 PERMISSIONS RULES:
 - Admin (romangulanyan@gmail.com) can edit or delete ANY employee's leave
