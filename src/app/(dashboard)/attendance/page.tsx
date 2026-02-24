@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
 import { AttendanceDashboard } from "@/components/attendance/AttendanceDashboard";
 import { SupervisorRatingForm } from "@/components/attendance/SupervisorRatingForm";
+import { AttendanceDetailModal } from "@/components/attendance/AttendanceDetailModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,8 @@ const itemVariants = {
 export default function AttendancePage() {
   const { user } = useAuthStore();
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: Id<"users">; name: string } | null>(null);
+  const [detailRecord, setDetailRecord] = useState<any | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const isAdminOrSupervisor = user?.role === "admin" || user?.role === "supervisor";
 
@@ -130,8 +133,9 @@ export default function AttendancePage() {
                   {todayAllAttendance.map((record) => (
                     <div
                       key={record._id}
-                      className="flex items-center justify-between p-3 rounded-lg border"
+                      className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
                       style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
+                      onClick={() => { setDetailRecord(record); setDetailOpen(true); }}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold">
@@ -253,6 +257,13 @@ export default function AttendancePage() {
           </Card>
         </motion.div>
       )}
+
+      {/* Attendance Detail Modal */}
+      <AttendanceDetailModal
+        record={detailRecord}
+        open={detailOpen}
+        onClose={() => { setDetailOpen(false); setDetailRecord(null); }}
+      />
     </motion.div>
   );
 }

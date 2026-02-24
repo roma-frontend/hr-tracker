@@ -188,6 +188,20 @@ export const getCurrentlyAtWork = query({
   },
 });
 
+// ── Get Recent Attendance for a user (last N days) ───────────────────────
+export const getRecentAttendance = query({
+  args: { userId: v.id("users"), limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 7;
+    const records = await ctx.db
+      .query("timeTracking")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .take(limit);
+    return records;
+  },
+});
+
 // ── Get Today's Full Attendance (all who checked in/out) ─────────────────
 export const getTodayAllAttendance = query({
   args: {},
