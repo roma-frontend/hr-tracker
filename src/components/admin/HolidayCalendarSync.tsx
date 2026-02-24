@@ -6,12 +6,11 @@ import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Download, Loader2, ExternalLink } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function HolidayCalendarSync() {
   const [isExporting, setIsExporting] = useState(false);
   const calendarData = useQuery(api.admin.getCalendarExportData, {});
-  const { toast } = useToast();
 
   const handleExportICS = async () => {
     if (!calendarData) return;
@@ -56,33 +55,20 @@ export default function HolidayCalendarSync() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast({
-        title: "Calendar Exported",
-        description: "iCal file downloaded successfully",
-      });
+      toast.success("iCal file downloaded successfully");
     } catch (error) {
-      toast({
-        title: "Export Failed",
-        description: "Failed to export calendar",
-        variant: "destructive",
-      });
+      toast.error("Failed to export calendar");
     } finally {
       setIsExporting(false);
     }
   };
 
   const handleGoogleCalendar = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Google Calendar sync will be available soon",
-    });
+    toast.info("Google Calendar sync will be available soon");
   };
 
   const handleOutlook = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Outlook sync will be available soon",
-    });
+    toast.info("Outlook sync will be available soon");
   };
 
   if (!calendarData) {
