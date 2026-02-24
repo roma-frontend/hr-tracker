@@ -6,13 +6,17 @@ import { MessageCircle, X, Send, Sparkles, Loader2, CheckCircle, AlertCircle, Ca
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/useAuthStore';
 
+interface BookingState {
+  status: 'pending' | 'booked' | 'conflict' | 'loading';
+  result?: string;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  action?: BookLeaveAction;
-  actionStatus?: 'pending' | 'booked' | 'conflict' | 'loading';
-  actionResult?: string;
+  actions?: BookLeaveAction[];
+  bookingStates?: Record<number, BookingState>;
 }
 
 interface BookLeaveAction {
@@ -24,17 +28,23 @@ interface BookLeaveAction {
   reason: string;
 }
 
-function parseAction(content: string): { cleanContent: string; action?: BookLeaveAction } {
-  const actionMatch = content.match(/<ACTION>([\s\S]*?)<\/ACTION>/);
-  if (!actionMatch) return { cleanContent: content };
+function parseActions(content: string): { cleanContent: string; actions: BookLeaveAction[] } {
+  const actionMatches = [...content.matchAll(/<ACTION>([\s\S]*?)<\/ACTION>/g)];
+  if (actionMatches.length === 0) return { cleanContent: content, actions: [] };
 
-  try {
-    const action = JSON.parse(actionMatch[1].trim()) as BookLeaveAction;
-    const cleanContent = content.replace(/<ACTION>[\s\S]*?<\/ACTION>/, '').trim();
-    return { cleanContent, action };
-  } catch {
-    return { cleanContent: content };
+  const actions: BookLeaveAction[] = [];
+  for (const match of actionMatches) {
+    try {
+      const action = JSON.parse(match[1].trim()) as BookLeaveAction;
+      actions.push(action);
+    } catch {
+      // skip invalid JSON
+    }
   }
+
+  // Remove ALL <ACTION>...</ACTION> blocks from displayed text
+  const cleanContent = content.replace(/<ACTION>[\s\S]*?<\/ACTION>/g, '').replace(/или\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+  return { cleanContent, actions };
 }
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
@@ -63,18 +73,20 @@ export function ChatWidget() {
     scrollToBottom();
   }, [messages, isLoading, scrollToBottom]);
 
-  const handleBookLeave = async (messageId: string, action: BookLeaveAction) => {
+  const handleBookLeave = async (messageId: string, action: BookLeaveAction, actionIndex: number) => {
     if (!user?.id) {
       setMessages(prev => prev.map(m =>
         m.id === messageId
-          ? { ...m, actionStatus: 'conflict', actionResult: 'You must be logged in to book a leave.' }
+          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: 'You must be logged in to book a leave.' } } }
           : m
       ));
       return;
     }
 
     setMessages(prev => prev.map(m =>
-      m.id === messageId ? { ...m, actionStatus: 'loading' } : m
+      m.id === messageId
+        ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'loading' } } }
+        : m
     ));
 
     try {
@@ -93,23 +105,24 @@ export function ChatWidget() {
 
       const data = await res.json();
 
-      if (data.success) {
-        setMessages(prev => prev.map(m =>
-          m.id === messageId
-            ? { ...m, actionStatus: 'booked', actionResult: data.message }
-            : m
-        ));
-      } else {
-        setMessages(prev => prev.map(m =>
-          m.id === messageId
-            ? { ...m, actionStatus: 'conflict', actionResult: data.message }
-            : m
-        ));
-      }
-    } catch (err) {
       setMessages(prev => prev.map(m =>
         m.id === messageId
-          ? { ...m, actionStatus: 'conflict', actionResult: 'Failed to submit leave request. Please try again.' }
+          ? {
+              ...m,
+              bookingStates: {
+                ...m.bookingStates,
+                [actionIndex]: {
+                  status: data.success ? 'booked' : 'conflict',
+                  result: data.message,
+                },
+              },
+            }
+          : m
+      ));
+    } catch {
+      setMessages(prev => prev.map(m =>
+        m.id === messageId
+          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: 'Failed to submit. Please try again.' } } }
           : m
       ));
     }
@@ -194,13 +207,20 @@ export function ChatWidget() {
             previousText = text;
             accumulatedContent += text;
 
-            // Parse action from accumulated content
-            const { cleanContent, action } = parseAction(accumulatedContent);
+            // Parse ALL action blocks from accumulated content
+            const { cleanContent, actions } = parseActions(accumulatedContent);
 
             setMessages(prev =>
               prev.map(m =>
                 m.id === assistantMessageId
-                  ? { ...m, content: cleanContent, action, actionStatus: action ? 'pending' : undefined }
+                  ? {
+                      ...m,
+                      content: cleanContent,
+                      actions: actions.length > 0 ? actions : undefined,
+                      bookingStates: actions.length > 0 && !m.bookingStates
+                        ? Object.fromEntries(actions.map((_, i) => [i, { status: 'pending' as const }]))
+                        : m.bookingStates,
+                    }
                   : m
               )
             );
@@ -304,57 +324,71 @@ export function ChatWidget() {
                       <p className="text-sm whitespace-pre-wrap">{m.content}</p>
                     </div>
 
-                    {/* Booking Action Card */}
-                    {m.action && m.role === 'assistant' && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-2 p-3 rounded-xl border border-[#6366f1]/30 bg-[var(--background-subtle)]"
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <Calendar className="w-4 h-4 text-[#6366f1]" />
-                          <span className="text-xs font-semibold text-[var(--text-primary)]">
-                            Leave Request
-                          </span>
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] space-y-1 mb-3">
-                          <p><span className="font-medium">Type:</span> {LEAVE_TYPE_LABELS[m.action.leaveType]}</p>
-                          <p><span className="font-medium">From:</span> {m.action.startDate}</p>
-                          <p><span className="font-medium">To:</span> {m.action.endDate}</p>
-                          <p><span className="font-medium">Days:</span> {m.action.days}</p>
-                          <p><span className="font-medium">Reason:</span> {m.action.reason}</p>
-                        </div>
-
-                        {m.actionStatus === 'pending' && (
-                          <button
-                            onClick={() => handleBookLeave(m.id, m.action!)}
-                            className="w-full py-2 px-3 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity"
-                          >
-                            ✅ Confirm & Send to Admin
-                          </button>
+                    {/* Booking Action Cards — one per option */}
+                    {m.actions && m.actions.length > 0 && m.role === 'assistant' && (
+                      <div className="mt-2 space-y-2">
+                        {m.actions.length > 1 && (
+                          <p className="text-xs font-semibold text-[#6366f1] px-1">
+                            📅 Choose a date to book:
+                          </p>
                         )}
+                        {m.actions.map((action, idx) => {
+                          const state = m.bookingStates?.[idx] ?? { status: 'pending' };
+                          return (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.08 }}
+                              className="p-3 rounded-xl border border-[#6366f1]/30 bg-[var(--background-subtle)]"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <Calendar className="w-4 h-4 text-[#6366f1]" />
+                                <span className="text-xs font-semibold text-[var(--text-primary)]">
+                                  {m.actions!.length > 1 ? `Option ${idx + 1}` : 'Leave Request'}
+                                </span>
+                              </div>
+                              <div className="text-xs text-[var(--text-muted)] space-y-1 mb-3">
+                                <p><span className="font-medium">Type:</span> {LEAVE_TYPE_LABELS[action.leaveType] ?? action.leaveType}</p>
+                                <p><span className="font-medium">From:</span> {action.startDate}</p>
+                                <p><span className="font-medium">To:</span> {action.endDate}</p>
+                                <p><span className="font-medium">Days:</span> {action.days}</p>
+                                {action.reason && <p><span className="font-medium">Reason:</span> {action.reason}</p>}
+                              </div>
 
-                        {m.actionStatus === 'loading' && (
-                          <div className="flex items-center justify-center gap-2 py-2">
-                            <Loader2 className="w-4 h-4 animate-spin text-[#6366f1]" />
-                            <span className="text-xs text-[var(--text-muted)]">Submitting...</span>
-                          </div>
-                        )}
+                              {state.status === 'pending' && (
+                                <button
+                                  onClick={() => handleBookLeave(m.id, action, idx)}
+                                  className="w-full py-2 px-3 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                                >
+                                  ✅ Confirm & Send to Admin
+                                </button>
+                              )}
 
-                        {m.actionStatus === 'booked' && (
-                          <div className="flex items-start gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
-                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-green-600 dark:text-green-400">{m.actionResult}</p>
-                          </div>
-                        )}
+                              {state.status === 'loading' && (
+                                <div className="flex items-center justify-center gap-2 py-2">
+                                  <Loader2 className="w-4 h-4 animate-spin text-[#6366f1]" />
+                                  <span className="text-xs text-[var(--text-muted)]">Submitting...</span>
+                                </div>
+                              )}
 
-                        {m.actionStatus === 'conflict' && (
-                          <div className="flex items-start gap-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20">
-                            <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-red-600 dark:text-red-400">{m.actionResult}</p>
-                          </div>
-                        )}
-                      </motion.div>
+                              {state.status === 'booked' && (
+                                <div className="flex items-start gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                  <p className="text-xs text-green-600 dark:text-green-400">{state.result}</p>
+                                </div>
+                              )}
+
+                              {state.status === 'conflict' && (
+                                <div className="flex items-start gap-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                                  <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                                  <p className="text-xs text-red-600 dark:text-red-400">{state.result}</p>
+                                </div>
+                              )}
+                            </motion.div>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
                 </div>
