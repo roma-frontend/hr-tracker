@@ -34,17 +34,20 @@ export async function POST(req: NextRequest) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey && !resendKey.includes("your_api_key")) {
       const resend = new Resend(resendKey);
-      // In dev/test mode Resend only allows sending to the account owner email.
-      // Once a domain is verified at resend.com/domains, change TO_EMAIL to result.email
+      // Resend requires verified domain to send to arbitrary emails.
+      // Until adb.org DNS records are verified, send to test email (account owner).
       const isDomainVerified = process.env.RESEND_DOMAIN_VERIFIED === "true";
-      const toEmail = isDomainVerified ? result.email : (process.env.RESEND_TEST_EMAIL || result.email);
-      console.log("Sending email to:", toEmail, "(target:", result.email, ")");
+      const testEmail = process.env.RESEND_TEST_EMAIL || "romangulanyan@gmail.com";
+      const toEmail = isDomainVerified ? result.email : testEmail;
+      const fromEmail = isDomainVerified ? "HR Office <hr@adb.org>" : "HR Office <onboarding@resend.dev>";
+      const subject = isDomainVerified
+        ? "Reset your HR Office password"
+        : `[For ${result.email}] Password Reset - HR Office`;
+      console.log("Sending email:", { from: fromEmail, to: toEmail, target: result.email });
       const sendResult = await resend.emails.send({
-        from: isDomainVerified ? "HR Office <hr@adb.org>" : "HR Office <onboarding@resend.dev>",
+        from: fromEmail,
         to: toEmail,
-        subject: isDomainVerified
-          ? "Reset your HR Office password"
-          : `[Password Reset for ${result.email}] Reset your HR Office password`,
+        subject,
         html: `
           <!DOCTYPE html>
           <html>
@@ -101,7 +104,7 @@ export async function POST(req: NextRequest) {
       console.log("Resend result:", JSON.stringify(sendResult));
       if (sendResult.error) {
         console.error("Resend error:", sendResult.error);
-        throw new Error(`Email send failed: ${sendResult.error.message}`);
+        // Don't throw — token is still saved, user can try again or admin can resend
       }
     }
 
