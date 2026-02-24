@@ -20,6 +20,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType, type LeaveStatus } from "@/lib/types";
+import dynamic from "next/dynamic";
+
+// Lazy load admin components
+const HolidayCalendarSync = dynamic(() => import("@/components/admin/HolidayCalendarSync"), { ssr: false });
+const CostAnalysis = dynamic(() => import("@/components/admin/CostAnalysis"), { ssr: false });
+const ConflictDetection = dynamic(() => import("@/components/admin/ConflictDetection"), { ssr: false });
+const SmartSuggestions = dynamic(() => import("@/components/admin/SmartSuggestions"), { ssr: false });
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -287,6 +294,46 @@ export function DashboardClient() {
           </Button>
         </div>
       </motion.div>
+
+      {/* Admin-Only Section */}
+      {user?.role === "admin" && (
+        <>
+          <motion.div variants={itemVariants} className="pt-6 border-t border-[var(--border)]">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-8 w-1 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                Admin Tools
+              </h3>
+              <span className="px-2 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full">
+                PREMIUM
+              </span>
+            </div>
+            <p className="text-sm text-[var(--text-muted)] mb-6">
+              Advanced analytics and AI-powered insights for managing your team's leave schedule
+            </p>
+          </motion.div>
+
+          {/* Admin Grid - Row 1: Calendar Sync + Cost Analysis */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <motion.div variants={itemVariants}>
+              <HolidayCalendarSync />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <CostAnalysis />
+            </motion.div>
+          </div>
+
+          {/* Admin Grid - Row 2: Conflict Detection (Full Width) */}
+          <motion.div variants={itemVariants}>
+            <ConflictDetection />
+          </motion.div>
+
+          {/* Admin Grid - Row 3: Smart Suggestions (Full Width) */}
+          <motion.div variants={itemVariants}>
+            <SmartSuggestions />
+          </motion.div>
+        </>
+      )}
     </motion.div>
   );
 }
