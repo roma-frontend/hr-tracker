@@ -76,8 +76,8 @@ export default function AttendancePage() {
         </>
       )}
 
-      {/* Admin/Supervisor: Today's overview */}
-      {isAdminOrSupervisor && todaySummary && (
+      {/* Admin/Supervisor: Today's overview — show even if all zeros */}
+      {isAdminOrSupervisor && todaySummary !== undefined && (
         <motion.div variants={itemVariants}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <Card>

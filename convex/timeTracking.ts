@@ -2,6 +2,14 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
+// Helper: get today's date string in Armenia timezone (UTC+4)
+function getTodayDate() {
+  const now = new Date();
+  const armeniaOffset = 4 * 60 * 60 * 1000;
+  const armeniaTime = new Date(now.getTime() + armeniaOffset);
+  return armeniaTime.toISOString().split("T")[0];
+}
+
 // ── Check In (Employee arrives at work) ──────────────────────────────────
 export const checkIn = mutation({
   args: {
@@ -9,7 +17,7 @@ export const checkIn = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const today = new Date(now).toISOString().split("T")[0]; // "2026-02-24"
+    const today = getTodayDate();
 
     // Check if already checked in today
     const existing = await ctx.db
@@ -84,7 +92,7 @@ export const checkOut = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const today = new Date(now).toISOString().split("T")[0];
+    const today = getTodayDate();
 
     // Find today's check-in record
     const record = await ctx.db
@@ -136,7 +144,7 @@ export const getTodayStatus = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayDate();
 
     const record = await ctx.db
       .query("timeTracking")
@@ -168,7 +176,7 @@ export const getUserHistory = query({
 export const getCurrentlyAtWork = query({
   args: {},
   handler: async (ctx) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayDate();
 
     const records = await ctx.db
       .query("timeTracking")
@@ -206,7 +214,7 @@ export const getRecentAttendance = query({
 export const getTodayAllAttendance = query({
   args: {},
   handler: async (ctx) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayDate();
 
     const records = await ctx.db
       .query("timeTracking")
@@ -232,7 +240,7 @@ export const getTodayAllAttendance = query({
 export const getTodayAttendanceSummary = query({
   args: {},
   handler: async (ctx) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayDate();
 
     const records = await ctx.db
       .query("timeTracking")
