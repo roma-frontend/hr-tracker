@@ -30,6 +30,9 @@ export default defineSchema({
     faceDescriptor: v.optional(v.array(v.number())), // 128-dimensional face embedding
     faceImageUrl: v.optional(v.string()), // Reference image for face
     faceRegisteredAt: v.optional(v.number()),
+    // Password Reset
+    resetPasswordToken: v.optional(v.string()),
+    resetPasswordExpiry: v.optional(v.number()),
     // Sessions
     sessionToken: v.optional(v.string()),
     sessionExpiry: v.optional(v.number()),

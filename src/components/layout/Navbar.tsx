@@ -284,7 +284,7 @@ export function Navbar() {
         {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-[var(--background-subtle)] transition-colors outline-none">
+            <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-[var(--background-subtle)] transition-colors outline-none focus-visible:outline-none focus:outline-none">
               <Avatar className="w-8 h-8">
                 {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                 <AvatarFallback className="text-xs bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white font-semibold">

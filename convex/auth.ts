@@ -178,6 +178,71 @@ export const getSession = query({
   },
 });
 
+// ── Request Password Reset ────────────────────────────────────────────────
+export const requestPasswordReset = mutation({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    // Always return success to prevent email enumeration
+    if (!user) return { success: true };
+
+    // Generate a secure random token
+    const token = `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+    const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    await ctx.db.patch(user._id, {
+      resetPasswordToken: token,
+      resetPasswordExpiry: expiry,
+    });
+
+    return { success: true, token, name: user.name, email: user.email };
+  },
+});
+
+// ── Reset Password ────────────────────────────────────────────────────────
+export const resetPassword = mutation({
+  args: { token: v.string(), newPassword: v.string() },
+  handler: async (ctx, { token, newPassword }) => {
+    const users = await ctx.db.query("users").collect();
+    const user = users.find((u) => u.resetPasswordToken === token);
+
+    if (!user) throw new Error("Invalid or expired reset token");
+    if (!user.resetPasswordExpiry || user.resetPasswordExpiry < Date.now()) {
+      throw new Error("Reset token has expired. Please request a new one.");
+    }
+
+    // Clear the token and update password
+    await ctx.db.patch(user._id, {
+      passwordHash: newPassword,
+      resetPasswordToken: undefined,
+      resetPasswordExpiry: undefined,
+      sessionToken: undefined, // invalidate all sessions
+    });
+
+    return { success: true };
+  },
+});
+
+// ── Verify Reset Token ────────────────────────────────────────────────────
+export const verifyResetToken = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const users = await ctx.db.query("users").collect();
+    const user = users.find((u) => u.resetPasswordToken === token);
+
+    if (!user) return { valid: false };
+    if (!user.resetPasswordExpiry || user.resetPasswordExpiry < Date.now()) {
+      return { valid: false, expired: true };
+    }
+
+    return { valid: true, email: user.email, name: user.name };
+  },
+});
+
 // ── Register WebAuthn credential ───────────────────────────────────────────
 export const registerWebauthn = mutation({
   args: {

@@ -71,13 +71,15 @@ export function Sidebar() {
                 transition={{ duration: 0.2 }}
                 className="flex items-center gap-2 overflow-hidden"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0 shadow-md">
-                  <Building2 className="w-4 h-4 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-sm leading-tight truncate text-[var(--text-primary)]">HR Office</p>
-                  <p className="text-[10px] truncate text-[var(--text-muted)]">Leave Monitoring</p>
-                </div>
+                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0 shadow-md">
+                    <Building2 className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm leading-tight truncate text-[var(--text-primary)]">HR Office</p>
+                    <p className="text-[10px] truncate text-[var(--text-muted)]">Leave Monitoring</p>
+                  </div>
+                </Link>
               </motion.div>
             )}
           </AnimatePresence>
@@ -112,7 +114,7 @@ export function Sidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative outline-none focus-visible:outline-none",
                   isActive
                     ? "border"
                     : "hover:text-[var(--text-primary)]"
@@ -253,7 +255,7 @@ export function MobileSidebar() {
               className="flex items-center h-16 px-4 border-b transition-colors duration-300"
               style={{ borderColor: "var(--sidebar-border)" }}
             >
-              <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity outline-none" onClick={() => setMobileOpen(false)}>
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-md">
                   <Building2 className="w-4 h-4 text-white" />
                 </div>
@@ -261,7 +263,7 @@ export function MobileSidebar() {
                   <p className="font-bold text-sm leading-tight text-[var(--text-primary)]">HR Office</p>
                   <p className="text-[10px] text-[var(--text-muted)]">Leave Monitoring</p>
                 </div>
-              </div>
+              </Link>
             </div>
 
             {/* Nav */}
@@ -275,7 +277,7 @@ export function MobileSidebar() {
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 outline-none focus-visible:outline-none",
                       isActive ? "border" : ""
                     )}
                     style={

@@ -273,27 +273,29 @@ function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-48 bg-[#020817]/95 backdrop-blur-xl border-white/10"
+                className="w-48 bg-[#0a0a0f]/95 backdrop-blur-xl border border-[#d4af37]/20 shadow-xl shadow-black/50 rounded-xl"
               >
-                <DropdownMenuLabel className="text-[#f7e7ce]/70 text-xs">My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuLabel className="text-[#d4af37]/60 text-xs font-semibold tracking-widest uppercase px-2 py-1.5">My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-[#d4af37]/10" />
                 <DropdownMenuItem
-                  className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 gap-2"
+                  className="text-[#f7e7ce] cursor-pointer hover:bg-[#f7e7ce]/10 hover:text-[#f7e7ce] focus:bg-[#f7e7ce]/10 focus:text-[#f7e7ce] focus:outline-none focus-visible:outline-none outline-none border-0 focus:border-0 focus:ring-0 focus-visible:ring-0 gap-2 rounded-lg transition-colors"
+                  style={{ boxShadow: 'none' }}
                   onClick={() => router.push('/dashboard')}
                 >
                   <UserIcon className="w-4 h-4 text-[#d4af37]/70" />
                   Dashboard
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 gap-2"
+                  className="text-[#f7e7ce] cursor-pointer hover:bg-[#f7e7ce]/10 hover:text-[#f7e7ce] focus:bg-[#f7e7ce]/10 focus:text-[#f7e7ce] focus:outline-none focus-visible:outline-none outline-none border-0 focus:border-0 focus:ring-0 focus-visible:ring-0 gap-2 rounded-lg transition-colors"
+                  style={{ boxShadow: 'none' }}
                   onClick={() => router.push('/settings')}
                 >
                   <SettingsIcon className="w-4 h-4 text-[#d4af37]/70" />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuSeparator className="bg-[#d4af37]/10" />
                 <DropdownMenuItem
-                  className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer gap-2"
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:text-red-300 focus:bg-red-500/10 focus:outline-none focus-visible:outline-none outline-none cursor-pointer gap-2 rounded-lg transition-colors"
                   onClick={handleLogout}
                 >
                   <LogOut className="w-4 h-4" />

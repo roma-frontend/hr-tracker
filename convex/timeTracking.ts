@@ -2,12 +2,38 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
+// Armenia timezone offset: UTC+4
+const ARMENIA_OFFSET_MS = 4 * 60 * 60 * 1000;
+
 // Helper: get today's date string in Armenia timezone (UTC+4)
 function getTodayDate() {
   const now = new Date();
-  const armeniaOffset = 4 * 60 * 60 * 1000;
-  const armeniaTime = new Date(now.getTime() + armeniaOffset);
+  const armeniaTime = new Date(now.getTime() + ARMENIA_OFFSET_MS);
   return armeniaTime.toISOString().split("T")[0];
+}
+
+// Helper: get scheduled start/end timestamps in Armenia timezone (UTC+4)
+// Armenia is UTC+4, so Armenia 09:00 = UTC 05:00, Armenia 18:00 = UTC 14:00
+// dateStr is "YYYY-MM-DD" in Armenia local date
+function getScheduledTimestamps(dateStr: string, startTime: string, endTime: string) {
+  const [startHour, startMin] = startTime.split(":").map(Number);
+  const [endHour, endMin] = endTime.split(":").map(Number);
+
+  const [year, month, day] = dateStr.split("-").map(Number);
+
+  // Armenia midnight in UTC = UTC midnight MINUS 4h (because Armenia is UTC+4, ahead of UTC)
+  // Armenia 00:00 = UTC (previous day) 20:00
+  // So: UTC timestamp of Armenia midnight = Date.UTC(year, month-1, day) - ARMENIA_OFFSET_MS
+  // Then Armenia HH:MM = Armenia midnight + HH*60+MM minutes
+  // But since Date.now() returns UTC, we compare directly:
+  // Armenia 09:00 as UTC ms = Date.UTC(year, month-1, day) - ARMENIA_OFFSET_MS + 9*3600*1000
+
+  const armeniaDayStartUTC = Date.UTC(year, month - 1, day) - ARMENIA_OFFSET_MS;
+
+  const scheduledStart = armeniaDayStartUTC + (startHour * 60 + startMin) * 60 * 1000;
+  const scheduledEnd   = armeniaDayStartUTC + (endHour   * 60 + endMin  ) * 60 * 1000;
+
+  return { scheduledStart, scheduledEnd };
 }
 
 // ── Check In (Employee arrives at work) ──────────────────────────────────
@@ -38,20 +64,12 @@ export const checkIn = mutation({
     const startTime = schedule?.startTime || "09:00";
     const endTime = schedule?.endTime || "18:00";
 
-    // Create scheduled times for today
-    const todayDate = new Date(now);
-    const [startHour, startMin] = startTime.split(":").map(Number);
-    const [endHour, endMin] = endTime.split(":").map(Number);
+    // Create scheduled times for today in Armenia timezone
+    const { scheduledStart, scheduledEnd } = getScheduledTimestamps(today, startTime, endTime);
 
-    const scheduledStart = new Date(todayDate);
-    scheduledStart.setHours(startHour, startMin, 0, 0);
-
-    const scheduledEnd = new Date(todayDate);
-    scheduledEnd.setHours(endHour, endMin, 0, 0);
-
-    // Calculate if late
-    const isLate = now > scheduledStart.getTime();
-    const lateMinutes = isLate ? Math.floor((now - scheduledStart.getTime()) / 1000 / 60) : 0;
+    // Calculate if late (after 9:00 AM Armenia time)
+    const isLate = now > scheduledStart;
+    const lateMinutes = isLate ? Math.floor((now - scheduledStart) / 1000 / 60) : 0;
 
     // Create or update time tracking record
     if (existing) {
@@ -69,8 +87,8 @@ export const checkIn = mutation({
       const id = await ctx.db.insert("timeTracking", {
         userId: args.userId,
         checkInTime: now,
-        scheduledStartTime: scheduledStart.getTime(),
-        scheduledEndTime: scheduledEnd.getTime(),
+        scheduledStartTime: scheduledStart,
+        scheduledEndTime: scheduledEnd,
         isLate,
         lateMinutes: lateMinutes > 0 ? lateMinutes : undefined,
         isEarlyLeave: false,
@@ -108,18 +126,33 @@ export const checkOut = mutation({
       throw new Error("Already checked out today");
     }
 
+    // Recalculate scheduled end fresh (correct Armenia UTC+4 timezone)
+    const scheduleForOut = await ctx.db
+      .query("workSchedule")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+    const endTime = scheduleForOut?.endTime || "18:00";
+    const startTime = scheduleForOut?.startTime || "09:00";
+    const { scheduledStart: freshStart, scheduledEnd: freshEnd } = getScheduledTimestamps(today, startTime, endTime);
+
+    // Patch the record with correct scheduled times (fixes old stale values)
+    await ctx.db.patch(record._id, {
+      scheduledStartTime: freshStart,
+      scheduledEndTime: freshEnd,
+    });
+
     // Calculate worked time
     const totalWorkedMinutes = Math.floor((now - record.checkInTime) / 1000 / 60);
 
-    // Calculate if early leave
-    const isEarlyLeave = now < record.scheduledEndTime;
+    // Calculate if early leave (compare against fresh correct scheduledEnd)
+    const isEarlyLeave = now < freshEnd;
     const earlyLeaveMinutes = isEarlyLeave
-      ? Math.floor((record.scheduledEndTime - now) / 1000 / 60)
+      ? Math.floor((freshEnd - now) / 1000 / 60)
       : 0;
 
     // Calculate overtime
-    const overtimeMinutes = now > record.scheduledEndTime
-      ? Math.floor((now - record.scheduledEndTime) / 1000 / 60)
+    const overtimeMinutes = now > freshEnd
+      ? Math.floor((now - freshEnd) / 1000 / 60)
       : 0;
 
     // Update record
@@ -334,22 +367,15 @@ export const markAbsent = mutation({
     const startTime = schedule?.startTime || "09:00";
     const endTime = schedule?.endTime || "18:00";
 
-    const dateObj = new Date(args.date);
-    const [startHour, startMin] = startTime.split(":").map(Number);
-    const [endHour, endMin] = endTime.split(":").map(Number);
-
-    const scheduledStart = new Date(dateObj);
-    scheduledStart.setHours(startHour, startMin, 0, 0);
-
-    const scheduledEnd = new Date(dateObj);
-    scheduledEnd.setHours(endHour, endMin, 0, 0);
+    // Create scheduled times in Armenia timezone
+    const { scheduledStart, scheduledEnd } = getScheduledTimestamps(args.date, startTime, endTime);
 
     // Create absent record
     const id = await ctx.db.insert("timeTracking", {
       userId: args.userId,
       checkInTime: 0, // no check-in
-      scheduledStartTime: scheduledStart.getTime(),
-      scheduledEndTime: scheduledEnd.getTime(),
+      scheduledStartTime: scheduledStart,
+      scheduledEndTime: scheduledEnd,
       isLate: false,
       isEarlyLeave: false,
       status: "absent",

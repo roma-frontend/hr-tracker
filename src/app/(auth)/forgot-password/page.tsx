@@ -1,0 +1,190 @@
+"use client";
+
+import React, { useState, useTransition } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Loader2, AlertCircle, Building2, CheckCircle2, ArrowLeft } from "lucide-react";
+
+export default function ForgotPasswordPage() {
+  const [isPending, startTransition] = useTransition();
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    startTransition(async () => {
+      try {
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Something went wrong");
+        setSent(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  };
+
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: "var(--background)" }}
+    >
+      {/* Background gradient */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
+          style={{ background: "radial-gradient(circle, #6366f1, transparent)" }}
+        />
+        <div
+          className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
+          style={{ background: "radial-gradient(circle, #8b5cf6, transparent)" }}
+        />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md relative"
+      >
+        {/* Card */}
+        <div
+          className="rounded-2xl p-8 shadow-2xl border"
+          style={{ background: "var(--card)", borderColor: "var(--border)" }}
+        >
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg">
+              <Building2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-base leading-tight" style={{ color: "var(--text-primary)" }}>HR Office</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Leave Monitoring</p>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {!sent ? (
+              <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <div className="mb-6">
+                  <h1 className="text-xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
+                    Forgot your password?
+                  </h1>
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    No worries! Enter your email and we'll send you a reset link.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                      Email address
+                    </label>
+                    <div className="relative">
+                      <Mail
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                        style={{ color: "var(--text-muted)" }}
+                      />
+                      <input
+                        type="email"
+                        required
+                        autoFocus
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@company.com"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
+                        style={{
+                          background: "var(--input)",
+                          borderColor: "var(--border)",
+                          color: "var(--text-primary)",
+                        }}
+                        onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                        onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                      />
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center gap-2 p-3 rounded-xl text-sm"
+                        style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}
+                      >
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        {error}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <motion.button
+                    type="submit"
+                    disabled={isPending}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+                    style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                  >
+                    {isPending ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+                    ) : (
+                      "Send Reset Link"
+                    )}
+                  </motion.button>
+                </form>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-4"
+              >
+                <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-green-500" />
+                </div>
+                <h2 className="text-xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+                  Check your email!
+                </h2>
+                <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
+                  If an account with <strong style={{ color: "var(--text-primary)" }}>{email}</strong> exists,
+                  we've sent a password reset link. It expires in 1 hour.
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Didn't receive it? Check your spam folder or{" "}
+                  <button
+                    onClick={() => setSent(false)}
+                    className="underline"
+                    style={{ color: "#6366f1" }}
+                  >
+                    try again
+                  </button>
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Back to login */}
+        <div className="text-center mt-4">
+          <Link
+            href="/login"
+            className="text-sm flex items-center justify-center gap-1.5 hover:underline"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Back to login
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

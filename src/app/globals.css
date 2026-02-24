@@ -312,3 +312,17 @@ body {
   background: rgba(99, 102, 241, 0.25);
   color: var(--text-primary);
 }
+
+/* ── Landing Dropdown — champagne theme, no purple borders ──────── */
+[data-radix-popper-content-wrapper] [role="menuitem"] {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+[data-radix-popper-content-wrapper] [role="menuitem"]:focus,
+[data-radix-popper-content-wrapper] [role="menuitem"]:hover,
+[data-radix-popper-content-wrapper] [role="menuitem"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
