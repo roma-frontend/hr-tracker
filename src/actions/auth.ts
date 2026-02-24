@@ -200,6 +200,36 @@ export async function getSessionAction() {
   return await verifyJWT(jwt);
 }
 
+export async function updateSessionProfileAction(userId: string, name: string, email: string) {
+  const cookieStore = await cookies();
+  const jwt = cookieStore.get("hr-auth-token")?.value;
+  if (!jwt) throw new Error("Not authenticated");
+
+  const payload = await verifyJWT(jwt);
+  if (!payload || payload.userId !== userId) throw new Error("Unauthorized");
+
+  const newJwt = await signJWT({
+    userId: payload.userId,
+    name,
+    email,
+    role: payload.role,
+    department: payload.department,
+    position: payload.position,
+    employeeType: payload.employeeType,
+    avatar: payload.avatar,
+  });
+
+  cookieStore.set("hr-auth-token", newJwt, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60,
+    path: "/",
+  });
+
+  return { success: true };
+}
+
 export async function updateSessionAvatarAction(userId: string, avatarUrl: string) {
   const cookieStore = await cookies();
   const jwt = cookieStore.get("hr-auth-token")?.value;

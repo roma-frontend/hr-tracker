@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Save, Bell, Shield, Palette, Globe, ScanFace } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/store/useAuthStore";
+import { updateSessionProfileAction } from "@/actions/auth";
 import { toast } from "sonner";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
@@ -30,6 +31,12 @@ export default function SettingsPage() {
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
 
+  // Sync when user loads from store (async)
+  useEffect(() => {
+    if (user?.name) setName(user.name);
+    if (user?.email) setEmail(user.email);
+  }, [user?.name, user?.email]);
+
   // Get face descriptor status
   const faceData = useQuery(
     api.faceRecognition.getFaceDescriptor,
@@ -42,13 +49,22 @@ export default function SettingsPage() {
     if (!user?.id) return;
     setSaving(true);
     try {
+      const newName = name.trim() || user.name;
+      const newEmail = email.trim() || user.email;
+
+      // 1. Save to Convex DB
       await updateUser({
         userId: user.id as any,
-        name: name.trim() || user.name,
-        email: email.trim() || user.email,
+        name: newName,
+        email: newEmail,
       });
-      // Update local store
-      login({ ...user, name: name.trim() || user.name, email: email.trim() || user.email });
+
+      // 2. Update JWT cookie (so data persists after page refresh)
+      await updateSessionProfileAction(user.id, newName, newEmail);
+
+      // 3. Update Zustand store (localStorage)
+      login({ ...user, name: newName, email: newEmail });
+
       toast.success("Profile saved successfully!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save");

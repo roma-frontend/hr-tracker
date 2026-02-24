@@ -34,10 +34,17 @@ export async function POST(req: NextRequest) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey && !resendKey.includes("your_api_key")) {
       const resend = new Resend(resendKey);
-      await resend.emails.send({
-        from: "HR Office <onboarding@resend.dev>",
-        to: result.email,
-        subject: "Reset your HR Office password",
+      // In dev/test mode Resend only allows sending to the account owner email.
+      // Once a domain is verified at resend.com/domains, change TO_EMAIL to result.email
+      const isDomainVerified = process.env.RESEND_DOMAIN_VERIFIED === "true";
+      const toEmail = isDomainVerified ? result.email : (process.env.RESEND_TEST_EMAIL || result.email);
+      console.log("Sending email to:", toEmail, "(target:", result.email, ")");
+      const sendResult = await resend.emails.send({
+        from: isDomainVerified ? "HR Office <hr@adb.org>" : "HR Office <onboarding@resend.dev>",
+        to: toEmail,
+        subject: isDomainVerified
+          ? "Reset your HR Office password"
+          : `[Password Reset for ${result.email}] Reset your HR Office password`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -91,11 +98,17 @@ export async function POST(req: NextRequest) {
           </html>
         `,
       });
+      console.log("Resend result:", JSON.stringify(sendResult));
+      if (sendResult.error) {
+        console.error("Resend error:", sendResult.error);
+        throw new Error(`Email send failed: ${sendResult.error.message}`);
+      }
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Forgot password error:", err);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "Something went wrong";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
