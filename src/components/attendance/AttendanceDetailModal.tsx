@@ -48,9 +48,10 @@ function formatDuration(minutes: number) {
 }
 
 export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetailModalProps) {
+  const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
   const monthlyStats = useQuery(
     api.timeTracking.getMonthlyStats,
-    record?.userId ? { userId: record.userId } : "skip"
+    record?.userId ? { userId: record.userId, month: currentMonth } : "skip"
   );
 
   const recentRecords = useQuery(
