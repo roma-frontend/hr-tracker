@@ -68,6 +68,7 @@ export function ChatWidget() {
       setMessages(prev => [...prev, assistantMessage]);
 
       let previousChunk = '';
+      let previousText = ''; // Track previous extracted text to avoid duplicates
 
       while (true) {
         const { done, value } = await reader.read();
