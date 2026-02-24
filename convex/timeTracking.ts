@@ -177,18 +177,40 @@ export const getCurrentlyAtWork = query({
 
     const atWork = records.filter((r) => r.status === "checked_in");
 
-    // Get user details for each record
     const withUsers = await Promise.all(
       atWork.map(async (record) => {
         const user = await ctx.db.get(record.userId);
-        return {
-          ...record,
-          user,
-        };
+        return { ...record, user };
       })
     );
 
     return withUsers;
+  },
+});
+
+// ── Get Today's Full Attendance (all who checked in/out) ─────────────────
+export const getTodayAllAttendance = query({
+  args: {},
+  handler: async (ctx) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    const records = await ctx.db
+      .query("timeTracking")
+      .withIndex("by_date", (q) => q.eq("date", today))
+      .collect();
+
+    const withUsers = await Promise.all(
+      records.map(async (record) => {
+        const user = await ctx.db.get(record.userId);
+        return { ...record, user };
+      })
+    );
+
+    // Sort: checked_in first, then checked_out, then absent
+    return withUsers.sort((a, b) => {
+      const order = { checked_in: 0, checked_out: 1, absent: 2 };
+      return order[a.status] - order[b.status];
+    });
   },
 });
 

@@ -38,6 +38,10 @@ export default function AttendancePage() {
     api.timeTracking.getCurrentlyAtWork,
     isAdminOrSupervisor ? {} : "skip"
   );
+  const todayAllAttendance = useQuery(
+    api.timeTracking.getTodayAllAttendance,
+    isAdminOrSupervisor ? {} : "skip"
+  );
   const needsRating = useQuery(
     api.supervisorRatings.getEmployeesNeedingRating,
     isAdminOrSupervisor && user?.id ? { supervisorId: user.id as Id<"users"> } : "skip"
@@ -101,49 +105,78 @@ export default function AttendancePage() {
         </motion.div>
       )}
 
-      {/* Admin/Supervisor: Currently at work */}
-      {isAdminOrSupervisor && currentlyAtWork && currentlyAtWork.length > 0 && (
+      {/* Admin/Supervisor: Today's full attendance list */}
+      {isAdminOrSupervisor && todayAllAttendance !== undefined && (
         <motion.div variants={itemVariants}>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-green-500" />
-                Currently At Work ({currentlyAtWork.length})
+                <Users className="w-5 h-5 text-blue-500" />
+                Today's Attendance — {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                <Badge className="ml-auto bg-blue-500/10 text-blue-500 border-blue-500/30">
+                  {todayAllAttendance.length} recorded
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {currentlyAtWork.map((record) => (
-                  <div
-                    key={record._id}
-                    className="flex items-center justify-between p-3 rounded-lg border"
-                    style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold">
-                        {record.user?.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2) ?? "?"}
+              {todayAllAttendance.length === 0 ? (
+                <div className="text-center py-8">
+                  <Clock className="w-10 h-10 mx-auto mb-3 text-[var(--text-muted)] opacity-40" />
+                  <p className="text-sm text-[var(--text-muted)]">No attendance records yet today</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Employees will appear here once they check in</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {todayAllAttendance.map((record) => (
+                    <div
+                      key={record._id}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                      style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold">
+                          {record.user?.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2) ?? "?"}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                            {record.user?.name ?? "Unknown"}
+                          </p>
+                          <p className="text-xs text-[var(--text-muted)]">
+                            {record.status !== "absent" && record.checkInTime > 0
+                              ? `In: ${new Date(record.checkInTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`
+                              : ""}
+                            {record.checkOutTime
+                              ? ` · Out: ${new Date(record.checkOutTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`
+                              : ""}
+                            {record.totalWorkedMinutes
+                              ? ` · ${(record.totalWorkedMinutes / 60).toFixed(1)}h worked`
+                              : ""}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                          {record.user?.name ?? "Unknown"}
-                        </p>
-                        <p className="text-xs text-[var(--text-muted)]">
-                          Checked in at {new Date(record.checkInTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-                        </p>
+                      <div className="flex items-center gap-2">
+                        {record.isLate && (
+                          <Badge variant="destructive" className="text-xs">Late {record.lateMinutes}m</Badge>
+                        )}
+                        {record.isEarlyLeave && (
+                          <Badge className="bg-orange-500 text-white text-xs">Early leave</Badge>
+                        )}
+                        {record.status === "checked_in" && (
+                          <Badge className="bg-green-500 text-white text-xs">
+                            <Clock className="w-3 h-3 mr-1" />Active
+                          </Badge>
+                        )}
+                        {record.status === "checked_out" && (
+                          <Badge className="bg-blue-500 text-white text-xs">Done</Badge>
+                        )}
+                        {record.status === "absent" && (
+                          <Badge variant="destructive" className="text-xs">Absent</Badge>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {record.isLate && (
-                        <Badge variant="destructive" className="text-xs">Late {record.lateMinutes}m</Badge>
-                      )}
-                      <Badge className="bg-green-500 text-white text-xs">
-                        <Clock className="w-3 h-3 mr-1" />
-                        Active
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
