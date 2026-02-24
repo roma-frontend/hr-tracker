@@ -94,22 +94,36 @@ export function ChatWidget() {
           let text = null;
           
           // Check if line starts with a digit followed by colon (0:, 1:, 2:, etc.)
-          const streamFormatMatch = line.match(/^(\d+):"(.*)$/);
+          const streamFormatMatch = line.match(/^(\d+):(.+)$/);
           if (streamFormatMatch) {
-            // Extract the quoted text
-            try {
-              text = JSON.parse(`"${streamFormatMatch[2]}`);
-              console.log('✅ Parsed stream format:', text);
-            } catch (e) {
-              console.error('❌ Failed to parse stream format:', line, e);
+            // Extract the content after the prefix
+            const content = streamFormatMatch[2];
+            
+            // Try to parse as JSON string (with quotes)
+            if (content.startsWith('"')) {
+              try {
+                text = JSON.parse(content);
+                console.log('✅ Parsed JSON format:', text);
+              } catch (e) {
+                // If JSON parsing fails, try extracting quoted content manually
+                const quotedMatch = content.match(/^"(.*?)"?$/);
+                if (quotedMatch) {
+                  text = quotedMatch[1];
+                  console.log('✅ Extracted quoted text:', text);
+                }
+              }
+            } else {
+              // Direct text without quotes
+              text = content;
+              console.log('✅ Direct content:', text);
             }
-          } else if (line.match(/^\d+:/)) {
+          } else if (line.match(/^\d+:$/)) {
             // Skip lines like "0:", "1:" without content
             console.log('⏭️ Skipping empty prefix line');
           } else {
             // Direct text without prefix
             text = line;
-            console.log('✅ Direct text:', text);
+            console.log('✅ Plain text:', text);
           }
           
           if (text && text.trim()) {
