@@ -83,6 +83,13 @@ export default function AttendancePage() {
         </>
       )}
 
+      {/* Debug info — remove after fix */}
+      {isAdminOrSupervisor && (
+        <div className="text-xs p-3 rounded bg-yellow-100 text-yellow-900 font-mono">
+          mounted: {String(mounted)} | role: {user?.role} | todaySummary: {JSON.stringify(todaySummary)} | todayAllAttendance: {JSON.stringify(todayAllAttendance?.length)} | needsRating: {JSON.stringify(needsRating?.length)}
+        </div>
+      )}
+
       {/* Admin/Supervisor: Today's overview — show even if all zeros */}
       {isAdminOrSupervisor && todaySummary !== undefined && (
         <motion.div variants={itemVariants}>
