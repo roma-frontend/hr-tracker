@@ -20,7 +20,7 @@ const containerVariants = {
   visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
 };
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 1, y: 0 },
   visible: { opacity: 1, y: 0 },
 };
 
@@ -83,39 +83,32 @@ export default function AttendancePage() {
         </>
       )}
 
-      {/* Debug info — remove after fix */}
-      {isAdminOrSupervisor && (
-        <div className="text-xs p-3 rounded bg-yellow-100 text-yellow-900 font-mono">
-          mounted: {String(mounted)} | role: {user?.role} | todaySummary: {JSON.stringify(todaySummary)} | todayAllAttendance: {JSON.stringify(todayAllAttendance?.length)} | needsRating: {JSON.stringify(needsRating?.length)}
-        </div>
-      )}
-
-      {/* Admin/Supervisor: Today's overview — show even if all zeros */}
+      {/* Admin/Supervisor: Today's overview */}
       {isAdminOrSupervisor && todaySummary !== undefined && (
         <motion.div variants={itemVariants}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card>
+            <Card className="border border-green-200 dark:border-green-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-green-500">{todaySummary.checkedIn}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">At Work Now</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">At Work Now</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-blue-200 dark:border-blue-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-blue-500">{todaySummary.checkedOut}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Left Today</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Left Today</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-red-200 dark:border-red-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-red-500">{todaySummary.absent}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Absent</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Absent</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-orange-200 dark:border-orange-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-orange-500">{todaySummary.late}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Late Arrivals</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Late Arrivals</p>
               </CardContent>
             </Card>
           </div>
