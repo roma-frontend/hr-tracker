@@ -14,7 +14,7 @@ import { format } from "date-fns";
 
 export function CheckInOutWidget() {
   const { user } = useAuthStore();
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   const todayStatus = useQuery(api.timeTracking.getTodayStatus, 
     user?.id ? { userId: user.id as any } : "skip"
@@ -23,8 +23,9 @@ export function CheckInOutWidget() {
   const checkIn = useMutation(api.timeTracking.checkIn);
   const checkOut = useMutation(api.timeTracking.checkOut);
 
-  // Update current time every second
+  // Update current time every second — only on client to avoid hydration mismatch
   useEffect(() => {
+    setCurrentTime(new Date());
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -70,7 +71,9 @@ export function CheckInOutWidget() {
             <Clock className="w-5 h-5" />
             Time Tracker
           </CardTitle>
-          <div className="text-2xl font-mono">{format(currentTime, "HH:mm:ss")}</div>
+          <div className="text-2xl font-mono">
+            {currentTime ? format(currentTime, "HH:mm:ss") : "--:--:--"}
+          </div>
         </div>
       </CardHeader>
 
