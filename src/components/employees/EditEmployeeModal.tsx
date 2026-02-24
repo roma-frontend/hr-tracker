@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Loader2, User, Mail, Phone, Briefcase, Building2, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Employee {
   _id: string;
@@ -34,8 +35,9 @@ interface EditEmployeeModalProps {
   currentUserRole: "admin" | "supervisor" | "employee";
 }
 
+const ADMIN_EMAIL = "romangulanyan@gmail.com";
 const DEPARTMENTS = ["Engineering", "HR", "Finance", "Marketing", "Operations", "Sales", "Design", "Management", "Legal", "IT"];
-const ROLES = [
+const ALL_ROLES = [
   { value: "admin", label: "Admin", icon: "👑", description: "Full access" },
   { value: "supervisor", label: "Supervisor", icon: "🎯", description: "Manage team" },
   { value: "employee", label: "Employee", icon: "👤", description: "Basic access" },
@@ -61,6 +63,10 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
   });
 
   const canEditRole = currentUserRole === "admin";
+  const currentUser = useAuthStore((s) => s.user);
+  // Only romangulanyan@gmail.com can assign admin role
+  const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
+  const ROLES = isActualAdmin ? ALL_ROLES : ALL_ROLES.filter((r) => r.value !== "admin");
 
   const handleSave = async () => {
     setLoading(true);

@@ -15,6 +15,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { DEPARTMENTS, getTravelAllowance } from "@/lib/types";
+import { useAuthStore } from "@/store/useAuthStore";
+
+const ADMIN_EMAIL = "romangulanyan@gmail.com";
 
 interface AddEmployeeModalProps {
   open: boolean;
@@ -27,6 +30,8 @@ function formatCurrency(amount: number): string {
 
 export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
   const createUser = useMutation(api.users.createUser);
+  const currentUser = useAuthStore((s) => s.user);
+  const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -160,7 +165,9 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
               <SelectContent>
                 <SelectItem value="employee">Employee</SelectItem>
                 <SelectItem value="supervisor">Supervisor</SelectItem>
-                <SelectItem value="admin">Administrator</SelectItem>
+                {isActualAdmin && (
+                  <SelectItem value="admin">Administrator</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
