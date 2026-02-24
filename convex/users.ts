@@ -63,6 +63,8 @@ export const seedAdmin = mutation({
 });
 
 // ── Create user (admin only) ───────────────────────────────────────────────
+const ADMIN_EMAIL = "romangulanyan@gmail.com";
+
 export const createUser = mutation({
   args: {
     name: v.string(),
@@ -76,6 +78,11 @@ export const createUser = mutation({
     supervisorId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    // ONLY romangulanyan@gmail.com can be admin
+    if (args.role === "admin" && args.email.toLowerCase() !== ADMIN_EMAIL) {
+      throw new Error("Cannot assign admin role to this email address");
+    }
+
     const existing = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", args.email))
@@ -147,6 +154,16 @@ export const updateUser = mutation({
   handler: async (ctx, { userId, ...updates }) => {
     const user = await ctx.db.get(userId);
     if (!user) throw new Error("User not found");
+
+    // ONLY romangulanyan@gmail.com can have admin role
+    if (updates.role === "admin" && user.email.toLowerCase() !== ADMIN_EMAIL) {
+      throw new Error("Cannot assign admin role: only romangulanyan@gmail.com can be admin");
+    }
+
+    // Prevent removing admin role from romangulanyan@gmail.com
+    if (user.email.toLowerCase() === ADMIN_EMAIL && updates.role && updates.role !== "admin") {
+      throw new Error("Cannot change role of the admin account");
+    }
 
     // Recalculate travel allowance if employeeType changed
     const employeeType = updates.employeeType ?? user.employeeType;

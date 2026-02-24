@@ -20,11 +20,19 @@ export const register = mutation({
       .unique();
     if (existing) throw new Error("Email already registered");
 
-    // First user ever OR romangulanyan@gmail.com gets admin role
+    // ONLY romangulanyan@gmail.com can be admin — no exceptions
+    const ADMIN_EMAIL = "romangulanyan@gmail.com";
+    const isAdminEmail = email.toLowerCase() === ADMIN_EMAIL;
+
+    // Block any attempt to register as admin with a non-admin email
+    if (forcedRole === "admin" && !isAdminEmail) {
+      throw new Error("You are not authorized to register as admin");
+    }
+
     const allUsers = await ctx.db.query("users").collect();
     const isFirstUser = allUsers.length === 0;
-    const isAdminEmail = email.toLowerCase() === "romangulanyan@gmail.com";
-    const role = isFirstUser || isAdminEmail ? "admin" : "employee";
+    // Admin role is ONLY for romangulanyan@gmail.com
+    const role = isAdminEmail ? "admin" : "employee";
 
     const isContractor = email.toLowerCase().includes("contractor");
     const travelAllowance = isContractor ? 12000 : 20000;
