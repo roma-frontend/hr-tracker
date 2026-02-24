@@ -139,6 +139,7 @@ export const updateUser = mutation({
   args: {
     userId: v.id("users"),
     name: v.optional(v.string()),
+    email: v.optional(v.string()),
     role: v.optional(v.union(v.literal("admin"), v.literal("supervisor"), v.literal("employee"))),
     employeeType: v.optional(v.union(v.literal("staff"), v.literal("contractor"))),
     department: v.optional(v.string()),

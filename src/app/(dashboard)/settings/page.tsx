@@ -21,12 +21,14 @@ import dynamic from "next/dynamic";
 const SLASettings = dynamic(() => import("@/components/admin/SLASettings"), { ssr: false });
 
 export default function SettingsPage() {
-  const { user } = useAuthStore();
+  const { user, login } = useAuthStore();
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [pushNotifs, setPushNotifs] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showFaceRegistration, setShowFaceRegistration] = useState(false);
+  const [name, setName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
 
   // Get face descriptor status
   const faceData = useQuery(
@@ -34,12 +36,25 @@ export default function SettingsPage() {
     user?.id ? { userId: user.id as any } : "skip"
   );
   const removeFaceRegistration = useMutation(api.faceRecognition.removeFaceRegistration);
+  const updateUser = useMutation(api.users.updateUser);
 
   const handleSave = async () => {
+    if (!user?.id) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setSaving(false);
-    toast.success("Settings saved successfully");
+    try {
+      await updateUser({
+        userId: user.id as any,
+        name: name.trim() || user.name,
+        email: email.trim() || user.email,
+      });
+      // Update local store
+      login({ ...user, name: name.trim() || user.name, email: email.trim() || user.email });
+      toast.success("Profile saved successfully!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -86,11 +101,11 @@ export default function SettingsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Full Name</Label>
-              <Input defaultValue={user?.name} />
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Email</Label>
-              <Input defaultValue={user?.email} type="email" />
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">

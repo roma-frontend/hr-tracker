@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     // Send email via Resend
     const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey) {
+    if (resendKey && !resendKey.includes("your_api_key")) {
       const resend = new Resend(resendKey);
       await resend.emails.send({
         from: "HR Office <onboarding@resend.dev>",
