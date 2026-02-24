@@ -210,3 +210,78 @@ function getColorIdForLeaveType(type: string): string {
   };
   return colorMap[type.toLowerCase()] || "1"; // Default: Lavender
 }
+
+/**
+ * Exchange authorization code for access tokens
+ */
+export async function exchangeCodeForTokens(
+  code: string,
+  provider: "google" | "outlook"
+): Promise<{
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+}> {
+  if (provider === "google") {
+    const tokenEndpoint = "https://oauth2.googleapis.com/token";
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`;
+
+    if (!clientId || !clientSecret) {
+      throw new Error("Google OAuth credentials not configured");
+    }
+
+    const response = await fetch(tokenEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to exchange Google code for tokens: ${error}`);
+    }
+
+    return response.json();
+  } else {
+    // Outlook
+    const tokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+    const clientId = process.env.MICROSOFT_CLIENT_ID;
+    const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/outlook/callback`;
+
+    if (!clientId || !clientSecret) {
+      throw new Error("Microsoft OAuth credentials not configured");
+    }
+
+    const response = await fetch(tokenEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to exchange Outlook code for tokens: ${error}`);
+    }
+
+    return response.json();
+  }
+}
