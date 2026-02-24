@@ -1007,6 +1007,21 @@ function Footer() {
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export default function LandingClient() {
+  const router = useRouter();
+  const { user } = useAuthStore();
+
+  // Redirect authenticated users to dashboard
+  React.useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
+  // Don't render landing page if user is authenticated
+  if (user) {
+    return null;
+  }
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-black">
       {/* Background layers - lowest z-index */}
