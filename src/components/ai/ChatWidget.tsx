@@ -128,6 +128,13 @@ export function ChatWidget() {
           }
           
           if (text && text.trim()) {
+            // Skip if this is a duplicate of the previous text (same content twice in a row)
+            if (text === previousText) {
+              console.log('⏭️ Skipping duplicate text:', text);
+              continue;
+            }
+            previousText = text;
+            
             // Update the message content immutably
             setMessages(prev => {
               const updated = prev.map(m => 
