@@ -897,26 +897,54 @@ function CTABanner() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link href="/register">
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.7)' }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-black font-bold text-lg"
-                style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
-              >
-                <Zap size={20} />
-                Start for Free
-              </motion.button>
-            </Link>
-            <Link href="/login">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-[#f7e7ce] font-bold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm hover:bg-[#d4af37]/10 transition-all"
-              >
-                Sign In to Dashboard
-              </motion.button>
-            </Link>
+            {user ? (
+              // Authenticated user - show explore buttons
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.7)' }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => router.push('/dashboard')}
+                  className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-black font-bold text-lg"
+                  style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
+                >
+                  <Calendar size={20} />
+                  Manage Leaves
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => router.push('/dashboard')}
+                  className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-[#f7e7ce] font-bold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm hover:bg-[#d4af37]/10 transition-all"
+                >
+                  <Users size={20} />
+                  View Team
+                </motion.button>
+              </>
+            ) : (
+              // Non-authenticated user - show sign up buttons
+              <>
+                <Link href="/register">
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.7)' }}
+                    whileTap={{ scale: 0.97 }}
+                    className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-black font-bold text-lg"
+                    style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
+                  >
+                    <Zap size={20} />
+                    Start for Free
+                  </motion.button>
+                </Link>
+                <Link href="/login">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-[#f7e7ce] font-bold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm hover:bg-[#d4af37]/10 transition-all"
+                  >
+                    Sign In to Dashboard
+                  </motion.button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </motion.div>
