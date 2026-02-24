@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, Bell, Sun, Moon, LogOut, User, Settings, ChevronDown, Check,
+  Menu, Bell, Sun, Moon, LogOut, User, Settings, ChevronDown, Check, X,
 } from "lucide-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -21,6 +21,35 @@ import {
 import { Badge } from "@/components/ui/badge";
 import type { Id } from "../../../convex/_generated/dataModel";
 
+// Play a beautiful notification sound using Web Audio API
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    const playTone = (freq: number, startTime: number, duration: number, gain: number) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
+
+    const now = ctx.currentTime;
+    // Beautiful 3-note chime: C5 → E5 → G5
+    playTone(523.25, now, 0.4, 0.3);
+    playTone(659.25, now + 0.15, 0.4, 0.25);
+    playTone(783.99, now + 0.3, 0.6, 0.2);
+  } catch (e) {
+    // Silently fail if audio not supported
+  }
+}
+
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/leaves": "Leave Management",
@@ -34,6 +63,12 @@ function getInitials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
+interface ToastNotif {
+  id: string;
+  title: string;
+  message: string;
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -42,11 +77,14 @@ export function Navbar() {
   const { user, logout } = useAuthStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [toasts, setToasts] = useState<ToastNotif[]>([]);
+  const prevUnreadCount = useRef<number>(-1);
+  const prevNotifIds = useRef<Set<string>>(new Set());
+  const isFirstLoad = useRef(true);
 
   React.useEffect(() => { 
     setMounted(true); 
-    console.log("Navbar - Current user:", user); // Debug
-  }, [user]);
+  }, []);
 
   // Convex notifications
   const notifications = useQuery(api.notifications.getUserNotifications, 
@@ -56,6 +94,45 @@ export function Navbar() {
   const markAllRead = useMutation(api.notifications.markAllAsRead);
 
   const unreadCount = notifications.filter((n: { isRead: boolean }) => !n.isRead).length;
+
+  // Detect new notifications and play sound + show toast
+  useEffect(() => {
+    if (!notifications || notifications.length === 0) return;
+
+    // Skip very first load to avoid sound on page refresh
+    if (isFirstLoad.current) {
+      notifications.forEach((n: any) => prevNotifIds.current.add(n._id));
+      prevUnreadCount.current = unreadCount;
+      isFirstLoad.current = false;
+      return;
+    }
+
+    // Find truly new notifications (not seen before)
+    const newNotifs = notifications.filter(
+      (n: any) => !n.isRead && !prevNotifIds.current.has(n._id)
+    );
+
+    if (newNotifs.length > 0) {
+      playNotificationSound();
+
+      // Show toast for each new notification
+      newNotifs.forEach((n: any) => {
+        const toastId = n._id + Date.now();
+        setToasts(prev => [...prev, { id: toastId, title: n.title, message: n.message }]);
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+          setToasts(prev => prev.filter(t => t.id !== toastId));
+        }, 5000);
+      });
+
+      // Update seen IDs
+      newNotifs.forEach((n: any) => prevNotifIds.current.add(n._id));
+    }
+
+    // Also track all IDs
+    notifications.forEach((n: any) => prevNotifIds.current.add(n._id));
+    prevUnreadCount.current = unreadCount;
+  }, [notifications, unreadCount]);
 
   const pageTitle = Object.entries(PAGE_TITLES).find(([key]) =>
     pathname.startsWith(key)
@@ -88,6 +165,7 @@ export function Navbar() {
   };
 
   return (
+    <>
     <header className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] backdrop-blur-md flex items-center px-4 gap-4 sticky top-0 z-20 transition-colors duration-300">
       {/* Mobile hamburger */}
       <Button
@@ -252,5 +330,54 @@ export function Navbar() {
         </DropdownMenu>
       </div>
     </header>
+    {/* Notification Toasts */}
+    <div className="fixed top-20 right-4 z-[100] flex flex-col gap-3 pointer-events-none">
+      <AnimatePresence>
+        {toasts.map((toast) => (
+          <motion.div
+            key={toast.id}
+            initial={{ opacity: 0, x: 80, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 80, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="pointer-events-auto w-80 bg-[var(--card)] border border-[#6366f1]/40 rounded-2xl shadow-2xl shadow-[#6366f1]/20 overflow-hidden"
+          >
+            {/* Animated top bar */}
+            <div className="h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]">
+              <motion.div
+                className="h-full bg-white/30"
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: 5, ease: "linear" }}
+              />
+            </div>
+            <div className="p-4 flex items-start gap-3">
+              {/* Bell icon with pulse */}
+              <div className="relative flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--card)] animate-pulse" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[var(--text-primary)] leading-tight">
+                  {toast.title}
+                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1 leading-snug">
+                  {toast.message}
+                </p>
+              </div>
+              <button
+                onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+                className="flex-shrink-0 p-1 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+              >
+                <X className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+    </>
   );
 }
