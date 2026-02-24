@@ -24,10 +24,18 @@ export async function POST(req: Request) {
     });
 
     if (conflict) {
+      // Suggest next available dates after the conflict ends
+      const conflictEnd = new Date(conflict.endDate);
+      conflictEnd.setDate(conflictEnd.getDate() + 1);
+      const suggestedStart = conflictEnd.toISOString().split('T')[0];
+      const suggestedEnd = new Date(conflictEnd);
+      suggestedEnd.setDate(suggestedEnd.getDate() + days - 1);
+      const suggestedEndStr = suggestedEnd.toISOString().split('T')[0];
+
       return NextResponse.json({
         success: false,
         conflict: true,
-        message: `You already have a ${conflict.type} leave request (${conflict.startDate} → ${conflict.endDate}) with status: ${conflict.status}. Please choose different dates.`,
+        message: `You already have a ${conflict.type} leave (${conflict.startDate} → ${conflict.endDate}) with status: "${conflict.status}". 💡 Suggested alternative: ${suggestedStart} → ${suggestedEndStr}`,
       });
     }
 

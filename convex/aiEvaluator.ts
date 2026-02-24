@@ -27,18 +27,41 @@ export const calculateEmployeeScore = query({
       .withIndex("by_employee", (q) => q.eq("employeeId", args.userId))
       .collect();
 
-    // Calculate scores
-    const performanceScore = metrics ? calculatePerformanceScore(metrics) : 50;
-    const attendanceScore = calculateAttendanceScore(metrics, leaves);
+    // Get real time tracking data (last 60 days)
+    const timeRecords = await ctx.db
+      .query("timeTracking")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .take(60);
+
+    // Get supervisor rating for additional score
+    const latestRating = await ctx.db
+      .query("supervisorRatings")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.userId))
+      .order("desc")
+      .first();
+
+    // Calculate scores — attendance now uses REAL time tracking data
+    const performanceScore = metrics ? calculatePerformanceScore(metrics) : (latestRating ? Math.round(latestRating.overallRating * 20) : 50);
+    const attendanceScore = calculateAttendanceScore(metrics, leaves, timeRecords);
     const behaviorScore = calculateBehaviorScore(notes);
     const leaveHistoryScore = calculateLeaveHistoryScore(leaves, user);
+    const supervisorScore = latestRating ? Math.round(latestRating.overallRating * 20) : null;
 
-    const overallScore = Math.round(
-      performanceScore * 0.35 +
-      attendanceScore * 0.25 +
-      behaviorScore * 0.25 +
-      leaveHistoryScore * 0.15
-    );
+    // If supervisor has rated — include it in score (replaces behavior weight)
+    const overallScore = supervisorScore !== null
+      ? Math.round(
+          performanceScore * 0.30 +
+          attendanceScore * 0.30 +
+          supervisorScore * 0.25 +
+          leaveHistoryScore * 0.15
+        )
+      : Math.round(
+          performanceScore * 0.35 +
+          attendanceScore * 0.25 +
+          behaviorScore * 0.25 +
+          leaveHistoryScore * 0.15
+        );
 
     return {
       overallScore,
@@ -47,6 +70,7 @@ export const calculateEmployeeScore = query({
         attendance: attendanceScore,
         behavior: behaviorScore,
         leaveHistory: leaveHistoryScore,
+        supervisorRating: supervisorScore,
       },
     };
   },
@@ -168,13 +192,28 @@ function calculatePerformanceScore(metrics: any): number {
   return Math.round((kpi + completion + deadline) / 3);
 }
 
-function calculateAttendanceScore(metrics: any, leaves: any[]): number {
+function calculateAttendanceScore(metrics: any, leaves: any[], timeRecords?: any[]): number {
+  // If we have real time tracking data, use it
+  if (timeRecords && timeRecords.length > 0) {
+    const totalDays = timeRecords.length;
+    const lateDays = timeRecords.filter((r: any) => r.isLate).length;
+    const earlyLeaveDays = timeRecords.filter((r: any) => r.isEarlyLeave).length;
+    const absentDays = timeRecords.filter((r: any) => r.status === 'absent').length;
+
+    const punctualityRate = totalDays > 0 ? ((totalDays - lateDays) / totalDays) * 100 : 100;
+    const attendanceRate = totalDays > 0 ? ((totalDays - absentDays) / totalDays) * 100 : 100;
+
+    // Weighted: 60% punctuality, 30% attendance, 10% early leave
+    const earlyLeaveDeduction = (earlyLeaveDays / totalDays) * 10;
+    return Math.max(0, Math.min(100, Math.round(
+      punctualityRate * 0.6 + attendanceRate * 0.3 - earlyLeaveDeduction * 10
+    )));
+  }
+
   if (!metrics) return 70;
-  
   const punctuality = metrics.punctualityScore;
   const absenceDeduction = metrics.absenceRate * 5;
   const lateDeduction = metrics.lateArrivals * 2;
-  
   return Math.max(0, Math.min(100, punctuality - absenceDeduction - lateDeduction));
 }
 

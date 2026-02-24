@@ -28,6 +28,7 @@ const CostAnalysis = dynamic(() => import("@/components/admin/CostAnalysis"), { 
 const ConflictDetection = dynamic(() => import("@/components/admin/ConflictDetection"), { ssr: false });
 const SmartSuggestions = dynamic(() => import("@/components/admin/SmartSuggestions"), { ssr: false });
 const ResponseTimeSLA = dynamic(() => import("@/components/admin/ResponseTimeSLA"), { ssr: false });
+const WeeklyDigestWidget = dynamic(() => import("@/components/ai/WeeklyDigestWidget").then(m => ({ default: m.WeeklyDigestWidget })), { ssr: false });
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -300,14 +301,17 @@ export function DashboardClient() {
       {user?.role === "admin" && (
         <>
           <motion.div variants={itemVariants} className="pt-6 border-t border-[var(--border)]">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-1 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
-              <h3 className="text-lg font-bold text-[var(--text-primary)]">
-                Admin Tools
-              </h3>
-              <span className="px-2 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full">
-                PREMIUM
-              </span>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-1 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                  Admin Tools
+                </h3>
+                <span className="px-2 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full">
+                  PREMIUM
+                </span>
+              </div>
+              <WeeklyDigestWidget />
             </div>
             <p className="text-sm text-[var(--text-muted)] mb-6">
               Advanced analytics and AI-powered insights for managing your team's leave schedule

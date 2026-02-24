@@ -58,9 +58,32 @@ ${context.teamAvailability.map((l: any) => `- ${l.userName} (${l.department}): $
       throw new Error('GROQ_API_KEY is not configured');
     }
     
+    // Fetch AI insights (patterns, best dates, balance warnings)
+    let aiInsights = '';
+    try {
+      const insightsRes = await fetch(`${req.headers.get('origin')}/api/chat/insights${userId ? `?userId=${userId}` : ''}`, {
+        headers: { cookie: req.headers.get('cookie') || '' },
+      });
+      if (insightsRes.ok) {
+        const insights = await insightsRes.json();
+        if (insights) {
+          aiInsights = `
+
+AI INSIGHTS FOR THIS EMPLOYEE:
+${insights.balanceWarning ? `⚠️ BALANCE WARNING: ${insights.balanceWarning}` : ''}
+${insights.patterns?.length ? `📊 ATTENDANCE PATTERNS:\n${insights.patterns.map((p: string) => `- ${p}`).join('\n')}` : ''}
+${insights.bestDates?.length ? `📅 RECOMMENDED VACATION DATES (no team conflicts):\n${insights.bestDates.map((d: string) => `- ${d}`).join('\n')}` : ''}
+${insights.teamConflicts?.length ? `⚠️ TEAM CONFLICTS (people already on leave):\n${insights.teamConflicts.map((c: string) => `- ${c}`).join('\n')}` : ''}
+`;
+        }
+      }
+    } catch (e) {
+      // silently ignore
+    }
+
     const result = await streamText({
       model: groq('llama-3.3-70b-versatile'),
-      system: `You are an HR AI assistant for an office leave monitoring system.${userContext}
+      system: `You are an HR AI assistant for an office leave monitoring system.${userContext}${aiInsights}
 ${userId ? `CURRENT USER ID: ${userId}` : ''}
 
 Your role is to help employees with:
@@ -93,6 +116,13 @@ Leave types mapping:
 - doctor / врач / medical = "doctor"
 - unpaid / без сохранения = "unpaid"
 
+SMART RECOMMENDATIONS:
+- When user asks for best dates → use RECOMMENDED VACATION DATES from AI INSIGHTS
+- When user wants to book → proactively mention any TEAM CONFLICTS
+- When BALANCE WARNING exists → always mention it proactively (e.g. "⚠️ You only have X days left, they expire end of year!")
+- When ATTENDANCE PATTERNS exist → gently mention them (e.g. "I noticed you've had several sick days on Mondays this month...")
+- When a leave is rejected → suggest RECOMMENDED VACATION DATES as alternatives
+
 IMPORTANT:
 - Always use the USER CONTEXT data when answering questions about the user's leave balance
 - Be specific with numbers from the context
@@ -103,6 +133,7 @@ IMPORTANT:
 - **ALWAYS respond in the same language as the user's question** (if they ask in Russian, respond in Russian; if English, respond in English)
 - All leave requests go to admin for approval — inform the user about this
 - If dates are not specified, ask the user for them before booking
+- When rejecting or detecting conflicts, always suggest alternative dates from RECOMMENDED VACATION DATES
 
 When user asks about their leave balance, you MUST use the exact numbers from LEAVE BALANCES above.
 When user asks who's on leave, you MUST check TEAM AVAILABILITY above.`,
