@@ -11,9 +11,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'Missing requesterId' }, { status: 400 });
     }
 
-    // Get all leaves
+    // Get all leaves and users
     const leaves = await fetchQuery(api.leaves.getAllLeaves, {});
-    const users = await fetchQuery(api.users.getAllUsers, {});
+    const allUsers = await fetchQuery(api.users.getAllUsers, {});
 
     // Try to find leave by ID first, then by employee name + dates
     let leave = (leaves as any[]).find((l: any) => l._id === leaveId);
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     // If not found by ID, search by employee name + dates
     if (!leave && (employeeName || startDate)) {
       leave = (leaves as any[]).find((l: any) => {
-        const user = (users as any[]).find((u: any) => u._id === l.userId);
+        const user = (allUsers as any[]).find((u: any) => u._id === l.userId);
         const nameMatch = employeeName
           ? user?.name?.toLowerCase().includes(employeeName.toLowerCase())
           : true;
@@ -33,9 +33,8 @@ export async function POST(req: Request) {
     }
 
     if (!leave) {
-      // List available leaves for this context to help AI
       const availableLeaves = (leaves as any[]).slice(0, 10).map((l: any) => {
-        const user = (users as any[]).find((u: any) => u._id === l.userId);
+        const user = (allUsers as any[]).find((u: any) => u._id === l.userId);
         return `${user?.name}: ${l.type} ${l.startDate}→${l.endDate} (${l.status}) id:${l._id}`;
       }).join('\n');
       return NextResponse.json({
@@ -44,9 +43,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // Get requester
-    const users = await fetchQuery(api.users.getAllUsers, {});
-    const requester = (users as any[]).find((u: any) => u._id === requesterId);
+    const requester = (allUsers as any[]).find((u: any) => u._id === requesterId);
 
     if (!requester) {
       return NextResponse.json({ success: false, message: 'User not found' });
@@ -62,7 +59,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const employeeName = leave.userName ?? 'Employee';
+    const deletedEmployeeName = leave.userName ?? (allUsers as any[]).find((u: any) => u._id === leave.userId)?.name ?? 'Employee';
     await fetchMutation(api.leaves.deleteLeave, {
       leaveId: leaveId as Id<'leaveRequests'>,
       requesterId: requesterId as Id<'users'>,
@@ -70,7 +67,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `✅ ${isAdmin && !isOwner ? `${employeeName}'s` : 'Your'} ${leave.type} leave (${leave.startDate} → ${leave.endDate}) has been deleted.${leave.status === 'approved' ? ' Leave balance has been restored.' : ''}`,
+      message: `✅ ${isAdmin && !isOwner ? `${deletedEmployeeName}'s` : 'Your'} ${leave.type} leave (${leave.startDate} → ${leave.endDate}) has been deleted.${leave.status === 'approved' ? ' Leave balance has been restored.' : ''}`,
     });
   } catch (error: any) {
     return NextResponse.json({
