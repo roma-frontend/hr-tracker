@@ -88,7 +88,7 @@ export default function HolidayCalendarSync() {
     } else {
       // Need to authenticate
       try {
-        const redirectUri = `${window.location.origin}/api/calendar/google/auth`;
+        const redirectUri = `${window.location.origin}/api/calendar/google/callback`;
         const authUrl = getGoogleCalendarAuthUrl(redirectUri);
         window.location.href = authUrl;
       } catch (error) {
@@ -130,7 +130,7 @@ export default function HolidayCalendarSync() {
     } else {
       // Need to authenticate
       try {
-        const redirectUri = `${window.location.origin}/api/calendar/outlook/auth`;
+        const redirectUri = `${window.location.origin}/api/calendar/outlook/callback`;
         const authUrl = getOutlookAuthUrl(redirectUri);
         window.location.href = authUrl;
       } catch (error) {
