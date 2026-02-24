@@ -137,16 +137,17 @@ export function ChatWidget() {
             
             // Update the message content immutably
             setMessages(prev => {
-              const updated = prev.map(m => 
-                m.id === assistantMessage.id 
-                  ? { ...m, content: m.content + text }
-                  : m
-              );
+              const updated = prev.map(m => {
+                if (m.id === assistantMessage.id) {
+                  const newContent = m.content + text;
+                  // Also update the local reference
+                  assistantMessage.content = newContent;
+                  return { ...m, content: newContent };
+                }
+                return m;
+              });
               return updated;
             });
-            
-            // Update local reference for next iteration
-            assistantMessage.content += text;
           }
         }
       }
