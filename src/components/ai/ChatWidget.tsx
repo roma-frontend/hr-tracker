@@ -67,23 +67,69 @@ export function ChatWidget() {
 
       setMessages(prev => [...prev, assistantMessage]);
 
+      let previousChunk = '';
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
+        const chunk = decoder.decode(value, { stream: true });
+        console.log('📦 Raw chunk:', chunk);
+        
+        // Skip if this chunk is the same as previous (avoid duplicates)
+        if (chunk === previousChunk && chunk.length < 10) {
+          console.log('⏭️ Skipping duplicate chunk');
+          continue;
+        }
+        previousChunk = chunk;
+        
+        const lines = chunk.split('\n');
 
         for (const line of lines) {
-          if (line.startsWith('0:')) {
-            const text = line.slice(2).replace(/^"|"$/g, '');
+          if (!line.trim()) continue;
+          
+          console.log('📝 Processing line:', line);
+          
+          // Try to parse as stream format: N:"text" where N is a number
+          let text = null;
+          
+          // Check if line starts with a digit followed by colon (0:, 1:, 2:, etc.)
+          const streamFormatMatch = line.match(/^(\d+):"(.*)$/);
+          if (streamFormatMatch) {
+            // Extract the quoted text
+            try {
+              text = JSON.parse(`"${streamFormatMatch[2]}`);
+              console.log('✅ Parsed stream format:', text);
+            } catch (e) {
+              console.error('❌ Failed to parse stream format:', line, e);
+            }
+          } else if (line.match(/^\d+:/)) {
+            // Skip lines like "0:", "1:" without content
+            console.log('⏭️ Skipping empty prefix line');
+          } else {
+            // Direct text without prefix
+            text = line;
+            console.log('✅ Direct text:', text);
+          }
+          
+          if (text && text.trim()) {
+            // Update the message content immutably
+            setMessages(prev => {
+              const updated = prev.map(m => 
+                m.id === assistantMessage.id 
+                  ? { ...m, content: m.content + text }
+                  : m
+              );
+              return updated;
+            });
+            
+            // Update local reference for next iteration
             assistantMessage.content += text;
-            setMessages(prev => 
-              prev.map(m => m.id === assistantMessage.id ? assistantMessage : m)
-            );
           }
         }
       }
+      
+      console.log('🏁 Final message:', assistantMessage.content);
     } catch (err) {
       console.error('❌ Chat error:', err);
       setError(err instanceof Error ? err.message : 'Failed to send message');
@@ -166,16 +212,28 @@ export function ChatWidget() {
               {messages.map((m) => (
                 <div
                   key={m.id}
-                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex w-full ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div
-                    className={`max-w-[80%] p-3 rounded-2xl ${
-                      m.role === 'user'
-                        ? 'bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white'
-                        : 'bg-[var(--background-subtle)] text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{m.content}</p>
+                  <div className="flex flex-col gap-1 max-w-[80%]">
+                    {/* Role label */}
+                    <span className={`text-xs font-medium px-2 ${
+                      m.role === 'user' 
+                        ? 'text-[#6366f1] text-right' 
+                        : 'text-[#8b5cf6] text-left'
+                    }`}>
+                      {m.role === 'user' ? 'You' : 'AI Assistant'}
+                    </span>
+                    
+                    {/* Message bubble */}
+                    <div
+                      className={`p-3 rounded-2xl ${
+                        m.role === 'user'
+                          ? 'bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white rounded-tr-sm'
+                          : 'bg-[var(--background-subtle)] text-[var(--text-primary)] rounded-tl-sm'
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{m.content}</p>
+                    </div>
                   </div>
                 </div>
               ))}

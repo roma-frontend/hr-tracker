@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai';
+import { groq } from '@ai-sdk/groq';
 import { streamText } from 'ai';
 
 // Remove edge runtime to see better errors
@@ -48,9 +48,18 @@ ${context.teamAvailability.map((l: any) => `- ${l.userName} (${l.department}): $
     console.error('Failed to fetch context:', error);
   }
 
-    console.log('🧠 Calling OpenAI...');
+    console.log('🧠 Calling Groq AI...');
+    
+    // Ensure API key is available
+    const apiKey = process.env.GROQ_API_KEY;
+    console.log('🔑 API Key available:', !!apiKey, 'Length:', apiKey?.length);
+    
+    if (!apiKey) {
+      throw new Error('GROQ_API_KEY is not configured');
+    }
+    
     const result = await streamText({
-      model: openai('gpt-3.5-turbo'),
+      model: groq('llama-3.3-70b-versatile'),
       system: `You are an HR AI assistant for an office leave monitoring system.${userContext}
 
 Your role is to help employees with:

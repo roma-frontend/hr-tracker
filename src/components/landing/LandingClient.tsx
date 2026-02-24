@@ -1009,12 +1009,14 @@ function Footer() {
 export default function LandingClient() {
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-black">
-      {/* Background layers */}
-      <GradientOrbs />
-      <FloatingParticles />
+      {/* Background layers - lowest z-index */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <GradientOrbs />
+        <FloatingParticles />
+      </div>
 
       {/* 3D Canvas — hero area */}
-      <div className="absolute top-0 left-0 right-0 h-screen pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 h-screen pointer-events-none -z-10">
         <ThreeScene />
       </div>
 
@@ -1022,7 +1024,7 @@ export default function LandingClient() {
       <Navbar />
 
       {/* Page content */}
-      <main>
+      <main className="relative z-10">
         <HeroSection />
         <SocialProof />
         <StatsSection />
