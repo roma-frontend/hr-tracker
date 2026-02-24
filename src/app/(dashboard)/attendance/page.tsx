@@ -29,25 +29,32 @@ export default function AttendancePage() {
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: Id<"users">; name: string } | null>(null);
   const [detailRecord, setDetailRecord] = useState<any | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const isAdminOrSupervisor = user?.role === "admin" || user?.role === "supervisor";
+  React.useEffect(() => { setMounted(true); }, []);
+
+  const isAdminOrSupervisor = mounted && (user?.role === "admin" || user?.role === "supervisor");
+  const isEmployee = mounted && user?.role === "employee";
 
   // Admin/Supervisor: fetch today's attendance summary and employees needing rating
+  // Use user?.id as dependency so queries only run after localStorage hydration
   const todaySummary = useQuery(
     api.timeTracking.getTodayAttendanceSummary,
-    isAdminOrSupervisor ? {} : "skip"
+    mounted && user && (user.role === "admin" || user.role === "supervisor") ? {} : "skip"
   );
   const currentlyAtWork = useQuery(
     api.timeTracking.getCurrentlyAtWork,
-    isAdminOrSupervisor ? {} : "skip"
+    mounted && user && (user.role === "admin" || user.role === "supervisor") ? {} : "skip"
   );
   const todayAllAttendance = useQuery(
     api.timeTracking.getTodayAllAttendance,
-    isAdminOrSupervisor ? {} : "skip"
+    mounted && user && (user.role === "admin" || user.role === "supervisor") ? {} : "skip"
   );
   const needsRating = useQuery(
     api.supervisorRatings.getEmployeesNeedingRating,
-    isAdminOrSupervisor && user?.id ? { supervisorId: user.id as Id<"users"> } : "skip"
+    mounted && user?.id && (user.role === "admin" || user.role === "supervisor")
+      ? { supervisorId: user.id as Id<"users"> }
+      : "skip"
   );
 
   return (
@@ -65,7 +72,7 @@ export default function AttendancePage() {
       </motion.div>
 
       {/* Employee: Check-In widget + full attendance dashboard */}
-      {!isAdminOrSupervisor && (
+      {mounted && !isAdminOrSupervisor && (
         <>
           <motion.div variants={itemVariants}>
             <CheckInOutWidget />
