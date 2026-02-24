@@ -75,6 +75,7 @@ IMPORTANT:
 - Mention team members on leave when relevant
 - Be helpful, concise, and professional
 - Use emojis occasionally to be friendly 😊
+- **ALWAYS respond in the same language as the user's question** (if they ask in Russian, respond in Russian; if English, respond in English)
 
 When user asks about their leave balance, you MUST use the exact numbers from LEAVE BALANCES above.
 When user asks who's on leave, you MUST check TEAM AVAILABILITY above.`,
