@@ -5,7 +5,13 @@ import type { Id } from '../../../../../convex/_generated/dataModel';
 
 export async function POST(req: Request) {
   try {
-    const { leaveId, requesterId, employeeName, startDate, endDate, leaveType } = await req.json();
+    const body = await req.json();
+    const leaveId = body.leaveId;
+    const requesterId = body.requesterId;
+    const searchName = body.employeeName;
+    const startDate = body.startDate;
+    const endDate = body.endDate;
+    const leaveType = body.leaveType;
 
     if (!requesterId) {
       return NextResponse.json({ success: false, message: 'Missing requesterId' }, { status: 400 });
@@ -19,11 +25,11 @@ export async function POST(req: Request) {
     let leave = (leaves as any[]).find((l: any) => l._id === leaveId);
 
     // If not found by ID, search by employee name + dates
-    if (!leave && (employeeName || startDate)) {
+    if (!leave && (searchName || startDate)) {
       leave = (leaves as any[]).find((l: any) => {
         const user = (allUsers as any[]).find((u: any) => u._id === l.userId);
-        const nameMatch = employeeName
-          ? user?.name?.toLowerCase().includes(employeeName.toLowerCase())
+        const nameMatch = searchName
+          ? user?.name?.toLowerCase().includes(searchName.toLowerCase())
           : true;
         const startMatch = startDate ? l.startDate === startDate : true;
         const endMatch = endDate ? l.endDate === endDate : true;
