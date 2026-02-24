@@ -84,8 +84,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
-            style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}
+            className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
           >
             {/* Header gradient */}
             <div className="relative h-28 bg-gradient-to-br from-indigo-600 to-purple-700 flex items-end px-6 pb-4">
@@ -113,7 +112,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
 
               {/* Date & Status */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Calendar className="w-4 h-4" />
                   {new Date(record.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </div>
@@ -125,17 +124,17 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
               </div>
 
               {/* Timeline */}
-              <div className="rounded-xl p-4 space-y-4" style={{ background: "var(--background-subtle)", border: "1px solid var(--border)" }}>
-                <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
+              <div className="rounded-xl p-4 space-y-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-indigo-500" />
                   Time Timeline
                 </h3>
                 <div className="flex items-center gap-3">
                   {/* Check In */}
-                  <div className="flex-1 rounded-lg p-3" style={{ background: "var(--background-card)" }}>
+                  <div className="flex-1 rounded-lg p-3 bg-white dark:bg-gray-900">
                     <div className="flex items-center gap-2 mb-1">
                       <LogIn className="w-4 h-4 text-green-500" />
-                      <span className="text-xs text-[var(--text-muted)]">Check In</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Check In</span>
                     </div>
                     <p className="text-lg font-bold text-green-500">
                       {record.checkInTime ? formatTime(record.checkInTime) : "—"}
@@ -158,10 +157,10 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                   <div className="text-[var(--text-muted)] text-lg">→</div>
 
                   {/* Check Out */}
-                  <div className="flex-1 rounded-lg p-3" style={{ background: "var(--background-card)" }}>
+                  <div className="flex-1 rounded-lg p-3 bg-white dark:bg-gray-900">
                     <div className="flex items-center gap-2 mb-1">
                       <LogOut className="w-4 h-4 text-blue-500" />
-                      <span className="text-xs text-[var(--text-muted)]">Check Out</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Check Out</span>
                     </div>
                     <p className="text-lg font-bold text-blue-500">
                       {record.checkOutTime ? formatTime(record.checkOutTime) : "—"}
@@ -187,11 +186,11 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                 {/* Work duration */}
                 {workedHours && (
                   <div>
-                    <div className="flex justify-between text-xs text-[var(--text-muted)] mb-1">
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                       <span className="flex items-center gap-1"><Timer className="w-3 h-3" /> Worked</span>
-                      <span className="font-semibold text-[var(--text-primary)]">{workedHours}h / {expectedHours}h</span>
+                      <span className="font-semibold text-gray-800 dark:text-gray-100">{workedHours}h / {expectedHours}h</span>
                     </div>
-                    <div className="h-2 rounded-full bg-[var(--border)] overflow-hidden">
+                    <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${workCompletion}%` }}
@@ -210,7 +209,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
 
               {/* Department */}
               {record.user?.department && (
-                <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Building2 className="w-4 h-4" />
                   {record.user.department} department
                 </div>
@@ -218,23 +217,23 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
 
               {/* Monthly Stats */}
               {monthlyStats && (
-                <div className="rounded-xl p-4" style={{ background: "var(--background-subtle)", border: "1px solid var(--border)" }}>
-                  <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 mb-3">
+                <div className="rounded-xl p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-3">
                     <TrendingUp className="w-4 h-4 text-purple-500" />
                     This Month
                   </h3>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="text-center">
                       <p className="text-xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                      <p className="text-xs text-[var(--text-muted)]">Days worked</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Days worked</p>
                     </div>
                     <div className="text-center">
                       <p className="text-xl font-bold text-green-500">{monthlyStats.punctualityRate}%</p>
-                      <p className="text-xs text-[var(--text-muted)]">Punctuality</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Punctuality</p>
                     </div>
                     <div className="text-center">
                       <p className="text-xl font-bold text-orange-500">{monthlyStats.lateDays}</p>
-                      <p className="text-xs text-[var(--text-muted)]">Late days</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Late days</p>
                     </div>
                   </div>
                 </div>
@@ -242,20 +241,20 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
 
               {/* Recent 7 days */}
               {recentRecords && recentRecords.length > 0 && (
-                <div className="rounded-xl p-4" style={{ background: "var(--background-subtle)", border: "1px solid var(--border)" }}>
-                  <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 mb-3">
+                <div className="rounded-xl p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-3">
                     <Calendar className="w-4 h-4 text-indigo-500" />
                     Last 7 Days
                   </h3>
                   <div className="space-y-2">
                     {recentRecords.map((r: any) => (
                       <div key={r._id} className="flex items-center justify-between text-sm">
-                        <span className="text-[var(--text-muted)]">
+                        <span className="text-gray-500 dark:text-gray-400">
                           {new Date(r.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
                         </span>
                         <div className="flex items-center gap-2">
                           {r.checkInTime ? (
-                            <span className="text-xs text-[var(--text-muted)]">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {formatTime(r.checkInTime)} → {r.checkOutTime ? formatTime(r.checkOutTime) : "..."}
                             </span>
                           ) : null}
