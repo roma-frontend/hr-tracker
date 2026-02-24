@@ -404,6 +404,8 @@ function HeroSection() {
   const { scrollYProgress } = useScroll({ target: containerRef });
   const y = useTransform(scrollYProgress, [0, 1], [0, -80]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const router = useRouter();
+  const { user } = useAuthStore();
 
   const titleWords = ['HR', 'Leave', 'Monitor'];
 
@@ -638,30 +640,61 @@ function HeroSection() {
         transition={{ delay: 0.9, duration: 0.8 }}
         className="flex flex-col sm:flex-row items-center gap-4 mb-16"
       >
-        <Link href="/register">
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(212,175,55,0.6)' }}
-            whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-black font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
-            style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
-            aria-label="Get started for free"
-          >
-            <Zap size={20} aria-hidden="true" />
-            Get Started Free
-            <ArrowRight size={18} aria-hidden="true" />
-          </motion.button>
-        </Link>
-        <Link href="/login">
-          <motion.button
-            whileHover={{ scale: 1.05, borderColor: 'rgba(212,175,55,0.6)' }}
-            whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-[#f7e7ce] font-semibold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm transition-all duration-300 hover:bg-[#d4af37]/10 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
-            aria-label="Sign in to your account"
-          >
-            Sign In
-            <ArrowRight size={18} aria-hidden="true" />
-          </motion.button>
-        </Link>
+        {user ? (
+          // Authenticated user - show dashboard buttons
+          <>
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(212,175,55,0.6)' }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => router.push('/dashboard')}
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-black font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+              style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
+              aria-label="Go to Dashboard"
+            >
+              <Activity size={20} aria-hidden="true" />
+              Go to Dashboard
+              <ArrowRight size={18} aria-hidden="true" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05, borderColor: 'rgba(212,175,55,0.6)' }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => router.push('/dashboard')}
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-[#f7e7ce] font-semibold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm transition-all duration-300 hover:bg-[#d4af37]/10 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+              aria-label="View analytics"
+            >
+              <BarChart3 size={20} aria-hidden="true" />
+              View Analytics
+            </motion.button>
+          </>
+        ) : (
+          // Non-authenticated user - show sign up buttons
+          <>
+            <Link href="/register">
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(212,175,55,0.6)' }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-black font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
+                aria-label="Get started for free"
+              >
+                <Zap size={20} aria-hidden="true" />
+                Get Started Free
+                <ArrowRight size={18} aria-hidden="true" />
+              </motion.button>
+            </Link>
+            <Link href="/login">
+              <motion.button
+                whileHover={{ scale: 1.05, borderColor: 'rgba(212,175,55,0.6)' }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-[#f7e7ce] font-semibold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm transition-all duration-300 hover:bg-[#d4af37]/10 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                aria-label="Sign in to your account"
+              >
+                Sign In
+                <ArrowRight size={18} aria-hidden="true" />
+              </motion.button>
+            </Link>
+          </>
+        )}
       </motion.div>
 
       {/* Trusted companies with luxury styling */}
@@ -803,6 +836,9 @@ function FeaturesSection() {
 
 // ─── CTA Banner ───────────────────────────────────────────────────────────────
 function CTABanner() {
+  const router = useRouter();
+  const { user } = useAuthStore();
+  
   return (
     <section className="relative z-10 px-6 md:px-12 py-20" aria-label="Call to action">
       <motion.div
@@ -1007,21 +1043,6 @@ function Footer() {
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export default function LandingClient() {
-  const router = useRouter();
-  const { user } = useAuthStore();
-
-  // Redirect authenticated users to dashboard
-  React.useEffect(() => {
-    if (user) {
-      router.push('/dashboard');
-    }
-  }, [user, router]);
-
-  // Don't render landing page if user is authenticated
-  if (user) {
-    return null;
-  }
-
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-black">
       {/* Background layers - lowest z-index */}
