@@ -6,79 +6,81 @@ import type { Id } from '../../../../../convex/_generated/dataModel';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const leaveId = body.leaveId;
-    const requesterId = body.requesterId;
-    const searchName = body.employeeName;
-    const startDate = body.startDate;
-    const endDate = body.endDate;
-    const leaveType = body.leaveType;
+    const leaveId: string = body.leaveId ?? '';
+    const requesterId: string = body.requesterId ?? '';
+    const searchEmployeeName: string = body.employeeName ?? '';
+    const searchStartDate: string = body.startDate ?? '';
+    const searchEndDate: string = body.endDate ?? '';
+    const searchLeaveType: string = body.leaveType ?? '';
 
     if (!requesterId) {
       return NextResponse.json({ success: false, message: 'Missing requesterId' }, { status: 400 });
     }
 
-    // Get all leaves and users
-    const leaves = await fetchQuery(api.leaves.getAllLeaves, {});
+    // Fetch all data
+    const allLeaves = await fetchQuery(api.leaves.getAllLeaves, {});
     const allUsers = await fetchQuery(api.users.getAllUsers, {});
 
-    // Try to find leave by ID first, then by employee name + dates
-    let leave = (leaves as any[]).find((l: any) => l._id === leaveId);
+    // Find leave by ID first
+    let targetLeave = (allLeaves as any[]).find((l: any) => l._id === leaveId);
 
-    // If not found by ID, search by employee name + dates
-    if (!leave && (searchName || startDate)) {
-      leave = (leaves as any[]).find((l: any) => {
-        const user = (allUsers as any[]).find((u: any) => u._id === l.userId);
-        const nameMatch = searchName
-          ? user?.name?.toLowerCase().includes(searchName.toLowerCase())
+    // If not found by ID — search by employee name + dates
+    if (!targetLeave) {
+      targetLeave = (allLeaves as any[]).find((l: any) => {
+        const leaveUser = (allUsers as any[]).find((u: any) => u._id === l.userId);
+        const nameOk = searchEmployeeName
+          ? leaveUser?.name?.toLowerCase().includes(searchEmployeeName.toLowerCase())
           : true;
-        const startMatch = startDate ? l.startDate === startDate : true;
-        const endMatch = endDate ? l.endDate === endDate : true;
-        const typeMatch = leaveType ? l.type === leaveType : true;
-        return nameMatch && startMatch && endMatch && typeMatch;
+        const startOk = searchStartDate ? l.startDate === searchStartDate : true;
+        const endOk = searchEndDate ? l.endDate === searchEndDate : true;
+        const typeOk = searchLeaveType ? l.type === searchLeaveType : true;
+        return nameOk && startOk && endOk && typeOk;
       });
     }
 
-    if (!leave) {
-      const availableLeaves = (leaves as any[]).slice(0, 10).map((l: any) => {
-        const user = (allUsers as any[]).find((u: any) => u._id === l.userId);
-        return `${user?.name}: ${l.type} ${l.startDate}→${l.endDate} (${l.status}) id:${l._id}`;
-      }).join('\n');
+    if (!targetLeave) {
+      const preview = (allLeaves as any[]).slice(0, 5).map((l: any) => {
+        const u = (allUsers as any[]).find((u: any) => u._id === l.userId);
+        return `${u?.name ?? '?'}: ${l.type} ${l.startDate}→${l.endDate} [${l._id}]`;
+      }).join(', ');
       return NextResponse.json({
         success: false,
-        message: `Leave request not found. Available leaves:\n${availableLeaves}`
+        message: `Leave not found. Available: ${preview}`,
       });
     }
 
+    // Find requester
     const requester = (allUsers as any[]).find((u: any) => u._id === requesterId);
-
     if (!requester) {
-      return NextResponse.json({ success: false, message: 'User not found' });
+      return NextResponse.json({ success: false, message: 'Requester not found' });
     }
 
     const isAdmin = requester.role === 'admin';
-    const isOwner = leave.userId === requesterId;
+    const isOwner = targetLeave.userId === requesterId;
 
     if (!isAdmin && !isOwner) {
       return NextResponse.json({
         success: false,
-        message: "❌ You can only delete your own leave requests. You don't have permission to delete other employees' leaves."
+        message: "❌ You can only delete your own leave requests.",
       });
     }
 
-    const deletedEmployeeName = leave.userName ?? (allUsers as any[]).find((u: any) => u._id === leave.userId)?.name ?? 'Employee';
+    const ownerUser = (allUsers as any[]).find((u: any) => u._id === targetLeave.userId);
+    const ownerName = ownerUser?.name ?? 'Employee';
+
     await fetchMutation(api.leaves.deleteLeave, {
-      leaveId: leaveId as Id<'leaveRequests'>,
+      leaveId: targetLeave._id as Id<'leaveRequests'>,
       requesterId: requesterId as Id<'users'>,
     });
 
     return NextResponse.json({
       success: true,
-      message: `✅ ${isAdmin && !isOwner ? `${deletedEmployeeName}'s` : 'Your'} ${leave.type} leave (${leave.startDate} → ${leave.endDate}) has been deleted.${leave.status === 'approved' ? ' Leave balance has been restored.' : ''}`,
+      message: `✅ ${isAdmin && !isOwner ? `${ownerName}'s` : 'Your'} ${targetLeave.type} leave (${targetLeave.startDate} → ${targetLeave.endDate}) has been deleted.${targetLeave.status === 'approved' ? ' Leave balance restored.' : ''}`,
     });
   } catch (error: any) {
     return NextResponse.json({
       success: false,
-      message: error.message ?? 'Failed to delete leave request',
+      message: error.message ?? 'Failed to delete leave',
     });
   }
 }
