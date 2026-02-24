@@ -1,0 +1,200 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Calendar, AlertTriangle, TrendingUp, Users, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuthStore } from "@/store/useAuthStore";
+
+interface Insights {
+  balanceWarning: string | null;
+  patterns: string[] | null;
+  teamConflicts: string[] | null;
+  bestDates: string[] | null;
+}
+
+export function AIRecommendationsCard() {
+  const user = useAuthStore((s) => s.user);
+  const [insights, setInsights] = useState<Insights | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const [lastFetched, setLastFetched] = useState<Date | null>(null);
+
+  const fetchInsights = async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/chat/insights?userId=${user.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setInsights(data);
+        setLastFetched(new Date());
+      }
+    } catch (e) {
+      // silently fail
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInsights();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Don't show if no insights at all
+  const hasContent =
+    insights?.balanceWarning ||
+    (insights?.patterns && insights.patterns.length > 0) ||
+    (insights?.bestDates && insights.bestDates.length > 0) ||
+    (insights?.teamConflicts && insights.teamConflicts.length > 0);
+
+  if (!hasContent && !loading) return null;
+
+  return (
+    <Card className="border border-[#6366f1]/30 overflow-hidden">
+      {/* Gradient top bar */}
+      <div className="h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" />
+
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            AI Recommendations
+            {lastFetched && (
+              <span className="text-xs text-[var(--text-muted)] font-normal">
+                · {lastFetched.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            )}
+          </CardTitle>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={fetchInsights}
+              disabled={loading}
+              className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[var(--text-muted)] ${loading ? "animate-spin" : ""}`} />
+            </button>
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+            >
+              {expanded
+                ? <ChevronUp className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                : <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
+            </button>
+          </div>
+        </div>
+      </CardHeader>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <CardContent className="space-y-3 pt-0">
+              {loading && !insights ? (
+                <div className="flex items-center gap-2 py-4 justify-center">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#6366f1]" />
+                  <span className="text-sm text-[var(--text-muted)]">Analyzing your data...</span>
+                </div>
+              ) : (
+                <>
+                  {/* Balance Warning */}
+                  {insights?.balanceWarning && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-start gap-3 p-3 rounded-xl border border-orange-500/30 bg-orange-500/5"
+                    >
+                      <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-orange-500">{insights.balanceWarning}</p>
+                    </motion.div>
+                  )}
+
+                  {/* Attendance Patterns */}
+                  {insights?.patterns && insights.patterns.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 }}
+                      className="p-3 rounded-xl border border-purple-500/30 bg-purple-500/5"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="w-4 h-4 text-purple-500" />
+                        <p className="text-xs font-semibold text-purple-500">Attendance Patterns</p>
+                      </div>
+                      <ul className="space-y-1">
+                        {insights.patterns.map((p, i) => (
+                          <li key={i} className="text-sm text-[var(--text-primary)] flex items-start gap-2">
+                            <span className="text-purple-500 mt-0.5">•</span>
+                            {p}
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+
+                  {/* Best Dates */}
+                  {insights?.bestDates && insights.bestDates.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="p-3 rounded-xl border border-green-500/30 bg-green-500/5"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="w-4 h-4 text-green-500" />
+                        <p className="text-xs font-semibold text-green-500">Best Dates for Vacation</p>
+                      </div>
+                      <ul className="space-y-1">
+                        {insights.bestDates.map((d, i) => (
+                          <li key={i} className="text-sm text-[var(--text-primary)] flex items-start gap-2">
+                            <span className="text-green-500 mt-0.5">✓</span>
+                            {d}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-xs text-[var(--text-muted)] mt-2">
+                        💬 Ask the AI assistant to book any of these dates
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Team Conflicts */}
+                  {insights?.teamConflicts && insights.teamConflicts.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.15 }}
+                      className="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="w-4 h-4 text-blue-500" />
+                        <p className="text-xs font-semibold text-blue-500">Team on Leave (next 60 days)</p>
+                      </div>
+                      <ul className="space-y-1">
+                        {insights.teamConflicts.map((c, i) => (
+                          <li key={i} className="text-sm text-[var(--text-primary)] flex items-start gap-2">
+                            <span className="text-blue-500 mt-0.5">•</span>
+                            {c}
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}

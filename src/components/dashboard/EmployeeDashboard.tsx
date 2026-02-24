@@ -14,6 +14,7 @@ import Link from "next/link";
 import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from "@/lib/types";
 import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
 import { AttendanceDashboard } from "@/components/attendance/AttendanceDashboard";
+import { AIRecommendationsCard } from "@/components/ai/AIRecommendationsCard";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -79,6 +80,11 @@ export function EmployeeDashboard() {
       {/* Check-In / Check-Out Widget */}
       <motion.div variants={itemVariants}>
         <CheckInOutWidget />
+      </motion.div>
+
+      {/* AI Recommendations */}
+      <motion.div variants={itemVariants}>
+        <AIRecommendationsCard />
       </motion.div>
 
       {/* This Month Attendance Quick Stats */}
