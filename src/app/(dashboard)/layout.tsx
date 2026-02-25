@@ -13,21 +13,21 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Server-side auth guard — second layer of protection after middleware
+// Server-side auth guard - second layer of protection after middleware
 async function requireAuth() {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
   if (!session) {
-    redirect("/auth/login");
+    redirect("/login");
   }
   try {
     const parsed = JSON.parse(decodeURIComponent(session));
     if (!parsed?.id && !parsed?._id) {
-      redirect("/auth/login");
+      redirect("/login");
     }
     return parsed;
   } catch {
-    redirect("/auth/login");
+    redirect("/login");
   }
 }
 

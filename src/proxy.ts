@@ -15,10 +15,10 @@ const PROTECTED_ROUTES = [
 ]
 
 // Auth routes (redirect to dashboard if already logged in)
-const AUTH_ROUTES = ['/login', '/register', '/auth/login', '/auth/register']
+const AUTH_ROUTES = ['/login', '/register']
 
 // Public routes (always accessible)
-const PUBLIC_ROUTES = ['/', '/privacy', '/terms', '/about', '/auth/login', '/auth/register']
+const PUBLIC_ROUTES = ['/', '/privacy', '/terms', '/about', '/login', '/register']
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -35,11 +35,12 @@ export function proxy(request: NextRequest) {
   // ── Redirect authenticated users away from auth pages ──────────────────
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
+
   }
 
   // ── Block unauthenticated users from protected routes ──────────────────
   if (isProtectedRoute && !token) {
-    const loginUrl = new URL('/auth/login', request.url)
+    const loginUrl = new URL('/login', request.url)
     // Remember where they were trying to go
     loginUrl.searchParams.set('from', pathname)
     return NextResponse.redirect(loginUrl)
