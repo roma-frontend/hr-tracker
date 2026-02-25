@@ -7,7 +7,10 @@ import { streamText } from 'ai';
 export async function POST(req: Request) {
   try {
     console.log('🤖 AI Chat request received');
-    const { messages, userId } = await req.json();
+    const { messages, userId, lang } = await req.json();
+    const langInstruction = lang === 'ru'
+      ? 'ЯЗЫК: Пользователь пишет на русском. Отвечай ТОЛЬКО на русском языке.'
+      : 'LANGUAGE: The user is writing in English. Reply ONLY in English.';
     console.log('📝 Messages count:', messages.length);
 
   // Fetch user context
@@ -253,6 +256,7 @@ IMPORTANT:
 - Be helpful, concise, and professional
 - Use emojis occasionally to be friendly 😊
 - **ALWAYS respond in the same language as the user's question**
+- ${langInstruction}
 - All leave requests go to admin for approval — inform the user about this
 - If dates are not specified, ask the user for them before booking
 

@@ -842,33 +842,27 @@ function CTABanner() {
   const { user } = useAuthStore();
   
   return (
-    <section className="relative z-10 px-0 md:px-0 py-20" style={{ background: 'linear-gradient(135deg, #0d0d1a 0%, #12103a 30%, #1a0a2e 60%, #0f1a2e 100%)' }} aria-label="Call to action">
+    <section className="relative z-10 py-28" aria-label="Call to action">
+      {/* Purple glow top-right */}
+      <motion.div className="absolute -top-24 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)', filter: 'blur(60px)' }}
+        animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 7, repeat: Infinity }} />
+      {/* Gold glow bottom-left */}
+      <motion.div className="absolute bottom-0 -left-20 w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%)', filter: 'blur(60px)' }}
+        animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 9, repeat: Infinity, delay: 2 }} />
+      {/* Teal glow center */}
+      <motion.div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(52,211,153,0.08) 0%, transparent 70%)', filter: 'blur(50px)' }}
+        animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 6, repeat: Infinity, delay: 1 }} />
+
       <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.96 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="relative max-w-5xl mx-auto rounded-3xl overflow-hidden"
-        style={{ minHeight: 380 }}
+        className="relative max-w-5xl mx-auto px-6 md:px-12"
       >
-        {/* Deep dark gradient background - matches screenshot */}
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, #0d0d1a 0%, #12103a 30%, #1a0a2e 60%, #0f1a2e 100%)',
-        }} />
-        {/* Purple glow top-right */}
-        <motion.div className="absolute -top-24 -right-24 w-80 h-80 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 70%)', filter: 'blur(40px)' }}
-          animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 7, repeat: Infinity }} />
-        {/* Gold glow bottom-left */}
-        <motion.div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%)', filter: 'blur(40px)' }}
-          animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 9, repeat: Infinity, delay: 2 }} />
-        {/* Teal glow bottom-right */}
-        <motion.div className="absolute -bottom-10 right-1/4 w-48 h-48 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(52,211,153,0.15) 0%, transparent 70%)', filter: 'blur(30px)' }}
-          animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 6, repeat: Infinity, delay: 1 }} />
-        {/* Subtle border */}
-        <div className="absolute inset-0 rounded-3xl border border-white/[0.06]" />
 
         <div className="relative px-10 py-20 text-center flex flex-col items-center">
           {/* Icon */}
