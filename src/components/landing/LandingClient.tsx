@@ -842,7 +842,7 @@ function CTABanner() {
   const { user } = useAuthStore();
   
   return (
-    <section className="relative z-10 px-6 md:px-12 py-20" aria-label="Call to action">
+    <section className="relative z-10 px-0 md:px-0 py-20" style={{ background: 'linear-gradient(135deg, #0d0d1a 0%, #12103a 30%, #1a0a2e 60%, #0f1a2e 100%)' }} aria-label="Call to action">
       <motion.div
         initial={{ opacity: 0, y: 40, scale: 0.96 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -925,7 +925,7 @@ function CTABanner() {
               </>
             ) : (
               <>
-                <Link href="/auth/register">
+                <Link href="/register">
                   <motion.button
                     whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.5)' }}
                     whileTap={{ scale: 0.97 }}
@@ -936,7 +936,7 @@ function CTABanner() {
                     Start for Free
                   </motion.button>
                 </Link>
-                <Link href="/auth/login">
+                <Link href="/login">
                   <motion.button
                     whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.3)' }}
                     whileTap={{ scale: 0.97 }}
