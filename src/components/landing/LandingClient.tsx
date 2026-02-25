@@ -848,99 +848,99 @@ function CTABanner() {
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden"
+        className="relative max-w-5xl mx-auto rounded-3xl overflow-hidden"
+        style={{ minHeight: 380 }}
       >
-        {/* Background */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(135deg, rgba(59,130,246,0.25) 0%, rgba(139,92,246,0.25) 50%, rgba(52,211,153,0.15) 100%)',
-          }}
-        />
-        <div className="absolute inset-0 backdrop-blur-xl border border-white/10 rounded-3xl" />
+        {/* Deep dark gradient background - matches screenshot */}
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(135deg, #0d0d1a 0%, #12103a 30%, #1a0a2e 60%, #0f1a2e 100%)',
+        }} />
+        {/* Purple glow top-right */}
+        <motion.div className="absolute -top-24 -right-24 w-80 h-80 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 70%)', filter: 'blur(40px)' }}
+          animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 7, repeat: Infinity }} />
+        {/* Gold glow bottom-left */}
+        <motion.div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%)', filter: 'blur(40px)' }}
+          animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 9, repeat: Infinity, delay: 2 }} />
+        {/* Teal glow bottom-right */}
+        <motion.div className="absolute -bottom-10 right-1/4 w-48 h-48 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(52,211,153,0.15) 0%, transparent 70%)', filter: 'blur(30px)' }}
+          animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 6, repeat: Infinity, delay: 1 }} />
+        {/* Subtle border */}
+        <div className="absolute inset-0 rounded-3xl border border-white/[0.06]" />
 
-        {/* Animated orb inside */}
-        <motion.div
-          className="absolute -top-20 -right-20 w-60 h-60 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
-            filter: 'blur(30px)',
-          }}
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 6, repeat: Infinity }}
-        />
-
-        <div className="relative px-10 py-16 text-center">
-          <motion.div
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-            className="inline-block mb-6"
-          >
-            <Sparkles size={32} className="text-yellow-400" />
+        <div className="relative px-10 py-20 text-center flex flex-col items-center">
+          {/* Icon */}
+          <motion.div className="inline-flex mb-8"
+            animate={{ y: [0, -8, 0], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
+            <div className="relative">
+              <Sparkles size={48} className="text-[#d4af37]" />
+              <motion.div className="absolute inset-0 blur-xl"
+                style={{ background: 'rgba(212,175,55,0.4)' }}
+                animate={{ opacity: [0.3, 0.8, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity }} />
+            </div>
           </motion.div>
 
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
+          <h2 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
             Ready to elevate your{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #d4af37, #f4e5a8, #cd7f32)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span style={{
+              background: 'linear-gradient(135deg, #d4af37 0%, #f4e5a8 50%, #cd7f32 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
               HR operations?
             </span>
           </h2>
 
-          <p className="text-[#f7e7ce]/60 text-lg mb-10 max-w-xl mx-auto">
+          <p className="text-white/50 text-lg mb-12 max-w-xl mx-auto leading-relaxed">
             Join elite HR professionals who rely on HRLeave to manage their teams with sophistication.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             {user ? (
-              // Authenticated user - show explore buttons
               <>
                 <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.7)' }}
+                  whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.5)' }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => router.push('/dashboard')}
-                  className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-black font-bold text-lg"
+                  className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-black font-bold text-lg shadow-lg"
                   style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
                 >
                   <Calendar size={20} />
                   Manage Leaves
                 </motion.button>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.3)' }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => router.push('/dashboard')}
-                  className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-[#f7e7ce] font-bold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm hover:bg-[#d4af37]/10 transition-all"
+                  onClick={() => router.push('/employees')}
+                  className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white font-bold text-lg border border-white/15 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all"
                 >
                   <Users size={20} />
                   View Team
                 </motion.button>
               </>
             ) : (
-              // Non-authenticated user - show sign up buttons
               <>
-                <Link href="/register">
+                <Link href="/auth/register">
                   <motion.button
-                    whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.7)' }}
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(212,175,55,0.5)' }}
                     whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-black font-bold text-lg"
+                    className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-black font-bold text-lg shadow-lg"
                     style={{ background: 'linear-gradient(135deg, #d4af37, #f4e5a8)' }}
                   >
                     <Zap size={20} />
                     Start for Free
                   </motion.button>
                 </Link>
-                <Link href="/login">
+                <Link href="/auth/login">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.3)' }}
                     whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-[#f7e7ce] font-bold text-lg border border-[#d4af37]/20 bg-[#d4af37]/5 backdrop-blur-sm hover:bg-[#d4af37]/10 transition-all"
+                    className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white font-bold text-lg border border-white/15 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all"
                   >
                     Sign In to Dashboard
                   </motion.button>
@@ -967,7 +967,9 @@ function Footer() {
       { name: 'Dashboard', href: '/dashboard' },
       { name: 'Attendance', href: '/attendance' },
       { name: 'Tasks', href: '/tasks' },
+      { name: 'Employees', href: '/employees' },
       { name: 'Analytics', href: '/analytics' },
+      { name: 'Calendar', href: '/calendar' },
     ],
     account: [
       { name: 'Sign In', href: '/auth/login' },
@@ -1037,17 +1039,35 @@ function Footer() {
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">
-                {category}
+                {category === 'product' ? 'Product' : category === 'platform' ? 'Platform' : category === 'account' ? 'Account' : 'Legal'}
               </h4>
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="text-[#f7e7ce]/50 hover:text-[#d4af37] text-sm transition-colors focus:outline-none focus:text-[#d4af37] focus:underline underline-offset-4"
-                    >
-                      {link.name}
-                    </a>
+                    {link.href.startsWith('http') ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#f7e7ce]/50 hover:text-[#d4af37] text-sm transition-colors focus:outline-none focus:text-[#d4af37] focus:underline underline-offset-4"
+                      >
+                        {link.name}
+                      </a>
+                    ) : link.href.startsWith('#') ? (
+                      <a
+                        href={link.href}
+                        className="text-[#f7e7ce]/50 hover:text-[#d4af37] text-sm transition-colors focus:outline-none focus:text-[#d4af37] focus:underline underline-offset-4"
+                      >
+                        {link.name}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-[#f7e7ce]/50 hover:text-[#d4af37] text-sm transition-colors focus:outline-none focus:text-[#d4af37] focus:underline underline-offset-4"
+                      >
+                        {link.name}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
