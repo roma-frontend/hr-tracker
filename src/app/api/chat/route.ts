@@ -92,7 +92,12 @@ ${insights.teamConflicts?.length ? `⚠️ TEAM CONFLICTS (people already on lea
         
         // Build employees info
         const employeesInfo = (data.employees ?? []).map((e: any) => {
+          const presenceEmoji: Record<string, string> = {
+            available: '🟢', in_meeting: '📅', in_call: '📞', out_of_office: '🏠', busy: '⛔'
+          };
           const lines = [`👤 ${e.name} (${e.role}, ${e.department ?? 'No dept'}, ${e.position ?? 'No position'})`];
+          lines.push(`  Status: ${presenceEmoji[e.presenceStatus] ?? '🟢'} ${e.presenceStatus ?? 'available'}`);
+          if (e.supervisorName) lines.push(`  Supervisor: ${e.supervisorName}`);
           if (e.todayStatus) {
             lines.push(`  Today: ${e.todayStatus.status} | In: ${e.todayStatus.checkIn ?? '—'} | Out: ${e.todayStatus.checkOut ?? '—'}${e.todayStatus.isLate ? ` | LATE by ${e.todayStatus.lateMinutes}min` : ''} | Worked: ${e.todayStatus.workedHours ?? '—'}h`);
           } else {
@@ -118,6 +123,13 @@ ${insights.teamConflicts?.length ? `⚠️ TEAM CONFLICTS (people already on lea
             });
           }
           lines.push(`  Leave balance: Paid: ${e.leaveBalance?.paid ?? '?'}d, Sick: ${e.leaveBalance?.sick ?? '?'}d, Family: ${e.leaveBalance?.family ?? '?'}d`);
+          if (e.tasks?.length) {
+            lines.push(`  Tasks (${e.tasks.length}):`);
+            e.tasks.forEach((t: any) => {
+              const deadline = t.deadline ? ` | deadline: ${t.deadline}` : '';
+              lines.push(`    - [${t.status}] ${t.title} (${t.priority} priority${deadline}) assigned by ${t.assignedBy} [taskId: ${t.taskId}]`);
+            });
+          }
           return lines.join('\n');
         }).join('\n\n');
 
@@ -167,6 +179,10 @@ Your role is to help employees and admins with:
 - General HR questions
 - **BOOKING LEAVES, SICK DAYS, VACATIONS** — you can submit requests on behalf of the employee!
 - Answering questions like "Is John in today?", "When is Anna on vacation?", "Who is on leave this week?"
+- Task management: who has what tasks, what's their status, deadlines, priorities
+- Presence status: who is available, in meeting, in call, out of office, busy
+- Supervisor relationships: who reports to whom, who manages whom
+- Employee info: department, position, contact details, type (staff/contractor)
 
 BOOKING LEAVES:
 When a user asks to book/reserve/schedule any type of leave, respond with:

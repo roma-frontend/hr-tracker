@@ -189,6 +189,39 @@ export const deleteUser = mutation({
   },
 });
 
+// ── Migrate: copy faceImageUrl → avatarUrl for users who have face but no avatar ──
+export const migrateFaceToAvatar = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    let count = 0;
+    for (const user of users) {
+      if (!user.avatarUrl && user.faceImageUrl) {
+        await ctx.db.patch(user._id, { avatarUrl: user.faceImageUrl });
+        count++;
+      }
+    }
+    return { migrated: count };
+  },
+});
+
+// ── Update presence status ────────────────────────────────────────────────
+export const updatePresenceStatus = mutation({
+  args: {
+    userId: v.id("users"),
+    status: v.union(
+      v.literal("available"),
+      v.literal("in_meeting"),
+      v.literal("in_call"),
+      v.literal("out_of_office"),
+      v.literal("busy"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, { presenceStatus: args.status });
+  },
+});
+
 // ── Update avatar ──────────────────────────────────────────────────────────
 export const updateAvatar = mutation({
   args: {
@@ -288,14 +321,19 @@ export const getWebauthnCredential = query({
   },
 });
 
-// ── Get supervisors list ───────────────────────────────────────────────────
+// ── Get supervisors list (supervisors + admins) ────────────────────────────
 export const getSupervisors = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
+    const supervisors = await ctx.db
       .query("users")
       .withIndex("by_role", (q) => q.eq("role", "supervisor"))
       .collect();
+    const admins = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "admin"))
+      .collect();
+    return [...supervisors, ...admins];
   },
 });
 

@@ -17,21 +17,26 @@ import {
   UserCheck,
   BarChart3,
   Clock,
+  CheckSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "supervisor", "employee"] },
   { href: "/attendance", label: "Attendance", icon: Clock, roles: ["admin", "supervisor", "employee"] },
   { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["admin", "supervisor"] },
   { href: "/leaves", label: "Leaves", icon: ClipboardList, roles: ["admin", "supervisor", "employee"] },
-  { href: "/employees", label: "Employees", icon: Users, roles: ["admin", "supervisor"] },
+  { href: "/employees", label: "Employees", icon: Users, roles: ["admin", "supervisor", "employee"] },
   { href: "/calendar", label: "Calendar", icon: CalendarDays, roles: ["admin", "supervisor", "employee"] },
   { href: "/reports", label: "Reports", icon: FileText, roles: ["admin", "supervisor"] },
+  { href: "/tasks", label: "Tasks", icon: CheckSquare, roles: ["admin", "supervisor", "employee"] },
   { href: "/approvals", label: "Approvals", icon: UserCheck, roles: ["admin"] },
   { href: "/settings", label: "Settings", icon: Settings, roles: ["admin", "supervisor", "employee"] },
 ];
@@ -46,6 +51,16 @@ export function Sidebar() {
   const { user } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
+
+  // Unread task notifications badge
+  const notifications = useQuery(
+    api.notifications.getUserNotifications,
+    mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
+  );
+  const taskUnreadCount = (notifications ?? []).filter(
+    (n: any) => !n.isRead && n.type === "system" && (n.title?.includes("Task") || n.title?.includes("task"))
+  ).length;
+
   if (!mounted) return null;
 
   return (
@@ -108,6 +123,8 @@ export function Sidebar() {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
 
+            const badge = item.href === "/tasks" && taskUnreadCount > 0 ? taskUnreadCount : 0;
+
             const linkContent = (
               <Link
                 key={item.href}
@@ -148,10 +165,17 @@ export function Sidebar() {
                     className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--primary)] rounded-full"
                   />
                 )}
-                <Icon
-                  className="w-5 h-5 flex-shrink-0"
-                  style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
-                />
+                <div className="relative flex-shrink-0">
+                  <Icon
+                    className="w-5 h-5"
+                    style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
+                  />
+                  {badge > 0 && collapsed && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                      {badge > 9 ? "9+" : badge}
+                    </span>
+                  )}
+                </div>
                 <AnimatePresence>
                   {!collapsed && (
                     <motion.span
@@ -159,12 +183,21 @@ export function Sidebar() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -8 }}
                       transition={{ duration: 0.15 }}
-                      className="truncate"
+                      className="truncate flex-1"
                     >
                       {item.label}
                     </motion.span>
                   )}
                 </AnimatePresence>
+                {!collapsed && badge > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm shadow-indigo-300 animate-pulse"
+                  >
+                    {badge > 9 ? "9+" : badge}
+                  </motion.span>
+                )}
               </Link>
             );
 
@@ -229,6 +262,15 @@ export function MobileSidebar() {
   const { user } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
+
+  const mobileNotifications = useQuery(
+    api.notifications.getUserNotifications,
+    mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
+  );
+  const mobileTaskBadge = (mobileNotifications ?? []).filter(
+    (n: any) => !n.isRead && n.type === "system" && (n.title?.includes("Task") || n.title?.includes("task"))
+  ).length;
+
   if (!mounted) return null;
 
   return (
@@ -271,6 +313,7 @@ export function MobileSidebar() {
               {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
+                const mobileBadge = item.href === "/tasks" && mobileTaskBadge > 0 ? mobileTaskBadge : 0;
                 return (
                   <Link
                     key={item.href}
@@ -306,7 +349,12 @@ export function MobileSidebar() {
                       className="w-5 h-5"
                       style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
                     />
-                    {item.label}
+                    <span className="flex-1">{item.label}</span>
+                    {mobileBadge > 0 && (
+                      <span className="min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                        {mobileBadge > 9 ? "9+" : mobileBadge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}

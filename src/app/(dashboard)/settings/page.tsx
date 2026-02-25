@@ -44,6 +44,14 @@ export default function SettingsPage() {
   );
   const removeFaceRegistration = useMutation(api.faceRecognition.removeFaceRegistration);
   const updateUser = useMutation(api.users.updateUser);
+  const migrateFaceToAvatar = useMutation(api.users.migrateFaceToAvatar);
+
+  // Auto-migrate: copy faceImageUrl → avatarUrl for users who registered face but have no avatar
+  useEffect(() => {
+    if (user?.role === "admin") {
+      migrateFaceToAvatar({}).catch(() => {});
+    }
+  }, [user?.role]);
 
   const handleSave = async () => {
     if (!user?.id) return;

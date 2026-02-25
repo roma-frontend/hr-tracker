@@ -16,11 +16,16 @@ export const registerFace = mutation({
     }
 
     // Update user with face data
-    await ctx.db.patch(args.userId, {
+    // Also set avatarUrl if not already set, so face photo shows as avatar everywhere
+    const updateData: any = {
       faceDescriptor: args.faceDescriptor,
       faceImageUrl: args.faceImageUrl,
       faceRegisteredAt: Date.now(),
-    });
+    };
+    if (!user.avatarUrl) {
+      updateData.avatarUrl = args.faceImageUrl;
+    }
+    await ctx.db.patch(args.userId, updateData);
 
     return { success: true };
   },

@@ -57,8 +57,12 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-2xl">
-                {employee.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                {(employee as any).avatarUrl ? (
+                  <img src={(employee as any).avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  employee.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+                )}
               </div>
               <div>
                 <CardTitle className="text-2xl">{employee.name}</CardTitle>

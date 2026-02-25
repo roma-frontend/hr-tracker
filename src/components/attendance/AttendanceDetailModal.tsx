@@ -97,8 +97,12 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
 
               {/* Avatar */}
               <div className="flex items-end gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-white/20 border-2 border-white/40 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                  {record.user?.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) ?? "?"}
+                <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden shadow-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-2xl font-bold">
+                  {record.user?.avatarUrl ? (
+                    <img src={record.user.avatarUrl} alt={record.user.name ?? ""} className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                  ) : (
+                    record.user?.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) ?? "?"
+                  )}
                 </div>
                 <div className="pb-1">
                   <h2 className="text-xl font-bold text-white">{record.user?.name ?? "Unknown"}</h2>
@@ -207,13 +211,21 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                 )}
               </div>
 
-              {/* Department */}
-              {record.user?.department && (
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <Building2 className="w-4 h-4" />
-                  {record.user.department} department
-                </div>
-              )}
+              {/* Department + Supervisor */}
+              <div className="flex flex-wrap gap-4">
+                {record.user?.department && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <Building2 className="w-4 h-4" />
+                    {record.user.department} department
+                  </div>
+                )}
+                {(record.user as any)?.supervisorName && (
+                  <div className="flex items-center gap-2 text-sm text-indigo-500">
+                    <User className="w-4 h-4" />
+                    Supervisor: <span className="font-semibold">{(record.user as any).supervisorName}</span>
+                  </div>
+                )}
+              </div>
 
               {/* Monthly Stats */}
               {monthlyStats && (

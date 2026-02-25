@@ -6,14 +6,16 @@ import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus, Search, Filter, MoreVertical, Edit2, Trash2,
+  Plus, Search, MoreVertical, Edit2, Trash2,
   Shield, Users, Briefcase, Mail, Phone, Building2,
-  Crown, UserCheck, User, AlertTriangle, Eye,
+  Crown, UserCheck, User, AlertTriangle, Eye, UserCog,
+  LayoutGrid, List, ChevronRight,
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { EditEmployeeModal } from "./EditEmployeeModal";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
+import { EmployeeHoverCard } from "./EmployeeHoverCard";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -37,13 +39,15 @@ export function EmployeesClient() {
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("active");
+  const [filterStatus, setFilterStatus] = useState<string>(user?.role === "employee" ? "active" : "active");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEmployee, setEditEmployee] = useState<typeof users extends (infer T)[] ? T : never | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const users = useQuery(api.users.getAllUsers, {});
+  const supervisors = useQuery(api.tasks.getSupervisors, {});
   const deleteUser = useMutation(api.users.deleteUser);
 
   const isAdmin = user?.role === "admin";
@@ -155,11 +159,11 @@ export function EmployeesClient() {
             style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--text-primary)" }}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           {[
             { value: filterRole, setter: setFilterRole, options: ["all", "admin", "supervisor", "employee"], label: "Role" },
             { value: filterType, setter: setFilterType, options: ["all", "staff", "contractor"], label: "Type" },
-            { value: filterStatus, setter: setFilterStatus, options: ["all", "active", "inactive"], label: "Status" },
+            ...(canManage ? [{ value: filterStatus, setter: setFilterStatus, options: ["all", "active", "inactive"], label: "Status" }] : []),
           ].map(({ value, setter, options, label }) => (
             <select
               key={label}
@@ -171,156 +175,251 @@ export function EmployeesClient() {
               {options.map((o) => <option key={o} value={o} className="capitalize">{o === "all" ? `All ${label}s` : o}</option>)}
             </select>
           ))}
+          {/* View toggle */}
+          <div className="flex rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2.5 transition-colors ${viewMode === "grid" ? "text-white" : ""}`}
+              style={{ background: viewMode === "grid" ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "var(--card)", color: viewMode === "grid" ? "white" : "var(--text-muted)" }}
+              title="Grid view"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className="p-2.5 transition-colors"
+              style={{ background: viewMode === "list" ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "var(--card)", color: viewMode === "list" ? "white" : "var(--text-muted)" }}
+              title="List view"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </motion.div>
 
-      {/* Employee Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((emp, i) => {
-            const roleConf = ROLE_CONFIG[emp.role];
-            const typeConf = TYPE_CONFIG[emp.employeeType];
-            const RoleIcon = roleConf.icon;
+      {/* Presence badge helper */}
+      {(() => {
+        const getPresenceBadge = (status: string | undefined) => {
+          const cfg: Record<string, { label: string; cls: string }> = {
+            available:     { label: "🟢 Available",     cls: "bg-emerald-100 text-emerald-700" },
+            in_meeting:    { label: "📅 In Meeting",    cls: "bg-amber-100 text-amber-700" },
+            in_call:       { label: "📞 In Call",       cls: "bg-blue-100 text-blue-700" },
+            out_of_office: { label: "🏠 Out of Office", cls: "bg-rose-100 text-rose-700" },
+            busy:          { label: "⛔ Busy",          cls: "bg-orange-100 text-orange-700" },
+          };
+          return cfg[status ?? "available"] ?? cfg["available"];
+        };
 
-            return (
-              <motion.div
-                key={emp._id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: i * 0.03 }}
-                onClick={() => router.push(`/employees/${emp._id}`)}
-                className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
-                style={{
-                  background: "var(--card)",
-                  borderColor: emp.isActive ? "var(--border)" : "rgba(239,68,68,0.2)",
-                  opacity: emp.isActive ? 1 : 0.6,
-                }}
-              >
-                {/* Menu */}
-                {canManage && emp.email !== "romangulanyan@gmail.com" || isAdmin ? (
-                  <div className="absolute top-4 right-4">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === emp._id ? null : emp._id); }}
-                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                      style={{ color: "var(--text-muted)", background: "var(--background-subtle)" }}
-                    >
-                      <MoreVertical className="w-4 h-4" />
+        const renderMenu = (emp: any) => canManage ? (
+          <div className="relative flex-shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === emp._id ? null : emp._id); }}
+              className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+              style={{ color: "var(--text-muted)", background: "var(--background-subtle)" }}
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+            <AnimatePresence>
+              {openMenuId === emp._id && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="absolute right-0 top-8 w-40 rounded-xl border shadow-xl z-20 overflow-hidden"
+                  style={{ background: "var(--card)", borderColor: "var(--border)" }}
+                >
+                  <button onClick={(e) => { e.stopPropagation(); router.push(`/employees/${emp._id}`); setOpenMenuId(null); }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80" style={{ color: "var(--text-primary)" }}>
+                    <Eye className="w-3.5 h-3.5" /> View Profile
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setEditEmployee(emp as any); setOpenMenuId(null); }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80" style={{ color: "var(--text-primary)" }}>
+                    <Edit2 className="w-3.5 h-3.5" /> Edit
+                  </button>
+                  {isAdmin && emp.role !== "admin" && (
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(emp._id); setOpenMenuId(null); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80" style={{ color: "#ef4444" }}>
+                      <Trash2 className="w-3.5 h-3.5" /> Deactivate
                     </button>
-                    <AnimatePresence>
-                      {openMenuId === emp._id && (
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : null;
+
+        return (
+          <>
+            {/* GRID VIEW */}
+            {viewMode === "grid" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <AnimatePresence mode="popLayout">
+                  {filtered.map((emp, i) => {
+                    const roleConf = ROLE_CONFIG[emp.role];
+                    const typeConf = TYPE_CONFIG[emp.employeeType];
+                    const RoleIcon = roleConf.icon;
+                    const presence = getPresenceBadge(emp.presenceStatus);
+                    return (
+                      <EmployeeHoverCard key={emp._id} employee={emp}
+                        canEditStatus={isAdmin || emp._id === user?.id}
+                        currentUserId={user?.id} userRole={user?.role} allUsers={users ?? []}>
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: -8 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          className="absolute right-0 top-8 w-40 rounded-xl border shadow-xl z-20 overflow-hidden"
-                          style={{ background: "var(--card)", borderColor: "var(--border)" }}
+                          initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: i * 0.03 }}
+                          onClick={() => router.push(`/employees/${emp._id}`)}
+                          className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
+                          style={{ background: "var(--card)", borderColor: emp.isActive ? "var(--border)" : "rgba(239,68,68,0.2)", opacity: emp.isActive ? 1 : 0.6 }}
                         >
-                          <button
-                            onClick={(e) => { e.stopPropagation(); router.push(`/employees/${emp._id}`); setOpenMenuId(null); }}
-                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:opacity-80"
-                            style={{ color: "var(--text-primary)" }}
-                          >
-                            <Eye className="w-3.5 h-3.5" /> View Profile
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setEditEmployee(emp as any); setOpenMenuId(null); }}
-                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:opacity-80"
-                            style={{ color: "var(--text-primary)" }}
-                          >
-                            <Edit2 className="w-3.5 h-3.5" /> Edit
-                          </button>
-                          {isAdmin && emp.role !== "admin" && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setDeleteConfirm(emp._id); setOpenMenuId(null); }}
-                              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:opacity-80"
-                              style={{ color: "#ef4444" }}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" /> Deactivate
-                            </button>
+                          <div className="absolute top-4 right-4">{renderMenu(emp)}</div>
+                          <div className="flex items-start gap-3 mb-4">
+                            <AvatarUpload userId={emp._id} currentUrl={emp.avatarUrl} name={emp.name} size="md" readonly={!canManage && emp._id !== user?.id} />
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-semibold truncate" style={{ color: "var(--text-primary)" }}>{emp.name}</h3>
+                              <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{emp.position ?? "No position"}</p>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mt-1"
+                                style={{ background: roleConf.bg, color: roleConf.color }}>
+                                <RoleIcon className="w-2.5 h-2.5" />{roleConf.label}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="space-y-1.5 text-xs">
+                            <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+                              <Mail className="w-3 h-3 flex-shrink-0" /><span className="truncate">{emp.email}</span>
+                            </div>
+                            {emp.phone && <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}><Phone className="w-3 h-3" />{emp.phone}</div>}
+                            {emp.department && <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}><Building2 className="w-3 h-3" />{emp.department}</div>}
+                            {emp.supervisorId && (
+                              <div className="flex items-center gap-2">
+                                <UserCog className="w-3 h-3 flex-shrink-0 text-indigo-400" />
+                                <span className="truncate text-indigo-500 font-medium">
+                                  {supervisors?.find(s => s._id === emp.supervisorId)?.name ?? "Supervisor"}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: typeConf.bg, color: typeConf.color }}>{typeConf.label}</span>
+                            {isAdmin
+                              ? <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{emp.travelAllowance.toLocaleString()} AMD</span>
+                              : <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}>{presence.label}</span>
+                            }
+                          </div>
+                          {!emp.isActive && (
+                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center" style={{ background: "rgba(0,0,0,0.05)" }}>
+                              <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>DEACTIVATED</span>
+                            </div>
                           )}
                         </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ) : null}
-
-                {/* Avatar + Name */}
-                <div className="flex items-start gap-3 mb-4">
-                  <AvatarUpload
-                    userId={emp._id}
-                    currentUrl={emp.avatarUrl}
-                    name={emp.name}
-                    size="md"
-                    readonly={!canManage && emp._id !== user?.id}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold truncate" style={{ color: "var(--text-primary)" }}>{emp.name}</h3>
-                    <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{emp.position ?? "No position"}</p>
-                    {/* Role badge */}
-                    <div className="flex items-center gap-1 mt-1">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                        style={{ background: roleConf.bg, color: roleConf.color }}>
-                        <RoleIcon className="w-2.5 h-2.5" />
-                        {roleConf.label}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
-                    <Mail className="w-3 h-3 flex-shrink-0" />
-                    <span className="truncate">{emp.email}</span>
-                  </div>
-                  {emp.phone && (
-                    <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
-                      <Phone className="w-3 h-3 flex-shrink-0" />
-                      <span>{emp.phone}</span>
-                    </div>
-                  )}
-                  {emp.department && (
-                    <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
-                      <Building2 className="w-3 h-3 flex-shrink-0" />
-                      <span>{emp.department}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: typeConf.bg, color: typeConf.color }}>
-                    {typeConf.label}
-                  </span>
-                  <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-                    {emp.travelAllowance.toLocaleString()} AMD
-                  </span>
-                </div>
-
-                {/* Inactive banner */}
-                {!emp.isActive && (
-                  <div className="absolute inset-0 rounded-2xl flex items-center justify-center"
-                    style={{ background: "rgba(0,0,0,0.05)" }}>
-                    <span className="text-xs font-bold px-3 py-1 rounded-full"
-                      style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>
-                      DEACTIVATED
-                    </span>
+                      </EmployeeHoverCard>
+                    );
+                  })}
+                </AnimatePresence>
+                {filtered.length === 0 && (
+                  <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
+                    <Users className="w-12 h-12 opacity-20" style={{ color: "var(--text-muted)" }} />
+                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>No employees found</p>
                   </div>
                 )}
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+              </div>
+            )}
 
-        {filtered.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
-            <Users className="w-12 h-12 opacity-20" style={{ color: "var(--text-muted)" }} />
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No employees found</p>
-          </div>
-        )}
-      </div>
+            {/* LIST VIEW */}
+            {viewMode === "list" && (
+              <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+                {/* Table header */}
+                <div className="grid grid-cols-12 gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
+                  style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>
+                  <div className="col-span-4">Employee</div>
+                  <div className="col-span-2">Department</div>
+                  <div className="col-span-2">Supervisor</div>
+                  <div className="col-span-2">Status</div>
+                  <div className="col-span-1">Type</div>
+                  <div className="col-span-1"></div>
+                </div>
+                <AnimatePresence mode="popLayout">
+                  {filtered.map((emp, i) => {
+                    const roleConf = ROLE_CONFIG[emp.role];
+                    const typeConf = TYPE_CONFIG[emp.employeeType];
+                    const RoleIcon = roleConf.icon;
+                    const presence = getPresenceBadge(emp.presenceStatus);
+                    return (
+                      <EmployeeHoverCard key={emp._id} employee={emp}
+                        canEditStatus={isAdmin || emp._id === user?.id}
+                        currentUserId={user?.id} userRole={user?.role} allUsers={users ?? []}>
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }} transition={{ delay: i * 0.02 }}
+                          onClick={() => router.push(`/employees/${emp._id}`)}
+                          className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center group cursor-pointer border-t transition-colors hover:bg-[var(--background-subtle)]"
+                          style={{ borderColor: "var(--border)", opacity: emp.isActive ? 1 : 0.5 }}
+                        >
+                          {/* Employee name + avatar */}
+                          <div className="col-span-4 flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                              {emp.avatarUrl
+                                ? <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                : emp.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+                              }
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>{emp.name}</p>
+                              <div className="flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-0.5 text-xs font-medium" style={{ color: roleConf.color }}>
+                                  <RoleIcon className="w-2.5 h-2.5" />{emp.position ?? roleConf.label}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Department */}
+                          <div className="col-span-2 text-sm truncate" style={{ color: "var(--text-muted)" }}>
+                            {emp.department ?? "—"}
+                          </div>
+
+                          {/* Supervisor */}
+                          <div className="col-span-2 text-sm truncate text-indigo-500 font-medium">
+                            {emp.supervisorId
+                              ? supervisors?.find(s => s._id === emp.supervisorId)?.name ?? "—"
+                              : "—"}
+                          </div>
+
+                          {/* Presence status */}
+                          <div className="col-span-2">
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${presence.cls}`}>
+                              {presence.label}
+                            </span>
+                          </div>
+
+                          {/* Type */}
+                          <div className="col-span-1">
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                              style={{ background: typeConf.bg, color: typeConf.color }}>
+                              {typeConf.label}
+                            </span>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="col-span-1 flex items-center justify-end gap-1">
+                            {canManage ? renderMenu(emp) : (
+                              <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--text-muted)" }} />
+                            )}
+                          </div>
+                        </motion.div>
+                      </EmployeeHoverCard>
+                    );
+                  })}
+                </AnimatePresence>
+                {filtered.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Users className="w-12 h-12 opacity-20" style={{ color: "var(--text-muted)" }} />
+                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>No employees found</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* Modals */}
       <AddEmployeeModal open={showAddModal} onClose={() => setShowAddModal(false)} />

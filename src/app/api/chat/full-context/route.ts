@@ -5,10 +5,11 @@ import { api } from '../../../../../convex/_generated/api';
 export async function GET() {
   try {
     // Fetch ALL system data in parallel
-    const [users, leaves, todayAttendance] = await Promise.all([
+    const [users, leaves, todayAttendance, allTasks] = await Promise.all([
       fetchQuery(api.users.getAllUsers, {}),
       fetchQuery(api.leaves.getAllLeaves, {}),
       fetchQuery(api.timeTracking.getTodayAllAttendance, {}),
+      fetchQuery(api.tasks.getAllTasks, {}),
     ]);
 
     // Build rich employee map with leave info
@@ -85,6 +86,21 @@ export async function GET() {
         })),
         // Leave history summary
         totalLeavesTaken: approvedLeaves.reduce((sum: number, l: any) => sum + (l.days ?? 0), 0),
+        // Supervisor
+        supervisorName: u.supervisorId ? (users as any[]).find((s: any) => s._id === u.supervisorId)?.name ?? null : null,
+        // Presence status
+        presenceStatus: u.presenceStatus ?? 'available',
+        // Tasks
+        tasks: (allTasks as any[])
+          .filter((t: any) => t.assignedTo === u._id)
+          .map((t: any) => ({
+            taskId: t._id,
+            title: t.title,
+            status: t.status,
+            priority: t.priority,
+            deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null,
+            assignedBy: (users as any[]).find((s: any) => s._id === t.assignedBy)?.name ?? 'Unknown',
+          })),
       };
     });
 

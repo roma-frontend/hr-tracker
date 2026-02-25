@@ -113,11 +113,16 @@ export function LeavesClient() {
   };
 
   const handleDelete = async (id: Id<"leaveRequests">) => {
+    if (!user?.id) {
+      toast.error("Please login again");
+      return;
+    }
     try {
-      await deleteLeave({ leaveId: id });
+      await deleteLeave({ leaveId: id, requesterId: user.id as Id<"users"> });
       toast.success("Leave request deleted");
-    } catch {
-      toast.error("Failed to delete");
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
     }
   };
 

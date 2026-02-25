@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 const AUTH_ROUTES = ['/login', '/register']
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get('hr-auth-token')?.value
 

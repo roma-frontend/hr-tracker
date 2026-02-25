@@ -7,6 +7,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, Bell, Sun, Moon, LogOut, User, Settings, ChevronDown, Check, X,
 } from "lucide-react";
+
+type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";
+const PRESENCE_CONFIG: Record<PresenceStatus, { label: string; dot: string; icon: string }> = {
+  available:     { label: "Available",     dot: "bg-emerald-500", icon: "🟢" },
+  in_meeting:    { label: "In Meeting",    dot: "bg-amber-500",   icon: "📅" },
+  in_call:       { label: "In Call",       dot: "bg-blue-500",    icon: "📞" },
+  out_of_office: { label: "Out of Office", dot: "bg-rose-500",    icon: "🏠" },
+  busy:          { label: "Busy",          dot: "bg-orange-500",  icon: "⛔" },
+};
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useSidebarStore } from "@/store/useSidebarStore";
@@ -56,6 +65,10 @@ const PAGE_TITLES: Record<string, string> = {
   "/employees": "Employees",
   "/calendar": "Calendar",
   "/reports": "Reports",
+  "/tasks": "Tasks",
+  "/attendance": "Attendance",
+  "/analytics": "Analytics",
+  "/approvals": "Approvals",
   "/settings": "Settings",
 };
 
@@ -92,6 +105,13 @@ export function Navbar() {
   ) ?? [];
   const markRead = useMutation(api.notifications.markAsRead);
   const markAllRead = useMutation(api.notifications.markAllAsRead);
+  const updatePresence = useMutation(api.users.updatePresenceStatus);
+  const currentUserData = useQuery(
+    api.users.getUserById,
+    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+  );
+  const currentPresence = ((currentUserData as any)?.presenceStatus ?? "available") as PresenceStatus;
+  const presenceCfg = PRESENCE_CONFIG[currentPresence];
 
   const unreadCount = notifications.filter((n: { isRead: boolean }) => !n.isRead).length;
 
@@ -246,6 +266,8 @@ export function Navbar() {
                               router.push("/leaves");
                             } else if (n.type === "employee_added") {
                               router.push("/employees");
+                            } else if (n.type === "system" && (n.title?.includes("Task") || n.title?.includes("task"))) {
+                              router.push("/tasks");
                             }
                             setShowNotifications(false);
                           }}
@@ -285,22 +307,26 @@ export function Navbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-[var(--background-subtle)] transition-colors outline-none focus-visible:outline-none focus:outline-none">
-              <Avatar className="w-8 h-8">
-                {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                <AvatarFallback className="text-xs bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white font-semibold">
-                  {user?.name ? getInitials(user.name) : "U"}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="w-8 h-8">
+                  {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white font-semibold">
+                    {user?.name ? getInitials(user.name) : "U"}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Presence dot */}
+                <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--navbar-bg)] ${presenceCfg.dot}`} />
+              </div>
               <div className="hidden sm:block text-left">
                 <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">{user?.name ?? "User"}</p>
-                <p className="text-[10px] text-[var(--text-muted)] capitalize">{user?.role ?? "admin"}</p>
+                <p className="text-[10px] text-[var(--text-muted)] capitalize">{presenceCfg.icon} {presenceCfg.label}</p>
               </div>
               <ChevronDown className="w-3 h-3 text-[var(--text-muted)] hidden sm:block" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-48 bg-[var(--card)] border-[var(--border)] shadow-xl"
+            className="w-56 bg-[var(--card)] border-[var(--border)] shadow-xl"
           >
             <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-[var(--border)]" />
@@ -318,6 +344,26 @@ export function Navbar() {
               <Settings className="w-4 h-4 text-[var(--text-muted)]" />
               Settings
             </DropdownMenuItem>
+
+            {/* Status selector */}
+            <DropdownMenuSeparator className="bg-[var(--border)]" />
+            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">Set Status</DropdownMenuLabel>
+            {(Object.entries(PRESENCE_CONFIG) as [PresenceStatus, typeof PRESENCE_CONFIG[PresenceStatus]][]).map(([key, cfg]) => (
+              <DropdownMenuItem
+                key={key}
+                className="cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+                onClick={async () => {
+                  if (user?.id) await updatePresence({ userId: user.id as Id<"users">, status: key });
+                }}
+              >
+                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                <span className={`text-sm ${currentPresence === key ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}>
+                  {cfg.label}
+                </span>
+                {currentPresence === key && <Check className="w-3.5 h-3.5 ml-auto text-[#6366f1]" />}
+              </DropdownMenuItem>
+            ))}
+
             <DropdownMenuSeparator className="bg-[var(--border)]" />
             <DropdownMenuItem
               className="text-red-500 focus:text-red-500 focus:bg-red-500/10 cursor-pointer gap-2"

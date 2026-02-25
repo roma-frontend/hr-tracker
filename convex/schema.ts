@@ -12,6 +12,13 @@ export default defineSchema({
     position: v.optional(v.string()),
     phone: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
+    presenceStatus: v.optional(v.union(
+      v.literal("available"),
+      v.literal("in_meeting"),
+      v.literal("in_call"),
+      v.literal("out_of_office"),
+      v.literal("busy"),
+    )),
     supervisorId: v.optional(v.id("users")),
     isActive: v.boolean(),
     // New user approval system
@@ -288,6 +295,45 @@ export default defineSchema({
     .index("by_employee", ["employeeId"])
     .index("by_supervisor", ["supervisorId"])
     .index("by_period", ["ratingPeriod"]),
+
+  // Tasks (ToDo per employee, assigned by supervisor)
+  tasks: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    assignedTo: v.id("users"),       // employee
+    assignedBy: v.id("users"),       // supervisor or admin
+    status: v.union(
+      v.literal("pending"),
+      v.literal("in_progress"),
+      v.literal("review"),
+      v.literal("completed"),
+      v.literal("cancelled")
+    ),
+    priority: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("urgent")
+    ),
+    deadline: v.optional(v.number()),   // timestamp
+    completedAt: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
+    attachmentUrl: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_assigned_to", ["assignedTo"])
+    .index("by_assigned_by", ["assignedBy"])
+    .index("by_status", ["status"])
+    .index("by_deadline", ["deadline"]),
+
+  // Task comments
+  taskComments: defineTable({
+    taskId: v.id("tasks"),
+    authorId: v.id("users"),
+    content: v.string(),
+    createdAt: v.number(),
+  }).index("by_task", ["taskId"]),
 
   // Work Schedule Configuration
   workSchedule: defineTable({

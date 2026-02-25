@@ -291,7 +291,10 @@ export const getEmployeesNeedingRating = query({
         const needsRatingThisMonth = !rating || rating.ratingPeriod !== currentPeriod;
 
         return {
-          employee,
+          employee: {
+            ...employee,
+            avatarUrl: employee.avatarUrl ?? employee.faceImageUrl,
+          },
           lastRated: rating?.ratingPeriod || "Never",
           needsRating: needsRatingThisMonth,
         };

@@ -221,7 +221,11 @@ export const getCurrentlyAtWork = query({
     const withUsers = await Promise.all(
       atWork.map(async (record) => {
         const user = await ctx.db.get(record.userId);
-        return { ...record, user };
+        const userWithAvatar = user ? {
+          ...user,
+          avatarUrl: user.avatarUrl ?? user.faceImageUrl,
+        } : user;
+        return { ...record, user: userWithAvatar };
       })
     );
 
@@ -257,7 +261,11 @@ export const getTodayAllAttendance = query({
     const withUsers = await Promise.all(
       records.map(async (record) => {
         const user = await ctx.db.get(record.userId);
-        return { ...record, user };
+        const userWithAvatar = user ? {
+          ...user,
+          avatarUrl: user.avatarUrl ?? user.faceImageUrl,
+        } : user;
+        return { ...record, user: userWithAvatar };
       })
     );
 
@@ -337,6 +345,79 @@ export const getMonthlyStats = query({
       averageWorkHours: totalDays > 0 ? (totalWorkedMinutes / 60 / totalDays).toFixed(1) : "0",
       punctualityRate: totalDays > 0 ? (((totalDays - lateDays) / totalDays) * 100).toFixed(1) : "100",
     };
+  },
+});
+
+// ── Admin: Get all employees with attendance for a date range ─────────────
+export const getAllEmployeesAttendanceOverview = query({
+  args: {
+    month: v.string(), // "2026-02"
+  },
+  handler: async (ctx, args) => {
+    const users = await ctx.db.query("users").collect();
+    const activeUsers = users.filter(u => u.isActive && u.role === "employee");
+
+    const results = await Promise.all(
+      activeUsers.map(async (user) => {
+        const records = await ctx.db
+          .query("timeTracking")
+          .withIndex("by_user", q => q.eq("userId", user._id))
+          .collect();
+
+        const monthRecords = records.filter(r => r.date.startsWith(args.month));
+        const totalDays = monthRecords.length;
+        const lateDays = monthRecords.filter(r => r.isLate).length;
+        const absentDays = monthRecords.filter(r => r.status === "absent").length;
+        const totalWorkedMinutes = monthRecords.reduce((s, r) => s + (r.totalWorkedMinutes ?? 0), 0);
+        const punctualityRate = totalDays > 0 ? (((totalDays - lateDays) / totalDays) * 100).toFixed(0) : "100";
+
+        // Get supervisor
+        const supervisor = user.supervisorId ? await ctx.db.get(user.supervisorId) : null;
+
+        // Last check in
+        const lastRecord = records.sort((a, b) => b.checkInTime - a.checkInTime)[0];
+
+        return {
+          user: {
+            _id: user._id,
+            name: user.name,
+            position: user.position,
+            department: user.department,
+            avatarUrl: user.avatarUrl ?? user.faceImageUrl,
+            supervisorId: user.supervisorId,
+          },
+          supervisor: supervisor ? { _id: supervisor._id, name: supervisor.name } : null,
+          stats: {
+            totalDays,
+            lateDays,
+            absentDays,
+            punctualityRate,
+            totalWorkedHours: (totalWorkedMinutes / 60).toFixed(1),
+          },
+          lastRecord: lastRecord ?? null,
+        };
+      })
+    );
+
+    return results.sort((a, b) => a.user.name.localeCompare(b.user.name));
+  },
+});
+
+// ── Admin: Get attendance history for one employee ────────────────────────
+export const getEmployeeAttendanceHistory = query({
+  args: {
+    userId: v.id("users"),
+    month: v.string(), // "2026-02"
+  },
+  handler: async (ctx, args) => {
+    const records = await ctx.db
+      .query("timeTracking")
+      .withIndex("by_user", q => q.eq("userId", args.userId))
+      .collect();
+
+    return records
+      .filter(r => r.date.startsWith(args.month))
+      .sort((a, b) => b.date.localeCompare(a.date));
   },
 });
 

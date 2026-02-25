@@ -1,0 +1,257 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+import { X, Clock, Calendar, TrendingUp, AlertTriangle, CheckCircle, LogIn, LogOut, Timer, Building2, UserCog } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+interface EmployeeInfo {
+  _id: Id<"users">;
+  name: string;
+  position?: string;
+  department?: string;
+  avatarUrl?: string;
+  supervisorName?: string;
+}
+
+interface Props {
+  employee: EmployeeInfo | null;
+  onClose: () => void;
+}
+
+function formatTime(ts: number) {
+  return new Date(ts).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+function formatDuration(min: number) {
+  return `${Math.floor(min / 60)}h ${min % 60}m`;
+}
+
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.toISOString().slice(0, 7));
+
+  const history = useQuery(
+    api.timeTracking.getEmployeeAttendanceHistory,
+    employee ? { userId: employee._id, month: selectedMonth } : "skip"
+  );
+
+  const monthlyStats = useQuery(
+    api.timeTracking.getMonthlyStats,
+    employee ? { userId: employee._id, month: selectedMonth } : "skip"
+  );
+
+  const [year, month] = selectedMonth.split("-").map(Number);
+  const monthLabel = `${MONTHS[month - 1]} ${year}`;
+
+  // Generate last 12 months for selector
+  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return d.toISOString().slice(0, 7);
+  });
+
+  return (
+    <AnimatePresence>
+      {employee && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
+
+          {/* Drawer */}
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 px-6 py-6 flex-shrink-0">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                    {employee.avatarUrl ? (
+                      <img src={employee.avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      employee.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">{employee.name}</h2>
+                    {employee.position && <p className="text-indigo-200 text-sm">{employee.position}</p>}
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      {employee.department && (
+                        <span className="flex items-center gap-1 text-xs text-indigo-200">
+                          <Building2 className="w-3 h-3" /> {employee.department}
+                        </span>
+                      )}
+                      {employee.supervisorName && (
+                        <span className="flex items-center gap-1 text-xs text-indigo-200">
+                          <UserCog className="w-3 h-3" /> {employee.supervisorName}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Month selector */}
+              <div className="mt-4">
+                <select
+                  value={selectedMonth}
+                  onChange={e => setSelectedMonth(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-white/20 text-white text-sm font-medium border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 [&>option]:text-slate-800"
+                >
+                  {monthOptions.map(m => {
+                    const [y, mo] = m.split("-").map(Number);
+                    return <option key={m} value={m}>{MONTHS[mo - 1]} {y}</option>;
+                  })}
+                </select>
+              </div>
+            </div>
+
+            {/* Stats */}
+            {monthlyStats && (
+              <div className="grid grid-cols-4 gap-0 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+                {[
+                  { label: "Days", value: monthlyStats.totalDays, color: "text-blue-600" },
+                  { label: "Late", value: monthlyStats.lateDays, color: "text-rose-500" },
+                  { label: "Hours", value: monthlyStats.totalWorkedHours + "h", color: "text-emerald-600" },
+                  { label: "Punctuality", value: monthlyStats.punctualityRate + "%", color: "text-indigo-600" },
+                ].map(s => (
+                  <div key={s.label} className="py-4 text-center border-r border-gray-100 dark:border-gray-800 last:border-0">
+                    <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Records list */}
+            <div className="flex-1 overflow-y-auto">
+              {history === undefined ? (
+                <div className="flex items-center justify-center h-40">
+                  <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                </div>
+              ) : history.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 gap-3">
+                  <Calendar className="w-12 h-12 text-gray-300" />
+                  <p className="text-gray-500 font-medium">No records for {monthLabel}</p>
+                  <p className="text-gray-400 text-sm">Employee had no attendance this month</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {history.map(record => {
+                    const workedH = record.totalWorkedMinutes ? (record.totalWorkedMinutes / 60).toFixed(1) : null;
+                    const dateObj = new Date(record.date + "T00:00:00");
+                    const dayLabel = dateObj.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
+                    return (
+                      <div key={record._id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <div className="flex items-start justify-between gap-3">
+                          {/* Date + status dot */}
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1 ${
+                              record.status === "checked_in" ? "bg-green-500 animate-pulse" :
+                              record.status === "checked_out" ? "bg-blue-500" : "bg-rose-400"
+                            }`} />
+                            <div>
+                              <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">{dayLabel}</p>
+                              {record.status === "absent" ? (
+                                <p className="text-xs text-rose-500 mt-0.5">Absent</p>
+                              ) : (
+                                <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
+                                  <span className="flex items-center gap-1">
+                                    <LogIn className="w-3 h-3 text-green-500" />
+                                    {record.checkInTime ? formatTime(record.checkInTime) : "—"}
+                                  </span>
+                                  <span>→</span>
+                                  <span className="flex items-center gap-1">
+                                    <LogOut className="w-3 h-3 text-blue-500" />
+                                    {record.checkOutTime ? formatTime(record.checkOutTime) : <span className="text-green-500">Active</span>}
+                                  </span>
+                                  {workedH && (
+                                    <span className="flex items-center gap-1 text-indigo-500">
+                                      <Timer className="w-3 h-3" />{workedH}h
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Badges */}
+                          <div className="flex flex-wrap gap-1 justify-end">
+                            {record.isLate && (
+                              <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-medium">
+                                Late {record.lateMinutes}m
+                              </span>
+                            )}
+                            {record.isEarlyLeave && (
+                              <span className="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full font-medium">
+                                Early -{record.earlyLeaveMinutes}m
+                              </span>
+                            )}
+                            {record.overtimeMinutes && record.overtimeMinutes > 0 && (
+                              <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-medium">
+                                +{record.overtimeMinutes}m OT
+                              </span>
+                            )}
+                            {record.status === "checked_out" && !record.isLate && !record.isEarlyLeave && (
+                              <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-medium">✓ Perfect</span>
+                            )}
+                            {record.status === "checked_in" && (
+                              <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-medium animate-pulse">● Active</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Progress bar for worked hours */}
+                        {workedH && record.status === "checked_out" && (
+                          <div className="mt-2 ml-6">
+                            <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all ${
+                                  parseFloat(workedH) >= 9 ? "bg-emerald-500" :
+                                  parseFloat(workedH) >= 6 ? "bg-blue-500" : "bg-amber-500"
+                                }`}
+                                style={{ width: `${Math.min(100, (parseFloat(workedH) / 9) * 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {record.notes && (
+                          <p className="text-xs text-gray-400 mt-1 ml-6 italic">"{record.notes}"</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
