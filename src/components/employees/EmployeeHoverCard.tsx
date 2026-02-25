@@ -31,7 +31,7 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<"right" | "left">("right");
   const containerRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const updatePresence = useMutation(api.users.updatePresenceStatus);
 

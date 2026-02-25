@@ -219,7 +219,7 @@ async function updatePerformanceMetrics(
   // Get average ratings
   const ratings = await ctx.db
     .query("supervisorRatings")
-    .withIndex("by_employee", (q) => q.eq("employeeId", employeeId))
+    .withIndex("by_employee", (q: any) => q.eq("employeeId", employeeId))
     .collect();
 
   if (ratings.length === 0) return;
@@ -227,17 +227,17 @@ async function updatePerformanceMetrics(
   const recent = ratings.slice(-3); // Last 3 ratings
   const count = recent.length;
 
-  const avgQuality = recent.reduce((sum, r) => sum + r.qualityOfWork, 0) / count;
-  const avgEfficiency = recent.reduce((sum, r) => sum + r.efficiency, 0) / count;
-  const avgTeamwork = recent.reduce((sum, r) => sum + r.teamwork, 0) / count;
+  const avgQuality = recent.reduce((sum: number, r: any) => sum + r.qualityOfWork, 0) / count;
+  const avgEfficiency = recent.reduce((sum: number, r: any) => sum + r.efficiency, 0) / count;
+  const avgTeamwork = recent.reduce((sum: number, r: any) => sum + r.teamwork, 0) / count;
 
   // Convert 1-5 scale to 0-5 scale for kpiScore
-  const kpiScore = recent.reduce((sum, r) => sum + r.overallRating, 0) / count;
+  const kpiScore = recent.reduce((sum: number, r: any) => sum + r.overallRating, 0) / count;
 
   // Get or create performance metrics
   const existing = await ctx.db
     .query("performanceMetrics")
-    .withIndex("by_user", (q) => q.eq("userId", employeeId))
+    .withIndex("by_user", (q: any) => q.eq("userId", employeeId))
     .first();
 
   const metricsData = {
@@ -245,7 +245,7 @@ async function updatePerformanceMetrics(
     projectCompletion: avgQuality * 20, // Convert to percentage
     deadlineAdherence: avgEfficiency * 20,
     teamworkRating: avgTeamwork,
-    communicationScore: recent.reduce((sum, r) => sum + r.communication, 0) / count,
+    communicationScore: recent.reduce((sum: number, r: any) => sum + r.communication, 0) / count,
   };
 
   if (existing) {

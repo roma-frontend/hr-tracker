@@ -363,7 +363,7 @@ function ThreeScene() {
         navigator.userAgent
       );
       const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-      setIsLowPerformance(isMobile || isLowEnd);
+      setIsLowPerformance(isMobile || Boolean(isLowEnd));
     };
     checkPerformance();
   }, []);
