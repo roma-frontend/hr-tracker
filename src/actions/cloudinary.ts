@@ -9,6 +9,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Upload any file (PDF, image, doc, etc.) for task attachments
+export async function uploadTaskAttachment(
+  base64File: string,
+  fileName: string
+): Promise<string> {
+  const publicId = `task_${Date.now()}_${fileName.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40)}`;
+  const result = await cloudinary.uploader.upload(base64File, {
+    folder: "hr-office/task-attachments",
+    public_id: publicId,
+    resource_type: "auto", // auto-detect: image, video, raw (pdf, doc, etc.)
+    overwrite: false,
+  });
+  return result.secure_url;
+}
+
 export async function uploadAvatarToCloudinary(
   base64Image: string,
   userId: string

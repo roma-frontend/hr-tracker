@@ -118,20 +118,20 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
 function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task._id });
   const style = { transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.4 : 1 };
-  const dragStartTime = useRef<number>(0);
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="cursor-grab active:cursor-grabbing"
-      onPointerDown={() => { dragStartTime.current = Date.now(); }}
-      onClick={() => {
-        if (Date.now() - dragStartTime.current < 200) onOpen();
-      }}
-      {...listeners}
-      {...attributes}
+      className="relative group cursor-pointer"
+      onClick={onOpen}
     >
+      {/* Drag handle — only this area activates drag */}
+      <div {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity" title="Drag to move">
+        <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+        </svg>
+      </div>
       <TaskCardContent task={task} isDragging={isDragging} />
     </div>
   );

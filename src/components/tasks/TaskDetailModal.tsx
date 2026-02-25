@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { TaskAttachments } from "./TaskAttachments";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 type Status = "pending" | "in_progress" | "review" | "completed" | "cancelled";
@@ -275,6 +276,16 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 </div>
               </div>
             )}
+
+            {/* Attachments */}
+            <div>
+              <TaskAttachments
+                taskId={task._id as Id<"tasks">}
+                attachments={task.attachments ?? []}
+                currentUserId={currentUserId}
+                canUpload={true}
+              />
+            </div>
 
             {/* Comments */}
             <div>

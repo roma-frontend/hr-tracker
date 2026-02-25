@@ -319,6 +319,14 @@ export default defineSchema({
     completedAt: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
     attachmentUrl: v.optional(v.string()),
+    attachments: v.optional(v.array(v.object({
+      url: v.string(),
+      name: v.string(),
+      type: v.string(),
+      size: v.number(),
+      uploadedBy: v.id("users"),
+      uploadedAt: v.number(),
+    }))),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

@@ -358,6 +358,49 @@ export const getSupervisors = query({
 });
 
 // ── Get task comments ──────────────────────────────────────────────────────
+// ── Add Attachment ─────────────────────────────────────────────────────────
+export const addAttachment = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    url: v.string(),
+    name: v.string(),
+    type: v.string(),
+    size: v.number(),
+    uploadedBy: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error("Task not found");
+    const attachments = task.attachments ?? [];
+    await ctx.db.patch(args.taskId, {
+      attachments: [...attachments, {
+        url: args.url,
+        name: args.name,
+        type: args.type,
+        size: args.size,
+        uploadedBy: args.uploadedBy,
+        uploadedAt: Date.now(),
+      }],
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// ── Remove Attachment ──────────────────────────────────────────────────────
+export const removeAttachment = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    url: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error("Task not found");
+    const attachments = (task.attachments ?? []).filter((a: any) => a.url !== args.url);
+    await ctx.db.patch(args.taskId, { attachments, updatedAt: Date.now() });
+  },
+});
+
+// ── Get Task Comments ──────────────────────────────────────────────────────
 export const getTaskComments = query({
   args: { taskId: v.id("tasks") },
   handler: async (ctx, args) => {
