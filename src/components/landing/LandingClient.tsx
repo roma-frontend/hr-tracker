@@ -960,26 +960,26 @@ function Footer() {
     product: [
       { name: 'Features', href: '#features' },
       { name: 'Pricing', href: '#pricing' },
-      { name: 'Integrations', href: '#integrations' },
-      { name: 'API', href: '/api-docs' },
+      { name: 'Testimonials', href: '#testimonials' },
+      { name: 'FAQ', href: '#faq' },
     ],
-    company: [
-      { name: 'About Us', href: '/about' },
-      { name: 'Careers', href: '/careers' },
-      { name: 'Blog', href: '/blog' },
-      { name: 'Press Kit', href: '/press' },
+    platform: [
+      { name: 'Dashboard', href: '/dashboard' },
+      { name: 'Attendance', href: '/attendance' },
+      { name: 'Tasks', href: '/tasks' },
+      { name: 'Analytics', href: '/analytics' },
     ],
-    resources: [
-      { name: 'Documentation', href: '/docs' },
-      { name: 'Help Center', href: '/help' },
-      { name: 'Community', href: '/community' },
-      { name: 'Contact', href: '/contact' },
+    account: [
+      { name: 'Sign In', href: '/auth/login' },
+      { name: 'Register', href: '/auth/register' },
+      { name: 'Settings', href: '/settings' },
+      { name: 'Help', href: '#faq' },
     ],
     legal: [
       { name: 'Privacy Policy', href: '/privacy' },
       { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/cookies' },
-      { name: 'GDPR', href: '/gdpr' },
+      { name: 'Cookie Policy', href: '/privacy#cookies' },
+      { name: 'GDPR', href: '/privacy#gdpr' },
     ],
   };
 
