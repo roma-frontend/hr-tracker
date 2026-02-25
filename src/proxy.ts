@@ -1,6 +1,24 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-const AUTH_ROUTES = ['/login', '/register']
+// Routes that require authentication
+const PROTECTED_ROUTES = [
+  '/dashboard',
+  '/attendance',
+  '/employees',
+  '/leaves',
+  '/analytics',
+  '/reports',
+  '/tasks',
+  '/calendar',
+  '/approvals',
+  '/settings',
+]
+
+// Auth routes (redirect to dashboard if already logged in)
+const AUTH_ROUTES = ['/login', '/register', '/auth/login', '/auth/register']
+
+// Public routes (always accessible)
+const PUBLIC_ROUTES = ['/', '/privacy', '/terms', '/about', '/auth/login', '/auth/register']
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -10,9 +28,21 @@ export function proxy(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   )
 
-  // Redirect authenticated users away from auth pages
+  const isProtectedRoute = PROTECTED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  )
+
+  // ── Redirect authenticated users away from auth pages ──────────────────
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // ── Block unauthenticated users from protected routes ──────────────────
+  if (isProtectedRoute && !token) {
+    const loginUrl = new URL('/auth/login', request.url)
+    // Remember where they were trying to go
+    loginUrl.searchParams.set('from', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()
@@ -20,6 +50,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|favicon.svg|icon.svg|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|json)$).*)',
   ],
 }
