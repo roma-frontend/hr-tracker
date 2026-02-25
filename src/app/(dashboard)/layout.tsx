@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Providers } from "@/components/layout/Providers";
-import { ChatWidget } from "@/components/ai/ChatWidget";
 
 export const metadata: Metadata = {
-  title: "HR Office — Leave Monitoring",
-  description: "HR Leave Monitoring System",
+  title: {
+    default: "Dashboard | HR Office",
+    template: "%s | HR Office",
+  },
+  description: "HR Office - Manage attendance, leaves, tasks and employees in real-time.",
+  robots: { index: false, follow: false },
 };
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <Providers>
       {children}
-      <ChatWidget />
     </Providers>
   );
 }

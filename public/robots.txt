@@ -1,11 +1,23 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
-
-# Disallow admin and private sections
-Disallow: /api/
+Allow: /auth/login
+Allow: /auth/register
 Disallow: /dashboard/
+Disallow: /attendance/
+Disallow: /employees/
+Disallow: /leaves/
+Disallow: /analytics/
+Disallow: /reports/
+Disallow: /tasks/
+Disallow: /calendar/
+Disallow: /approvals/
 Disallow: /settings/
+Disallow: /api/
 
-# Sitemap
-Sitemap: https://hrleave.com/sitemap.xml
+User-agent: Googlebot
+Allow: /
+Allow: /auth/login
+Allow: /auth/register
+Disallow: /api/
+
+Sitemap: https://hroffice.app/sitemap.xml

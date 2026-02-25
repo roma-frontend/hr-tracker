@@ -1,48 +1,42 @@
 "use client";
 
 import React, { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { Sidebar, MobileSidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getSessionAction } from "@/actions/auth";
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  const { setUser, isAuthenticated } = useAuthStore();
+const ChatWidget = dynamic(
+  () => import("@/components/ai/ChatWidget").then((m) => m.ChatWidget),
+  { ssr: false, loading: () => null }
+);
 
-  // Load user session on mount
+export function Providers({ children }: { children: React.ReactNode }) {
+  const { setUser } = useAuthStore();
+
   useEffect(() => {
     async function loadSession() {
       try {
-        console.log("🔄 Loading session...");
         const session = await getSessionAction();
-        console.log("📦 Session loaded:", session);
-        
-        if (session && session.userId) {
-          const userData = {
+        if (session?.userId) {
+          setUser({
             id: session.userId,
             name: session.name,
             email: session.email,
-            role: session.role as 'admin' | 'supervisor' | 'employee',
+            role: session.role as "admin" | "supervisor" | "employee",
             department: session.department,
             position: session.position,
-            employeeType: session.employeeType as 'staff' | 'contractor',
+            employeeType: session.employeeType as "staff" | "contractor",
             avatar: session.avatar,
-          };
-          
-          console.log("✅ Setting user in store:", userData);
-          setUser(userData);
-        } else {
-          console.warn("⚠️ No valid session found");
+          });
         }
-      } catch (error) {
-        console.error("❌ Failed to load session:", error);
+      } catch {
+        // Session load failed silently
       }
     }
-    
-    // Always try to load session on mount
-    console.log("🚀 Providers mounted, isAuthenticated:", isAuthenticated);
     loadSession();
-  }, []); // Run only once on mount
+  }, []);
 
   return (
     <div className="flex h-screen bg-[var(--background)] overflow-hidden transition-colors duration-300">
@@ -61,6 +55,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </div>
         </main>
       </div>
+      {/* AI Chat Widget - lazy loaded */}
+      <ChatWidget />
     </div>
   );
 }

@@ -1,27 +1,69 @@
 {
-  "name": "HR Leave Monitor",
-  "short_name": "HRLeave",
-  "description": "Modern HR Leave Monitoring System for managing vacations, sick leaves, and more",
-  "start_url": "/",
+  "name": "HR Office",
+  "short_name": "HR Office",
+  "description": "All-in-One HR Management Platform with real-time attendance, leave management, task tracking, and AI assistant.",
+  "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#020817",
-  "theme_color": "#3b82f6",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["business", "productivity"],
   "icons": [
     {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple touch icon"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable any"
     }
   ],
-  "categories": ["business", "productivity"],
-  "lang": "en-US",
-  "dir": "ltr",
-  "orientation": "portrait-primary"
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "Go to Dashboard"
+    },
+    {
+      "name": "Attendance",
+      "url": "/attendance",
+      "description": "Check in / Check out"
+    },
+    {
+      "name": "Tasks",
+      "url": "/tasks",
+      "description": "View your tasks"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "HR Office Dashboard"
+    }
+  ],
+  "prefer_related_applications": false
 }

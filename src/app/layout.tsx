@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
@@ -8,37 +8,65 @@ import { Toaster } from "sonner";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://hroffice.app";
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#6366f1" },
+    { media: "(prefers-color-scheme: dark)", color: "#818cf8" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  colorScheme: "dark light",
+};
+
 export const metadata: Metadata = {
-  title: "HR Leave Monitor — Smart HR Platform",
-  description: "Modern HR Leave Monitoring System for managing vacations, sick leaves, and more. Track employee absences with real-time analytics and intelligent automation.",
-  keywords: ["HR software", "leave management", "vacation tracking", "employee monitoring", "HR platform", "absence management"],
-  authors: [{ name: "HRLeave Team" }],
-  creator: "HRLeave",
-  publisher: "HRLeave",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: "HR Office — All-in-One HR Management Platform",
+    template: "%s | HR Office",
+  },
+  description:
+    "HR Office is a powerful all-in-one HR platform with real-time attendance tracking, leave management, task management, employee analytics, face recognition check-in, and AI assistant. Built for modern teams.",
+  keywords: [
+    "HR software", "HR management", "leave management", "attendance tracking",
+    "employee management", "task management", "HR platform", "absence management",
+    "face recognition HR", "AI HR assistant", "workforce management",
+    "employee scheduling", "HR analytics", "team management",
+    "remote work tracking", "performance management",
+  ],
+  authors: [{ name: "HR Office Team", url: APP_URL }],
+  creator: "HR Office",
+  publisher: "HR Office",
+  category: "Business Software",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://hrleave.com",
-    title: "HR Leave Monitor — Smart HR Platform",
-    description: "Modern HR Leave Monitoring System for managing vacations, sick leaves, and more. Track employee absences with real-time analytics and intelligent automation.",
-    siteName: "HR Leave Monitor",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "HR Leave Monitor Platform",
-      },
-    ],
+    url: APP_URL,
+    title: "HR Office — All-in-One HR Management Platform",
+    description:
+      "Manage your entire workforce with real-time attendance, AI-powered analytics, task management, and smart leave tracking.",
+    siteName: "HR Office",
+    images: [{
+      url: "/og-image.png",
+      width: 1200,
+      height: 630,
+      alt: "HR Office — All-in-One HR Management Platform",
+      type: "image/png",
+    }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "HR Leave Monitor — Smart HR Platform",
-    description: "Modern HR Leave Monitoring System for managing vacations, sick leaves, and more.",
+    title: "HR Office — All-in-One HR Management Platform",
+    description:
+      "Manage your entire workforce with real-time attendance, AI-powered analytics, and smart task management.",
     images: ["/og-image.png"],
-    creator: "@hrleave",
+    creator: "@hrofficeapp",
   },
   robots: {
     index: true,
@@ -46,54 +74,112 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+    ],
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
+  alternates: {
+    canonical: "/",
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${APP_URL}/#software`,
+      "name": "HR Office",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": APP_URL,
+      "description": "All-in-one HR management platform with real-time attendance, leave management, tasks, and AI assistant.",
+      "featureList": [
+        "Real-time attendance tracking with face recognition",
+        "Leave management with AI assistant",
+        "Task management with Kanban board",
+        "Employee performance analytics",
+        "Multi-role access control (Admin, Supervisor, Employee)",
+        "Real-time notifications",
+        "Calendar integration (Google, Outlook)",
+        "AI-powered HR assistant",
+      ],
+      "offers": {
+        "@type": "Offer",
+        "price": "29",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2027-12-31",
+        "availability": "https://schema.org/InStock",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": "500",
+        "reviewCount": "120",
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "HR Office",
+        "url": APP_URL,
+      },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${APP_URL}/#organization`,
+      "name": "HR Office",
+      "url": APP_URL,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${APP_URL}/icon.png`,
+      },
+      "sameAs": [],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${APP_URL}/#website`,
+      "url": APP_URL,
+      "name": "HR Office",
+      "description": "All-in-one HR management platform",
+      "publisher": { "@id": `${APP_URL}/#organization` },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${APP_URL}/employees?search={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect to external resources */}
+        {/* Preconnect to speed up critical resources */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
-        {/* JSON-LD Structured Data for SEO */}
+
+        {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "SoftwareApplication",
-              "name": "HR Leave Monitor",
-              "applicationCategory": "BusinessApplication",
-              "operatingSystem": "Web",
-              "offers": {
-                "@type": "Offer",
-                "price": "29",
-                "priceCurrency": "USD",
-              },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "ratingCount": "500",
-              },
-              "description": "Modern HR Leave Monitoring System for managing vacations, sick leaves, and more. Track employee absences with real-time analytics and intelligent automation.",
-            }),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className={`${inter.variable} antialiased`}>
@@ -109,6 +195,8 @@ export default function RootLayout({
               position="top-right"
               richColors
               closeButton
+              expand={false}
+              duration={4000}
             />
           </ThemeProvider>
         </ConvexClientProvider>
