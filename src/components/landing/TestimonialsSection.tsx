@@ -25,7 +25,7 @@ const testimonials: Testimonial[] = [
     avatar: '',
     rating: 5,
     text: 'HRLeave transformed our leave management process. What used to take hours now takes minutes. The analytics are incredible!',
-    gradient: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(244,229,168,0.08))',
+    gradient: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(129,140,248,0.08))',
   },
   {
     id: 2,
@@ -35,7 +35,7 @@ const testimonials: Testimonial[] = [
     avatar: '',
     rating: 5,
     text: 'The real-time tracking and automated approvals have saved us countless hours. Best HR tool we\'ve ever used.',
-    gradient: 'linear-gradient(135deg, rgba(205,127,50,0.12), rgba(170,139,46,0.06))',
+    gradient: 'linear-gradient(135deg, rgba(79,70,229,0.12), rgba(99,102,241,0.06))',
   },
   {
     id: 3,
@@ -45,7 +45,7 @@ const testimonials: Testimonial[] = [
     avatar: '',
     rating: 5,
     text: 'Finally, a leave management system that employees actually love to use. The face recognition login is a game-changer!',
-    gradient: 'linear-gradient(135deg, rgba(192,192,192,0.12), rgba(169,169,169,0.06))',
+    gradient: 'linear-gradient(135deg, rgba(129,140,248,0.12), rgba(99,102,241,0.06))',
   },
 ];
 
@@ -75,7 +75,7 @@ function TestimonialCard({ testimonial, delay }: { testimonial: Testimonial; del
       <div className="relative h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 flex flex-col gap-4">
         {/* Quote icon */}
         <div className="flex items-start justify-between">
-          <Quote size={32} className="text-[#d4af37]/30" />
+          <Quote size={32} className="text-[#6366f1]/30" />
           
           {/* Rating */}
           <div className="flex gap-1">
@@ -90,7 +90,7 @@ function TestimonialCard({ testimonial, delay }: { testimonial: Testimonial; del
         </div>
 
         {/* Testimonial text */}
-        <p className="text-[#f7e7ce]/80 leading-relaxed text-sm flex-1">
+        <p className="text-[#e2e8f0]/80 leading-relaxed text-sm flex-1">
           "{testimonial.text}"
         </p>
 
@@ -98,13 +98,13 @@ function TestimonialCard({ testimonial, delay }: { testimonial: Testimonial; del
         <div className="flex items-center gap-3 pt-4 border-t border-white/5">
           <Avatar className="w-10 h-10">
             {testimonial.avatar && <AvatarImage src={testimonial.avatar} alt={testimonial.name} />}
-            <AvatarFallback className="text-xs bg-gradient-to-br from-[#d4af37] to-[#cd7f32] text-black font-semibold">
+            <AvatarFallback className="text-xs bg-gradient-to-br from-[#4f46e5] to-[#6366f1] text-white font-semibold">
               {getInitials(testimonial.name)}
             </AvatarFallback>
           </Avatar>
           <div>
             <p className="text-white font-semibold text-sm">{testimonial.name}</p>
-            <p className="text-[#f7e7ce]/50 text-xs">
+            <p className="text-[#e2e8f0]/50 text-xs">
               {testimonial.role} at {testimonial.company}
             </p>
           </div>
@@ -125,24 +125,24 @@ export default function TestimonialsSection() {
         transition={{ duration: 0.7 }}
         className="text-center mb-16"
       >
-        <span className="text-xs text-[#c0c0c0] font-semibold uppercase tracking-widest">
+        <span className="text-xs text-[#818cf8] font-semibold uppercase tracking-widest">
           Testimonials
         </span>
         <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
           Loved by{' '}
           <span
             style={{
-              background: 'linear-gradient(135deg, #d4af37, #f4e5a8)',
+              background: 'linear-gradient(135deg, #4f46e5, #818cf8)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}
           >
-            elite HR teams
+            HR teams worldwide
           </span>
         </h2>
-        <p className="mt-4 text-[#f7e7ce]/60 max-w-2xl mx-auto text-lg">
-          Don't just take our word for it — hear what our distinguished clients have to say.
+        <p className="mt-4 text-[#e2e8f0]/60 max-w-2xl mx-auto text-lg">
+          Don't just take our word for it — hear what our clients have to say.
         </p>
       </motion.div>
 

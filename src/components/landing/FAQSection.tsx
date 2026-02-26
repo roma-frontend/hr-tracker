@@ -62,7 +62,7 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
         aria-expanded={isOpen}
         aria-controls={`faq-answer-${faq.id}`}
       >
-        <span className="text-white font-semibold text-lg pr-4 group-hover:text-[#d4af37] transition-colors">
+        <span className="text-white font-semibold text-lg pr-4 group-hover:text-[#a78bfa] transition-colors">
           {faq.question}
         </span>
         <div
@@ -73,9 +73,9 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
             transition={{ duration: 0.3 }}
           >
             {isOpen ? (
-              <Minus size={16} className="text-[#d4af37]" />
+              <Minus size={16} className="text-[#a78bfa]" />
             ) : (
-              <Plus size={16} className="text-[#d4af37]" />
+              <Plus size={16} className="text-[#a78bfa]" />
             )}
           </motion.div>
         </div>
@@ -91,7 +91,7 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="text-[#f7e7ce]/70 leading-relaxed pb-5 pr-12">
+            <p className="text-[#e0d9ff]/70 leading-relaxed pb-5 pr-12">
               {faq.answer}
             </p>
           </motion.div>
@@ -113,14 +113,14 @@ export default function FAQSection() {
           transition={{ duration: 0.7 }}
           className="text-center mb-12"
         >
-          <span className="text-xs text-[#f4e5a8] font-semibold uppercase tracking-widest">
+          <span className="text-xs text-[#c4b5fd] font-semibold uppercase tracking-widest">
             FAQ
           </span>
           <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
             Got questions?{' '}
             <span
               style={{
-                background: 'linear-gradient(135deg, #d4af37, #f4e5a8)',
+                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -129,7 +129,7 @@ export default function FAQSection() {
               We've got answers
             </span>
           </h2>
-          <p className="mt-4 text-[#f7e7ce]/60 max-w-2xl mx-auto text-lg">
+          <p className="mt-4 text-[#e0d9ff]/60 max-w-2xl mx-auto text-lg">
             Everything you need to know about HRLeave and how it works.
           </p>
         </motion.div>
@@ -149,10 +149,10 @@ export default function FAQSection() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-10"
         >
-          <p className="text-[#f7e7ce]/60 mb-4">Still have questions?</p>
+          <p className="text-[#e0d9ff]/60 mb-4">Still have questions?</p>
           <a
             href="mailto:support@hrleave.com"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#d4af37]/5 hover:bg-[#d4af37]/10 border border-[#d4af37]/20 text-[#f7e7ce] hover:text-[#d4af37] transition-all font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#8b5cf6]/5 hover:bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 text-[#e0d9ff] hover:text-[#a78bfa] transition-all font-medium"
           >
             Contact Support
           </a>

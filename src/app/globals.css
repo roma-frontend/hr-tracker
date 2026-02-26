@@ -1,21 +1,16 @@
 @import "tailwindcss";
 
-/* Premium Restaurant Theme - Deep Black & Gold */
+/* Professional HR Platform Theme - Deep Slate + Indigo */
 :root {
-  --color-premium-black: #000000;
-  --color-rich-black: #0a0a0a;
-  --color-deep-charcoal: #0f0f0f;
-  --color-gold: #d4af37;
-  --color-gold-light: #f4e5a8;
-  --color-gold-dark: #aa8b2e;
-  --color-bronze: #cd7f32;
-  --color-silver: #c0c0c0;
-  --color-champagne: #f7e7ce;
-}
-
-body {
-  background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #0f0f0f 100%);
-  background-attachment: fixed;
+  --color-slate-950: #020617;
+  --color-slate-900: #0f172a;
+  --color-slate-800: #1e293b;
+  --color-indigo: #6366f1;
+  --color-indigo-light: #818cf8;
+  --color-indigo-dark: #4f46e5;
+  --color-violet: #8b5cf6;
+  --color-emerald: #10b981;
+  --color-amber: #f59e0b;
 }
 
 /* Skip to content link - hidden by default, visible on focus */
@@ -133,45 +128,45 @@ html.dark {
   --status-rejected-text:  #dc2626;
 }
 
-/* ── Dark Theme ────────────────────────────────────────────────── */
+/* ── Dark Theme — Deep Slate + Indigo ──────────────────────────── */
 .dark {
   /* Base */
   --background:          #0f172a;
   --background-subtle:   #1e293b;
-  --foreground:          #f1f5f9;
+  --foreground:          #e2e8f0;
 
   /* Card / Surface */
   --card:                #1e293b;
-  --card-hover:          #243044;
-  --card-foreground:     #f1f5f9;
+  --card-hover:          #273549;
+  --card-foreground:     #e2e8f0;
   --card-border:         #334155;
 
   /* Popover */
   --popover:             #1e293b;
-  --popover-foreground:  #f1f5f9;
+  --popover-foreground:  #e2e8f0;
 
   /* Border */
   --border:              #334155;
   --border-subtle:       #1e293b;
   --input:               #1e293b;
   --input-border:        #475569;
-  --ring:                #818cf8;
+  --ring:                #6366f1;
 
   /* Primary */
-  --primary:             #818cf8;
-  --primary-hover:       #6366f1;
+  --primary:             #6366f1;
+  --primary-hover:       #4f46e5;
   --primary-foreground:  #ffffff;
 
   /* Secondary */
-  --secondary:           #1e293b;
+  --secondary:           #273549;
   --secondary-foreground:#94a3b8;
 
   /* Muted */
   --muted:               #1e293b;
-  --muted-foreground:    #94a3b8;
+  --muted-foreground:    #64748b;
 
   /* Accent */
-  --accent:              #818cf8;
+  --accent:              #6366f1;
   --accent-foreground:   #ffffff;
 
   /* Semantic */
@@ -183,28 +178,28 @@ html.dark {
   --warning-foreground:  #ffffff;
 
   /* Text */
-  --text-primary:        #f1f5f9;
-  --text-secondary:      #cbd5e1;
-  --text-muted:          #94a3b8;
-  --text-disabled:       #64748b;
+  --text-primary:        #e2e8f0;
+  --text-secondary:      #94a3b8;
+  --text-muted:          #64748b;
+  --text-disabled:       #475569;
 
   /* Sidebar */
   --sidebar-bg:          #0f172a;
   --sidebar-border:      #1e293b;
   --sidebar-item-hover:  #1e293b;
-  --sidebar-item-active: rgba(129,140,248,0.15);
+  --sidebar-item-active: rgba(99,102,241,0.15);
   --sidebar-item-active-text: #818cf8;
-  --sidebar-text:        #94a3b8;
-  --sidebar-text-muted:  #64748b;
+  --sidebar-text:        #64748b;
+  --sidebar-text-muted:  #475569;
 
   /* Navbar */
-  --navbar-bg:           rgba(15,23,42,0.85);
-  --navbar-border:       #1e293b;
+  --navbar-bg:           rgba(15,23,42,0.90);
+  --navbar-border:       #334155;
 
   /* Shadows */
-  --shadow:              0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md:           0 4px 6px rgba(0,0,0,0.4);
-  --shadow-lg:           0 10px 15px rgba(0,0,0,0.5);
+  --shadow:              0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:           0 4px 6px rgba(99,102,241,0.15);
+  --shadow-lg:           0 10px 15px rgba(99,102,241,0.2);
 
   /* Status badges */
   --status-approved-bg:    rgba(52,211,153,0.15);
@@ -238,8 +233,8 @@ body {
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────── */
@@ -288,14 +283,14 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+  background: linear-gradient(135deg, #6366f1, #818cf8, #4f46e5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+  background: linear-gradient(135deg, #6366f1, #818cf8, #4f46e5);
   background-size: 200% 200%;
   animation: gradient-shift 4s ease infinite;
 }
@@ -309,7 +304,7 @@ body {
 
 /* ── Selection ─────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.3);
   color: var(--text-primary);
 }
 

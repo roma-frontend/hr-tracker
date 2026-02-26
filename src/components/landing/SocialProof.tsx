@@ -8,31 +8,31 @@ const metrics = [
     icon: Users,
     value: '10,000+',
     label: 'Active Users',
-    color: '#d4af37',
+    color: '#6366f1',
   },
   {
     icon: Award,
     value: '4.9/5',
     label: 'Customer Rating',
-    color: '#f4e5a8',
+    color: '#818cf8',
   },
   {
     icon: TrendingUp,
     value: '99.9%',
     label: 'Uptime',
-    color: '#cd7f32',
+    color: '#4f46e5',
   },
   {
     icon: Globe,
     value: '50+',
     label: 'Countries',
-    color: '#c0c0c0',
+    color: '#818cf8',
   },
 ];
 
 export default function SocialProof() {
   return (
-    <section className="relative z-10 py-12 border-y border-[#d4af37]/10">
+    <section className="relative z-10 py-12 border-y border-[#6366f1]/10">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -62,7 +62,7 @@ export default function SocialProof() {
                   <div className="text-2xl md:text-3xl font-bold text-white mb-1">
                     {metric.value}
                   </div>
-                  <div className="text-sm text-[#f7e7ce]/60">{metric.label}</div>
+                  <div className="text-sm text-[#e2e8f0]/60">{metric.label}</div>
                 </div>
               </motion.div>
             );

@@ -29,7 +29,7 @@ const pricingTiers: PricingTier[] = [
       'Mobile app access',
       'Standard support',
     ],
-    gradient: 'linear-gradient(135deg, rgba(212,175,55,0.12), rgba(244,229,168,0.06))',
+    gradient: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(129,140,248,0.06))',
     buttonText: 'Start Free Trial',
   },
   {
@@ -45,7 +45,7 @@ const pricingTiers: PricingTier[] = [
       'Priority support',
       'Slack integration',
     ],
-    gradient: 'linear-gradient(135deg, rgba(205,127,50,0.15), rgba(170,139,46,0.1))',
+    gradient: 'linear-gradient(135deg, rgba(79,70,229,0.15), rgba(99,102,241,0.1))',
     buttonText: 'Start Free Trial',
     popular: true,
   },
@@ -62,7 +62,7 @@ const pricingTiers: PricingTier[] = [
       '24/7 phone support',
       'SLA guarantee',
     ],
-    gradient: 'linear-gradient(135deg, rgba(192,192,192,0.12), rgba(169,169,169,0.06))',
+    gradient: 'linear-gradient(135deg, rgba(129,140,248,0.12), rgba(99,102,241,0.06))',
     buttonText: 'Contact Sales',
   },
 ];
@@ -81,7 +81,7 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
     >
       {/* Popular badge */}
       {tier.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#d4af37] to-[#f4e5a8] text-black text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#d4af37]/30 z-20">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#6366f1]/30 z-20">
           Most Popular
         </div>
       )}
@@ -93,25 +93,25 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
       />
 
       {/* Card */}
-      <div className={`relative h-full rounded-2xl border ${tier.popular ? 'border-[#d4af37]/30' : 'border-white/10'} bg-white/5 backdrop-blur-xl p-8 flex flex-col`}>
+      <div className={`relative h-full rounded-2xl border ${tier.popular ? 'border-[#6366f1]/30' : 'border-white/10'} bg-white/5 backdrop-blur-xl p-8 flex flex-col`}>
         {/* Icon */}
         <div
           className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
           style={{ background: tier.gradient }}
         >
-          <div className="text-black">{tier.icon}</div>
+          <div className="text-white">{tier.icon}</div>
         </div>
 
         {/* Title */}
         <h3 className="text-2xl font-bold text-white mb-2">{tier.name}</h3>
-        <p className="text-[#f7e7ce]/60 text-sm mb-6">{tier.description}</p>
+        <p className="text-[#e2e8f0]/60 text-sm mb-6">{tier.description}</p>
 
         {/* Price */}
         <div className="mb-6">
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-black text-white">{tier.price}</span>
             {tier.price !== 'Custom' && (
-              <span className="text-[#f7e7ce]/50 text-sm">/month</span>
+              <span className="text-[#e2e8f0]/50 text-sm">/month</span>
             )}
           </div>
         </div>
@@ -120,8 +120,8 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
         <ul className="space-y-3 mb-8 flex-1">
           {tier.features.map((feature, i) => (
             <li key={i} className="flex items-start gap-3">
-              <Check size={18} className="text-[#d4af37] flex-shrink-0 mt-0.5" />
-              <span className="text-[#f7e7ce]/80 text-sm">{feature}</span>
+              <Check size={18} className="text-[#6366f1] flex-shrink-0 mt-0.5" />
+              <span className="text-[#e2e8f0]/80 text-sm">{feature}</span>
             </li>
           ))}
         </ul>
@@ -133,8 +133,8 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
             whileTap={{ scale: 0.98 }}
             className={`w-full py-3.5 rounded-xl font-bold transition-all ${
               tier.popular
-                ? 'bg-gradient-to-r from-[#d4af37] to-[#f4e5a8] text-black shadow-lg shadow-[#d4af37]/40'
-                : 'bg-[#d4af37]/10 text-[#f7e7ce] border border-[#d4af37]/20 hover:bg-[#d4af37]/15'
+                ? 'bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white shadow-lg shadow-[#6366f1]/40'
+                : 'bg-[#6366f1]/10 text-[#e2e8f0] border border-[#6366f1]/20 hover:bg-[#6366f1]/15'
             }`}
           >
             {tier.buttonText}
@@ -156,14 +156,14 @@ export default function PricingPreview() {
         transition={{ duration: 0.7 }}
         className="text-center mb-16"
       >
-        <span className="text-xs text-[#cd7f32] font-semibold uppercase tracking-widest">
+        <span className="text-xs text-[#818cf8] font-semibold uppercase tracking-widest">
           Pricing
         </span>
         <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
-          Exclusive,{' '}
+          Simple,{' '}
           <span
             style={{
-              background: 'linear-gradient(135deg, #d4af37, #f4e5a8)',
+              background: 'linear-gradient(135deg, #4f46e5, #818cf8)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -172,8 +172,8 @@ export default function PricingPreview() {
             transparent pricing
           </span>
         </h2>
-        <p className="mt-4 text-[#f7e7ce]/60 max-w-2xl mx-auto text-lg">
-          Choose the plan that's right for your organization. All plans include a 14-day complimentary trial.
+        <p className="mt-4 text-[#e2e8f0]/60 max-w-2xl mx-auto text-lg">
+          Choose the plan that's right for your organization. All plans include a 14-day free trial.
         </p>
       </motion.div>
 
@@ -190,7 +190,7 @@ export default function PricingPreview() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ delay: 0.5 }}
-        className="text-center text-[#f7e7ce]/50 text-sm mt-10"
+        className="text-center text-[#e2e8f0]/50 text-sm mt-10"
       >
         All plans include SSL security, premium backups, and GDPR compliance.
       </motion.p>

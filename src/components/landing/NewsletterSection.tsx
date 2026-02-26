@@ -39,30 +39,30 @@ export default function NewsletterSection() {
         className="relative max-w-3xl mx-auto"
       >
         {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37]/15 via-[#cd7f32]/15 to-[#c0c0c0]/10 rounded-3xl blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#4f46e5]/15 via-[#6366f1]/15 to-[#818cf8]/10 rounded-3xl blur-3xl" />
         
         <div className="relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-12 text-center overflow-hidden">
           {/* Animated background orb */}
           <motion.div
-            className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br from-[#d4af37]/25 to-[#cd7f32]/20 blur-3xl"
+            className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br from-[#4f46e5]/25 to-[#6366f1]/20 blur-3xl"
             animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
             transition={{ duration: 10, repeat: Infinity }}
           />
 
           {/* Icon */}
           <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#d4af37] to-[#cd7f32] mb-6"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4f46e5] to-[#6366f1] mb-6"
             animate={{ rotate: [0, 5, -5, 0] }}
             transition={{ duration: 4, repeat: Infinity }}
           >
-            <Mail size={28} className="text-black" />
+            <Mail size={28} className="text-white" />
           </motion.div>
 
           {/* Heading */}
           <h3 className="text-2xl md:text-4xl font-black text-white mb-4">
             Stay in the loop
           </h3>
-          <p className="text-[#f7e7ce]/70 text-lg mb-8 max-w-xl mx-auto">
+          <p className="text-[#e2e8f0]/70 text-lg mb-8 max-w-xl mx-auto">
             Get the latest updates on HR trends, premium features, and exclusive insights delivered to your inbox.
           </p>
 
@@ -75,7 +75,7 @@ export default function NewsletterSection() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-5 py-4 rounded-xl bg-white/10 border border-[#d4af37]/20 text-white placeholder:text-[#f7e7ce]/40 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 focus:border-[#d4af37]/50 transition-all"
+                  className="w-full px-5 py-4 rounded-xl bg-white/10 border border-[#6366f1]/20 text-white placeholder:text-[#e2e8f0]/40 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/50 focus:border-[#6366f1]/50 transition-all"
                   disabled={isLoading}
                   aria-label="Email address"
                 />
@@ -85,7 +85,7 @@ export default function NewsletterSection() {
                 disabled={isLoading}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="px-6 py-4 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#f4e5a8] text-black font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-[#d4af37]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-4 rounded-xl bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-[#6366f1]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <motion.div
@@ -105,7 +105,7 @@ export default function NewsletterSection() {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center justify-center gap-3 text-[#d4af37] font-semibold"
+              className="flex items-center justify-center gap-3 text-[#818cf8] font-semibold"
             >
               <CheckCircle2 size={24} />
               <span>You're subscribed! Check your inbox.</span>
@@ -113,7 +113,7 @@ export default function NewsletterSection() {
           )}
 
           {/* Privacy notice */}
-          <p className="text-xs text-[#f7e7ce]/40 mt-6">
+          <p className="text-xs text-[#e2e8f0]/40 mt-6">
             We respect your privacy. Unsubscribe at any time.
           </p>
         </div>

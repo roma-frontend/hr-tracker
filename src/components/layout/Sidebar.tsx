@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+// api.leaves is used for pending leave badge
 import type { Id } from "../../../convex/_generated/dataModel";
 
 const navItems = [
@@ -52,7 +53,7 @@ export function Sidebar() {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
-  // Unread task notifications badge
+  // Unread task notifications badge + pending leave requests badge
   const notifications = useQuery(
     api.notifications.getUserNotifications,
     mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
@@ -60,6 +61,13 @@ export function Sidebar() {
   const taskUnreadCount = (notifications ?? []).filter(
     (n: any) => !n.isRead && n.type === "system" && (n.title?.includes("Task") || n.title?.includes("task"))
   ).length;
+
+  // Pending leave requests badge for admin/supervisor
+  const pendingLeaves = useQuery(
+    api.leaves.getPendingLeaves,
+    mounted && user?.id && (user.role === "admin" || user.role === "supervisor") ? {} : "skip"
+  );
+  const pendingLeaveCount = (pendingLeaves ?? []).length;
 
   if (!mounted) return null;
 
@@ -87,7 +95,7 @@ export function Sidebar() {
                 className="flex items-center gap-2 overflow-hidden"
               >
                 <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0 shadow-md">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4f46e5] to-[#6366f1] flex items-center justify-center flex-shrink-0 shadow-md">
                     <Building2 className="w-4 h-4 text-white" />
                   </div>
                   <div className="min-w-0">
@@ -123,7 +131,11 @@ export function Sidebar() {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
 
-            const badge = item.href === "/tasks" && taskUnreadCount > 0 ? taskUnreadCount : 0;
+            const badge = item.href === "/tasks" && taskUnreadCount > 0
+              ? taskUnreadCount
+              : item.href === "/leaves" && pendingLeaveCount > 0
+              ? pendingLeaveCount
+              : 0;
 
             const linkContent = (
               <Link
@@ -171,7 +183,7 @@ export function Sidebar() {
                     style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
                   />
                   {badge > 0 && collapsed && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 rounded-full bg-[#6366f1] text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
                       {badge > 9 ? "9+" : badge}
                     </span>
                   )}
@@ -193,7 +205,7 @@ export function Sidebar() {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm shadow-indigo-300 animate-pulse"
+                    className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white text-[10px] font-bold flex items-center justify-center shadow-sm shadow-indigo-300 animate-pulse"
                   >
                     {badge > 9 ? "9+" : badge}
                   </motion.span>
@@ -224,7 +236,7 @@ export function Sidebar() {
           <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
             <Avatar className="w-8 h-8 flex-shrink-0">
               {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-              <AvatarFallback className="text-xs bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white font-bold">
+              <AvatarFallback className="text-xs bg-gradient-to-br from-[#4f46e5] to-[#6366f1] text-white font-bold">
                 {user?.name ? getInitials(user.name) : "U"}
               </AvatarFallback>
             </Avatar>
@@ -271,6 +283,13 @@ export function MobileSidebar() {
     (n: any) => !n.isRead && n.type === "system" && (n.title?.includes("Task") || n.title?.includes("task"))
   ).length;
 
+  // Pending leave badge for mobile admin/supervisor
+  const mobilePendingLeaves = useQuery(
+    api.leaves.getPendingLeaves,
+    mounted && user?.id && (user.role === "admin" || user.role === "supervisor") ? {} : "skip"
+  );
+  const mobilePendingLeaveCount = (mobilePendingLeaves ?? []).length;
+
   if (!mounted) return null;
 
   return (
@@ -298,7 +317,7 @@ export function MobileSidebar() {
               style={{ borderColor: "var(--sidebar-border)" }}
             >
               <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity outline-none" onClick={() => setMobileOpen(false)}>
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-md">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4f46e5] to-[#6366f1] flex items-center justify-center shadow-md">
                   <Building2 className="w-4 h-4 text-white" />
                 </div>
                 <div>
@@ -313,7 +332,11 @@ export function MobileSidebar() {
               {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
-                const mobileBadge = item.href === "/tasks" && mobileTaskBadge > 0 ? mobileTaskBadge : 0;
+                const mobileBadge = item.href === "/tasks" && mobileTaskBadge > 0
+                  ? mobileTaskBadge
+                  : item.href === "/leaves" && mobilePendingLeaveCount > 0
+                  ? mobilePendingLeaveCount
+                  : 0;
                 return (
                   <Link
                     key={item.href}
@@ -351,7 +374,7 @@ export function MobileSidebar() {
                     />
                     <span className="flex-1">{item.label}</span>
                     {mobileBadge > 0 && (
-                      <span className="min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                      <span className="min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
                         {mobileBadge > 9 ? "9+" : mobileBadge}
                       </span>
                     )}
@@ -368,7 +391,7 @@ export function MobileSidebar() {
               <div className="flex items-center gap-3">
                 <Avatar className="w-8 h-8">
                   {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                  <AvatarFallback className="text-xs bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white font-bold">
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-[#4f46e5] to-[#6366f1] text-white font-bold">
                     {user?.name ? getInitials(user.name) : "U"}
                   </AvatarFallback>
                 </Avatar>
