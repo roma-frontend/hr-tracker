@@ -343,6 +343,45 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_task", ["taskId"]),
 
+  // Stripe Subscriptions
+  subscriptions: defineTable({
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.string(),
+    stripeSessionId: v.optional(v.string()),
+    plan: v.union(v.literal("starter"), v.literal("professional"), v.literal("enterprise")),
+    status: v.union(
+      v.literal("trialing"),
+      v.literal("active"),
+      v.literal("past_due"),
+      v.literal("canceled"),
+      v.literal("incomplete"),
+    ),
+    email: v.optional(v.string()),
+    userId: v.optional(v.id("users")),
+    currentPeriodStart: v.optional(v.number()),
+    currentPeriodEnd: v.optional(v.number()),
+    cancelAtPeriodEnd: v.boolean(),
+    trialEnd: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_stripe_customer", ["stripeCustomerId"])
+    .index("by_stripe_subscription", ["stripeSubscriptionId"])
+    .index("by_status", ["status"])
+    .index("by_user", ["userId"])
+    .index("by_email", ["email"]),
+
+  // Contact / Sales inquiries
+  contactInquiries: defineTable({
+    name: v.string(),
+    email: v.string(),
+    company: v.optional(v.string()),
+    teamSize: v.optional(v.string()),
+    message: v.string(),
+    plan: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_created", ["createdAt"]),
+
   // Work Schedule Configuration
   workSchedule: defineTable({
     userId: v.id("users"),

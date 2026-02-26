@@ -18,6 +18,7 @@ import { FaceRegistration } from "@/components/auth/FaceRegistration";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import dynamic from "next/dynamic";
+import { SubscriptionPlanCard } from "@/components/subscription/SubscriptionPlanCard";
 
 const SLASettings = dynamic(() => import("@/components/admin/SLASettings"), { ssr: false });
 
@@ -298,6 +299,9 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Subscription Plan */}
+      <SubscriptionPlanCard />
 
       {/* Admin-Only: SLA Settings */}
       {user?.role === "admin" && (

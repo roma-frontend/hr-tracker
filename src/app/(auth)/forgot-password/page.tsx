@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
@@ -39,11 +39,11 @@ export default function ForgotPasswordPage() {
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #6366f1, transparent)" }}
+          style={{ background: "radial-gradient(circle, #2563eb, transparent)" }}
         />
         <div
           className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #8b5cf6, transparent)" }}
+          style={{ background: "radial-gradient(circle, #0ea5e9, transparent)" }}
         />
       </div>
 
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
         >
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center shadow-lg">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -104,7 +104,7 @@ export default function ForgotPasswordPage() {
                           borderColor: "var(--border)",
                           color: "var(--text-primary)",
                         }}
-                        onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                        onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                         onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                       />
                     </div>
@@ -131,7 +131,7 @@ export default function ForgotPasswordPage() {
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                     className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
-                    style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                    style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
                   >
                     {isPending ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
@@ -163,7 +163,7 @@ export default function ForgotPasswordPage() {
                   <button
                     onClick={() => setSent(false)}
                     className="underline"
-                    style={{ color: "#6366f1" }}
+                    style={{ color: "#2563eb" }}
                   >
                     try again
                   </button>

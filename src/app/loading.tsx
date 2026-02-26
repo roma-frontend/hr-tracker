@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { motion } from 'framer-motion';
 import { Shield } from 'lucide-react';
@@ -16,7 +16,7 @@ export default function Loading() {
         >
           {/* Rotating ring */}
           <motion.div
-            className="absolute inset-0 w-24 h-24 rounded-full border-4 border-transparent border-t-blue-500 border-r-purple-500"
+            className="absolute inset-0 w-24 h-24 rounded-full border-4 border-transparent border-t-blue-500 border-r-sky-400"
             animate={{ rotate: 360 }}
             transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
           />
@@ -24,7 +24,7 @@ export default function Loading() {
           {/* Logo */}
           <motion.div
             className="w-24 h-24 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}
             animate={{ 
               scale: [1, 1.05, 1],
               boxShadow: [

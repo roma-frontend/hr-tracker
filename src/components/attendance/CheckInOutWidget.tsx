@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
@@ -65,7 +65,7 @@ export function CheckInOutWidget() {
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-sky-400 text-white">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-white">
             <Clock className="w-5 h-5" />

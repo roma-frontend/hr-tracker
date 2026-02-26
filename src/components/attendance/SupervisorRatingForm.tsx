@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useMutation } from "convex/react";
@@ -120,7 +120,7 @@ export function SupervisorRatingForm({
 
   return (
     <Card className="w-full max-w-3xl">
-      <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+      <CardHeader className="bg-gradient-to-r from-sky-400 to-pink-500 text-white">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-white">Performance Rating</CardTitle>
@@ -182,14 +182,14 @@ export function SupervisorRatingForm({
         </div>
 
         {/* Average Score */}
-        <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
+        <div className="p-4 rounded-lg bg-gradient-to-r from-sky-50 to-pink-50 dark:from-sky-950 dark:to-pink-950">
           <div className="flex items-center justify-between">
             <span className="font-medium" style={{ color: "var(--text-primary)" }}>
               Overall Average
             </span>
             <div className="flex items-center gap-2">
               <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
-              <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+              <span className="text-3xl font-bold text-sky-500 dark:text-sky-400">
                 {averageRating.toFixed(1)}
               </span>
               <span className="text-sm text-[var(--text-muted)]">/ 5.0</span>
@@ -244,7 +244,7 @@ export function SupervisorRatingForm({
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+            className="flex-1 bg-gradient-to-r from-sky-400 to-pink-500 hover:from-sky-500 hover:to-pink-600 text-white"
           >
             {isSubmitting ? (
               "Submitting..."

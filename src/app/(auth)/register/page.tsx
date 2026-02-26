@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ export default function RegisterPage() {
   };
 
   const strength = passwordStrength(formData.password);
-  const strengthColors = ["#ef4444", "#f59e0b", "#10b981", "#6366f1"];
+  const strengthColors = ["#ef4444", "#f59e0b", "#10b981", "#2563eb"];
   const strengthLabels = ["Weak", "Fair", "Good", "Strong"];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,9 +72,9 @@ export default function RegisterPage() {
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #6366f1, transparent)" }} />
+          style={{ background: "radial-gradient(circle, #2563eb, transparent)" }} />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #8b5cf6, transparent)" }} />
+          style={{ background: "radial-gradient(circle, #0ea5e9, transparent)" }} />
       </div>
 
       <motion.div
@@ -91,7 +91,7 @@ export default function RegisterPage() {
           <div className="flex flex-col items-center mb-8">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+              style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
             >
               <Building2 className="w-7 h-7 text-white" />
             </div>
@@ -116,7 +116,7 @@ export default function RegisterPage() {
                   placeholder="John Doe"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
               </div>
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                   placeholder="you@company.com"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
               </div>
@@ -147,7 +147,7 @@ export default function RegisterPage() {
                     exit={{ opacity: 0 }}
                     className="flex items-center gap-2 text-xs px-2"
                   >
-                    <CheckCircle2 className="w-3 h-3" style={{ color: isAdminEmail ? "#6366f1" : "#10b981" }} />
+                    <CheckCircle2 className="w-3 h-3" style={{ color: isAdminEmail ? "#2563eb" : "#10b981" }} />
                     <span style={{ color: "var(--text-muted)" }}>
                       {isAdminEmail
                         ? "You will be registered as Admin 👑"
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                   placeholder="+374 XX XXX XXX"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
               </div>
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                   placeholder="Min. 8 characters"
                   className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
                 <button type="button" onClick={() => setShowPassword((p) => !p)}
@@ -237,7 +237,7 @@ export default function RegisterPage() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+              style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
             >
               {isPending ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</>
@@ -249,7 +249,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm mt-6" style={{ color: "var(--text-muted)" }}>
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold hover:underline" style={{ color: "#6366f1" }}>
+            <Link href="/login" className="font-semibold hover:underline" style={{ color: "#2563eb" }}>
               Sign in
             </Link>
           </p>

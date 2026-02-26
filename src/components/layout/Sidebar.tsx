@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+// framer-motion removed from Sidebar — replaced with CSS transitions to eliminate
+// forced reflow, reduce main-thread work and reduce JS bundle on initial load
 import {
   LayoutDashboard,
   CalendarDays,
@@ -26,7 +27,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-// api.leaves is used for pending leave badge
 import type { Id } from "../../../convex/_generated/dataModel";
 
 const navItems = [
@@ -53,7 +53,7 @@ export function Sidebar() {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
-  // Unread task notifications badge + pending leave requests badge
+  // Unread task notifications badge
   const notifications = useQuery(
     api.notifications.getUserNotifications,
     mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
@@ -62,56 +62,51 @@ export function Sidebar() {
     (n: any) => !n.isRead && n.type === "system" && (n.title?.includes("Task") || n.title?.includes("task"))
   ).length;
 
-  // Pending leave requests badge for admin/supervisor
-  const pendingLeaves = useQuery(
-    api.leaves.getPendingLeaves,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor") ? {} : "skip"
-  );
-  const pendingLeaveCount = (pendingLeaves ?? []).length;
-
   if (!mounted) return null;
 
   return (
     <TooltipProvider delayDuration={0}>
-      <motion.aside
-        animate={{ width: collapsed ? 72 : 240 }}
-        transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="relative hidden lg:flex flex-col h-screen border-r z-30 flex-shrink-0 transition-colors duration-300"
-        style={{ background: "var(--sidebar-bg)", borderColor: "var(--sidebar-border)" }}
+      {/* CSS width transition instead of framer-motion — avoids JS-driven layout recalc */}
+      <aside
+        className="relative hidden lg:flex flex-col h-screen border-r z-30 flex-shrink-0"
+        style={{
+          background: "var(--sidebar-bg)",
+          borderColor: "var(--sidebar-border)",
+          width: collapsed ? 72 : 240,
+          transition: "width 0.25s ease",
+        }}
       >
         {/* Logo + Toggle */}
         <div
-          className="flex items-center h-16 px-3 flex-shrink-0 border-b transition-colors duration-300 justify-between gap-2"
+          className="flex items-center h-16 px-3 flex-shrink-0 border-b justify-between gap-2"
           style={{ borderColor: "var(--sidebar-border)" }}
         >
-          {/* Logo — hidden when collapsed */}
-          <AnimatePresence initial={false}>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center gap-2 overflow-hidden"
-              >
-                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4f46e5] to-[#6366f1] flex items-center justify-center flex-shrink-0 shadow-md">
-                    <Building2 className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm leading-tight truncate text-[var(--text-primary)]">HR Office</p>
-                    <p className="text-[10px] truncate text-[var(--text-muted)]">Leave Monitoring</p>
-                  </div>
-                </Link>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Logo — CSS opacity/width transition instead of AnimatePresence */}
+          <div
+            className="flex items-center gap-2 overflow-hidden"
+            style={{
+              opacity: collapsed ? 0 : 1,
+              width: collapsed ? 0 : "auto",
+              transition: "opacity 0.2s ease, width 0.2s ease",
+              pointerEvents: collapsed ? "none" : "auto",
+            }}
+          >
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] flex items-center justify-center flex-shrink-0 shadow-md">
+                <Building2 className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-sm leading-tight truncate text-[var(--text-primary)]">HR Office</p>
+                <p className="text-[10px] truncate text-[var(--text-muted)]">Leave Monitoring</p>
+              </div>
+            </Link>
+          </div>
 
-          {/* Collapse toggle — always visible, ml-auto when collapsed */}
+          {/* Collapse toggle */}
           <button
             onClick={toggle}
             className={cn(
-              "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 border",
+              "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 border",
               collapsed && "ml-auto mr-auto"
             )}
             style={{
@@ -130,12 +125,7 @@ export function Sidebar() {
           {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
-
-            const badge = item.href === "/tasks" && taskUnreadCount > 0
-              ? taskUnreadCount
-              : item.href === "/leaves" && pendingLeaveCount > 0
-              ? pendingLeaveCount
-              : 0;
+            const badge = item.href === "/tasks" && taskUnreadCount > 0 ? taskUnreadCount : 0;
 
             const linkContent = (
               <Link
@@ -143,10 +133,8 @@ export function Sidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative outline-none focus-visible:outline-none",
-                  isActive
-                    ? "border"
-                    : "hover:text-[var(--text-primary)]"
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 relative outline-none focus-visible:outline-none",
+                  isActive ? "border" : "hover:text-[var(--text-primary)]"
                 )}
                 style={
                   isActive
@@ -155,27 +143,18 @@ export function Sidebar() {
                         color: "var(--sidebar-item-active-text)",
                         borderColor: "color-mix(in srgb, var(--primary) 20%, transparent)",
                       }
-                    : {
-                        color: "var(--text-muted)",
-                        background: "transparent",
-                      }
+                    : { color: "var(--text-muted)", background: "transparent" }
                 }
                 onMouseEnter={(e) => {
-                  if (!isActive) {
-                    (e.currentTarget as HTMLElement).style.background = "var(--sidebar-item-hover)";
-                  }
+                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--sidebar-item-hover)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive) {
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                  }
+                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
                 }}
               >
+                {/* Active indicator — CSS only, no layoutId reflow */}
                 {isActive && (
-                  <motion.div
-                    layoutId="activeNav"
-                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--primary)] rounded-full"
-                  />
+                  <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--primary)] rounded-full" />
                 )}
                 <div className="relative flex-shrink-0">
                   <Icon
@@ -183,32 +162,28 @@ export function Sidebar() {
                     style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
                   />
                   {badge > 0 && collapsed && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 rounded-full bg-[#6366f1] text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
                       {badge > 9 ? "9+" : badge}
                     </span>
                   )}
                 </div>
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -8 }}
-                      transition={{ duration: 0.15 }}
-                      className="truncate flex-1"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                {/* Label — CSS transition instead of motion.span */}
+                <span
+                  className="truncate flex-1"
+                  style={{
+                    opacity: collapsed ? 0 : 1,
+                    width: collapsed ? 0 : "auto",
+                    overflow: "hidden",
+                    transition: "opacity 0.15s ease",
+                    display: collapsed ? "none" : undefined,
+                  }}
+                >
+                  {item.label}
+                </span>
                 {!collapsed && badge > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white text-[10px] font-bold flex items-center justify-center shadow-sm shadow-indigo-300 animate-pulse"
-                  >
+                  <span className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm shadow-blue-300">
                     {badge > 9 ? "9+" : badge}
-                  </motion.span>
+                  </span>
                 )}
               </Link>
             );
@@ -230,42 +205,40 @@ export function Sidebar() {
 
         {/* User info */}
         <div
-          className="border-t p-3 flex-shrink-0 transition-colors duration-300"
+          className="border-t p-3 flex-shrink-0"
           style={{ borderColor: "var(--sidebar-border)" }}
         >
           <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
             <Avatar className="w-8 h-8 flex-shrink-0">
               {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-              <AvatarFallback className="text-xs bg-gradient-to-br from-[#4f46e5] to-[#6366f1] text-white font-bold">
+              <AvatarFallback className="text-xs bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] text-white font-bold">
                 {user?.name ? getInitials(user.name) : "U"}
               </AvatarFallback>
             </Avatar>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.15 }}
-                  className="min-w-0 flex-1"
-                >
-                  <p className="text-xs font-medium truncate text-[var(--text-primary)]">
-                    {user?.name ?? "User"}
-                  </p>
-                  <p className="text-[10px] truncate capitalize text-[var(--text-muted)]">
-                    {user?.role ?? "admin"}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* CSS transition instead of AnimatePresence motion.div */}
+            <div
+              className="min-w-0 flex-1"
+              style={{
+                opacity: collapsed ? 0 : 1,
+                transition: "opacity 0.15s ease",
+                display: collapsed ? "none" : undefined,
+              }}
+            >
+              <p className="text-xs font-medium truncate text-[var(--text-primary)]">
+                {user?.name ?? "User"}
+              </p>
+              <p className="text-[10px] truncate capitalize text-[var(--text-muted)]">
+                {user?.role ?? "admin"}
+              </p>
+            </div>
           </div>
         </div>
-
-        {/* Collapse toggle */}
-      </motion.aside>
+      </aside>
     </TooltipProvider>
   );
 }
+
+export default Sidebar;
 
 // ─── Mobile Sidebar ────────────────────────────────────────────────────────────
 export function MobileSidebar() {
@@ -283,131 +256,123 @@ export function MobileSidebar() {
     (n: any) => !n.isRead && n.type === "system" && (n.title?.includes("Task") || n.title?.includes("task"))
   ).length;
 
-  // Pending leave badge for mobile admin/supervisor
-  const mobilePendingLeaves = useQuery(
-    api.leaves.getPendingLeaves,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor") ? {} : "skip"
-  );
-  const mobilePendingLeaveCount = (mobilePendingLeaves ?? []).length;
-
   if (!mounted) return null;
 
   return (
-    <AnimatePresence>
+    <>
+      {/* Overlay — CSS opacity transition, display toggled via pointer-events */}
+      <div
+        onClick={() => setMobileOpen(false)}
+        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+        style={{
+          opacity: mobileOpen ? 1 : 0,
+          pointerEvents: mobileOpen ? "auto" : "none",
+          transition: "opacity 0.2s ease",
+        }}
+      />
+      {/* Drawer — CSS transform transition instead of spring animation */}
       {mobileOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-          />
-          <motion.aside
-            initial={{ x: -280 }}
-            animate={{ x: 0 }}
-            exit={{ x: -280 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col lg:hidden border-r transition-colors duration-300"
-            style={{ background: "var(--sidebar-bg)", borderColor: "var(--sidebar-border)" }}
+        <aside
+          className="fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col lg:hidden border-r"
+          style={{
+            background: "var(--sidebar-bg)",
+            borderColor: "var(--sidebar-border)",
+            transform: "translateX(0)",
+            transition: "transform 0.25s ease",
+          }}
+        >
+          {/* Logo */}
+          <div
+            className="flex items-center h-16 px-4 border-b"
+            style={{ borderColor: "var(--sidebar-border)" }}
           >
-            {/* Logo */}
-            <div
-              className="flex items-center h-16 px-4 border-b transition-colors duration-300"
-              style={{ borderColor: "var(--sidebar-border)" }}
-            >
-              <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity outline-none" onClick={() => setMobileOpen(false)}>
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4f46e5] to-[#6366f1] flex items-center justify-center shadow-md">
-                  <Building2 className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm leading-tight text-[var(--text-primary)]">HR Office</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">Leave Monitoring</p>
-                </div>
-              </Link>
-            </div>
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity outline-none" onClick={() => setMobileOpen(false)}>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] flex items-center justify-center shadow-md">
+                <Building2 className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-sm leading-tight text-[var(--text-primary)]">HR Office</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Leave Monitoring</p>
+              </div>
+            </Link>
+          </div>
 
-            {/* Nav */}
-            <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-              {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                const Icon = item.icon;
-                const mobileBadge = item.href === "/tasks" && mobileTaskBadge > 0
-                  ? mobileTaskBadge
-                  : item.href === "/leaves" && mobilePendingLeaveCount > 0
-                  ? mobilePendingLeaveCount
-                  : 0;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 outline-none focus-visible:outline-none",
-                      isActive ? "border" : ""
-                    )}
-                    style={
-                      isActive
-                        ? {
-                            background: "var(--sidebar-item-active)",
-                            color: "var(--sidebar-item-active-text)",
-                            borderColor: "color-mix(in srgb, var(--primary) 20%, transparent)",
-                          }
-                        : { color: "var(--text-muted)" }
+          {/* Nav */}
+          <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+            {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              const Icon = item.icon;
+              const mobileBadge = item.href === "/tasks" && mobileTaskBadge > 0 ? mobileTaskBadge : 0;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 outline-none focus-visible:outline-none",
+                    isActive ? "border" : ""
+                  )}
+                  style={
+                    isActive
+                      ? {
+                          background: "var(--sidebar-item-active)",
+                          color: "var(--sidebar-item-active-text)",
+                          borderColor: "color-mix(in srgb, var(--primary) 20%, transparent)",
+                        }
+                      : { color: "var(--text-muted)" }
+                  }
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.background = "var(--sidebar-item-hover)";
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
                     }
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        (e.currentTarget as HTMLElement).style.background = "var(--sidebar-item-hover)";
-                        (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        (e.currentTarget as HTMLElement).style.background = "transparent";
-                        (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-                      }
-                    }}
-                  >
-                    <Icon
-                      className="w-5 h-5"
-                      style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
-                    />
-                    <span className="flex-1">{item.label}</span>
-                    {mobileBadge > 0 && (
-                      <span className="min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
-                        {mobileBadge > 9 ? "9+" : mobileBadge}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+                    }
+                  }}
+                >
+                  <Icon
+                    className="w-5 h-5"
+                    style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
+                  />
+                  <span className="flex-1">{item.label}</span>
+                  {mobileBadge > 0 && (
+                    <span className="min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {mobileBadge > 9 ? "9+" : mobileBadge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
 
-            {/* User */}
-            <div
-              className="border-t p-3"
-              style={{ borderColor: "var(--sidebar-border)" }}
-            >
-              <div className="flex items-center gap-3">
-                <Avatar className="w-8 h-8">
-                  {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                  <AvatarFallback className="text-xs bg-gradient-to-br from-[#4f46e5] to-[#6366f1] text-white font-bold">
-                    {user?.name ? getInitials(user.name) : "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium truncate text-[var(--text-primary)]">
-                    {user?.name ?? "User"}
-                  </p>
-                  <p className="text-[10px] truncate capitalize text-[var(--text-muted)]">
-                    {user?.role ?? "admin"}
-                  </p>
-                </div>
+          {/* User */}
+          <div
+            className="border-t p-3"
+            style={{ borderColor: "var(--sidebar-border)" }}
+          >
+            <div className="flex items-center gap-3">
+              <Avatar className="w-8 h-8">
+                {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                <AvatarFallback className="text-xs bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] text-white font-bold">
+                  {user?.name ? getInitials(user.name) : "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-xs font-medium truncate text-[var(--text-primary)]">
+                  {user?.name ?? "User"}
+                </p>
+                <p className="text-[10px] truncate capitalize text-[var(--text-muted)]">
+                  {user?.role ?? "admin"}
+                </p>
               </div>
             </div>
-          </motion.aside>
-        </>
+          </div>
+        </aside>
       )}
-    </AnimatePresence>
+    </>
   );
 }

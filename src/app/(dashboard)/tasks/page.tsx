@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { TasksClient } from "@/components/tasks/TasksClient";
+import dynamic from "next/dynamic";
 import { useAuthStore } from "@/store/useAuthStore";
+
+const TasksClient = dynamic(
+  () => import("@/components/tasks/TasksClient"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-6 space-y-4 animate-pulse">
+        <div className="h-8 w-48 rounded-lg bg-white/5" />
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-16 rounded-2xl bg-white/5" />
+        ))}
+      </div>
+    ),
+  }
+);
 
 export default function TasksPage() {
   const { user } = useAuthStore();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-    </div>
-  );
 
   return (
     <TasksClient

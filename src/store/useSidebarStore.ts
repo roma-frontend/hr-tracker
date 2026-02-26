@@ -18,6 +18,9 @@ export const useSidebarStore = create<SidebarState>()(
       setCollapsed: (val) => set({ collapsed: val }),
       setMobileOpen: (val) => set({ mobileOpen: val }),
     }),
-    { name: "sidebar-store" }
+    {
+      name: "sidebar-store",
+      skipHydration: true,
+    }
   )
 );

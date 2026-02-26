@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
-/* Professional HR Platform Theme - Deep Slate + Indigo */
+/* Professional HR Platform Theme - Deep Navy & Sky Blue */
 :root {
-  --color-slate-950: #020617;
-  --color-slate-900: #0f172a;
-  --color-slate-800: #1e293b;
-  --color-indigo: #6366f1;
-  --color-indigo-light: #818cf8;
-  --color-indigo-dark: #4f46e5;
-  --color-violet: #8b5cf6;
-  --color-emerald: #10b981;
-  --color-amber: #f59e0b;
+  --color-bg-deep:       #0f172a;
+  --color-bg-card:       #1e293b;
+  --color-bg-elevated:   #1e3a5f;
+  --color-primary:       #2563eb;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark:  #1d4ed8;
+  --color-accent:        #38bdf8;
+  --color-slate-400:     #94a3b8;
+  --color-slate-600:     #475569;
+}
+
+body {
+  /* background-attachment: fixed removed — forces repaint on every scroll frame (forced reflow) */
+  background: linear-gradient(135deg, #0f172a 0%, #0c1e3a 50%, #0f172a 100%);
 }
 
 /* Skip to content link - hidden by default, visible on focus */
@@ -39,7 +44,7 @@
 
 /* ── Color Scheme ──────────────────────────────────────────────── */
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth removed — prevents bfcache restoration (back/forward cache) */
   color-scheme: light;
 }
 html.dark {
@@ -49,42 +54,42 @@ html.dark {
 /* ── Light Theme (default) ─────────────────────────────────────── */
 :root {
   /* Base */
-  --background:          #f8fafc;
-  --background-subtle:   #f1f5f9;
-  --foreground:          #0f172a;
+  --background:          #f0f6ff;
+  --background-subtle:   #e8f0fe;
+  --foreground:          #0c1a2e;
 
   /* Card / Surface */
   --card:                #ffffff;
-  --card-hover:          #f8fafc;
-  --card-foreground:     #0f172a;
-  --card-border:         #e2e8f0;
+  --card-hover:          #f0f6ff;
+  --card-foreground:     #0c1a2e;
+  --card-border:         #c7d9f5;
 
   /* Popover */
   --popover:             #ffffff;
-  --popover-foreground:  #0f172a;
+  --popover-foreground:  #0c1a2e;
 
   /* Border */
-  --border:              #e2e8f0;
-  --border-subtle:       #f1f5f9;
+  --border:              #c7d9f5;
+  --border-subtle:       #e8f0fe;
   --input:               #ffffff;
-  --input-border:        #cbd5e1;
-  --ring:                #6366f1;
+  --input-border:        #93bef7;
+  --ring:                #2563eb;
 
   /* Primary */
-  --primary:             #6366f1;
-  --primary-hover:       #4f46e5;
+  --primary:             #2563eb;
+  --primary-hover:       #1d4ed8;
   --primary-foreground:  #ffffff;
 
   /* Secondary */
-  --secondary:           #f1f5f9;
-  --secondary-foreground:#475569;
+  --secondary:           #e8f0fe;
+  --secondary-foreground:#1e3a6e;
 
   /* Muted */
-  --muted:               #f1f5f9;
-  --muted-foreground:    #64748b;
+  --muted:               #e8f0fe;
+  --muted-foreground:    #4a6fa5;
 
   /* Accent */
-  --accent:              #6366f1;
+  --accent:              #0ea5e9;
   --accent-foreground:   #ffffff;
 
   /* Semantic */
@@ -96,28 +101,28 @@ html.dark {
   --warning-foreground:  #ffffff;
 
   /* Text */
-  --text-primary:        #0f172a;
-  --text-secondary:      #334155;
-  --text-muted:          #64748b;
-  --text-disabled:       #94a3b8;
+  --text-primary:        #0c1a2e;
+  --text-secondary:      #1e3a6e;
+  --text-muted:          #4a6fa5;
+  --text-disabled:       #93bef7;
 
   /* Sidebar */
   --sidebar-bg:          #ffffff;
-  --sidebar-border:      #e2e8f0;
-  --sidebar-item-hover:  #f1f5f9;
-  --sidebar-item-active: rgba(99,102,241,0.1);
-  --sidebar-item-active-text: #6366f1;
-  --sidebar-text:        #475569;
-  --sidebar-text-muted:  #94a3b8;
+  --sidebar-border:      #c7d9f5;
+  --sidebar-item-hover:  #e8f0fe;
+  --sidebar-item-active: rgba(37,99,235,0.1);
+  --sidebar-item-active-text: #2563eb;
+  --sidebar-text:        #4a6fa5;
+  --sidebar-text-muted:  #93bef7;
 
   /* Navbar */
-  --navbar-bg:           rgba(255,255,255,0.85);
-  --navbar-border:       #e2e8f0;
+  --navbar-bg:           rgba(255,255,255,0.88);
+  --navbar-border:       #c7d9f5;
 
   /* Shadows */
-  --shadow:              0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:           0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg:           0 10px 15px rgba(0,0,0,0.07), 0 4px 6px rgba(0,0,0,0.04);
+  --shadow:              0 1px 3px rgba(37,99,235,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:           0 4px 6px rgba(37,99,235,0.1), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:           0 10px 15px rgba(37,99,235,0.1), 0 4px 6px rgba(0,0,0,0.04);
 
   /* Status badges */
   --status-approved-bg:    rgba(16,185,129,0.1);
@@ -128,45 +133,45 @@ html.dark {
   --status-rejected-text:  #dc2626;
 }
 
-/* ── Dark Theme — Deep Slate + Indigo ──────────────────────────── */
+/* ── Dark Theme ────────────────────────────────────────────────── */
 .dark {
   /* Base */
-  --background:          #0f172a;
-  --background-subtle:   #1e293b;
-  --foreground:          #e2e8f0;
+  --background:          #060e1e;
+  --background-subtle:   #0d1e38;
+  --foreground:          #e8f0fe;
 
   /* Card / Surface */
-  --card:                #1e293b;
-  --card-hover:          #273549;
-  --card-foreground:     #e2e8f0;
-  --card-border:         #334155;
+  --card:                #0d1e38;
+  --card-hover:          #112344;
+  --card-foreground:     #e8f0fe;
+  --card-border:         #1a3460;
 
   /* Popover */
-  --popover:             #1e293b;
-  --popover-foreground:  #e2e8f0;
+  --popover:             #0d1e38;
+  --popover-foreground:  #e8f0fe;
 
   /* Border */
-  --border:              #334155;
-  --border-subtle:       #1e293b;
-  --input:               #1e293b;
-  --input-border:        #475569;
-  --ring:                #6366f1;
+  --border:              #1a3460;
+  --border-subtle:       #0d1e38;
+  --input:               #0d1e38;
+  --input-border:        #2563eb;
+  --ring:                #60a5fa;
 
   /* Primary */
-  --primary:             #6366f1;
-  --primary-hover:       #4f46e5;
+  --primary:             #3b82f6;
+  --primary-hover:       #2563eb;
   --primary-foreground:  #ffffff;
 
   /* Secondary */
-  --secondary:           #273549;
-  --secondary-foreground:#94a3b8;
+  --secondary:           #0d1e38;
+  --secondary-foreground:#93c5fd;
 
   /* Muted */
-  --muted:               #1e293b;
-  --muted-foreground:    #64748b;
+  --muted:               #0d1e38;
+  --muted-foreground:    #7ab3f5;
 
   /* Accent */
-  --accent:              #6366f1;
+  --accent:              #38bdf8;
   --accent-foreground:   #ffffff;
 
   /* Semantic */
@@ -178,28 +183,28 @@ html.dark {
   --warning-foreground:  #ffffff;
 
   /* Text */
-  --text-primary:        #e2e8f0;
-  --text-secondary:      #94a3b8;
-  --text-muted:          #64748b;
-  --text-disabled:       #475569;
+  --text-primary:        #e8f0fe;
+  --text-secondary:      #bdd4fa;
+  --text-muted:          #7ab3f5;
+  --text-disabled:       #2d5a9e;
 
   /* Sidebar */
-  --sidebar-bg:          #0f172a;
-  --sidebar-border:      #1e293b;
-  --sidebar-item-hover:  #1e293b;
-  --sidebar-item-active: rgba(99,102,241,0.15);
-  --sidebar-item-active-text: #818cf8;
-  --sidebar-text:        #64748b;
-  --sidebar-text-muted:  #475569;
+  --sidebar-bg:          #060e1e;
+  --sidebar-border:      #0d1e38;
+  --sidebar-item-hover:  #0d1e38;
+  --sidebar-item-active: rgba(59,130,246,0.18);
+  --sidebar-item-active-text: #60a5fa;
+  --sidebar-text:        #7ab3f5;
+  --sidebar-text-muted:  #2d5a9e;
 
   /* Navbar */
-  --navbar-bg:           rgba(15,23,42,0.90);
-  --navbar-border:       #334155;
+  --navbar-bg:           rgba(6,14,30,0.88);
+  --navbar-border:       #0d1e38;
 
   /* Shadows */
   --shadow:              0 1px 3px rgba(0,0,0,0.4);
-  --shadow-md:           0 4px 6px rgba(99,102,241,0.15);
-  --shadow-lg:           0 10px 15px rgba(99,102,241,0.2);
+  --shadow-md:           0 4px 6px rgba(0,0,0,0.5);
+  --shadow-lg:           0 10px 15px rgba(0,0,0,0.6);
 
   /* Status badges */
   --status-approved-bg:    rgba(52,211,153,0.15);
@@ -213,7 +218,16 @@ html.dark {
 /* ── Base Styles ───────────────────────────────────────────────── */
 * {
   border-color: var(--border);
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+  /* Scoped transitions — NOT on * (causes layout thrash & paint on every element) */
+}
+
+/* Only transitioning interactive elements saves massive repaint cost */
+a, button, [role="button"],
+input, select, textarea,
+.transition-colors, .transition-all, .transition {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
 }
 
 body {
@@ -229,12 +243,136 @@ body {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.12);
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(6, 14, 30, 0.75);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+}
+
+/* ── Beautiful heading & section effects ───────────────────────── */
+
+/* Gradient text for section titles */
+.heading-gradient {
+  background: linear-gradient(135deg, #2563eb 0%, #93c5fd 50%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Animated shimmer on the gradient */
+  background-size: 200% auto;
+  animation: heading-shimmer 4s linear infinite;
+}
+
+@keyframes heading-shimmer {
+  0%   { background-position: 0% center; }
+  50%  { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+
+/* Eyebrow label above section titles */
+.section-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #60a5fa;
+  position: relative;
+  padding: 0 1rem;
+}
+.section-eyebrow::before,
+.section-eyebrow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 2rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #2563eb);
+  transform: translateY(-50%);
+}
+.section-eyebrow::before { right: 100%; }
+.section-eyebrow::after  { left: 100%; background: linear-gradient(90deg, #2563eb, transparent); }
+
+/* Reveal-on-scroll: elements start hidden, animate in via IntersectionObserver trigger */
+/* Uses CSS animation-timeline where supported, JS IntersectionObserver as fallback */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1), transform 0.75s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Badge pulse (CSS-only, replaces framer-motion animate) */
+@keyframes badge-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+.badge-pulse { animation: badge-pulse 2.5s ease-in-out infinite; }
+
+/* Arrow bounce (replaces motion.span animate x) */
+@keyframes arrow-bounce {
+  0%, 100% { transform: translateX(0); }
+  50%       { transform: translateX(5px); }
+}
+.arrow-bounce { display: inline-block; animation: arrow-bounce 1.2s ease-in-out infinite; }
+
+/* Float animation (CTA icon) */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33%       { transform: translateY(-8px) rotate(5deg); }
+  66%       { transform: translateY(-4px) rotate(-5deg); }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+/* Success reveal fade-in */
+@keyframes success-reveal {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.success-reveal { animation: success-reveal 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* ── Respect prefers-reduced-motion ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .nav-animate,
+  .logo-spin,
+  .spin-slow,
+  .pulse-dot,
+  .badge-shimmer,
+  .hero-word-1,
+  .hero-word-2,
+  .hero-word-3,
+  .hero-line,
+  .hero-fade-1,
+  .hero-fade-2,
+  .hero-fade-3,
+  .hero-fade-4,
+  .scroll-line,
+  .section-fade,
+  .orb-pulse-1,
+  .orb-pulse-2,
+  .orb-pulse-3,
+  .orb-glow,
+  .particle-float-1,
+  .particle-float-2,
+  .particle-float-3,
+  .animate-float,
+  .animate-pulse-glow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────── */
@@ -262,10 +400,7 @@ body {
   0% { transform: scale(0.9); opacity: 1; }
   100% { transform: scale(1.8); opacity: 0; }
 }
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
+/* NOTE: @keyframes float defined once above — duplicate removed to reduce CSS parse cost */
 @keyframes gradient-shift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -283,14 +418,14 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #6366f1, #818cf8, #4f46e5);
+  background: linear-gradient(135deg, #2563eb, #0ea5e9, #38bdf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #6366f1, #818cf8, #4f46e5);
+  background: linear-gradient(135deg, #1d4ed8, #2563eb, #0ea5e9);
   background-size: 200% 200%;
   animation: gradient-shift 4s ease infinite;
 }
@@ -304,11 +439,11 @@ body {
 
 /* ── Selection ─────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(99, 102, 241, 0.3);
+  background: rgba(37, 99, 235, 0.25);
   color: var(--text-primary);
 }
 
-/* ── Landing Dropdown — champagne theme, no purple borders ──────── */
+/* ── Landing Dropdown — professional slate+indigo theme ──────── */
 [data-radix-popper-content-wrapper] [role="menuitem"] {
   outline: none !important;
   box-shadow: none !important;
@@ -321,3 +456,211 @@ body {
   box-shadow: none !important;
   border-color: transparent !important;
 }
+
+/* ── Hero / Landing CSS Animations (replace framer-motion) ────────── */
+
+/* Navbar slide-in */
+@keyframes nav-slide-in {
+  from { transform: translateY(-80px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+.nav-animate {
+  animation: nav-slide-in 0.7s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* Logo wiggle */
+@keyframes logo-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(5deg); }
+  75%       { transform: rotate(-5deg); }
+}
+.logo-spin {
+  animation: logo-wiggle 4s ease-in-out infinite;
+}
+
+/* Spinning icon (slow) */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spin-slow { animation: spin-slow 20s linear infinite; }
+
+/* Pulsing dot */
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1);   opacity: 0.6; }
+  50%       { transform: scale(1.4); opacity: 1;   }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* Badge shimmer sweep */
+@keyframes badge-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.badge-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(147,197,253,0.2), transparent);
+  animation: badge-shimmer 3s linear infinite;
+}
+
+/* Hero word fade-up stagger */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+.hero-word-1 { animation: hero-fade-up 0.9s cubic-bezier(0.22,1,0.36,1) 0.4s both; }
+.hero-word-2 { animation: hero-fade-up 0.9s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.hero-word-3 { animation: hero-fade-up 0.9s cubic-bezier(0.22,1,0.36,1) 0.8s both; }
+
+/* Hero underline line */
+@keyframes hero-line-grow {
+  from { width: 0; opacity: 0; }
+  to   { width: 128px; opacity: 1; }
+}
+.hero-line { animation: hero-line-grow 1s ease 1.2s both; }
+
+/* General fade-up for sections */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-fade-1 { animation: fade-up 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
+.hero-fade-2 { animation: fade-up 0.8s cubic-bezier(0.22,1,0.36,1) 0.9s both; }
+.hero-fade-3 { animation: fade-up 0.8s cubic-bezier(0.22,1,0.36,1) 1.1s both; }
+.hero-fade-4 { animation: fade-up 0.8s cubic-bezier(0.22,1,0.36,1) 1.4s both; }
+
+/* Scroll indicator line */
+@keyframes scroll-line {
+  0%, 100% { transform: scaleY(0); opacity: 0; transform-origin: top; }
+  50%       { transform: scaleY(1); opacity: 1; transform-origin: top; }
+}
+.scroll-line { animation: scroll-line 2s ease-in-out infinite; }
+
+/* Section fade-in on scroll (used for CTABanner etc.) */
+.section-fade {
+  animation: fade-up 0.8s cubic-bezier(0.22,1,0.36,1) both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 30%;
+}
+
+/* CTA button hover — CSS only, no JS */
+.cta-btn-primary {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.cta-btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(37,99,235,0.6);
+}
+.cta-btn-primary:active { transform: scale(0.97); }
+
+.cta-btn-secondary {
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+.cta-btn-secondary:hover { transform: scale(1.03); }
+.cta-btn-secondary:active { transform: scale(0.97); }
+
+/* Floating particles — pure CSS, replaces framer-motion */
+@keyframes particle-float-1 {
+  0%   { transform: translate(0, 0)     scale(0.5); opacity: 0; }
+  20%  { opacity: 1; }
+  50%  { transform: translate(20px, -80px) scale(1.2); opacity: 0.7; }
+  80%  { opacity: 0.5; }
+  100% { transform: translate(0, 0)     scale(0.5); opacity: 0; }
+}
+@keyframes particle-float-2 {
+  0%   { transform: translate(0, 0)      scale(0.5); opacity: 0; }
+  20%  { opacity: 0.8; }
+  50%  { transform: translate(-20px, -70px) scale(1); opacity: 0.6; }
+  80%  { opacity: 0.3; }
+  100% { transform: translate(0, 0)      scale(0.5); opacity: 0; }
+}
+@keyframes particle-float-3 {
+  0%   { transform: translate(0, 0)     scale(0.6); opacity: 0; }
+  30%  { opacity: 0.9; }
+  50%  { transform: translate(10px, -60px) scale(0.8); opacity: 0.5; }
+  100% { transform: translate(0, 0)     scale(0.6); opacity: 0; }
+}
+.particle-float-1 { animation: particle-float-1 linear infinite; }
+.particle-float-2 { animation: particle-float-2 linear infinite; }
+.particle-float-3 { animation: particle-float-3 linear infinite; }
+
+/* ── Orb CSS Animations (GPU composited, no JS) ─────────────────── */
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, 20px) scale(1.12); }
+  66%       { transform: translate(15px, -10px) scale(0.95); }
+}
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-20px, 30px) scale(1.15); }
+  70%       { transform: translate(-10px, 10px) scale(0.92); }
+}
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(25px, -20px) scale(1.08); }
+}
+
+.orb-pulse-1 {
+  animation: orb-float-1 14s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.orb-pulse-2 {
+  animation: orb-float-2 18s ease-in-out infinite;
+  animation-delay: -6s;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.orb-pulse-3 {
+  animation: orb-float-3 12s ease-in-out infinite;
+  animation-delay: -4s;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ── Performance hints ─────────────────────────────────────────── */
+.perf-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ── Reduce motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .orb-pulse-1,
+  .orb-pulse-2,
+  .orb-pulse-3 {
+    animation: none;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Content visibility for below-fold sections ────────────────── */
+.section-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px;
+}
+
+/* ── Navbar notification dropdown (replaces framer-motion) ─────── */
+@keyframes notif-dropdown {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ── Toast slide-in from right (replaces framer-motion spring) ─── */
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateX(80px) scale(0.9); }
+  to   { opacity: 1; transform: translateX(0)    scale(1); }
+}
+
+/* ── Toast progress bar shrink (replaces motion.div width) ─────── */
+@keyframes toast-progress {
+  from { transform: scaleX(1); transform-origin: left; }
+  to   { transform: scaleX(0); transform-origin: left; }
+}
+
+/* ── smooth scroll only for user-initiated anchor clicks ────────── */
+/* Applied via JS: document.documentElement.style.scrollBehavior = 'smooth' */
+/* NOT set globally — preserves bfcache restoration */

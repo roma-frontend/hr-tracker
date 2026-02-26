@@ -33,6 +33,7 @@
     "@react-three/fiber": "^9.5.0",
     "@simplewebauthn/browser": "^13.2.2",
     "@simplewebauthn/server": "^13.2.3",
+    "@stripe/stripe-js": "^8.8.0",
     "ai": "^6.0.97",
     "canvas": "^3.2.1",
     "class-variance-authority": "^0.7.1",
@@ -53,6 +54,7 @@
     "recharts": "^3.7.0",
     "resend": "^6.9.2",
     "sonner": "^2.0.7",
+    "stripe": "^20.4.0",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.1",
     "zustand": "^5.0.11"

@@ -1,0 +1,72 @@
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ✓ optimizeCss
+  · optimizePackageImports
+  ✓ scrollRestoration
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 19.9s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+⚠ Using edge runtime on a page currently disables static generation for that page
+  Generating static pages using 7 workers (0/43) ...
+  Generating static pages using 7 workers (10/43) 
+  Generating static pages using 7 workers (21/43) 
+  Generating static pages using 7 workers (32/43) 
+✓ Generating static pages using 7 workers (43/43) in 1376.3ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /analytics
+├ ƒ /api/approve-all
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/reset-password
+├ ƒ /api/calendar/google/auth
+├ ƒ /api/calendar/google/callback
+├ ƒ /api/calendar/google/sync
+├ ƒ /api/calendar/outlook/auth
+├ ƒ /api/calendar/outlook/callback
+├ ƒ /api/calendar/outlook/sync
+├ ƒ /api/chat
+├ ƒ /api/chat/book-leave
+├ ƒ /api/chat/context
+├ ƒ /api/chat/delete-leave
+├ ƒ /api/chat/edit-leave
+├ ƒ /api/chat/full-context
+├ ƒ /api/chat/insights
+├ ƒ /api/chat/weekly-digest
+├ ƒ /api/stripe/checkout
+├ ƒ /api/stripe/webhook
+├ ƒ /apple-icon
+├ ○ /approvals
+├ ○ /attendance
+├ ○ /calendar
+├ ○ /checkout/success
+├ ○ /contact
+├ ○ /dashboard
+├ ○ /employees
+├ ƒ /employees/[id]
+├ ○ /forgot-password
+├ ƒ /icon
+├ ○ /leaves
+├ ○ /login
+├ ƒ /opengraph-image
+├ ○ /privacy
+├ ○ /register
+├ ○ /reports
+├ ○ /reset-password
+├ ○ /robots.txt
+├ ○ /settings
+├ ○ /sitemap.xml
+├ ○ /tasks
+└ ○ /terms
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

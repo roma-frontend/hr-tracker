@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -52,14 +52,14 @@ export function AIRecommendationsCard() {
   if (!hasContent && !loading) return null;
 
   return (
-    <Card className="border border-[#6366f1]/30 overflow-hidden">
+    <Card className="border border-[#2563eb]/30 overflow-hidden">
       {/* Gradient top bar */}
-      <div className="h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" />
+      <div className="h-1 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9]" />
 
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]">
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#0ea5e9]">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             AI Recommendations
@@ -101,7 +101,7 @@ export function AIRecommendationsCard() {
             <CardContent className="space-y-3 pt-0">
               {loading && !insights ? (
                 <div className="flex items-center gap-2 py-4 justify-center">
-                  <Loader2 className="w-4 h-4 animate-spin text-[#6366f1]" />
+                  <Loader2 className="w-4 h-4 animate-spin text-[#2563eb]" />
                   <span className="text-sm text-[var(--text-muted)]">Analyzing your data...</span>
                 </div>
               ) : (
@@ -124,16 +124,16 @@ export function AIRecommendationsCard() {
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.05 }}
-                      className="p-3 rounded-xl border border-purple-500/30 bg-purple-500/5"
+                      className="p-3 rounded-xl border border-sky-400/30 bg-sky-400/5"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="w-4 h-4 text-purple-500" />
-                        <p className="text-xs font-semibold text-purple-500">Attendance Patterns</p>
+                        <TrendingUp className="w-4 h-4 text-sky-400" />
+                        <p className="text-xs font-semibold text-sky-400">Attendance Patterns</p>
                       </div>
                       <ul className="space-y-1">
                         {insights.patterns.map((p, i) => (
                           <li key={i} className="text-sm text-[var(--text-primary)] flex items-start gap-2">
-                            <span className="text-purple-500 mt-0.5">•</span>
+                            <span className="text-sky-400 mt-0.5">•</span>
                             {p}
                           </li>
                         ))}

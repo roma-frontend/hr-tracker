@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -7,6 +7,7 @@ import {
   PieChart, Pie, Cell, Legend, AreaChart, Area,
 } from "recharts";
 import { Download, TrendingUp, Users, CalendarDays, FileText } from "lucide-react";
+import { PlanGate } from "@/components/subscription/PlanGate";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -115,6 +116,11 @@ export default function ReportsPage() {
   if (!mounted) return null;
 
   return (
+    <PlanGate
+      feature="reports"
+      title="Reports — Professional Plan Required"
+      description="Detailed reports and CSV export are available on the Professional plan and above."
+    >
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -321,8 +327,8 @@ export default function ReportsPage() {
                       <XAxis dataKey="month" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                       <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }} />
-                      <Area type="monotone" dataKey="cumulative" name="Requests" stroke="#6366f1" fill="#6366f1" fillOpacity={0.1} strokeWidth={2} />
-                      <Area type="monotone" dataKey="days" name="Days" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.1} strokeWidth={2} />
+                      <Area type="monotone" dataKey="cumulative" name="Requests" stroke="#2563eb" fill="#2563eb" fillOpacity={0.1} strokeWidth={2} />
+                      <Area type="monotone" dataKey="days" name="Days" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.1} strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -332,5 +338,6 @@ export default function ReportsPage() {
         </Tabs>
       </motion.div>
     </motion.div>
+    </PlanGate>
   );
 }

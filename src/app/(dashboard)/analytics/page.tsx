@@ -3,12 +3,29 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
-import { LeavesTrendChart } from "@/components/analytics/LeavesTrendChart";
-import { DepartmentStats } from "@/components/analytics/DepartmentStats";
-import { LeaveHeatmap } from "@/components/analytics/LeaveHeatmap";
 import { StatsCard } from "@/components/analytics/StatsCard";
+import dynamic from "next/dynamic";
+
+// Recharts is ~500KB — lazy load chart components so they don't block
+// the initial analytics page render
+const ChartSkeleton = () => (
+  <div className="h-96 bg-[var(--background-subtle)] animate-pulse rounded-2xl" />
+);
+const LeavesTrendChart = dynamic(
+  () => import("@/components/analytics/LeavesTrendChart"),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+const DepartmentStats = dynamic(
+  () => import("@/components/analytics/DepartmentStats"),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+const LeaveHeatmap = dynamic(
+  () => import("@/components/analytics/LeaveHeatmap"),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
 import { Users, Clock, CheckCircle, XCircle, AlertCircle, TrendingUp } from "lucide-react";
 import { redirect } from "next/navigation";
+import { PlanGate } from "@/components/subscription/PlanGate";
 
 export default function AnalyticsPage() {
   const { user } = useAuthStore();
@@ -51,6 +68,11 @@ export default function AnalyticsPage() {
   const approvalRate = totalLeaves > 0 ? ((approvedLeaves / totalLeaves) * 100).toFixed(1) : 0;
 
   return (
+    <PlanGate
+      feature="advancedAnalytics"
+      title="Analytics — Professional Plan Required"
+      description="Advanced analytics and HR insights are available on the Professional plan and above."
+    >
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -140,5 +162,6 @@ export default function AnalyticsPage() {
       {/* Heatmap */}
       <LeaveHeatmap leaves={allLeaves} />
     </div>
+    </PlanGate>
   );
 }

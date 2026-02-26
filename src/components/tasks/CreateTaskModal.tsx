@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -59,14 +59,14 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-[var(--border)]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
+        <div className="bg-gradient-to-r from-blue-600 to-sky-500 px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-white">Create New Task</h2>
-              <p className="text-indigo-200 text-sm mt-0.5">Assign a task to your team member</p>
+              <p className="text-blue-200 text-sm mt-0.5">Assign a task to your team member</p>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">✕</button>
           </div>
@@ -75,39 +75,39 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-600 text-sm rounded-xl px-4 py-3">{error}</div>
+            <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm rounded-xl px-4 py-3">{error}</div>
           )}
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Task Title *</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Task Title *</label>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="e.g. Prepare monthly sales report"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Description</label>
             <textarea
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="Add task details, requirements, or notes..."
               rows={3}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent resize-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none placeholder:text-[var(--text-muted)]"
             />
           </div>
 
           {/* Assignee */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Assign To *</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Assign To *</label>
             <select
               value={assignedTo}
               onChange={e => setAssignedTo(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent bg-white"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
             >
               <option value="">Select employee...</option>
               {availableEmployees?.map(emp => (
@@ -117,7 +117,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               ))}
             </select>
             {availableEmployees?.length === 0 && (
-              <p className="text-xs text-amber-500 mt-1">
+              <p className="text-xs text-amber-400 mt-1">
                 {userRole === "supervisor" ? "No employees assigned to you yet. Ask admin to assign employees." : "No employees found."}
               </p>
             )}
@@ -126,11 +126,11 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
           {/* Priority + Deadline row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Priority</label>
+              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Priority</label>
               <select
                 value={priority}
                 onChange={e => setPriority(e.target.value as any)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent bg-white"
+                className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               >
                 <option value="low">↓ Low</option>
                 <option value="medium">→ Medium</option>
@@ -139,25 +139,25 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Deadline</label>
+              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Deadline</label>
               <input
                 type="date"
                 value={deadline}
                 onChange={e => setDeadline(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tags <span className="font-normal text-slate-400">(comma separated)</span></label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Tags <span className="font-normal text-[var(--text-muted)]">(comma separated)</span></label>
             <input
               value={tagsInput}
               onChange={e => setTagsInput(e.target.value)}
               placeholder="e.g. marketing, report, urgent"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
             />
           </div>
 
@@ -166,14 +166,14 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--background-subtle)] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold shadow-md shadow-indigo-200 transition-all disabled:opacity-60"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-700 text-white text-sm font-semibold shadow-md shadow-blue-500/20 transition-all disabled:opacity-60"
             >
               {loading ? "Creating..." : "Create Task"}
             </button>

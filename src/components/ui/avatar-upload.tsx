@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -139,7 +139,7 @@ export function AvatarUpload({
         ) : (
           <div
             className={`${sizes[size]} rounded-full flex items-center justify-center font-bold`}
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff" }}
+            style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)", color: "#fff" }}
           >
             {initials || <User className="w-1/2 h-1/2" />}
           </div>

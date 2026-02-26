@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useQuery } from "convex/react";
@@ -57,7 +57,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
                 {(employee as any).avatarUrl ? (
                   <img src={(employee as any).avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
@@ -89,7 +89,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 <Button
                   size="sm"
                   onClick={() => setShowRatingForm(!showRatingForm)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                  className="bg-gradient-to-r from-sky-400 to-pink-500 hover:from-sky-500 hover:to-pink-600 text-white"
                 >
                   <Star className="w-4 h-4 mr-1" />
                   {showRatingForm ? "Cancel Rating" : "Rate Performance"}
@@ -164,7 +164,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 <p className="text-xs text-[var(--text-muted)] mt-1">Total Hours</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
-                <p className="text-2xl font-bold text-purple-500">{monthlyStats.punctualityRate}%</p>
+                <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">Punctuality</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
@@ -292,7 +292,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <p className="text-sm text-[var(--text-muted)]">No performance rating yet</p>
             <Button
               size="sm"
-              className="mt-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+              className="mt-3 bg-gradient-to-r from-sky-400 to-pink-500 text-white"
               onClick={() => setShowRatingForm(true)}
             >
               <Plus className="w-4 h-4 mr-1" />
@@ -309,7 +309,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#6366f1]">{employee.paidLeaveBalance}</p>
+            <p className="text-2xl font-bold text-[#2563eb]">{employee.paidLeaveBalance}</p>
             <p className="text-xs text-[var(--text-muted)] mt-1">Paid Leave</p>
           </div>
           <div className="text-center">

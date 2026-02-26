@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
@@ -19,10 +19,10 @@ interface StatsCardProps {
 
 const colorMap = {
   blue: {
-    bg: "from-[#6366f1]/20 to-[#6366f1]/5",
-    icon: "bg-[#6366f1]/20 text-[#6366f1]",
-    border: "border-[#6366f1]/20",
-    glow: "shadow-[#6366f1]/10",
+    bg: "from-[#2563eb]/20 to-[#2563eb]/5",
+    icon: "bg-[#2563eb]/20 text-[#2563eb]",
+    border: "border-[#2563eb]/20",
+    glow: "shadow-[#2563eb]/10",
   },
   green: {
     bg: "from-[#10b981]/20 to-[#10b981]/5",
@@ -43,10 +43,10 @@ const colorMap = {
     glow: "shadow-[#ef4444]/10",
   },
   purple: {
-    bg: "from-[#8b5cf6]/20 to-[#8b5cf6]/5",
-    icon: "bg-[#8b5cf6]/20 text-[#8b5cf6]",
-    border: "border-[#8b5cf6]/20",
-    glow: "shadow-[#8b5cf6]/10",
+    bg: "from-[#0ea5e9]/20 to-[#0ea5e9]/5",
+    icon: "bg-[#0ea5e9]/20 text-[#0ea5e9]",
+    border: "border-[#0ea5e9]/20",
+    glow: "shadow-[#0ea5e9]/10",
   },
   cyan: {
     bg: "from-[#06b6d4]/20 to-[#06b6d4]/5",

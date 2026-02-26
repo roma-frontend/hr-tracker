@@ -100,3 +100,5 @@ export function LeavesTrendChart({ leaves }: LeavesTrendChartProps) {
     </div>
   );
 }
+
+export default LeavesTrendChart;

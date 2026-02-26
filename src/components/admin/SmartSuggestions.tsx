@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -28,7 +28,7 @@ export default function SmartSuggestions() {
       case "conflict":
         return "bg-red-500/10 text-red-500 border-red-500/30";
       case "policy":
-        return "bg-purple-500/10 text-purple-500 border-purple-500/30";
+        return "bg-sky-400/10 text-sky-400 border-sky-400/30";
       default:
         return "bg-gray-500/10 text-gray-500 border-gray-500/30";
     }
@@ -51,14 +51,14 @@ export default function SmartSuggestions() {
     <Card className="border-[var(--border)]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-500" />
+          <Sparkles className="h-5 w-5 text-sky-400" />
           AI Smart Suggestions
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {suggestions.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
-            <Lightbulb className="mb-3 h-12 w-12 text-purple-500 opacity-50" />
+            <Lightbulb className="mb-3 h-12 w-12 text-sky-400 opacity-50" />
             <p className="text-sm font-medium text-[var(--text-primary)]">
               No Suggestions Available
             </p>

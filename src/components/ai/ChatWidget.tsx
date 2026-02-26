@@ -1,10 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Sparkles, Loader2, CheckCircle, AlertCircle, Calendar, Pencil, Trash2, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useUpgradeModal } from '@/components/subscription/PlanGate';
+import { usePlanFeatures } from '@/hooks/usePlanFeatures';
 
 // SpeechRecognition type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -168,6 +170,11 @@ export function ChatWidget() {
   const user = useAuthStore((s) => s.user);
   const wakeRecogRef = useRef<SpeechRecognition[]>([]);
   const voiceRecogRef = useRef<SpeechRecognition | null>(null);
+
+  // Plan gating
+  const { canAccess } = usePlanFeatures();
+  const hasAiChat = canAccess('aiChat');
+  const { openModal, modal: upgradeModal } = useUpgradeModal();
 
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -532,7 +539,7 @@ export function ChatWidget() {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="fixed bottom-24 right-6 z-50 px-4 py-2 rounded-xl bg-[#6366f1] text-white text-sm font-medium shadow-lg flex items-center gap-2"
+            className="fixed bottom-24 right-6 z-50 px-4 py-2 rounded-xl bg-[#2563eb] text-white text-sm font-medium shadow-lg flex items-center gap-2"
           >
             <Mic className="w-4 h-4 animate-pulse" />
             Hey HR! I'm listening…
@@ -540,10 +547,23 @@ export function ChatWidget() {
         )}
       </AnimatePresence>
 
+      {/* Upgrade modal (rendered at root level) */}
+      {upgradeModal}
+
       {/* Toggle Button */}
       <motion.button
-        onClick={() => setIsOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white shadow-2xl shadow-[#6366f1]/40 flex items-center justify-center hover:scale-105 transition-transform"
+        onClick={() => {
+          if (!hasAiChat) {
+            openModal({
+              featureTitle: 'AI HR Assistant',
+              featureDescription: 'AI-powered leave assistant, smart suggestions, and voice commands are available on the Professional plan.',
+              recommendedPlan: 'professional',
+            });
+            return;
+          }
+          setIsOpen(o => !o);
+        }}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white shadow-2xl shadow-[#2563eb]/40 flex items-center justify-center hover:scale-105 transition-transform"
         whileTap={{ scale: 0.95 }}
       >
         <AnimatePresence mode="wait">
@@ -571,8 +591,8 @@ export function ChatWidget() {
             style={{ background: 'var(--card)' }}
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] flex-shrink-0 bg-gradient-to-r from-[#6366f1]/10 to-[#8b5cf6]/10">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] flex-shrink-0 bg-gradient-to-r from-[#2563eb]/10 to-[#0ea5e9]/10">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center shadow">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -597,7 +617,7 @@ export function ChatWidget() {
                         key={s}
                         onClick={() => handleSuggestion(s)}
                         disabled={isLoading}
-                        className="text-left px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] hover:border-[#6366f1]/50 hover:bg-[#6366f1]/5 hover:text-[#6366f1] text-xs text-[var(--text-primary)] transition-all duration-150 disabled:opacity-50"
+                        className="text-left px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] hover:border-[#2563eb]/50 hover:bg-[#2563eb]/5 hover:text-[#2563eb] text-xs text-[var(--text-primary)] transition-all duration-150 disabled:opacity-50"
                       >
                         {s}
                       </button>
@@ -615,7 +635,7 @@ export function ChatWidget() {
                       <div
                         className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                           isUser
-                            ? 'bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white rounded-br-sm'
+                            ? 'bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white rounded-br-sm'
                             : 'bg-[var(--background-subtle)] text-[var(--text-primary)] rounded-bl-sm'
                         }`}
                       >
@@ -636,11 +656,11 @@ export function ChatWidget() {
                                 initial={{ opacity: 0, y: 4 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className={`rounded-xl border p-3 text-xs space-y-2 ${
-                                  isDelete ? 'border-red-500/20 bg-red-500/5' : isEdit ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-[#6366f1]/20 bg-[#6366f1]/5'
+                                  isDelete ? 'border-red-500/20 bg-red-500/5' : isEdit ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-[#2563eb]/20 bg-[#2563eb]/5'
                                 }`}
                               >
                                 <div className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
-                                  {isDelete ? <Trash2 className="w-3.5 h-3.5 text-red-500" /> : isEdit ? <Pencil className="w-3.5 h-3.5 text-yellow-500" /> : <Calendar className="w-3.5 h-3.5 text-[#6366f1]" />}
+                                  {isDelete ? <Trash2 className="w-3.5 h-3.5 text-red-500" /> : isEdit ? <Pencil className="w-3.5 h-3.5 text-yellow-500" /> : <Calendar className="w-3.5 h-3.5 text-[#2563eb]" />}
                                   {isDelete ? 'Cancel Leave' : isEdit ? 'Update Leave' : (LEAVE_TYPE_LABELS[( action as BookLeaveAction).leaveType] ?? 'Leave Request')}
                                 </div>
                                 <div className="text-[var(--text-muted)] space-y-0.5">
@@ -664,7 +684,7 @@ export function ChatWidget() {
                                   <button
                                     onClick={() => handleAction(m.id, action, idx)}
                                     className={`w-full py-2 px-3 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity ${
-                                      isDelete ? 'bg-gradient-to-r from-red-500 to-red-600' : isEdit ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]'
+                                      isDelete ? 'bg-gradient-to-r from-red-500 to-red-600' : isEdit ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gradient-to-r from-[#2563eb] to-[#0ea5e9]'
                                     }`}
                                   >
                                     {isDelete ? '🗑️ Confirm Delete' : isEdit ? '✏️ Confirm Update' : '✅ Confirm & Send to Admin'}
@@ -672,7 +692,7 @@ export function ChatWidget() {
                                 )}
                                 {state.status === 'loading' && (
                                   <div className="flex items-center justify-center gap-2 py-2">
-                                    <Loader2 className="w-4 h-4 animate-spin text-[#6366f1]" />
+                                    <Loader2 className="w-4 h-4 animate-spin text-[#2563eb]" />
                                     <span className="text-xs text-[var(--text-muted)]">Submitting...</span>
                                   </div>
                                 )}
@@ -707,7 +727,7 @@ export function ChatWidget() {
                               key={s}
                               onClick={() => handleSuggestion(s)}
                               disabled={isLoading}
-                              className="px-2.5 py-1 rounded-full border border-[#6366f1]/30 bg-[#6366f1]/5 hover:bg-[#6366f1]/15 hover:border-[#6366f1]/60 text-[10px] text-[#6366f1] font-medium transition-all duration-150 disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-full border border-[#2563eb]/30 bg-[#2563eb]/5 hover:bg-[#2563eb]/15 hover:border-[#2563eb]/60 text-[10px] text-[#2563eb] font-medium transition-all duration-150 disabled:opacity-50"
                             >
                               {s}
                             </button>
@@ -723,7 +743,7 @@ export function ChatWidget() {
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-[var(--background-subtle)] px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#6366f1]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#2563eb]" />
                     <span className="text-xs text-[var(--text-muted)]">Thinking...</span>
                   </div>
                 </div>
@@ -748,8 +768,8 @@ export function ChatWidget() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder={isListening ? '🎤 Listening...' : 'Ask about leaves, book time off...'}
-                    className={`w-full px-4 py-2 pr-10 bg-[var(--background-subtle)] border rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#6366f1] text-sm transition-colors ${
-                      isListening ? 'border-[#6366f1] ring-2 ring-[#6366f1]/30' : 'border-[var(--border)]'
+                    className={`w-full px-4 py-2 pr-10 bg-[var(--background-subtle)] border rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-sm transition-colors ${
+                      isListening ? 'border-[#2563eb] ring-2 ring-[#2563eb]/30' : 'border-[var(--border)]'
                     }`}
                     disabled={isLoading}
                     onKeyDown={(e) => {
@@ -766,8 +786,8 @@ export function ChatWidget() {
                     title={isListening ? 'Stop listening' : 'Voice input'}
                     className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors disabled:opacity-50 ${
                       isListening
-                        ? 'text-[#6366f1] animate-pulse'
-                        : 'text-[var(--text-muted)] hover:text-[#6366f1]'
+                        ? 'text-[#2563eb] animate-pulse'
+                        : 'text-[var(--text-muted)] hover:text-[#2563eb]'
                     }`}
                   >
                     {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -776,7 +796,7 @@ export function ChatWidget() {
                 <Button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] hover:opacity-90 disabled:opacity-50"
+                  className="bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] hover:opacity-90 disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </Button>
@@ -788,3 +808,5 @@ export function ChatWidget() {
     </>
   );
 }
+
+export default ChatWidget;

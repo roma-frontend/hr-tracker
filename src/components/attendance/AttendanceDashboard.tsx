@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { useQuery } from "convex/react";
@@ -55,9 +55,9 @@ export function AttendanceDashboard() {
       label: "Punctuality",
       value: `${monthlyStats.punctualityRate}%`,
       icon: Target,
-      color: "text-purple-500",
-      borderColor: "border-purple-500/30",
-      iconBg: "bg-purple-500/10",
+      color: "text-sky-400",
+      borderColor: "border-sky-400/30",
+      iconBg: "bg-sky-400/10",
     },
     {
       label: "Overtime",
@@ -176,7 +176,7 @@ export function AttendanceDashboard() {
                     {record.isLate && <Badge variant="destructive">Late</Badge>}
                     {record.isEarlyLeave && <Badge className="bg-orange-500 text-white">Early</Badge>}
                     {record.overtimeMinutes && record.overtimeMinutes > 0 && (
-                      <Badge className="bg-purple-500 text-white">
+                      <Badge className="bg-sky-400 text-white">
                         +{Math.floor(record.overtimeMinutes / 60)}h OT
                       </Badge>
                     )}

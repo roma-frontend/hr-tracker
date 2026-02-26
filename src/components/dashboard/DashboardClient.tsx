@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType, type LeaveStatus } from "@/lib/types";
 import dynamic from "next/dynamic";
+import { PlanGate } from "@/components/subscription/PlanGate";
 
 // Lazy load admin components
 const HolidayCalendarSync = dynamic(() => import("@/components/admin/HolidayCalendarSync"), { ssr: false });
@@ -46,9 +47,16 @@ function StatusBadge({ status }: { status: LeaveStatus }) {
   return <Badge variant={variants[status]} className="capitalize">{status}</Badge>;
 }
 
+function formatDate(dateStr: string | undefined | null, fmt: string): string {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "—";
+  return format(d, fmt);
+}
+
 function LeaveTypeBadge({ type }: { type: LeaveType }) {
   const colorMap: Record<LeaveType, string> = {
-    paid: "bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30",
+    paid: "bg-[#2563eb]/20 text-[#2563eb] border-[#2563eb]/30",
     unpaid: "bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30",
     sick: "bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/30",
     family: "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30",
@@ -120,7 +128,7 @@ export function DashboardClient() {
       </div>
       <h2 className="text-xl font-bold text-[var(--text-primary)]">Convex Not Deployed</h2>
       <p className="text-[var(--text-muted)] text-sm max-w-sm">
-        Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#6366f1]">npx convex dev</code> in the terminal to connect to the database.
+        Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#2563eb]">npx convex dev</code> in the terminal to connect to the database.
       </p>
     </div>
   );
@@ -224,7 +232,7 @@ export function DashboardClient() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Recent Leave Requests</CardTitle>
-              <Button asChild variant="ghost" size="sm" className="text-[#6366f1] hover:text-[#6366f1]">
+              <Button asChild variant="ghost" size="sm" className="text-[#2563eb] hover:text-[#2563eb]">
                 <Link href="/leaves">View all <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link>
               </Button>
             </div>
@@ -264,7 +272,7 @@ export function DashboardClient() {
                         <td className="px-4 py-3"><LeaveTypeBadge type={req.type as LeaveType} /></td>
                         <td className="px-4 py-3 hidden md:table-cell">
                           <p className="text-xs text-[var(--text-secondary)]">
-                            {format(new Date(req.startDate), "MMM d")} – {format(new Date(req.endDate), "MMM d, yyyy")}
+                            {formatDate(req.startDate, "MMM d")} – {formatDate(req.endDate, "MMM d, yyyy")}
                           </p>
                         </td>
                         <td className="px-4 py-3 hidden sm:table-cell">
@@ -285,14 +293,14 @@ export function DashboardClient() {
       <motion.div variants={itemVariants}>
         <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#6366f1]">
-            <Link href="/leaves"><Plus className="w-5 h-5 text-[#6366f1]" /><span className="text-xs">New Leave Request</span></Link>
+          <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#2563eb]">
+            <Link href="/leaves"><Plus className="w-5 h-5 text-[#2563eb]" /><span className="text-xs">New Leave Request</span></Link>
           </Button>
           <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#10b981]">
             <Link href="/employees"><Users className="w-5 h-5 text-[#10b981]" /><span className="text-xs">Add Employee</span></Link>
           </Button>
-          <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#8b5cf6]">
-            <Link href="/calendar"><CalendarDays className="w-5 h-5 text-[#8b5cf6]" /><span className="text-xs">View Calendar</span></Link>
+          <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#0ea5e9]">
+            <Link href="/calendar"><CalendarDays className="w-5 h-5 text-[#0ea5e9]" /><span className="text-xs">View Calendar</span></Link>
           </Button>
         </div>
       </motion.div>
@@ -303,15 +311,22 @@ export function DashboardClient() {
           <motion.div variants={itemVariants} className="pt-6 border-t border-[var(--border)]">
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-1 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+                <div className="h-8 w-1 bg-gradient-to-b from-sky-400 to-pink-500 rounded-full" />
                 <h3 className="text-lg font-bold text-[var(--text-primary)]">
                   Admin Tools
                 </h3>
-                <span className="px-2 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full">
+                <span className="px-2 py-1 bg-gradient-to-r from-sky-400/10 to-pink-500/10 text-sky-500 dark:text-sky-400 text-xs font-semibold rounded-full">
                   PREMIUM
                 </span>
               </div>
-              <WeeklyDigestWidget />
+              <PlanGate
+                feature="aiChat"
+                title="AI Weekly Digest — Professional Plan Required"
+                description="AI-powered weekly digests are available on the Professional plan and above."
+                mode="overlay"
+              >
+                <WeeklyDigestWidget />
+              </PlanGate>
             </div>
             <p className="text-sm text-[var(--text-muted)] mb-6">
               Advanced analytics and AI-powered insights for managing your team's leave schedule
@@ -320,7 +335,13 @@ export function DashboardClient() {
 
           {/* Admin Grid - Row 1: Response Time SLA (Full Width) */}
           <motion.div variants={itemVariants}>
-            <ResponseTimeSLA />
+            <PlanGate
+              feature="slaSettings"
+              title="SLA Management — Professional Plan Required"
+              description="Response time SLA tracking and management is available on the Professional plan and above."
+            >
+              <ResponseTimeSLA />
+            </PlanGate>
           </motion.div>
 
           {/* Admin Grid - Row 2: Calendar Sync + Cost Analysis */}
@@ -347,3 +368,5 @@ export function DashboardClient() {
     </motion.div>
   );
 }
+
+export default DashboardClient;

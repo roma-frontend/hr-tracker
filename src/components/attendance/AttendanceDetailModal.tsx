@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,7 +87,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
             className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
           >
             {/* Header gradient */}
-            <div className="relative h-28 bg-gradient-to-br from-indigo-600 to-purple-700 flex items-end px-6 pb-4">
+            <div className="relative h-28 bg-gradient-to-br from-blue-600 to-sky-700 flex items-end px-6 pb-4">
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
@@ -97,7 +97,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
 
               {/* Avatar */}
               <div className="flex items-end gap-4">
-                <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden shadow-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden shadow-lg bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-2xl font-bold">
                   {record.user?.avatarUrl ? (
                     <img src={record.user.avatarUrl} alt={record.user.name ?? ""} className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
                   ) : (
@@ -130,7 +130,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
               {/* Timeline */}
               <div className="rounded-xl p-4 space-y-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-indigo-500" />
+                  <Clock className="w-4 h-4 text-blue-500" />
                   Time Timeline
                 </h3>
                 <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                       />
                     </div>
                     {record.overtimeMinutes && record.overtimeMinutes > 0 && (
-                      <p className="text-xs text-purple-500 mt-1">
+                      <p className="text-xs text-sky-400 mt-1">
                         +{formatDuration(record.overtimeMinutes)} overtime
                       </p>
                     )}
@@ -220,7 +220,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                   </div>
                 )}
                 {(record.user as any)?.supervisorName && (
-                  <div className="flex items-center gap-2 text-sm text-indigo-500">
+                  <div className="flex items-center gap-2 text-sm text-blue-500">
                     <User className="w-4 h-4" />
                     Supervisor: <span className="font-semibold">{(record.user as any).supervisorName}</span>
                   </div>
@@ -231,7 +231,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
               {monthlyStats && (
                 <div className="rounded-xl p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-3">
-                    <TrendingUp className="w-4 h-4 text-purple-500" />
+                    <TrendingUp className="w-4 h-4 text-sky-400" />
                     This Month
                   </h3>
                   <div className="grid grid-cols-3 gap-3">
@@ -255,7 +255,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
               {recentRecords && recentRecords.length > 0 && (
                 <div className="rounded-xl p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-3">
-                    <Calendar className="w-4 h-4 text-indigo-500" />
+                    <Calendar className="w-4 h-4 text-blue-500" />
                     Last 7 Days
                   </h3>
                   <div className="space-y-2">

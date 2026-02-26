@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { motion, AnimatePresence } from "framer-motion";
+// framer-motion removed — replaced with CSS transitions to reduce main-thread work,
+// eliminate forced reflow from JS-driven animations, and defer the framer-motion bundle
 import {
   Menu, Bell, Sun, Moon, LogOut, User, Settings, ChevronDown, Check, X,
 } from "lucide-react";
@@ -214,35 +215,34 @@ export function Navbar() {
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#6366f1] rounded-full animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#2563eb] rounded-full animate-pulse" />
             )}
           </Button>
 
-          <AnimatePresence>
-            {showNotifications && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-80 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-20 overflow-hidden"
-                >
+          {showNotifications && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
+              {/* CSS transition instead of motion.div — no JS-driven layout recalc */}
+              <div
+                className="absolute right-0 top-full mt-2 w-80 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-20 overflow-hidden"
+                style={{
+                  animation: "notif-dropdown 0.15s ease both",
+                }}
+              >
                   <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                     <p className="text-sm font-semibold text-[var(--text-primary)]">
                       Notifications
                     </p>
                     <div className="flex items-center gap-2">
                       {unreadCount > 0 && (
-                        <Badge variant="default" className="text-xs px-1.5 py-0 bg-[#6366f1]">
+                        <Badge variant="default" className="text-xs px-1.5 py-0 bg-[#2563eb]">
                           {unreadCount}
                         </Badge>
                       )}
                       {unreadCount > 0 && (
                         <button
                           onClick={handleMarkAllRead}
-                          className="text-xs text-[#6366f1] hover:underline flex items-center gap-1"
+                          className="text-xs text-[#2563eb] hover:underline flex items-center gap-1"
                         >
                           <Check className="w-3 h-3" /> All read
                         </button>
@@ -272,7 +272,7 @@ export function Navbar() {
                             setShowNotifications(false);
                           }}
                           className={`px-4 py-3 hover:bg-[var(--background-subtle)] cursor-pointer transition-colors ${
-                            !n.isRead ? "bg-[#6366f1]/5 border-l-2 border-[#6366f1]" : ""
+                            !n.isRead ? "bg-[#2563eb]/5 border-l-2 border-[#2563eb]" : ""
                           }`}
                         >
                           <p className="text-sm font-semibold text-[var(--text-primary)] leading-snug">{n.title}</p>
@@ -282,10 +282,9 @@ export function Navbar() {
                       ))
                     )}
                   </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Theme toggle */}
@@ -310,7 +309,7 @@ export function Navbar() {
               <div className="relative">
                 <Avatar className="w-8 h-8">
                   {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                  <AvatarFallback className="text-xs bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white font-semibold">
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] text-white font-semibold">
                     {user?.name ? getInitials(user.name) : "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -360,7 +359,7 @@ export function Navbar() {
                 <span className={`text-sm ${currentPresence === key ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}>
                   {cfg.label}
                 </span>
-                {currentPresence === key && <Check className="w-3.5 h-3.5 ml-auto text-[#6366f1]" />}
+                {currentPresence === key && <Check className="w-3.5 h-3.5 ml-auto text-[#2563eb]" />}
               </DropdownMenuItem>
             ))}
 
@@ -376,54 +375,48 @@ export function Navbar() {
         </DropdownMenu>
       </div>
     </header>
-    {/* Notification Toasts */}
+    {/* Notification Toasts — CSS keyframe animation instead of framer-motion spring */}
     <div className="fixed top-20 right-4 z-[100] flex flex-col gap-3 pointer-events-none">
-      <AnimatePresence>
-        {toasts.map((toast) => (
-          <motion.div
-            key={toast.id}
-            initial={{ opacity: 0, x: 80, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 80, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="pointer-events-auto w-80 bg-[var(--card)] border border-[#6366f1]/40 rounded-2xl shadow-2xl shadow-[#6366f1]/20 overflow-hidden"
-          >
-            {/* Animated top bar */}
-            <div className="h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]">
-              <motion.div
-                className="h-full bg-white/30"
-                initial={{ width: "100%" }}
-                animate={{ width: "0%" }}
-                transition={{ duration: 5, ease: "linear" }}
-              />
-            </div>
-            <div className="p-4 flex items-start gap-3">
-              {/* Bell icon with pulse */}
-              <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg">
-                  <Bell className="w-5 h-5 text-white" />
-                </div>
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--card)] animate-pulse" />
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className="pointer-events-auto w-80 bg-[var(--card)] border border-[#2563eb]/40 rounded-2xl shadow-2xl shadow-[#2563eb]/20 overflow-hidden"
+          style={{ animation: "toast-slide-in 0.3s cubic-bezier(0.22,1,0.36,1) both" }}
+        >
+          {/* Progress bar — CSS animation instead of motion.div width */}
+          <div className="h-1 bg-gradient-to-r from-[#1d4ed8] to-[#0ea5e9] relative overflow-hidden">
+            <div
+              className="absolute inset-0 bg-white/30"
+              style={{ animation: "toast-progress 5s linear both" }}
+            />
+          </div>
+          <div className="p-4 flex items-start gap-3">
+            <div className="relative flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] flex items-center justify-center shadow-lg">
+                <Bell className="w-5 h-5 text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[var(--text-primary)] leading-tight">
-                  {toast.title}
-                </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1 leading-snug">
-                  {toast.message}
-                </p>
-              </div>
-              <button
-                onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
-                className="flex-shrink-0 p-1 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
-              >
-                <X className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-              </button>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--card)]" />
             </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[var(--text-primary)] leading-tight">
+                {toast.title}
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 leading-snug">
+                {toast.message}
+              </p>
+            </div>
+            <button
+              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+              className="flex-shrink-0 p-1 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+            >
+              <X className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
     </>
   );
 }
+
+export default Navbar;

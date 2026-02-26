@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
@@ -10,14 +10,18 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   preload: true,
+  // Only load weights we actually use — reduces font payload significantly
+  weight: ["400", "500", "600", "700", "800", "900"],
+  fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+  adjustFontFallback: true,
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://hroffice.app";
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#6366f1" },
-    { media: "(prefers-color-scheme: dark)", color: "#818cf8" },
+    { media: "(prefers-color-scheme: light)", color: "#2563eb" },
+    { media: "(prefers-color-scheme: dark)", color: "#60a5fa" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -174,17 +178,25 @@ export default function RootLayout({
         {/* SVG Favicon - works in all modern browsers */}
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="alternate icon" href="/favicon.ico" />
-        <link rel="mask-icon" href="/favicon.svg" color="#6366f1" />
-        {/* Preconnect to speed up critical resources */}
-        <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="mask-icon" href="/favicon.svg" color="#2563eb" />
 
-        {/* JSON-LD Structured Data */}
+        {/* ── Critical resource hints ── */}
+        {/* Cloudinary for avatars/images */}
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        {/* NOTE: fonts.googleapis.com NOT needed — Inter is self-hosted via next/font */}
+        {/* Convex real-time backend */}
+        <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
+
+        {/* ── Prefetch key navigation pages ── */}
+        <link rel="prefetch" href="/login" as="document" />
+
+        {/* JSON-LD Structured Data — async so it never blocks rendering */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          async
         />
       </head>
       <body className={`${inter.variable} antialiased`}>

@@ -6,9 +6,11 @@ import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Download, Loader2, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Calendar, Download, Loader2, ExternalLink, CheckCircle2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { generateICalendar, downloadICalFile, getGoogleCalendarAuthUrl, getOutlookAuthUrl } from "@/lib/calendar-sync";
+import { useUpgradeModal } from "@/components/subscription/PlanGate";
+import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 
 export default function HolidayCalendarSync() {
   const [isExporting, setIsExporting] = useState(false);
@@ -17,6 +19,11 @@ export default function HolidayCalendarSync() {
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
   const calendarData = useQuery(api.admin.getCalendarExportData, {});
+
+  // Plan gating
+  const { canAccess } = usePlanFeatures();
+  const hasCalendarSync = canAccess('calendarSync');
+  const { openModal, modal: upgradeModal } = useUpgradeModal();
 
   // Check connection status on mount
   useEffect(() => {
@@ -151,6 +158,8 @@ export default function HolidayCalendarSync() {
   }
 
   return (
+    <>
+    {upgradeModal}
     <Card className="border-[var(--border)]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -189,52 +198,92 @@ export default function HolidayCalendarSync() {
 
           <div className="relative">
             <Button
-              onClick={handleGoogleCalendar}
+              onClick={() => {
+                if (!hasCalendarSync) {
+                  openModal({
+                    featureTitle: 'Google Calendar Sync',
+                    featureDescription: 'Sync leave schedules with Google Calendar. Available on Professional plan and above.',
+                    recommendedPlan: 'professional',
+                  });
+                  return;
+                }
+                handleGoogleCalendar();
+              }}
               className="w-full justify-start"
               variant="outline"
               disabled={isSyncingGoogle || calendarData.length === 0}
             >
               {isSyncingGoogle ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : !hasCalendarSync ? (
+                <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
               ) : googleConnected ? (
                 <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
               ) : (
                 <ExternalLink className="mr-2 h-4 w-4" />
               )}
-              {googleConnected ? "Sync with Google Calendar" : "Connect Google Calendar"}
+              {googleConnected && hasCalendarSync ? "Sync with Google Calendar" : "Connect Google Calendar"}
             </Button>
-            {googleConnected && (
-              <Badge 
-                variant="secondary" 
+            {googleConnected && hasCalendarSync && (
+              <Badge
+                variant="secondary"
                 className="absolute -right-2 -top-2 bg-green-500 text-white"
               >
                 Connected
+              </Badge>
+            )}
+            {!hasCalendarSync && (
+              <Badge
+                variant="secondary"
+                className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
+              >
+                Pro
               </Badge>
             )}
           </div>
 
           <div className="relative">
             <Button
-              onClick={handleOutlook}
+              onClick={() => {
+                if (!hasCalendarSync) {
+                  openModal({
+                    featureTitle: 'Outlook Calendar Sync',
+                    featureDescription: 'Sync leave schedules with Outlook Calendar. Available on Professional plan and above.',
+                    recommendedPlan: 'professional',
+                  });
+                  return;
+                }
+                handleOutlook();
+              }}
               className="w-full justify-start"
               variant="outline"
               disabled={isSyncingOutlook || calendarData.length === 0}
             >
               {isSyncingOutlook ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : !hasCalendarSync ? (
+                <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
               ) : outlookConnected ? (
                 <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
               ) : (
                 <ExternalLink className="mr-2 h-4 w-4" />
               )}
-              {outlookConnected ? "Sync with Outlook" : "Connect Outlook"}
+              {outlookConnected && hasCalendarSync ? "Sync with Outlook" : "Connect Outlook"}
             </Button>
-            {outlookConnected && (
-              <Badge 
-                variant="secondary" 
+            {outlookConnected && hasCalendarSync && (
+              <Badge
+                variant="secondary"
                 className="absolute -right-2 -top-2 bg-green-500 text-white"
               >
                 Connected
+              </Badge>
+            )}
+            {!hasCalendarSync && (
+              <Badge
+                variant="secondary"
+                className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
+              >
+                Pro
               </Badge>
             )}
           </div>
@@ -247,5 +296,6 @@ export default function HolidayCalendarSync() {
         )}
       </CardContent>
     </Card>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -22,6 +22,17 @@ import dynamic from "next/dynamic";
 
 const AILeaveAssistant = dynamic(() => import("@/components/leaves/AILeaveAssistant"), { ssr: false });
 
+function safeFormat(dateStr: string | undefined | null, fmt: string): string {
+  if (!dateStr) return "—";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "—";
+    return format(d, fmt);
+  } catch {
+    return "—";
+  }
+}
+
 function StatusBadge({ status }: { status: LeaveStatus }) {
   const map: Record<LeaveStatus, { variant: "warning" | "success" | "destructive"; label: string }> = {
     pending: { variant: "warning", label: "Pending" },
@@ -34,7 +45,7 @@ function StatusBadge({ status }: { status: LeaveStatus }) {
 
 function LeaveTypeBadge({ type }: { type: LeaveType }) {
   const colorMap: Record<LeaveType, string> = {
-    paid: "bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30",
+    paid: "bg-[#2563eb]/20 text-[#2563eb] border-[#2563eb]/30",
     unpaid: "bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30",
     sick: "bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/30",
     family: "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30",
@@ -139,7 +150,7 @@ export function LeavesClient() {
       </div>
       <h2 className="text-xl font-bold text-[var(--text-primary)]">Convex Not Deployed</h2>
       <p className="text-[var(--text-muted)] text-sm max-w-sm">
-        Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#6366f1]">npx convex dev</code> in the terminal to connect to the database.
+        Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#2563eb]">npx convex dev</code> in the terminal to connect to the database.
       </p>
     </div>
   );
@@ -254,7 +265,7 @@ export function LeavesClient() {
                         <td className="px-4 py-3"><LeaveTypeBadge type={req.type as LeaveType} /></td>
                         <td className="px-4 py-3 hidden md:table-cell">
                           <p className="text-xs text-[var(--text-secondary)]">
-                            {format(new Date(req.startDate), "MMM d")} – {format(new Date(req.endDate), "MMM d, yyyy")}
+                            {safeFormat(req.startDate, "MMM d")} – {safeFormat(req.endDate, "MMM d, yyyy")}
                           </p>
                         </td>
                         <td className="px-4 py-3 hidden sm:table-cell">
@@ -319,3 +330,5 @@ export function LeavesClient() {
     </div>
   );
 }
+
+export default LeavesClient;

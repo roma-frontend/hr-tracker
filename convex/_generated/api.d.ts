@@ -19,6 +19,7 @@ import type * as leaves from "../leaves.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
 import type * as sla from "../sla.js";
+import type * as subscriptions from "../subscriptions.js";
 import type * as supervisorRatings from "../supervisorRatings.js";
 import type * as tasks from "../tasks.js";
 import type * as timeTracking from "../timeTracking.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   notifications: typeof notifications;
   sla: typeof sla;
+  subscriptions: typeof subscriptions;
   supervisorRatings: typeof supervisorRatings;
   tasks: typeof tasks;
   timeTracking: typeof timeTracking;

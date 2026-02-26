@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -25,7 +25,7 @@ interface LeaveRequestModalProps {
 }
 
 const LEAVE_TYPES: { value: LeaveType; label: string; color: string }[] = [
-  { value: "paid", label: "Paid Vacation", color: "text-[#6366f1]" },
+  { value: "paid", label: "Paid Vacation", color: "text-[#2563eb]" },
   { value: "unpaid", label: "Unpaid Leave", color: "text-[#f59e0b]" },
   { value: "sick", label: "Sick Leave", color: "text-[#ef4444]" },
   { value: "family", label: "Family Leave", color: "text-[#10b981]" },
@@ -164,7 +164,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                   onClick={() => setLeaveType(lt.value)}
                   className={`px-3 py-2.5 rounded-lg border text-xs font-medium transition-all text-left ${
                     leaveType === lt.value
-                      ? "border-[#6366f1] bg-[#6366f1]/10 text-[var(--text-primary)]"
+                      ? "border-[#2563eb] bg-[#2563eb]/10 text-[var(--text-primary)]"
                       : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:text-[var(--text-secondary)]"
                   }`}
                 >
@@ -203,9 +203,9 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           {days > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#6366f1]/10 border border-[#6366f1]/20"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#2563eb]/10 border border-[#2563eb]/20"
             >
-              <CalendarDays className="w-4 h-4 text-[#6366f1] flex-shrink-0" />
+              <CalendarDays className="w-4 h-4 text-[#2563eb] flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-[var(--text-primary)]">{days} day{days !== 1 ? "s" : ""} requested</p>
                 <p className="text-xs text-[var(--text-muted)]">
@@ -233,13 +233,13 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
               id="comment" placeholder="Any additional information..."
               value={comment} onChange={(e) => setComment(e.target.value)}
               rows={3}
-              className="flex w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:border-[#6366f1] resize-none"
+              className="flex w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] resize-none"
             />
           </div>
 
           {/* Attachment hint */}
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-[var(--border)] cursor-pointer hover:border-[#6366f1] transition-colors group">
-            <Paperclip className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[#6366f1]" />
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-[var(--border)] cursor-pointer hover:border-[#2563eb] transition-colors group">
+            <Paperclip className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[#2563eb]" />
             <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">
               Attach supporting documents (medical certificate, etc.)
             </span>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -41,7 +41,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
     <div className="space-y-6">
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-90">Days Taken</p>
@@ -168,7 +168,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
-                className="bg-purple-500 h-2 rounded-full"
+                className="bg-sky-400 h-2 rounded-full"
                 style={{ width: `${(balances.sick / 10) * 100}%` }}
               />
             </div>

@@ -1,4 +1,4 @@
-import { ImageResponse } from "next/og";
+﻿import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 export const alt = "HR Office - All-in-One HR Management Platform";
@@ -39,7 +39,7 @@ export default function OGImage() {
             width: 72,
             height: 72,
             borderRadius: 18,
-            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            background: "linear-gradient(135deg, #2563eb, #0ea5e9)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -50,7 +50,7 @@ export default function OGImage() {
             HR
           </div>
           <span style={{ fontSize: 42, fontWeight: 800, color: "white" }}>
-            HR <span style={{ color: "#818cf8" }}>Office</span>
+            HR <span style={{ color: "#60a5fa" }}>Office</span>
           </span>
         </div>
 
@@ -86,7 +86,7 @@ export default function OGImage() {
               border: "1px solid rgba(99,102,241,0.4)",
               borderRadius: 100,
               padding: "8px 20px",
-              color: "#a5b4fc",
+              color: "#93c5fd",
               fontSize: 16,
               fontWeight: 600,
             }}>

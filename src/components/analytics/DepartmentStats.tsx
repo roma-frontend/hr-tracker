@@ -65,11 +65,13 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
             }}
           />
           <Legend wrapperStyle={{ color: 'var(--text-primary)' }} />
-          <Bar dataKey="avgPaid" fill="#6366F1" name="Paid Leave" />
-          <Bar dataKey="avgSick" fill="#8B5CF6" name="Sick Leave" />
+          <Bar dataKey="avgPaid" fill="#2563eb" name="Paid Leave" />
+          <Bar dataKey="avgSick" fill="#0ea5e9" name="Sick Leave" />
           <Bar dataKey="avgFamily" fill="#EC4899" name="Family Leave" />
         </BarChart>
       </ResponsiveContainer>
     </div>
   );
 }
+
+export default DepartmentStats;

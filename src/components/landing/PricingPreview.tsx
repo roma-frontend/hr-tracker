@@ -1,59 +1,76 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Check, Zap, Building2, Rocket } from 'lucide-react';
-import Link from 'next/link';
+import { useRef, useEffect, useState } from 'react';
+import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star } from 'lucide-react';
 
+// ── Types ─────────────────────────────────────────────────────────────────────
 interface PricingTier {
+  id: string;
   name: string;
   price: string;
+  priceMonthly?: number;
   description: string;
   icon: React.ReactNode;
   features: string[];
-  gradient: string;
   buttonText: string;
   popular?: boolean;
+  badge?: string;
+  accentFrom: string;
+  accentTo: string;
+  glowColor: string;
 }
 
+// ── Plans ─────────────────────────────────────────────────────────────────────
 const pricingTiers: PricingTier[] = [
   {
+    id: 'starter',
     name: 'Starter',
     price: '$29',
-    description: 'Perfect for small teams',
-    icon: <Zap size={24} />,
+    priceMonthly: 29,
+    description: 'Perfect for small teams getting started',
+    icon: <Zap size={22} />,
     features: [
       'Up to 50 employees',
       'Basic leave tracking',
       'Email notifications',
       'Mobile app access',
       'Standard support',
+      '14-day free trial',
     ],
-    gradient: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(129,140,248,0.06))',
     buttonText: 'Start Free Trial',
+    accentFrom: '#6366f1',
+    accentTo: '#8b5cf6',
+    glowColor: 'rgba(99,102,241,0.35)',
   },
   {
+    id: 'professional',
     name: 'Professional',
     price: '$79',
-    description: 'For growing businesses',
-    icon: <Building2 size={24} />,
+    priceMonthly: 79,
+    description: 'For growing teams that need more power',
+    icon: <Building2 size={22} />,
     features: [
       'Up to 200 employees',
       'Advanced analytics',
       'Custom leave policies',
       'API access',
       'Priority support',
-      'Slack integration',
+      'Slack & calendar integrations',
+      'AI-powered insights',
     ],
-    gradient: 'linear-gradient(135deg, rgba(79,70,229,0.15), rgba(99,102,241,0.1))',
     buttonText: 'Start Free Trial',
     popular: true,
+    badge: 'Most Popular',
+    accentFrom: '#3b82f6',
+    accentTo: '#6366f1',
+    glowColor: 'rgba(59,130,246,0.4)',
   },
   {
+    id: 'enterprise',
     name: 'Enterprise',
     price: 'Custom',
-    description: 'For large organizations',
-    icon: <Rocket size={24} />,
+    description: 'Tailored for large organizations',
+    icon: <Rocket size={22} />,
     features: [
       'Unlimited employees',
       'White-label solution',
@@ -61,139 +78,282 @@ const pricingTiers: PricingTier[] = [
       'Custom integrations',
       '24/7 phone support',
       'SLA guarantee',
+      'On-premise option',
     ],
-    gradient: 'linear-gradient(135deg, rgba(129,140,248,0.12), rgba(99,102,241,0.06))',
     buttonText: 'Contact Sales',
+    accentFrom: '#0ea5e9',
+    accentTo: '#06b6d4',
+    glowColor: 'rgba(14,165,233,0.35)',
   },
 ];
 
-function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
+// ── Reveal hook ───────────────────────────────────────────────────────────────
+function useReveal(delay = '0s') {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.08, rootMargin: '-30px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return {
+    ref,
+    style: {
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0) scale(1)' : 'translateY(48px) scale(0.97)',
+      transition: `opacity 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}, transform 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}`,
+    },
+  };
+}
+
+// ── PricingCard ───────────────────────────────────────────────────────────────
+function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
+  const { ref, style } = useReveal(`${delay}s`);
+  const [loading, setLoading] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const handleCheckout = async () => {
+    if (tier.id === 'enterprise') {
+      window.location.href = '/contact';
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: tier.id }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      console.error('[Stripe]', e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative group ${tier.popular ? 'md:scale-105 md:z-10' : ''}`}
+      style={style}
+      className={`relative group flex flex-col ${tier.popular ? 'md:-mt-4 md:mb-4' : ''}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Popular badge */}
       {tier.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#6366f1]/30 z-20">
-          Most Popular
+        <div className="absolute -top-5 inset-x-0 flex justify-center z-20">
+          <div
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-lg"
+            style={{ background: `linear-gradient(90deg, ${tier.accentFrom}, ${tier.accentTo})`, boxShadow: `0 4px 20px ${tier.glowColor}` }}
+          >
+            <Star size={11} fill="currentColor" />
+            {tier.badge}
+          </div>
         </div>
       )}
 
       {/* Glow effect */}
       <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-        style={{ background: tier.gradient }}
+        className="absolute -inset-px rounded-3xl transition-opacity duration-500 -z-10 blur-2xl"
+        style={{
+          background: `radial-gradient(ellipse at center, ${tier.glowColor}, transparent 70%)`,
+          opacity: hovered ? 1 : 0,
+        }}
       />
 
-      {/* Card */}
-      <div className={`relative h-full rounded-2xl border ${tier.popular ? 'border-[#6366f1]/30' : 'border-white/10'} bg-white/5 backdrop-blur-xl p-8 flex flex-col`}>
-        {/* Icon */}
+      {/* Card border gradient */}
+      <div
+        className="absolute -inset-px rounded-3xl -z-[1] transition-opacity duration-500"
+        style={{
+          background: `linear-gradient(135deg, ${tier.accentFrom}55, ${tier.accentTo}22, transparent)`,
+          opacity: hovered || tier.popular ? 1 : 0.4,
+        }}
+      />
+
+      {/* Main card */}
+      <div
+        className={`relative h-full rounded-3xl flex flex-col overflow-hidden
+          ${tier.popular
+            ? 'border border-white/20 bg-gradient-to-b from-white/[0.08] to-white/[0.03]'
+            : 'border border-white/[0.08] bg-white/[0.03]'}
+          backdrop-blur-xl transition-transform duration-500
+          ${hovered ? '-translate-y-2' : 'translate-y-0'}
+        `}
+      >
+        {/* Top accent line */}
         <div
-          className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-          style={{ background: tier.gradient }}
-        >
-          <div className="text-white">{tier.icon}</div>
-        </div>
+          className="h-[2px] w-full"
+          style={{ background: `linear-gradient(90deg, transparent, ${tier.accentFrom}, ${tier.accentTo}, transparent)` }}
+        />
 
-        {/* Title */}
-        <h3 className="text-2xl font-bold text-white mb-2">{tier.name}</h3>
-        <p className="text-[#e2e8f0]/60 text-sm mb-6">{tier.description}</p>
+        <div className="p-8 flex flex-col flex-1">
+          {/* Icon + name */}
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, ${tier.accentFrom}33, ${tier.accentTo}22)`,
+                  border: `1px solid ${tier.accentFrom}44`,
+                  boxShadow: `0 8px 24px ${tier.glowColor}`,
+                  color: tier.accentFrom,
+                }}
+              >
+                {tier.icon}
+              </div>
+              <h3 className="text-xl font-bold text-white">{tier.name}</h3>
+              <p className="text-blue-200/50 text-sm mt-1">{tier.description}</p>
+            </div>
+          </div>
 
-        {/* Price */}
-        <div className="mb-6">
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-black text-white">{tier.price}</span>
-            {tier.price !== 'Custom' && (
-              <span className="text-[#e2e8f0]/50 text-sm">/month</span>
+          {/* Price */}
+          <div className="mb-8">
+            <div className="flex items-end gap-2">
+              <span
+                className="text-5xl font-black leading-none"
+                style={{ background: `linear-gradient(135deg, #fff 60%, ${tier.accentFrom})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+              >
+                {tier.price}
+              </span>
+              {tier.priceMonthly && (
+                <span className="text-blue-200/40 text-sm pb-1.5">/month</span>
+              )}
+            </div>
+            {tier.priceMonthly && (
+              <p className="text-blue-200/40 text-xs mt-2 flex items-center gap-1.5">
+                <Shield size={11} />
+                14-day free trial · No credit card required
+              </p>
             )}
           </div>
-        </div>
 
-        {/* Features */}
-        <ul className="space-y-3 mb-8 flex-1">
-          {tier.features.map((feature, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <Check size={18} className="text-[#6366f1] flex-shrink-0 mt-0.5" />
-              <span className="text-[#e2e8f0]/80 text-sm">{feature}</span>
-            </li>
-          ))}
-        </ul>
+          {/* Features */}
+          <ul className="space-y-3 mb-8 flex-1">
+            {tier.features.map((feature, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                  style={{ background: `${tier.accentFrom}22`, border: `1px solid ${tier.accentFrom}44` }}
+                >
+                  <Check size={11} style={{ color: tier.accentFrom }} />
+                </div>
+                <span className="text-blue-100/70 text-sm">{feature}</span>
+              </li>
+            ))}
+          </ul>
 
-        {/* CTA Button */}
-        <Link href={tier.price === 'Custom' ? '/contact' : '/register'}>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`w-full py-3.5 rounded-xl font-bold transition-all ${
-              tier.popular
-                ? 'bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white shadow-lg shadow-[#6366f1]/40'
-                : 'bg-[#6366f1]/10 text-[#e2e8f0] border border-[#6366f1]/20 hover:bg-[#6366f1]/15'
-            }`}
+          {/* CTA Button */}
+          <button
+            onClick={handleCheckout}
+            disabled={loading}
+            className={`relative w-full py-4 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden group/btn
+              ${loading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}
+            `}
+            style={tier.popular ? {
+              background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
+              boxShadow: `0 8px 32px ${tier.glowColor}`,
+              color: '#fff',
+            } : {
+              background: `${tier.accentFrom}15`,
+              border: `1px solid ${tier.accentFrom}33`,
+              color: '#e0e7ff',
+            }}
           >
-            {tier.buttonText}
-          </motion.button>
-        </Link>
+            {/* Shimmer effect */}
+            {!loading && (
+              <div
+                className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 1.5s infinite',
+                }}
+              />
+            )}
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <Sparkles size={15} />
+                {tier.buttonText}
+                <ArrowRight size={15} className="group-hover/btn:translate-x-0.5 transition-transform" />
+              </>
+            )}
+          </button>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
+// ── Section ───────────────────────────────────────────────────────────────────
 export default function PricingPreview() {
-  return (
-    <section id="pricing" className="relative z-10 px-6 md:px-12 py-20">
-      {/* Section header */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        className="text-center mb-16"
-      >
-        <span className="text-xs text-[#818cf8] font-semibold uppercase tracking-widest">
-          Pricing
-        </span>
-        <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
-          Simple,{' '}
-          <span
-            style={{
-              background: 'linear-gradient(135deg, #4f46e5, #818cf8)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            transparent pricing
-          </span>
-        </h2>
-        <p className="mt-4 text-[#e2e8f0]/60 max-w-2xl mx-auto text-lg">
-          Choose the plan that's right for your organization. All plans include a 14-day free trial.
-        </p>
-      </motion.div>
+  const { ref, style } = useReveal();
 
-      {/* Pricing cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto pt-8">
+  return (
+    <section id="pricing" className="relative z-10 px-6 md:px-12 py-24 overflow-hidden">
+      {/* Background glows */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-indigo-600/8 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-blue-600/8 rounded-full blur-[120px]" />
+      </div>
+
+      {/* Header */}
+      <div ref={ref} className="text-center mb-20" style={style}>
+        <span className="section-eyebrow">Pricing</span>
+        <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
+          Exclusive,{' '}
+          <span className="heading-gradient">transparent pricing</span>
+        </h2>
+        <p className="mt-4 text-blue-200/60 max-w-2xl mx-auto text-lg">
+          Choose the plan that&apos;s right for your organization.{' '}
+          <span className="text-blue-300/80">All plans include a 14-day free trial.</span>
+        </p>
+
+        {/* Trust badges */}
+        <div className="flex items-center justify-center gap-6 mt-8 flex-wrap">
+          {[
+            { icon: <Shield size={14} />, text: 'SSL Secured' },
+            { icon: <Check size={14} />, text: 'No setup fees' },
+            { icon: <Zap size={14} />, text: 'Cancel anytime' },
+            { icon: <Star size={14} />, text: 'GDPR compliant' },
+          ].map(({ icon, text }) => (
+            <div key={text} className="flex items-center gap-1.5 text-blue-200/50 text-sm">
+              <span className="text-blue-400/70">{icon}</span>
+              {text}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Cards grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start pt-6">
         {pricingTiers.map((tier, i) => (
-          <PricingCard key={tier.name} tier={tier} delay={i * 0.15} />
+          <PricingCard key={tier.id} tier={tier} delay={i * 0.12} />
         ))}
       </div>
 
-      {/* Additional info */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.5 }}
-        className="text-center text-[#e2e8f0]/50 text-sm mt-10"
-      >
+      {/* Footer note */}
+      <p className="text-center text-blue-200/30 text-sm mt-14 flex items-center justify-center gap-2">
+        <Shield size={13} className="text-blue-400/40" />
         All plans include SSL security, premium backups, and GDPR compliance.
-      </motion.p>
+        Payments powered by{' '}
+        <span className="text-blue-300/50 font-semibold">Stripe</span>.
+      </p>
+
+      {/* Shimmer keyframe */}
+      <style>{`
+        @keyframes shimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
     </section>
   );
 }

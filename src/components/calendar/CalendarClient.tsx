@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,15 +47,28 @@ type LeaveRequest = {
   comment?: string;
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 function getInitials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
+function safeDate(dateStr: string | undefined | null): Date | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function safeFormat(dateStr: string | undefined | null, fmt: string): string {
+  const d = safeDate(dateStr);
+  if (!d) return "�";
+  try { return format(d, fmt); } catch { return "�"; }
+}
+
 function getDateRange(start: string, end: string): Date[] {
   const dates: Date[] = [];
-  const s = new Date(start);
-  const e = new Date(end);
+  const s = safeDate(start);
+  const e = safeDate(end);
+  if (!s || !e) return dates;
   const cur = new Date(s);
   while (cur <= e) {
     dates.push(new Date(cur));
@@ -71,7 +84,7 @@ function StatusIcon({ status }: { status: LeaveStatus }) {
 }
 
 const LEAVE_TYPE_BG: Record<string, string> = {
-  paid: "#6366f1",
+  paid: "#2563eb",
   unpaid: "#f59e0b",
   sick: "#ef4444",
   family: "#10b981",
@@ -80,7 +93,7 @@ const LEAVE_TYPE_BG: Record<string, string> = {
 
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// ─── Calendar Day Cell ─────────────────────────────────────────────────────────
+// --- Calendar Day Cell ---------------------------------------------------------
 function DayCell({
   date,
   currentMonth,
@@ -166,7 +179,7 @@ function DayCell({
   );
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// --- Main Component ------------------------------------------------------------
 export function CalendarClient() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
@@ -243,7 +256,7 @@ export function CalendarClient() {
 
   return (
     <div className="space-y-6">
-      {/* ── Header ── */}
+      {/* -- Header -- */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -252,7 +265,7 @@ export function CalendarClient() {
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-primary)]">Leave Calendar</h2>
           <p className="text-[var(--text-muted)] text-sm mt-1">
-            Visual overview of team leaves — click any day to see details
+            Visual overview of team leaves � click any day to see details
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -268,7 +281,7 @@ export function CalendarClient() {
       </motion.div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* ── Calendar Panel ── */}
+        {/* -- Calendar Panel -- */}
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -380,7 +393,7 @@ export function CalendarClient() {
           </motion.div>
         </motion.div>
 
-        {/* ── Side Panel ── */}
+        {/* -- Side Panel -- */}
         <motion.div
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -446,8 +459,8 @@ export function CalendarClient() {
                             </span>
                           </div>
                           <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                            {format(new Date(leave.startDate), "MMM d")} –{" "}
-                            {format(new Date(leave.endDate), "MMM d")} · {leave.days}d
+                            {safeFormat(leave.startDate, "MMM d")} &ndash;{" "}
+                            {safeFormat(leave.endDate, "MMM d")} &middot; {leave.days}d
                           </p>
                           {leave.comment && (
                             <p className="text-[10px] text-[var(--text-muted)] mt-1 italic line-clamp-2">
@@ -544,3 +557,5 @@ export function CalendarClient() {
     </div>
   );
 }
+
+export default CalendarClient;

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -79,7 +79,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
-            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 px-6 py-6 flex-shrink-0">
+            <div className="bg-gradient-to-br from-blue-600 to-sky-700 px-6 py-6 flex-shrink-0">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
@@ -91,15 +91,15 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-white">{employee.name}</h2>
-                    {employee.position && <p className="text-indigo-200 text-sm">{employee.position}</p>}
+                    {employee.position && <p className="text-blue-200 text-sm">{employee.position}</p>}
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {employee.department && (
-                        <span className="flex items-center gap-1 text-xs text-indigo-200">
+                        <span className="flex items-center gap-1 text-xs text-blue-200">
                           <Building2 className="w-3 h-3" /> {employee.department}
                         </span>
                       )}
                       {employee.supervisorName && (
-                        <span className="flex items-center gap-1 text-xs text-indigo-200">
+                        <span className="flex items-center gap-1 text-xs text-blue-200">
                           <UserCog className="w-3 h-3" /> {employee.supervisorName}
                         </span>
                       )}
@@ -136,7 +136,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                   { label: "Days", value: monthlyStats.totalDays, color: "text-blue-600" },
                   { label: "Late", value: monthlyStats.lateDays, color: "text-rose-500" },
                   { label: "Hours", value: monthlyStats.totalWorkedHours + "h", color: "text-emerald-600" },
-                  { label: "Punctuality", value: monthlyStats.punctualityRate + "%", color: "text-indigo-600" },
+                  { label: "Punctuality", value: monthlyStats.punctualityRate + "%", color: "text-blue-600" },
                 ].map(s => (
                   <div key={s.label} className="py-4 text-center border-r border-gray-100 dark:border-gray-800 last:border-0">
                     <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
@@ -150,7 +150,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             <div className="flex-1 overflow-y-auto">
               {history === undefined ? (
                 <div className="flex items-center justify-center h-40">
-                  <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
                 </div>
               ) : history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">
@@ -190,7 +190,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                                     {record.checkOutTime ? formatTime(record.checkOutTime) : <span className="text-green-500">Active</span>}
                                   </span>
                                   {workedH && (
-                                    <span className="flex items-center gap-1 text-indigo-500">
+                                    <span className="flex items-center gap-1 text-blue-500">
                                       <Timer className="w-3 h-3" />{workedH}h
                                     </span>
                                   )}
@@ -212,7 +212,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                               </span>
                             )}
                             {record.overtimeMinutes && record.overtimeMinutes > 0 && (
-                              <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-medium">
+                              <span className="text-xs bg-sky-100 text-sky-500 px-2 py-0.5 rounded-full font-medium">
                                 +{record.overtimeMinutes}m OT
                               </span>
                             )}

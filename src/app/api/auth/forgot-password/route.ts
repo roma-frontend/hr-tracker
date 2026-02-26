@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
             <div style="max-width: 480px; margin: 0 auto;">
               <!-- Logo -->
               <div style="text-align: center; margin-bottom: 32px;">
-                <div style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 12px 20px; border-radius: 12px;">
+                <div style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #2563eb, #0ea5e9); padding: 12px 20px; border-radius: 12px;">
                   <span style="color: white; font-weight: 700; font-size: 18px;">🏢 HR Office</span>
                 </div>
               </div>
@@ -73,14 +73,14 @@ export async function POST(req: NextRequest) {
                 </p>
 
                 <!-- Button -->
-                <a href="${resetLink}" style="display: block; text-align: center; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; text-decoration: none; padding: 14px 24px; border-radius: 10px; font-weight: 600; font-size: 15px; margin-bottom: 24px;">
+                <a href="${resetLink}" style="display: block; text-align: center; background: linear-gradient(135deg, #2563eb, #0ea5e9); color: white; text-decoration: none; padding: 14px 24px; border-radius: 10px; font-weight: 600; font-size: 15px; margin-bottom: 24px;">
                   Reset Password →
                 </a>
 
                 <!-- Warning -->
                 <div style="background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); border-radius: 8px; padding: 14px 16px; margin-bottom: 24px;">
                   <p style="color: #9ca3af; font-size: 13px; margin: 0; line-height: 1.5;">
-                    ⏱️ This link expires in <strong style="color: #a5b4fc;">1 hour</strong>.<br>
+                    ⏱️ This link expires in <strong style="color: #93c5fd;">1 hour</strong>.<br>
                     If you didn't request this, you can safely ignore this email.
                   </p>
                 </div>
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
                 <!-- Link fallback -->
                 <p style="color: #6b7280; font-size: 12px; margin: 0; line-height: 1.6;">
                   If the button doesn't work, copy and paste this link:<br>
-                  <a href="${resetLink}" style="color: #6366f1; word-break: break-all;">${resetLink}</a>
+                  <a href="${resetLink}" style="color: #2563eb; word-break: break-all;">${resetLink}</a>
                 </p>
               </div>
 

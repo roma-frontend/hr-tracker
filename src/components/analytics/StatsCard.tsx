@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -15,11 +15,11 @@ interface StatsCardProps {
 }
 
 const colorMap = {
-  blue: 'from-blue-500 to-indigo-600',
+  blue: 'from-blue-500 to-blue-600',
   green: 'from-green-500 to-emerald-600',
   yellow: 'from-yellow-500 to-orange-600',
   red: 'from-red-500 to-rose-600',
-  purple: 'from-purple-500 to-pink-600',
+  purple: 'from-sky-400 to-pink-600',
 };
 
 export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: StatsCardProps) {
@@ -46,10 +46,10 @@ export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: S
             
             {trend && (
               <div className="flex items-center gap-1 mt-2">
-                <span className={`text-sm font-medium ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-sm font-medium ${trend.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                   {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                 </span>
-                <span className="text-xs text-gray-500">vs last month</span>
+                <span className="text-xs text-[var(--text-muted)]">vs last month</span>
               </div>
             )}
           </div>

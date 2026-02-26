@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,7 +50,7 @@ export function WeeklyDigestWidget() {
       {/* Trigger Button */}
       <button
         onClick={handleOpen}
-        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[#6366f1]/20"
+        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[#2563eb]/20"
       >
         <Sparkles className="w-4 h-4" />
         Weekly AI Digest
@@ -73,7 +73,7 @@ export function WeeklyDigestWidget() {
               className="w-full max-w-2xl bg-[var(--background)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
             >
               {/* Header */}
-              <div className="p-6 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white flex-shrink-0">
+              <div className="p-6 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/20 rounded-xl">
@@ -130,10 +130,10 @@ export function WeeklyDigestWidget() {
                 {loading ? (
                   <div className="flex flex-col items-center justify-center py-16 gap-4">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center">
                         <Sparkles className="w-8 h-8 text-white animate-pulse" />
                       </div>
-                      <div className="absolute inset-0 rounded-full border-4 border-[#6366f1]/30 animate-ping" />
+                      <div className="absolute inset-0 rounded-full border-4 border-[#2563eb]/30 animate-ping" />
                     </div>
                     <div className="text-center">
                       <p className="font-semibold text-[var(--text-primary)]">Generating AI Digest...</p>
@@ -163,7 +163,7 @@ export function WeeklyDigestWidget() {
                   onClick={generateDigest}
                   disabled={loading}
                   size="sm"
-                  className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:opacity-90"
+                  className="bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white hover:opacity-90"
                 >
                   {loading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCw className="w-3 h-3 mr-1" />}
                   Refresh

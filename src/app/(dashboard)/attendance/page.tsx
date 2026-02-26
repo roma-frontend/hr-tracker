@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
-import { motion } from "framer-motion";
 import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
 import { AttendanceDashboard } from "@/components/attendance/AttendanceDashboard";
 import { SupervisorRatingForm } from "@/components/attendance/SupervisorRatingForm";
@@ -13,17 +12,8 @@ import { EmployeeAttendanceDrawer } from "@/components/attendance/EmployeeAttend
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Star, UserCheck, BarChart2, CalendarDays, TrendingUp, Search } from "lucide-react";
+import { Clock, Users, Star, UserCheck, BarChart2, Search } from "lucide-react";
 import type { Id } from "../../../../convex/_generated/dataModel";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-};
-const itemVariants = {
-  hidden: { opacity: 1, y: 0 },
-  visible: { opacity: 1, y: 0 },
-};
 
 type Tab = "today" | "all_employees" | "rating";
 
@@ -81,9 +71,9 @@ export default function AttendancePage() {
   );
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <motion.div variants={itemVariants}>
+      <div>
         <h2 className="text-2xl font-bold text-[var(--text-primary)]">
           {isAdminOrSupervisor ? "Attendance Management" : "My Attendance"}
         </h2>
@@ -92,23 +82,23 @@ export default function AttendancePage() {
             ? "Monitor employee attendance and manage performance ratings"
             : "Track your work hours and view your performance scores"}
         </p>
-      </motion.div>
+      </div>
 
       {/* Employee: Check-In widget + full attendance dashboard */}
       {mounted && !isAdminOrSupervisor && (
         <>
-          <motion.div variants={itemVariants}>
+          <div>
             <CheckInOutWidget />
-          </motion.div>
-          <motion.div variants={itemVariants}>
+          </div>
+          <div>
             <AttendanceDashboard />
-          </motion.div>
+          </div>
         </>
       )}
 
       {/* Tabs for Admin/Supervisor */}
       {isAdminOrSupervisor && (
-        <motion.div variants={itemVariants}>
+        <div>
           <div className="flex gap-1 bg-slate-100 dark:bg-gray-800 p-1 rounded-xl w-fit">
             {([
               { id: "today", label: "Today", icon: Clock },
@@ -120,7 +110,7 @@ export default function AttendancePage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-white dark:bg-gray-900 text-indigo-600 shadow-sm"
+                    ? "bg-white dark:bg-gray-900 text-blue-600 shadow-sm"
                     : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                 }`}
               >
@@ -134,12 +124,12 @@ export default function AttendancePage() {
               </button>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Admin/Supervisor: Today's overview */}
       {isAdminOrSupervisor && activeTab === "today" && todaySummary !== undefined && (
-        <motion.div variants={itemVariants}>
+        <div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <Card className="border border-green-200 dark:border-green-800">
               <CardContent className="p-5 text-center">
@@ -166,12 +156,12 @@ export default function AttendancePage() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Admin/Supervisor: Today's full attendance list */}
       {isAdminOrSupervisor && activeTab === "today" && todayAllAttendance !== undefined && (
-        <motion.div variants={itemVariants}>
+        <div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -199,7 +189,7 @@ export default function AttendancePage() {
                       onClick={() => { setDetailRecord(record); setDetailOpen(true); }}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold">
+                        <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-sm font-bold">
                           {record.user?.avatarUrl ? (
                             <img src={record.user.avatarUrl} alt={record.user.name ?? ""} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                           ) : (
@@ -248,16 +238,16 @@ export default function AttendancePage() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* All Employees Tab */}
       {isAdminOrSupervisor && activeTab === "all_employees" && (
-        <motion.div variants={itemVariants}>
+        <div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 flex-wrap">
-                <BarChart2 className="w-5 h-5 text-indigo-500" />
+                <BarChart2 className="w-5 h-5 text-blue-500" />
                 Attendance Overview
                 <div className="ml-auto flex items-center gap-2">
                   {/* Search */}
@@ -267,14 +257,14 @@ export default function AttendancePage() {
                       value={empSearch}
                       onChange={e => setEmpSearch(e.target.value)}
                       placeholder="Search..."
-                      className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 w-36"
+                      className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 w-36"
                     />
                   </div>
                   {/* Month */}
                   <select
                     value={selectedMonth}
                     onChange={e => setSelectedMonth(e.target.value)}
-                    className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+                    className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
                   >
                     {monthOptions.map(m => {
                       const [y, mo] = m.split("-").map(Number);
@@ -287,7 +277,7 @@ export default function AttendancePage() {
             <CardContent>
               {allEmployeesOverview === undefined ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
                 </div>
               ) : filteredEmployees.length === 0 ? (
                 <div className="text-center py-10 text-slate-400">No employees found</div>
@@ -297,10 +287,10 @@ export default function AttendancePage() {
                     <div
                       key={emp._id}
                       onClick={() => setDrawerEmployee({ ...emp, supervisorName: supervisor?.name })}
-                      className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/50 cursor-pointer transition-all group"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-all group"
                     >
                       {/* Avatar */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                         {emp.avatarUrl ? (
                           <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
@@ -310,10 +300,10 @@ export default function AttendancePage() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-slate-800 group-hover:text-indigo-700 transition-colors truncate">{emp.name}</p>
+                        <p className="font-semibold text-sm text-slate-800 group-hover:text-blue-700 transition-colors truncate">{emp.name}</p>
                         <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
                           {emp.position && <span>{emp.position}</span>}
-                          {supervisor && <span className="text-indigo-400">· {supervisor.name}</span>}
+                          {supervisor && <span className="text-blue-400">· {supervisor.name}</span>}
                         </div>
                       </div>
 
@@ -355,12 +345,12 @@ export default function AttendancePage() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* Admin/Supervisor: Employees needing performance rating */}
       {isAdminOrSupervisor && activeTab === "rating" && needsRating && needsRating.length > 0 && !selectedEmployee && (
-        <motion.div variants={itemVariants}>
+        <div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -377,7 +367,7 @@ export default function AttendancePage() {
                     style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-sky-400 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
                         {employee.avatarUrl ? (
                           <img src={employee.avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
@@ -395,7 +385,7 @@ export default function AttendancePage() {
                     </div>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                      className="bg-gradient-to-r from-sky-400 to-pink-500 hover:from-sky-500 hover:to-pink-600 text-white"
                       onClick={() => setSelectedEmployee({ id: employee._id, name: employee.name })}
                     >
                       <UserCheck className="w-4 h-4 mr-1" />
@@ -406,24 +396,24 @@ export default function AttendancePage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* Rating form when employee selected */}
       {isAdminOrSupervisor && activeTab === "rating" && selectedEmployee && (
-        <motion.div variants={itemVariants}>
+        <div>
           <SupervisorRatingForm
             employeeId={selectedEmployee.id}
             employeeName={selectedEmployee.name}
             onClose={() => setSelectedEmployee(null)}
             onSuccess={() => setSelectedEmployee(null)}
           />
-        </motion.div>
+        </div>
       )}
 
       {/* Admin/Supervisor: no employees needing rating */}
       {isAdminOrSupervisor && activeTab === "rating" && needsRating && needsRating.length === 0 && !selectedEmployee && (
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="border-dashed">
             <CardContent className="p-6 text-center">
               <UserCheck className="w-10 h-10 text-green-500 mx-auto mb-2" />
@@ -431,7 +421,7 @@ export default function AttendancePage() {
               <p className="text-xs text-[var(--text-muted)] mt-1">Check back next month</p>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* Attendance Detail Modal */}
@@ -446,6 +436,6 @@ export default function AttendancePage() {
         employee={drawerEmployee}
         onClose={() => setDrawerEmployee(null)}
       />
-    </motion.div>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
 
 interface StatsCardProps {
   value: string;
@@ -11,82 +10,95 @@ interface StatsCardProps {
   delay?: number;
 }
 
-function useCountUp(target: number, duration: number = 2000, start: boolean = false) {
+function useCountUp(target: number, duration = 2000, start = false) {
   const [count, setCount] = useState(0);
-
   useEffect(() => {
     if (!start) return;
     let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    const step = (ts: number) => {
+      if (!startTime) startTime = ts;
+      const progress = Math.min((ts - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(eased * target));
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
   }, [target, duration, start]);
-
   return count;
 }
 
 export default function StatsCard({ value, label, icon, color, delay = 0 }: StatsCardProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const [visible, setVisible] = useState(false);
 
-  // Parse numeric portion from value string like "500+", "99%", "24/7"
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.15, rootMargin: '-30px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const numericMatch = value.match(/^(\d+)/);
   const numericTarget = numericMatch ? parseInt(numericMatch[1]) : 0;
   const suffix = value.replace(/^\d+/, '');
-  const count = useCountUp(numericTarget, 2000, isInView);
+  const count = useCountUp(numericTarget, 2000, visible);
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0, y: 40, scale: 0.9 }}
-      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -8, scale: 1.03 }}
       className="relative group"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.9)',
+        transition: `opacity 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+      }}
     >
-      {/* Glow effect */}
+      {/* Glow on hover */}
       <div
         className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
         style={{ background: color }}
+        aria-hidden="true"
       />
 
-      {/* Card */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 flex flex-col items-center text-center gap-3 overflow-hidden">
+      {/* Card — CSS lift on hover */}
+      <div
+        className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 flex flex-col items-center text-center gap-3 overflow-hidden group-hover:-translate-y-2 group-hover:scale-[1.03] transition-transform duration-300"
+      >
         {/* Shimmer top border */}
         <div
           className="absolute top-0 left-0 right-0 h-px opacity-60"
           style={{ background: `linear-gradient(90deg, transparent, ${color.replace('0.15', '0.8')}, transparent)` }}
+          aria-hidden="true"
         />
 
-        {/* Icon */}
-        <motion.div
-          className="flex items-center justify-center w-12 h-12 rounded-xl"
+        {/* Icon — CSS wiggle */}
+        <div
+          className="flex items-center justify-center w-12 h-12 rounded-xl logo-spin"
           style={{ background: color }}
-          animate={{ rotate: [0, 5, -5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          aria-hidden="true"
         >
           {icon}
-        </motion.div>
+        </div>
 
-        {/* Counter */}
-        <div className="text-3xl font-bold text-white tracking-tight">
+        {/* Count-up number */}
+        <div className="text-3xl font-bold text-white tracking-tight tabular-nums">
           {numericTarget > 0 ? `${count}${suffix}` : value}
         </div>
 
         {/* Label */}
         <div className="text-sm text-[#f7e7ce]/70 font-medium">{label}</div>
 
-        {/* Background decoration */}
+        {/* Corner glow */}
         <div
           className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full opacity-10 blur-2xl"
           style={{ background: color }}
+          aria-hidden="true"
         />
       </div>
-    </motion.div>
+    </div>
   );
 }

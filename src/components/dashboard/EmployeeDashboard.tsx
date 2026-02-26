@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -105,7 +105,7 @@ export function EmployeeDashboard() {
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-purple-500">{monthlyStats.punctualityRate}%</p>
+                <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">Punctuality</p>
               </CardContent>
             </Card>
@@ -211,7 +211,7 @@ export function EmployeeDashboard() {
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
-                <p className="text-2xl font-bold text-[#6366f1]">{userData?.paidLeaveBalance ?? 0}</p>
+                <p className="text-2xl font-bold text-[#2563eb]">{userData?.paidLeaveBalance ?? 0}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">Paid Leave</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
@@ -335,3 +335,5 @@ export function EmployeeDashboard() {
     </motion.div>
   );
 }
+
+export default EmployeeDashboard;

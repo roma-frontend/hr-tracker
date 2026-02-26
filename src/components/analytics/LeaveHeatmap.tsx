@@ -78,3 +78,5 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
     </div>
   );
 }
+
+export default LeaveHeatmap;

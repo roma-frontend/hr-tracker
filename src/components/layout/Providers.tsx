@@ -1,11 +1,25 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Sidebar, MobileSidebar } from "@/components/layout/Sidebar";
-import { Navbar } from "@/components/layout/Navbar";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSidebarStore } from "@/store/useSidebarStore";
 import { getSessionAction } from "@/actions/auth";
+
+const Sidebar = dynamic(
+  () => import("@/components/layout/Sidebar").then((m) => m.Sidebar),
+  { ssr: false, loading: () => null }
+);
+
+const MobileSidebar = dynamic(
+  () => import("@/components/layout/Sidebar").then((m) => m.MobileSidebar),
+  { ssr: false, loading: () => null }
+);
+
+const Navbar = dynamic(
+  () => import("@/components/layout/Navbar").then((m) => m.Navbar),
+  { ssr: false, loading: () => <div className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)]" /> }
+);
 
 const ChatWidget = dynamic(
   () => import("@/components/ai/ChatWidget").then((m) => m.ChatWidget),
@@ -14,8 +28,15 @@ const ChatWidget = dynamic(
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const { setUser } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Rehydrate persisted stores from localStorage on client only
+    // This prevents SSR/client mismatch (hydration errors) from localStorage state
+    useSidebarStore.persist.rehydrate();
+    useAuthStore.persist.rehydrate();
+    setMounted(true);
+
     async function loadSession() {
       try {
         const session = await getSessionAction();
@@ -38,9 +59,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     loadSession();
   }, []);
 
+  // transition-colors removed from wrapper div — causes full-tree repaint on theme change
   return (
-    <div className="flex h-screen bg-[var(--background)] overflow-hidden transition-colors duration-300">
-      {/* Desktop Sidebar */}
+    <div className="flex h-screen bg-[var(--background)] overflow-hidden">
+      {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
       <Sidebar />
 
       {/* Mobile Sidebar */}
@@ -48,6 +70,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
         <Navbar />
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
@@ -55,7 +78,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </div>
         </main>
       </div>
-      {/* AI Chat Widget - lazy loaded */}
+      {/* AI Chat Widget - lazy loaded, ssr:false defers entire chunk until interaction */}
       <ChatWidget />
     </div>
   );

@@ -45,6 +45,17 @@ export async function registerAction(formData: FormData) {
 
   // If user needs approval, don't auto-login
   if (result.needsApproval) {
+    // Still try to link subscription even if pending approval
+    if (result.userId) {
+      try {
+        await convexMutation("subscriptions:linkSubscriptionToUser", {
+          email,
+          userId: result.userId,
+        });
+      } catch {
+        // Non-critical — subscription linking can fail silently
+      }
+    }
     return { 
       success: true, 
       role: result.role, 
@@ -63,6 +74,16 @@ export async function registerAction(formData: FormData) {
     sessionToken,
     sessionExpiry,
   });
+
+  // Link subscription to user (non-critical, fails silently)
+  try {
+    await convexMutation("subscriptions:linkSubscriptionToUser", {
+      email,
+      userId: loginResult.userId,
+    });
+  } catch {
+    // Subscription linking is optional — user can still register
+  }
 
   const jwt = await signJWT({
     userId: loginResult.userId,

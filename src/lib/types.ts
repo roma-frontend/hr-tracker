@@ -1,4 +1,4 @@
-// ── Leave Types ──────────────────────────────────────────────────────────────
+﻿// ── Leave Types ──────────────────────────────────────────────────────────────
 export type LeaveType = "paid" | "unpaid" | "sick" | "family" | "doctor";
 export type LeaveStatus = "pending" | "approved" | "rejected";
 export type EmployeeType = "staff" | "contractor";
@@ -13,7 +13,7 @@ export const LEAVE_TYPE_LABELS: Record<LeaveType, string> = {
 };
 
 export const LEAVE_TYPE_COLORS: Record<LeaveType, string> = {
-  paid: "#6366f1",
+  paid: "#2563eb",
   unpaid: "#f59e0b",
   sick: "#ef4444",
   family: "#10b981",

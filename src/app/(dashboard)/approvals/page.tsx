@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -108,7 +108,7 @@ export default function ApprovalsPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                       {(pendingUser as any).avatarUrl ? (
                         <img src={(pendingUser as any).avatarUrl} alt={pendingUser.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       ) : (

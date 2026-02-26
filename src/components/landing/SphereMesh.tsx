@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
@@ -8,16 +8,16 @@ export function SphereMesh() {
   const particlesRef = useRef<THREE.Points>(null);
   const starsRef = useRef<THREE.Points>(null);
 
-  // Create floating golden particles
+  // Create floating indigo particles
   const particles = useMemo(() => {
     const count = 80;
     const positions = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
     const colors = new Float32Array(count * 3);
     
-    const goldColor = new THREE.Color('#d4af37');
-    const champagneColor = new THREE.Color('#f4e5a8');
-    const bronzeColor = new THREE.Color('#cd7f32');
+    const goldColor = new THREE.Color('#2563eb');
+    const champagneColor = new THREE.Color('#93c5fd');
+    const bronzeColor = new THREE.Color('#60a5fa');
     
     for (let i = 0; i < count; i++) {
       // Random positions in a volume
@@ -89,11 +89,11 @@ export function SphereMesh() {
       {/* Soft ambient lighting */}
       <ambientLight intensity={0.2} />
       
-      {/* Subtle golden accent lights */}
-      <pointLight position={[3, 3, 3]} intensity={0.5} color="#d4af37" />
-      <pointLight position={[-3, -3, -3]} intensity={0.3} color="#f4e5a8" />
+      {/* Subtle indigo accent lights */}
+      <pointLight position={[3, 3, 3]} intensity={0.5} color="#2563eb" />
+      <pointLight position={[-3, -3, -3]} intensity={0.3} color="#93c5fd" />
 
-      {/* Floating golden particles */}
+      {/* Floating indigo particles */}
       <points ref={particlesRef} geometry={particles}>
         <pointsMaterial
           size={0.05}
@@ -110,7 +110,7 @@ export function SphereMesh() {
       <points ref={starsRef} geometry={stars}>
         <pointsMaterial
           size={0.015}
-          color="#f4e5a8"
+          color="#93c5fd"
           transparent
           opacity={0.3}
           sizeAttenuation

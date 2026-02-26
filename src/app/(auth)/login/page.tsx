@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -77,11 +77,11 @@ export default function LoginPage() {
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #6366f1, transparent)" }}
+          style={{ background: "radial-gradient(circle, #2563eb, transparent)" }}
         />
         <div
           className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #8b5cf6, transparent)" }}
+          style={{ background: "radial-gradient(circle, #0ea5e9, transparent)" }}
         />
       </div>
 
@@ -103,7 +103,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-center mb-8">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+              style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
             >
               <Building2 className="w-7 h-7 text-white" />
             </div>
@@ -198,7 +198,7 @@ export default function LoginPage() {
                     borderColor: "var(--border)",
                     color: "var(--text-primary)",
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
               </div>
@@ -213,7 +213,7 @@ export default function LoginPage() {
                 <Link
                   href="/forgot-password"
                   className="text-xs hover:underline"
-                  style={{ color: "#6366f1" }}
+                  style={{ color: "#2563eb" }}
                 >
                   Forgot password?
                 </Link>
@@ -235,7 +235,7 @@ export default function LoginPage() {
                     borderColor: "var(--border)",
                     color: "var(--text-primary)",
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
                 <button
@@ -272,7 +272,7 @@ export default function LoginPage() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+              style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
             >
               {isPending ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</>
@@ -286,7 +286,7 @@ export default function LoginPage() {
           {/* Footer */}
           <p className="text-center text-sm mt-6" style={{ color: "var(--text-muted)" }}>
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold hover:underline" style={{ color: "#6366f1" }}>
+            <Link href="/register" className="font-semibold hover:underline" style={{ color: "#2563eb" }}>
               Create one
             </Link>
           </p>

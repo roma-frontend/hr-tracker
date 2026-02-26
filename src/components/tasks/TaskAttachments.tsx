@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
@@ -76,7 +76,6 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
 
     try {
       await Promise.all(validFiles.map(async (file) => {
-        // Convert to base64
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -84,10 +83,8 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
           reader.readAsDataURL(file);
         });
 
-        // Upload to Cloudinary
         const url = await uploadTaskAttachment(base64, file.name);
 
-        // Save to Convex
         await addAttachment({
           taskId,
           url,
@@ -125,9 +122,9 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-slate-700">📎 Attachments</span>
+          <span className="text-sm font-semibold text-[var(--text-secondary)]">📎 Attachments</span>
           {attachments.length > 0 && (
-            <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-medium">
+            <span className="text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-medium">
               {attachments.length}
             </span>
           )}
@@ -137,7 +134,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl text-white transition-all disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+            style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
           >
             {uploading ? (
               <>
@@ -163,13 +160,12 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
       {attachments.length === 0 ? (
         <div
           onClick={() => canUpload && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
-            canUpload ? "cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30" : ""
+          className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors border-[var(--border)] ${
+            canUpload ? "cursor-pointer hover:border-blue-400/50 hover:bg-blue-500/5" : ""
           }`}
-          style={{ borderColor: "var(--border)" }}
         >
           <p className="text-2xl mb-1">📎</p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[var(--text-muted)]">
             {canUpload ? "Click to attach files (PDF, images, docs...)" : "No attachments"}
           </p>
         </div>
@@ -182,25 +178,24 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="group relative rounded-xl border overflow-hidden cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all"
-                style={{ borderColor: "var(--border)", background: "var(--card)" }}
+                className="group relative rounded-xl border border-[var(--border)] overflow-hidden cursor-pointer hover:border-blue-400/50 hover:shadow-md transition-all bg-[var(--background-subtle)]"
                 onClick={() => setPreview(att)}
               >
                 {/* Image thumbnail */}
                 {isImage(att.type) ? (
-                  <div className="h-20 bg-slate-50 overflow-hidden">
+                  <div className="h-20 bg-[var(--background-subtle)] overflow-hidden">
                     <img src={att.url} alt={att.name} className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div className="h-20 flex items-center justify-center text-4xl bg-slate-50">
+                  <div className="h-20 flex items-center justify-center text-4xl bg-[var(--background-subtle)]">
                     {getFileIcon(att.type)}
                   </div>
                 )}
 
                 {/* File info */}
                 <div className="p-2">
-                  <p className="text-xs font-medium text-slate-700 truncate" title={att.name}>{att.name}</p>
-                  <p className="text-xs text-slate-400">{formatSize(att.size)}</p>
+                  <p className="text-xs font-medium text-[var(--text-primary)] truncate" title={att.name}>{att.name}</p>
+                  <p className="text-xs text-[var(--text-muted)]">{formatSize(att.size)}</p>
                 </div>
 
                 {/* Remove button */}
@@ -232,16 +227,16 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="bg-white rounded-2xl overflow-hidden max-w-3xl w-full max-h-[90vh] flex flex-col"
+              className="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden max-w-3xl w-full max-h-[90vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Preview header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{getFileIcon(preview.type)}</span>
                   <div>
-                    <p className="font-semibold text-slate-800 text-sm">{preview.name}</p>
-                    <p className="text-xs text-slate-400">{formatSize(preview.size)}</p>
+                    <p className="font-semibold text-[var(--text-primary)] text-sm">{preview.name}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{formatSize(preview.size)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -251,14 +246,14 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-medium px-3 py-1.5 rounded-xl text-white"
-                    style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                    style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
                     onClick={(e) => e.stopPropagation()}
                   >
                     ⬇ Download
                   </a>
                   <button
                     onClick={() => setPreview(null)}
-                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold"
+                    className="w-8 h-8 rounded-full bg-[var(--background-subtle)] hover:bg-[var(--border)] flex items-center justify-center text-[var(--text-muted)] font-bold transition-colors"
                   >
                     ×
                   </button>
@@ -266,7 +261,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
               </div>
 
               {/* Preview content */}
-              <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-slate-50 min-h-[300px]">
+              <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-[var(--background-subtle)] min-h-[300px]">
                 {isImage(preview.type) ? (
                   <img src={preview.url} alt={preview.name} className="max-w-full max-h-[60vh] object-contain rounded-xl shadow" />
                 ) : isPdf(preview.type) ? (
@@ -274,15 +269,15 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                 ) : (
                   <div className="text-center space-y-4">
                     <p className="text-6xl">{getFileIcon(preview.type)}</p>
-                    <p className="text-slate-600 font-medium">{preview.name}</p>
-                    <p className="text-slate-400 text-sm">Preview not available for this file type</p>
+                    <p className="text-[var(--text-secondary)] font-medium">{preview.name}</p>
+                    <p className="text-[var(--text-muted)] text-sm">Preview not available for this file type</p>
                     <a
                       href={preview.url}
                       download={preview.name}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl text-white"
-                      style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                      style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
                     >
                       ⬇ Download to view
                     </a>

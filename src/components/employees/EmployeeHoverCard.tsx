@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
@@ -119,9 +119,9 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
               };
             })()}
           >
-            <div className="bg-white rounded-2xl overflow-hidden border border-indigo-100">
+            <div className="bg-white rounded-2xl overflow-hidden border border-blue-100">
               {/* Header gradient with avatar + name inside */}
-              <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 p-4">
+              <div className="bg-gradient-to-r from-blue-600 via-sky-500 to-pink-500 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${presenceCfg.bg} ${presenceCfg.color}`}>
                     <span className="mr-1">{presenceCfg.icon}</span>{presenceCfg.label}
@@ -154,8 +154,8 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
                       href={`mailto:${employee.email}`}
                       className="flex items-center gap-2.5 group"
                     >
-                      <span className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-100 transition-colors flex-shrink-0">✉️</span>
-                      <span className="text-sm text-slate-600 group-hover:text-indigo-600 transition-colors truncate">{employee.email}</span>
+                      <span className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors flex-shrink-0">✉️</span>
+                      <span className="text-sm text-slate-600 group-hover:text-blue-600 transition-colors truncate">{employee.email}</span>
                     </a>
                   )}
 
@@ -178,10 +178,10 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
 
                   {supervisor && (
                     <div className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500 flex-shrink-0">👤</span>
+                      <span className="w-7 h-7 rounded-lg bg-sky-50 flex items-center justify-center text-sky-400 flex-shrink-0">👤</span>
                       <div>
                         <span className="text-xs text-slate-400 block">Supervisor</span>
-                        <span className="text-sm font-medium text-purple-600">
+                        <span className="text-sm font-medium text-sky-500">
                           {supervisor.name && supervisor.name !== "admin"
                             ? supervisor.name
                             : supervisor.email?.split("@")[0] ?? "Admin"}

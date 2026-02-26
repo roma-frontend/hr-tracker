@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
@@ -20,13 +20,13 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const ROLE_CONFIG = {
-  admin: { label: "Admin", icon: Crown, color: "#6366f1", bg: "rgba(99,102,241,0.1)" },
+  admin: { label: "Admin", icon: Crown, color: "#2563eb", bg: "rgba(99,102,241,0.1)" },
   supervisor: { label: "Supervisor", icon: UserCheck, color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
   employee: { label: "Employee", icon: User, color: "#10b981", bg: "rgba(16,185,129,0.1)" },
 };
 
 const TYPE_CONFIG = {
-  staff: { label: "Staff", color: "#6366f1", bg: "rgba(99,102,241,0.1)" },
+  staff: { label: "Staff", color: "#2563eb", bg: "rgba(99,102,241,0.1)" },
   contractor: { label: "Contractor", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
 };
 
@@ -97,7 +97,7 @@ export function EmployeesClient() {
   if (!mounted) return null;
   if (users === undefined) return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "#6366f1", borderTopColor: "transparent" }} />
+      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "#2563eb", borderTopColor: "transparent" }} />
     </div>
   );
 
@@ -116,7 +116,7 @@ export function EmployeesClient() {
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-lg"
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+            style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
           >
             <Plus className="w-4 h-4" /> Add Employee
           </button>
@@ -127,10 +127,10 @@ export function EmployeesClient() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total Active", value: stats.total, icon: Users, color: "#6366f1" },
+          { label: "Total Active", value: stats.total, icon: Users, color: "#2563eb" },
           { label: "Staff", value: stats.staff, icon: User, color: "#10b981" },
           { label: "Contractors", value: stats.contractors, icon: Briefcase, color: "#f59e0b" },
-          { label: "Supervisors", value: stats.supervisors, icon: Shield, color: "#8b5cf6" },
+          { label: "Supervisors", value: stats.supervisors, icon: Shield, color: "#0ea5e9" },
         ].map((stat) => (
           <div key={stat.label} className="p-4 rounded-2xl border flex items-center gap-3"
             style={{ background: "var(--card)", borderColor: "var(--border)" }}>
@@ -180,7 +180,7 @@ export function EmployeesClient() {
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2.5 transition-colors ${viewMode === "grid" ? "text-white" : ""}`}
-              style={{ background: viewMode === "grid" ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "var(--card)", color: viewMode === "grid" ? "white" : "var(--text-muted)" }}
+              style={{ background: viewMode === "grid" ? "linear-gradient(135deg,#2563eb,#0ea5e9)" : "var(--card)", color: viewMode === "grid" ? "white" : "var(--text-muted)" }}
               title="Grid view"
             >
               <LayoutGrid className="w-4 h-4" />
@@ -188,7 +188,7 @@ export function EmployeesClient() {
             <button
               onClick={() => setViewMode("list")}
               className="p-2.5 transition-colors"
-              style={{ background: viewMode === "list" ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "var(--card)", color: viewMode === "list" ? "white" : "var(--text-muted)" }}
+              style={{ background: viewMode === "list" ? "linear-gradient(135deg,#2563eb,#0ea5e9)" : "var(--card)", color: viewMode === "list" ? "white" : "var(--text-muted)" }}
               title="List view"
             >
               <List className="w-4 h-4" />
@@ -290,8 +290,8 @@ export function EmployeesClient() {
                             {emp.department && <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}><Building2 className="w-3 h-3" />{emp.department}</div>}
                             {emp.supervisorId && (
                               <div className="flex items-center gap-2">
-                                <UserCog className="w-3 h-3 flex-shrink-0 text-indigo-400" />
-                                <span className="truncate text-indigo-500 font-medium">
+                                <UserCog className="w-3 h-3 flex-shrink-0 text-blue-400" />
+                                <span className="truncate text-blue-500 font-medium">
                                   {supervisors?.find(s => s._id === emp.supervisorId)?.name ?? "Supervisor"}
                                 </span>
                               </div>
@@ -355,7 +355,7 @@ export function EmployeesClient() {
                         >
                           {/* Employee name + avatar */}
                           <div className="col-span-4 flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-xs font-bold">
                               {emp.avatarUrl
                                 ? <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 : emp.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -377,7 +377,7 @@ export function EmployeesClient() {
                           </div>
 
                           {/* Supervisor */}
-                          <div className="col-span-2 text-sm truncate text-indigo-500 font-medium">
+                          <div className="col-span-2 text-sm truncate text-blue-500 font-medium">
                             {emp.supervisorId
                               ? supervisors?.find(s => s._id === emp.supervisorId)?.name ?? "—"
                               : "—"}
@@ -475,3 +475,5 @@ export function EmployeesClient() {
     </div>
   );
 }
+
+export default EmployeesClient;

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -147,7 +147,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
                   style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
               </div>
@@ -166,9 +166,9 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                         onClick={() => setForm((p) => ({ ...p, role: r.value as "admin" | "supervisor" | "employee" }))}
                         className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-sm font-medium transition-all"
                         style={{
-                          borderColor: form.role === r.value ? "#6366f1" : "var(--border)",
+                          borderColor: form.role === r.value ? "#2563eb" : "var(--border)",
                           background: form.role === r.value ? "rgba(99,102,241,0.1)" : "var(--background-subtle)",
-                          color: form.role === r.value ? "#6366f1" : "var(--text-muted)",
+                          color: form.role === r.value ? "#2563eb" : "var(--text-muted)",
                         }}
                       >
                         <span className="text-lg">{r.icon}</span>
@@ -193,9 +193,9 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                       onClick={() => setForm((p) => ({ ...p, employeeType: type as "staff" | "contractor" }))}
                       className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-sm font-medium transition-all"
                       style={{
-                        borderColor: form.employeeType === type ? "#6366f1" : "var(--border)",
+                        borderColor: form.employeeType === type ? "#2563eb" : "var(--border)",
                         background: form.employeeType === type ? "rgba(99,102,241,0.1)" : "var(--background-subtle)",
-                        color: form.employeeType === type ? "#6366f1" : "var(--text-muted)",
+                        color: form.employeeType === type ? "#2563eb" : "var(--text-muted)",
                       }}
                     >
                       <span className="capitalize">{type}</span>
@@ -231,7 +231,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                     placeholder="e.g. Engineer"
                     className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
                     style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                    onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                    onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                     onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                   />
                 </div>
@@ -248,7 +248,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                   placeholder="+374 XX XXX XXX"
                   className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
                   style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
               </div>
@@ -259,7 +259,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                   <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Leave Balances (days)</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { key: "paidLeaveBalance", label: "Paid", color: "#6366f1" },
+                      { key: "paidLeaveBalance", label: "Paid", color: "#2563eb" },
                       { key: "sickLeaveBalance", label: "Sick", color: "#ef4444" },
                       { key: "familyLeaveBalance", label: "Family", color: "#10b981" },
                     ].map(({ key, label, color }) => (
@@ -293,7 +293,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, isActive: !p.isActive }))}
                     className="w-12 h-6 rounded-full transition-all relative"
-                    style={{ background: form.isActive ? "#6366f1" : "var(--border)" }}
+                    style={{ background: form.isActive ? "#2563eb" : "var(--border)" }}
                   >
                     <div
                       className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all"
@@ -317,7 +317,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                 onClick={handleSave}
                 disabled={loading}
                 className="px-6 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2 disabled:opacity-70"
-                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes

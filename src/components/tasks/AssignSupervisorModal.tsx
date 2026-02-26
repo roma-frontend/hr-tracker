@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -12,7 +12,7 @@ interface Props {
 function Avatar({ name, url }: { name: string; url?: string | null }) {
   const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   return (
-    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white text-xs bg-gradient-to-br from-indigo-500 to-purple-600">
+    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white text-xs bg-gradient-to-br from-blue-500 to-sky-500">
       {url ? <img src={url} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : initials}
     </div>
   );
@@ -48,10 +48,10 @@ export function AssignSupervisorModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[var(--border)]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-5">
+        <div className="bg-gradient-to-r from-violet-600 to-blue-600 px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-white">Assign Supervisor</h2>
@@ -63,18 +63,18 @@ export function AssignSupervisorModal({ onClose }: Props) {
 
         <div className="p-6 space-y-5">
           {success && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-3 text-center font-medium">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm rounded-xl px-4 py-3 text-center font-medium">
               ✅ Supervisor assigned successfully!
             </div>
           )}
 
           {/* Employee select */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Select Employee</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Select Employee</label>
             <select
               value={selectedEmployee}
               onChange={e => { setSelectedEmployee(e.target.value); setSelectedSupervisor(""); }}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">Choose employee...</option>
               {employees?.map(emp => (
@@ -87,28 +87,28 @@ export function AssignSupervisorModal({ onClose }: Props) {
 
           {/* Current supervisor info */}
           {selectedEmp && (
-            <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
+            <div className="bg-[var(--background-subtle)] rounded-2xl p-4 space-y-2 border border-[var(--border)]">
               <div className="flex items-center gap-3">
                 <Avatar name={selectedEmp.name} url={selectedEmp.avatarUrl} />
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">{selectedEmp.name}</p>
-                  <p className="text-xs text-slate-500">{selectedEmp.position} {selectedEmp.department ? `· ${selectedEmp.department}` : ""}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{selectedEmp.name}</p>
+                  <p className="text-xs text-[var(--text-muted)]">{selectedEmp.position} {selectedEmp.department ? `· ${selectedEmp.department}` : ""}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500 mt-2">
+              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mt-2">
                 <span>Current supervisor:</span>
-                <span className="font-semibold text-slate-700">{currentSupervisor?.name ?? "None"}</span>
+                <span className="font-semibold text-[var(--text-secondary)]">{currentSupervisor?.name ?? "None"}</span>
               </div>
             </div>
           )}
 
           {/* Supervisor select */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Assign Supervisor</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Assign Supervisor</label>
             <select
               value={selectedSupervisor}
               onChange={e => setSelectedSupervisor(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50"
               disabled={!selectedEmployee}
             >
               <option value="">— Remove supervisor</option>
@@ -122,18 +122,18 @@ export function AssignSupervisorModal({ onClose }: Props) {
 
           {/* All employees overview */}
           <div>
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Current Assignments</h3>
+            <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Current Assignments</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
               {employees?.map(emp => {
                 const sup = supervisors?.find(s => s._id === emp.supervisorId);
                 return (
-                  <div key={emp._id} className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2">
+                  <div key={emp._id} className="flex items-center justify-between bg-[var(--background-subtle)] rounded-xl px-3 py-2 border border-[var(--border)]">
                     <div className="flex items-center gap-2">
                       <Avatar name={emp.name} url={emp.avatarUrl} />
-                      <span className="text-xs font-medium text-slate-700">{emp.name}</span>
+                      <span className="text-xs font-medium text-[var(--text-primary)]">{emp.name}</span>
                     </div>
-                    <span className="text-xs text-slate-400">
-                      {sup ? `→ ${sup.name}` : <span className="text-amber-500">No supervisor</span>}
+                    <span className="text-xs text-[var(--text-muted)]">
+                      {sup ? `→ ${sup.name}` : <span className="text-amber-400">No supervisor</span>}
                     </span>
                   </div>
                 );
@@ -143,13 +143,13 @@ export function AssignSupervisorModal({ onClose }: Props) {
 
           {/* Actions */}
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors">
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--background-subtle)] transition-colors">
               Close
             </button>
             <button
               onClick={handleAssign}
               disabled={!selectedEmployee || loading}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-sm font-semibold shadow-md shadow-violet-200 transition-all disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white text-sm font-semibold shadow-md shadow-violet-500/20 transition-all disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Assignment"}
             </button>
