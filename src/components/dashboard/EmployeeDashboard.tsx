@@ -36,7 +36,7 @@ function StatusBadge({ status }: { status: LeaveStatus }) {
 
 export function EmployeeDashboard() {
   const { user } = useAuthStore();
-  const leaves = useQuery(api.leaves.getAllLeaves, {});
+  const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const userData = useQuery(
     api.users.getUserById,
     user?.id ? { userId: user.id as any } : "skip"

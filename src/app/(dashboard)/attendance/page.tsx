@@ -110,7 +110,7 @@ export default function AttendancePage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-white dark:bg-gray-900 text-blue-600 shadow-sm"
+                    ? "bg-white dark:bg-gray-800 text-blue-600 shadow-sm"
                     : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                 }`}
               >
@@ -134,25 +134,25 @@ export default function AttendancePage() {
             <Card className="border border-green-200 dark:border-green-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-green-500">{todaySummary.checkedIn}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">At Work Now</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>At Work Now</p>
               </CardContent>
             </Card>
             <Card className="border border-blue-200 dark:border-blue-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-blue-500">{todaySummary.checkedOut}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Left Today</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Left Today</p>
               </CardContent>
             </Card>
             <Card className="border border-red-200 dark:border-red-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-red-500">{todaySummary.absent}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Absent</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Absent</p>
               </CardContent>
             </Card>
             <Card className="border border-orange-200 dark:border-orange-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-orange-500">{todaySummary.late}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Late Arrivals</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Late Arrivals</p>
               </CardContent>
             </Card>
           </div>
@@ -252,19 +252,19 @@ export default function AttendancePage() {
                 <div className="ml-auto flex items-center gap-2">
                   {/* Search */}
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} />
                     <input
                       value={empSearch}
                       onChange={e => setEmpSearch(e.target.value)}
                       placeholder="Search..."
-                      className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 w-36"
+                      className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 w-36 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100"
                     />
                   </div>
                   {/* Month */}
                   <select
                     value={selectedMonth}
                     onChange={e => setSelectedMonth(e.target.value)}
-                    className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                    className="px-3 py-1.5 text-sm border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100"
                   >
                     {monthOptions.map(m => {
                       const [y, mo] = m.split("-").map(Number);
@@ -280,14 +280,14 @@ export default function AttendancePage() {
                   <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
                 </div>
               ) : filteredEmployees.length === 0 ? (
-                <div className="text-center py-10 text-slate-400">No employees found</div>
+                <div className="text-center py-10" style={{ color: "var(--text-muted)" }}>No employees found</div>
               ) : (
                 <div className="space-y-2">
                   {filteredEmployees.map(({ user: emp, supervisor, stats, lastRecord }) => (
                     <div
                       key={emp._id}
                       onClick={() => setDrawerEmployee({ ...emp, supervisorName: supervisor?.name })}
-                      className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-all group"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all group"
                     >
                       {/* Avatar */}
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
@@ -300,43 +300,43 @@ export default function AttendancePage() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-slate-800 group-hover:text-blue-700 transition-colors truncate">{emp.name}</p>
-                        <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                        <p className="font-semibold text-sm group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors truncate" style={{ color: "var(--text-primary)" }}>{emp.name}</p>
+                        <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                           {emp.position && <span>{emp.position}</span>}
-                          {supervisor && <span className="text-blue-400">· {supervisor.name}</span>}
+                          {supervisor && <span className="text-blue-400 dark:text-blue-500">· {supervisor.name}</span>}
                         </div>
                       </div>
 
                       {/* Stats */}
                       <div className="hidden sm:flex items-center gap-4 text-center flex-shrink-0">
                         <div>
-                          <p className="text-sm font-bold text-blue-600">{stats.totalDays}</p>
-                          <p className="text-xs text-slate-400">Days</p>
+                          <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{stats.totalDays}</p>
+                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Days</p>
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-rose-500">{stats.lateDays}</p>
-                          <p className="text-xs text-slate-400">Late</p>
+                          <p className="text-sm font-bold text-rose-500 dark:text-rose-400">{stats.lateDays}</p>
+                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Late</p>
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-emerald-600">{stats.totalWorkedHours}h</p>
-                          <p className="text-xs text-slate-400">Worked</p>
+                          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{stats.totalWorkedHours}h</p>
+                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Worked</p>
                         </div>
                         <div>
-                          <p className={`text-sm font-bold ${Number(stats.punctualityRate) >= 80 ? "text-emerald-600" : Number(stats.punctualityRate) >= 60 ? "text-amber-500" : "text-rose-500"}`}>
+                          <p className={`text-sm font-bold ${Number(stats.punctualityRate) >= 80 ? "text-emerald-600 dark:text-emerald-400" : Number(stats.punctualityRate) >= 60 ? "text-amber-500 dark:text-amber-400" : "text-rose-500 dark:text-rose-400"}`}>
                             {stats.punctualityRate}%
                           </p>
-                          <p className="text-xs text-slate-400">Punct.</p>
+                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Punct.</p>
                         </div>
                       </div>
 
                       {/* Last record badge */}
                       <div className="flex-shrink-0">
                         {lastRecord?.status === "checked_in" ? (
-                          <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium animate-pulse">● Active</span>
+                          <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full font-medium animate-pulse">● Active</span>
                         ) : lastRecord?.status === "checked_out" ? (
-                          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">Done</span>
+                          <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">Done</span>
                         ) : (
-                          <span className="text-xs bg-slate-100 text-slate-400 px-2 py-1 rounded-full font-medium">—</span>
+                          <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 px-2 py-1 rounded-full font-medium">—</span>
                         )}
                       </div>
                     </div>

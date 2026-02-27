@@ -74,8 +74,8 @@ export function DashboardClient() {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
 
-  const leaves = useQuery(api.leaves.getAllLeaves, {});
-  const users = useQuery(api.users.getAllUsers, {});
+  const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  const users = useQuery(api.users.getAllUsers, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
 
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
@@ -179,7 +179,17 @@ export function DashboardClient() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="month" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <RechartsTooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }} cursor={{ fill: "rgba(99,102,241,0.05)" }} />
+                  <RechartsTooltip 
+                    contentStyle={{ 
+                      background: "var(--card)", 
+                      border: "1px solid var(--border)", 
+                      borderRadius: "8px", 
+                      color: "var(--text-primary)" 
+                    }}
+                    itemStyle={{ color: "var(--text-primary)" }}
+                    labelStyle={{ color: "var(--text-primary)" }}
+                    cursor={{ fill: "rgba(99,102,241,0.05)" }} 
+                  />
                   <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-muted)" }} />
                   <Bar dataKey="approved" name="Approved" fill="#10b981" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="pending" name="Pending" fill="#f59e0b" radius={[4, 4, 0, 0]} />
@@ -203,7 +213,16 @@ export function DashboardClient() {
                       <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
                         {pieData.map((entry, index) => <Cell key={index} fill={entry.color} stroke="transparent" />)}
                       </Pie>
-                      <RechartsTooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }} />
+                      <RechartsTooltip 
+                        contentStyle={{ 
+                          background: "var(--card)", 
+                          border: "1px solid var(--border)", 
+                          borderRadius: "8px", 
+                          color: "var(--text-primary)" 
+                        }}
+                        itemStyle={{ color: "var(--text-primary)" }}
+                        labelStyle={{ color: "var(--text-primary)" }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="mt-2 space-y-1.5">

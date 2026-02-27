@@ -34,16 +34,16 @@ export interface PlanFeatures {
 const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
   starter: {
     analytics: true,
-    advancedAnalytics: false,
-    reports: false,
-    exportReports: false,
-    aiChat: false,
-    aiInsights: false,
-    aiLeaveAssistant: false,
-    slaSettings: false,
+    advancedAnalytics: true,
+    reports: true,
+    exportReports: true,
+    aiChat: true,
+    aiInsights: true,
+    aiLeaveAssistant: true,
+    slaSettings: true,
     maxEmployees: 50,
-    calendarSync: false,
-    integrations: false,
+    calendarSync: true,
+    integrations: true,
   },
   professional: {
     analytics: true,
@@ -80,7 +80,7 @@ export const PLAN_LABELS: Record<PlanType, string> = {
 };
 
 export const PLAN_PRICES: Record<PlanType, string> = {
-  starter: "$29/mo",
+  starter: "Free",
   professional: "$79/mo",
   enterprise: "Custom",
 };

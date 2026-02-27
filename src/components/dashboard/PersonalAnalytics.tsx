@@ -76,7 +76,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart */}
         {pieData.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="rounded-2xl p-6 shadow-lg border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
               📊 Leave Distribution
             </h3>
@@ -96,14 +96,23 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    background: "var(--card)", 
+                    border: "1px solid var(--border)", 
+                    borderRadius: "8px", 
+                    color: "var(--text-primary)" 
+                  }}
+                  itemStyle={{ color: "var(--text-primary)" }}
+                  labelStyle={{ color: "var(--text-primary)" }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
         )}
 
         {/* Recent Leaves */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="rounded-2xl p-6 shadow-lg border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
             📅 Recent Requests
           </h3>
@@ -143,7 +152,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
       </div>
 
       {/* Leave Balances */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+      <div className="rounded-2xl p-6 shadow-lg border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
           💼 Leave Balances
         </h3>

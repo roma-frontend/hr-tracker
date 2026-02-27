@@ -1,0 +1,206 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Building2, Check, Zap, Crown, ArrowRight } from "lucide-react";
+
+type Plan = "starter" | "professional" | "enterprise";
+
+const plans = [
+  {
+    id: "starter" as Plan,
+    name: "Starter",
+    price: "Free",
+    description: "Perfect for small teams getting started",
+    icon: Zap,
+    color: "from-green-500 to-emerald-500",
+    features: [
+      "Up to 50 employees",
+      "Basic leave management",
+      "Time tracking",
+      "Employee profiles",
+      "Email notifications",
+      "Community support",
+    ],
+    instant: true,
+  },
+  {
+    id: "professional" as Plan,
+    name: "Professional",
+    price: "$49/mo",
+    description: "For growing teams with advanced needs",
+    icon: Building2,
+    color: "from-blue-500 to-cyan-500",
+    features: [
+      "Up to 200 employees",
+      "Everything in Starter",
+      "Advanced analytics",
+      "Custom workflows",
+      "Priority support",
+      "API access",
+      "Integrations",
+    ],
+    instant: false,
+    popular: true,
+  },
+  {
+    id: "enterprise" as Plan,
+    name: "Enterprise",
+    price: "Custom",
+    description: "Unlimited scale for large organizations",
+    icon: Crown,
+    color: "from-purple-500 to-pink-500",
+    features: [
+      "Unlimited employees",
+      "Everything in Professional",
+      "Dedicated support",
+      "Custom integrations",
+      "SLA guarantee",
+      "Advanced security",
+      "Training & onboarding",
+    ],
+    instant: false,
+  },
+];
+
+export default function RegisterOrgPage() {
+  const router = useRouter();
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+
+  const handleSelectPlan = (plan: Plan) => {
+    setSelectedPlan(plan);
+    // Navigate to registration form with plan
+    if (plan === "starter") {
+      router.push(`/register-org/create?plan=${plan}`);
+    } else {
+      router.push(`/register-org/request?plan=${plan}`);
+    }
+  };
+
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: "var(--background)" }}
+    >
+      {/* Background blobs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
+          style={{ background: "radial-gradient(circle, #2563eb, transparent)" }}
+        />
+        <div
+          className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
+          style={{ background: "radial-gradient(circle, #0ea5e9, transparent)" }}
+        />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="w-full max-w-6xl relative"
+      >
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+            Choose Your Plan
+          </h1>
+          <p className="text-lg" style={{ color: "var(--text-muted)" }}>
+            Start managing your team today
+          </p>
+        </div>
+
+        {/* Plans Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          {plans.map((plan) => {
+            const Icon = plan.icon;
+            return (
+              <motion.div
+                key={plan.id}
+                whileHover={{ scale: 1.02, y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                className={`relative rounded-2xl p-6 cursor-pointer border-2 transition-all ${
+                  selectedPlan === plan.id
+                    ? "border-blue-500 shadow-xl"
+                    : "border-transparent hover:border-blue-300"
+                }`}
+                style={{
+                  background: "var(--card)",
+                  boxShadow: plan.popular ? "0 0 30px rgba(37,99,235,0.2)" : undefined,
+                }}
+                onClick={() => handleSelectPlan(plan.id)}
+              >
+                {/* Popular badge */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-blue-500 to-cyan-500">
+                    Most Popular
+                  </div>
+                )}
+
+                {/* Icon */}
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: `linear-gradient(135deg, var(--color-${plan.id}))` }}
+                >
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
+
+                {/* Plan details */}
+                <h3 className="text-2xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
+                  {plan.name}
+                </h3>
+                <p className="text-3xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent"
+                   style={{ backgroundImage: `linear-gradient(135deg, ${plan.color})` }}>
+                  {plan.price}
+                </p>
+                <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
+                  {plan.description}
+                </p>
+
+                {/* Features */}
+                <ul className="space-y-3 mb-6">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <Check className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
+                      <span style={{ color: "var(--text-secondary)" }}>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Action button */}
+                <button
+                  className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all"
+                  style={{ background: `linear-gradient(135deg, ${plan.color})` }}
+                >
+                  {plan.instant ? "Get Started Free" : "Request Access"}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+
+                {!plan.instant && (
+                  <p className="text-xs text-center mt-3" style={{ color: "var(--text-muted)" }}>
+                    Approval within 24 hours
+                  </p>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center">
+          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
+            Already have an organization?{" "}
+            <Link href="/register" className="font-semibold hover:underline text-blue-500">
+              Join existing team
+            </Link>
+          </p>
+          <Link href="/login" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
+            ← Back to login
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

@@ -316,9 +316,18 @@ export const getMyEmployees = query({
 
 // ── Get all users for assignment (admin/supervisor) ────────────────────────
 export const getUsersForAssignment = query({
-  args: {},
-  handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
+  args: { requesterId: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    // If requesterId provided, filter by organization
+    let users = await ctx.db.query("users").collect();
+    
+    if (args.requesterId) {
+      const requester = await ctx.db.get(args.requesterId);
+      if (requester && requester.organizationId) {
+        users = users.filter(u => u.organizationId === requester.organizationId);
+      }
+    }
+    
     return users
       .filter(u => u.isActive && u.role === "employee")
       .map(u => ({
@@ -334,16 +343,26 @@ export const getUsersForAssignment = query({
 
 // ── Get supervisors list ───────────────────────────────────────────────────
 export const getSupervisors = query({
-  args: {},
-  handler: async (ctx) => {
-    const supervisors = await ctx.db
+  args: { requesterId: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    let supervisors = await ctx.db
       .query("users")
       .withIndex("by_role", q => q.eq("role", "supervisor"))
       .collect();
-    const admins = await ctx.db
+    let admins = await ctx.db
       .query("users")
       .withIndex("by_role", q => q.eq("role", "admin"))
       .collect();
+    
+    // Filter by organization if requesterId provided
+    if (args.requesterId) {
+      const requester = await ctx.db.get(args.requesterId);
+      if (requester && requester.organizationId) {
+        supervisors = supervisors.filter(u => u.organizationId === requester.organizationId);
+        admins = admins.filter(u => u.organizationId === requester.organizationId);
+      }
+    }
+    
     return [...supervisors, ...admins]
       .filter(u => u.isActive)
       .map(u => ({

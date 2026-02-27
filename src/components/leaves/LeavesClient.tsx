@@ -69,7 +69,7 @@ export function LeavesClient() {
 
   React.useEffect(() => { setMounted(true); }, []);
 
-  const leaves = useQuery(api.leaves.getAllLeaves, {});
+  const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
 
   const approveLeave = useMutation(api.leaves.approveLeave);
   const rejectLeave = useMutation(api.leaves.rejectLeave);

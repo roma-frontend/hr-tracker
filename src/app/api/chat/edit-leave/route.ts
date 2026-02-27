@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     }
 
     // Get the leave to validate
-    const leaves = await fetchQuery(api.leaves.getAllLeaves, {});
+    const leaves = await fetchQuery(api.leaves.getAllLeaves, { requesterId: requesterId as any });
     const leave = (leaves as any[]).find((l: any) => l._id === leaveId);
 
     if (!leave) {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     // Get requester
-    const users = await fetchQuery(api.users.getAllUsers, {});
+    const users = await fetchQuery(api.users.getAllUsers, { requesterId: requesterId as any });
     const requester = (users as any[]).find((u: any) => u._id === requesterId);
 
     if (!requester) {

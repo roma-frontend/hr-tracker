@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Props {
   onClose: () => void;
@@ -24,8 +25,9 @@ export function AssignSupervisorModal({ onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const employees = useQuery(api.tasks.getUsersForAssignment);
-  const supervisors = useQuery(api.tasks.getSupervisors);
+  const { user } = useAuthStore();
+  const employees = useQuery(api.tasks.getUsersForAssignment, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  const supervisors = useQuery(api.tasks.getSupervisors, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const assignSupervisor = useMutation(api.tasks.assignSupervisor);
 
   const selectedEmp = employees?.find(e => e._id === selectedEmployee);

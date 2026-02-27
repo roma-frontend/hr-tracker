@@ -87,7 +87,7 @@ ${insights.teamConflicts?.length ? `⚠️ TEAM CONFLICTS (people already on lea
     // Fetch FULL SYSTEM CONTEXT — all employees, leaves, calendar, attendance
     let fullContext = '';
     try {
-      const fullRes = await fetch(`${req.headers.get('origin')}/api/chat/full-context`, {
+      const fullRes = await fetch(`${req.headers.get('origin')}/api/chat/full-context?requesterId=${userId}`, {
         headers: { cookie: req.headers.get('cookie') || '' },
       });
       if (fullRes.ok) {

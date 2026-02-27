@@ -12,15 +12,15 @@ const ChartSkeleton = () => (
   <div className="h-96 bg-[var(--background-subtle)] animate-pulse rounded-2xl" />
 );
 const LeavesTrendChart = dynamic(
-  () => import("@/components/analytics/LeavesTrendChart"),
+  () => import("@/components/analytics/LeavesTrendChart").then(mod => ({ default: mod.LeavesTrendChart })),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 const DepartmentStats = dynamic(
-  () => import("@/components/analytics/DepartmentStats"),
+  () => import("@/components/analytics/DepartmentStats").then(mod => ({ default: mod.DepartmentStats })),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 const LeaveHeatmap = dynamic(
-  () => import("@/components/analytics/LeaveHeatmap"),
+  () => import("@/components/analytics/LeaveHeatmap").then(mod => ({ default: mod.LeaveHeatmap })),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 import { Users, Clock, CheckCircle, XCircle, AlertCircle, TrendingUp } from "lucide-react";

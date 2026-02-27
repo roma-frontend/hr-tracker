@@ -21,7 +21,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const employees = useQuery(api.tasks.getUsersForAssignment);
+  const employees = useQuery(api.tasks.getUsersForAssignment, { requesterId: currentUserId });
   const myEmployees = useQuery(
     api.tasks.getMyEmployees,
     userRole === "supervisor" ? { supervisorId: currentUserId } : "skip"

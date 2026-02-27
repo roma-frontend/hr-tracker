@@ -75,7 +75,13 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
     setSubmitting(true);
     try {
+      if (!currentUser?.id) {
+        toast.error("User ID not found");
+        return;
+      }
+      
       await createUser({
+        adminId: currentUser.id as any,
         name,
         email,
         passwordHash: "temp-password-will-be-changed", // User will need to reset password

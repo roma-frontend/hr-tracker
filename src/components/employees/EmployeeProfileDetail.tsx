@@ -89,7 +89,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 <Button
                   size="sm"
                   onClick={() => setShowRatingForm(!showRatingForm)}
-                  className="bg-gradient-to-r from-sky-400 to-pink-500 hover:from-sky-500 hover:to-pink-600 text-white"
+                  className="bg-gradient-to-r from-blue-600 to-sky-700 hover:from-blue-700 hover:to-sky-800 text-white"
                 >
                   <Star className="w-4 h-4 mr-1" />
                   {showRatingForm ? "Cancel Rating" : "Rate Performance"}
@@ -292,7 +292,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <p className="text-sm text-[var(--text-muted)]">No performance rating yet</p>
             <Button
               size="sm"
-              className="mt-3 bg-gradient-to-r from-sky-400 to-pink-500 text-white"
+              className="mt-3 bg-gradient-to-r from-blue-600 to-sky-700 text-white"
               onClick={() => setShowRatingForm(true)}
             >
               <Plus className="w-4 h-4 mr-1" />

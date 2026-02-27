@@ -203,6 +203,29 @@ export function Sidebar() {
           })}
         </nav>
 
+        {/* Organization Branding */}
+        <div className="mt-auto px-3 py-2 flex-shrink-0">
+          <div 
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-lg transition-all",
+              collapsed ? "justify-center" : ""
+            )}
+            style={{ backgroundColor: "var(--background-subtle)" }}
+          >
+            <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: "var(--primary)" }} />
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                  ADB-ARRM
+                </p>
+                <p className="text-[9px] truncate" style={{ color: "var(--text-muted)" }}>
+                  HR Management
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* User info */}
         <div
           className="border-t p-3 flex-shrink-0"
@@ -348,6 +371,24 @@ export function MobileSidebar() {
               );
             })}
           </nav>
+
+          {/* Organization Branding - Mobile */}
+          <div className="mt-auto px-3 py-2 flex-shrink-0">
+            <div 
+              className="flex items-center gap-2 px-3 py-2 rounded-lg"
+              style={{ backgroundColor: "var(--background-subtle)" }}
+            >
+              <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: "var(--primary)" }} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                  ADB-ARRM
+                </p>
+                <p className="text-[9px] truncate" style={{ color: "var(--text-muted)" }}>
+                  HR Management System
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* User */}
           <div

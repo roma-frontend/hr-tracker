@@ -146,6 +146,14 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
                 <YAxis yAxisId="right" orientation="right" />
                 <Tooltip 
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                  contentStyle={{
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    color: 'var(--text-primary)'
+                  }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
                 />
                 <Legend />
                 <Line 
@@ -189,6 +197,14 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
                 <YAxis />
                 <Tooltip 
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                  contentStyle={{
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    color: 'var(--text-primary)'
+                  }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
                 />
                 <Legend />
                 <Bar dataKey="onTime" fill="#10b981" name="On Time" stackId="a" />
@@ -222,7 +238,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
                 return (
                   <div 
                     key={request._id} 
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="flex items-center gap-4 flex-1">
                       <div className={`p-2 rounded-full ${config.color}`}>

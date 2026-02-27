@@ -24,7 +24,7 @@ export default function ApprovalsPage() {
     console.log("Approvals page - Current user:", user);
   }, [user]);
   
-  const pendingUsers = useQuery(api.users.getPendingApprovalUsers, {});
+  const pendingUsers = useQuery(api.users.getPendingApprovalUsers, user?.id ? { adminId: user.id as Id<"users"> } : "skip");
   const approveUser = useMutation(api.users.approveUser);
   const rejectUser = useMutation(api.users.rejectUser);
 

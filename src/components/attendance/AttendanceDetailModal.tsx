@@ -84,7 +84,8 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+            className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border"
+            style={{ background: "var(--card)", borderColor: "var(--border)" }}
           >
             {/* Header gradient */}
             <div className="relative h-28 bg-gradient-to-br from-blue-600 to-sky-700 flex items-end px-6 pb-4">

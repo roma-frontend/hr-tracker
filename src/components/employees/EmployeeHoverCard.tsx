@@ -13,7 +13,7 @@ const PRESENCE_CONFIG: Record<PresenceStatus, { label: string; color: string; bg
   available:     { label: "Available",     color: "text-emerald-600", bg: "bg-emerald-50",  dot: "bg-emerald-500", icon: "🟢" },
   in_meeting:    { label: "In Meeting",    color: "text-amber-600",   bg: "bg-amber-50",    dot: "bg-amber-500",   icon: "📅" },
   in_call:       { label: "In Call",       color: "text-blue-600",    bg: "bg-blue-50",     dot: "bg-blue-500",    icon: "📞" },
-  out_of_office: { label: "Out of Office", color: "text-rose-600",    bg: "bg-rose-50",     dot: "bg-rose-500",    icon: "🏠" },
+  out_of_office: { label: "Out of Office", color: "text-slate-600",   bg: "bg-slate-50",    dot: "bg-slate-500",   icon: "🏠" },
   busy:          { label: "Busy",          color: "text-orange-600",  bg: "bg-orange-50",   dot: "bg-orange-500",  icon: "⛔" },
 };
 
@@ -119,28 +119,28 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
               };
             })()}
           >
-            <div className="bg-white rounded-2xl overflow-hidden border border-blue-100">
-              {/* Header gradient with avatar + name inside */}
-              <div className="bg-gradient-to-r from-blue-600 via-sky-500 to-pink-500 p-4">
+            <div className="rounded-2xl overflow-hidden border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+              {/* Header with avatar + name inside */}
+              <div className="bg-gradient-to-br from-blue-600 to-sky-700 p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${presenceCfg.bg} ${presenceCfg.color}`}>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)" }}>
                     <span className="mr-1">{presenceCfg.icon}</span>{presenceCfg.label}
                   </span>
                   {activeTasks > 0 && (
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 text-white">
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)" }}>
                       📋 {activeTasks} task{activeTasks > 1 ? "s" : ""}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/60 shadow-lg flex-shrink-0 bg-white/20 flex items-center justify-center text-white text-xl font-bold">
+                  <div className="w-14 h-14 rounded-full overflow-hidden shadow-lg flex-shrink-0 flex items-center justify-center text-xl font-bold" style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.4)", color: "var(--text-on-primary)" }}>
                     {employee.avatarUrl ? (
                       <img src={employee.avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     ) : initials}
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base leading-tight">{employee.name}</h3>
-                    <p className="text-white/70 text-sm">{employee.position ?? employee.role}</p>
+                    <h3 className="font-bold text-base leading-tight" style={{ color: "var(--text-on-primary)" }}>{employee.name}</h3>
+                    <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>{employee.position ?? employee.role}</p>
                   </div>
                 </div>
               </div>
@@ -154,8 +154,8 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
                       href={`mailto:${employee.email}`}
                       className="flex items-center gap-2.5 group"
                     >
-                      <span className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors flex-shrink-0">✉️</span>
-                      <span className="text-sm text-slate-600 group-hover:text-blue-600 transition-colors truncate">{employee.email}</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 transition-colors flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>✉️</span>
+                      <span className="text-sm transition-colors truncate" style={{ color: "var(--text-secondary)" }}>{employee.email}</span>
                     </a>
                   )}
 
@@ -164,23 +164,23 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
                       href={`tel:${employee.phone}`}
                       className="flex items-center gap-2.5 group"
                     >
-                      <span className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-100 transition-colors flex-shrink-0">📞</span>
-                      <span className="text-sm text-slate-600 group-hover:text-emerald-600 transition-colors">{employee.phone}</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-emerald-500 transition-colors flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>📞</span>
+                      <span className="text-sm transition-colors" style={{ color: "var(--text-secondary)" }}>{employee.phone}</span>
                     </a>
                   )}
 
                   {employee.department && (
                     <div className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 flex-shrink-0">🏢</span>
-                      <span className="text-sm text-slate-600">{employee.department}</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>🏢</span>
+                      <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{employee.department}</span>
                     </div>
                   )}
 
                   {supervisor && (
                     <div className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-lg bg-sky-50 flex items-center justify-center text-sky-400 flex-shrink-0">👤</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-sky-400 flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>👤</span>
                       <div>
-                        <span className="text-xs text-slate-400 block">Supervisor</span>
+                        <span className="text-xs block" style={{ color: "var(--text-muted)" }}>Supervisor</span>
                         <span className="text-sm font-medium text-sky-500">
                           {supervisor.name && supervisor.name !== "admin"
                             ? supervisor.name
@@ -192,29 +192,29 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
 
                   {/* Financial info — admin only */}
                   {isAdmin && employee.travelAllowance != null && (
-                    <div className="mt-1 pt-2.5 border-t border-slate-100">
-                      <p className="text-xs text-slate-400 mb-2 font-medium uppercase tracking-wide">Finance (Admin only)</p>
+                    <div className="mt-1 pt-2.5 border-t" style={{ borderColor: "var(--border)" }}>
+                      <p className="text-xs mb-2 font-medium uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Finance (Admin only)</p>
                       <div className="grid grid-cols-2 gap-2">
                         {employee.travelAllowance != null && (
-                          <div className="bg-amber-50 rounded-xl p-2.5">
+                          <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-amber-500 font-medium">✈️ Travel</p>
                             <p className="text-sm font-bold text-amber-700">{employee.travelAllowance.toLocaleString()} AMD</p>
                           </div>
                         )}
                         {employee.sickLeaveBudget != null && (
-                          <div className="bg-rose-50 rounded-xl p-2.5">
+                          <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-rose-500 font-medium">🏥 Sick Leave</p>
                             <p className="text-sm font-bold text-rose-700">{employee.sickLeaveBudget.toLocaleString()} AMD</p>
                           </div>
                         )}
                         {employee.vacationBudget != null && (
-                          <div className="bg-blue-50 rounded-xl p-2.5">
+                          <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-blue-500 font-medium">🏖️ Vacation</p>
                             <p className="text-sm font-bold text-blue-700">{employee.vacationBudget.toLocaleString()} AMD</p>
                           </div>
                         )}
                         {employee.salary != null && (
-                          <div className="bg-emerald-50 rounded-xl p-2.5">
+                          <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-emerald-500 font-medium">💰 Salary</p>
                             <p className="text-sm font-bold text-emerald-700">{employee.salary.toLocaleString()} AMD</p>
                           </div>
@@ -226,8 +226,8 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
 
                 {/* Presence selector — only for self or admin */}
                 {canEditStatus && (
-                  <div className="mt-3 pt-3 border-t border-slate-100">
-                    <p className="text-xs text-slate-400 mb-2 font-medium">Set Status</p>
+                  <div className="mt-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+                    <p className="text-xs mb-2 font-medium" style={{ color: "var(--text-muted)" }}>Set Status</p>
                     <div className="flex flex-wrap gap-1.5">
                       {(Object.entries(PRESENCE_CONFIG) as [PresenceStatus, typeof PRESENCE_CONFIG[PresenceStatus]][]).map(([key, cfg]) => (
                         <button
@@ -236,8 +236,23 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
                           className={`text-xs px-2.5 py-1 rounded-full font-medium transition-all ${
                             presence === key
                               ? `${cfg.bg} ${cfg.color} ring-2 ring-offset-1 ring-current`
-                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                              : ""
                           }`}
+                          style={
+                            presence === key
+                              ? {}
+                              : { backgroundColor: "var(--background-subtle)", color: "var(--text-muted)" }
+                          }
+                          onMouseEnter={(e) => {
+                            if (presence !== key) {
+                              e.currentTarget.style.backgroundColor = "var(--background)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (presence !== key) {
+                              e.currentTarget.style.backgroundColor = "var(--background-subtle)";
+                            }
+                          }}
                         >
                           {cfg.icon} {cfg.label}
                         </button>

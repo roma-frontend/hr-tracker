@@ -46,8 +46,8 @@ export function EmployeesClient() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const users = useQuery(api.users.getAllUsers, {});
-  const supervisors = useQuery(api.tasks.getSupervisors, {});
+  const users = useQuery(api.users.getAllUsers, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  const supervisors = useQuery(api.tasks.getSupervisors, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const deleteUser = useMutation(api.users.deleteUser);
 
   const isAdmin = user?.role === "admin";
@@ -85,8 +85,12 @@ export function EmployeesClient() {
   }, [users]);
 
   const handleDelete = async (userId: string) => {
+    if (!user?.id) {
+      toast.error("User ID not found");
+      return;
+    }
     try {
-      await deleteUser({ userId: userId as Id<"users"> });
+      await deleteUser({ adminId: user.id as Id<"users">, userId: userId as Id<"users"> });
       toast.success("Employee deactivated");
       setDeleteConfirm(null);
     } catch (err) {

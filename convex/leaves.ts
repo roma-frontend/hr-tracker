@@ -1,12 +1,29 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { internal } from "./_generated/api";
 
-// ── Get all leaves with user info ──────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// GET ALL LEAVES — scoped to caller's organization
+// ─────────────────────────────────────────────────────────────────────────────
 export const getAllLeaves = query({
-  args: {},
-  handler: async (ctx) => {
-    const leaves = await ctx.db.query("leaveRequests").order("desc").collect();
+  args: { requesterId: v.id("users") },
+  handler: async (ctx, { requesterId }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error("Requester not found");
+
+    // Superadmin sees all leaves across all organizations
+    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+    let leaves;
+    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+      leaves = await ctx.db.query("leaveRequests").order("desc").collect();
+    } else {
+      if (!requester.organizationId) throw new Error("User does not belong to an organization");
+      leaves = await ctx.db
+        .query("leaveRequests")
+        .withIndex("by_org", (q) => q.eq("organizationId", requester.organizationId))
+        .order("desc")
+        .collect();
+    }
+
     return await Promise.all(
       leaves.map(async (leave) => {
         const user = await ctx.db.get(leave.userId);
@@ -25,7 +42,9 @@ export const getAllLeaves = query({
   },
 });
 
-// ── Get leaves for a specific user ────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// GET USER LEAVES — own leaves only (or admin sees all within org)
+// ─────────────────────────────────────────────────────────────────────────────
 export const getUserLeaves = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
@@ -37,14 +56,31 @@ export const getUserLeaves = query({
   },
 });
 
-// ── Get pending leaves (for admin/supervisor) ──────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// GET PENDING LEAVES — scoped to org
+// ─────────────────────────────────────────────────────────────────────────────
 export const getPendingLeaves = query({
-  args: {},
-  handler: async (ctx) => {
-    const leaves = await ctx.db
-      .query("leaveRequests")
-      .withIndex("by_status", (q) => q.eq("status", "pending"))
-      .collect();
+  args: { requesterId: v.id("users") },
+  handler: async (ctx, { requesterId }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error("Requester not found");
+
+    // Superadmin sees all pending leaves
+    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+    let leaves;
+    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+      const allLeaves = await ctx.db.query("leaveRequests").collect();
+      leaves = allLeaves.filter(l => l.status === "pending");
+    } else {
+      if (!requester.organizationId) throw new Error("User does not belong to an organization");
+      leaves = await ctx.db
+        .query("leaveRequests")
+        .withIndex("by_org_status", (q) =>
+          q.eq("organizationId", requester.organizationId).eq("status", "pending")
+        )
+        .collect();
+    }
+
     return await Promise.all(
       leaves.map(async (leave) => {
         const user = await ctx.db.get(leave.userId);
@@ -60,7 +96,9 @@ export const getPendingLeaves = query({
   },
 });
 
-// ── Create leave request ───────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// CREATE LEAVE REQUEST
+// ─────────────────────────────────────────────────────────────────────────────
 export const createLeave = mutation({
   args: {
     userId: v.id("users"),
@@ -80,31 +118,43 @@ export const createLeave = mutation({
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
+    if (!user.isApproved) throw new Error("Account pending approval");
+    if (!user.organizationId) throw new Error("User does not belong to an organization");
 
     const leaveId = await ctx.db.insert("leaveRequests", {
-      ...args,
+      organizationId: user.organizationId, // ← tenant isolation
+      userId: args.userId,
+      type: args.type,
+      startDate: args.startDate,
+      endDate: args.endDate,
+      days: args.days,
+      reason: args.reason,
+      comment: args.comment,
       status: "pending",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
 
-    // Notify ALL admins and supervisors
+    // Notify admins and supervisors within same org only
     const admins = await ctx.db
       .query("users")
-      .withIndex("by_role", (q) => q.eq("role", "admin"))
+      .withIndex("by_org_role", (q) =>
+        q.eq("organizationId", user.organizationId).eq("role", "admin")
+      )
       .collect();
 
     const supervisors = await ctx.db
       .query("users")
-      .withIndex("by_role", (q) => q.eq("role", "supervisor"))
+      .withIndex("by_org_role", (q) =>
+        q.eq("organizationId", user.organizationId).eq("role", "supervisor")
+      )
       .collect();
 
-    const notifyUsers = [...admins, ...supervisors];
-
-    for (const admin of notifyUsers) {
-      if (admin._id === args.userId) continue;
+    for (const recipient of [...admins, ...supervisors]) {
+      if (recipient._id === args.userId) continue;
       await ctx.db.insert("notifications", {
-        userId: admin._id,
+        organizationId: user.organizationId,
+        userId: recipient._id,
         type: "leave_request",
         title: "🏖 New Leave Request",
         message: `${user.name} requested ${args.days} day(s) of ${args.type} leave (${args.startDate} → ${args.endDate})`,
@@ -114,11 +164,12 @@ export const createLeave = mutation({
       });
     }
 
-    // Create SLA metric for tracking
+    // Create SLA metric
     await ctx.db.insert("slaMetrics", {
+      organizationId: user.organizationId,
       leaveRequestId: leaveId,
       submittedAt: Date.now(),
-      targetResponseTime: 24, // Will be updated from config if exists
+      targetResponseTime: 24,
       status: "pending",
       warningTriggered: false,
       criticalTriggered: false,
@@ -129,7 +180,9 @@ export const createLeave = mutation({
   },
 });
 
-// ── Approve leave ──────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// APPROVE LEAVE — cross-org check
+// ─────────────────────────────────────────────────────────────────────────────
 export const approveLeave = mutation({
   args: {
     leaveId: v.id("leaveRequests"),
@@ -141,28 +194,39 @@ export const approveLeave = mutation({
     if (!leave) throw new Error("Leave request not found");
     if (leave.status !== "pending") throw new Error("Leave is not pending");
 
+    const reviewer = await ctx.db.get(reviewerId);
+    if (!reviewer) throw new Error("Reviewer not found");
+
+    // Cross-org protection
+    if (reviewer.organizationId !== leave.organizationId) {
+      throw new Error("Access denied: cross-organization operation");
+    }
+    if (reviewer.role !== "admin" && reviewer.role !== "supervisor" && reviewer.role !== "superadmin") {
+      throw new Error("Only admins and supervisors can approve leaves");
+    }
+
+    const now = Date.now();
     await ctx.db.patch(leaveId, {
       status: "approved",
       reviewedBy: reviewerId,
       reviewComment: comment,
-      reviewedAt: Date.now(),
-      updatedAt: Date.now(),
+      reviewedAt: now,
+      updatedAt: now,
     });
 
-    const reviewer = await ctx.db.get(reviewerId);
-
-    // Notify the employee
+    // Notify employee
     await ctx.db.insert("notifications", {
+      organizationId: leave.organizationId,
       userId: leave.userId,
       type: "leave_approved",
       title: "✅ Leave Approved!",
-      message: `Your ${leave.type} leave request (${leave.startDate} → ${leave.endDate}) has been approved by ${reviewer?.name ?? "Admin"}.${comment ? ` Note: ${comment}` : ""}`,
+      message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) has been approved by ${reviewer.name}.${comment ? ` Note: ${comment}` : ""}`,
       isRead: false,
       relatedId: leaveId,
-      createdAt: Date.now(),
+      createdAt: now,
     });
 
-    // Deduct from balance
+    // Deduct balance
     const user = await ctx.db.get(leave.userId);
     if (user) {
       if (leave.type === "paid") {
@@ -185,18 +249,19 @@ export const approveLeave = mutation({
       .query("slaMetrics")
       .withIndex("by_leave", (q) => q.eq("leaveRequestId", leaveId))
       .first();
-    
-    if (metric && leave.reviewedAt) {
-      const responseTimeHours = (leave.reviewedAt - metric.submittedAt) / (1000 * 60 * 60);
-      const slaScore = responseTimeHours <= metric.targetResponseTime 
-        ? Math.max(80, 100 - ((responseTimeHours / metric.targetResponseTime) * 20))
-        : Math.max(0, 79 - (((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40));
-      
+
+    if (metric) {
+      const responseTimeHours = (now - metric.submittedAt) / (1000 * 60 * 60);
+      const onTime = responseTimeHours <= metric.targetResponseTime;
+      const slaScore = onTime
+        ? Math.max(80, 100 - (responseTimeHours / metric.targetResponseTime) * 20)
+        : Math.max(0, 79 - ((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40);
+
       await ctx.db.patch(metric._id, {
-        respondedAt: leave.reviewedAt,
+        respondedAt: now,
         responseTimeHours: Math.round(responseTimeHours * 10) / 10,
         slaScore: Math.round(slaScore * 10) / 10,
-        status: responseTimeHours <= metric.targetResponseTime ? "on_time" : "breached",
+        status: onTime ? "on_time" : "breached",
       });
     }
 
@@ -204,7 +269,9 @@ export const approveLeave = mutation({
   },
 });
 
-// ── Reject leave ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// REJECT LEAVE — cross-org check
+// ─────────────────────────────────────────────────────────────────────────────
 export const rejectLeave = mutation({
   args: {
     leaveId: v.id("leaveRequests"),
@@ -216,25 +283,34 @@ export const rejectLeave = mutation({
     if (!leave) throw new Error("Leave request not found");
     if (leave.status !== "pending") throw new Error("Leave is not pending");
 
+    const reviewer = await ctx.db.get(reviewerId);
+    if (!reviewer) throw new Error("Reviewer not found");
+
+    if (reviewer.organizationId !== leave.organizationId) {
+      throw new Error("Access denied: cross-organization operation");
+    }
+    if (reviewer.role !== "admin" && reviewer.role !== "supervisor" && reviewer.role !== "superadmin") {
+      throw new Error("Only admins and supervisors can reject leaves");
+    }
+
+    const now = Date.now();
     await ctx.db.patch(leaveId, {
       status: "rejected",
       reviewedBy: reviewerId,
       reviewComment: comment,
-      reviewedAt: Date.now(),
-      updatedAt: Date.now(),
+      reviewedAt: now,
+      updatedAt: now,
     });
 
-    const reviewer = await ctx.db.get(reviewerId);
-
-    // Notify the employee
     await ctx.db.insert("notifications", {
+      organizationId: leave.organizationId,
       userId: leave.userId,
       type: "leave_rejected",
       title: "❌ Leave Rejected",
-      message: `Your ${leave.type} leave request (${leave.startDate} → ${leave.endDate}) has been rejected by ${reviewer?.name ?? "Admin"}.${comment ? ` Reason: ${comment}` : ""}`,
+      message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) was rejected by ${reviewer.name}.${comment ? ` Reason: ${comment}` : ""}`,
       isRead: false,
       relatedId: leaveId,
-      createdAt: Date.now(),
+      createdAt: now,
     });
 
     // Update SLA metric
@@ -242,18 +318,19 @@ export const rejectLeave = mutation({
       .query("slaMetrics")
       .withIndex("by_leave", (q) => q.eq("leaveRequestId", leaveId))
       .first();
-    
-    if (metric && leave.reviewedAt) {
-      const responseTimeHours = (leave.reviewedAt - metric.submittedAt) / (1000 * 60 * 60);
-      const slaScore = responseTimeHours <= metric.targetResponseTime 
-        ? Math.max(80, 100 - ((responseTimeHours / metric.targetResponseTime) * 20))
-        : Math.max(0, 79 - (((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40));
-      
+
+    if (metric) {
+      const responseTimeHours = (now - metric.submittedAt) / (1000 * 60 * 60);
+      const onTime = responseTimeHours <= metric.targetResponseTime;
+      const slaScore = onTime
+        ? Math.max(80, 100 - (responseTimeHours / metric.targetResponseTime) * 20)
+        : Math.max(0, 79 - ((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40);
+
       await ctx.db.patch(metric._id, {
-        respondedAt: leave.reviewedAt,
+        respondedAt: now,
         responseTimeHours: Math.round(responseTimeHours * 10) / 10,
         slaScore: Math.round(slaScore * 10) / 10,
-        status: responseTimeHours <= metric.targetResponseTime ? "on_time" : "breached",
+        status: onTime ? "on_time" : "breached",
       });
     }
 
@@ -261,7 +338,9 @@ export const rejectLeave = mutation({
   },
 });
 
-// ── Update leave (with role check) ────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// UPDATE LEAVE — org scoped
+// ─────────────────────────────────────────────────────────────────────────────
 export const updateLeave = mutation({
   args: {
     leaveId: v.id("leaveRequests"),
@@ -282,26 +361,26 @@ export const updateLeave = mutation({
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error("Requester not found");
 
-    // Admin can edit anyone; others can only edit their own pending leaves
-    const isAdmin = requester.role === "admin";
+    // Cross-org protection
+    if (requester.organizationId !== leave.organizationId) {
+      throw new Error("Access denied: cross-organization operation");
+    }
+
+    const isAdmin = requester.role === "admin" || requester.role === "superadmin";
     const isOwner = leave.userId === requesterId;
 
-    if (!isAdmin && !isOwner) {
-      throw new Error("You can only edit your own leave requests");
-    }
-    if (!isAdmin && leave.status !== "pending") {
-      throw new Error("You can only edit pending leave requests. Already approved/rejected leaves cannot be changed.");
-    }
+    if (!isAdmin && !isOwner) throw new Error("You can only edit your own leave requests");
+    if (!isAdmin && leave.status !== "pending") throw new Error("Only pending leaves can be edited");
 
     await ctx.db.patch(leaveId, { ...updates, updatedAt: Date.now() });
 
-    // Notify employee if admin edited their leave
     if (isAdmin && !isOwner) {
       await ctx.db.insert("notifications", {
+        organizationId: leave.organizationId,
         userId: leave.userId,
         type: "leave_request",
-        title: "✏️ Leave Request Updated",
-        message: `Your leave request (${leave.startDate} → ${leave.endDate}) was updated by admin.`,
+        title: "✏️ Leave Updated",
+        message: `Your leave request (${leave.startDate} → ${leave.endDate}) was updated by ${requester.name}.`,
         isRead: false,
         relatedId: leaveId,
         createdAt: Date.now(),
@@ -312,7 +391,9 @@ export const updateLeave = mutation({
   },
 });
 
-// ── Delete leave (with role check) ────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE LEAVE — org scoped
+// ─────────────────────────────────────────────────────────────────────────────
 export const deleteLeave = mutation({
   args: {
     leaveId: v.id("leaveRequests"),
@@ -325,35 +406,32 @@ export const deleteLeave = mutation({
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error("Requester not found");
 
-    // Admin can delete anyone's leave; others only their own
-    const isAdmin = requester.role === "admin";
-    const isOwner = leave.userId === requesterId;
-
-    if (!isAdmin && !isOwner) {
-      throw new Error("You can only delete your own leave requests");
+    if (requester.organizationId !== leave.organizationId) {
+      throw new Error("Access denied: cross-organization operation");
     }
 
-    // Restore balance if approved leave is deleted
+    const isAdmin = requester.role === "admin" || requester.role === "superadmin";
+    const isOwner = leave.userId === requesterId;
+
+    if (!isAdmin && !isOwner) throw new Error("You can only delete your own leave requests");
+
+    // Restore balance if approved
     if (leave.status === "approved") {
       const user = await ctx.db.get(leave.userId);
       if (user) {
-        if (leave.type === "paid") {
-          await ctx.db.patch(leave.userId, { paidLeaveBalance: (user.paidLeaveBalance ?? 0) + leave.days });
-        } else if (leave.type === "sick") {
-          await ctx.db.patch(leave.userId, { sickLeaveBalance: (user.sickLeaveBalance ?? 0) + leave.days });
-        } else if (leave.type === "family") {
-          await ctx.db.patch(leave.userId, { familyLeaveBalance: (user.familyLeaveBalance ?? 0) + leave.days });
-        }
+        if (leave.type === "paid") await ctx.db.patch(leave.userId, { paidLeaveBalance: (user.paidLeaveBalance ?? 0) + leave.days });
+        else if (leave.type === "sick") await ctx.db.patch(leave.userId, { sickLeaveBalance: (user.sickLeaveBalance ?? 0) + leave.days });
+        else if (leave.type === "family") await ctx.db.patch(leave.userId, { familyLeaveBalance: (user.familyLeaveBalance ?? 0) + leave.days });
       }
     }
 
-    // Notify employee if admin deleted their leave
     if (isAdmin && !isOwner) {
       await ctx.db.insert("notifications", {
+        organizationId: leave.organizationId,
         userId: leave.userId,
         type: "leave_request",
-        title: "🗑️ Leave Request Deleted",
-        message: `Your ${leave.type} leave request (${leave.startDate} → ${leave.endDate}) was deleted by admin.`,
+        title: "🗑️ Leave Deleted",
+        message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) was deleted by ${requester.name}.`,
         isRead: false,
         relatedId: leaveId,
         createdAt: Date.now(),
@@ -365,11 +443,28 @@ export const deleteLeave = mutation({
   },
 });
 
-// ── Get leave stats ────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// GET LEAVE STATS — scoped to org
+// ─────────────────────────────────────────────────────────────────────────────
 export const getLeaveStats = query({
-  args: {},
-  handler: async (ctx) => {
-    const all = await ctx.db.query("leaveRequests").collect();
+  args: { requesterId: v.id("users") },
+  handler: async (ctx, { requesterId }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error("Requester not found");
+
+    // Superadmin sees stats across all organizations
+    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+    let all;
+    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+      all = await ctx.db.query("leaveRequests").collect();
+    } else {
+      if (!requester.organizationId) throw new Error("User does not belong to an organization");
+      all = await ctx.db
+        .query("leaveRequests")
+        .withIndex("by_org", (q) => q.eq("organizationId", requester.organizationId))
+        .collect();
+    }
+
     const pending = all.filter((l) => l.status === "pending").length;
     const approved = all.filter((l) => l.status === "approved").length;
     const rejected = all.filter((l) => l.status === "rejected").length;
@@ -377,6 +472,7 @@ export const getLeaveStats = query({
     const onLeaveToday = all.filter(
       (l) => l.status === "approved" && l.startDate <= today && l.endDate >= today
     ).length;
+
     return { total: all.length, pending, approved, rejected, onLeaveToday };
   },
 });

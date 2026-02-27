@@ -2,12 +2,16 @@ import { NextResponse } from 'next/server';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '../../../../../convex/_generated/api';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const requesterId = searchParams.get('requesterId');
+    if (!requesterId) return NextResponse.json({ error: 'requesterId required' }, { status: 400 });
+
     // Fetch ALL system data in parallel
     const [users, leaves, todayAttendance, allTasks] = await Promise.all([
-      fetchQuery(api.users.getAllUsers, {}),
-      fetchQuery(api.leaves.getAllLeaves, {}),
+      fetchQuery(api.users.getAllUsers, { requesterId: requesterId as any }),
+      fetchQuery(api.leaves.getAllLeaves, { requesterId: requesterId as any }),
       fetchQuery(api.timeTracking.getTodayAllAttendance, {}),
       fetchQuery(api.tasks.getAllTasks, {}),
     ]);

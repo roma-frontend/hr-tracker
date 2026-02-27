@@ -18,6 +18,8 @@ import type * as faceRecognition from "../faceRecognition.js";
 import type * as leaves from "../leaves.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
+import type * as organizationRequests from "../organizationRequests.js";
+import type * as organizations from "../organizations.js";
 import type * as sla from "../sla.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as supervisorRatings from "../supervisorRatings.js";
@@ -42,6 +44,8 @@ declare const fullApi: ApiFromModules<{
   leaves: typeof leaves;
   migrations: typeof migrations;
   notifications: typeof notifications;
+  organizationRequests: typeof organizationRequests;
+  organizations: typeof organizations;
   sla: typeof sla;
   subscriptions: typeof subscriptions;
   supervisorRatings: typeof supervisorRatings;

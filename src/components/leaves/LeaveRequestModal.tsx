@@ -34,7 +34,7 @@ const LEAVE_TYPES: { value: LeaveType; label: string; color: string }[] = [
 
 export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
   const { user } = useAuthStore();
-  const allUsers = useQuery(api.users.getAllUsers, {});
+  const allUsers = useQuery(api.users.getAllUsers, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const createLeave = useMutation(api.leaves.createLeave);
 
   const [selectedUserId, setSelectedUserId] = useState("");

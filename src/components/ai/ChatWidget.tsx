@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUpgradeModal } from '@/components/subscription/PlanGate';
 import { usePlanFeatures } from '@/hooks/usePlanFeatures';
+import { useRouter } from 'next/navigation';
 
 // SpeechRecognition type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -158,6 +159,7 @@ const INITIAL_SUGGESTIONS = [
 ];
 
 export function ChatWidget() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -165,11 +167,16 @@ export function ChatWidget() {
   const [error, setError] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [wakeWordActive, setWakeWordActive] = useState(false);
+  const [voiceInput, setVoiceInput] = useState('');
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const user = useAuthStore((s) => s.user);
   const wakeRecogRef = useRef<SpeechRecognition[]>([]);
   const voiceRecogRef = useRef<SpeechRecognition | null>(null);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isListeningRef = useRef(false);
+  const accumulatedTranscriptRef = useRef('');
 
   // Plan gating
   const { canAccess } = usePlanFeatures();
@@ -238,8 +245,11 @@ export function ChatWidget() {
     }
   }, []);
 
-  // ── Wake word listener: "Hey HR" (single recognizer, alternates EN/RU) ─
+  // ── Wake word listener: "Hey HR" (DISABLED - only manual mic button) ─
   useEffect(() => {
+    // Disabled auto wake word detection
+    return;
+    
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
 
@@ -321,11 +331,10 @@ export function ChatWidget() {
     }
 
     const rec = new SR();
-    rec.continuous = false;
+    rec.continuous = true;
     rec.interimResults = true;
-    // Use the last message's language for voice input, default en-US
-    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-    rec.lang = lastUserMsg && detectLanguage(lastUserMsg.content) === 'ru' ? 'ru-RU' : 'en-US';
+    // Default to Russian for voice input
+    rec.lang = 'ru-RU';
     voiceRecogRef.current = rec;
 
     setIsListening(true);
@@ -338,21 +347,36 @@ export function ChatWidget() {
         if (e.results[i].isFinal) final += t;
         else interim += t;
       }
-      setInput(final || interim);
+      const text = final || interim;
+      setInput(text);
+      
+      // Reset silence timer - auto-send after 1 second of silence
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
+      if (text.trim()) {
+        silenceTimerRef.current = setTimeout(() => {
+          // Auto-submit after 1 second of silence
+          if (voiceRecogRef.current) {
+            voiceRecogRef.current.stop();
+            voiceRecogRef.current = null;
+            setIsListening(false);
+            setTimeout(() => {
+              inputRef.current?.form?.requestSubmit();
+            }, 100);
+          }
+        }, 1000); // 1 second pause
+      }
     };
 
     rec.onend = () => {
+      // Clean up silence timer
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       setIsListening(false);
       voiceRecogRef.current = null;
-      // Auto-send if we have text
-      setInput(prev => {
-        if (prev.trim()) {
-          setTimeout(() => {
-            inputRef.current?.form?.requestSubmit();
-          }, 100);
-        }
-        return prev;
-      });
     };
 
     rec.onerror = () => {
@@ -446,8 +470,72 @@ export function ChatWidget() {
     }
   };
 
+  // Smart navigation - detect navigation commands
+  const handleNavigation = useCallback((text: string) => {
+    const lowerText = text.toLowerCase();
+    
+    const navigationMap: { [key: string]: string } = {
+      'календарь': '/calendar',
+      'calendar': '/calendar',
+      'покажи календарь': '/calendar',
+      'открой календарь': '/calendar',
+      'show calendar': '/calendar',
+      
+      'отпуск': '/leaves',
+      'отпуска': '/leaves',
+      'leaves': '/leaves',
+      'мои отпуска': '/leaves',
+      'my leaves': '/leaves',
+      'запросы на отпуск': '/leaves',
+      
+      'сотрудники': '/employees',
+      'employees': '/employees',
+      'команда': '/employees',
+      'team': '/employees',
+      'покажи сотрудников': '/employees',
+      
+      'задачи': '/tasks',
+      'tasks': '/tasks',
+      'мои задачи': '/tasks',
+      'my tasks': '/tasks',
+      
+      'посещаемость': '/attendance',
+      'attendance': '/attendance',
+      'присутствие': '/attendance',
+      
+      'аналитика': '/analytics',
+      'analytics': '/analytics',
+      'статистика': '/analytics',
+      'reports': '/reports',
+      'отчеты': '/reports',
+      
+      'настройки': '/settings',
+      'settings': '/settings',
+      
+      'дашборд': '/dashboard',
+      'dashboard': '/dashboard',
+      'главная': '/dashboard',
+      'home': '/dashboard',
+    };
+    
+    for (const [keyword, path] of Object.entries(navigationMap)) {
+      if (lowerText.includes(keyword)) {
+        router.push(path);
+        setIsOpen(false);
+        return true;
+      }
+    }
+    
+    return false;
+  }, [router]);
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+
+    // Check for navigation command first
+    if (handleNavigation(text)) {
+      return;
+    }
 
     const lang = detectLanguage(text);
 

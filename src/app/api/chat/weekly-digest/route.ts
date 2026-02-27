@@ -24,8 +24,8 @@ export async function GET(req: Request) {
 
     // Fetch all data in parallel
     const [allLeaves, allUsers, attendanceSummary] = await Promise.all([
-      convex.query(api.leaves.getAllLeaves, {}),
-      convex.query(api.users.getAllUsers, {}),
+      convex.query(api.leaves.getAllLeaves, { requesterId: adminId as any }),
+      convex.query(api.users.getAllUsers, { requesterId: adminId as any }),
       convex.query(api.timeTracking.getTodayAttendanceSummary, {}),
     ]);
 

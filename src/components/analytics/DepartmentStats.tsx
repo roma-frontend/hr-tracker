@@ -63,6 +63,8 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
               borderRadius: '8px',
               color: 'var(--text-primary)'
             }}
+            itemStyle={{ color: 'var(--text-primary)' }}
+            labelStyle={{ color: 'var(--text-primary)' }}
           />
           <Legend wrapperStyle={{ color: 'var(--text-primary)' }} />
           <Bar dataKey="avgPaid" fill="#2563eb" name="Paid Leave" />

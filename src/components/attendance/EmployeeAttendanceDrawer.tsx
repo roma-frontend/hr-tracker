@@ -76,13 +76,14 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col"
+            className="fixed right-0 top-0 h-full w-full max-w-lg shadow-2xl z-50 flex flex-col"
+            style={{ background: "var(--card)" }}
           >
             {/* Header */}
             <div className="bg-gradient-to-br from-blue-600 to-sky-700 px-6 py-6 flex-shrink-0">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center text-xl font-bold flex-shrink-0" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)" }}>
                     {employee.avatarUrl ? (
                       <img src={employee.avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     ) : (
@@ -90,7 +91,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                     )}
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">{employee.name}</h2>
+                    <h2 className="text-xl font-bold" style={{ color: "var(--text-on-primary)" }}>{employee.name}</h2>
                     {employee.position && <p className="text-blue-200 text-sm">{employee.position}</p>}
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {employee.department && (
@@ -108,7 +109,10 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+                  style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)" }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)"}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -119,7 +123,10 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                 <select
                   value={selectedMonth}
                   onChange={e => setSelectedMonth(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl bg-white/20 text-white text-sm font-medium border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 [&>option]:text-slate-800"
+                  className="w-full px-4 py-2 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 [&>option]:text-slate-800 dark:[&>option]:text-slate-100 dark:[&>option]:bg-gray-800"
+                  style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)", border: "1px solid rgba(255,255,255,0.3)" }}
+                  onFocus={(e) => e.currentTarget.style.boxShadow = "0 0 0 2px rgba(255,255,255,0.3)"}
+                  onBlur={(e) => e.currentTarget.style.boxShadow = "none"}
                 >
                   {monthOptions.map(m => {
                     const [y, mo] = m.split("-").map(Number);
@@ -131,16 +138,16 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
 
             {/* Stats */}
             {monthlyStats && (
-              <div className="grid grid-cols-4 gap-0 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+              <div className="grid grid-cols-4 gap-0 border-b flex-shrink-0" style={{ borderColor: "var(--border)" }}>
                 {[
                   { label: "Days", value: monthlyStats.totalDays, color: "text-blue-600" },
                   { label: "Late", value: monthlyStats.lateDays, color: "text-rose-500" },
                   { label: "Hours", value: monthlyStats.totalWorkedHours + "h", color: "text-emerald-600" },
                   { label: "Punctuality", value: monthlyStats.punctualityRate + "%", color: "text-blue-600" },
                 ].map(s => (
-                  <div key={s.label} className="py-4 text-center border-r border-gray-100 dark:border-gray-800 last:border-0">
+                  <div key={s.label} className="py-4 text-center border-r last:border-0" style={{ borderColor: "var(--border)" }}>
                     <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{s.label}</p>
                   </div>
                 ))}
               </div>
@@ -154,19 +161,19 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                 </div>
               ) : history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">
-                  <Calendar className="w-12 h-12 text-gray-300" />
-                  <p className="text-gray-500 font-medium">No records for {monthLabel}</p>
-                  <p className="text-gray-400 text-sm">Employee had no attendance this month</p>
+                  <Calendar className="w-12 h-12" style={{ color: "var(--border)" }} />
+                  <p className="font-medium" style={{ color: "var(--text-muted)" }}>No records for {monthLabel}</p>
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>Employee had no attendance this month</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                <div className="divide-y" style={{ borderColor: "var(--border)" }}>
                   {history.map(record => {
                     const workedH = record.totalWorkedMinutes ? (record.totalWorkedMinutes / 60).toFixed(1) : null;
                     const dateObj = new Date(record.date + "T00:00:00");
                     const dayLabel = dateObj.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 
                     return (
-                      <div key={record._id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                      <div key={record._id} className="px-6 py-4 transition-colors" style={{ '&:hover': { backgroundColor: "var(--background-subtle)" } }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--background-subtle)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                         <div className="flex items-start justify-between gap-3">
                           {/* Date + status dot */}
                           <div className="flex items-center gap-3">
@@ -175,11 +182,11 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                               record.status === "checked_out" ? "bg-blue-500" : "bg-rose-400"
                             }`} />
                             <div>
-                              <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">{dayLabel}</p>
+                              <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{dayLabel}</p>
                               {record.status === "absent" ? (
                                 <p className="text-xs text-rose-500 mt-0.5">Absent</p>
                               ) : (
-                                <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
+                                <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
                                   <span className="flex items-center gap-1">
                                     <LogIn className="w-3 h-3 text-green-500" />
                                     {record.checkInTime ? formatTime(record.checkInTime) : "—"}
@@ -228,7 +235,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                         {/* Progress bar for worked hours */}
                         {workedH && record.status === "checked_out" && (
                           <div className="mt-2 ml-6">
-                            <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--background-subtle)" }}>
                               <div
                                 className={`h-full rounded-full transition-all ${
                                   parseFloat(workedH) >= 9 ? "bg-emerald-500" :
@@ -241,7 +248,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                         )}
 
                         {record.notes && (
-                          <p className="text-xs text-gray-400 mt-1 ml-6 italic">"{record.notes}"</p>
+                          <p className="text-xs mt-1 ml-6 italic" style={{ color: "var(--text-muted)" }}>"{record.notes}"</p>
                         )}
                       </div>
                     );

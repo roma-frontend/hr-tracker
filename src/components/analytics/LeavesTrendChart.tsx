@@ -72,6 +72,8 @@ export function LeavesTrendChart({ leaves }: LeavesTrendChartProps) {
               borderRadius: '8px',
               color: 'var(--text-primary)'
             }}
+            itemStyle={{ color: 'var(--text-primary)' }}
+            labelStyle={{ color: 'var(--text-primary)' }}
           />
           <Legend wrapperStyle={{ color: 'var(--text-primary)' }} />
           <Line 

@@ -26,12 +26,11 @@ export interface SubscriptionData {
 export function useSubscription() {
   const { user } = useAuthStore();
 
-  const subscription = useQuery(
-    api.subscriptions.getSubscriptionByUserId,
-    user?.id ? { userId: user.id as Id<"users"> } : "skip"
-  );
-
-  const isLoading = subscription === undefined;
+  // NOTE: subscriptions functionality is not implemented yet
+  // Using default values until Convex subscriptions are set up
+  const subscription = null; // useQuery disabled temporarily
+  
+  const isLoading = false;
 
   // считаем подписку активной если trialing или active
   const isActive =

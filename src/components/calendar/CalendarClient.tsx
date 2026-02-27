@@ -32,6 +32,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType, type LeaveStatus } from "@/lib/types";
+import { useAuthStore } from "@/store/useAuthStore";
 
 type LeaveRequest = {
   _id: string;
@@ -184,10 +185,11 @@ export function CalendarClient() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
   const [mounted, setMounted] = useState(false);
+  const { user } = useAuthStore();
 
   useEffect(() => { setMounted(true); }, []);
 
-  const leavesData = useQuery(api.leaves.getAllLeaves, {});
+  const leavesData = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const leaves: LeaveRequest[] = leavesData ?? [];
 
   // Build leave map

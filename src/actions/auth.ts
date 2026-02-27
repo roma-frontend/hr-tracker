@@ -32,6 +32,8 @@ export async function registerAction(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const phone = formData.get("phone") as string | undefined;
+  const organizationId = formData.get("organizationId") as string | undefined;
+  const inviteToken = formData.get("inviteToken") as string | undefined;
 
   if (!name || !email || !password) throw new Error("All fields required");
   if (password.length < 8) throw new Error("Password must be at least 8 characters");
@@ -39,8 +41,10 @@ export async function registerAction(formData: FormData) {
   const result = await convexMutation("auth:register", {
     name,
     email,
-    password, // Convex handles hashing internally
+    password,
     phone: phone || undefined,
+    organizationId: organizationId || undefined,
+    inviteToken: inviteToken || undefined,
   });
 
   // If user needs approval, don't auto-login

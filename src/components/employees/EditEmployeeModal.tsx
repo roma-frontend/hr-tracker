@@ -44,8 +44,9 @@ const ALL_ROLES = [
 ];
 
 export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: EditEmployeeModalProps) {
+  const { user } = useAuthStore();
   const updateUser = useMutation(api.users.updateUser);
-  const supervisors = useQuery(api.users.getSupervisors, {});
+  const supervisors = useQuery(api.users.getSupervisors, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -71,7 +72,13 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
   const handleSave = async () => {
     setLoading(true);
     try {
+      if (!user?.id) {
+        toast.error("User ID not found");
+        return;
+      }
+      
       await updateUser({
+        adminId: user.id as Id<"users">,
         userId: employee._id as Id<"users">,
         name: form.name,
         role: form.role as "admin" | "supervisor" | "employee",
@@ -296,7 +303,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                     style={{ background: form.isActive ? "#2563eb" : "var(--border)" }}
                   >
                     <div
-                      className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all"
+                      className="absolute top-0.5 w-5 h-5 rounded-full bg-white dark:bg-gray-700 shadow transition-all"
                       style={{ left: form.isActive ? "26px" : "2px" }}
                     />
                   </button>

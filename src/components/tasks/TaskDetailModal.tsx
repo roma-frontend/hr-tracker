@@ -160,7 +160,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               )}
               {editMode && (
                 <>
-                  <button onClick={handleSaveEdit} className="px-3 py-1.5 rounded-lg bg-white text-blue-600 text-xs font-bold hover:bg-blue-50 transition-colors">Save</button>
+                  <button onClick={handleSaveEdit} className="px-3 py-1.5 rounded-lg bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-xs font-bold hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors">Save</button>
                   <button onClick={() => setEditMode(false)} className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-medium hover:bg-white/30 transition-colors">Cancel</button>
                 </>
               )}

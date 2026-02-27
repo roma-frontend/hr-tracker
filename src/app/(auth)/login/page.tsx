@@ -284,12 +284,27 @@ export default function LoginPage() {
           )}
 
           {/* Footer */}
-          <p className="text-center text-sm mt-6" style={{ color: "var(--text-muted)" }}>
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold hover:underline" style={{ color: "#2563eb" }}>
-              Create one
+          <div className="text-center mt-6 space-y-3">
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="font-semibold hover:underline" style={{ color: "#2563eb" }}>
+                Join existing team
+              </Link>
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>or</span>
+              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+            </div>
+            <Link href="/register-org">
+              <button
+                className="text-sm font-semibold hover:underline"
+                style={{ color: "#10b981" }}
+              >
+                🏢 Create New Organization
+              </button>
             </Link>
-          </p>
+          </div>
         </div>
 
         {/* Back to home */}

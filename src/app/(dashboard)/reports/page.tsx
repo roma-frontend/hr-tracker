@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, DEPARTMENTS, type LeaveType } from "@/lib/types";
 import { toast } from "sonner";
 import { format, isSameMonth } from "date-fns";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -31,10 +32,11 @@ const itemVariants = {
 export default function ReportsPage() {
   const [tab, setTab] = useState("overview");
   const [mounted, setMounted] = React.useState(false);
+  const { user } = useAuthStore();
   React.useEffect(() => { setMounted(true); }, []);
 
-  const leaves = useQuery(api.leaves.getAllLeaves, {});
-  const users = useQuery(api.users.getAllUsers, {});
+  const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  const users = useQuery(api.users.getAllUsers, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
 
   const isLoading = leaves === undefined || users === undefined;
 
@@ -182,7 +184,11 @@ export default function ReportsPage() {
                         <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} innerRadius={50} dataKey="value" paddingAngle={3}>
                           {pieData.map((entry, i) => <Cell key={i} fill={entry.color} stroke="transparent" />)}
                         </Pie>
-                        <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }} />
+                        <Tooltip 
+                          contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
+                          itemStyle={{ color: "var(--text-primary)" }}
+                          labelStyle={{ color: "var(--text-primary)" }}
+                        />
                         <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-muted)" }} />
                       </PieChart>
                     </ResponsiveContainer>
@@ -251,7 +257,11 @@ export default function ReportsPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="dept" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }} />
+                        <Tooltip 
+                          contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
+                          itemStyle={{ color: "var(--text-primary)" }}
+                          labelStyle={{ color: "var(--text-primary)" }}
+                        />
                         <Bar dataKey="approved" name="Approved" fill="#10b981" radius={[4, 4, 0, 0]} stackId="a" />
                         <Bar dataKey="pending" name="Pending" fill="#f59e0b" radius={[4, 4, 0, 0]} stackId="a" />
                       </BarChart>
@@ -307,7 +317,11 @@ export default function ReportsPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="month" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }} />
+                      <Tooltip 
+                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
+                        itemStyle={{ color: "var(--text-primary)" }}
+                        labelStyle={{ color: "var(--text-primary)" }}
+                      />
                       <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-muted)" }} />
                       <Area type="monotone" dataKey="approved" name="Approved" stroke="#10b981" fill="url(#colorApproved)" strokeWidth={2} />
                       <Area type="monotone" dataKey="pending" name="Pending" stroke="#f59e0b" fill="url(#colorPending)" strokeWidth={2} />
@@ -326,7 +340,11 @@ export default function ReportsPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="month" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }} />
+                      <Tooltip 
+                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
+                        itemStyle={{ color: "var(--text-primary)" }}
+                        labelStyle={{ color: "var(--text-primary)" }}
+                      />
                       <Area type="monotone" dataKey="cumulative" name="Requests" stroke="#2563eb" fill="#2563eb" fillOpacity={0.1} strokeWidth={2} />
                       <Area type="monotone" dataKey="days" name="Days" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.1} strokeWidth={2} />
                     </AreaChart>
