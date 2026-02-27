@@ -65,13 +65,13 @@ export function AssignSupervisorModal({ onClose }: Props) {
       <div className="absolute inset-0 backdrop-blur-sm" style={{ backgroundColor: "var(--overlay-bg, rgba(0, 0, 0, 0.6))" }} onClick={onClose} />
       <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[var(--border)]">
         {/* Header */}
-        <div style={{ background: "var(--accent-gradient, linear-gradient(to right, #7c3aed, #2563eb))" }} className="px-6 py-5">
+        <div style={{ background: "var(--accent-gradient)" }} className="px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold" style={{ color: "var(--text-on-accent, #ffffff)" }}>Assign Supervisor</h2>
-              <p className="text-sm mt-0.5" style={{ color: "var(--text-on-accent-secondary, rgba(255,255,255,0.8))" }}>Link an employee to their supervisor</p>
+              <h2 className="text-xl font-bold" style={{ color: "var(--text-on-accent)" }}>Assign Supervisor</h2>
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-on-accent-secondary)" }}>Link an employee to their supervisor</p>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-white/30 flex items-center justify-center transition-colors" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "var(--text-on-accent, #ffffff)" }}>✕</button>
+            <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-white/30 flex items-center justify-center transition-colors" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "var(--text-on-accent)" }}>✕</button>
           </div>
         </div>
 
@@ -166,8 +166,8 @@ export function AssignSupervisorModal({ onClose }: Props) {
               onClick={handleAssign}
               disabled={!selectedEmployee || loading}
               style={{ 
-                background: "var(--accent-gradient, linear-gradient(to right, #7c3aed, #2563eb))",
-                color: "var(--text-on-accent, #ffffff)"
+                background: "var(--accent-gradient)",
+                color: "var(--text-on-accent)"
               }}
               className="flex-1 px-4 py-2.5 rounded-xl hover:opacity-90 text-sm font-semibold shadow-md transition-all disabled:opacity-50"
             >

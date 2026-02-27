@@ -134,6 +134,11 @@ html.dark {
 
   /* Modal overlay */
   --overlay-bg:            rgba(0, 0, 0, 0.4);
+  
+  /* Accent gradient for buttons and headers */
+  --accent-gradient:       linear-gradient(135deg, #2563eb, #3b82f6);
+  --text-on-accent:        #ffffff;
+  --text-on-accent-secondary: rgba(255, 255, 255, 0.8);
 }
 
 /* ── Dark Theme ────────────────────────────────────────────────── */
@@ -219,6 +224,11 @@ html.dark {
 
   /* Modal overlay */
   --overlay-bg:            rgba(0, 0, 0, 0.7);
+  
+  /* Accent gradient for buttons and headers */
+  --accent-gradient:       linear-gradient(135deg, #1e40af, #2563eb, #3b82f6);
+  --text-on-accent:        #ffffff;
+  --text-on-accent-secondary: rgba(255, 255, 255, 0.9);
 }
 
 /* ── Base Styles ───────────────────────────────────────────────── */
