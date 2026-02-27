@@ -128,7 +128,7 @@ export function DashboardClient() {
       <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
         <TrendingUp className="w-8 h-8 text-amber-500" />
       </div>
-      <h2 className="text-xl font-normal text-[var(--text-primary)]">Convex Not Deployed</h2>
+      <h2 className="text-xl font-semibold text-[var(--text-primary)]">Convex Not Deployed</h2>
       <p className="text-[var(--text-muted)] text-sm max-w-sm">
         Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#2563eb]">npx convex dev</code> in the terminal to connect to the database.
       </p>
@@ -145,12 +145,12 @@ export function DashboardClient() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-4xl sm:text-5xl font-normal tracking-wider leading-none uppercase" 
+              className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight" 
               style={{ 
-                fontFamily: "var(--font-orbitron), sans-serif", 
-                letterSpacing: '0.15em',
+                fontFamily: "var(--font-montserrat), sans-serif", 
+                letterSpacing: '-0.02em',
                 color: 'var(--text-primary)',
-                fontWeight: 400
+                fontWeight: 700
               }}
             >
               {organization?.name ?? "Office Management"}
@@ -361,7 +361,7 @@ export function DashboardClient() {
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-1 bg-gradient-to-b from-sky-400 to-pink-500 rounded-full" />
-                <h3 className="text-lg font-normal text-[var(--text-primary)]" style={{ fontFamily: "var(--font-bebas), cursive", letterSpacing: '0.08em' }}>
+                <h3 className="text-base font-semibold text-[var(--text-primary)]" style={{ fontFamily: "var(--font-work-sans), sans-serif", letterSpacing: '0.01em', fontWeight: 600 }}>
                   Admin Tools
                 </h3>
                 <span className="px-2 py-1 bg-gradient-to-r from-sky-400/10 to-pink-500/10 text-sky-500 dark:text-sky-400 text-xs font-semibold rounded-full">

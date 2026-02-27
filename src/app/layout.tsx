@@ -1,13 +1,29 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { Orbitron, Righteous, Bungee, Bebas_Neue, Inter } from "next/font/google";
+import { 
+  IBM_Plex_Sans,
+  Montserrat,
+  Work_Sans,
+  Inter 
+} from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
-// Futuristic & Tech - ORBITRON
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
+// Corporate & Professional - IBM PLEX SANS
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  weight: ["400", "500", "600", "700"],
+  fallback: ["sans-serif"],
+  adjustFontFallback: true,
+});
+
+// Modern & Bold - MONTSERRAT
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
   display: "swap",
   preload: true,
@@ -16,36 +32,14 @@ const orbitron = Orbitron({
   adjustFontFallback: true,
 });
 
-// Bold & Impactful - RIGHTEOUS
-const righteous = Righteous({
-  variable: "--font-righteous",
+// Clean & Serious - WORK SANS
+const workSans = Work_Sans({
+  variable: "--font-work-sans",
   subsets: ["latin"],
   display: "swap",
   preload: true,
-  weight: ["400"],
-  fallback: ["cursive"],
-  adjustFontFallback: true,
-});
-
-// Urban & Street - BUNGEE
-const bungee = Bungee({
-  variable: "--font-bungee",
-  subsets: ["latin"],
-  display: "swap",
-  preload: true,
-  weight: ["400"],
-  fallback: ["display"],
-  adjustFontFallback: true,
-});
-
-// Modern & Clean - BEBAS NEUE
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas",
-  subsets: ["latin"],
-  display: "swap",
-  preload: true,
-  weight: ["400"],
-  fallback: ["cursive"],
+  weight: ["400", "500", "600", "700", "800"],
+  fallback: ["sans-serif"],
   adjustFontFallback: true,
 });
 
@@ -242,7 +236,7 @@ export default function RootLayout({
           async
         />
       </head>
-      <body className={`${orbitron.variable} ${righteous.variable} ${bungee.variable} ${bebasNeue.variable} ${inter.variable} antialiased`}>
+      <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} antialiased`}>
         <ConvexClientProvider>
           <ThemeProvider
             attribute="class"
