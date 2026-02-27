@@ -152,9 +152,9 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
                   {employee.email && (
                     <a
                       href={`mailto:${employee.email}`}
-                      className="flex items-center gap-2.5 group"
+                      className="flex items-center gap-2.5 group hover:opacity-80 transition-opacity"
                     >
-                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 transition-colors flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>✉️</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>✉️</span>
                       <span className="text-sm transition-colors truncate" style={{ color: "var(--text-secondary)" }}>{employee.email}</span>
                     </a>
                   )}
@@ -162,26 +162,26 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
                   {employee.phone && (
                     <a
                       href={`tel:${employee.phone}`}
-                      className="flex items-center gap-2.5 group"
+                      className="flex items-center gap-2.5 group hover:opacity-80 transition-opacity"
                     >
-                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-emerald-500 transition-colors flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>📞</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>📞</span>
                       <span className="text-sm transition-colors" style={{ color: "var(--text-secondary)" }}>{employee.phone}</span>
                     </a>
                   )}
 
                   {employee.department && (
                     <div className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>🏢</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>🏢</span>
                       <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{employee.department}</span>
                     </div>
                   )}
 
                   {supervisor && (
                     <div className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-sky-400 flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>👤</span>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>👤</span>
                       <div>
                         <span className="text-xs block" style={{ color: "var(--text-muted)" }}>Supervisor</span>
-                        <span className="text-sm font-medium text-sky-500">
+                        <span className="text-sm font-medium" style={{ color: "var(--accent-primary)" }}>
                           {supervisor.name && supervisor.name !== "admin"
                             ? supervisor.name
                             : supervisor.email?.split("@")[0] ?? "Admin"}
@@ -198,25 +198,25 @@ export function EmployeeHoverCard({ employee, children, canEditStatus = false, c
                         {employee.travelAllowance != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-amber-500 font-medium">✈️ Travel</p>
-                            <p className="text-sm font-bold text-amber-700">{employee.travelAllowance.toLocaleString()} AMD</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.travelAllowance.toLocaleString()} AMD</p>
                           </div>
                         )}
                         {employee.sickLeaveBudget != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-rose-500 font-medium">🏥 Sick Leave</p>
-                            <p className="text-sm font-bold text-rose-700">{employee.sickLeaveBudget.toLocaleString()} AMD</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.sickLeaveBudget.toLocaleString()} AMD</p>
                           </div>
                         )}
                         {employee.vacationBudget != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-blue-500 font-medium">🏖️ Vacation</p>
-                            <p className="text-sm font-bold text-blue-700">{employee.vacationBudget.toLocaleString()} AMD</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.vacationBudget.toLocaleString()} AMD</p>
                           </div>
                         )}
                         {employee.salary != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
                             <p className="text-xs text-emerald-500 font-medium">💰 Salary</p>
-                            <p className="text-sm font-bold text-emerald-700">{employee.salary.toLocaleString()} AMD</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.salary.toLocaleString()} AMD</p>
                           </div>
                         )}
                       </div>
