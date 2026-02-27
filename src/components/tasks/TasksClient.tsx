@@ -100,12 +100,30 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
           ))}
         </div>
       )}
+      {task.attachments && task.attachments.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {task.attachments.slice(0, 3).map((att: any, idx: number) => (
+            <div key={idx} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-[var(--background-subtle)] text-[var(--text-secondary)] border border-[var(--border)]">
+              <span>📎</span>
+              <span className="truncate max-w-[80px]">{att.name}</span>
+            </div>
+          ))}
+          {task.attachments.length > 3 && (
+            <span className="text-xs text-[var(--text-muted)] px-2 py-1">+{task.attachments.length - 3} more</span>
+          )}
+        </div>
+      )}
       <div className="flex items-center justify-between pt-1 border-t border-[var(--border)]">
         <div className="flex items-center gap-2">
           <Avatar name={task.assignedToUser?.name ?? "?"} url={task.assignedToUser?.avatarUrl} size="sm" />
           <span className="text-xs text-[var(--text-muted)] truncate max-w-[100px]">{task.assignedToUser?.name ?? "—"}</span>
         </div>
         <div className="flex items-center gap-2">
+          {task.attachments && task.attachments.length > 0 && (
+            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+              📎 {task.attachments.length}
+            </span>
+          )}
           {task.commentCount > 0 && <span className="text-xs text-[var(--text-muted)]">💬 {task.commentCount}</span>}
           <DeadlineBadge deadline={task.deadline} status={task.status as Status} />
         </div>
