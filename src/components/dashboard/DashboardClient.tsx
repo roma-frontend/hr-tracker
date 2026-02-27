@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import {
   Users, Clock, CheckCircle, UserCheck,
-  Plus, CalendarDays, ArrowRight, TrendingUp,
+  Plus, CalendarDays, ArrowRight, TrendingUp, Building2,
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip as RechartsTooltip,
@@ -147,6 +147,11 @@ export function DashboardClient() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          {user?.email?.toLowerCase() === "romangulanyan@gmail.com" && (
+            <Button asChild size="sm" variant="default" className="bg-gradient-to-r from-[#1e40af] to-[#2563eb] hover:opacity-90">
+              <Link href="/superadmin/create-org"><Building2 className="w-4 h-4" />Create Org</Link>
+            </Button>
+          )}
           <Button asChild size="sm" variant="outline">
             <Link href="/calendar"><CalendarDays className="w-4 h-4" />Calendar</Link>
           </Button>
