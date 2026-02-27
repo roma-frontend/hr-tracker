@@ -75,15 +75,13 @@ export default function AnalyticsPage() {
     >
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-            📊 Analytics Dashboard
-          </h1>
-          <p className="text-[var(--text-muted)] mt-1">
-            Overview of your HR metrics and insights
-          </p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+          Analytics Dashboard
+        </h2>
+        <p className="text-[var(--text-muted)] text-sm mt-1">
+          Overview of your HR metrics and insights
+        </p>
       </div>
 
       {/* KPI Cards */}
@@ -122,7 +120,7 @@ export default function AnalyticsPage() {
               <p className="text-sm text-[var(--text-muted)]">Pending Leaves</p>
               <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-1">{pendingLeaves}</p>
             </div>
-            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl">
+            <div className="p-3 bg-yellow-500/20 dark:bg-yellow-500/30 rounded-xl">
               <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-500" />
             </div>
           </div>
@@ -134,7 +132,7 @@ export default function AnalyticsPage() {
               <p className="text-sm text-[var(--text-muted)]">Approved Leaves</p>
               <p className="text-2xl font-bold text-green-600 dark:text-green-500 mt-1">{approvedLeaves}</p>
             </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
+            <div className="p-3 bg-green-500/20 dark:bg-green-500/30 rounded-xl">
               <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-500" />
             </div>
           </div>
@@ -146,7 +144,7 @@ export default function AnalyticsPage() {
               <p className="text-sm text-[var(--text-muted)]">Approval Rate</p>
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-500 mt-1">{approvalRate}%</p>
             </div>
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+            <div className="p-3 bg-blue-500/20 dark:bg-blue-500/30 rounded-xl">
               <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-500" />
             </div>
           </div>

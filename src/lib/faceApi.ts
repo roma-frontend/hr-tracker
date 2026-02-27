@@ -4,18 +4,30 @@ let modelsLoaded = false;
 
 // Load face-api.js models
 export async function loadFaceApiModels() {
-  if (modelsLoaded) return;
+  if (modelsLoaded) {
+    console.log('ℹ️ Models already loaded');
+    return;
+  }
 
   const MODEL_URL = '/models'; // We'll place model files in public/models
   
+  console.log('📦 Loading Face-API models from:', MODEL_URL);
+  
   try {
-    await Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-    ]);
+    console.log('⏳ Loading SSD MobileNet v1...');
+    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+    console.log('✅ SSD MobileNet v1 loaded');
+    
+    console.log('⏳ Loading Face Landmark 68...');
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    console.log('✅ Face Landmark 68 loaded');
+    
+    console.log('⏳ Loading Face Recognition...');
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+    console.log('✅ Face Recognition loaded');
+    
     modelsLoaded = true;
-    console.log('✅ Face-API models loaded successfully');
+    console.log('✅ All Face-API models loaded successfully');
   } catch (error) {
     console.error('❌ Error loading Face-API models:', error);
     throw error;
@@ -25,15 +37,35 @@ export async function loadFaceApiModels() {
 // Detect face and get descriptor
 export async function detectFace(videoElement: HTMLVideoElement) {
   if (!modelsLoaded) {
+    console.log("📦 Models not loaded, loading now...");
     await loadFaceApiModels();
   }
 
-  const detection = await faceapi
-    .detectSingleFace(videoElement)
-    .withFaceLandmarks()
-    .withFaceDescriptor();
+  // Verify video element is ready
+  if (!videoElement || videoElement.readyState < 2) {
+    console.warn("⚠️ Video element not ready for detection");
+    return null;
+  }
 
-  return detection;
+  try {
+    const detection = await faceapi
+      .detectSingleFace(videoElement, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (detection) {
+      console.log('👤 Face detection result:', {
+        score: detection.detection.score,
+        box: detection.detection.box,
+        descriptorLength: detection.descriptor.length
+      });
+    }
+
+    return detection;
+  } catch (error) {
+    console.error("❌ Error detecting face:", error);
+    return null;
+  }
 }
 
 // Compare two face descriptors

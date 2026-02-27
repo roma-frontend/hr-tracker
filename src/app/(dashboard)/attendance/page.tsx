@@ -99,7 +99,7 @@ export default function AttendancePage() {
       {/* Tabs for Admin/Supervisor */}
       {isAdminOrSupervisor && (
         <div>
-          <div className="flex gap-1 bg-slate-100 dark:bg-gray-800 p-1 rounded-xl w-fit">
+          <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: "var(--background-subtle)" }}>
             {([
               { id: "today", label: "Today", icon: Clock },
               { id: "all_employees", label: "All Employees", icon: Users },
@@ -110,9 +110,13 @@ export default function AttendancePage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-white dark:bg-gray-800 text-blue-600 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    ? "shadow-sm"
+                    : "hover:opacity-80"
                 }`}
+                style={activeTab === tab.id 
+                  ? { background: "var(--background)", color: "var(--primary)" }
+                  : { color: "var(--text-muted)" }
+                }
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -257,14 +261,24 @@ export default function AttendancePage() {
                       value={empSearch}
                       onChange={e => setEmpSearch(e.target.value)}
                       placeholder="Search..."
-                      className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 w-36 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100"
+                      className="pl-8 pr-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 w-36"
+                      style={{ 
+                        border: "1px solid var(--border)", 
+                        background: "var(--background)",
+                        color: "var(--text-primary)"
+                      }}
                     />
                   </div>
                   {/* Month */}
                   <select
                     value={selectedMonth}
                     onChange={e => setSelectedMonth(e.target.value)}
-                    className="px-3 py-1.5 text-sm border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100"
+                    className="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2"
+                    style={{ 
+                      border: "1px solid var(--border)", 
+                      background: "var(--background)",
+                      color: "var(--text-primary)"
+                    }}
                   >
                     {monthOptions.map(m => {
                       const [y, mo] = m.split("-").map(Number);
@@ -332,11 +346,11 @@ export default function AttendancePage() {
                       {/* Last record badge */}
                       <div className="flex-shrink-0">
                         {lastRecord?.status === "checked_in" ? (
-                          <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full font-medium animate-pulse">● Active</span>
+                          <span className="text-xs bg-green-500/20 dark:bg-green-500/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full font-medium animate-pulse">● Active</span>
                         ) : lastRecord?.status === "checked_out" ? (
-                          <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">Done</span>
+                          <span className="text-xs bg-blue-500/20 dark:bg-blue-500/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">Done</span>
                         ) : (
-                          <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 px-2 py-1 rounded-full font-medium">—</span>
+                          <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>—</span>
                         )}
                       </div>
                     </div>
@@ -367,7 +381,7 @@ export default function AttendancePage() {
                     style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-sky-400 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold">
                         {employee.avatarUrl ? (
                           <img src={employee.avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
@@ -385,7 +399,8 @@ export default function AttendancePage() {
                     </div>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-sky-400 to-pink-500 hover:from-sky-500 hover:to-pink-600 text-white"
+                      className="text-white hover:opacity-90 transition-opacity"
+                      style={{ background: "var(--primary)" }}
                       onClick={() => setSelectedEmployee({ id: employee._id, name: employee.name })}
                     >
                       <UserCheck className="w-4 h-4 mr-1" />

@@ -15,11 +15,11 @@ interface StatsCardProps {
 }
 
 const colorMap = {
-  blue: 'from-blue-500 to-blue-600',
-  green: 'from-green-500 to-emerald-600',
-  yellow: 'from-yellow-500 to-orange-600',
-  red: 'from-red-500 to-rose-600',
-  purple: 'from-sky-400 to-pink-600',
+  blue: { bg: 'bg-blue-500/20 dark:bg-blue-500/30', icon: 'text-blue-600 dark:text-blue-400' },
+  green: { bg: 'bg-green-500/20 dark:bg-green-500/30', icon: 'text-green-600 dark:text-green-400' },
+  yellow: { bg: 'bg-yellow-500/20 dark:bg-yellow-500/30', icon: 'text-yellow-600 dark:text-yellow-400' },
+  red: { bg: 'bg-red-500/20 dark:bg-red-500/30', icon: 'text-red-600 dark:text-red-400' },
+  purple: { bg: 'bg-purple-500/20 dark:bg-purple-500/30', icon: 'text-purple-600 dark:text-purple-400' },
 };
 
 export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: StatsCardProps) {
@@ -31,9 +31,6 @@ export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: S
       transition={{ duration: 0.2 }}
       className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)] relative overflow-hidden"
     >
-      {/* Gradient background */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${colorMap[color]} opacity-5`} />
-      
       <div className="relative z-10">
         <div className="flex items-start justify-between">
           <div>
@@ -54,8 +51,8 @@ export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: S
             )}
           </div>
           
-          <div className={`p-3 rounded-xl bg-gradient-to-br ${colorMap[color]}`}>
-            <Icon className="w-6 h-6 text-white" />
+          <div className={`p-3 rounded-xl ${colorMap[color].bg}`}>
+            <Icon className={`w-6 h-6 ${colorMap[color].icon}`} />
           </div>
         </div>
       </div>

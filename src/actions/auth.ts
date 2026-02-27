@@ -135,69 +135,89 @@ export async function loginAction(formData: FormData | { email: string; password
   let password: string;
   let isFaceLogin = false;
 
-  if (formData instanceof FormData) {
-    email = formData.get("email") as string;
-    password = formData.get("password") as string;
-  } else {
-    email = formData.email;
-    password = formData.password;
-    isFaceLogin = formData.isFaceLogin || false;
+  try {
+    console.log("🔐 loginAction called with:", formData instanceof FormData ? "FormData" : "Object");
+    
+    if (formData instanceof FormData) {
+      email = formData.get("email") as string;
+      password = formData.get("password") as string;
+    } else {
+      email = formData.email;
+      password = formData.password;
+      isFaceLogin = formData.isFaceLogin || false;
+    }
+
+    console.log("📧 Email:", email);
+    console.log("🔑 Has password:", !!password);
+    console.log("👤 isFaceLogin:", isFaceLogin);
+
+    // For Face ID login, we don't need password validation
+    if (!isFaceLogin && (!email || !password)) {
+      throw new Error("Email and password required");
+    }
+
+    const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+    console.log("📡 Calling Convex mutation auth:login...");
+    const result = await convexMutation("auth:login", {
+      email,
+      password: password || "", // Empty password for Face ID login
+      sessionToken,
+      sessionExpiry,
+      isFaceLogin, // Pass Face ID login flag
+    });
+    console.log("✅ Convex mutation successful:", result);
+
+    console.log("🔐 Creating JWT...");
+    const jwt = await signJWT({
+      userId: result.userId,
+      name: result.name,
+      email: result.email,
+      role: result.role,
+      department: result.department,
+      position: result.position,
+      employeeType: result.employeeType,
+      avatar: result.avatarUrl,
+    });
+    console.log("✅ JWT created");
+
+    console.log("🍪 Setting cookies...");
+    const cookieStore = await cookies();
+    cookieStore.set("hr-auth-token", jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+      path: "/",
+    });
+    cookieStore.set("hr-session-token", sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+      path: "/",
+    });
+    console.log("✅ Cookies set successfully");
+
+    return {
+      success: true,
+      userId: result.userId,
+      name: result.name,
+      email: result.email,
+      role: result.role,
+      department: result.department,
+      position: result.position,
+      employeeType: result.employeeType,
+      avatar: result.avatarUrl,
+      travelAllowance: result.travelAllowance,
+    };
+  } catch (error: any) {
+    console.error("❌ Error in loginAction:", error);
+    console.error("Error message:", error?.message);
+    console.error("Error stack:", error?.stack);
+    throw error;
   }
-
-  // For Face ID login, we don't need password validation
-  if (!isFaceLogin && (!email || !password)) {
-    throw new Error("Email and password required");
-  }
-
-  const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
-
-  const result = await convexMutation("auth:login", {
-    email,
-    password: password || "face-login-bypass", // Convex handles hashing internally
-    sessionToken,
-    sessionExpiry,
-  });
-
-  const jwt = await signJWT({
-    userId: result.userId,
-    name: result.name,
-    email: result.email,
-    role: result.role,
-    department: result.department,
-    position: result.position,
-    employeeType: result.employeeType,
-    avatar: result.avatarUrl,
-  });
-
-  const cookieStore = await cookies();
-  cookieStore.set("hr-auth-token", jwt, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60,
-    path: "/",
-  });
-  cookieStore.set("hr-session-token", sessionToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60,
-    path: "/",
-  });
-
-  return {
-    success: true,
-    userId: result.userId,
-    name: result.name,
-    email: result.email,
-    role: result.role,
-    department: result.department,
-    position: result.position,
-    employeeType: result.employeeType,
-    avatar: result.avatarUrl,
-    travelAllowance: result.travelAllowance,
-  };
 }
 
 export async function logoutAction() {

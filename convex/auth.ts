@@ -225,8 +225,9 @@ export const login = mutation({
     password: v.string(),
     sessionToken: v.string(),
     sessionExpiry: v.number(),
+    isFaceLogin: v.optional(v.boolean()),
   },
-  handler: async (ctx, { email, password: passwordHash, sessionToken, sessionExpiry }) => {
+  handler: async (ctx, { email, password: passwordHash, sessionToken, sessionExpiry, isFaceLogin }) => {
     const user = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", email.toLowerCase().trim()))
@@ -239,7 +240,11 @@ export const login = mutation({
         "Your account is pending approval from your organization administrator. Please wait."
       );
     }
-    if (user.passwordHash !== passwordHash) throw new Error("Invalid email or password");
+    
+    // Skip password check for Face ID login
+    if (!isFaceLogin && user.passwordHash !== passwordHash) {
+      throw new Error("Invalid email or password");
+    }
 
     // Verify org is still active (skip for superadmins who don't have an org)
     let org = null;

@@ -87,19 +87,85 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
       
       console.log("✅ Camera access granted");
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream);
-        setIsWebcamActive(true);
-        
-        // Wait for video to load before starting detection
-        videoRef.current.onloadedmetadata = () => {
-          console.log("✅ Video metadata loaded, starting detection");
-          detectFaceLoop();
-        };
+      // Set state to trigger video element rendering
+      setStream(mediaStream);
+      setIsWebcamActive(true);
+      
+      // Wait for React to render the video element
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Wait for video element to be available in DOM
+      const waitForVideoElement = async (maxAttempts = 20) => {
+        for (let i = 0; i < maxAttempts; i++) {
+          if (videoRef.current) {
+            console.log("📹 Video element found on attempt", i + 1);
+            return true;
+          }
+          console.log(`⏳ Waiting for video element... attempt ${i + 1}`);
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        return false;
+      };
+      
+      const videoElementAvailable = await waitForVideoElement();
+      
+      if (!videoElementAvailable || !videoRef.current) {
+        console.error("❌ Video element ref is null after waiting!");
+        toast.error("Video element not found. Please try again.");
+        // Stop the stream and reset state
+        mediaStream.getTracks().forEach(track => track.stop());
+        setStream(null);
+        setIsWebcamActive(false);
+        return;
       }
+      
+      console.log("📹 Setting up video element...");
+      videoRef.current.srcObject = mediaStream;
+        
+        console.log("⏳ Waiting for metadata to load...");
+        
+        // Ensure video plays
+        const playVideo = async () => {
+          if (!videoRef.current) {
+            console.error("❌ videoRef is null when trying to play");
+            return;
+          }
+          
+          try {
+            console.log("🎬 Attempting to play video...");
+            console.log("Video element state:", {
+              readyState: videoRef.current.readyState,
+              paused: videoRef.current.paused,
+              srcObject: !!videoRef.current.srcObject
+            });
+            await videoRef.current.play();
+            console.log("✅ Video playing successfully");
+            detectFaceLoop(true); // Force start with true flag
+          } catch (err) {
+            console.error("❌ Failed to play video:", err);
+            toast.error("Failed to start video playback");
+          }
+        };
+        
+        // Wait for metadata and play
+        videoRef.current.onloadedmetadata = () => {
+          console.log("✅ Video metadata loaded");
+          playVideo();
+        };
+        
+      // Fallback: try to play after a short delay if metadata event doesn't fire
+      setTimeout(() => {
+        if (videoRef.current && isWebcamActive) {
+          console.log("⚠️ Metadata event didn't fire, trying to play anyway...");
+          playVideo();
+        }
+      }, 1000);
     } catch (error: any) {
       console.error("❌ Error accessing webcam:", error);
+      
+      // Reset state on error
+      setIsWebcamActive(false);
+      setStream(null);
       
       if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
         toast.error("Camera permission denied. Please allow camera access in your browser settings.");
@@ -122,20 +188,45 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
     setFaceDetected(false);
   };
 
-  const detectFaceLoop = () => {
-    if (!videoRef.current || !isWebcamActive) return;
+  const detectFaceLoop = (forceStart = false) => {
+    console.log("🔄 Starting face detection loop...");
+    console.log("forceStart:", forceStart, "videoRef.current:", !!videoRef.current, "isWebcamActive:", isWebcamActive);
+    
+    if (!videoRef.current) {
+      console.warn("⚠️ Cannot start detection loop - videoRef is null");
+      return;
+    }
+    
+    if (!forceStart && !isWebcamActive) {
+      console.warn("⚠️ Cannot start detection loop - isWebcamActive is false");
+      return;
+    }
 
     const interval = setInterval(async () => {
-      if (!videoRef.current || !isWebcamActive) {
+      if (!videoRef.current) {
+        console.log("🛑 Stopping face detection loop - videoRef is null");
         clearInterval(interval);
         return;
       }
 
       try {
+        // Check if video is actually playing and has valid dimensions
+        if (videoRef.current.readyState < 2) {
+          console.log("⏳ Video not ready yet, readyState:", videoRef.current.readyState);
+          return;
+        }
+
         const detection = await detectFace(videoRef.current);
-        setFaceDetected(!!detection);
+        const faceFound = !!detection;
+        
+        // Only log when face detection status changes
+        if (faceFound !== faceDetected) {
+          console.log(faceFound ? "✅ Face detected!" : "❌ No face detected");
+        }
+        
+        setFaceDetected(faceFound);
       } catch (error) {
-        // Ignore detection errors during loop
+        console.error("Error in face detection loop:", error);
       }
     }, 500);
 

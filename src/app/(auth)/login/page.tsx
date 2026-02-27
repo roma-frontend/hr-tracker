@@ -10,6 +10,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
 import { FaceLogin } from "@/components/auth/FaceLogin";
 import { toast } from "sonner";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
+import { loginTourSteps } from "@/components/onboarding/loginTourSteps";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -69,11 +71,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "var(--background)" }}
-    >
-      {/* Background gradient */}
+    <>
+      {/* Onboarding Tour */}
+      <OnboardingTour 
+        steps={loginTourSteps} 
+        tourId="login-tour"
+        onComplete={() => console.log("Tour completed!")}
+        onSkip={() => console.log("Tour skipped")}
+      />
+
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ background: "var(--background)" }}
+      >
+        {/* Background gradient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
@@ -93,6 +104,7 @@ export default function LoginPage() {
       >
         {/* Card */}
         <div
+          id="login-card"
           className="rounded-2xl p-8 shadow-2xl border"
           style={{
             background: "var(--card)",
@@ -158,7 +170,7 @@ export default function LoginPage() {
           {loginMode === "email" && (
             <>
               {/* WebAuthn */}
-              <div className="mb-6">
+              <div id="biometric-login" className="mb-6">
                 <WebAuthnButton mode="login" onSuccess={handleWebAuthnSuccess} />
               </div>
 
@@ -175,7 +187,7 @@ export default function LoginPage() {
 
           {/* Form - Only show for email mode */}
           {loginMode === "email" && (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form id="email-login-form" onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
@@ -285,7 +297,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="text-center mt-6 space-y-3">
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            <p id="join-team-link" className="text-sm" style={{ color: "var(--text-muted)" }}>
               Don&apos;t have an account?{" "}
               <Link href="/register" className="font-semibold hover:underline" style={{ color: "#2563eb" }}>
                 Join existing team
@@ -296,7 +308,7 @@ export default function LoginPage() {
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>or</span>
               <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
             </div>
-            <Link href="/register-org">
+            <Link href="/register-org" id="create-org-link">
               <button
                 className="text-sm font-semibold hover:underline"
                 style={{ color: "#10b981" }}
@@ -314,6 +326,7 @@ export default function LoginPage() {
           </Link>
         </div>
       </motion.div>
-    </div>
+      </div>
+    </>
   );
 }

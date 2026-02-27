@@ -528,4 +528,16 @@ export default defineSchema({
   })
     .index("by_org", ["organizationId"])
     .index("by_user", ["userId"]),
+
+  // ── USER PREFERENCES ─────────────────────────────────────────────────────
+  // Store user preferences like tour completion, UI settings, etc.
+  userPreferences: defineTable({
+    userId: v.id("users"),
+    key: v.string(),              // e.g., "tour_seen_login-tour", "theme", "notifications_enabled"
+    value: v.any(),               // The preference value (boolean, string, object, etc.)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_key", ["userId", "key"]),
 });

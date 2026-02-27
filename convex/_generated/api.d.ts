@@ -25,6 +25,7 @@ import type * as subscriptions from "../subscriptions.js";
 import type * as supervisorRatings from "../supervisorRatings.js";
 import type * as tasks from "../tasks.js";
 import type * as timeTracking from "../timeTracking.js";
+import type * as userPreferences from "../userPreferences.js";
 import type * as users from "../users.js";
 
 import type {
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   supervisorRatings: typeof supervisorRatings;
   tasks: typeof tasks;
   timeTracking: typeof timeTracking;
+  userPreferences: typeof userPreferences;
   users: typeof users;
 }>;
 

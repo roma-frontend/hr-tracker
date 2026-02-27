@@ -86,19 +86,88 @@ export function FaceLogin() {
       
       console.log("✅ Camera access granted");
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream);
-        setIsWebcamActive(true);
-        
-        // Wait for video to load before starting detection
-        videoRef.current.onloadedmetadata = () => {
-          console.log("✅ Video metadata loaded, starting detection");
-          detectFaceLoop();
-        };
+      // Set state to trigger video element rendering
+      setStream(mediaStream);
+      setIsWebcamActive(true);
+      
+      // Wait for React to render the video element
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Wait for video element to be available in DOM
+      const waitForVideoElement = async (maxAttempts = 20) => {
+        for (let i = 0; i < maxAttempts; i++) {
+          if (videoRef.current) {
+            console.log("📹 Video element found on attempt", i + 1);
+            return true;
+          }
+          console.log(`⏳ Waiting for video element... attempt ${i + 1}`);
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        return false;
+      };
+      
+      const videoElementAvailable = await waitForVideoElement();
+      
+      if (!videoElementAvailable || !videoRef.current) {
+        console.error("❌ Video element ref is null after waiting!");
+        toast.error("Video element not found. Please try again.");
+        // Stop the stream and reset state
+        mediaStream.getTracks().forEach(track => track.stop());
+        setStream(null);
+        setIsWebcamActive(false);
+        return;
       }
+      
+      console.log("📹 Setting up video element...");
+      videoRef.current.srcObject = mediaStream;
+        
+        console.log("⏳ Waiting for metadata to load...");
+        
+        // Ensure video plays
+        const playVideo = async () => {
+          if (!videoRef.current) {
+            console.error("❌ videoRef is null when trying to play");
+            return;
+          }
+          
+          try {
+            console.log("🎬 Attempting to play video...");
+            console.log("Video element state:", {
+              readyState: videoRef.current.readyState,
+              paused: videoRef.current.paused,
+              srcObject: !!videoRef.current.srcObject
+            });
+            await videoRef.current.play();
+            console.log("✅ Video playing successfully");
+            console.log("🎯 About to start face detection loop...");
+            console.log("videoRef.current exists?", !!videoRef.current);
+            console.log("isWebcamActive?", isWebcamActive);
+            detectFaceLoop(true); // Force start with true flag
+          } catch (err) {
+            console.error("❌ Failed to play video:", err);
+            toast.error("Failed to start video playback");
+          }
+        };
+        
+        // Wait for metadata and play
+        videoRef.current.onloadedmetadata = () => {
+          console.log("✅ Video metadata loaded");
+          playVideo();
+        };
+        
+      // Fallback: try to play after a short delay if metadata event doesn't fire
+      setTimeout(() => {
+        if (videoRef.current && isWebcamActive) {
+          console.log("⚠️ Metadata event didn't fire, trying to play anyway...");
+          playVideo();
+        }
+      }, 1000);
     } catch (error: any) {
       console.error("❌ Error accessing webcam:", error);
+      
+      // Reset state on error
+      setIsWebcamActive(false);
+      setStream(null);
       
       if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
         toast.error("Camera permission denied. Please allow camera access in your browser settings.");
@@ -123,20 +192,45 @@ export function FaceLogin() {
     setMatchedUser(null);
   };
 
-  const detectFaceLoop = () => {
-    if (!videoRef.current || !isWebcamActive) return;
+  const detectFaceLoop = (forceStart = false) => {
+    console.log("🔄 Starting face detection loop...");
+    console.log("forceStart:", forceStart, "videoRef.current:", !!videoRef.current, "isWebcamActive:", isWebcamActive);
+    
+    if (!videoRef.current) {
+      console.warn("⚠️ Cannot start detection loop - videoRef is null");
+      return;
+    }
+    
+    if (!forceStart && !isWebcamActive) {
+      console.warn("⚠️ Cannot start detection loop - isWebcamActive is false");
+      return;
+    }
 
     const interval = setInterval(async () => {
-      if (!videoRef.current || !isWebcamActive) {
+      if (!videoRef.current) {
+        console.log("🛑 Stopping face detection loop - videoRef is null");
         clearInterval(interval);
         return;
       }
 
       try {
+        // Check if video is actually playing and has valid dimensions
+        if (videoRef.current.readyState < 2) {
+          console.log("⏳ Video not ready yet, readyState:", videoRef.current.readyState);
+          return;
+        }
+
         const detection = await detectFace(videoRef.current);
-        setFaceDetected(!!detection);
+        const faceFound = !!detection;
+        
+        // Only log when face detection status changes
+        if (faceFound !== faceDetected) {
+          console.log(faceFound ? "✅ Face detected!" : "❌ No face detected");
+        }
+        
+        setFaceDetected(faceFound);
       } catch (error) {
-        // Ignore detection errors during loop
+        console.error("❌ Error in face detection loop:", error);
       }
     }, 500);
 
@@ -153,10 +247,12 @@ export function FaceLogin() {
     setMatchStatus("searching");
 
     try {
+      console.log("🔍 Step 1: Detecting face...");
       // Detect face and get descriptor
       const detection = await detectFace(videoRef.current);
 
       if (!detection) {
+        console.error("❌ No face detected in frame");
         toast.error("No face detected. Please position your face in the frame.");
         setIsProcessing(false);
         setMatchStatus("not_found");
@@ -164,10 +260,13 @@ export function FaceLogin() {
         return;
       }
 
+      console.log("✅ Face detected, getting descriptor...");
       // Get face descriptor
       const descriptor = detection.descriptor;
+      console.log("✅ Descriptor obtained, length:", descriptor.length);
 
       // Find best match from registered faces
+      console.log("🔍 Step 2: Finding best match from", allFaceDescriptors.length, "registered faces");
       const knownFaces = allFaceDescriptors.map((user) => ({
         userId: user.userId,
         name: user.name,
@@ -175,8 +274,10 @@ export function FaceLogin() {
       }));
 
       const bestMatch = findBestMatch(descriptor, knownFaces);
+      console.log("🎯 Best match found:", bestMatch);
 
       if (!bestMatch) {
+        console.error("❌ No matching face found");
         toast.error("No matching face found.");
         setMatchStatus("not_found");
         setTimeout(() => setMatchStatus("idle"), 2000);
@@ -185,7 +286,9 @@ export function FaceLogin() {
       }
 
       // Check if match is good enough (threshold: 0.6)
+      console.log("🔍 Step 3: Checking match quality. Distance:", bestMatch.distance, "Threshold: 0.6");
       if (!isFaceMatch(bestMatch.distance, 0.6)) {
+        console.error("❌ Match quality too low. Distance:", bestMatch.distance);
         toast.error(`Face not recognized. Confidence too low.`);
         setMatchStatus("not_found");
         setTimeout(() => setMatchStatus("idle"), 2000);
@@ -194,27 +297,36 @@ export function FaceLogin() {
       }
 
       // Match found!
+      console.log("✅ Match confirmed! User:", bestMatch.name);
       setMatchedUser(bestMatch.name);
       setMatchStatus("found");
 
       // Verify login and get user data
+      console.log("🔍 Step 4: Verifying login with Convex...");
       const userData = await verifyFaceLogin({
         userId: bestMatch.userId as any,
       });
+      console.log("✅ User data from Convex:", userData);
 
       // Create session via server action
+      console.log("🔍 Step 5: Finding matched user data...");
       const matchedUserData = allFaceDescriptors.find(u => u.userId === bestMatch.userId);
       if (!matchedUserData) {
+        console.error("❌ User data not found in allFaceDescriptors");
         throw new Error("User data not found");
       }
+      console.log("✅ Matched user data:", matchedUserData);
 
+      console.log("🔍 Step 6: Creating session via loginAction...");
       await loginAction({
         email: matchedUserData.email,
         password: "", // Face login doesn't use password
         isFaceLogin: true,
       });
+      console.log("✅ Session created successfully");
 
       // Update auth store
+      console.log("🔍 Step 7: Updating auth store...");
       setUser({
         id: userData.userId,
         name: userData.name,
@@ -225,16 +337,21 @@ export function FaceLogin() {
         employeeType: userData.employeeType,
         avatar: userData.avatar,
       });
+      console.log("✅ Auth store updated");
 
       toast.success(`Welcome back, ${userData.name}! 👋`);
       
       // Redirect to dashboard
+      console.log("🔍 Step 8: Redirecting to dashboard...");
       setTimeout(() => {
         router.push("/dashboard");
       }, 1000);
 
-    } catch (error) {
-      console.error("Error during face login:", error);
+    } catch (error: any) {
+      console.error("❌ Error during face login:", error);
+      console.error("Error name:", error?.name);
+      console.error("Error message:", error?.message);
+      console.error("Error stack:", error?.stack);
       toast.error("Failed to login with Face ID. Please try again.");
       setMatchStatus("not_found");
       setTimeout(() => setMatchStatus("idle"), 2000);
