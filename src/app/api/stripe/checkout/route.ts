@@ -6,13 +6,21 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const PLANS: Record<string, { priceId: string; name: string }> = {
-  starter:      { priceId: process.env.STRIPE_PRICE_STARTER!,      name: 'Starter' },
+  // Starter is now free, so no Stripe checkout needed
   professional: { priceId: process.env.STRIPE_PRICE_PROFESSIONAL!, name: 'Professional' },
 };
 
 export async function POST(req: NextRequest) {
   try {
     const { plan, email } = await req.json();
+
+    // Starter plan is free, redirect to direct signup
+    if (plan === 'starter') {
+      return NextResponse.json({ 
+        error: 'Starter plan is free. Please use the direct signup instead.',
+        redirect: '/register-org/create?plan=starter'
+      }, { status: 400 });
+    }
 
     if (!plan || !PLANS[plan]) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
