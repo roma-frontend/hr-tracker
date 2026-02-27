@@ -26,8 +26,18 @@ export function AssignSupervisorModal({ onClose }: Props) {
   const [success, setSuccess] = useState(false);
 
   const { user } = useAuthStore();
-  const employees = useQuery(api.tasks.getUsersForAssignment, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
-  const supervisors = useQuery(api.tasks.getSupervisors, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  const employees = useQuery(
+    api.tasks.getUsersForAssignment,
+    user?.id ? { requesterId: user.id as Id<"users"> } : "skip"
+  );
+  const supervisors = useQuery(
+    api.tasks.getSupervisors,
+    user?.id ? { requesterId: user.id as Id<"users"> } : "skip"
+  );
+
+  // Debug: log to check if data is loading
+  console.log("AssignSupervisorModal - employees:", employees);
+  console.log("AssignSupervisorModal - supervisors:", supervisors);
   const assignSupervisor = useMutation(api.tasks.assignSupervisor);
 
   const selectedEmp = employees?.find(e => e._id === selectedEmployee);
@@ -53,13 +63,13 @@ export function AssignSupervisorModal({ onClose }: Props) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[var(--border)]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-violet-600 to-blue-600 px-6 py-5">
+        <div style={{ background: "var(--accent-gradient, linear-gradient(to right, #7c3aed, #2563eb))" }} className="px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Assign Supervisor</h2>
-              <p className="text-violet-200 text-sm mt-0.5">Link an employee to their supervisor</p>
+              <h2 className="text-xl font-bold" style={{ color: "var(--text-on-accent, #ffffff)" }}>Assign Supervisor</h2>
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-on-accent-secondary, rgba(255,255,255,0.8))" }}>Link an employee to their supervisor</p>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">✕</button>
+            <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-white/30 flex items-center justify-center transition-colors" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "var(--text-on-accent, #ffffff)" }}>✕</button>
           </div>
         </div>
 
@@ -151,7 +161,11 @@ export function AssignSupervisorModal({ onClose }: Props) {
             <button
               onClick={handleAssign}
               disabled={!selectedEmployee || loading}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white text-sm font-semibold shadow-md shadow-violet-500/20 transition-all disabled:opacity-50"
+              style={{ 
+                background: "var(--accent-gradient, linear-gradient(to right, #7c3aed, #2563eb))",
+                color: "var(--text-on-accent, #ffffff)"
+              }}
+              className="flex-1 px-4 py-2.5 rounded-xl hover:opacity-90 text-sm font-semibold shadow-md transition-all disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Assignment"}
             </button>
