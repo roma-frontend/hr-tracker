@@ -14,6 +14,7 @@ import Link from "next/link";
 import { format, isSameMonth } from "date-fns";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
 import { useAuthStore } from "@/store/useAuthStore";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Badge } from "@/components/ui/badge";

@@ -5,7 +5,7 @@ export interface User {
   id: string
   name: string
   email: string
-  role: 'admin' | 'supervisor' | 'employee'
+  role: 'superadmin' | 'admin' | 'supervisor' | 'employee'
   avatar?: string
   department?: string
   position?: string

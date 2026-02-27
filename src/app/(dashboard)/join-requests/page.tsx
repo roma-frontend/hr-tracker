@@ -36,7 +36,7 @@ export default function JoinRequestsPage() {
   const [generatingLink, setGeneratingLink] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
-  const userId = user?.userId as Id<"users"> | undefined;
+  const userId = user?.id as Id<"users"> | undefined;
 
   const requests = useQuery(
     api.organizations.getJoinRequests,

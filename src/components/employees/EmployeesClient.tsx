@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const ROLE_CONFIG = {
+  superadmin: { label: "Super Admin", icon: Shield, color: "#9333ea", bg: "rgba(147,51,234,0.1)" },
   admin: { label: "Admin", icon: Crown, color: "#2563eb", bg: "rgba(99,102,241,0.1)" },
   supervisor: { label: "Supervisor", icon: UserCheck, color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
   employee: { label: "Employee", icon: User, color: "#10b981", bg: "rgba(16,185,129,0.1)" },

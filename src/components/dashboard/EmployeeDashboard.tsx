@@ -6,6 +6,7 @@ import { Clock, CheckCircle, XCircle, Plus, Calendar as CalendarIcon, TrendingUp
 import { format } from "date-fns";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
