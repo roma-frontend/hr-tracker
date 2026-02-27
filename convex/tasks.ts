@@ -328,9 +328,9 @@ export const getUsersForAssignment = query({
       }
     }
     
-    // Return all active users (employees, supervisors, but not admins for assignment)
+    // Return all active and approved users (employees, supervisors, but not admins for assignment)
     return users
-      .filter(u => u.isActive && (u.role === "employee" || u.role === "supervisor"))
+      .filter(u => u.isActive && u.isApproved && (u.role === "employee" || u.role === "supervisor"))
       .map(u => ({
         _id: u._id,
         name: u.name,
@@ -365,7 +365,7 @@ export const getSupervisors = query({
     }
     
     return [...supervisors, ...admins]
-      .filter(u => u.isActive)
+      .filter(u => u.isActive && u.isApproved)
       .map(u => ({
         _id: u._id,
         name: u.name,

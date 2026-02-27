@@ -36,6 +36,8 @@ export function AssignSupervisorModal({ onClose }: Props) {
   );
 
   // Debug: log to check if data is loading
+  console.log("AssignSupervisorModal - user:", user);
+  console.log("AssignSupervisorModal - user.id:", user?.id);
   console.log("AssignSupervisorModal - employees:", employees);
   console.log("AssignSupervisorModal - supervisors:", supervisors);
   const assignSupervisor = useMutation(api.tasks.assignSupervisor);
@@ -60,7 +62,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 backdrop-blur-sm" style={{ backgroundColor: "var(--overlay-bg, rgba(0, 0, 0, 0.6))" }} onClick={onClose} />
       <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[var(--border)]">
         {/* Header */}
         <div style={{ background: "var(--accent-gradient, linear-gradient(to right, #7c3aed, #2563eb))" }} className="px-6 py-5">
@@ -89,6 +91,8 @@ export function AssignSupervisorModal({ onClose }: Props) {
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">Choose employee...</option>
+              {employees === undefined && <option disabled>Loading...</option>}
+              {employees?.length === 0 && <option disabled>No employees found</option>}
               {employees?.map(emp => (
                 <option key={emp._id} value={emp._id}>
                   {emp.name}{emp.position ? ` — ${emp.position}` : ""}
