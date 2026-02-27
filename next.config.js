@@ -6,11 +6,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  
-  // Ignore ESLint errors during build (for deployment)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 
   // ── Images ───────────────────────────────────────────────────────────────
   images: {
