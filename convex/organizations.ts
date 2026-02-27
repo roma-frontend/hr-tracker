@@ -308,6 +308,10 @@ export const getJoinRequests = query({
     }
 
     const orgId = admin.organizationId;
+    if (!orgId) {
+      throw new Error("Admin must belong to an organization");
+    }
+
     let invites;
 
     if (status) {
@@ -349,6 +353,11 @@ export const approveJoinRequest = mutation({
     const invite = await ctx.db.get(args.inviteId);
     if (!invite) throw new Error("Invite not found");
     if (invite.status !== "pending") throw new Error("This request has already been reviewed");
+    
+    if (!admin.organizationId) {
+      throw new Error("Admin must belong to an organization");
+    }
+    
     if (invite.organizationId !== admin.organizationId) {
       throw new Error("This request belongs to a different organization");
     }
@@ -435,6 +444,11 @@ export const rejectJoinRequest = mutation({
     const invite = await ctx.db.get(args.inviteId);
     if (!invite) throw new Error("Invite not found");
     if (invite.status !== "pending") throw new Error("This request has already been reviewed");
+    
+    if (!admin.organizationId) {
+      throw new Error("Admin must belong to an organization");
+    }
+    
     if (invite.organizationId !== admin.organizationId) {
       throw new Error("This request belongs to a different organization");
     }
@@ -472,6 +486,10 @@ export const generateInviteToken = mutation({
 
     const expiryHours = args.expiryHours ?? 72;
     const expiry = Date.now() + expiryHours * 60 * 60 * 1000;
+
+    if (!admin.organizationId) {
+      throw new Error("Admin must belong to an organization");
+    }
 
     const inviteId = await ctx.db.insert("organizationInvites", {
       organizationId: admin.organizationId,
@@ -542,6 +560,8 @@ export const getPendingJoinRequestCount = query({
   handler: async (ctx, { adminId }) => {
     const admin = await ctx.db.get(adminId);
     if (!admin || admin.role !== "admin") return 0;
+
+    if (!admin.organizationId) return 0;
 
     const pending = await ctx.db
       .query("organizationInvites")
