@@ -328,8 +328,9 @@ export const getUsersForAssignment = query({
       }
     }
     
+    // Return all active users (employees, supervisors, but not admins for assignment)
     return users
-      .filter(u => u.isActive && u.role === "employee")
+      .filter(u => u.isActive && (u.role === "employee" || u.role === "supervisor"))
       .map(u => ({
         _id: u._id,
         name: u.name,
