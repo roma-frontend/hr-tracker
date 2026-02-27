@@ -77,6 +77,7 @@ export function DashboardClient() {
 
   const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const users = useQuery(api.users.getAllUsers, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  const organization = useQuery(api.organizations.getMyOrganization, user?.id ? { userId: user.id as Id<"users"> } : "skip");
 
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
@@ -127,7 +128,7 @@ export function DashboardClient() {
       <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
         <TrendingUp className="w-8 h-8 text-amber-500" />
       </div>
-      <h2 className="text-xl font-bold text-[var(--text-primary)]">Convex Not Deployed</h2>
+      <h2 className="text-xl font-normal text-[var(--text-primary)]">Convex Not Deployed</h2>
       <p className="text-[var(--text-muted)] text-sm max-w-sm">
         Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#2563eb]">npx convex dev</code> in the terminal to connect to the database.
       </p>
@@ -139,12 +140,30 @@ export function DashboardClient() {
       {/* Welcome header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-            Welcome back, {user?.name?.split(" ")[0] ?? "Admin"} 👋
-          </h2>
-          <p className="text-[var(--text-muted)] text-sm mt-1">
-            {format(today, "EEEE, MMMM d, yyyy")} · Here&apos;s what&apos;s happening today.
-          </p>
+          <div className="flex items-center gap-4">
+            <motion.h1 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="text-4xl sm:text-5xl font-normal tracking-wider leading-none uppercase" 
+              style={{ 
+                fontFamily: "var(--font-orbitron), sans-serif", 
+                letterSpacing: '0.15em',
+                color: 'var(--text-primary)',
+                fontWeight: 400
+              }}
+            >
+              {organization?.name ?? "Office Management"}
+            </motion.h1>
+          </div>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="text-[var(--text-muted)] text-sm mt-2"
+          >
+            {format(today, "EEEE, MMMM d, yyyy")}
+          </motion.p>
         </div>
         <div className="flex gap-2 flex-wrap">
           {user?.email?.toLowerCase() === "romangulanyan@gmail.com" && (
@@ -342,7 +361,7 @@ export function DashboardClient() {
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-1 bg-gradient-to-b from-sky-400 to-pink-500 rounded-full" />
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                <h3 className="text-lg font-normal text-[var(--text-primary)]" style={{ fontFamily: "var(--font-bebas), cursive", letterSpacing: '0.08em' }}>
                   Admin Tools
                 </h3>
                 <span className="px-2 py-1 bg-gradient-to-r from-sky-400/10 to-pink-500/10 text-sky-500 dark:text-sky-400 text-xs font-semibold rounded-full">

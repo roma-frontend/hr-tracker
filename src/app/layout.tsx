@@ -1,17 +1,60 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Orbitron, Righteous, Bungee, Bebas_Neue, Inter } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
+
+// Futuristic & Tech - ORBITRON
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  weight: ["400", "500", "600", "700", "800", "900"],
+  fallback: ["sans-serif"],
+  adjustFontFallback: true,
+});
+
+// Bold & Impactful - RIGHTEOUS
+const righteous = Righteous({
+  variable: "--font-righteous",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  weight: ["400"],
+  fallback: ["cursive"],
+  adjustFontFallback: true,
+});
+
+// Urban & Street - BUNGEE
+const bungee = Bungee({
+  variable: "--font-bungee",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  weight: ["400"],
+  fallback: ["display"],
+  adjustFontFallback: true,
+});
+
+// Modern & Clean - BEBAS NEUE
+const bebasNeue = Bebas_Neue({
+  variable: "--font-bebas",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  weight: ["400"],
+  fallback: ["cursive"],
+  adjustFontFallback: true,
+});
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
   preload: true,
-  // Only load weights we actually use — reduces font payload significantly
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600"],
   fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
   adjustFontFallback: true,
 });
@@ -199,7 +242,7 @@ export default function RootLayout({
           async
         />
       </head>
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${orbitron.variable} ${righteous.variable} ${bungee.variable} ${bebasNeue.variable} ${inter.variable} antialiased`}>
         <ConvexClientProvider>
           <ThemeProvider
             attribute="class"

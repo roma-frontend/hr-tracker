@@ -180,22 +180,38 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="startDate">Start Date *</Label>
-              <Input
-                id="startDate" type="date" value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                min={format(new Date(), "yyyy-MM-dd")}
-                className={errors.startDate ? "border-destructive" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="startDate" 
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  min={format(new Date(), "yyyy-MM-dd")}
+                  className={`cursor-pointer ${errors.startDate ? "border-destructive" : ""}`}
+                  onClick={(e) => {
+                    e.currentTarget.showPicker?.();
+                  }}
+                />
+                <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+              </div>
               {errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="endDate">End Date *</Label>
-              <Input
-                id="endDate" type="date" value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate || format(new Date(), "yyyy-MM-dd")}
-                className={errors.endDate ? "border-destructive" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="endDate" 
+                  type="date" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate || format(new Date(), "yyyy-MM-dd")}
+                  className={`cursor-pointer ${errors.endDate ? "border-destructive" : ""}`}
+                  onClick={(e) => {
+                    e.currentTarget.showPicker?.();
+                  }}
+                />
+                <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+              </div>
               {errors.endDate && <p className="text-xs text-destructive">{errors.endDate}</p>}
             </div>
           </div>
