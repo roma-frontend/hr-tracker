@@ -307,10 +307,11 @@ export const getJoinRequests = query({
       throw new Error("Only org admins can view join requests");
     }
 
-    const orgId = admin.organizationId;
-    if (!orgId) {
+    if (!admin.organizationId) {
       throw new Error("Admin must belong to an organization");
     }
+    
+    const orgId = admin.organizationId; // TypeScript now knows this is not undefined
 
     let invites;
 
@@ -560,9 +561,9 @@ export const getPendingJoinRequestCount = query({
   handler: async (ctx, { adminId }) => {
     const admin = await ctx.db.get(adminId);
     if (!admin || admin.role !== "admin") return 0;
+    if (!admin.organizationId) return 0;
 
-    const orgId = admin.organizationId;
-    if (!orgId) return 0;
+    const orgId = admin.organizationId; // TypeScript now knows this is not undefined
 
     const pending = await ctx.db
       .query("organizationInvites")
