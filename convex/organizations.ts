@@ -561,12 +561,13 @@ export const getPendingJoinRequestCount = query({
     const admin = await ctx.db.get(adminId);
     if (!admin || admin.role !== "admin") return 0;
 
-    if (!admin.organizationId) return 0;
+    const orgId = admin.organizationId;
+    if (!orgId) return 0;
 
     const pending = await ctx.db
       .query("organizationInvites")
       .withIndex("by_org_status", (q) =>
-        q.eq("organizationId", admin.organizationId).eq("status", "pending")
+        q.eq("organizationId", orgId).eq("status", "pending")
       )
       .collect();
 

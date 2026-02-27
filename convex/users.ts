@@ -126,13 +126,16 @@ export const createUser = mutation({
     if (existing) throw new Error("A user with this email already exists");
 
     // Check employee limit for this org
-    const org = await ctx.db.get(admin.organizationId);
+    const orgId = admin.organizationId;
+    if (!orgId) throw new Error("Admin must belong to an organization");
+    
+    const org = await ctx.db.get(orgId);
     if (!org) throw new Error("Organization not found");
 
     const currentCount = await ctx.db
       .query("users")
       .withIndex("by_org_active", (q) =>
-        q.eq("organizationId", admin.organizationId).eq("isActive", true)
+        q.eq("organizationId", orgId).eq("isActive", true)
       )
       .collect();
 
@@ -145,7 +148,7 @@ export const createUser = mutation({
     const travelAllowance = args.employeeType === "contractor" ? 12000 : 20000;
 
     const userId = await ctx.db.insert("users", {
-      organizationId: admin.organizationId, // ← always scoped to admin's org
+      organizationId: orgId, // ← always scoped to admin's org
       name: args.name,
       email,
       passwordHash: args.passwordHash,
@@ -170,7 +173,7 @@ export const createUser = mutation({
     const admins = await ctx.db
       .query("users")
       .withIndex("by_org_role", (q) =>
-        q.eq("organizationId", admin.organizationId).eq("role", "admin")
+        q.eq("organizationId", orgId).eq("role", "admin")
       )
       .collect();
 
