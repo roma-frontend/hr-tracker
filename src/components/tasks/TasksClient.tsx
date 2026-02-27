@@ -123,11 +123,13 @@ function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) 
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group cursor-pointer"
+      {...listeners}
+      {...attributes}
+      className="relative group cursor-grab active:cursor-grabbing"
       onClick={onOpen}
     >
-      {/* Drag handle — only this area activates drag */}
-      <div {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-[var(--background-subtle)] hover:bg-[var(--border)] cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity" title="Drag to move">
+      {/* Drag indicator icon - visible on hover */}
+      <div className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-[var(--background-subtle)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" title="Drag to move">
         <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
         </svg>
@@ -229,9 +231,9 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
   const convexId = userId as Id<"users">;
   const canManage = userRole === "admin" || userRole === "supervisor";
 
-  // DnD sensors — require 8px movement before drag starts (prevents accidental drags)
+  // DnD sensors — require 5px movement before drag starts (prevents accidental drags)
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
   const updateStatus = useMutation(api.tasks.updateTaskStatus);
 
