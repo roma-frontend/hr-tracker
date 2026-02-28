@@ -38,6 +38,7 @@ import { TodayTasksPanel } from "@/components/productivity/TodayTasksPanel";
 import { TeamPresence } from "@/components/productivity/TeamPresence";
 import { PomodoroTimer } from "@/components/productivity/PomodoroTimer";
 import { FocusMode } from "@/components/productivity/FocusMode";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 // Play a beautiful notification sound using Web Audio API
 function playNotificationSound() {
@@ -302,6 +303,9 @@ export function Navbar() {
             </>
           )}
         </div>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher />
 
         {/* Theme toggle */}
         <Button

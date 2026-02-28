@@ -34,6 +34,7 @@ import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType, type LeaveStatus } from "@/lib/types";
 import { useAuthStore } from "@/store/useAuthStore";
+import { LeaveRequestModal } from "@/components/leaves/LeaveRequestModal";
 
 type LeaveRequest = {
   _id: string;
@@ -186,6 +187,7 @@ export function CalendarClient() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
   const [mounted, setMounted] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
   const { user } = useAuthStore();
 
   useEffect(() => { setMounted(true); }, []);
@@ -276,7 +278,7 @@ export function CalendarClient() {
             <CalendarDays className="w-4 h-4" />
             Today
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setShowLeaveModal(true)}>
             <Plus className="w-4 h-4" />
             New Leave
           </Button>
@@ -336,11 +338,11 @@ export function CalendarClient() {
 
             <CardContent className="p-3 sm:p-4">
               {/* Day-of-week header */}
-              <div className="grid grid-cols-7 gap-1.5 mb-2">
+              <div className="grid grid-cols-7 gap-1.5 mb-3">
                 {DAYS_OF_WEEK.map((d) => (
                   <div
                     key={d}
-                    className="text-center text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] py-2"
+                    className="text-center text-xs font-semibold text-[var(--text-muted)] py-2 border-b border-[var(--border)]"
                   >
                     {d}
                   </div>
@@ -557,6 +559,12 @@ export function CalendarClient() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Leave Request Modal */}
+      <LeaveRequestModal
+        open={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+      />
     </div>
   );
 }

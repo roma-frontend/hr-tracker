@@ -10,6 +10,7 @@ import { ConvexClientProvider } from "@/lib/convex";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import CookieBanner from "@/components/CookieBanner";
+import { I18nProvider } from "@/components/I18nProvider";
 
 // Corporate & Professional - IBM PLEX SANS
 const ibmPlexSans = IBM_Plex_Sans({
@@ -254,32 +255,34 @@ export default function RootLayout({
         />
       </head>
       <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} antialiased`}>
-        <ConvexClientProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster
-              position="top-right"
-              closeButton
-              expand={false}
-              duration={4000}
-              theme="dark"
-              toastOptions={{
-                style: {
-                  background: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--foreground)',
-                },
-                className: 'sonner-toast',
-              }}
-            />
-            <CookieBanner />
-          </ThemeProvider>
-        </ConvexClientProvider>
+        <I18nProvider>
+          <ConvexClientProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem={false}
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster
+                position="top-right"
+                closeButton
+                expand={false}
+                duration={4000}
+                theme="dark"
+                toastOptions={{
+                  style: {
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--foreground)',
+                  },
+                  className: 'sonner-toast',
+                }}
+              />
+              <CookieBanner />
+            </ThemeProvider>
+          </ConvexClientProvider>
+        </I18nProvider>
       </body>
     </html>
   );

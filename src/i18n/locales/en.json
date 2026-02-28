@@ -10,12 +10,9 @@
     "search": "Search",
     "filter": "Filter",
     "export": "Export",
-    "import": "Import",
     "close": "Close",
     "back": "Back",
     "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
     "yes": "Yes",
     "no": "No"
   },
@@ -24,38 +21,16 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "employees": "Employees",
-    "leave": "Leave Management",
+    "leave": "Leave",
     "attendance": "Attendance",
     "reports": "Reports",
     "settings": "Settings",
     "logout": "Logout"
   },
   
-  "auth": {
-    "login": "Login",
-    "register": "Register",
-    "email": "Email",
-    "password": "Password",
-    "forgotPassword": "Forgot Password?",
-    "rememberMe": "Remember Me",
-    "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "companyName": "Company Name",
-    "alreadyHaveAccount": "Already have an account?",
-    "dontHaveAccount": "Don't have an account?",
-    "loginSuccess": "Login successful!",
-    "loginError": "Invalid credentials",
-    "registerSuccess": "Registration successful!"
-  },
-  
   "dashboard": {
     "title": "Dashboard",
-    "overview": "Overview",
-    "todayAttendance": "Today's Attendance",
-    "pendingLeaves": "Pending Leaves",
-    "upcomingLeaves": "Upcoming Leaves",
+    "welcome": "Welcome to HR Office",
     "quickActions": "Quick Actions",
     "recentActivity": "Recent Activity"
   },
@@ -64,24 +39,9 @@
     "title": "Leave Management",
     "requestLeave": "Request Leave",
     "myLeaves": "My Leaves",
-    "leaveBalance": "Leave Balance",
-    "leaveType": "Leave Type",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "duration": "Duration",
-    "reason": "Reason",
-    "status": "Status",
     "pending": "Pending",
     "approved": "Approved",
-    "rejected": "Rejected",
-    "annual": "Annual Leave",
-    "sick": "Sick Leave",
-    "personal": "Personal Leave",
-    "unpaid": "Unpaid Leave",
-    "daysRemaining": "{days} days remaining",
-    "submitRequest": "Submit Request",
-    "approveRequest": "Approve Request",
-    "rejectRequest": "Reject Request"
+    "rejected": "Rejected"
   },
   
   "attendance": {
@@ -89,80 +49,20 @@
     "checkIn": "Check In",
     "checkOut": "Check Out",
     "today": "Today",
-    "thisWeek": "This Week",
-    "thisMonth": "This Month",
     "present": "Present",
-    "absent": "Absent",
-    "late": "Late",
-    "earlyLeave": "Early Leave",
-    "workingHours": "Working Hours",
-    "overtime": "Overtime"
+    "absent": "Absent"
   },
   
   "employees": {
     "title": "Employees",
     "addEmployee": "Add Employee",
-    "employeeList": "Employee List",
-    "employeeDetails": "Employee Details",
-    "position": "Position",
-    "department": "Department",
-    "joinDate": "Join Date",
-    "phoneNumber": "Phone Number",
-    "address": "Address",
-    "status": "Status",
-    "active": "Active",
-    "inactive": "Inactive",
     "totalEmployees": "Total Employees"
-  },
-  
-  "reports": {
-    "title": "Reports",
-    "attendanceReport": "Attendance Report",
-    "leaveReport": "Leave Report",
-    "salaryReport": "Salary Report",
-    "generateReport": "Generate Report",
-    "dateRange": "Date Range",
-    "employeeFilter": "Employee Filter",
-    "exportPDF": "Export PDF",
-    "exportExcel": "Export Excel"
   },
   
   "settings": {
     "title": "Settings",
     "profile": "Profile",
-    "company": "Company Settings",
-    "security": "Security",
-    "notifications": "Notifications",
     "language": "Language",
-    "theme": "Theme",
-    "changePassword": "Change Password",
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "confirmPassword": "Confirm Password"
-  },
-  
-  "pricing": {
-    "title": "Pricing Plans",
-    "starter": "Starter",
-    "professional": "Professional",
-    "enterprise": "Enterprise",
-    "free": "Free",
-    "perMonth": "per month",
-    "mostPopular": "Most Popular",
-    "startFreeTrial": "Start Free Trial",
-    "contactSales": "Contact Sales",
-    "upTo": "Up to {count} employees",
-    "unlimited": "Unlimited employees"
-  },
-  
-  "notifications": {
-    "title": "Notifications",
-    "markAsRead": "Mark as Read",
-    "markAllAsRead": "Mark All as Read",
-    "noNotifications": "No notifications",
-    "leaveApproved": "Your leave request has been approved",
-    "leaveRejected": "Your leave request has been rejected",
-    "newEmployee": "New employee joined",
-    "attendanceReminder": "Don't forget to check in"
+    "theme": "Theme"
   }
 }

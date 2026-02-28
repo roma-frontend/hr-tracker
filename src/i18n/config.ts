@@ -1,26 +1,37 @@
-import { getRequestConfig } from 'next-intl/server';
-import { notFound } from 'next/navigation';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
-export const locales = ['en', 'hy'] as const;
-export type Locale = (typeof locales)[number];
+import enTranslations from './locales/en.json';
+import hyTranslations from './locales/hy.json';
 
-export const defaultLocale: Locale = 'en';
+export const defaultNS = 'translation';
 
-export const localeNames: Record<Locale, string> = {
-  en: 'English',
-  hy: 'Հայերեն',
-};
+export const resources = {
+  en: {
+    translation: enTranslations,
+  },
+  hy: {
+    translation: hyTranslations,
+  },
+} as const;
 
-export const localeFlags: Record<Locale, string> = {
-  en: '🇬🇧',
-  hy: '🇦🇲',
-};
+i18n
+  .use(LanguageDetector) // Detect user language
+  .use(initReactI18next) // Pass i18n to react-i18next
+  .init({
+    resources,
+    defaultNS,
+    fallbackLng: 'en',
+    
+    interpolation: {
+      escapeValue: false, // React already escapes
+    },
+    
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+    },
+  });
 
-export default getRequestConfig(async ({ locale }) => {
-  // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale as Locale)) notFound();
-
-  return {
-    messages: (await import(`./locales/${locale}.json`)).default,
-  };
-});
+export default i18n;

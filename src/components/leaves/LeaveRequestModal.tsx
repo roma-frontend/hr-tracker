@@ -191,6 +191,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                     type="button"
                     variant="outline"
                     className={`w-full justify-start text-left font-normal ${errors.startDate ? "border-destructive" : ""}`}
+                    style={{ color: "var(--text-primary)" }}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
                     {startDate ? format(new Date(startDate), "PPP") : "Pick a date"}
@@ -216,6 +217,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                     type="button"
                     variant="outline"
                     className={`w-full justify-start text-left font-normal ${errors.endDate ? "border-destructive" : ""}`}
+                    style={{ color: "var(--text-primary)" }}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
                     {endDate ? format(new Date(endDate), "PPP") : "Pick a date"}

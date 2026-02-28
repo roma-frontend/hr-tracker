@@ -10,12 +10,9 @@
     "search": "Փնտրել",
     "filter": "Զտիչ",
     "export": "Արտահանել",
-    "import": "Ներմուծել",
     "close": "Փակել",
     "back": "Հետ",
     "next": "Հաջորդ",
-    "previous": "Նախորդ",
-    "confirm": "Հաստատել",
     "yes": "Այո",
     "no": "Ոչ"
   },
@@ -24,38 +21,16 @@
     "home": "Գլխավոր",
     "dashboard": "Վահանակ",
     "employees": "Աշխատակիցներ",
-    "leave": "Արձակուրդների կառավարում",
+    "leave": "Արձակուրդ",
     "attendance": "Ներկայություն",
     "reports": "Հաշվետվություններ",
     "settings": "Կարգավորումներ",
     "logout": "Դուրս գալ"
   },
   
-  "auth": {
-    "login": "Մուտք",
-    "register": "Գրանցում",
-    "email": "Էլ. հասցե",
-    "password": "Գաղտնաբառ",
-    "forgotPassword": "Մոռացե՞լ եք գաղտնաբառը",
-    "rememberMe": "Հիշել ինձ",
-    "signIn": "Մուտք գործել",
-    "signUp": "Գրանցվել",
-    "firstName": "Անուն",
-    "lastName": "Ազգանուն",
-    "companyName": "Ընկերության անվանում",
-    "alreadyHaveAccount": "Արդեն ունե՞ք հաշիվ",
-    "dontHaveAccount": "Չունե՞ք հաշիվ",
-    "loginSuccess": "Մուտքը հաջող է",
-    "loginError": "Սխալ տվյալներ",
-    "registerSuccess": "Գրանցումը հաջող է"
-  },
-  
   "dashboard": {
     "title": "Վահանակ",
-    "overview": "Ընդհանուր",
-    "todayAttendance": "Այսօրվա ներկայություն",
-    "pendingLeaves": "Սպասող արձակուրդներ",
-    "upcomingLeaves": "Առաջիկա արձակուրդներ",
+    "welcome": "Բարի գալուստ HR Office",
     "quickActions": "Արագ գործողություններ",
     "recentActivity": "Վերջին գործողությունները"
   },
@@ -64,24 +39,9 @@
     "title": "Արձակուրդների կառավարում",
     "requestLeave": "Արձակուրդի հայտ",
     "myLeaves": "Իմ արձակուրդները",
-    "leaveBalance": "Արձակուրդների մնացորդ",
-    "leaveType": "Արձակուրդի տեսակ",
-    "startDate": "Սկիզբ",
-    "endDate": "Ավարտ",
-    "duration": "Տևողություն",
-    "reason": "Պատճառ",
-    "status": "Կարգավիճակ",
     "pending": "Սպասվող",
     "approved": "Հաստատված",
-    "rejected": "Մերժված",
-    "annual": "Տարեկան արձակուրդ",
-    "sick": "Հիվանդության արձակուրդ",
-    "personal": "Անձնական արձակուրդ",
-    "unpaid": "Անվճար արձակուրդ",
-    "daysRemaining": "{days} օր մնացել է",
-    "submitRequest": "Ուղարկել հայտ",
-    "approveRequest": "Հաստատել հայտը",
-    "rejectRequest": "Մերժել հայտը"
+    "rejected": "Մերժված"
   },
   
   "attendance": {
@@ -89,80 +49,20 @@
     "checkIn": "Ներկայանալ",
     "checkOut": "Հեռանալ",
     "today": "Այսօր",
-    "thisWeek": "Այս շաբաթ",
-    "thisMonth": "Այս ամիս",
     "present": "Ներկա",
-    "absent": "Բացակա",
-    "late": "Ուշացած",
-    "earlyLeave": "Վաղ հեռացած",
-    "workingHours": "Աշխատանքային ժամեր",
-    "overtime": "Արտաժամյա"
+    "absent": "Բացակա"
   },
   
   "employees": {
     "title": "Աշխատակիցներ",
     "addEmployee": "Ավելացնել աշխատակից",
-    "employeeList": "Աշխատակիցների ցանկ",
-    "employeeDetails": "Աշխատակցի տվյալներ",
-    "position": "Պաշտոն",
-    "department": "Բաժին",
-    "joinDate": "Աշխատանքի սկիզբ",
-    "phoneNumber": "Հեռախոս",
-    "address": "Հասցե",
-    "status": "Կարգավիճակ",
-    "active": "Ակտիվ",
-    "inactive": "Ոչ ակտիվ",
     "totalEmployees": "Ընդամենը աշխատակիցներ"
-  },
-  
-  "reports": {
-    "title": "Հաշվետվություններ",
-    "attendanceReport": "Ներկայության հաշվետվություն",
-    "leaveReport": "Արձակուրդների հաշվետվություն",
-    "salaryReport": "Աշխատավարձի հաշվետվություն",
-    "generateReport": "Ստեղծել հաշվետվություն",
-    "dateRange": "Ժամանակահատված",
-    "employeeFilter": "Աշխատակցի զտիչ",
-    "exportPDF": "Արտահանել PDF",
-    "exportExcel": "Արտահանել Excel"
   },
   
   "settings": {
     "title": "Կարգավորումներ",
     "profile": "Պրոֆիլ",
-    "company": "Ընկերության կարգավորումներ",
-    "security": "Անվտանգություն",
-    "notifications": "Ծանուցումներ",
     "language": "Լեզու",
-    "theme": "Թեմա",
-    "changePassword": "Փոխել գաղտնաբառը",
-    "currentPassword": "Ներկայիս գաղտնաբառ",
-    "newPassword": "Նոր գաղտնաբառ",
-    "confirmPassword": "Հաստատել գաղտնաբառը"
-  },
-  
-  "pricing": {
-    "title": "Գնային պլաններ",
-    "starter": "Սկսնակ",
-    "professional": "Պրոֆեսիոնալ",
-    "enterprise": "Ձեռնարկություն",
-    "free": "Անվճար",
-    "perMonth": "ամսական",
-    "mostPopular": "Ամենահայտնի",
-    "startFreeTrial": "Սկսել անվճար փորձաշրջան",
-    "contactSales": "Կապվել վաճառքի հետ",
-    "upTo": "Մինչև {count} աշխատակից",
-    "unlimited": "Անսահմանափակ աշխատակիցներ"
-  },
-  
-  "notifications": {
-    "title": "Ծանուցումներ",
-    "markAsRead": "Նշել որպես կարդացած",
-    "markAllAsRead": "Նշել բոլորը որպես կարդացած",
-    "noNotifications": "Ծանուցումներ չկան",
-    "leaveApproved": "Ձեր արձակուրդի հայտը հաստատվել է",
-    "leaveRejected": "Ձեր արձակուրդի հայտը մերժվել է",
-    "newEmployee": "Նոր աշխատակից է միացել",
-    "attendanceReminder": "Մի մոռացեք ներկայանալ"
+    "theme": "Թեմա"
   }
 }
