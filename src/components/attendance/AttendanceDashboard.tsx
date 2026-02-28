@@ -114,12 +114,12 @@ export function AttendanceDashboard() {
           <CardContent>
             <div className="space-y-2">
               {Number(monthlyStats.lateDays) > 0 && (
-                <p className="text-orange-500">
+                <p style={{ color: "var(--text-primary)" }}>
                   • {monthlyStats.lateDays} late arrival(s) this month
                 </p>
               )}
               {Number(monthlyStats.earlyLeaveDays) > 0 && (
-                <p className="text-orange-500">
+                <p style={{ color: "var(--text-primary)" }}>
                   • {monthlyStats.earlyLeaveDays} early leave(s) this month
                 </p>
               )}

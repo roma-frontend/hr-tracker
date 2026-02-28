@@ -177,7 +177,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             {(Number(monthlyStats.lateDays) > 0 || Number(monthlyStats.earlyLeaveDays) > 0) && (
               <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
                 <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                <p className="text-sm text-orange-700 dark:text-orange-300">
+                <p className="text-sm text-orange-700 dark:text-orange-200">
                   {Number(monthlyStats.lateDays) > 0 && `${monthlyStats.lateDays} late arrival(s)`}
                   {Number(monthlyStats.lateDays) > 0 && Number(monthlyStats.earlyLeaveDays) > 0 && " · "}
                   {Number(monthlyStats.earlyLeaveDays) > 0 && `${monthlyStats.earlyLeaveDays} early leave(s)`}
