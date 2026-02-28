@@ -4,38 +4,49 @@
       .bg { fill: #0a0a1a; }
       .grad-1 { stop-color: #2563eb; }
       .grad-2 { stop-color: #0ea5e9; }
-      .icon { fill: #ffffff; }
     }
     @media (prefers-color-scheme: light) {
       .bg { fill: #ffffff; }
       .grad-1 { stop-color: #2563eb; }
       .grad-2 { stop-color: #60a5fa; }
-      .icon { fill: #ffffff; }
     }
     
     /* Animated gradient pulse */
     @keyframes gradientShift {
-      0%, 100% { 
-        stop-color: #2563eb; 
-      }
-      50% { 
-        stop-color: #0ea5e9; 
-      }
+      0%, 100% { stop-color: #2563eb; }
+      50% { stop-color: #0ea5e9; }
     }
     
     @keyframes gradientShift2 {
-      0%, 100% { 
-        stop-color: #0ea5e9; 
-      }
-      50% { 
-        stop-color: #60a5fa; 
-      }
+      0%, 100% { stop-color: #0ea5e9; }
+      50% { stop-color: #60a5fa; }
     }
     
-    /* Window glow animation */
-    @keyframes windowGlow {
-      0%, 100% { opacity: 0.95; }
-      50% { opacity: 0.7; }
+    /* Bar growth animation */
+    @keyframes growBar1 {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(1.15); }
+    }
+    
+    @keyframes growBar2 {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(1.12); }
+    }
+    
+    @keyframes growBar3 {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(1.08); }
+    }
+    
+    @keyframes growBar4 {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(1.05); }
+    }
+    
+    /* Arrow pulse */
+    @keyframes arrowPulse {
+      0%, 100% { opacity: 0.9; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-1px); }
     }
     
     .animated-grad-1 {
@@ -46,23 +57,42 @@
       animation: gradientShift2 3s ease-in-out infinite;
     }
     
-    .window-glow {
-      animation: windowGlow 2s ease-in-out infinite;
+    .bar-1 {
+      transform-origin: bottom;
+      animation: growBar1 2s ease-in-out infinite;
+    }
+    
+    .bar-2 {
+      transform-origin: bottom;
+      animation: growBar2 2s ease-in-out infinite 0.2s;
+    }
+    
+    .bar-3 {
+      transform-origin: bottom;
+      animation: growBar3 2s ease-in-out infinite 0.4s;
+    }
+    
+    .bar-4 {
+      transform-origin: bottom;
+      animation: growBar4 2s ease-in-out infinite 0.6s;
+    }
+    
+    .arrow-anim {
+      animation: arrowPulse 2s ease-in-out infinite;
     }
   </style>
   
   <defs>
-    <linearGradient id="animGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="animGrad" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" class="grad-1 animated-grad-1"/>
       <stop offset="100%" class="grad-2 animated-grad-2"/>
     </linearGradient>
     
     <linearGradient id="bgAnim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.08"/>
-      <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.12"/>
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0.05"/>
     </linearGradient>
     
-    <!-- Glow filter -->
     <filter id="glow">
       <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
       <feMerge>
@@ -76,24 +106,17 @@
   <rect width="32" height="32" rx="8" class="bg"/>
   <rect width="32" height="32" rx="8" fill="url(#bgAnim)"/>
   
-  <!-- Building with animated gradient -->
-  <rect x="9" y="8" width="14" height="19" rx="1.5" fill="url(#animGrad)" filter="url(#glow)"/>
-  
-  <!-- Windows with glow animation -->
-  <g class="icon window-glow">
-    <rect x="11.5" y="10.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="15" y="10.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="18.5" y="10.5" width="2.5" height="2" rx="0.5"/>
+  <!-- Animated chart bars -->
+  <g transform="translate(6, 8)">
+    <rect class="bar-1" x="1" y="12" width="3.5" height="6" rx="1" fill="url(#animGrad)" opacity="0.7"/>
+    <rect class="bar-2" x="6" y="8" width="3.5" height="10" rx="1" fill="url(#animGrad)" opacity="0.85"/>
+    <rect class="bar-3" x="11" y="4" width="3.5" height="14" rx="1" fill="url(#animGrad)" opacity="0.95"/>
+    <rect class="bar-4" x="16" y="0" width="3.5" height="18" rx="1" fill="url(#animGrad)"/>
     
-    <rect x="11.5" y="14" width="2.5" height="2" rx="0.5"/>
-    <rect x="15" y="14" width="2.5" height="2" rx="0.5"/>
-    <rect x="18.5" y="14" width="2.5" height="2" rx="0.5"/>
-    
-    <rect x="11.5" y="17.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="15" y="17.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="18.5" y="17.5" width="2.5" height="2" rx="0.5"/>
-    
-    <!-- Door -->
-    <rect x="14" y="22" width="4" height="5" rx="0.5" opacity="0.85"/>
+    <!-- Animated trend arrow -->
+    <g class="arrow-anim">
+      <path d="M 2 15 L 8 11 L 13 7 L 18 2" stroke="#60a5fa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+      <polygon points="18,2 15,1 16,4" fill="#60a5fa"/>
+    </g>
   </g>
 </svg>

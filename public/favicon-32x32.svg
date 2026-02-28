@@ -4,24 +4,24 @@
       .bg { fill: #0a0a1a; }
       .gradient-start { stop-color: #2563eb; }
       .gradient-end { stop-color: #0ea5e9; }
-      .icon { fill: #ffffff; }
+      .accent { fill: #60a5fa; }
     }
     @media (prefers-color-scheme: light) {
       .bg { fill: #ffffff; }
       .gradient-start { stop-color: #2563eb; }
       .gradient-end { stop-color: #60a5fa; }
-      .icon { fill: #ffffff; }
+      .accent { fill: #93c5fd; }
     }
   </style>
   
   <defs>
-    <linearGradient id="grad32" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="grad32" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" class="gradient-start"/>
       <stop offset="100%" class="gradient-end"/>
     </linearGradient>
     <linearGradient id="bg32" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.08"/>
-      <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.12"/>
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0.05"/>
     </linearGradient>
   </defs>
   
@@ -29,24 +29,17 @@
   <rect width="32" height="32" rx="8" class="bg"/>
   <rect width="32" height="32" rx="8" fill="url(#bg32)"/>
   
-  <!-- Building -->
-  <rect x="9" y="8" width="14" height="19" rx="1.5" fill="url(#grad32)"/>
-  
-  <!-- Windows (3x3 grid) -->
-  <g class="icon" opacity="0.95">
-    <rect x="11.5" y="10.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="15" y="10.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="18.5" y="10.5" width="2.5" height="2" rx="0.5"/>
+  <!-- Chart bars -->
+  <g transform="translate(6, 8)">
+    <rect x="1" y="12" width="3.5" height="6" rx="1" fill="url(#grad32)" opacity="0.7"/>
+    <rect x="6" y="8" width="3.5" height="10" rx="1" fill="url(#grad32)" opacity="0.85"/>
+    <rect x="11" y="4" width="3.5" height="14" rx="1" fill="url(#grad32)" opacity="0.95"/>
+    <rect x="16" y="0" width="3.5" height="18" rx="1" fill="url(#grad32)"/>
     
-    <rect x="11.5" y="14" width="2.5" height="2" rx="0.5"/>
-    <rect x="15" y="14" width="2.5" height="2" rx="0.5"/>
-    <rect x="18.5" y="14" width="2.5" height="2" rx="0.5"/>
-    
-    <rect x="11.5" y="17.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="15" y="17.5" width="2.5" height="2" rx="0.5"/>
-    <rect x="18.5" y="17.5" width="2.5" height="2" rx="0.5"/>
-    
-    <!-- Door -->
-    <rect x="14" y="22" width="4" height="5" rx="0.5" opacity="0.85"/>
+    <!-- Trend arrow -->
+    <g class="accent" opacity="0.9">
+      <path d="M 2 15 L 8 11 L 13 7 L 18 2" stroke="#60a5fa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="18,2 15,1 16,4" fill="#60a5fa"/>
+    </g>
   </g>
 </svg>
