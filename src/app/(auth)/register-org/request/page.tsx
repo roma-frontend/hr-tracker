@@ -178,7 +178,7 @@ export default function RequestOrgPage() {
                 Request {plan} Plan
               </h1>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                {plan === "enterprise" ? "Custom pricing • Unlimited employees" : "$49/mo • Up to 200 employees"} • Approved within 24h
+                {plan === "enterprise" ? "Custom pricing • 100+ employees" : "$29/mo • Up to 50 employees"} • Approved within 24h
               </p>
             </div>
           </div>

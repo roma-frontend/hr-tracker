@@ -15,7 +15,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const TEAM_SIZES = ['1–10', '11–50', '51–200', '201–500', '500+'];
 
 const ENTERPRISE_FEATURES = [
-  { icon: <Users size={18} />,   text: 'Unlimited employees' },
+  { icon: <Users size={18} />,   text: '100+ employees supported' },
   { icon: <Shield size={18} />,  text: 'Dedicated security review' },
   { icon: <Zap size={18} />,     text: 'Custom integrations & API' },
   { icon: <Star size={18} />,    text: 'Priority 24/7 support' },

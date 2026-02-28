@@ -38,7 +38,7 @@ const ALL_TIERS: PlanTier[] = [
     description: 'Perfect for small teams getting started',
     icon: <Zap size={20} />,
     features: [
-      'Up to 50 employees',
+      'Up to 10 employees',
       'Basic leave tracking',
       'Email notifications',
       'Mobile app access',
@@ -57,7 +57,7 @@ const ALL_TIERS: PlanTier[] = [
     description: 'For growing teams that need more power',
     icon: <Building2 size={20} />,
     features: [
-      'Up to 200 employees',
+      'Up to 50 employees',
       'Advanced analytics & reports',
       'AI Leave Assistant & Insights',
       'SLA management',
@@ -79,7 +79,7 @@ const ALL_TIERS: PlanTier[] = [
     description: 'Tailored for large organizations',
     icon: <Rocket size={20} />,
     features: [
-      'Unlimited employees',
+      '100+ employees',
       'Everything in Professional',
       'Custom integrations & API',
       'White-label solution',

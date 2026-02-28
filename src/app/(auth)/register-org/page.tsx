@@ -17,7 +17,7 @@ const plans = [
     icon: Zap,
     color: "from-green-500 to-emerald-500",
     features: [
-      "Up to 50 employees",
+      "Up to 10 employees",
       "Basic leave management",
       "Time tracking",
       "Employee profiles",
@@ -29,12 +29,12 @@ const plans = [
   {
     id: "professional" as Plan,
     name: "Professional",
-    price: "$49/mo",
+    price: "$29/mo",
     description: "For growing teams with advanced needs",
     icon: Building2,
     color: "from-blue-500 to-cyan-500",
     features: [
-      "Up to 200 employees",
+      "Up to 50 employees",
       "Everything in Starter",
       "Advanced analytics",
       "Custom workflows",
@@ -53,7 +53,7 @@ const plans = [
     icon: Crown,
     color: "from-purple-500 to-pink-500",
     features: [
-      "Unlimited employees",
+      "100+ employees",
       "Everything in Professional",
       "Dedicated support",
       "Custom integrations",

@@ -180,7 +180,7 @@ export default function SuperadminCreateOrgPage() {
                   }}
                 >
                   <option value="starter">Starter (Free)</option>
-                  <option value="professional">Professional ($49/mo)</option>
+                  <option value="professional">Professional ($29/mo)</option>
                   <option value="enterprise">Enterprise (Custom)</option>
                 </select>
               </div>

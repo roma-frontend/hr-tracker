@@ -198,9 +198,9 @@ export default function EditOrganizationPage() {
                 color: "var(--text-primary)",
               }}
             >
-              <option value="starter">Starter (50 employees)</option>
-              <option value="professional">Professional (200 employees)</option>
-              <option value="enterprise">Enterprise (Unlimited)</option>
+              <option value="starter">Starter (10 employees)</option>
+              <option value="professional">Professional (50 employees)</option>
+              <option value="enterprise">Enterprise (100+)</option>
             </select>
           </div>
 

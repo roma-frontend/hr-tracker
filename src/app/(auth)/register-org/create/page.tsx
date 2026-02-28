@@ -165,7 +165,7 @@ export default function CreateStarterOrgPage() {
                 Create Starter Organization
               </h1>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Free forever • Up to 50 employees • Instant setup
+                Free forever • Up to 10 employees • Instant setup
               </p>
             </div>
           </div>

@@ -32,7 +32,7 @@ const pricingTiers: PricingTier[] = [
     description: 'Perfect for small teams getting started',
     icon: <Zap size={22} />,
     features: [
-      'Up to 50 employees',
+      'Up to 10 employees',
       'Basic leave management',
       'Time tracking',
       'Employee profiles',
@@ -47,12 +47,12 @@ const pricingTiers: PricingTier[] = [
   {
     id: 'professional',
     name: 'Professional',
-    price: '$49',
-    priceMonthly: 49,
+    price: '$29',
+    priceMonthly: 29,
     description: 'For growing teams with advanced needs',
     icon: <Building2 size={22} />,
     features: [
-      'Up to 200 employees',
+      'Up to 50 employees',
       'Everything in Starter',
       'Advanced analytics',
       'Custom workflows',
@@ -74,7 +74,8 @@ const pricingTiers: PricingTier[] = [
     description: 'Tailored for large organizations',
     icon: <Rocket size={22} />,
     features: [
-      'Unlimited employees',
+      '100+ employees',
+      'Everything in Professional',
       'White-label solution',
       'Dedicated account manager',
       'Custom integrations',
