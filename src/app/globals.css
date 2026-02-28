@@ -13,10 +13,7 @@
   --color-slate-600:     #475569;
 }
 
-body {
-  /* background-attachment: fixed removed — forces repaint on every scroll frame (forced reflow) */
-  background: var(--landing-bg);
-}
+/* Body background moved to line 280 to avoid duplication */
 
 /* Skip to content link - hidden by default, visible on focus */
 .sr-only {
@@ -279,7 +276,7 @@ input, select, textarea,
 }
 
 body {
-  background-color: var(--background);
+  background: var(--landing-bg);
   color: var(--text-primary);
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;

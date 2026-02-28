@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -32,6 +33,7 @@ const TYPE_CONFIG = {
 };
 
 export function EmployeesClient() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
