@@ -33,14 +33,14 @@ export default function CookieBanner() {
         <div className="mx-auto max-w-7xl">
           <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]/95 shadow-2xl backdrop-blur-xl">
             {/* Decorative gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#2563eb]/10 via-transparent to-[#0ea5e9]/10" />
             
             <div className="relative px-6 py-6 sm:px-8 sm:py-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 {/* Left section - Icon & Text */}
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] shadow-lg">
                       <Cookie className="h-6 w-6 text-white" />
                     </div>
                   </div>
