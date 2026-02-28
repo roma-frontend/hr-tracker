@@ -51,7 +51,7 @@ export const createStarterOrganization = mutation({
       timezone: "UTC",
       country: args.country,
       industry: args.industry,
-      employeeLimit: 50, // Starter limit
+      employeeLimit: 10, // Starter limit
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -83,7 +83,7 @@ export const createStarterOrganization = mutation({
       userId,
       type: "system",
       title: "🎉 Welcome to OfficeHub!",
-      message: `Your organization "${args.name}" has been created successfully. You're on the Starter plan (50 employees max).`,
+      message: `Your organization "${args.name}" has been created successfully. You're on the Starter plan (10 employees max).`,
       isRead: false,
       createdAt: Date.now(),
     });
@@ -243,7 +243,7 @@ export const approveOrganizationRequest = mutation({
     if (existingOrg) throw new Error("Organization slug is already taken");
 
     // Determine employee limit
-    const employeeLimit = request.requestedPlan === "professional" ? 200 : 999999;
+    const employeeLimit = request.requestedPlan === "professional" ? 50 : 999999;
 
     // Create organization
     const orgId = await ctx.db.insert("organizations", {

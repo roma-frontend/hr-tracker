@@ -7,8 +7,8 @@ const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
 // ── Employee limits by plan ──────────────────────────────────────────────────
 const PLAN_EMPLOYEE_LIMITS: Record<string, number> = {
-  starter: 50,
-  professional: 200,
+  starter: 10,
+  professional: 50,
   enterprise: 999999,
 };
 
