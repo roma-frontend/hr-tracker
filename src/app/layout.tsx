@@ -123,11 +123,17 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/favicon-animated.svg", type: "image/svg+xml" },
       { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.svg", sizes: "32x32", type: "image/svg+xml" },
+      { url: "/favicon-16x16.svg", sizes: "16x16", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
     ],
-    shortcut: "/favicon.svg",
-    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon-animated.svg",
+    apple: [
+      { url: "/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" },
+      { url: "/apple-touch-icon.png", sizes: "180x180" },
+    ],
   },
   manifest: "/site.webmanifest",
   alternates: {
@@ -213,10 +219,24 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* SVG Favicon - works in all modern browsers */}
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        {/* Animated SVG Favicon - works in all modern browsers */}
+        <link rel="icon" href="/favicon-animated.svg" type="image/svg+xml" />
+        
+        {/* Multiple sizes for better browser support */}
+        <link rel="icon" type="image/svg+xml" sizes="16x16" href="/favicon-16x16.svg" />
+        <link rel="icon" type="image/svg+xml" sizes="32x32" href="/favicon-32x32.svg" />
+        
+        {/* Fallback for older browsers */}
         <link rel="alternate icon" href="/favicon.ico" />
+        
+        {/* Safari pinned tab */}
         <link rel="mask-icon" href="/favicon.svg" color="#2563eb" />
+        
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg" />
+        
+        {/* Web App Manifest */}
+        <link rel="manifest" href="/site.webmanifest" />
 
         {/* ── Critical resource hints ── */}
         {/* Cloudinary for avatars/images */}

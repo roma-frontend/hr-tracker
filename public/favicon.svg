@@ -1,55 +1,64 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Professional HR Platform Theme - Deep Navy & Sky Blue -->
+  <!-- HRLeave Platform - Blue Theme -->
   <style>
     @media (prefers-color-scheme: dark) {
-      .bg { fill: #0d1e38; }
-      .building { fill: #e8f0fe; }
-      .window { fill: #3b82f6; }
+      .bg { fill: #0a0a1a; }
+      .gradient-start { stop-color: #2563eb; }
+      .gradient-end { stop-color: #0ea5e9; }
+      .icon { fill: #ffffff; }
       .accent { fill: #60a5fa; }
-      .glow { fill: #93c5fd; }
     }
     @media (prefers-color-scheme: light) {
       .bg { fill: #ffffff; }
-      .building { fill: #0c1a2e; }
-      .window { fill: #2563eb; }
-      .accent { fill: #3b82f6; }
-      .glow { fill: #60a5fa; }
+      .gradient-start { stop-color: #2563eb; }
+      .gradient-end { stop-color: #60a5fa; }
+      .icon { fill: #ffffff; }
+      .accent { fill: #93c5fd; }
     }
   </style>
   
-  <!-- Background with gradient -->
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.05" />
-      <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.1" />
+    <!-- Main gradient matching your theme -->
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" class="gradient-start"/>
+      <stop offset="100%" class="gradient-end"/>
+    </linearGradient>
+    
+    <!-- Subtle background gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.12"/>
     </linearGradient>
   </defs>
   
-  <rect width="32" height="32" rx="7" class="bg"/>
-  <rect width="32" height="32" rx="7" fill="url(#bgGrad)"/>
+  <!-- Background -->
+  <rect width="32" height="32" rx="8" class="bg"/>
+  <rect width="32" height="32" rx="8" fill="url(#bgGradient)"/>
   
-  <!-- Office building icon -->
-  <g transform="translate(8, 7)">
-    <!-- Main building -->
-    <path d="M2 2 L14 2 L14 18 L2 18 Z" class="building" opacity="0.95"/>
+  <!-- Office building with gradient -->
+  <g transform="translate(6, 5)">
+    <!-- Main building shape with gradient -->
+    <rect x="3" y="3" width="14" height="19" rx="1.5" fill="url(#mainGradient)"/>
     
-    <!-- Windows grid (3x3) with enhanced glow -->
-    <rect x="4" y="4" width="1.5" height="1.5" rx="0.4" class="window" opacity="0.9"/>
-    <rect x="7.25" y="4" width="1.5" height="1.5" rx="0.4" class="window" opacity="0.9"/>
-    <rect x="10.5" y="4" width="1.5" height="1.5" rx="0.4" class="window" opacity="0.9"/>
-    
-    <rect x="4" y="7" width="1.5" height="1.5" rx="0.4" class="window" opacity="0.9"/>
-    <rect x="7.25" y="7" width="1.5" height="1.5" rx="0.4" class="window" opacity="0.9"/>
-    <rect x="10.5" y="7" width="1.5" height="1.5" rx="0.4" class="window" opacity="0.9"/>
-    
-    <rect x="4" y="10" width="1.5" height="1.5" rx="0.4" class="glow" opacity="0.7"/>
-    <rect x="7.25" y="10" width="1.5" height="1.5" rx="0.4" class="glow" opacity="0.7"/>
-    <rect x="10.5" y="10" width="1.5" height="1.5" rx="0.4" class="glow" opacity="0.7"/>
-    
-    <!-- Door with gradient -->
-    <rect x="6.5" y="14" width="3" height="4" rx="0.5" class="accent" opacity="0.85"/>
-    
-    <!-- Roof accent line -->
-    <rect x="1.5" y="1" width="13" height="1.2" rx="0.6" class="accent" opacity="0.8"/>
+    <!-- Windows (modern grid layout) -->
+    <g class="icon" opacity="0.95">
+      <!-- Top row -->
+      <rect x="5.5" y="5.5" width="2.5" height="2" rx="0.5"/>
+      <rect x="9" y="5.5" width="2.5" height="2" rx="0.5"/>
+      <rect x="12.5" y="5.5" width="2.5" height="2" rx="0.5"/>
+      
+      <!-- Middle row -->
+      <rect x="5.5" y="9" width="2.5" height="2" rx="0.5"/>
+      <rect x="9" y="9" width="2.5" height="2" rx="0.5"/>
+      <rect x="12.5" y="9" width="2.5" height="2" rx="0.5"/>
+      
+      <!-- Bottom row -->
+      <rect x="5.5" y="12.5" width="2.5" height="2" rx="0.5"/>
+      <rect x="9" y="12.5" width="2.5" height="2" rx="0.5"/>
+      <rect x="12.5" y="12.5" width="2.5" height="2" rx="0.5"/>
+      
+      <!-- Door entrance -->
+      <rect x="8" y="17" width="4" height="5" rx="0.5" opacity="0.85"/>
+    </g>
   </g>
 </svg>

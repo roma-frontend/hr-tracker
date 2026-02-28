@@ -1,0 +1,99 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0a0a1a; }
+      .grad-1 { stop-color: #2563eb; }
+      .grad-2 { stop-color: #0ea5e9; }
+      .icon { fill: #ffffff; }
+    }
+    @media (prefers-color-scheme: light) {
+      .bg { fill: #ffffff; }
+      .grad-1 { stop-color: #2563eb; }
+      .grad-2 { stop-color: #60a5fa; }
+      .icon { fill: #ffffff; }
+    }
+    
+    /* Animated gradient pulse */
+    @keyframes gradientShift {
+      0%, 100% { 
+        stop-color: #2563eb; 
+      }
+      50% { 
+        stop-color: #0ea5e9; 
+      }
+    }
+    
+    @keyframes gradientShift2 {
+      0%, 100% { 
+        stop-color: #0ea5e9; 
+      }
+      50% { 
+        stop-color: #60a5fa; 
+      }
+    }
+    
+    /* Window glow animation */
+    @keyframes windowGlow {
+      0%, 100% { opacity: 0.95; }
+      50% { opacity: 0.7; }
+    }
+    
+    .animated-grad-1 {
+      animation: gradientShift 3s ease-in-out infinite;
+    }
+    
+    .animated-grad-2 {
+      animation: gradientShift2 3s ease-in-out infinite;
+    }
+    
+    .window-glow {
+      animation: windowGlow 2s ease-in-out infinite;
+    }
+  </style>
+  
+  <defs>
+    <linearGradient id="animGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" class="grad-1 animated-grad-1"/>
+      <stop offset="100%" class="grad-2 animated-grad-2"/>
+    </linearGradient>
+    
+    <linearGradient id="bgAnim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.12"/>
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" rx="8" class="bg"/>
+  <rect width="32" height="32" rx="8" fill="url(#bgAnim)"/>
+  
+  <!-- Building with animated gradient -->
+  <rect x="9" y="8" width="14" height="19" rx="1.5" fill="url(#animGrad)" filter="url(#glow)"/>
+  
+  <!-- Windows with glow animation -->
+  <g class="icon window-glow">
+    <rect x="11.5" y="10.5" width="2.5" height="2" rx="0.5"/>
+    <rect x="15" y="10.5" width="2.5" height="2" rx="0.5"/>
+    <rect x="18.5" y="10.5" width="2.5" height="2" rx="0.5"/>
+    
+    <rect x="11.5" y="14" width="2.5" height="2" rx="0.5"/>
+    <rect x="15" y="14" width="2.5" height="2" rx="0.5"/>
+    <rect x="18.5" y="14" width="2.5" height="2" rx="0.5"/>
+    
+    <rect x="11.5" y="17.5" width="2.5" height="2" rx="0.5"/>
+    <rect x="15" y="17.5" width="2.5" height="2" rx="0.5"/>
+    <rect x="18.5" y="17.5" width="2.5" height="2" rx="0.5"/>
+    
+    <!-- Door -->
+    <rect x="14" y="22" width="4" height="5" rx="0.5" opacity="0.85"/>
+  </g>
+</svg>

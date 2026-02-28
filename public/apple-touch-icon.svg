@@ -1,0 +1,66 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Main gradient -->
+    <linearGradient id="gradApple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#0ea5e9"/>
+    </linearGradient>
+    
+    <!-- Background gradient -->
+    <linearGradient id="bgApple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a1a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background with gradient -->
+  <rect width="180" height="180" rx="40" fill="url(#bgApple)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="140" cy="40" r="30" fill="#2563eb" opacity="0.1"/>
+  <circle cx="40" cy="140" r="40" fill="#0ea5e9" opacity="0.08"/>
+  
+  <!-- Office building -->
+  <g transform="translate(45, 35)">
+    <!-- Main building with gradient -->
+    <rect x="0" y="0" width="90" height="120" rx="8" fill="url(#gradApple)" filter="url(#glow)"/>
+    
+    <!-- Windows grid (4x5) -->
+    <g fill="white" opacity="0.95">
+      <!-- Row 1 -->
+      <rect x="12" y="15" width="14" height="12" rx="3"/>
+      <rect x="38" y="15" width="14" height="12" rx="3"/>
+      <rect x="64" y="15" width="14" height="12" rx="3"/>
+      
+      <!-- Row 2 -->
+      <rect x="12" y="35" width="14" height="12" rx="3"/>
+      <rect x="38" y="35" width="14" height="12" rx="3"/>
+      <rect x="64" y="35" width="14" height="12" rx="3"/>
+      
+      <!-- Row 3 -->
+      <rect x="12" y="55" width="14" height="12" rx="3"/>
+      <rect x="38" y="55" width="14" height="12" rx="3"/>
+      <rect x="64" y="55" width="14" height="12" rx="3"/>
+      
+      <!-- Row 4 -->
+      <rect x="12" y="75" width="14" height="12" rx="3"/>
+      <rect x="38" y="75" width="14" height="12" rx="3"/>
+      <rect x="64" y="75" width="14" height="12" rx="3"/>
+      
+      <!-- Door entrance -->
+      <rect x="30" y="95" width="30" height="25" rx="4" opacity="0.9"/>
+    </g>
+    
+    <!-- Roof accent -->
+    <rect x="-2" y="-5" width="94" height="6" rx="3" fill="#60a5fa" opacity="0.8"/>
+  </g>
+</svg>
