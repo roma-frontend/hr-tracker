@@ -694,3 +694,209 @@ body {
 /* ── smooth scroll only for user-initiated anchor clicks ────────── */
 /* Applied via JS: document.documentElement.style.scrollBehavior = 'smooth' */
 /* NOT set globally — preserves bfcache restoration */
+
+/* ── Sonner Toast Custom Styling ────────────────────────────────── */
+[data-sonner-toast] {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  background: var(--card) !important;
+  border-left: 3px solid var(--primary) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--primary) !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  background: var(--card) !important;
+  border-left: 3px solid #ef4444 !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #ef4444 !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  background: var(--card) !important;
+  border-left: 3px solid var(--primary) !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: var(--primary) !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  background: var(--card) !important;
+  border-left: 3px solid #f59e0b !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #f59e0b !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+[data-sonner-toast] [data-title] {
+  color: var(--foreground) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  margin-bottom: 2px !important;
+}
+
+[data-sonner-toast] [data-description] {
+  color: var(--text-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+[data-sonner-toast] [data-button] {
+  background: var(--primary) !important;
+  color: white !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  opacity: 0.9 !important;
+  transform: scale(1.02) !important;
+}
+
+[data-sonner-toast] [data-close-button] {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  color: var(--text-muted) !important;
+  width: 20px !important;
+  height: 20px !important;
+  transition: all 0.2s !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: var(--background-subtle) !important;
+  border-color: var(--primary) !important;
+  color: var(--foreground) !important;
+}
+
+/* Animate toast entrance */
+[data-sonner-toast] {
+  animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Break Reminder Toast Specific Styling */
+.break-reminder-toast {
+  min-width: 400px !important;
+  max-width: 500px !important;
+}
+
+@media (max-width: 640px) {
+  .break-reminder-toast {
+    min-width: 320px !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Native Date Picker z-index fix */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  z-index: 9999 !important;
+  cursor: pointer;
+}
+
+input[type="date"] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure date picker popup appears above everything */
+input[type="date"]:focus {
+  z-index: 9999 !important;
+}
+
+/* ── Dropdown Smooth Animations ─────────────────────────────────── */
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateY(-4px);
+  }
+}
+
+@keyframes submenu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+@keyframes submenu-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateX(-8px);
+  }
+}
+
+/* Smooth hover transitions for all interactive elements */
+[data-radix-collection-item],
+[role="menuitem"],
+[data-radix-dropdown-menu-item] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hardware acceleration for dropdowns */
+[role="menu"],
+[data-radix-dropdown-menu-content],
+[data-radix-dropdown-menu-sub-content] {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
+}

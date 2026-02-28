@@ -1,7 +1,9 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star } from 'lucide-react';
+import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star, CheckCircle2 } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useSubscription } from '@/hooks/useSubscription';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface PricingTier {
@@ -111,10 +113,11 @@ function useReveal(delay = '0s') {
 }
 
 // ── PricingCard ───────────────────────────────────────────────────────────────
-function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
+function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: number; currentPlan?: string }) {
   const { ref, style } = useReveal(`${delay}s`);
   const [loading, setLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const isCurrentPlan = currentPlan === tier.id;
 
   const handleCheckout = async () => {
     if (tier.id === 'enterprise') {
@@ -221,11 +224,11 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
               >
                 {tier.price}
               </span>
-              {tier.priceMonthly && (
+              {tier.priceMonthly !== undefined && (
                 <span className="text-blue-200/40 text-sm pb-1.5">/month</span>
               )}
             </div>
-            {tier.priceMonthly && (
+            {tier.priceMonthly !== undefined && tier.priceMonthly >= 0 && (
               <p className="text-blue-200/40 text-xs mt-2 flex items-center gap-1.5">
                 <Shield size={11} />
                 14-day free trial · No credit card required
@@ -251,11 +254,11 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
           {/* CTA Button */}
           <button
             onClick={handleCheckout}
-            disabled={loading}
+            disabled={loading || isCurrentPlan}
             className={`relative w-full py-4 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden group/btn
-              ${loading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}
+              ${loading || isCurrentPlan ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}
             `}
-            style={tier.popular ? {
+            style={tier.popular || isCurrentPlan ? {
               background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
               boxShadow: `0 8px 32px ${tier.glowColor}`,
               color: '#fff',
@@ -266,7 +269,7 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
             }}
           >
             {/* Shimmer effect */}
-            {!loading && (
+            {!loading && !isCurrentPlan && (
               <div
                 className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"
                 style={{
@@ -278,6 +281,11 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
             )}
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : isCurrentPlan ? (
+              <>
+                <CheckCircle2 size={15} />
+                Current Plan
+              </>
             ) : (
               <>
                 <Sparkles size={15} />
@@ -295,6 +303,11 @@ function PricingCard({ tier, delay }: { tier: PricingTier; delay: number }) {
 // ── Section ───────────────────────────────────────────────────────────────────
 export default function PricingPreview() {
   const { ref, style } = useReveal();
+  const { user } = useAuthStore();
+  const { plan } = useSubscription();
+  
+  // Only show current plan if user is logged in
+  const currentPlan = user ? plan : undefined;
 
   return (
     <section id="pricing" className="relative z-10 px-6 md:px-12 py-24 overflow-hidden">
@@ -335,7 +348,7 @@ export default function PricingPreview() {
       {/* Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start pt-6">
         {pricingTiers.map((tier, i) => (
-          <PricingCard key={tier.id} tier={tier} delay={i * 0.12} />
+          <PricingCard key={tier.id} tier={tier} delay={i * 0.12} currentPlan={currentPlan} />
         ))}
       </div>
 

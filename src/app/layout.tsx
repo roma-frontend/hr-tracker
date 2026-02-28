@@ -9,6 +9,7 @@ import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
+import CookieBanner from "@/components/CookieBanner";
 
 // Corporate & Professional - IBM PLEX SANS
 const ibmPlexSans = IBM_Plex_Sans({
@@ -247,11 +248,20 @@ export default function RootLayout({
             {children}
             <Toaster
               position="top-right"
-              richColors
               closeButton
               expand={false}
               duration={4000}
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--foreground)',
+                },
+                className: 'sonner-toast',
+              }}
             />
+            <CookieBanner />
           </ThemeProvider>
         </ConvexClientProvider>
       </body>

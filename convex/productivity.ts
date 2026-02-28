@@ -1,0 +1,226 @@
+import { v } from "convex/values";
+import { query, mutation } from "./_generated/server";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET TODAY'S STATS FOR USER
+// ─────────────────────────────────────────────────────────────────────────────
+export const getTodayStats = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const now = Date.now();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayStartMs = todayStart.getTime();
+
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const weekStartMs = weekStart.getTime();
+
+    // Get today's attendance
+    const todayAttendance = await ctx.db
+      .query("attendance")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("userId"), userId),
+          q.gte(q.field("clockIn"), todayStartMs)
+        )
+      )
+      .order("desc")
+      .first();
+
+    // Calculate hours worked today
+    let hoursWorkedToday = 0;
+    if (todayAttendance) {
+      const clockIn = todayAttendance.clockIn;
+      const clockOut = todayAttendance.clockOut || now;
+      hoursWorkedToday = (clockOut - clockIn) / (1000 * 60 * 60);
+    }
+
+    // Get week's attendance for weekly hours
+    const weekAttendance = await ctx.db
+      .query("attendance")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("userId"), userId),
+          q.gte(q.field("clockIn"), weekStartMs)
+        )
+      )
+      .collect();
+
+    let hoursWorkedWeek = 0;
+    weekAttendance.forEach((att) => {
+      const clockIn = att.clockIn;
+      const clockOut = att.clockOut || (att.clockIn === todayAttendance?.clockIn ? now : att.clockIn);
+      hoursWorkedWeek += (clockOut - clockIn) / (1000 * 60 * 60);
+    });
+
+    // Get tasks
+    const allTasks = await ctx.db
+      .query("tasks")
+      .filter((q) => q.eq(q.field("assignedTo"), userId))
+      .collect();
+
+    const completedTasksToday = allTasks.filter(
+      (t) => t.status === "completed" && t.updatedAt && t.updatedAt >= todayStartMs
+    ).length;
+
+    const completedTasksWeek = allTasks.filter(
+      (t) => t.status === "completed" && t.updatedAt && t.updatedAt >= weekStartMs
+    ).length;
+
+    const totalTasksWeek = allTasks.filter(
+      (t) => t.createdAt && t.createdAt >= weekStartMs
+    ).length;
+
+    // Get today's deadlines
+    const todayEnd = todayStart.getTime() + 24 * 60 * 60 * 1000;
+    const todayDeadlines = allTasks.filter(
+      (t) => 
+        t.dueDate && 
+        t.dueDate >= todayStartMs && 
+        t.dueDate < todayEnd &&
+        t.status !== "completed"
+    ).length;
+
+    // Weekly goal progress (target: 40 hours)
+    const weeklyGoalTarget = 40;
+    const weeklyGoalProgress = Math.min(100, (hoursWorkedWeek / weeklyGoalTarget) * 100);
+
+    return {
+      hoursWorkedToday: Math.round(hoursWorkedToday * 10) / 10,
+      hoursWorkedWeek: Math.round(hoursWorkedWeek * 10) / 10,
+      completedTasksToday,
+      completedTasksWeek,
+      totalTasksWeek,
+      todayDeadlines,
+      weeklyGoalProgress: Math.round(weeklyGoalProgress),
+      isClockedIn: !!todayAttendance && !todayAttendance.clockOut,
+    };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET TODAY'S PRIORITY TASKS (Top 3)
+// ─────────────────────────────────────────────────────────────────────────────
+export const getTodayTasks = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const tasks = await ctx.db
+      .query("tasks")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("assignedTo"), userId),
+          q.neq(q.field("status"), "completed")
+        )
+      )
+      .collect();
+
+    // Sort by priority and due date
+    const priorityMap = { high: 3, medium: 2, low: 1 };
+    const sorted = tasks.sort((a, b) => {
+      const priorityDiff = (priorityMap[b.priority || "medium"] || 0) - (priorityMap[a.priority || "medium"] || 0);
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      if (a.dueDate && b.dueDate) return a.dueDate - b.dueDate;
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+      return 0;
+    });
+
+    return sorted.slice(0, 3);
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET TEAM PRESENCE (who's online)
+// ─────────────────────────────────────────────────────────────────────────────
+export const getTeamPresence = query({
+  args: { organizationId: v.optional(v.string()) },
+  handler: async (ctx, { organizationId }) => {
+    const users = await ctx.db.query("users").collect();
+    
+    // Filter by organization if provided
+    const filteredUsers = organizationId 
+      ? users.filter(u => u.organizationId === organizationId)
+      : users;
+
+    // Get only active users with presence status
+    const onlineUsers = filteredUsers
+      .filter(u => u.isActive && u.presenceStatus && u.presenceStatus !== "offline")
+      .map(u => ({
+        _id: u._id,
+        name: u.name,
+        avatarUrl: u.avatarUrl,
+        presenceStatus: u.presenceStatus || "offline",
+        department: u.department,
+        role: u.role,
+      }))
+      .slice(0, 10); // Limit to 10 for performance
+
+    return onlineUsers;
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POMODORO TIMER TRACKING
+// ─────────────────────────────────────────────────────────────────────────────
+export const startPomodoroSession = mutation({
+  args: {
+    userId: v.id("users"),
+    duration: v.number(), // in minutes
+    taskId: v.optional(v.id("tasks")),
+  },
+  handler: async (ctx, { userId, duration, taskId }) => {
+    const sessionId = await ctx.db.insert("pomodoroSessions", {
+      userId,
+      taskId,
+      startTime: Date.now(),
+      duration: duration * 60 * 1000,
+      endTime: Date.now() + duration * 60 * 1000,
+      completed: false,
+      interrupted: false,
+    });
+
+    return sessionId;
+  },
+});
+
+export const completePomodoroSession = mutation({
+  args: { sessionId: v.id("pomodoroSessions") },
+  handler: async (ctx, { sessionId }) => {
+    await ctx.db.patch(sessionId, {
+      completed: true,
+      actualEndTime: Date.now(),
+    });
+  },
+});
+
+export const interruptPomodoroSession = mutation({
+  args: { sessionId: v.id("pomodoroSessions") },
+  handler: async (ctx, { sessionId }) => {
+    await ctx.db.patch(sessionId, {
+      interrupted: true,
+      actualEndTime: Date.now(),
+    });
+  },
+});
+
+export const getActivePomodoroSession = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const session = await ctx.db
+      .query("pomodoroSessions")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("userId"), userId),
+          q.eq(q.field("completed"), false),
+          q.eq(q.field("interrupted"), false)
+        )
+      )
+      .order("desc")
+      .first();
+
+    return session;
+  },
+});

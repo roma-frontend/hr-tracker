@@ -127,7 +127,6 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
       );
 
       onSuccess?.(assertedCredentialId);
-      toast.success("Biometric login successful! 🎉");
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "NotAllowedError") {
         toast.error("Authentication cancelled");

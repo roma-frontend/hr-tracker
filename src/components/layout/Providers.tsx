@@ -26,8 +26,18 @@ const ChatWidget = dynamic(
   { ssr: false, loading: () => null }
 );
 
+const BreakReminderService = dynamic(
+  () => import("@/components/productivity/BreakReminderService").then((m) => m.BreakReminderService),
+  { ssr: false, loading: () => null }
+);
+
+const FocusModeIndicator = dynamic(
+  () => import("@/components/productivity/FocusModeIndicator").then((m) => m.FocusModeIndicator),
+  { ssr: false, loading: () => null }
+);
+
 export function Providers({ children }: { children: React.ReactNode }) {
-  const { setUser } = useAuthStore();
+  const { setUser, user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -80,6 +90,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </div>
       {/* AI Chat Widget - lazy loaded, ssr:false defers entire chunk until interaction */}
       <ChatWidget />
+
+      {/* Productivity Services - only render when mounted to avoid SSR mismatch */}
+      {mounted && user && (
+        <>
+          <BreakReminderService
+            enabled={user.breakRemindersEnabled ?? false}
+            intervalMinutes={user.breakInterval ?? 120}
+            workHoursStart={user.workHoursStart}
+            workHoursEnd={user.workHoursEnd}
+          />
+          <FocusModeIndicator
+            enabled={user.focusModeEnabled ?? false}
+            workHoursStart={user.workHoursStart}
+            workHoursEnd={user.workHoursEnd}
+          />
+        </>
+      )}
     </div>
   );
 }

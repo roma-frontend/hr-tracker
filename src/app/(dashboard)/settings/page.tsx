@@ -1,51 +1,72 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Save, Bell, Shield, Palette, Globe, ScanFace } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Save, 
+  Bell, 
+  Shield, 
+  Palette, 
+  CreditCard, 
+  Settings as SettingsIcon, 
+  Lock,
+  Zap,
+  Globe,
+  LayoutDashboard,
+  Link2,
+  ShieldCheck,
+  User
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthStore } from "@/store/useAuthStore";
 import { updateSessionProfileAction } from "@/actions/auth";
 import { toast } from "sonner";
-import { AvatarUpload } from "@/components/ui/avatar-upload";
-import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
-import { FaceRegistration } from "@/components/auth/FaceRegistration";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import dynamic from "next/dynamic";
 import { SubscriptionPlanCard } from "@/components/subscription/SubscriptionPlanCard";
+import { CookiePreferences } from "@/components/settings/CookiePreferences";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { SecuritySettings } from "@/components/settings/SecuritySettings";
+import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
+import { ProductivitySettings } from "@/components/settings/ProductivitySettings";
+import { LocalizationSettings } from "@/components/settings/LocalizationSettings";
+import { DashboardCustomization } from "@/components/settings/DashboardCustomization";
+import { AdvancedSecuritySettings } from "@/components/settings/AdvancedSecuritySettings";
+import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
+import { ProfileSettings } from "@/components/settings/ProfileSettings";
 
 const SLASettings = dynamic(() => import("@/components/admin/SLASettings"), { ssr: false });
 
 export default function SettingsPage() {
   const { user, login } = useAuthStore();
+  const [activeTab, setActiveTab] = useState("profile");
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [pushNotifs, setPushNotifs] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showFaceRegistration, setShowFaceRegistration] = useState(false);
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
+  const [productivitySettings, setProductivitySettings] = useState({});
+  const [localizationSettings, setLocalizationSettings] = useState({});
+  const [dashboardSettings, setDashboardSettings] = useState({});
+
+  // Debug: log user data on mount
+  useEffect(() => {
+    console.log('Current user data:', user);
+    console.log('Break interval from user:', user?.breakInterval);
+    console.log('Break reminders enabled:', user?.breakRemindersEnabled);
+  }, [user]);
+
+  const updateOwnProfile = useMutation(api.users.updateOwnProfile);
+  const migrateFaceToAvatar = useMutation(api.users.migrateFaceToAvatar);
 
   // Sync when user loads from store (async)
   useEffect(() => {
     if (user?.name) setName(user.name);
     if (user?.email) setEmail(user.email);
   }, [user?.name, user?.email]);
-
-  // Get face descriptor status
-  const faceData = useQuery(
-    api.faceRecognition.getFaceDescriptor,
-    user?.id ? { userId: user.id as any } : "skip"
-  );
-  const removeFaceRegistration = useMutation(api.faceRecognition.removeFaceRegistration);
-  const updateUser = useMutation(api.users.updateUser);
-  const migrateFaceToAvatar = useMutation(api.users.migrateFaceToAvatar);
 
   // Auto-migrate: copy faceImageUrl → avatarUrl for users who registered face but have no avatar
   useEffect(() => {
@@ -61,265 +82,263 @@ export default function SettingsPage() {
       const newName = name.trim() || user.name;
       const newEmail = email.trim() || user.email;
 
-      // 1. Save to Convex DB
-      await updateUser({
-        userId: user.id as any,
+      const allSettings = {
         name: newName,
         email: newEmail,
+        ...productivitySettings,
+        ...localizationSettings,
+        ...dashboardSettings,
+      };
+
+      console.log('Saving settings:', allSettings);
+
+      // 1. Save all settings to Convex DB
+      await updateOwnProfile({
+        userId: user.id as any,
+        ...allSettings,
       });
 
       // 2. Update JWT cookie (so data persists after page refresh)
       await updateSessionProfileAction(user.id, newName, newEmail);
 
       // 3. Update Zustand store (localStorage)
-      login({ ...user, name: newName, email: newEmail });
+      login({ 
+        ...user, 
+        ...allSettings,
+      });
 
-      toast.success("Profile saved successfully!");
+      toast.success("Settings saved successfully!");
+      console.log('Settings saved to store:', { ...user, ...allSettings });
     } catch (err) {
+      console.error('Failed to save settings:', err);
       toast.error(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
     }
   };
 
+  const tabs = [
+    {
+      value: "profile",
+      label: "Profile",
+      icon: User,
+      description: "Personal information",
+    },
+    {
+      value: "productivity",
+      label: "Productivity",
+      icon: Zap,
+      description: "Focus & efficiency",
+    },
+    {
+      value: "notifications",
+      label: "Notifications",
+      icon: Bell,
+      description: "Email & alerts",
+    },
+    {
+      value: "security",
+      label: "Security",
+      icon: Shield,
+      description: "Authentication",
+    },
+    {
+      value: "advanced-security",
+      label: "Privacy",
+      icon: ShieldCheck,
+      description: "2FA & sessions",
+    },
+    {
+      value: "appearance",
+      label: "Appearance",
+      icon: Palette,
+      description: "Theme",
+    },
+    {
+      value: "dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      description: "Widgets",
+    },
+    {
+      value: "localization",
+      label: "Regional",
+      icon: Globe,
+      description: "Language",
+    },
+    {
+      value: "integrations",
+      label: "Integrations",
+      icon: Link2,
+      description: "Apps",
+    },
+    {
+      value: "billing",
+      label: "Billing",
+      icon: CreditCard,
+      description: "Plans",
+    },
+    ...(user?.role === "admin"
+      ? [
+          {
+            value: "admin",
+            label: "Admin",
+            icon: SettingsIcon,
+            description: "System settings",
+          },
+        ]
+      : []),
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 max-w-2xl"
+      className="space-y-6 pb-8"
     >
-      <div>
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">Settings</h2>
-        <p className="text-[var(--text-muted)] text-sm mt-1">Manage your account and system preferences</p>
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-[var(--text-primary)] flex items-center gap-3">
+            <SettingsIcon className="w-8 h-8 text-[var(--primary)]" />
+            Settings
+          </h2>
+          <p className="text-[var(--text-muted)] text-sm mt-2">
+            Manage your account, preferences, and system configuration
+          </p>
+        </div>
       </div>
 
-      {/* Profile */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[var(--primary)]" />
-            <CardTitle className="text-base">Profile Information</CardTitle>
-          </div>
-          <CardDescription>Update your personal details</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Avatar Section */}
-          <div className="flex items-center gap-4 pb-4 border-b border-[var(--border)]">
-            <AvatarUpload
-              userId={user?.id ?? ""}
-              currentUrl={user?.avatar}
-              name={user?.name ?? "User"}
-              size="lg"
-              onSuccess={(url) => {
-                toast.success("Avatar updated!");
-              }}
-            />
-            <div>
-              <p className="text-sm font-medium text-[var(--text-primary)]">Profile Picture</p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Click the camera icon to upload a new avatar
-              </p>
-              <p className="text-xs text-[var(--text-muted)]">JPG, PNG or GIF. Max 5MB.</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Full Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Email</Label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Role</Label>
-              <Input defaultValue={user?.role} disabled className="opacity-60" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Department</Label>
-              <Input defaultValue={user?.department ?? ""} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Notifications */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-[var(--warning)]" />
-            <CardTitle className="text-base">Notifications</CardTitle>
-          </div>
-          <CardDescription>Configure how you receive alerts</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[
-            { label: "Email Notifications", desc: "Receive leave updates via email", value: emailNotifs, set: setEmailNotifs },
-            { label: "Push Notifications", desc: "Browser push notifications", value: pushNotifs, set: setPushNotifs },
-            { label: "Weekly Report", desc: "Get weekly summary digest", value: weeklyReport, set: setWeeklyReport },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{item.label}</p>
-                <p className="text-xs text-[var(--text-muted)]">{item.desc}</p>
-              </div>
-              <Switch checked={item.value} onCheckedChange={item.set} />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Security - WebAuthn */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[var(--primary)]" />
-            <CardTitle className="text-base">Touch ID / Fingerprint</CardTitle>
-          </div>
-          <CardDescription>Register Touch ID or fingerprint for quick login</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <p className="text-sm text-[var(--text-muted)]">
-              Enable Touch ID or fingerprint for faster and more secure login
-            </p>
-            <WebAuthnButton
-              mode="register"
-              userId={user?.id}
-              onSuccess={() => {
-                toast.success("Biometric authentication registered successfully!");
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Face ID Registration */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <ScanFace className="w-4 h-4 text-[var(--primary)]" />
-            <CardTitle className="text-base">Face ID</CardTitle>
-          </div>
-          <CardDescription>Register your face for secure login</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {faceData?.faceDescriptor ? (
-              <>
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-[var(--surface-hover)]">
-                    {faceData.faceImageUrl && (
-                      <img
-                        src={faceData.faceImageUrl}
-                        alt="Registered face"
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                      ✓ Face ID Registered
-                    </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
-                      Registered on {new Date(faceData.faceRegisteredAt || 0).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    if (confirm("Are you sure you want to remove Face ID registration?")) {
-                      await removeFaceRegistration({ userId: user?.id as any });
-                      toast.success("Face ID removed successfully");
-                    }
-                  }}
-                  className="w-full"
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        {/* Navigation Tabs - Scrollable on mobile */}
+        <div className="bg-[var(--surface)] p-1.5 rounded-xl border border-[var(--border)] overflow-x-auto">
+          <TabsList className="inline-flex w-auto min-w-full gap-1 bg-transparent h-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:text-[var(--text-muted)] transition-colors rounded-lg py-2.5 px-3 h-auto whitespace-nowrap"
                 >
-                  Remove Face ID
-                </Button>
-              </>
-            ) : (
-              <>
-                {!showFaceRegistration ? (
-                  <div className="space-y-3">
-                    <p className="text-sm text-[var(--text-muted)]">
-                      Register your face to enable quick and secure login with Face ID
-                    </p>
-                    <Button
-                      onClick={() => setShowFaceRegistration(true)}
-                      className="w-full"
-                    >
-                      <ScanFace className="w-4 h-4 mr-2" />
-                      Register Face ID
-                    </Button>
+                  <div className="flex items-center justify-center gap-2">
+                    <Icon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{tab.label}</span>
                   </div>
-                ) : (
-                  <FaceRegistration
-                    userId={user?.id as any}
-                    onSuccess={() => {
-                      setShowFaceRegistration(false);
-                      toast.success("Face ID registered successfully!");
-                    }}
-                    onCancel={() => setShowFaceRegistration(false)}
-                  />
-                )}
-              </>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </div>
+
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6 mt-0">
+              <ProfileSettings
+                user={user}
+                name={name}
+                email={email}
+                onNameChange={setName}
+                onEmailChange={setEmail}
+              />
+            </TabsContent>
+
+            {/* Productivity Tab */}
+            <TabsContent value="productivity" className="space-y-6 mt-0">
+              <ProductivitySettings 
+                user={user}
+                onSettingsChange={setProductivitySettings}
+              />
+            </TabsContent>
+
+            {/* Notifications Tab */}
+            <TabsContent value="notifications" className="space-y-6 mt-0">
+              <NotificationSettings
+                emailNotifs={emailNotifs}
+                pushNotifs={pushNotifs}
+                weeklyReport={weeklyReport}
+                onEmailNotifsChange={setEmailNotifs}
+                onPushNotifsChange={setPushNotifs}
+                onWeeklyReportChange={setWeeklyReport}
+              />
+            </TabsContent>
+
+            {/* Security Tab */}
+            <TabsContent value="security" className="space-y-6 mt-0">
+              <SecuritySettings userId={user?.id ?? ""} />
+            </TabsContent>
+
+            {/* Advanced Security Tab */}
+            <TabsContent value="advanced-security" className="space-y-6 mt-0">
+              <AdvancedSecuritySettings />
+            </TabsContent>
+
+            {/* Appearance Tab */}
+            <TabsContent value="appearance" className="space-y-6 mt-0">
+              <AppearanceSettings />
+            </TabsContent>
+
+            {/* Dashboard Customization Tab */}
+            <TabsContent value="dashboard" className="space-y-6 mt-0">
+              <DashboardCustomization 
+                user={user}
+                onSettingsChange={setDashboardSettings}
+              />
+            </TabsContent>
+
+            {/* Localization Tab */}
+            <TabsContent value="localization" className="space-y-6 mt-0">
+              <LocalizationSettings 
+                user={user}
+                onSettingsChange={setLocalizationSettings}
+              />
+            </TabsContent>
+
+            {/* Integrations Tab */}
+            <TabsContent value="integrations" className="space-y-6 mt-0">
+              <IntegrationSettings />
+            </TabsContent>
+
+            {/* Billing Tab */}
+            <TabsContent value="billing" className="space-y-6 mt-0">
+              <SubscriptionPlanCard />
+              <CookiePreferences />
+            </TabsContent>
+
+            {/* Admin Tab */}
+            {user?.role === "admin" && (
+              <TabsContent value="admin" className="space-y-6 mt-0">
+                <SLASettings />
+              </TabsContent>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </motion.div>
+        </AnimatePresence>
+      </Tabs>
 
-      {/* Appearance */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Palette className="w-4 h-4 text-[var(--primary)]" />
-            <CardTitle className="text-base">Appearance</CardTitle>
-          </div>
-          <CardDescription>Customize your interface</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-3">
-            {["Dark", "Light", "System"].map((t) => (
-              <button
-                key={t}
-                className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                  t === "Dark"
-                    ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--text-primary)]"
-                    : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-subtle)]"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Subscription Plan */}
-      <SubscriptionPlanCard />
-
-      {/* Admin-Only: SLA Settings */}
-      {user?.role === "admin" && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+      {/* Save Button - Fixed at bottom */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-end sticky bottom-6 z-10"
+      >
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          size="lg"
+          className="shadow-lg shadow-[var(--primary)]/20"
         >
-          <SLASettings />
-        </motion.div>
-      )}
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="w-4 h-4" />
-          {saving ? "Saving..." : "Save Changes"}
+          <Save className="w-4 h-4 mr-2" />
+          {saving ? "Saving..." : "Save All Changes"}
         </Button>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

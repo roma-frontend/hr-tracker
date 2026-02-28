@@ -1,0 +1,129 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useCookieConsent } from "@/store/cookieConsentStore";
+import { motion, AnimatePresence } from "framer-motion";
+import { Cookie, Settings, Shield, BarChart3, Target, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+export default function CookieBanner() {
+  const { hasConsent, showBanner, acceptAll, rejectAll } = useCookieConsent();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || hasConsent || !showBanner) {
+    return null;
+  }
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className="fixed bottom-0 left-0 right-0 z-[100] p-4 sm:p-6"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]/95 shadow-2xl backdrop-blur-xl">
+            {/* Decorative gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10" />
+            
+            <div className="relative px-6 py-6 sm:px-8 sm:py-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                {/* Left section - Icon & Text */}
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                      <Cookie className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-[var(--foreground)]">
+                      🍪 We value your privacy
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+                      We use cookies to enhance your browsing experience, ensure security, and analyze site performance. 
+                      By clicking "Accept All", you consent to our use of cookies.{" "}
+                      <Link
+                        href="/privacy"
+                        className="inline-flex items-center font-medium text-[var(--primary)] hover:underline"
+                      >
+                        Learn more
+                      </Link>
+                      {" or "}
+                      <Link
+                        href="/settings"
+                        className="inline-flex items-center gap-1 font-medium text-[var(--primary)] hover:underline"
+                      >
+                        customize settings
+                        <Settings className="h-3 w-3" />
+                      </Link>
+                    </p>
+                    
+                    {/* Cookie categories preview */}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <div className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        <Shield className="h-3 w-3" />
+                        Essential
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-full bg-[var(--background-subtle)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                        <BarChart3 className="h-3 w-3" />
+                        Analytics
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-full bg-[var(--background-subtle)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                        <Target className="h-3 w-3" />
+                        Marketing
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-full bg-[var(--background-subtle)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                        <Palette className="h-3 w-3" />
+                        Preferences
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right section - Actions */}
+                <div className="flex flex-col gap-3 sm:flex-row lg:flex-shrink-0">
+                  <Button
+                    onClick={acceptAll}
+                    size="lg"
+                    className="group relative overflow-hidden shadow-lg hover:shadow-xl"
+                  >
+                    Accept All
+                  </Button>
+                  
+                  <Button
+                    onClick={rejectAll}
+                    variant="outline"
+                    size="lg"
+                    className="shadow-sm"
+                  >
+                    Reject All
+                  </Button>
+                  
+                  <Button
+                    onClick={() => router.push("/settings")}
+                    variant="secondary"
+                    size="lg"
+                    className="shadow-sm"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}

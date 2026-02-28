@@ -7,6 +7,7 @@ import { useTheme } from "next-themes";
 // eliminate forced reflow from JS-driven animations, and defer the framer-motion bundle
 import {
   Menu, Bell, Sun, Moon, LogOut, User, Settings, ChevronDown, Check, X,
+  Plus, Calendar, Clock, FileText, Zap, Keyboard, History, Star, Circle,
 } from "lucide-react";
 
 type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";
@@ -27,9 +28,16 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { KeyboardShortcutsModal } from "@/components/KeyboardShortcutsModal";
+import { QuickStatsWidget } from "@/components/productivity/QuickStatsWidget";
+import { TodayTasksPanel } from "@/components/productivity/TodayTasksPanel";
+import { TeamPresence } from "@/components/productivity/TeamPresence";
+import { PomodoroTimer } from "@/components/productivity/PomodoroTimer";
+import { FocusMode } from "@/components/productivity/FocusMode";
 
 // Play a beautiful notification sound using Web Audio API
 function playNotificationSound() {
@@ -70,6 +78,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/attendance": "Attendance",
   "/analytics": "Analytics",
   "/approvals": "Approvals",
+  "/profile": "Profile",
   "/settings": "Settings",
 };
 
@@ -92,6 +101,8 @@ export function Navbar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [toasts, setToasts] = useState<ToastNotif[]>([]);
+  const [statusExpanded, setStatusExpanded] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const prevUnreadCount = useRef<number>(-1);
   const prevNotifIds = useRef<Set<string>>(new Set());
   const isFirstLoad = useRef(true);
@@ -111,10 +122,15 @@ export function Navbar() {
     api.users.getUserById,
     user?.id ? { userId: user.id as Id<"users"> } : "skip"
   );
+  const userStats = useQuery(
+    api.userStats.getUserStats,
+    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+  );
   const currentPresence = ((currentUserData as any)?.presenceStatus ?? "available") as PresenceStatus;
   const presenceCfg = PRESENCE_CONFIG[currentPresence];
 
   const unreadCount = notifications.filter((n: { isRead: boolean }) => !n.isRead).length;
+  const leaveBalance = currentUserData?.paidLeaveBalance || 0;
 
   // Detect new notifications and play sound + show toast
   useEffect(() => {
@@ -325,13 +341,71 @@ export function Navbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-56 bg-[var(--card)] border-[var(--border)] shadow-xl"
+            className="w-80 max-h-[85vh] overflow-y-auto bg-[var(--card)] border-[var(--border)] shadow-xl"
           >
-            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">My Account</DropdownMenuLabel>
+            {/* Productivity Widgets */}
+            {mounted && user && (
+              <>
+                {/* Quick Stats Widget */}
+                <QuickStatsWidget />
+                <DropdownMenuSeparator className="bg-[var(--border)]" />
+
+                {/* Focus Mode */}
+                <FocusMode currentPresence={currentPresence} />
+                <DropdownMenuSeparator className="bg-[var(--border)]" />
+
+                {/* Pomodoro Timer */}
+                <PomodoroTimer />
+                <DropdownMenuSeparator className="bg-[var(--border)]" />
+
+                {/* Today's Tasks */}
+                <TodayTasksPanel />
+                <DropdownMenuSeparator className="bg-[var(--border)]" />
+
+                {/* Team Presence */}
+                <TeamPresence />
+                <DropdownMenuSeparator className="bg-[var(--border)]" />
+              </>
+            )}
+            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">Quick Actions</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-[var(--border)]" />
             <DropdownMenuItem
+              className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2 font-medium"
+              onClick={() => router.push("/tasks?new=true")}
+            >
+              <Plus className="w-4 h-4 text-blue-500" />
+              <span>New Task</span>
+              <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘T</kbd>
+            </DropdownMenuItem>
+            <DropdownMenuItem
               className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
-              onClick={() => router.push("/settings")}
+              onClick={() => router.push("/leaves?new=true")}
+            >
+              <Calendar className="w-4 h-4 text-purple-500" />
+              <span>Request Leave</span>
+              <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘L</kbd>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+              onClick={() => router.push("/attendance")}
+            >
+              <Clock className="w-4 h-4 text-green-500" />
+              <span>Clock In/Out</span>
+              <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘A</kbd>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+              onClick={() => router.push("/reports")}
+            >
+              <FileText className="w-4 h-4 text-orange-500" />
+              My Reports
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="bg-[var(--border)]" />
+            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">My Account</DropdownMenuLabel>
+            <DropdownMenuItem
+              className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+              onClick={() => router.push("/profile")}
             >
               <User className="w-4 h-4 text-[var(--text-muted)]" />
               Profile
@@ -344,24 +418,67 @@ export function Navbar() {
               Settings
             </DropdownMenuItem>
 
-            {/* Status selector */}
+            {/* Status selector - collapsible */}
             <DropdownMenuSeparator className="bg-[var(--border)]" />
-            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">Set Status</DropdownMenuLabel>
-            {(Object.entries(PRESENCE_CONFIG) as [PresenceStatus, typeof PRESENCE_CONFIG[PresenceStatus]][]).map(([key, cfg]) => (
-              <DropdownMenuItem
-                key={key}
-                className="cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
-                onClick={async () => {
-                  if (user?.id) await updatePresence({ userId: user.id as Id<"users">, status: key });
-                }}
-              >
-                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-                <span className={`text-sm ${currentPresence === key ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}>
-                  {cfg.label}
-                </span>
-                {currentPresence === key && <Check className="w-3.5 h-3.5 ml-auto text-[#2563eb]" />}
-              </DropdownMenuItem>
-            ))}
+            
+            {/* Status trigger button */}
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setStatusExpanded(!statusExpanded);
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-all duration-200 hover:bg-[var(--background-subtle)]/60 hover:pl-2.5 cursor-pointer"
+            >
+              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${presenceCfg.dot}`} />
+              <span className="flex-1 text-left font-medium text-[var(--text-primary)]">
+                {presenceCfg.icon} {presenceCfg.label}
+              </span>
+              <ChevronDown 
+                className={`h-4 w-4 text-[var(--text-muted)] transition-transform duration-200 ${
+                  statusExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </div>
+
+            {/* Expandable status list */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-out ${
+                statusExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'
+              }`}
+            >
+              <div className="py-1">
+                {(Object.entries(PRESENCE_CONFIG) as [PresenceStatus, typeof PRESENCE_CONFIG[PresenceStatus]][]).map(([key, cfg]) => (
+                  <DropdownMenuItem
+                    key={key}
+                    onClick={async () => {
+                      if (user?.id) {
+                        await updatePresence({ userId: user.id as Id<"users">, status: key });
+                        setStatusExpanded(false); // Close after selection
+                      }
+                    }}
+                    className={`ml-4 ${currentPresence === key ? 'bg-[var(--background-subtle)]/40' : ''}`}
+                  >
+                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                    <span className={`text-sm flex-1 ${currentPresence === key ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}>
+                      {cfg.label}
+                    </span>
+                    {currentPresence === key && <Check className="w-3.5 h-3.5 text-[#2563eb]" />}
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            </div>
+
+            {/* Keyboard Shortcuts hint */}
+            <DropdownMenuSeparator className="bg-[var(--border)]" />
+            <DropdownMenuItem
+              className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+              onClick={() => setShowShortcutsModal(true)}
+            >
+              <Keyboard className="w-4 h-4 text-[var(--text-muted)]" />
+              <span>Keyboard Shortcuts</span>
+              <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘/</kbd>
+            </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-[var(--border)]" />
             <DropdownMenuItem
@@ -415,6 +532,12 @@ export function Navbar() {
         </div>
       ))}
     </div>
+
+    {/* Keyboard Shortcuts Modal */}
+    <KeyboardShortcutsModal 
+      isOpen={showShortcutsModal} 
+      onClose={() => setShowShortcutsModal(false)} 
+    />
     </>
   );
 }

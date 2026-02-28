@@ -53,3 +53,24 @@ export async function uploadAvatarToCloudinary(
     throw new Error(error instanceof Error ? error.message : "Upload failed");
   }
 }
+
+export async function deleteAvatarFromCloudinary(userId: string): Promise<void> {
+  console.log("🗑️ Cloudinary delete starting...");
+  console.log("👤 User ID:", userId);
+
+  try {
+    const publicId = `hr-office/avatars/${userId}`;
+    console.log("📤 Deleting from Cloudinary:", publicId);
+    
+    const result = await cloudinary.uploader.destroy(publicId);
+    
+    console.log("✅ Delete result:", result);
+    
+    if (result.result !== 'ok' && result.result !== 'not found') {
+      throw new Error(`Delete failed: ${result.result}`);
+    }
+  } catch (error) {
+    console.error("❌ Delete error:", error);
+    throw new Error(error instanceof Error ? error.message : "Delete failed");
+  }
+}

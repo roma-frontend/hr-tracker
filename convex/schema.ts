@@ -110,6 +110,7 @@ export default defineSchema({
     department: v.optional(v.string()),
     position: v.optional(v.string()),
     phone: v.optional(v.string()),
+    location: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
     presenceStatus: v.optional(v.union(
       v.literal("available"),
@@ -142,6 +143,31 @@ export default defineSchema({
     // Sessions
     sessionToken: v.optional(v.string()),
     sessionExpiry: v.optional(v.number()),
+    // Productivity Settings
+    focusModeEnabled: v.optional(v.boolean()),
+    workHoursStart: v.optional(v.string()),
+    workHoursEnd: v.optional(v.string()),
+    breakRemindersEnabled: v.optional(v.boolean()),
+    breakInterval: v.optional(v.number()),
+    dailyTaskGoal: v.optional(v.number()),
+    // Localization Settings
+    language: v.optional(v.string()),
+    timezone: v.optional(v.string()),
+    dateFormat: v.optional(v.string()),
+    timeFormat: v.optional(v.string()),
+    firstDayOfWeek: v.optional(v.string()),
+    // Dashboard Settings
+    defaultView: v.optional(v.string()),
+    dataRefreshRate: v.optional(v.string()),
+    compactMode: v.optional(v.boolean()),
+    dashboardWidgets: v.optional(v.object({
+      quickStats: v.boolean(),
+      leaveCalendar: v.boolean(),
+      upcomingTasks: v.boolean(),
+      teamActivity: v.boolean(),
+      recentLeaves: v.boolean(),
+      analytics: v.boolean(),
+    })),
     // Metadata
     createdAt: v.number(),
     lastLoginAt: v.optional(v.number()),
@@ -529,7 +555,7 @@ export default defineSchema({
     .index("by_org", ["organizationId"])
     .index("by_user", ["userId"]),
 
-  // ── USER PREFERENCES ─────────────────────────────────────────────────────
+  // ── USER PREFERENCES ─────────────────────────────────────────────────
   // Store user preferences like tour completion, UI settings, etc.
   userPreferences: defineTable({
     userId: v.id("users"),
@@ -540,4 +566,18 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_and_key", ["userId", "key"]),
+
+  // ── POMODORO SESSIONS ────────────────────────────────────────────────
+  pomodoroSessions: defineTable({
+    userId: v.id("users"),
+    taskId: v.optional(v.id("tasks")),
+    startTime: v.number(),
+    endTime: v.number(),
+    duration: v.number(), // in milliseconds
+    completed: v.boolean(),
+    interrupted: v.boolean(),
+    actualEndTime: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_active", ["userId", "completed", "interrupted"]),
 });

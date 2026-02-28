@@ -338,8 +338,6 @@ export function FaceLogin() {
         avatar: userData.avatar,
       });
       console.log("✅ Auth store updated");
-
-      toast.success(`Welcome back, ${userData.name}! 👋`);
       
       // Redirect to dashboard
       console.log("🔍 Step 8: Redirecting to dashboard...");

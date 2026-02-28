@@ -1,0 +1,148 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Keyboard, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface KeyboardShortcutsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const shortcuts = [
+  {
+    category: "Navigation",
+    items: [
+      { keys: ["⌘", "K"], description: "Command Palette" },
+      { keys: ["⌘", "/"], description: "Toggle Sidebar" },
+    ],
+  },
+  {
+    category: "Quick Actions",
+    items: [
+      { keys: ["⌘", "T"], description: "New Task" },
+      { keys: ["⌘", "L"], description: "Request Leave" },
+      { keys: ["⌘", "A"], description: "Attendance" },
+    ],
+  },
+  {
+    category: "Interface",
+    items: [
+      { keys: ["⌘", "B"], description: "Toggle Notifications" },
+      { keys: ["Esc"], description: "Close Modal" },
+    ],
+  },
+];
+
+export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsModalProps) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* Modal */}
+          <div className="fixed inset-0 z-[201] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300, duration: 0.3 }}
+              className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="border-b border-[var(--border)] bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 px-6 py-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                      <Keyboard className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-[var(--foreground)]">
+                        Keyboard Shortcuts
+                      </h2>
+                      <p className="text-sm text-[var(--text-muted)] mt-0.5">
+                        Work faster with keyboard shortcuts
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)]"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="max-h-[60vh] overflow-y-auto px-6 py-6">
+                <div className="space-y-6">
+                  {shortcuts.map((section, idx) => (
+                    <motion.div
+                      key={section.category}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                    >
+                      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                        <Zap className="h-4 w-4 text-[var(--primary)]" />
+                        {section.category}
+                      </h3>
+                      <div className="space-y-2">
+                        {section.items.map((shortcut, itemIdx) => (
+                          <motion.div
+                            key={itemIdx}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.1 + itemIdx * 0.05 }}
+                            className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] p-3 transition-all hover:border-[var(--primary)]/50 hover:bg-[var(--background-subtle)]/80"
+                          >
+                            <span className="text-sm text-[var(--text-primary)]">
+                              {shortcut.description}
+                            </span>
+                            <div className="flex gap-1">
+                              {shortcut.keys.map((key, keyIdx) => (
+                                <kbd
+                                  key={keyIdx}
+                                  className="inline-flex h-7 min-w-[28px] items-center justify-center rounded-md border border-[var(--border)] bg-[var(--background)] px-2 font-mono text-xs font-semibold text-[var(--text-primary)] shadow-sm"
+                                >
+                                  {key}
+                                </kbd>
+                              ))}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="border-t border-[var(--border)] bg-[var(--background-subtle)] px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Press <kbd className="rounded border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> to close
+                  </p>
+                  <Button onClick={onClose} variant="secondary" size="sm">
+                    Got it!
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}

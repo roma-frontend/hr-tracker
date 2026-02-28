@@ -17,6 +17,10 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useAuthStore } from "@/store/useAuthStore";
 import { LEAVE_TYPE_LABELS, calculateDays, type LeaveType } from "@/lib/types";
 
@@ -112,13 +116,14 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg" style={{ maxHeight: '90vh' }}>
         <DialogHeader>
           <DialogTitle>New Leave Request</DialogTitle>
           <DialogDescription>Submit a new leave request for an employee.</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="max-h-[calc(90vh-180px)] overflow-y-auto overflow-x-visible pr-2">
+          <form id="leave-request-form" onSubmit={handleSubmit} className="space-y-5">
           {/* Employee */}
           <div className="space-y-1.5">
             <Label htmlFor="employee">Employee *</Label>
@@ -179,39 +184,56 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="startDate">Start Date *</Label>
-              <div className="relative">
-                <Input
-                  id="startDate" 
-                  type="date" 
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  min={format(new Date(), "yyyy-MM-dd")}
-                  className={`cursor-pointer ${errors.startDate ? "border-destructive" : ""}`}
-                  onClick={(e) => {
-                    e.currentTarget.showPicker?.();
-                  }}
-                />
-                <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-              </div>
+              <Label>Start Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={`w-full justify-start text-left font-normal ${errors.startDate ? "border-destructive" : ""}`}
+                  >
+                    <CalendarDays className="mr-2 h-4 w-4" />
+                    {startDate ? format(new Date(startDate), "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[200]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate ? new Date(startDate) : undefined}
+                    onSelect={(date) => setStartDate(date ? format(date, "yyyy-MM-dd") : "")}
+                    disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               {errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="endDate">End Date *</Label>
-              <div className="relative">
-                <Input
-                  id="endDate" 
-                  type="date" 
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  min={startDate || format(new Date(), "yyyy-MM-dd")}
-                  className={`cursor-pointer ${errors.endDate ? "border-destructive" : ""}`}
-                  onClick={(e) => {
-                    e.currentTarget.showPicker?.();
-                  }}
-                />
-                <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-              </div>
+              <Label>End Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={`w-full justify-start text-left font-normal ${errors.endDate ? "border-destructive" : ""}`}
+                  >
+                    <CalendarDays className="mr-2 h-4 w-4" />
+                    {endDate ? format(new Date(endDate), "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[200]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate ? new Date(endDate) : undefined}
+                    onSelect={(date) => setEndDate(date ? format(date, "yyyy-MM-dd") : "")}
+                    disabled={(date) => {
+                      const minDate = startDate ? new Date(startDate) : new Date(new Date().setHours(0,0,0,0));
+                      return date < minDate;
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               {errors.endDate && <p className="text-xs text-destructive">{errors.endDate}</p>}
             </div>
           </div>
@@ -261,14 +283,15 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
               Attach supporting documents (medical certificate, etc.)
             </span>
           </div>
+          </form>
+        </div>
 
-          <DialogFooter className="gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>Cancel</Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit Request"}
-            </Button>
-          </DialogFooter>
-        </form>
+        <DialogFooter className="gap-2 pt-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>Cancel</Button>
+          <Button type="submit" form="leave-request-form" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit Request"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

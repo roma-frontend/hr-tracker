@@ -208,6 +208,7 @@ export const updateUser = mutation({
     department: v.optional(v.string()),
     position: v.optional(v.string()),
     phone: v.optional(v.string()),
+    location: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
     supervisorId: v.optional(v.id("users")),
     isActive: v.optional(v.boolean()),
@@ -614,6 +615,61 @@ export const seedAdmin = mutation({
       familyLeaveBalance: 5,
       createdAt: Date.now(),
     });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UPDATE OWN PROFILE (users can update their own profile without admin)
+// ─────────────────────────────────────────────────────────────────────────────
+export const updateOwnProfile = mutation({
+  args: {
+    userId: v.id("users"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
+    // Productivity Settings
+    focusModeEnabled: v.optional(v.boolean()),
+    workHoursStart: v.optional(v.string()),
+    workHoursEnd: v.optional(v.string()),
+    breakRemindersEnabled: v.optional(v.boolean()),
+    breakInterval: v.optional(v.number()),
+    dailyTaskGoal: v.optional(v.number()),
+    // Localization Settings
+    language: v.optional(v.string()),
+    timezone: v.optional(v.string()),
+    dateFormat: v.optional(v.string()),
+    timeFormat: v.optional(v.string()),
+    firstDayOfWeek: v.optional(v.string()),
+    // Dashboard Settings
+    defaultView: v.optional(v.string()),
+    dataRefreshRate: v.optional(v.string()),
+    compactMode: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { userId, ...updates }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+    
+    await ctx.db.patch(userId, updates);
+    return userId;
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE AVATAR
+// ─────────────────────────────────────────────────────────────────────────────
+export const deleteAvatar = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+    
+    // Remove avatar URL from database
+    await ctx.db.patch(userId, { 
+      avatarUrl: undefined 
+    });
+    
+    return userId;
   },
 });
 

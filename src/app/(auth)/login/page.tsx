@@ -55,7 +55,6 @@ export default function LoginPage() {
           console.log("🔍 Verification - localStorage:", stored);
         }, 100);
         
-        toast.success(`Welcome back, ${result.name}! 👋`);
         router.push("/dashboard");
       } catch (err) {
         console.error("❌ Login failed:", err);
@@ -66,7 +65,6 @@ export default function LoginPage() {
 
   const handleWebAuthnSuccess = (credentialId: string) => {
     // For demo: redirect to dashboard after biometric
-    toast.success("Biometric login successful!");
     router.push("/dashboard");
   };
 

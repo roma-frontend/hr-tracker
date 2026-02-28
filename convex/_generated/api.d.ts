@@ -20,12 +20,14 @@ import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
 import type * as organizationRequests from "../organizationRequests.js";
 import type * as organizations from "../organizations.js";
+import type * as productivity from "../productivity.js";
 import type * as sla from "../sla.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as supervisorRatings from "../supervisorRatings.js";
 import type * as tasks from "../tasks.js";
 import type * as timeTracking from "../timeTracking.js";
 import type * as userPreferences from "../userPreferences.js";
+import type * as userStats from "../userStats.js";
 import type * as users from "../users.js";
 
 import type {
@@ -47,12 +49,14 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   organizationRequests: typeof organizationRequests;
   organizations: typeof organizations;
+  productivity: typeof productivity;
   sla: typeof sla;
   subscriptions: typeof subscriptions;
   supervisorRatings: typeof supervisorRatings;
   tasks: typeof tasks;
   timeTracking: typeof timeTracking;
   userPreferences: typeof userPreferences;
+  userStats: typeof userStats;
   users: typeof users;
 }>;
 

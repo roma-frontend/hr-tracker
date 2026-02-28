@@ -19,6 +19,7 @@ import {
   BarChart3,
   Clock,
   CheckSquare,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
@@ -39,6 +40,7 @@ const navItems = [
   { href: "/reports", label: "Reports", icon: FileText, roles: ["admin", "supervisor"] },
   { href: "/tasks", label: "Tasks", icon: CheckSquare, roles: ["admin", "supervisor", "employee"] },
   { href: "/approvals", label: "Approvals", icon: UserCheck, roles: ["admin"] },
+  { href: "/profile", label: "Profile", icon: User, roles: ["admin", "supervisor", "employee"] },
   { href: "/settings", label: "Settings", icon: Settings, roles: ["admin", "supervisor", "employee"] },
 ];
 
@@ -121,7 +123,7 @@ export function Sidebar() {
         </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+        <nav className={cn("flex-1 py-4 space-y-1 overflow-y-auto", collapsed ? "px-2" : "px-3")}>
           {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
@@ -133,7 +135,8 @@ export function Sidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 relative outline-none focus-visible:outline-none",
+                  "flex items-center rounded-lg text-sm font-medium transition-colors duration-150 relative outline-none focus-visible:outline-none",
+                  collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5",
                   isActive ? "border" : "hover:text-[var(--text-primary)]"
                 )}
                 style={
@@ -290,24 +293,29 @@ export function MobileSidebar() {
         style={{
           opacity: mobileOpen ? 1 : 0,
           pointerEvents: mobileOpen ? "auto" : "none",
-          transition: "opacity 0.2s ease",
+          transition: "opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       />
-      {/* Drawer — CSS transform transition instead of spring animation */}
-      {mobileOpen && (
-        <aside
-          className="fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col lg:hidden border-r"
-          style={{
-            background: "var(--sidebar-bg)",
-            borderColor: "var(--sidebar-border)",
-            transform: "translateX(0)",
-            transition: "transform 0.25s ease",
-          }}
-        >
+      {/* Drawer — Smooth slide-in with staggered content animation */}
+      <aside
+        className="fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col lg:hidden border-r shadow-2xl"
+        style={{
+          background: "var(--sidebar-bg)",
+          borderColor: "var(--sidebar-border)",
+          transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          willChange: "transform",
+        }}
+      >
           {/* Logo */}
           <div
             className="flex items-center h-16 px-4 border-b"
-            style={{ borderColor: "var(--sidebar-border)" }}
+            style={{
+              borderColor: "var(--sidebar-border)",
+              opacity: mobileOpen ? 1 : 0,
+              transform: mobileOpen ? "translateY(0)" : "translateY(-10px)",
+              transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
+            }}
           >
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity outline-none" onClick={() => setMobileOpen(false)}>
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] flex items-center justify-center shadow-md">
@@ -322,7 +330,7 @@ export function MobileSidebar() {
 
           {/* Nav */}
           <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-            {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item) => {
+            {navItems.filter(item => item.roles.includes(user?.role || "employee")).map((item, index) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = item.icon;
               const mobileBadge = item.href === "/tasks" && mobileTaskBadge > 0 ? mobileTaskBadge : 0;
@@ -332,18 +340,21 @@ export function MobileSidebar() {
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 outline-none focus-visible:outline-none",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium outline-none focus-visible:outline-none",
                     isActive ? "border" : ""
                   )}
-                  style={
-                    isActive
+                  style={{
+                    ...(isActive
                       ? {
                           background: "var(--sidebar-item-active)",
                           color: "var(--sidebar-item-active-text)",
                           borderColor: "color-mix(in srgb, var(--primary) 20%, transparent)",
                         }
-                      : { color: "var(--text-muted)" }
-                  }
+                      : { color: "var(--text-muted)" }),
+                    opacity: mobileOpen ? 1 : 0,
+                    transform: mobileOpen ? "translateX(0)" : "translateX(-20px)",
+                    transition: `all 0.3s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.05}s`,
+                  }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
                       (e.currentTarget as HTMLElement).style.background = "var(--sidebar-item-hover)";
@@ -376,7 +387,11 @@ export function MobileSidebar() {
           <div className="mt-auto px-3 py-2 flex-shrink-0">
             <div 
               className="flex items-center gap-2 px-3 py-2 rounded-lg"
-              style={{ backgroundColor: "var(--background-subtle)" }}
+              style={{
+                backgroundColor: "var(--background-subtle)",
+                opacity: mobileOpen ? 1 : 0,
+                transition: "opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.5s",
+              }}
             >
               <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: "var(--primary)" }} />
               <div className="min-w-0 flex-1">
@@ -393,7 +408,11 @@ export function MobileSidebar() {
           {/* User */}
           <div
             className="border-t p-3"
-            style={{ borderColor: "var(--sidebar-border)" }}
+            style={{
+              borderColor: "var(--sidebar-border)",
+              opacity: mobileOpen ? 1 : 0,
+              transition: "opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.6s",
+            }}
           >
             <div className="flex items-center gap-3">
               <Avatar className="w-8 h-8">
@@ -413,7 +432,6 @@ export function MobileSidebar() {
             </div>
           </div>
         </aside>
-      )}
     </>
   );
 }
