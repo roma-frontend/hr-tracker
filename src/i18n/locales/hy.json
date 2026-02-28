@@ -6,7 +6,13 @@
     "faq": "ՀՏՀ",
     "getStarted": "Սկսել",
     "login": "Մուտք",
-    "heroTitle": "Ժամանակակից HR արձակուրդների կառավարում",
+    "signIn": "Մուտք գործել",
+    "getStartedFree": "Սկսել անվճար",
+    "exclusiveHR": "Էքսկլյուզիվ HR գերազանցություն",
+    "trustedByElite": "Վստահում են էլիտար կազմակերպությունները",
+    "goToDashboard": "Անցնել վահանակ",
+    "viewAnalytics": "Տեսնել վերլուծությունը",
+    "heroTitle": "Ժամանակակից HR կառավարում",
     "heroSubtitle": "Պարզեցրեք ձեր արձակուրդների կառավարման գործընթացը մեր հարմար հարթակով",
     "vacationTracking": "Արձակուրդների հետևում",
     "vacationDesc": "Համահունչ կերպով կառավարեք տարեկան արձակուրդների հայտերը, հաստատումները և մնացորդները հարմար օրացուցային ինտերֆեյսով և ակնթարթային ծանուցումներով:",
@@ -22,7 +28,6 @@
     "premium": "Պրեմիում",
     "trustedBy": "Վստահում են առաջատար ընկերությունները"
   },
-  
   "common": {
     "welcome": "Բարի գալուստ",
     "loading": "Բեռնվում է...",
@@ -85,7 +90,6 @@
     "attachment": "Կցորդ",
     "attachments": "Կցորդներ"
   },
-  
   "nav": {
     "home": "Գլխավոր",
     "dashboard": "Վահանակ",
@@ -105,9 +109,22 @@
     "teamLeaves": "Թիմի արձակուրդներ",
     "approvals": "Հաստատումներ",
     "calendar": "Օրացույց",
-    "tasks": "Առաջադրանքներ"
+    "tasks": "Առաջադրանքներ",
+    "leaveManagement": "Արձակուրդների կառավարում",
+    "myProfile": "Իմ պրոֆիլը",
+    "quickActions": "Արագ գործողություններ",
+    "newLeaveRequest": "Նոր արձակուրդի հայտ",
+    "viewCalendar": "Տեսնել օրացույցը",
+    "checkIn": "Ներկայանալ",
+    "checkOut": "Հեռանալ",
+    "viewProfile": "Տեսնել պրոֆիլը",
+    "accountSettings": "Հաշվի կարգավորումներ"
   },
-  
+  "landing": {
+    "scroll": "Ոլորել",
+    "leaveTypes": "Արձակուրդների տեսակներ",
+    "hrLeave": "HRLeave"
+  },
   "auth": {
     "login": "Մուտք",
     "register": "Գրանցում",
@@ -128,9 +145,38 @@
     "dontHaveAccount": "Չունե՞ք հաշիվ",
     "createAccount": "Ստեղծել հաշիվ",
     "welcomeBack": "Բարի վերադարձ",
-    "getStarted": "Սկսել"
+    "getStarted": "Սկսել",
+    "emailAddress": "Էլ. հասցե",
+    "enterEmail": "Մուտքագրեք ձեր էլ. հասցեն",
+    "enterPassword": "Մուտքագրեք ձեր գաղտնաբառը",
+    "passwordMin8": "Գաղտնաբառը պետք է լինի առնվազն 8 նիշ",
+    "passwordsDoNotMatch": "Գաղտնաբառերը չեն համընկնում",
+    "showPassword": "Ցույց տալ գաղտնաբառը",
+    "hidePassword": "Թաքցնել գաղտնաբառը",
+    "sendResetLink": "Ուղարկել վերականգնման հղումը",
+    "backToLogin": "Վերադառնալ մուտքին",
+    "checkYourEmail": "Ստուգեք ձեր էլ. փոստը",
+    "resetLinkSent": "Գաղտնաբառի վերականգնման հղումն ուղարկվել է",
+    "updatePassword": "Թարմացնել գաղտնաբառը",
+    "updating": "Թարմացվում է...",
+    "passwordUpdated": "Գաղտնաբառը թարմացվել է!",
+    "newPassword": "Նոր գաղտնաբառ",
+    "organizationName": "Կազմակերպության անուն",
+    "findYourOrganization": "Գտեք ձեր կազմակերպությունը",
+    "noOrganizationFound": "Կազմակերպություն չի գտնվել",
+    "requestNewOrg": "Հայտ ուղարկել նոր կազմակերպության համար",
+    "createOrganization": "Ստեղծել կազմակերպություն",
+    "pending": "Սպասվող",
+    "approved": "Հաստատված",
+    "rejected": "Մերժված",
+    "orgRequestPending": "Ձեր կազմակերպության հայտը սպասվող է",
+    "emailNotification": "Էլ. փոստի ծանուցում",
+    "continueWithEmail": "Շարունակել էլ. փոստով",
+    "orContinueWith": "Կամ շարունակել",
+    "signingIn": "Մուտք գործվում է...",
+    "creatingAccount": "Հաշիվ ստեղծվում է...",
+    "signInToHROffice": "Մուտք գործել HR Office Leave Monitor"
   },
-  
   "dashboard": {
     "title": "Վահանակ",
     "welcome": "Բարի գալուստ HR Office",
@@ -152,9 +198,45 @@
     "requestLeave": "Արձակուրդի հայտ",
     "viewReports": "Տեսնել հաշվետվությունները",
     "leaveDistribution": "Արձակուրդների բաշխում",
-    "advancedAnalytics": "Խորացված վերլուծություն և AI-ի միջոցով ստացվող պատկերացումներ՝ ձեր թիմի արձակուրդների ժամանակացույցի կառավարման համար"
+    "advancedAnalytics": "Խորացված վերլուծություն և AI-ի միջոցով ստացվող պատկերացումներ՝ ձեր թիմի արձակուրդների ժամանակացույցի կառավարման համար",
+    "daysWorked": "Աշխատած օրեր",
+    "totalHours": "Ընդհանուր ժամեր",
+    "punctuality": "Ճշտապահություն",
+    "lateDays": "Ուշացած օրեր",
+    "noPerformanceRating": "Կատարողականի գնահատական դեռ չկա",
+    "supervisorWillRate": "Ձեր վերակացուն կգնահատի ձեր կատարողականը",
+    "leaveBalances": "Արձակուրդների մնացորդ",
+    "paidLeave": "Վճարովի արձակուրդ",
+    "sickLeave": "Հիվանդության արձակուրդ",
+    "familyLeave": "Ընտանեկան արձակուրդ",
+    "pending": "Սպասվող",
+    "approved": "Հաստատված",
+    "rejected": "Մերժված",
+    "myLeaveRequests": "Իմ արձակուրդի հայտերը",
+    "noLeaveRequests": "Արձակուրդի հայտեր դեռ չկան",
+    "convexNotDeployed": "Convex տեղադրված չէ",
+    "monthlyLeaveTrend": "Ամսական արձակուրդների միտում",
+    "noDataYet": "Տվյալներ դեռ չկան",
+    "recentLeaveRequests": "Վերջին արձակուրդի հայտեր",
+    "loading": "Բեռնվում է...",
+    "employee": "Աշխատակից",
+    "type": "Տեսակ",
+    "dates": "Ամսաթվեր",
+    "days": "Օրեր",
+    "status": "Կարգավիճակ",
+    "newLeaveRequest": "Նոր արձակուրդի հայտ",
+    "addEmployee": "Ավելացնել աշխատակից",
+    "viewCalendar": "Տեսնել օրացույցը",
+    "daysTaken": "Օգտագործված օրեր",
+    "remaining": "Մնացել է",
+    "noRecentRequests": "Վերջին հայտեր չկան",
+    "viewFullAttendance": "Տեսնել ներկայության ամբողջ պատմությունը →",
+    "viewAllRequests": "Տեսնել բոլոր {{count}} հայտերը",
+    "manageOrgs": "Կառավարել կազմակերպությունները",
+    "createOrg": "Ստեղծել կազմակերպություն",
+    "newRequest": "Նոր հայտ",
+    "viewAll": "Տեսնել բոլորը"
   },
-  
   "leave": {
     "title": "Արձակուրդների կառավարում",
     "requestLeave": "Արձակուրդի հայտ",
@@ -196,7 +278,6 @@
     "rejectedBy": "Մերժել է",
     "rejectionReason": "Մերժման պատճառ"
   },
-  
   "attendance": {
     "title": "Ներկայություն",
     "myAttendance": "Իմ ներկայությունը",
@@ -229,7 +310,6 @@
     "viewHistory": "Տեսնել պատմությունը",
     "markAttendance": "Նշել ներկայությունը"
   },
-  
   "employees": {
     "title": "Աշխատակիցներ",
     "addEmployee": "Ավելացնել աշխատակից",
@@ -267,7 +347,6 @@
     "permissions": "Թույլտվություններ",
     "noEmployees": "Աշխատակիցներ չեն գտնվել"
   },
-  
   "reports": {
     "title": "Հաշվետվություններ",
     "analytics": "Վերլուծություն",
@@ -291,7 +370,6 @@
     "noData": "Տվյալներ չկան",
     "totalRecords": "Ընդամենը գրառումներ"
   },
-  
   "settings": {
     "title": "Կարգավորումներ",
     "profile": "Պրոֆիլ",
@@ -321,7 +399,6 @@
     "lightMode": "Լուսավոր թեմա",
     "saveChanges": "Պահպանել փոփոխությունները"
   },
-  
   "notifications": {
     "title": "Ծանուցումներ",
     "markAsRead": "Նշել որպես կարդացած",
@@ -338,7 +415,6 @@
     "birthdayReminder": "Այսօր {{name}}-ի ծննդյան օրն է",
     "upcomingLeave": "{{name}}-ը արձակուրդում կլինի {{date}}"
   },
-  
   "errors": {
     "required": "Այս դաշտը պարտադիր է",
     "invalidEmail": "Սխալ էլ. հասցե",
@@ -351,7 +427,6 @@
     "notFound": "Չի գտնվել",
     "serverError": "Սերվերի սխալ"
   },
-  
   "success": {
     "saved": "Հաջողությամբ պահպանվել է",
     "updated": "Հաջողությամբ թարմացվել է",

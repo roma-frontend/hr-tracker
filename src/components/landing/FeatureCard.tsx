@@ -55,8 +55,12 @@ export default function FeatureCard({
 
       {/* Glass card */}
       <div
-        className="relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl overflow-hidden h-full"
-        style={{ transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1)' }}
+        className="relative rounded-3xl border backdrop-blur-2xl overflow-hidden h-full"
+        style={{ 
+          transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1)',
+          borderColor: 'var(--landing-card-border)',
+          backgroundColor: 'var(--landing-card-bg)'
+        }}
       >
         {/* Top shimmer border */}
         <div
@@ -98,10 +102,10 @@ export default function FeatureCard({
 
           {/* Text */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-2 transition-colors">
+            <h3 className="text-xl font-bold mb-2 transition-colors" style={{ color: 'var(--landing-text-primary)' }}>
               {title}
             </h3>
-            <p className="text-[#f7e7ce]/60 text-sm leading-relaxed group-hover:text-[#f7e7ce]/80 transition-colors">
+            <p className="text-sm leading-relaxed transition-colors" style={{ color: 'var(--landing-text-secondary)', opacity: 0.8 }}>
               {description}
             </p>
           </div>

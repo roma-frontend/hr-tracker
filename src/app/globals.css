@@ -42,10 +42,13 @@
 /* ── Color Scheme ──────────────────────────────────────────────── */
 html {
   /* scroll-behavior: smooth removed — prevents bfcache restoration (back/forward cache) */
-  color-scheme: light;
+  color-scheme: light dark;
 }
 html.dark {
   color-scheme: dark;
+}
+html.light {
+  color-scheme: light;
 }
 
 /* ── Light Theme (default) ─────────────────────────────────────── */
@@ -300,13 +303,9 @@ body {
 
 /* Gradient text for section titles */
 .heading-gradient {
-  background: linear-gradient(135deg, #2563eb 0%, #93c5fd 50%, #60a5fa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  /* Animated shimmer on the gradient */
-  background-size: 200% auto;
-  animation: heading-shimmer 4s linear infinite;
+  /* Use primary color instead of gradient for better visibility in both themes */
+  color: var(--primary);
+  font-weight: 900;
 }
 
 @keyframes heading-shimmer {
@@ -322,7 +321,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #60a5fa;
+  color: var(--primary);
   position: relative;
   padding: 0 1rem;
 }
@@ -333,11 +332,12 @@ body {
   top: 50%;
   width: 2rem;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #2563eb);
+  background: linear-gradient(90deg, transparent, var(--primary));
   transform: translateY(-50%);
+  opacity: 0.5;
 }
 .section-eyebrow::before { right: 100%; }
-.section-eyebrow::after  { left: 100%; background: linear-gradient(90deg, #2563eb, transparent); }
+.section-eyebrow::after  { left: 100%; background: linear-gradient(90deg, var(--primary), transparent); }
 
 /* Reveal-on-scroll: elements start hidden, animate in via IntersectionObserver trigger */
 /* Uses CSS animation-timeline where supported, JS IntersectionObserver as fallback */

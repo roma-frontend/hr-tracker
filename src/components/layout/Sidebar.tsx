@@ -29,19 +29,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { useTranslation } from "react-i18next";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "supervisor", "employee"] },
-  { href: "/attendance", label: "Attendance", icon: Clock, roles: ["admin", "supervisor", "employee"] },
-  { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["admin", "supervisor"] },
-  { href: "/leaves", label: "Leaves", icon: ClipboardList, roles: ["admin", "supervisor", "employee"] },
-  { href: "/employees", label: "Employees", icon: Users, roles: ["admin", "supervisor", "employee"] },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays, roles: ["admin", "supervisor", "employee"] },
-  { href: "/reports", label: "Reports", icon: FileText, roles: ["admin", "supervisor"] },
-  { href: "/tasks", label: "Tasks", icon: CheckSquare, roles: ["admin", "supervisor", "employee"] },
-  { href: "/approvals", label: "Approvals", icon: UserCheck, roles: ["admin"] },
-  { href: "/profile", label: "Profile", icon: User, roles: ["admin", "supervisor", "employee"] },
-  { href: "/settings", label: "Settings", icon: Settings, roles: ["admin", "supervisor", "employee"] },
+  { href: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard, roles: ["admin", "supervisor", "employee"] },
+  { href: "/attendance", labelKey: "nav.attendance", icon: Clock, roles: ["admin", "supervisor", "employee"] },
+  { href: "/analytics", labelKey: "nav.analytics", icon: BarChart3, roles: ["admin", "supervisor"] },
+  { href: "/leaves", labelKey: "nav.leaves", icon: ClipboardList, roles: ["admin", "supervisor", "employee"] },
+  { href: "/employees", labelKey: "nav.employees", icon: Users, roles: ["admin", "supervisor", "employee"] },
+  { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, roles: ["admin", "supervisor", "employee"] },
+  { href: "/reports", labelKey: "nav.reports", icon: FileText, roles: ["admin", "supervisor"] },
+  { href: "/tasks", labelKey: "nav.tasks", icon: CheckSquare, roles: ["admin", "supervisor", "employee"] },
+  { href: "/approvals", labelKey: "nav.approvals", icon: UserCheck, roles: ["admin"] },
+  { href: "/profile", labelKey: "nav.profile", icon: User, roles: ["admin", "supervisor", "employee"] },
+  { href: "/settings", labelKey: "nav.settings", icon: Settings, roles: ["admin", "supervisor", "employee"] },
 ];
 
 function getInitials(name: string) {
@@ -49,6 +50,7 @@ function getInitials(name: string) {
 }
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { collapsed, toggle, setMobileOpen } = useSidebarStore();
   const { user } = useAuthStore();
@@ -181,7 +183,7 @@ export function Sidebar() {
                     display: collapsed ? "none" : undefined,
                   }}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
                 {!collapsed && badge > 0 && (
                   <span className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm shadow-blue-300">
@@ -196,7 +198,7 @@ export function Sidebar() {
                 <Tooltip key={item.href}>
                   <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
                   <TooltipContent side="right" className="bg-[var(--card)] text-[var(--text-primary)] border-[var(--border)]">
-                    {item.label}
+                    {t(item.labelKey)}
                   </TooltipContent>
                 </Tooltip>
               );
@@ -372,7 +374,7 @@ export function MobileSidebar() {
                     className="w-5 h-5"
                     style={{ color: isActive ? "var(--sidebar-item-active-text)" : "var(--text-disabled)" }}
                   />
-                  <span className="flex-1">{item.label}</span>
+                  <span className="flex-1">{t(item.labelKey)}</span>
                   {mobileBadge > 0 && (
                     <span className="min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 text-white text-[10px] font-bold flex items-center justify-center">
                       {mobileBadge > 9 ? "9+" : mobileBadge}

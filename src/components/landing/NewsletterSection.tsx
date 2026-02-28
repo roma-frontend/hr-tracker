@@ -51,7 +51,8 @@ export default function NewsletterSection() {
         {/* Background glow */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-blue-600/15 to-slate-400/10 rounded-3xl blur-3xl" aria-hidden="true" />
 
-        <div className="relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-12 text-center overflow-hidden">
+        <div className="relative rounded-3xl border backdrop-blur-xl p-8 md:p-12 text-center overflow-hidden"
+          style={{ borderColor: 'var(--landing-card-border)', backgroundColor: 'var(--landing-card-bg)' }}>
           {/* Static orb — CSS pulse instead of JS animate */}
           <div
             className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br from-blue-500/25 to-blue-600/20 blur-3xl orb-pulse-1"
@@ -60,13 +61,13 @@ export default function NewsletterSection() {
 
           {/* Icon — CSS float */}
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 mb-6 animate-float">
-            <Mail size={28} className="text-white" />
+            <Mail size={28} style={{ color: '#ffffff' }} />
           </div>
 
-          <h3 className="text-2xl md:text-4xl font-black text-white mb-4">
+          <h3 className="text-2xl md:text-4xl font-black mb-4" style={{ color: 'var(--landing-text-primary)' }}>
             Stay in the loop
           </h3>
-          <p className="text-blue-300/70 text-lg mb-8 max-w-xl mx-auto">
+          <p className="text-lg mb-8 max-w-xl mx-auto" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
             Get the latest updates on HR trends, premium features, and exclusive insights delivered to your inbox.
           </p>
 
@@ -77,17 +78,23 @@ export default function NewsletterSection() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="flex-1 px-5 py-4 rounded-xl bg-white/10 border border-blue-500/20 text-white placeholder:text-blue-300/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                className="flex-1 px-5 py-4 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                style={{
+                  backgroundColor: 'var(--input)',
+                  borderColor: 'var(--input-border)',
+                  color: 'var(--landing-text-primary)'
+                }}
                 disabled={isLoading}
                 aria-label="Email address"
               />
               <button
                 type="submit"
                 disabled={isLoading}
-                className="cta-btn-primary px-6 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-300 text-white font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cta-btn-primary px-6 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-300 font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ color: '#ffffff' }}
               >
                 {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }} />
                 ) : (
                   <><span>Subscribe</span><ArrowRight size={18} /></>
                 )}
@@ -95,13 +102,13 @@ export default function NewsletterSection() {
             </form>
           ) : (
             /* CSS fade-in on success */
-            <div className="flex items-center justify-center gap-3 text-blue-400 font-semibold success-reveal">
+            <div className="flex items-center justify-center gap-3 font-semibold success-reveal" style={{ color: 'var(--primary)' }}>
               <CheckCircle2 size={24} />
               <span>You&apos;re subscribed! Check your inbox.</span>
             </div>
           )}
 
-          <p className="text-xs text-blue-300/40 mt-6">
+          <p className="text-xs mt-6" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
             We respect your privacy. Unsubscribe at any time.
           </p>
         </div>

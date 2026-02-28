@@ -47,11 +47,13 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
       {/* Slide-in panel — CSS transform transition */}
       <div
-        className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-[#020817]/95 backdrop-blur-xl border-l border-white/10 z-[70] md:hidden"
+        className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm backdrop-blur-xl border-l z-[70] md:hidden"
         style={{
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.35s cubic-bezier(0.22,1,0.36,1)',
           visibility: isOpen ? 'visible' : 'hidden',
+          backgroundColor: 'var(--background)',
+          borderColor: 'var(--landing-card-border)'
         }}
         role="dialog"
         aria-modal="true"
@@ -59,14 +61,17 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-white/10">
-            <span className="text-white font-bold text-lg">HR<span className="text-blue-400">Leave</span></span>
+          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--landing-card-border)' }}>
+            <span className="font-bold text-lg" style={{ color: 'var(--landing-text-primary)' }}>HR<span style={{ color: 'var(--primary)' }}>Leave</span></span>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+              className="w-10 h-10 rounded-xl transition-colors flex items-center justify-center"
+              style={{ backgroundColor: 'var(--landing-card-bg)' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)'}
               aria-label="Close menu"
             >
-              <X size={20} className="text-white" />
+              <X size={20} style={{ color: 'var(--landing-text-primary)' }} />
             </button>
           </div>
 
@@ -87,10 +92,19 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                     <a
                       href={item.href}
                       onClick={onClose}
-                      className="flex items-center gap-4 px-4 py-3 rounded-xl text-blue-200/80 hover:text-white hover:bg-blue-500/10 transition-all duration-200 group"
+                      className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group"
+                      style={{ color: 'var(--landing-text-secondary)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'var(--landing-text-primary)';
+                        e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--landing-text-secondary)';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
-                      <div className="w-10 h-10 rounded-lg bg-white/5 group-hover:bg-blue-500/20 transition-colors flex items-center justify-center">
-                        <Icon size={18} className="text-blue-400" />
+                      <div className="w-10 h-10 rounded-lg transition-colors flex items-center justify-center" style={{ backgroundColor: 'var(--landing-card-bg)' }}>
+                        <Icon size={18} style={{ color: 'var(--primary)' }} />
                       </div>
                       <span className="font-medium">{item.name}</span>
                     </a>
@@ -101,20 +115,29 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </nav>
 
           {/* Footer CTA */}
-          <div className="flex flex-col p-6 border-t border-white/10 space-y-3"
+          <div className="flex flex-col p-6 border-t space-y-3"
             style={{
               opacity: isOpen ? 1 : 0,
               transition: `opacity 0.4s ease 0.4s`,
+              borderColor: 'var(--landing-card-border)'
             }}
           >
             <Link href="/login" onClick={onClose}>
-              <button className="w-full px-4 py-3 rounded-xl text-blue-100 font-semibold border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-all active:scale-95">
+              <button className="w-full px-4 py-3 rounded-xl font-semibold border transition-all active:scale-95"
+                style={{ 
+                  color: 'var(--landing-text-primary)',
+                  borderColor: 'var(--landing-card-border)',
+                  backgroundColor: 'var(--landing-card-bg)'
+                }}>
                 Sign In
               </button>
             </Link>
             <Link href="/register" onClick={onClose}>
-              <button className="w-full px-4 py-3 rounded-xl text-white font-bold transition-all active:scale-95 cta-btn-primary"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}>
+              <button className="w-full px-4 py-3 rounded-xl font-bold transition-all active:scale-95 cta-btn-primary"
+                style={{ 
+                  background: 'linear-gradient(135deg, #2563eb, #93c5fd)',
+                  color: '#ffffff'
+                }}>
                 Get Started Free
               </button>
             </Link>

@@ -153,8 +153,8 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
       {tier.popular && (
         <div className="absolute -top-5 inset-x-0 flex justify-center z-20">
           <div
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-lg"
-            style={{ background: `linear-gradient(90deg, ${tier.accentFrom}, ${tier.accentTo})`, boxShadow: `0 4px 20px ${tier.glowColor}` }}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg"
+            style={{ background: `linear-gradient(90deg, ${tier.accentFrom}, ${tier.accentTo})`, boxShadow: `0 4px 20px ${tier.glowColor}`, color: '#ffffff' }}
           >
             <Star size={11} fill="currentColor" />
             {tier.badge}
@@ -182,13 +182,15 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
 
       {/* Main card */}
       <div
-        className={`relative h-full rounded-3xl flex flex-col overflow-hidden
-          ${tier.popular
-            ? 'border border-white/20 bg-gradient-to-b from-white/[0.08] to-white/[0.03]'
-            : 'border border-white/[0.08] bg-white/[0.03]'}
-          backdrop-blur-xl transition-transform duration-500
+        className={`relative h-full rounded-3xl flex flex-col overflow-hidden backdrop-blur-xl transition-transform duration-500
           ${hovered ? '-translate-y-2' : 'translate-y-0'}
         `}
+        style={{
+          borderColor: tier.popular ? tier.accentFrom : 'var(--landing-card-border)',
+          borderWidth: tier.popular ? '2px' : '1px',
+          backgroundColor: 'var(--landing-card-bg)',
+          boxShadow: tier.popular ? `0 0 30px ${tier.glowColor}` : 'none'
+        }}
       >
         {/* Top accent line */}
         <div
@@ -211,8 +213,8 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
               >
                 {tier.icon}
               </div>
-              <h3 className="text-xl font-bold text-white">{tier.name}</h3>
-              <p className="text-blue-200/50 text-sm mt-1">{tier.description}</p>
+              <h3 className="text-xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>{tier.name}</h3>
+              <p className="text-sm mt-1" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{tier.description}</p>
             </div>
           </div>
 
@@ -221,16 +223,16 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
             <div className="flex items-end gap-2">
               <span
                 className="text-5xl font-black leading-none"
-                style={{ background: `linear-gradient(135deg, #fff 60%, ${tier.accentFrom})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                style={{ color: 'var(--landing-text-primary)' }}
               >
                 {tier.price}
               </span>
               {tier.priceMonthly !== undefined && (
-                <span className="text-blue-200/40 text-sm pb-1.5">/month</span>
+                <span className="text-sm pb-1.5" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>/month</span>
               )}
             </div>
             {tier.priceMonthly !== undefined && tier.priceMonthly >= 0 && (
-              <p className="text-blue-200/40 text-xs mt-2 flex items-center gap-1.5">
+              <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
                 <Shield size={11} />
                 14-day free trial · No credit card required
               </p>
@@ -247,7 +249,7 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
                 >
                   <Check size={11} style={{ color: tier.accentFrom }} />
                 </div>
-                <span className="text-blue-100/70 text-sm">{feature}</span>
+                <span className="text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{feature}</span>
               </li>
             ))}
           </ul>
@@ -262,11 +264,11 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
             style={tier.popular || isCurrentPlan ? {
               background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
               boxShadow: `0 8px 32px ${tier.glowColor}`,
-              color: '#fff',
+              color: '#ffffff',
             } : {
               background: `${tier.accentFrom}15`,
-              border: `1px solid ${tier.accentFrom}33`,
-              color: '#e0e7ff',
+              border: `1px solid ${tier.accentFrom}55`,
+              color: 'var(--landing-text-primary)',
             }}
           >
             {/* Shimmer effect */}
@@ -281,7 +283,7 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
               />
             )}
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }} />
             ) : isCurrentPlan ? (
               <>
                 <CheckCircle2 size={15} />
@@ -321,13 +323,13 @@ export default function PricingPreview() {
       {/* Header */}
       <div ref={ref} className="text-center mb-20" style={style}>
         <span className="section-eyebrow">Pricing</span>
-        <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
+        <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
           Exclusive,{' '}
           <span className="heading-gradient">transparent pricing</span>
         </h2>
-        <p className="mt-4 text-blue-200/60 max-w-2xl mx-auto text-lg">
+        <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
           Choose the plan that&apos;s right for your organization.{' '}
-          <span className="text-blue-300/80">All plans include a 14-day free trial.</span>
+          <span style={{ color: 'var(--landing-text-muted)' }}>All plans include a 14-day free trial.</span>
         </p>
 
         {/* Trust badges */}
@@ -338,8 +340,8 @@ export default function PricingPreview() {
             { icon: <Zap size={14} />, text: 'Cancel anytime' },
             { icon: <Star size={14} />, text: 'GDPR compliant' },
           ].map(({ icon, text }) => (
-            <div key={text} className="flex items-center gap-1.5 text-blue-200/50 text-sm">
-              <span className="text-blue-400/70">{icon}</span>
+            <div key={text} className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
+              <span style={{ color: 'var(--primary)' }}>{icon}</span>
               {text}
             </div>
           ))}
@@ -354,11 +356,11 @@ export default function PricingPreview() {
       </div>
 
       {/* Footer note */}
-      <p className="text-center text-blue-200/30 text-sm mt-14 flex items-center justify-center gap-2">
-        <Shield size={13} className="text-blue-400/40" />
+      <p className="text-center text-sm mt-14 flex items-center justify-center gap-2" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
+        <Shield size={13} style={{ color: 'var(--primary)' }} />
         All plans include SSL security, premium backups, and GDPR compliance.
         Payments powered by{' '}
-        <span className="text-blue-300/50 font-semibold">Stripe</span>.
+        <span className="font-semibold" style={{ color: 'var(--landing-text-muted)' }}>Stripe</span>.
       </p>
 
       {/* Shimmer keyframe */}

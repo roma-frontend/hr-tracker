@@ -66,7 +66,11 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
 
       {/* Card — CSS lift on hover */}
       <div
-        className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 flex flex-col items-center text-center gap-3 overflow-hidden group-hover:-translate-y-2 group-hover:scale-[1.03] transition-transform duration-300"
+        className="relative rounded-2xl border backdrop-blur-xl p-6 flex flex-col items-center text-center gap-3 overflow-hidden group-hover:-translate-y-2 group-hover:scale-[1.03] transition-transform duration-300"
+        style={{
+          borderColor: 'var(--landing-card-border)',
+          backgroundColor: 'var(--landing-card-bg)'
+        }}
       >
         {/* Shimmer top border */}
         <div
@@ -85,12 +89,12 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
         </div>
 
         {/* Count-up number */}
-        <div className="text-3xl font-bold text-white tracking-tight tabular-nums">
+        <div className="text-3xl font-bold tracking-tight tabular-nums" style={{ color: 'var(--landing-text-primary)' }}>
           {numericTarget > 0 ? `${count}${suffix}` : value}
         </div>
 
         {/* Label */}
-        <div className="text-sm text-[#f7e7ce]/70 font-medium">{label}</div>
+        <div className="text-sm font-medium" style={{ color: 'var(--landing-text-muted)' }}>{label}</div>
 
         {/* Corner glow */}
         <div

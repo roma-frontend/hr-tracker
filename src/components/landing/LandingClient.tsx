@@ -35,23 +35,23 @@ const FloatingParticles = dynamic(() => import('./FloatingParticles'), { ssr: fa
 
 // Lazy load sections that appear below the fold
 const TestimonialsSection = dynamic(() => import('./TestimonialsSection'), {
-  loading: () => <div className="h-96 animate-pulse bg-white/5 rounded-3xl" />,
+  loading: () => <div className="h-96 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
 });
 
 const FAQSection = dynamic(() => import('./FAQSection'), {
-  loading: () => <div className="h-96 animate-pulse bg-white/5 rounded-3xl" />,
+  loading: () => <div className="h-96 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
 });
 
 const NewsletterSection = dynamic(() => import('./NewsletterSection'), {
-  loading: () => <div className="h-64 animate-pulse bg-white/5 rounded-3xl" />,
+  loading: () => <div className="h-64 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
 });
 
 const PricingPreview = dynamic(() => import('./PricingPreview'), {
-  loading: () => <div className="h-96 animate-pulse bg-white/5 rounded-3xl" />,
+  loading: () => <div className="h-96 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
 });
 
 const SocialProof = dynamic(() => import('./SocialProof'), {
-  loading: () => <div className="h-32 animate-pulse bg-white/5" />,
+  loading: () => <div className="h-32 animate-pulse" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
 });
 import { useAuthStore } from '@/store/useAuthStore';
 import { logoutAction } from '@/actions/auth';
@@ -71,25 +71,25 @@ const STATS = [
   {
     value: '500+',
     label: 'Employees Tracked',
-    icon: <Users size={22} className="text-white" />,
+    icon: <Users size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(37,99,235,0.2)',
   },
   {
     value: '99%',
     label: 'Accuracy Rate',
-    icon: <CheckCircle2 size={22} className="text-white" />,
+    icon: <CheckCircle2 size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(96,165,250,0.2)',
   },
   {
     value: '24',
     label: 'Real-time Tracking',
-    icon: <Activity size={22} className="text-white" />,
+    icon: <Activity size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(96,165,250,0.15)',
   },
   {
     value: '360',
     label: 'Smart Analytics',
-    icon: <BarChart3 size={22} className="text-white" />,
+    icon: <BarChart3 size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(56,189,248,0.18)',
   },
 ];
@@ -206,12 +206,12 @@ function Navbar() {
         aria-label="Main navigation"
       >
         {/* Glassmorphism nav background - uses CSS variable */}
-        <div 
+        <div
           className="absolute inset-0 backdrop-blur-xl border-b"
-          style={{ 
+          style={{
             background: 'var(--landing-navbar-bg)',
             borderColor: 'var(--landing-card-border)'
-          }} 
+          }}
         />
 
         {/* Logo */}
@@ -222,13 +222,13 @@ function Navbar() {
             style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}
             aria-hidden="true"
           >
-            <Shield size={18} className="text-white" />
+            <Shield size={18} style={{ color: '#ffffff' }} />
           </div>
-          <span 
+          <span
             className="font-bold text-lg tracking-tight transition-colors"
             style={{ color: 'var(--landing-text-primary)' }}
           >
-            HR<span className="text-blue-400">Leave</span>
+            HR<span style={{ color: 'var(--primary)' }}>Leave</span>
           </span>
         </Link>
 
@@ -244,7 +244,7 @@ function Navbar() {
               key={item.name}
               href={item.href}
               className="text-sm transition-colors duration-200 font-medium focus:outline-none focus:underline underline-offset-4"
-              style={{ 
+              style={{
                 color: 'var(--landing-navbar-text)',
               }}
               onMouseEnter={(e) => e.currentTarget.style.color = 'var(--landing-navbar-text-hover)'}
@@ -276,13 +276,16 @@ function Navbar() {
               )}
             </button>
           )}
-          
+
           {user ? (
             // Logged in - show user menu
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button 
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all outline-none focus:ring-2 focus:ring-blue-500/50"
+                <button
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all outline-none focus:ring-2 focus:ring-blue-500/50"
+                  style={{ backgroundColor: 'var(--landing-card-bg)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-hover)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)'}
                   aria-label="User menu"
                 >
                   <Avatar className="w-8 h-8">
@@ -292,37 +295,50 @@ function Navbar() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden sm:block text-left">
-                    <p className="text-xs font-semibold text-white leading-tight">{user.name}</p>
-                    <p className="text-[10px] text-blue-200/70 capitalize">{user.role}</p>
+                    <p className="text-xs font-semibold leading-tight" style={{ color: 'var(--landing-text-primary)' }}>{user.name}</p>
+                    <p className="text-[10px] capitalize" style={{ color: 'var(--landing-text-muted)', opacity: 0.85 }}>{user.role}</p>
                   </div>
-                  <ChevronDown className="w-3 h-3 text-blue-200/70 hidden sm:block" />
+                  <ChevronDown className="w-3 h-3 hidden sm:block" style={{ color: 'var(--landing-text-muted)' }} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-48 bg-slate-950/95 backdrop-blur-xl border border-blue-500/20 shadow-xl shadow-black/50 rounded-xl"
+                className="w-48 backdrop-blur-xl border shadow-xl rounded-xl"
+                style={{
+                  backgroundColor: 'var(--popover)',
+                  borderColor: 'var(--border)'
+                }}
               >
-                <DropdownMenuLabel className="text-blue-400/60 text-xs font-semibold tracking-widest uppercase px-2 py-1.5">My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-[#2563eb]/10" />
+                <DropdownMenuLabel className="text-xs font-semibold tracking-widest uppercase px-2 py-1.5" style={{ color: 'var(--muted-foreground)' }}>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator style={{ backgroundColor: 'var(--border)' }} />
                 <DropdownMenuItem
-                  className="text-blue-200 cursor-pointer hover:bg-blue-500/10 hover:text-blue-200 focus:bg-blue-500/10 focus:text-blue-200 focus:outline-none focus-visible:outline-none outline-none border-0 focus:border-0 focus:ring-0 focus-visible:ring-0 gap-2 rounded-lg transition-colors"
-                  style={{ boxShadow: 'none' }}
+                  className="cursor-pointer gap-2 rounded-lg transition-colors focus:outline-none focus-visible:outline-none outline-none border-0 focus:border-0 focus:ring-0 focus-visible:ring-0"
+                  style={{
+                    boxShadow: 'none',
+                    color: 'var(--foreground)'
+                  }}
                   onClick={() => router.push('/dashboard')}
                 >
-                  <UserIcon className="w-4 h-4 text-blue-400/70" />
-                  Dashboard
+                  <UserIcon className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                  {t('nav.dashboard')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="text-blue-200 cursor-pointer hover:bg-blue-500/10 hover:text-blue-200 focus:bg-blue-500/10 focus:text-blue-200 focus:outline-none focus-visible:outline-none outline-none border-0 focus:border-0 focus:ring-0 focus-visible:ring-0 gap-2 rounded-lg transition-colors"
-                  style={{ boxShadow: 'none' }}
+                  className="cursor-pointer gap-2 rounded-lg transition-colors focus:outline-none focus-visible:outline-none outline-none border-0 focus:border-0 focus:ring-0 focus-visible:ring-0"
+                  style={{
+                    boxShadow: 'none',
+                    color: 'var(--foreground)'
+                  }}
                   onClick={() => router.push('/settings')}
                 >
-                  <SettingsIcon className="w-4 h-4 text-blue-400/70" />
-                  Settings
+                  <SettingsIcon className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                  {t('nav.settings')}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#2563eb]/10" />
+                <DropdownMenuSeparator style={{ backgroundColor: 'var(--border)' }} />
                 <DropdownMenuItem
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:text-red-300 focus:bg-red-500/10 focus:outline-none focus-visible:outline-none outline-none cursor-pointer gap-2 rounded-lg transition-colors"
+                  className="text-red-400 hover:text-red-300 focus:text-red-300 focus:outline-none focus-visible:outline-none outline-none cursor-pointer gap-2 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: 'transparent'
+                  }}
                   onClick={handleLogout}
                 >
                   <LogOut className="w-4 h-4" />
@@ -335,14 +351,26 @@ function Navbar() {
             <>
               <Link
                 href="/login"
-                className="hidden md:inline-flex text-sm text-blue-200/70 hover:text-blue-400 transition-colors font-medium px-4 py-2 rounded-xl hover:bg-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="hidden md:inline-flex text-sm transition-colors font-medium px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                style={{
+                  color: 'var(--landing-navbar-text)',
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--landing-navbar-text-hover)';
+                  e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--landing-navbar-text)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="hidden md:inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}
+                className="hidden md:inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
               >
                 Get Started
                 <ArrowRight size={14} />
@@ -351,12 +379,17 @@ function Navbar() {
               {/* Mobile menu button */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="md:hidden w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="md:hidden w-10 h-10 rounded-xl transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                style={{
+                  backgroundColor: 'var(--landing-card-bg)',
+                  border: '1px solid var(--landing-card-border)'
+                }}
                 aria-label="Open mobile menu"
                 aria-expanded={isMobileMenuOpen}
               >
                 <svg
-                  className="w-6 h-6 text-white"
+                  className="w-6 h-6"
+                  style={{ color: 'var(--landing-text-primary)' }}
                   fill="none"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -384,6 +417,7 @@ function Navbar() {
 // Replaced framer-motion scroll parallax + per-element JS animations with
 // pure CSS keyframe animations — same visual result, zero runtime JS cost.
 function HeroSection() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
 
@@ -396,7 +430,11 @@ function HeroSection() {
       {/* Skip to content link for accessibility */}
       <a
         href="#features"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-500 focus:text-white focus:rounded-lg"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg"
+        style={{
+          backgroundColor: 'var(--primary)',
+          color: '#ffffff'
+        }}
       >
         Skip to main content
       </a>
@@ -412,63 +450,44 @@ function HeroSection() {
         aria-label="Premium HR platform"
       >
         <div className="badge-shimmer absolute inset-0" aria-hidden="true" />
-        <div className="w-2 h-2 rounded-full bg-blue-500 pulse-dot" aria-hidden="true" />
+        <div className="w-2 h-2 rounded-full pulse-dot" style={{ backgroundColor: 'var(--primary)' }} aria-hidden="true" />
         <span className="relative text-xs font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--landing-text-muted)' }}>
-          Exclusive HR Excellence
+          {t('landing.exclusiveHR')}
         </span>
-        <Sparkles size={16} className="text-blue-400 spin-slow" aria-hidden="true" />
+        <Sparkles size={16} className="spin-slow" style={{ color: 'var(--primary)' }} aria-hidden="true" />
       </div>
 
       {/* Title — CSS fade-up stagger */}
       <h1 className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6 relative">
-        {(['HR', 'Leave', 'Monitor'] as const).map((word, i) => (
-          <span
-            key={word}
-            className={`hero-word-${i + 1} relative text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none`}
-          >
-            <span
-              className="relative inline-block"
-              style={{
-                background:
-                  i === 0
-                    ? 'linear-gradient(135deg, #ffffff 0%, #93c5fd 100%)'
-                    : i === 1
-                    ? 'linear-gradient(135deg, #93c5fd 0%, #2563eb 100%)'
-                    : 'linear-gradient(135deg, #2563eb 0%, #60a5fa 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {word}
-            </span>
-          </span>
-        ))}
-        <div className="hero-line absolute -bottom-4 left-1/2 -translate-x-1/2 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+        <span className="hero-word-1 relative text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none" style={{ color: 'var(--landing-text-primary)' }}>
+          {t('landing.heroTitle')}
+        </span>
+        <div
+          className="hero-line absolute -bottom-4 left-1/2 -translate-x-1/2 h-[2px] w-32"
+          style={{
+            background: 'linear-gradient(to right, transparent, var(--primary), transparent)'
+          }}
+        />
       </h1>
+
 
       {/* Subtitle */}
       <div className="hero-fade-3 max-w-3xl mx-auto mb-12">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-blue-500" />
-          <div className="w-2 h-2 rounded-full bg-blue-500 pulse-dot" />
-          <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-blue-500" />
+          <div className="w-16 h-[1px]" style={{ background: 'linear-gradient(to right, transparent, var(--primary))' }} />
+          <div className="w-2 h-2 rounded-full pulse-dot" style={{ backgroundColor: 'var(--primary)' }} />
+          <div className="w-16 h-[1px]" style={{ background: 'linear-gradient(to left, transparent, var(--primary))' }} />
         </div>
         <p className="text-lg md:text-xl leading-relaxed font-light text-center" style={{ color: 'var(--landing-text-secondary)' }}>
-          Sophisticated leave management that empowers{' '}
-          <span className="font-semibold" style={{ color: 'var(--primary)' }}>elite HR teams</span>{' '}
-          with{' '}
-          <span className="font-medium text-blue-400">real-time precision</span>,{' '}
-          <span className="font-medium" style={{ color: 'var(--landing-text-muted)' }}>intelligent insights</span>, and{' '}
-          <span className="font-medium text-blue-500">seamless automation</span> — all in one
-          exclusive platform.
+          {t('landing.heroSubtitle')}
         </p>
         <div className="flex items-center justify-center gap-2 mt-6">
           {[0, 1, 2, 1, 0].map((size, idx) => (
             <div
               key={idx}
-              className="rounded-full bg-blue-500 pulse-dot"
+              className="rounded-full pulse-dot"
               style={{
+                backgroundColor: 'var(--primary)',
                 width: size === 0 ? 4 : size === 1 ? 6 : 8,
                 height: size === 0 ? 4 : size === 1 ? 6 : 8,
                 animationDelay: `${idx * 0.15}s`,
@@ -485,12 +504,12 @@ function HeroSection() {
           <>
             <button
               onClick={() => router.push('/dashboard')}
-              className="cta-btn-primary inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}
+              className="cta-btn-primary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
               aria-label="Go to Dashboard"
             >
               <Activity size={20} aria-hidden="true" />
-              Go to Dashboard
+              {t('landing.goToDashboard')}
               <ArrowRight size={18} aria-hidden="true" />
             </button>
             <button
@@ -504,19 +523,19 @@ function HeroSection() {
               aria-label="View analytics"
             >
               <BarChart3 size={20} aria-hidden="true" />
-              View Analytics
+              {t('landing.viewAnalytics')}
             </button>
           </>
         ) : (
           <>
             <Link href="/register">
               <button
-                className="cta-btn-primary inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}
+                className="cta-btn-primary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
                 aria-label="Get started for free"
               >
                 <Zap size={20} aria-hidden="true" />
-                Get Started Free
+                {t('landing.getStartedFree')}
                 <ArrowRight size={18} aria-hidden="true" />
               </button>
             </Link>
@@ -530,7 +549,7 @@ function HeroSection() {
                 }}
                 aria-label="Sign in to your account"
               >
-                Sign In
+                {t('landing.signIn')}
                 <ArrowRight size={18} aria-hidden="true" />
               </button>
             </Link>
@@ -541,24 +560,24 @@ function HeroSection() {
       {/* Trusted companies */}
       <div className="hero-fade-4 flex flex-col items-center gap-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-[1px] bg-gradient-to-r from-transparent to-blue-500/40" />
+          <div className="w-8 h-[1px]" style={{ background: 'linear-gradient(to right, transparent, var(--primary))', opacity: 0.7 }} />
           <p className="text-xs uppercase tracking-[0.3em] font-semibold" style={{ color: 'var(--landing-text-muted)' }}>
-            Trusted by Elite Organizations
+            {t('landing.trustedByElite')}
           </p>
-          <div className="w-8 h-[1px] bg-gradient-to-l from-transparent to-blue-500/40" />
+          <div className="w-8 h-[1px]" style={{ background: 'linear-gradient(to left, transparent, var(--primary))', opacity: 0.7 }} />
         </div>
         <div className="flex flex-wrap justify-center gap-10">
           {TRUSTED.map((name) => (
             <span
               key={name}
               className="relative text-sm font-bold transition-colors cursor-default group"
-              style={{ 
-                color: 'var(--landing-text-muted)',
-                opacity: 0.4,
+              style={{
+                color: 'var(--landing-text-secondary)',
+                opacity: 0.9,
               }}
             >
               {name}
-              <span className="absolute -bottom-1 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="absolute -bottom-1 left-0 right-0 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to right, transparent, var(--primary), transparent)' }} />
             </span>
           ))}
         </div>
@@ -569,8 +588,8 @@ function HeroSection() {
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center gap-2 hidden md:flex"
         aria-hidden="true"
       >
-        <span className="text-xs text-blue-500/40 uppercase tracking-widest">Scroll</span>
-        <div className="scroll-line w-px h-12 bg-gradient-to-b from-blue-500/50 to-transparent" />
+        <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--primary)', opacity: 0.6 }}>{t('landing.scroll')}</span>
+        <div className="scroll-line w-px h-12" style={{ background: 'linear-gradient(to bottom, var(--primary), transparent)', opacity: 0.7 }} />
       </div>
     </div>
   );
@@ -643,7 +662,7 @@ function FeaturesSection() {
           transition: 'opacity 0.75s cubic-bezier(0.22,1,0.36,1), transform 0.75s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
-        <span className="section-eyebrow">Leave Types</span>
+        <span className="section-eyebrow">{t('landing.leaveTypes')}</span>
         <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
           Every leave type,{' '}
           <span className="heading-gradient">perfectly managed</span>
@@ -665,9 +684,10 @@ function FeaturesSection() {
 
 // ─── CTA Banner ───────────────────────────────────────────────────────────────
 function CTABanner() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
-  
+
   return (
     <section className="relative z-10 py-28" aria-label="Call to action">
       {/* Static CSS glows — no JS animation needed */}
@@ -682,22 +702,17 @@ function CTABanner() {
         <div className="relative px-10 py-20 text-center flex flex-col items-center">
           {/* Icon — CSS float animation */}
           <div className="animate-float inline-flex mb-8">
-            <Sparkles size={48} className="text-blue-400" />
+            <Sparkles size={48} style={{ color: 'var(--primary)' }} />
           </div>
 
           <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
             Ready to elevate your{' '}
-            <span style={{
-              background: 'linear-gradient(135deg, #2563eb 0%, #93c5fd 50%, #60a5fa 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>
+            <span style={{ color: 'var(--primary)' }}>
               HR operations?
             </span>
           </h2>
 
-          <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--landing-text-muted)', opacity: 0.7 }}>
+          <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
             Join elite HR professionals who rely on HRLeave to manage their teams with sophistication.
           </p>
 
@@ -706,11 +721,11 @@ function CTABanner() {
               <>
                 <button
                   onClick={() => router.push('/dashboard')}
-                  className="cta-btn-primary inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white font-bold text-lg shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}
+                  className="cta-btn-primary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg shadow-lg"
+                  style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
                 >
                   <Calendar size={20} />
-                  Manage Leaves
+                  {t('nav.leaves')}
                 </button>
                 <button
                   onClick={() => router.push('/employees')}
@@ -722,18 +737,18 @@ function CTABanner() {
                   }}
                 >
                   <Users size={20} />
-                  View Team
+                  {t('nav.employees')}
                 </button>
               </>
             ) : (
               <>
                 <Link href="/register">
                   <button
-                    className="cta-btn-primary inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white font-bold text-lg shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}
+                    className="cta-btn-primary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg shadow-lg"
+                    style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
                   >
                     <Zap size={20} />
-                    Start for Free
+                    {t('landing.getStartedFree')}
                   </button>
                 </Link>
                 <Link href="/login">
@@ -745,7 +760,7 @@ function CTABanner() {
                       background: 'var(--landing-card-bg)',
                     }}
                   >
-                    Sign In to Dashboard
+                    {t('landing.signIn')}
                   </button>
                 </Link>
               </>
@@ -759,6 +774,7 @@ function CTABanner() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
+  const { t } = useTranslation();
   const footerLinks = {
     product: [
       { name: 'Features', href: '#features' },
@@ -767,12 +783,12 @@ function Footer() {
       { name: 'FAQ', href: '#faq' },
     ],
     platform: [
-      { name: 'Dashboard', href: '/login' },
-      { name: 'Attendance', href: '/login' },
-      { name: 'Tasks', href: '/login' },
-      { name: 'Employees', href: '/login' },
-      { name: 'Analytics', href: '/login' },
-      { name: 'Calendar', href: '/login' },
+      { nameKey: 'nav.dashboard', href: '/login' },
+      { nameKey: 'nav.attendance', href: '/login' },
+      { nameKey: 'nav.tasks', href: '/login' },
+      { nameKey: 'nav.employees', href: '/login' },
+      { nameKey: 'nav.analytics', href: '/login' },
+      { nameKey: 'nav.calendar', href: '/login' },
     ],
     account: [
       { name: 'Sign In', href: '/login' },
@@ -789,7 +805,7 @@ function Footer() {
   };
 
   return (
-    <footer className="relative z-10 border-t border-white/5" role="contentinfo">
+    <footer className="relative z-10 border-t" style={{ borderColor: 'var(--landing-card-border)' }} role="contentinfo">
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         {/* Main footer content */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
@@ -800,13 +816,16 @@ function Footer() {
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)' }}
               >
-                <Shield size={18} className="text-white" />
+                <Shield size={18} style={{ color: '#ffffff' }} />
               </div>
-              <span className="font-bold text-lg group-hover:text-blue-400 transition-colors" style={{ color: 'var(--landing-text-primary)' }}>
-                HR<span className="text-blue-400">Leave</span>
+              <span className="font-bold text-lg transition-colors" style={{ color: 'var(--landing-text-primary)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-primary)'}
+              >
+                HR<span style={{ color: 'var(--primary)' }}>Leave</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--landing-text-muted)', opacity: 0.5 }}>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
               Premium HR leave management platform for sophisticated teams.
             </p>
             {/* Social links */}
@@ -821,11 +840,15 @@ function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors group"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors group"
+                  style={{ backgroundColor: 'var(--landing-card-bg)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-hover)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)'}
                   aria-label={social.name}
                 >
                   <svg
-                    className="w-4 h-4 text-blue-400/50 group-hover:text-blue-400 transition-colors"
+                    className="w-4 h-4 transition-colors"
+                    style={{ color: 'var(--landing-text-secondary)' }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -846,32 +869,38 @@ function Footer() {
               </h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link.name}>
+                  <li key={link.nameKey || link.name}>
                     {link.href.startsWith('http') ? (
                       <a
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm transition-colors focus:outline-none hover:text-blue-400 focus:text-blue-400 focus:underline underline-offset-4"
-                        style={{ color: 'var(--landing-text-muted)', opacity: 0.6 }}
+                        className="text-sm transition-colors focus:outline-none focus:underline underline-offset-4"
+                        style={{ color: 'var(--landing-text-secondary)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
                       >
                         {link.name}
                       </a>
                     ) : link.href.startsWith('#') ? (
                       <a
                         href={link.href}
-                        className="text-sm transition-colors focus:outline-none hover:text-blue-400 focus:text-blue-400 focus:underline underline-offset-4"
-                        style={{ color: 'var(--landing-text-muted)', opacity: 0.6 }}
+                        className="text-sm transition-colors focus:outline-none focus:underline underline-offset-4"
+                        style={{ color: 'var(--landing-text-secondary)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
                       >
                         {link.name}
                       </a>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-sm transition-colors focus:outline-none hover:text-blue-400 focus:text-blue-400 focus:underline underline-offset-4"
-                        style={{ color: 'var(--landing-text-muted)', opacity: 0.6 }}
+                        className="text-sm transition-colors focus:outline-none focus:underline underline-offset-4"
+                        style={{ color: 'var(--landing-text-secondary)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
                       >
-                        {link.name}
+                        {link.nameKey ? t(link.nameKey) : link.name}
                       </Link>
                     )}
                   </li>
@@ -882,11 +911,11 @@ function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm" style={{ color: 'var(--landing-text-muted)', opacity: 0.4 }}>
+        <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--landing-card-border)' }}>
+          <p className="text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
             © {new Date().getFullYear()} HRLeave Monitor. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-xs" style={{ color: 'var(--landing-text-muted)', opacity: 0.4 }}>
+          <div className="flex items-center gap-6 text-xs" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
             <span>🔒 SSL Secured</span>
             <span>✓ GDPR Compliant</span>
             <span>✓ SOC 2 Certified</span>
@@ -900,7 +929,7 @@ function Footer() {
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export default function LandingClient() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-black">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: 'var(--landing-bg)' }}>
       {/* Background layers - lowest z-index */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <GradientOrbs />

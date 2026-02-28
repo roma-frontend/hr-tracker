@@ -6,7 +6,13 @@
     "faq": "FAQ",
     "getStarted": "Get Started",
     "login": "Login",
-    "heroTitle": "Modern HR Leave Management",
+    "signIn": "Sign In",
+    "getStartedFree": "Get Started Free",
+    "exclusiveHR": "Exclusive HR Excellence",
+    "trustedByElite": "Trusted by Elite Organizations",
+    "goToDashboard": "Go to Dashboard",
+    "viewAnalytics": "View Analytics",
+    "heroTitle": "Modern HR Management",
     "heroSubtitle": "Streamline your leave management process with our intuitive platform",
     "vacationTracking": "Vacation Tracking",
     "vacationDesc": "Seamlessly manage annual leave requests, approvals, and balances with an intuitive calendar-based interface and instant notifications.",
@@ -22,7 +28,6 @@
     "premium": "Premium",
     "trustedBy": "Trusted by leading companies"
   },
-  
   "common": {
     "welcome": "Welcome",
     "loading": "Loading...",
@@ -85,7 +90,6 @@
     "attachment": "Attachment",
     "attachments": "Attachments"
   },
-  
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
@@ -105,9 +109,22 @@
     "teamLeaves": "Team Leaves",
     "approvals": "Approvals",
     "calendar": "Calendar",
-    "tasks": "Tasks"
+    "tasks": "Tasks",
+    "leaveManagement": "Leave Management",
+    "myProfile": "My Profile",
+    "quickActions": "Quick Actions",
+    "newLeaveRequest": "New Leave Request",
+    "viewCalendar": "View Calendar",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "viewProfile": "View Profile",
+    "accountSettings": "Account Settings"
   },
-  
+  "landing": {
+    "scroll": "Scroll",
+    "leaveTypes": "Leave Types",
+    "hrLeave": "HRLeave"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",
@@ -128,9 +145,38 @@
     "dontHaveAccount": "Don't have an account?",
     "createAccount": "Create Account",
     "welcomeBack": "Welcome Back",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "emailAddress": "Email address",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "passwordMin8": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "sendResetLink": "Send reset link",
+    "backToLogin": "Back to login",
+    "checkYourEmail": "Check your email",
+    "resetLinkSent": "Password reset link has been sent",
+    "updatePassword": "Update Password",
+    "updating": "Updating...",
+    "passwordUpdated": "Password updated!",
+    "newPassword": "New Password",
+    "organizationName": "Organization Name",
+    "findYourOrganization": "Find your organization",
+    "noOrganizationFound": "No organization found",
+    "requestNewOrg": "Request new organization",
+    "createOrganization": "Create Organization",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "orgRequestPending": "Your organization request is pending",
+    "emailNotification": "Email Notification",
+    "continueWithEmail": "Continue with Email",
+    "orContinueWith": "Or continue with",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "signInToHROffice": "Sign in to HR Office Leave Monitor"
   },
-  
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome to HR Office",
@@ -152,9 +198,45 @@
     "requestLeave": "Request Leave",
     "viewReports": "View Reports",
     "leaveDistribution": "Leave Distribution",
-    "advancedAnalytics": "Advanced analytics and AI-powered insights for managing your team's leave schedule"
+    "advancedAnalytics": "Advanced analytics and AI-powered insights for managing your team's leave schedule",
+    "daysWorked": "Days Worked",
+    "totalHours": "Total Hours",
+    "punctuality": "Punctuality",
+    "lateDays": "Late Days",
+    "noPerformanceRating": "No performance rating yet",
+    "supervisorWillRate": "Your supervisor will rate your performance",
+    "leaveBalances": "Leave Balances",
+    "paidLeave": "Paid Leave",
+    "sickLeave": "Sick Leave",
+    "familyLeave": "Family Leave",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "myLeaveRequests": "My Leave Requests",
+    "noLeaveRequests": "No leave requests yet",
+    "convexNotDeployed": "Convex Not Deployed",
+    "monthlyLeaveTrend": "Monthly Leave Trend",
+    "noDataYet": "No data yet",
+    "recentLeaveRequests": "Recent Leave Requests",
+    "loading": "Loading...",
+    "employee": "Employee",
+    "type": "Type",
+    "dates": "Dates",
+    "days": "Days",
+    "status": "Status",
+    "newLeaveRequest": "New Leave Request",
+    "addEmployee": "Add Employee",
+    "viewCalendar": "View Calendar",
+    "daysTaken": "Days Taken",
+    "remaining": "Remaining",
+    "noRecentRequests": "No recent requests",
+    "viewFullAttendance": "View Full Attendance History →",
+    "viewAllRequests": "View all {{count}} requests",
+    "manageOrgs": "Manage Orgs",
+    "createOrg": "Create Org",
+    "newRequest": "New Request",
+    "viewAll": "View all"
   },
-  
   "leave": {
     "title": "Leave Management",
     "requestLeave": "Request Leave",
@@ -196,7 +278,6 @@
     "rejectedBy": "Rejected by",
     "rejectionReason": "Rejection Reason"
   },
-  
   "attendance": {
     "title": "Attendance",
     "myAttendance": "My Attendance",
@@ -229,7 +310,6 @@
     "viewHistory": "View History",
     "markAttendance": "Mark Attendance"
   },
-  
   "employees": {
     "title": "Employees",
     "addEmployee": "Add Employee",
@@ -267,7 +347,6 @@
     "permissions": "Permissions",
     "noEmployees": "No employees found"
   },
-  
   "reports": {
     "title": "Reports",
     "analytics": "Analytics",
@@ -291,7 +370,6 @@
     "noData": "No data available",
     "totalRecords": "Total Records"
   },
-  
   "settings": {
     "title": "Settings",
     "profile": "Profile",
@@ -321,7 +399,6 @@
     "lightMode": "Light Mode",
     "saveChanges": "Save Changes"
   },
-  
   "notifications": {
     "title": "Notifications",
     "markAsRead": "Mark as Read",
@@ -338,7 +415,6 @@
     "birthdayReminder": "Today is {{name}}'s birthday",
     "upcomingLeave": "{{name}} will be on leave {{date}}"
   },
-  
   "errors": {
     "required": "This field is required",
     "invalidEmail": "Invalid email address",
@@ -351,7 +427,6 @@
     "notFound": "Not found",
     "serverError": "Server error"
   },
-  
   "success": {
     "saved": "Saved successfully",
     "updated": "Updated successfully",

@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
@@ -13,6 +14,7 @@ interface PersonalAnalyticsProps {
 const COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'];
 
 export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
+  const { t } = useTranslation();
   const analytics = useQuery(api.analytics.getUserAnalytics, { userId });
 
   if (!analytics) {
@@ -44,7 +46,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-90">Days Taken</p>
+              <p className="text-sm opacity-90">{t('dashboard.daysTaken')}</p>
               <p className="text-3xl font-bold mt-1">{totalDaysTaken}</p>
             </div>
             <Calendar className="w-10 h-10 opacity-80" />
@@ -54,7 +56,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
         <div className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-90">Pending</p>
+              <p className="text-sm opacity-90">{t('dashboard.pending')}</p>
               <p className="text-3xl font-bold mt-1">{pendingDays}</p>
             </div>
             <Clock className="w-10 h-10 opacity-80" />
@@ -64,7 +66,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
         <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-90">Remaining</p>
+              <p className="text-sm opacity-90">{t('dashboard.remaining')}</p>
               <p className="text-3xl font-bold mt-1">{balances.paid}</p>
             </div>
             <TrendingUp className="w-10 h-10 opacity-80" />
@@ -118,7 +120,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
           </h3>
           <div className="space-y-3">
             {recentLeaves.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 text-sm">No recent requests</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dashboard.noRecentRequests')}</p>
             ) : (
               recentLeaves.map((leave) => (
                 <div
@@ -159,7 +161,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Paid Leave</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t('dashboard.paidLeave')}</span>
               <span className="text-lg font-bold text-gray-900 dark:text-white">{balances.paid}</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -172,7 +174,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Sick Leave</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t('dashboard.sickLeave')}</span>
               <span className="text-lg font-bold text-gray-900 dark:text-white">{balances.sick}</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -185,7 +187,7 @@ export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Family Leave</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t('dashboard.familyLeave')}</span>
               <span className="text-lg font-bold text-gray-900 dark:text-white">{balances.family}</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">

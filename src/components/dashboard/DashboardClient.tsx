@@ -130,7 +130,7 @@ export function DashboardClient() {
       <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
         <TrendingUp className="w-8 h-8 text-amber-500" />
       </div>
-      <h2 className="text-xl font-semibold text-[var(--text-primary)]">Convex Not Deployed</h2>
+      <h2 className="text-xl font-semibold text-[var(--text-primary)]">{t('dashboard.convexNotDeployed')}</h2>
       <p className="text-[var(--text-muted)] text-sm max-w-sm">
         Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#2563eb]">npx convex dev</code> in the terminal to connect to the database.
       </p>
@@ -171,18 +171,18 @@ export function DashboardClient() {
           {user?.email?.toLowerCase() === "romangulanyan@gmail.com" && (
             <>
               <Button asChild size="sm" variant="outline" className="border-blue-200 hover:bg-blue-50">
-                <Link href="/superadmin/organizations"><Building2 className="w-4 h-4" />Manage Orgs</Link>
+                <Link href="/superadmin/organizations"><Building2 className="w-4 h-4" />{t('dashboard.manageOrgs')}</Link>
               </Button>
               <Button asChild size="sm" variant="default" className="bg-gradient-to-r from-[#1e40af] to-[#2563eb] hover:opacity-90">
-                <Link href="/superadmin/create-org"><Building2 className="w-4 h-4" />Create Org</Link>
+                <Link href="/superadmin/create-org"><Building2 className="w-4 h-4" />{t('dashboard.createOrg')}</Link>
               </Button>
             </>
           )}
           <Button asChild size="sm" variant="outline">
-            <Link href="/calendar"><CalendarDays className="w-4 h-4" />Calendar</Link>
+            <Link href="/calendar"><CalendarDays className="w-4 h-4" />{t('nav.calendar')}</Link>
           </Button>
           <Button asChild size="sm">
-            <Link href="/leaves"><Plus className="w-4 h-4" />New Request</Link>
+            <Link href="/leaves"><Plus className="w-4 h-4" />{t('dashboard.newRequest')}</Link>
           </Button>
         </div>
       </motion.div>
@@ -201,7 +201,7 @@ export function DashboardClient() {
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Monthly Leave Trend</CardTitle>
+                <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.monthlyLeaveTrend')}</CardTitle>
                 <TrendingUp className="w-4 h-4 text-[var(--text-muted)]" />
               </div>
             </CardHeader>
@@ -270,7 +270,7 @@ export function DashboardClient() {
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center h-40 text-[var(--text-muted)] text-sm">No data yet</div>
+                <div className="flex items-center justify-center h-40 text-[var(--text-muted)] text-sm">{t('dashboard.noDataYet')}</div>
               )}
             </CardContent>
           </Card>
@@ -282,27 +282,27 @@ export function DashboardClient() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Recent Leave Requests</CardTitle>
+              <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.recentLeaveRequests')}</CardTitle>
               <Button asChild variant="ghost" size="sm" className="text-[#2563eb] hover:text-[#2563eb]">
-                <Link href="/leaves">View all <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link>
+                <Link href="/leaves">{t('dashboard.viewAll')} <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link>
               </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="p-8 text-center text-[var(--text-muted)] text-sm">Loading...</div>
+              <div className="p-8 text-center text-[var(--text-muted)] text-sm">{t('dashboard.loading')}</div>
             ) : recentLeaves.length === 0 ? (
-              <div className="p-8 text-center text-[var(--text-muted)] text-sm">No leave requests yet.</div>
+              <div className="p-8 text-center text-[var(--text-muted)] text-sm">{t('dashboard.noLeaveRequests')}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-[var(--border)]">
-                      <th className="text-left px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Employee</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Type</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden md:table-cell">Dates</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden sm:table-cell">Days</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Status</th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.employee')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.type')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden md:table-cell">{t('dashboard.dates')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden sm:table-cell">{t('dashboard.days')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.status')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">
@@ -345,13 +345,13 @@ export function DashboardClient() {
         <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">{t('dashboard.quickActions')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#2563eb]">
-            <Link href="/leaves"><Plus className="w-5 h-5 text-[#2563eb]" /><span className="text-xs">New Leave Request</span></Link>
+            <Link href="/leaves"><Plus className="w-5 h-5 text-[#2563eb]" /><span className="text-xs">{t('dashboard.newLeaveRequest')}</span></Link>
           </Button>
           <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#10b981]">
-            <Link href="/employees"><Users className="w-5 h-5 text-[#10b981]" /><span className="text-xs">Add Employee</span></Link>
+            <Link href="/employees"><Users className="w-5 h-5 text-[#10b981]" /><span className="text-xs">{t('dashboard.addEmployee')}</span></Link>
           </Button>
           <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#0ea5e9]">
-            <Link href="/calendar"><CalendarDays className="w-5 h-5 text-[#0ea5e9]" /><span className="text-xs">View Calendar</span></Link>
+            <Link href="/calendar"><CalendarDays className="w-5 h-5 text-[#0ea5e9]" /><span className="text-xs">{t('dashboard.viewCalendar')}</span></Link>
           </Button>
         </div>
       </motion.div>

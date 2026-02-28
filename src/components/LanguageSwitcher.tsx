@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 const languages = {
   en: { name: 'English', flag: '🇬🇧' },
   hy: { name: 'Հայերեն', flag: '🇦🇲' },
+  ru: { name: 'Русский', flag: '🇷🇺' },
 };
 
 export function LanguageSwitcher() {

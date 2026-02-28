@@ -40,8 +40,8 @@ function MetricItem({ icon: Icon, value, label, color, delay }: typeof metrics[0
         <Icon size={24} style={{ color }} />
       </div>
       <div>
-        <div className="text-2xl md:text-3xl font-bold text-white mb-1">{value}</div>
-        <div className="text-sm text-blue-300/60">{label}</div>
+        <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: 'var(--landing-text-primary)' }}>{value}</div>
+        <div className="text-sm" style={{ color: 'var(--landing-text-muted)', opacity: 0.7 }}>{label}</div>
       </div>
     </div>
   );
@@ -49,7 +49,7 @@ function MetricItem({ icon: Icon, value, label, color, delay }: typeof metrics[0
 
 export default function SocialProof() {
   return (
-    <section className="relative z-10 py-12 border-y border-blue-500/10">
+    <section className="relative z-10 py-12 border-y" style={{ borderColor: 'var(--landing-card-border)' }}>
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {metrics.map((m, i) => (

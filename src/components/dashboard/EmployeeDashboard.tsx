@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Clock, CheckCircle, XCircle, Plus, Calendar as CalendarIcon, TrendingUp, Star } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery } from "convex/react";
@@ -36,6 +37,7 @@ function StatusBadge({ status }: { status: LeaveStatus }) {
 }
 
 export function EmployeeDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const userData = useQuery(
@@ -95,19 +97,19 @@ export function EmployeeDashboard() {
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Days Worked</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.daysWorked')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-green-500">{monthlyStats.totalWorkedHours}h</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Total Hours</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.totalHours')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Punctuality</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.punctuality')}</p>
               </CardContent>
             </Card>
             <Card>
@@ -115,7 +117,7 @@ export function EmployeeDashboard() {
                 <p className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? "text-red-500" : "text-green-500"}`}>
                   {monthlyStats.lateDays}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Late Days</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.lateDays')}</p>
               </CardContent>
             </Card>
           </div>
@@ -183,7 +185,7 @@ export function EmployeeDashboard() {
               )}
 
               <Button asChild variant="ghost" size="sm" className="w-full mt-2">
-                <Link href="/attendance">View Full Attendance History →</Link>
+                <Link href="/attendance">{t('dashboard.viewFullAttendance')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -196,8 +198,8 @@ export function EmployeeDashboard() {
           <Card className="border-dashed">
             <CardContent className="p-6 text-center">
               <Star className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-              <p className="text-sm text-[var(--text-muted)]">No performance rating yet</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">Your supervisor will rate your performance</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noPerformanceRating')}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.supervisorWillRate')}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -207,21 +209,21 @@ export function EmployeeDashboard() {
       <motion.div variants={itemVariants}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Leave Balances</CardTitle>
+            <CardTitle className="text-base">{t('dashboard.leaveBalances')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-[#2563eb]">{userData?.paidLeaveBalance ?? 0}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Paid Leave</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.paidLeave')}</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-[#ef4444]">{userData?.sickLeaveBalance ?? 0}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Sick Leave</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.sickLeave')}</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-[#10b981]">{userData?.familyLeaveBalance ?? 0}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Family Leave</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.familyLeave')}</p>
               </div>
             </div>
           </CardContent>
@@ -239,7 +241,7 @@ export function EmployeeDashboard() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[var(--text-primary)]">{pendingLeaves.length}</p>
-                  <p className="text-sm text-[var(--text-muted)]">Pending</p>
+                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.pending')}</p>
                 </div>
               </div>
             </CardContent>
@@ -255,7 +257,7 @@ export function EmployeeDashboard() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[var(--text-primary)]">{approvedLeaves.length}</p>
-                  <p className="text-sm text-[var(--text-muted)]">Approved</p>
+                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.approved')}</p>
                 </div>
               </div>
             </CardContent>
@@ -271,7 +273,7 @@ export function EmployeeDashboard() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[var(--text-primary)]">{rejectedLeaves.length}</p>
-                  <p className="text-sm text-[var(--text-muted)]">Rejected</p>
+                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.rejected')}</p>
                 </div>
               </div>
             </CardContent>
@@ -284,7 +286,7 @@ export function EmployeeDashboard() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">My Leave Requests</CardTitle>
+              <CardTitle className="text-base">{t('dashboard.myLeaveRequests')}</CardTitle>
               <Button asChild size="sm">
                 <Link href="/leaves">
                   <Plus className="w-4 h-4" />
@@ -297,7 +299,7 @@ export function EmployeeDashboard() {
             {myLeaves.length === 0 ? (
               <div className="text-center py-8">
                 <CalendarIcon className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3 opacity-40" />
-                <p className="text-sm text-[var(--text-muted)]">No leave requests yet</p>
+                <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noLeaveRequests')}</p>
                 <Button asChild size="sm" className="mt-4">
                   <Link href="/leaves">
                     <Plus className="w-4 h-4" />
@@ -325,7 +327,7 @@ export function EmployeeDashboard() {
                 ))}
                 {myLeaves.length > 5 && (
                   <Button asChild variant="ghost" size="sm" className="w-full">
-                    <Link href="/leaves">View all {myLeaves.length} requests</Link>
+                    <Link href="/leaves">{t('dashboard.viewAllRequests', { count: myLeaves.length })}</Link>
                   </Button>
                 )}
               </div>

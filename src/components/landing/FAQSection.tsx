@@ -42,7 +42,8 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
   return (
     <div
       ref={ref}
-      className="border-b border-white/5 last:border-0"
+      className="border-b last:border-0"
+      style={{ borderColor: 'var(--landing-card-border)' }}
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(20px)',
@@ -55,15 +56,21 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
         aria-expanded={isOpen}
         aria-controls={`faq-answer-${faq.id}`}
       >
-        <span className="text-white font-semibold text-lg pr-4 group-hover:text-blue-400 transition-colors">
+        <span className="font-semibold text-lg pr-4 transition-colors" style={{ color: 'var(--landing-text-primary)' }}
+          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-primary)'}>
           {faq.question}
         </span>
         {/* CSS rotate instead of motion.div */}
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors flex items-center justify-center mt-1"
-          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1)' }}>
+        <div className="flex-shrink-0 w-8 h-8 rounded-lg transition-colors flex items-center justify-center mt-1"
+          style={{ 
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+            transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), background-color 0.3s',
+            backgroundColor: 'var(--landing-card-bg)'
+          }}>
           {isOpen
-            ? <Minus size={16} className="text-blue-400" />
-            : <Plus size={16} className="text-blue-400" />}
+            ? <Minus size={16} style={{ color: 'var(--primary)' }} />
+            : <Plus size={16} style={{ color: 'var(--primary)' }} />}
         </div>
       </button>
 
@@ -77,7 +84,7 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
           transition: 'max-height 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease',
         }}
       >
-        <p className="text-blue-200/70 leading-relaxed pb-5 pr-12">{faq.answer}</p>
+        <p className="leading-relaxed pb-5 pr-12" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>{faq.answer}</p>
       </div>
     </div>
   );
@@ -97,17 +104,17 @@ export default function FAQSection() {
           }}
         >
           <span className="section-eyebrow">FAQ</span>
-          <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
+          <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
             Got questions?{' '}
             <span className="heading-gradient">We&apos;ve got answers</span>
           </h2>
-          <p className="mt-4 text-blue-200/60 max-w-2xl mx-auto text-lg">
+          <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
             Everything you need to know about HRLeave and how it works.
           </p>
         </div>
 
         {/* FAQ list */}
-        <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-8">
+        <div className="relative rounded-2xl border backdrop-blur-xl p-6 md:p-8" style={{ borderColor: 'var(--landing-card-border)', backgroundColor: 'var(--landing-card-bg)' }}>
           {faqs.map((faq, i) => (
             <FAQItem key={faq.id} faq={faq} delay={i * 0.08} />
           ))}
@@ -115,10 +122,23 @@ export default function FAQSection() {
 
         {/* Still have questions */}
         <div className="text-center mt-10">
-          <p className="text-blue-200/60 mb-4">Still have questions?</p>
+          <p className="mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>Still have questions?</p>
           <a
             href="mailto:support@hrleave.com"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 text-blue-100 hover:text-blue-300 transition-all font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border transition-all font-medium"
+            style={{ 
+              backgroundColor: 'var(--landing-card-bg)', 
+              borderColor: 'var(--landing-card-border)',
+              color: 'var(--landing-text-primary)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--card-hover)';
+              e.currentTarget.style.color = 'var(--primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)';
+              e.currentTarget.style.color = 'var(--landing-text-primary)';
+            }}
           >
             Contact Support
           </a>

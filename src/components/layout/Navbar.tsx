@@ -69,18 +69,19 @@ function playNotificationSound() {
   }
 }
 
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/leaves": "Leave Management",
-  "/employees": "Employees",
-  "/calendar": "Calendar",
-  "/reports": "Reports",
-  "/tasks": "Tasks",
-  "/attendance": "Attendance",
-  "/analytics": "Analytics",
-  "/approvals": "Approvals",
-  "/profile": "Profile",
-  "/settings": "Settings",
+// Page titles mapped to translation keys
+const PAGE_TITLE_KEYS: Record<string, string> = {
+  "/dashboard": "nav.dashboard",
+  "/leaves": "nav.leaveManagement",
+  "/employees": "nav.employees",
+  "/calendar": "nav.calendar",
+  "/reports": "nav.reports",
+  "/tasks": "nav.tasks",
+  "/attendance": "nav.attendance",
+  "/analytics": "nav.analytics",
+  "/approvals": "nav.approvals",
+  "/profile": "nav.profile",
+  "/settings": "nav.settings",
 };
 
 function getInitials(name: string) {
@@ -94,6 +95,7 @@ interface ToastNotif {
 }
 
 export function Navbar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -172,9 +174,10 @@ export function Navbar() {
     prevUnreadCount.current = unreadCount;
   }, [notifications, unreadCount]);
 
-  const pageTitle = Object.entries(PAGE_TITLES).find(([key]) =>
+  const pageTitleKey = Object.entries(PAGE_TITLE_KEYS).find(([key]) =>
     pathname.startsWith(key)
-  )?.[1] ?? "HR Office";
+  )?.[1];
+  const pageTitle = pageTitleKey ? t(pageTitleKey) : "HR Office";
 
   const handleLogout = async () => {
     await logoutAction();
@@ -412,14 +415,14 @@ export function Navbar() {
               onClick={() => router.push("/profile")}
             >
               <User className="w-4 h-4 text-[var(--text-muted)]" />
-              Profile
+              {t('nav.profile')}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
               onClick={() => router.push("/settings")}
             >
               <Settings className="w-4 h-4 text-[var(--text-muted)]" />
-              Settings
+              {t('nav.settings')}
             </DropdownMenuItem>
 
             {/* Status selector - collapsible */}

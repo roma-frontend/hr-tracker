@@ -65,7 +65,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  colorScheme: "dark light",
+  colorScheme: "light dark",
 };
 
 export const metadata: Metadata = {
@@ -260,7 +260,7 @@ export default function RootLayout({
             <ThemeProvider
               attribute="class"
               defaultTheme="light"
-              enableSystem={true}
+              enableSystem={false}
               disableTransitionOnChange
             >
               {children}
@@ -269,7 +269,6 @@ export default function RootLayout({
                 closeButton
                 expand={false}
                 duration={4000}
-                theme="dark"
                 toastOptions={{
                   style: {
                     background: 'var(--card)',

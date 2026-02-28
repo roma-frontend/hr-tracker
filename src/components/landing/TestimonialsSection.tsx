@@ -55,17 +55,18 @@ function TestimonialCard({ testimonial, delay }: { testimonial: Testimonial; del
         style={{ background: testimonial.gradient }} aria-hidden="true" />
 
       {/* Card — lifts on hover */}
-      <div className="relative h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 flex flex-col gap-4 group-hover:-translate-y-2 transition-transform duration-300">
+      <div className="relative h-full rounded-2xl border backdrop-blur-xl p-6 flex flex-col gap-4 group-hover:-translate-y-2 transition-transform duration-300"
+        style={{ borderColor: 'var(--landing-card-border)', backgroundColor: 'var(--landing-card-bg)' }}>
         <div className="flex items-start justify-between">
-          <Quote size={32} className="text-blue-400/30" />
+          <Quote size={32} style={{ color: 'var(--primary)', opacity: 0.6 }} />
           <div className="flex gap-1">
             {Array.from({ length: testimonial.rating }).map((_, i) => (
               <Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />
             ))}
           </div>
         </div>
-        <p className="text-blue-100/80 leading-relaxed text-sm flex-1">"{testimonial.text}"</p>
-        <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+        <p className="leading-relaxed text-sm flex-1" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>"{testimonial.text}"</p>
+        <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: 'var(--landing-card-border)' }}>
           <Avatar className="w-10 h-10">
             {testimonial.avatar && <AvatarImage src={testimonial.avatar} alt={testimonial.name} />}
             <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold">
@@ -73,8 +74,8 @@ function TestimonialCard({ testimonial, delay }: { testimonial: Testimonial; del
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-white font-semibold text-sm">{testimonial.name}</p>
-            <p className="text-blue-200/50 text-xs">{testimonial.role} at {testimonial.company}</p>
+            <p className="font-semibold text-sm" style={{ color: 'var(--landing-text-primary)' }}>{testimonial.name}</p>
+            <p className="text-xs" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>{testimonial.role} at {testimonial.company}</p>
           </div>
         </div>
       </div>
@@ -95,10 +96,10 @@ export default function TestimonialsSection() {
         }}
       >
         <span className="section-eyebrow">Testimonials</span>
-        <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
+        <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
           Loved by <span className="heading-gradient">elite HR teams</span>
         </h2>
-        <p className="mt-4 text-blue-200/60 max-w-2xl mx-auto text-lg">
+        <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
           Don't just take our word for it — hear what our distinguished clients have to say.
         </p>
       </div>
