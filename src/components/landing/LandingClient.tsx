@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useTranslation } from 'react-i18next';
 // framer-motion removed — all animations now use CSS + IntersectionObserver
 import {
   Calendar,
@@ -91,42 +92,39 @@ const STATS = [
 ];
 
 // ─── Features Data ────────────────────────────────────────────────────────────
-const FEATURES = [
+// Features will be rendered with translations in the component
+const getFeaturesData = (t: any) => [
   {
     icon: <Calendar size={26} />,
-    title: 'Vacation Tracking',
-    description:
-      'Seamlessly manage annual leave requests, approvals, and balances with an intuitive calendar-based interface and instant notifications.',
+    title: t('landing.vacationTracking'),
+    description: t('landing.vacationDesc'),
     gradient: 'linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(96,165,250,0.08) 100%)',
     accentColor: '#2563eb',
-    badge: 'Most Used',
+    badge: t('landing.mostUsed'),
   },
   {
     icon: <Heart size={26} />,
-    title: 'Sick Leave',
-    description:
-      'Track employee sick days with automated policy enforcement, wellness insights, and HR-friendly reporting to keep your team healthy.',
+    title: t('landing.sickLeave'),
+    description: t('landing.sickLeaveDesc'),
     gradient: 'linear-gradient(135deg, rgba(56,189,248,0.12) 0%, rgba(14,165,233,0.06) 100%)',
     accentColor: '#60a5fa',
-    badge: 'Policy-Aware',
+    badge: t('landing.policyAware'),
   },
   {
     icon: <Users size={26} />,
-    title: 'Family Leave',
-    description:
-      'Full support for parental, maternity, and paternity leave with compliance tracking for labor regulations and seamless HR workflows.',
+    title: t('landing.familyLeave'),
+    description: t('landing.familyLeaveDesc'),
     gradient: 'linear-gradient(135deg, rgba(14,165,233,0.12) 0%, rgba(14,165,233,0.06) 100%)',
     accentColor: '#94a3b8',
-    badge: 'Compliance-Ready',
+    badge: t('landing.complianceReady'),
   },
   {
     icon: <Stethoscope size={26} />,
-    title: "Doctor Visits",
-    description:
-      "Log medical appointments and short absences without dipping into sick leave quotas. Keeps records clean and employees satisfied.",
+    title: t('landing.doctorVisits'),
+    description: t('landing.doctorVisitsDesc'),
     gradient: 'linear-gradient(135deg, rgba(96,165,250,0.12) 0%, rgba(37,99,235,0.06) 100%)',
     accentColor: '#93c5fd',
-    badge: 'Premium',
+    badge: t('landing.premium'),
   },
 ];
 
@@ -171,6 +169,7 @@ function GradientOrbs() {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 function Navbar() {
+  const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -214,10 +213,10 @@ function Navbar() {
         {/* Desktop Nav links */}
         <div className="relative hidden md:flex items-center gap-8">
           {[
-            { name: 'Features', href: '#features' },
-            { name: 'Pricing', href: '#pricing' },
-            { name: 'Testimonials', href: '#testimonials' },
-            { name: 'FAQ', href: '#faq' },
+            { name: t('landing.features'), href: '#features' },
+            { name: t('landing.pricing'), href: '#pricing' },
+            { name: t('landing.testimonials'), href: '#testimonials' },
+            { name: t('landing.faq'), href: '#faq' },
           ].map((item) => (
             <a
               key={item.name}
@@ -554,6 +553,8 @@ function StatsSection() {
 
 // ─── Features Section ─────────────────────────────────────────────────────────
 function FeaturesSection() {
+  const { t } = useTranslation();
+  const FEATURES = getFeaturesData(t);
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
   React.useEffect(() => {

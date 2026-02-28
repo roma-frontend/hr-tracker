@@ -122,7 +122,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           <DialogDescription className="text-[var(--text-muted)]">Submit a new leave request for an employee.</DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[calc(90vh-180px)] overflow-y-auto overflow-x-visible pr-2">
+        <div className="max-h-[calc(90vh-180px)] overflow-y-auto pr-2">
           <form id="leave-request-form" onSubmit={handleSubmit} className="space-y-5">
           {/* Employee */}
           <div className="space-y-1.5">
@@ -185,7 +185,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Start Date *</Label>
-              <Popover>
+              <Popover modal={true}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
@@ -197,13 +197,16 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                     {startDate ? format(new Date(startDate), "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-[200]" align="start">
+                <PopoverContent className="w-auto p-0" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
                   <Calendar
                     mode="single"
                     selected={startDate ? new Date(startDate) : undefined}
-                    onSelect={(date) => setStartDate(date ? format(date, "yyyy-MM-dd") : "")}
+                    onSelect={(date) => {
+                      if (date) {
+                        setStartDate(format(date, "yyyy-MM-dd"));
+                      }
+                    }}
                     disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
@@ -211,7 +214,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
             </div>
             <div className="space-y-1.5">
               <Label>End Date *</Label>
-              <Popover>
+              <Popover modal={true}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
@@ -223,16 +226,19 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                     {endDate ? format(new Date(endDate), "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-[200]" align="start">
+                <PopoverContent className="w-auto p-0" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
                   <Calendar
                     mode="single"
                     selected={endDate ? new Date(endDate) : undefined}
-                    onSelect={(date) => setEndDate(date ? format(date, "yyyy-MM-dd") : "")}
+                    onSelect={(date) => {
+                      if (date) {
+                        setEndDate(format(date, "yyyy-MM-dd"));
+                      }
+                    }}
                     disabled={(date) => {
                       const minDate = startDate ? new Date(startDate) : new Date(new Date().setHours(0,0,0,0));
                       return date < minDate;
                     }}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
