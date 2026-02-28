@@ -15,7 +15,7 @@
 
 body {
   /* background-attachment: fixed removed — forces repaint on every scroll frame (forced reflow) */
-  background: linear-gradient(135deg, #0f172a 0%, #0c1e3a 50%, #0f172a 100%);
+  background: var(--landing-bg);
 }
 
 /* Skip to content link - hidden by default, visible on focus */
@@ -139,6 +139,22 @@ html.dark {
   --accent-gradient:       linear-gradient(135deg, #2563eb, #3b82f6);
   --text-on-accent:        #ffffff;
   --text-on-accent-secondary: rgba(255, 255, 255, 0.8);
+
+  /* Landing page specific colors - Light Theme */
+  --landing-bg:            linear-gradient(135deg, #f0f6ff 0%, #e8f0fe 50%, #f0f6ff 100%);
+  --landing-text-primary:  #0c1a2e;
+  --landing-text-secondary: #1e3a6e;
+  --landing-text-muted:    #4a6fa5;
+  --landing-navbar-bg:     rgba(255,255,255,0.75);
+  --landing-navbar-text:   #1e3a6e;
+  --landing-navbar-text-hover: #2563eb;
+  --landing-card-bg:       rgba(255,255,255,0.5);
+  --landing-card-border:   rgba(37,99,235,0.15);
+  --landing-gradient-from: #2563eb;
+  --landing-gradient-to:   #60a5fa;
+  --landing-orb-1:         rgba(37,99,235,0.15);
+  --landing-orb-2:         rgba(96,165,250,0.12);
+  --landing-orb-3:         rgba(56,189,248,0.1);
 }
 
 /* ── Dark Theme ────────────────────────────────────────────────── */
@@ -229,6 +245,22 @@ html.dark {
   --accent-gradient:       linear-gradient(135deg, #1e40af, #2563eb, #3b82f6);
   --text-on-accent:        #ffffff;
   --text-on-accent-secondary: rgba(255, 255, 255, 0.9);
+
+  /* Landing page specific colors - Dark Theme */
+  --landing-bg:            linear-gradient(135deg, #0f172a 0%, #0c1e3a 50%, #0f172a 100%);
+  --landing-text-primary:  #ffffff;
+  --landing-text-secondary: #bdd4fa;
+  --landing-text-muted:    #7ab3f5;
+  --landing-navbar-bg:     rgba(15,23,42,0.75);
+  --landing-navbar-text:   #bdd4fa;
+  --landing-navbar-text-hover: #60a5fa;
+  --landing-card-bg:       rgba(13,30,56,0.4);
+  --landing-card-border:   rgba(59,130,246,0.2);
+  --landing-gradient-from: #2563eb;
+  --landing-gradient-to:   #93c5fd;
+  --landing-orb-1:         rgba(37,99,235,0.25);
+  --landing-orb-2:         rgba(96,165,250,0.2);
+  --landing-orb-3:         rgba(56,189,248,0.15);
 }
 
 /* ── Base Styles ───────────────────────────────────────────────── */

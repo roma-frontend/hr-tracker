@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from 'next-themes';
 // framer-motion removed — all animations now use CSS + IntersectionObserver
 import {
   Calendar,
@@ -21,6 +22,8 @@ import {
   LogOut,
   User as UserIcon,
   Settings as SettingsIcon,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 import StatsCard from './StatsCard';
@@ -139,7 +142,7 @@ function GradientOrbs() {
       <div
         className="fixed top-[-10%] left-[-5%] w-[700px] h-[700px] rounded-full pointer-events-none orb-pulse-1"
         style={{
-          background: 'radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--landing-orb-1) 0%, transparent 70%)',
           filter: 'blur(80px)',
           zIndex: 0,
           willChange: 'transform',
@@ -148,7 +151,7 @@ function GradientOrbs() {
       <div
         className="fixed top-[30%] right-[-10%] w-[600px] h-[600px] rounded-full pointer-events-none orb-pulse-2"
         style={{
-          background: 'radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--landing-orb-2) 0%, transparent 70%)',
           filter: 'blur(80px)',
           zIndex: 0,
           willChange: 'transform',
@@ -157,7 +160,7 @@ function GradientOrbs() {
       <div
         className="fixed bottom-[10%] left-[20%] w-[500px] h-[500px] rounded-full pointer-events-none orb-pulse-3"
         style={{
-          background: 'radial-gradient(circle, rgba(96,165,250,0.08) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--landing-orb-3) 0%, transparent 70%)',
           filter: 'blur(80px)',
           zIndex: 0,
           willChange: 'transform',
@@ -172,7 +175,13 @@ function Navbar() {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await logoutAction();
@@ -184,6 +193,10 @@ function Navbar() {
     return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
     <>
       {/* nav-animate class uses CSS animation — zero JS cost vs framer-motion */}
@@ -192,8 +205,14 @@ function Navbar() {
         role="navigation"
         aria-label="Main navigation"
       >
-        {/* Glassmorphism nav background */}
-        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl border-b border-blue-500/20" />
+        {/* Glassmorphism nav background - uses CSS variable */}
+        <div 
+          className="absolute inset-0 backdrop-blur-xl border-b"
+          style={{ 
+            background: 'var(--landing-navbar-bg)',
+            borderColor: 'var(--landing-card-border)'
+          }} 
+        />
 
         {/* Logo */}
         <Link href="/" className="relative flex items-center gap-3 group">
@@ -205,7 +224,10 @@ function Navbar() {
           >
             <Shield size={18} className="text-white" />
           </div>
-          <span className="text-white font-bold text-lg tracking-tight group-hover:text-blue-400 transition-colors">
+          <span 
+            className="font-bold text-lg tracking-tight transition-colors"
+            style={{ color: 'var(--landing-text-primary)' }}
+          >
             HR<span className="text-blue-400">Leave</span>
           </span>
         </Link>
@@ -221,7 +243,12 @@ function Navbar() {
             <a
               key={item.name}
               href={item.href}
-              className="text-sm text-blue-200/60 hover:text-blue-400 transition-colors duration-200 font-medium focus:outline-none focus:text-blue-400 focus:underline underline-offset-4"
+              className="text-sm transition-colors duration-200 font-medium focus:outline-none focus:underline underline-offset-4"
+              style={{ 
+                color: 'var(--landing-navbar-text)',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--landing-navbar-text-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-navbar-text)'}
               aria-label={`Navigate to ${item.name}`}
             >
               {item.name}
@@ -231,6 +258,25 @@ function Navbar() {
 
         {/* Auth buttons / User menu */}
         <div className="relative flex items-center gap-3">
+          {/* Theme Toggle Button */}
+          {mounted && (
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+              style={{
+                background: 'var(--landing-card-bg)',
+                border: '1px solid var(--landing-card-border)',
+              }}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? (
+                <Sun size={18} style={{ color: 'var(--landing-text-muted)' }} />
+              ) : (
+                <Moon size={18} style={{ color: 'var(--landing-text-muted)' }} />
+              )}
+            </button>
+          )}
+          
           {user ? (
             // Logged in - show user menu
             <DropdownMenu>
@@ -357,13 +403,17 @@ function HeroSection() {
 
       {/* Badge — CSS shimmer, no JS */}
       <div
-        className="hero-fade-1 relative inline-flex items-center gap-3 px-6 py-3 rounded-full border border-blue-500/40 bg-gradient-to-r from-blue-500/10 via-blue-300/5 to-blue-500/10 backdrop-blur-sm mb-8 overflow-hidden"
+        className="hero-fade-1 relative inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-sm mb-8 overflow-hidden"
+        style={{
+          border: '1px solid var(--landing-card-border)',
+          background: 'var(--landing-card-bg)',
+        }}
         role="status"
         aria-label="Premium HR platform"
       >
         <div className="badge-shimmer absolute inset-0" aria-hidden="true" />
-        <div className="w-2 h-2 rounded-full bg-[#2563eb] pulse-dot" aria-hidden="true" />
-        <span className="relative text-xs font-bold text-blue-300 tracking-[0.2em] uppercase">
+        <div className="w-2 h-2 rounded-full bg-blue-500 pulse-dot" aria-hidden="true" />
+        <span className="relative text-xs font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--landing-text-muted)' }}>
           Exclusive HR Excellence
         </span>
         <Sparkles size={16} className="text-blue-400 spin-slow" aria-hidden="true" />

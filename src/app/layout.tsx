@@ -259,8 +259,8 @@ export default function RootLayout({
           <ConvexClientProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="dark"
-              enableSystem={false}
+              defaultTheme="light"
+              enableSystem={true}
               disableTransitionOnChange
             >
               {children}
