@@ -150,7 +150,9 @@
     "checkInNow": "Check In Now",
     "checkOutNow": "Check Out Now",
     "requestLeave": "Request Leave",
-    "viewReports": "View Reports"
+    "viewReports": "View Reports",
+    "leaveDistribution": "Leave Distribution",
+    "advancedAnalytics": "Advanced analytics and AI-powered insights for managing your team's leave schedule"
   },
   
   "leave": {

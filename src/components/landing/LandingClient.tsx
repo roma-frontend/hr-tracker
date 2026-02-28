@@ -454,13 +454,13 @@ function HeroSection() {
           <div className="w-2 h-2 rounded-full bg-blue-500 pulse-dot" />
           <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-blue-500" />
         </div>
-        <p className="text-lg md:text-xl text-blue-200/80 leading-relaxed font-light text-center">
+        <p className="text-lg md:text-xl leading-relaxed font-light text-center" style={{ color: 'var(--landing-text-secondary)' }}>
           Sophisticated leave management that empowers{' '}
-          <span className="text-blue-400 font-semibold">elite HR teams</span>{' '}
+          <span className="font-semibold" style={{ color: 'var(--primary)' }}>elite HR teams</span>{' '}
           with{' '}
-          <span className="text-blue-300 font-medium">real-time precision</span>,{' '}
-          <span className="text-slate-400 font-medium">intelligent insights</span>, and{' '}
-          <span className="text-blue-500 font-medium">seamless automation</span> — all in one
+          <span className="font-medium text-blue-400">real-time precision</span>,{' '}
+          <span className="font-medium" style={{ color: 'var(--landing-text-muted)' }}>intelligent insights</span>, and{' '}
+          <span className="font-medium text-blue-500">seamless automation</span> — all in one
           exclusive platform.
         </p>
         <div className="flex items-center justify-center gap-2 mt-6">
@@ -495,7 +495,12 @@ function HeroSection() {
             </button>
             <button
               onClick={() => router.push('/dashboard')}
-              className="cta-btn-secondary inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-blue-200 font-semibold text-lg border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm hover:bg-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="cta-btn-secondary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              style={{
+                color: 'var(--landing-text-secondary)',
+                border: '1px solid var(--landing-card-border)',
+                background: 'var(--landing-card-bg)',
+              }}
               aria-label="View analytics"
             >
               <BarChart3 size={20} aria-hidden="true" />
@@ -517,7 +522,12 @@ function HeroSection() {
             </Link>
             <Link href="/login">
               <button
-                className="cta-btn-secondary inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-blue-200 font-semibold text-lg border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm hover:bg-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="cta-btn-secondary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                style={{
+                  color: 'var(--landing-text-secondary)',
+                  border: '1px solid var(--landing-card-border)',
+                  background: 'var(--landing-card-bg)',
+                }}
                 aria-label="Sign in to your account"
               >
                 Sign In
@@ -532,7 +542,7 @@ function HeroSection() {
       <div className="hero-fade-4 flex flex-col items-center gap-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-[1px] bg-gradient-to-r from-transparent to-blue-500/40" />
-          <p className="text-xs text-blue-400/60 uppercase tracking-[0.3em] font-semibold">
+          <p className="text-xs uppercase tracking-[0.3em] font-semibold" style={{ color: 'var(--landing-text-muted)' }}>
             Trusted by Elite Organizations
           </p>
           <div className="w-8 h-[1px] bg-gradient-to-l from-transparent to-blue-500/40" />
@@ -541,7 +551,11 @@ function HeroSection() {
           {TRUSTED.map((name) => (
             <span
               key={name}
-              className="relative text-sm font-bold text-blue-200/25 hover:text-blue-200/50 transition-colors cursor-default group"
+              className="relative text-sm font-bold transition-colors cursor-default group"
+              style={{ 
+                color: 'var(--landing-text-muted)',
+                opacity: 0.4,
+              }}
             >
               {name}
               <span className="absolute -bottom-1 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -588,7 +602,7 @@ function StatsSection() {
         }}
       >
         <span className="section-eyebrow">By the Numbers</span>
-        <h2 className="mt-3 text-3xl md:text-4xl font-bold text-white">
+        <h2 className="mt-3 text-3xl md:text-4xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>
           Trusted at <span className="heading-gradient">scale</span>
         </h2>
       </div>
@@ -630,11 +644,11 @@ function FeaturesSection() {
         }}
       >
         <span className="section-eyebrow">Leave Types</span>
-        <h2 className="mt-3 text-3xl md:text-5xl font-black text-white leading-tight">
+        <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
           Every leave type,{' '}
           <span className="heading-gradient">perfectly managed</span>
         </h2>
-        <p className="mt-4 text-blue-200/60 max-w-xl mx-auto text-lg">
+        <p className="mt-4 max-w-xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)' }}>
           From vacation days to medical appointments — track and manage every absence with precision and elegance.
         </p>
       </div>
@@ -671,7 +685,7 @@ function CTABanner() {
             <Sparkles size={48} className="text-blue-400" />
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
+          <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
             Ready to elevate your{' '}
             <span style={{
               background: 'linear-gradient(135deg, #2563eb 0%, #93c5fd 50%, #60a5fa 100%)',
@@ -683,7 +697,7 @@ function CTABanner() {
             </span>
           </h2>
 
-          <p className="text-white/50 text-lg mb-12 max-w-xl mx-auto leading-relaxed">
+          <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--landing-text-muted)', opacity: 0.7 }}>
             Join elite HR professionals who rely on HRLeave to manage their teams with sophistication.
           </p>
 
@@ -700,7 +714,12 @@ function CTABanner() {
                 </button>
                 <button
                   onClick={() => router.push('/employees')}
-                  className="cta-btn-secondary inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white font-bold text-lg border border-white/15 bg-white/5 backdrop-blur-sm hover:bg-white/10"
+                  className="cta-btn-secondary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg backdrop-blur-sm"
+                  style={{
+                    color: 'var(--landing-text-secondary)',
+                    border: '1px solid var(--landing-card-border)',
+                    background: 'var(--landing-card-bg)',
+                  }}
                 >
                   <Users size={20} />
                   View Team
@@ -719,7 +738,12 @@ function CTABanner() {
                 </Link>
                 <Link href="/login">
                   <button
-                    className="cta-btn-secondary inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white font-bold text-lg border border-white/15 bg-white/5 backdrop-blur-sm hover:bg-white/10"
+                    className="cta-btn-secondary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg backdrop-blur-sm"
+                    style={{
+                      color: 'var(--landing-text-secondary)',
+                      border: '1px solid var(--landing-card-border)',
+                      background: 'var(--landing-card-bg)',
+                    }}
                   >
                     Sign In to Dashboard
                   </button>
@@ -778,11 +802,11 @@ function Footer() {
               >
                 <Shield size={18} className="text-white" />
               </div>
-              <span className="text-white font-bold text-lg group-hover:text-blue-400 transition-colors">
+              <span className="font-bold text-lg group-hover:text-blue-400 transition-colors" style={{ color: 'var(--landing-text-primary)' }}>
                 HR<span className="text-blue-400">Leave</span>
               </span>
             </Link>
-            <p className="text-blue-200/50 text-sm leading-relaxed mb-4">
+            <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--landing-text-muted)', opacity: 0.5 }}>
               Premium HR leave management platform for sophisticated teams.
             </p>
             {/* Social links */}
@@ -817,7 +841,7 @@ function Footer() {
           {/* Links columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">
+              <h4 className="font-semibold text-sm uppercase tracking-wider mb-4" style={{ color: 'var(--landing-text-primary)' }}>
                 {category === 'product' ? 'Product' : category === 'platform' ? 'Platform' : category === 'account' ? 'Account' : 'Legal'}
               </h4>
               <ul className="space-y-3">
@@ -828,21 +852,24 @@ function Footer() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-200/50 hover:text-blue-400 text-sm transition-colors focus:outline-none focus:text-blue-400 focus:underline underline-offset-4"
+                        className="text-sm transition-colors focus:outline-none hover:text-blue-400 focus:text-blue-400 focus:underline underline-offset-4"
+                        style={{ color: 'var(--landing-text-muted)', opacity: 0.6 }}
                       >
                         {link.name}
                       </a>
                     ) : link.href.startsWith('#') ? (
                       <a
                         href={link.href}
-                        className="text-blue-200/50 hover:text-blue-400 text-sm transition-colors focus:outline-none focus:text-blue-400 focus:underline underline-offset-4"
+                        className="text-sm transition-colors focus:outline-none hover:text-blue-400 focus:text-blue-400 focus:underline underline-offset-4"
+                        style={{ color: 'var(--landing-text-muted)', opacity: 0.6 }}
                       >
                         {link.name}
                       </a>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-blue-200/50 hover:text-blue-400 text-sm transition-colors focus:outline-none focus:text-blue-400 focus:underline underline-offset-4"
+                        className="text-sm transition-colors focus:outline-none hover:text-blue-400 focus:text-blue-400 focus:underline underline-offset-4"
+                        style={{ color: 'var(--landing-text-muted)', opacity: 0.6 }}
                       >
                         {link.name}
                       </Link>
@@ -856,10 +883,10 @@ function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-blue-400/40 text-sm">
+          <p className="text-sm" style={{ color: 'var(--landing-text-muted)', opacity: 0.4 }}>
             © {new Date().getFullYear()} HRLeave Monitor. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-xs text-blue-400/40">
+          <div className="flex items-center gap-6 text-xs" style={{ color: 'var(--landing-text-muted)', opacity: 0.4 }}>
             <span>🔒 SSL Secured</span>
             <span>✓ GDPR Compliant</span>
             <span>✓ SOC 2 Certified</span>

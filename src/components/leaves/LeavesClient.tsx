@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -34,10 +35,11 @@ function safeFormat(dateStr: string | undefined | null, fmt: string): string {
 }
 
 function StatusBadge({ status }: { status: LeaveStatus }) {
+  const { t } = useTranslation();
   const map: Record<LeaveStatus, { variant: "warning" | "success" | "destructive"; label: string }> = {
-    pending: { variant: "warning", label: "Pending" },
-    approved: { variant: "success", label: "Approved" },
-    rejected: { variant: "destructive", label: "Rejected" },
+    pending: { variant: "warning", label: t('leave.pending') },
+    approved: { variant: "success", label: t('leave.approved') },
+    rejected: { variant: "destructive", label: t('leave.rejected') },
   };
   const { variant, label } = map[status];
   return <Badge variant={variant}>{label}</Badge>;
@@ -59,6 +61,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
 }
 
 export function LeavesClient() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");

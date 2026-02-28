@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Users, Clock, CheckCircle, UserCheck,
   Plus, CalendarDays, ArrowRight, TrendingUp, Building2,
@@ -71,6 +72,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
 }
 
 export function DashboardClient() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
@@ -233,7 +235,7 @@ export function DashboardClient() {
         <motion.div variants={itemVariants} className="lg:col-span-2">
           <Card className="h-full">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Leave Distribution</CardTitle>
+              <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.leaveDistribution')}</CardTitle>
             </CardHeader>
             <CardContent>
               {pieData.length > 0 ? (
@@ -340,7 +342,7 @@ export function DashboardClient() {
 
       {/* Quick actions */}
       <motion.div variants={itemVariants}>
-        <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Quick Actions</h3>
+        <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">{t('dashboard.quickActions')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#2563eb]">
             <Link href="/leaves"><Plus className="w-5 h-5 text-[#2563eb]" /><span className="text-xs">New Leave Request</span></Link>
