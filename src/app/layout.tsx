@@ -123,16 +123,15 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon-animated.svg?v=2", type: "image/svg+xml" },
-      { url: "/favicon.svg?v=2", type: "image/svg+xml" },
-      { url: "/favicon-32x32.svg?v=2", sizes: "32x32", type: "image/svg+xml" },
-      { url: "/favicon-16x16.svg?v=2", sizes: "16x16", type: "image/svg+xml" },
-      { url: "/favicon.ico?v=2", sizes: "any" },
+      { url: "/favicon-animated.svg?v=3", type: "image/svg+xml" },
+      { url: "/favicon.svg?v=3", type: "image/svg+xml" },
+      { url: "/favicon-32x32.svg?v=3", sizes: "32x32", type: "image/svg+xml" },
+      { url: "/favicon-16x16.svg?v=3", sizes: "16x16", type: "image/svg+xml" },
     ],
-    shortcut: "/favicon-animated.svg?v=2",
+    shortcut: "/favicon-animated.svg?v=3",
     apple: [
-      { url: "/apple-touch-icon.svg?v=2", sizes: "180x180", type: "image/svg+xml" },
-      { url: "/apple-touch-icon.png?v=2", sizes: "180x180" },
+      { url: "/apple-touch-icon.svg?v=3", sizes: "180x180", type: "image/svg+xml" },
+      { url: "/apple-touch-icon.png?v=3", sizes: "180x180" },
     ],
   },
   manifest: "/site.webmanifest",
@@ -220,20 +219,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Animated SVG Favicon - works in all modern browsers */}
-        <link rel="icon" href="/favicon-animated.svg?v=2" type="image/svg+xml" />
+        <link rel="icon" href="/favicon-animated.svg?v=3" type="image/svg+xml" />
         
         {/* Multiple sizes for better browser support */}
-        <link rel="icon" type="image/svg+xml" sizes="16x16" href="/favicon-16x16.svg?v=2" />
-        <link rel="icon" type="image/svg+xml" sizes="32x32" href="/favicon-32x32.svg?v=2" />
-        
-        {/* Fallback for older browsers */}
-        <link rel="alternate icon" href="/favicon.ico?v=2" />
+        <link rel="icon" type="image/svg+xml" sizes="16x16" href="/favicon-16x16.svg?v=3" />
+        <link rel="icon" type="image/svg+xml" sizes="32x32" href="/favicon-32x32.svg?v=3" />
         
         {/* Safari pinned tab */}
-        <link rel="mask-icon" href="/favicon.svg?v=2" color="#2563eb" />
+        <link rel="mask-icon" href="/favicon.svg?v=3" color="#2563eb" />
         
         {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg?v=2" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg?v=3" />
         
         {/* Web App Manifest */}
         <link rel="manifest" href="/site.webmanifest" />
