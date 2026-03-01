@@ -1756,5 +1756,22 @@
     "invert": "Invert Selection",
     "clear": "Clear",
     "remove": "Remove"
+  },
+  "quickActions": {
+    "quickActions": "Quick Actions",
+    "newEmployee": "New Employee",
+    "newLeave": "New Leave Request",
+    "newTask": "New Task",
+    "viewReports": "View Reports",
+    "exportData": "Export Data",
+    "importData": "Import Data",
+    "settings": "Settings",
+    "help": "Help",
+    "feedback": "Feedback",
+    "support": "Support",
+    "documentation": "Documentation",
+    "shortcuts": "Shortcuts",
+    "customize": "Customize",
+    "preferences": "Preferences"
   }
 }

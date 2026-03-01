@@ -1756,5 +1756,22 @@
     "invert": "Инвертировать выбор",
     "clear": "Очистить",
     "remove": "Удалить"
+  },
+  "quickActions": {
+    "quickActions": "Быстрые действия",
+    "newEmployee": "Новый сотрудник",
+    "newLeave": "Новый запрос на отпуск",
+    "newTask": "Новая задача",
+    "viewReports": "Посмотреть отчёты",
+    "exportData": "Экспорт данных",
+    "importData": "Импорт данных",
+    "settings": "Настройки",
+    "help": "Помощь",
+    "feedback": "Обратная связь",
+    "support": "Поддержка",
+    "documentation": "Документация",
+    "shortcuts": "Горячие клавиши",
+    "customize": "Настроить",
+    "preferences": "Предпочтения"
   }
 }
