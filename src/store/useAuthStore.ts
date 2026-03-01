@@ -10,6 +10,7 @@ export interface User {
   department?: string
   position?: string
   employeeType?: 'staff' | 'contractor'
+  organizationId?: string
 }
 
 interface AuthState {
