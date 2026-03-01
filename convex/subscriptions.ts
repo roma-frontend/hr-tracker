@@ -173,3 +173,13 @@ export const getSubscriptionByEmail = query({
       .first();
   },
 });
+
+// ── List all subscriptions (for admin/viewer) ──────────────────────────────────
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    return ctx.db
+      .query('subscriptions')
+      .collect();
+  },
+});

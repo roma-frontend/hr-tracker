@@ -43,3 +43,6 @@ next-env.d.ts
 build-log.txt
 
 build-output.txt
+
+# Stripe transaction exports
+stripe-transactions-*.xlsx

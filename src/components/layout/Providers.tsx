@@ -18,7 +18,7 @@ const MobileSidebar = dynamic(
 
 const Navbar = dynamic(
   () => import("@/components/layout/Navbar").then((m) => m.Navbar),
-  { ssr: false, loading: () => <div className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)]" /> }
+  { ssr: false, loading: () => <div className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] fixed top-0 left-0 right-0 z-[60]" /> }
 );
 
 const ChatWidget = dynamic(
@@ -82,7 +82,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
         <Navbar />
-        <main className="flex-1 overflow-y-auto">
+        {/* Add padding-top to compensate for fixed navbar (h-16 = 64px) */}
+        <main className="flex-1 overflow-y-auto pt-16">
           <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
             {children}
           </div>

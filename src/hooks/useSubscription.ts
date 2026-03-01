@@ -26,20 +26,23 @@ export interface SubscriptionData {
 export function useSubscription() {
   const { user } = useAuthStore();
 
+  // Get organization to determine plan
+  const organization = useQuery(
+    api.organizations.getMyOrganization,
+    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+  );
+
   // NOTE: subscriptions functionality is not implemented yet
-  // Using default values until Convex subscriptions are set up
+  // Using organization plan instead
   const subscription = null; // useQuery disabled temporarily
   
-  const isLoading = false;
+  const isLoading = organization === undefined;
 
-  // считаем подписку активной если trialing или active
-  const isActive =
-    subscription?.status === "active" ||
-    subscription?.status === "trialing";
+  // All users with organization are considered active
+  const isActive = !!organization;
 
-  const plan: PlanType = isActive
-    ? (subscription?.plan ?? "starter")
-    : "starter";
+  // Get plan from organization, default to starter
+  const plan: PlanType = organization?.plan ?? "starter";
 
   const isTrialing = subscription?.status === "trialing";
   const isCanceled = subscription?.status === "canceled";

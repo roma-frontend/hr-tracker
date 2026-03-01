@@ -201,7 +201,7 @@ export function PomodoroTimer() {
           onClick={() => handleModeChange("pomodoro")}
           className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
             mode === "pomodoro"
-              ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
+              ? "bg-[var(--primary)] text-white shadow-sm"
               : "bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80"
           }`}
         >
@@ -211,7 +211,7 @@ export function PomodoroTimer() {
           onClick={() => handleModeChange("shortBreak")}
           className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
             mode === "shortBreak"
-              ? "bg-gradient-to-r from-green-500 to-teal-500 text-white"
+              ? "bg-[var(--primary)] text-white shadow-sm"
               : "bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80"
           }`}
         >
@@ -221,7 +221,7 @@ export function PomodoroTimer() {
           onClick={() => handleModeChange("longBreak")}
           className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
             mode === "longBreak"
-              ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+              ? "bg-[var(--primary)] text-white shadow-sm"
               : "bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80"
           }`}
         >
@@ -238,7 +238,7 @@ export function PomodoroTimer() {
             cy="60"
             r="54"
             fill="none"
-            stroke="var(--background-subtle)"
+            stroke="var(--border)"
             strokeWidth="6"
           />
           <circle
@@ -246,7 +246,7 @@ export function PomodoroTimer() {
             cy="60"
             r="54"
             fill="none"
-            stroke="url(#gradient)"
+            stroke="var(--primary)"
             strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={`${2 * Math.PI * 54}`}
@@ -254,12 +254,6 @@ export function PomodoroTimer() {
             transform="rotate(-90 60 60)"
             className="transition-all duration-1000"
           />
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={mode === "pomodoro" ? "#ef4444" : "#10b981"} />
-              <stop offset="100%" stopColor={mode === "pomodoro" ? "#f97316" : "#06b6d4"} />
-            </linearGradient>
-          </defs>
         </svg>
 
         {/* Time text */}

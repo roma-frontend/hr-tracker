@@ -17,9 +17,9 @@ const PRESENCE_CONFIG = {
 } as const;
 
 export function TeamPresence() {
-  
+
   const { t } = useTranslation();
-const { user } = useAuthStore();
+  const { user } = useAuthStore();
   const teamMembers = useQuery(
     api.productivity.getTeamPresence,
     user?.organizationId ? { organizationId: user.organizationId } : "skip"

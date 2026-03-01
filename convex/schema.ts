@@ -580,4 +580,88 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_active", ["userId", "completed", "interrupted"]),
+
+  // ── AI SITE EDITOR SESSIONS ──────────────────────────────────────────────
+  // Track AI-powered site editing sessions with plan-based limitations
+  aiSiteEditorSessions: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),
+    plan: v.union(
+      v.literal("starter"),
+      v.literal("professional"),
+      v.literal("enterprise"),
+    ),
+    // Request details
+    userMessage: v.string(),              // What user asked for
+    aiResponse: v.string(),               // AI's response
+    // What was edited
+    editType: v.union(
+      v.literal("design"),                // CSS/styling changes
+      v.literal("content"),               // Text/content changes
+      v.literal("layout"),                // Component structure
+      v.literal("logic"),                 // Functionality/behavior
+      v.literal("full_control"),          // Complete site modifications (Pro only)
+    ),
+    targetComponent: v.optional(v.string()), // Which component was edited
+    changesMade: v.array(v.object({
+      file: v.string(),                   // File path that was modified
+      type: v.string(),                   // Type of change
+      description: v.string(),            // Human-readable description
+      before: v.optional(v.string()),     // Code before (for rollback)
+      after: v.optional(v.string()),      // Code after
+    })),
+    // Plan limits tracking
+    limitType: v.union(
+      v.literal("limited"),               // Starter: very limited actions
+      v.literal("unlimited"),             // Professional: unlimited actions
+    ),
+    tokensUsed: v.optional(v.number()),   // For usage tracking
+    // Status
+    status: v.union(
+      v.literal("pending"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("rejected"),              // Rejected by plan limits
+    ),
+    errorMessage: v.optional(v.string()),
+    // Rollback capability
+    canRollback: v.boolean(),
+    rolledBack: v.boolean(),
+    rolledBackAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_user", ["userId"])
+    .index("by_org_date", ["organizationId", "createdAt"])
+    .index("by_plan", ["plan"])
+    .index("by_status", ["status"]),
+
+  // ── AI SITE EDITOR USAGE LIMITS ──────────────────────────────────────────
+  // Track monthly usage limits for different plans
+  aiSiteEditorUsage: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),
+    plan: v.union(
+      v.literal("starter"),
+      v.literal("professional"),
+      v.literal("enterprise"),
+    ),
+    // Monthly tracking
+    month: v.string(),                    // "2026-03" format
+    // Usage counters
+    designChanges: v.number(),            // Starter: max 5/month
+    contentChanges: v.number(),           // Starter: max 10/month
+    layoutChanges: v.number(),            // Starter: max 2/month
+    logicChanges: v.number(),             // Starter: max 0/month (Pro only)
+    fullControlChanges: v.number(),       // Starter: max 0/month (Pro only)
+    totalRequests: v.number(),
+    // Last reset
+    lastResetAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_user", ["userId"])
+    .index("by_org_month", ["organizationId", "month"])
+    .index("by_user_month", ["userId", "month"]),
 });

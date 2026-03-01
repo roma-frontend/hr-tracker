@@ -6,9 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "stripe:view": "tsx scripts/view-stripe-transactions.ts",
+    "stripe:add-test-data": "tsx scripts/add-test-stripe-data.ts",
+    "stripe:export": "tsx scripts/export-stripe-to-excel.ts",
+    "stripe:export-pdf": "tsx scripts/export-stripe-to-pdf.ts",
+    "stripe:growth-chart": "tsx scripts/stripe-growth-chart.ts",
+    "stripe:sync": "tsx scripts/sync-stripe-data.ts",
+    "stripe:check-trials": "tsx scripts/check-trial-reminders.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.34",
     "@ai-sdk/groq": "^3.0.24",
     "@ai-sdk/openai": "^3.0.30",
     "@ai-sdk/react": "^3.0.99",
@@ -69,9 +77,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "chartjs-node-canvas": "^5.0.0",
+    "critters": "^0.0.23",
+    "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pdfkit": "^0.17.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "xlsx": "^0.18.5"
   }
 }

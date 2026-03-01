@@ -80,6 +80,7 @@ export function Sidebar() {
           borderColor: "var(--sidebar-border)",
           width: collapsed ? 72 : 240,
           transition: "width 0.25s ease",
+          minWidth: collapsed ? 72 : 240,
         }}
       >
         {/* Logo + Toggle */}
@@ -303,13 +304,14 @@ export function MobileSidebar() {
       />
       {/* Drawer — Smooth slide-in with staggered content animation */}
       <aside
-        className="fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col lg:hidden border-r shadow-2xl"
+        className="fixed left-0 top-0 bottom-0 z-40 w-64 flex flex-col lg:hidden border-r shadow-2xl"
         style={{
           background: "var(--sidebar-bg)",
           borderColor: "var(--sidebar-border)",
           transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           willChange: "transform",
+          minWidth: "256px",
         }}
       >
           {/* Logo */}

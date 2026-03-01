@@ -42,6 +42,18 @@ export const getAllUsers = query({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET CURRENT USER — for client-side auth state
+// ─────────────────────────────────────────────────────────────────────────────
+export const getCurrentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    // This function is meant to be called with a userId from the client
+    // For now, return null - the page should use useAuthStore instead
+    return null;
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // GET USER BY EMAIL — only within same org
 // ─────────────────────────────────────────────────────────────────────────────
 export const getUserByEmail = query({

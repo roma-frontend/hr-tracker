@@ -147,7 +147,7 @@ export default function DashboardClient() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight" 
+              className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight capitalize" 
               style={{ 
                 fontFamily: "var(--font-montserrat), sans-serif", 
                 letterSpacing: '-0.02em',
@@ -155,7 +155,7 @@ export default function DashboardClient() {
                 fontWeight: 700
               }}
             >
-              {organization?.name ?? "Office Management"}
+              {user?.role ?? "Dashboard"}
             </motion.h1>
           </div>
           <motion.p 
@@ -170,7 +170,7 @@ export default function DashboardClient() {
         <div className="flex gap-2 flex-wrap">
           {user?.email?.toLowerCase() === "romangulanyan@gmail.com" && (
             <>
-              <Button asChild size="sm" variant="outline" className="border-blue-500 dark:border-gray-600 !text-blue-600 dark:!text-gray-200 hover:bg-blue-50 dark:hover:!bg-gray-700 hover:!text-blue-700 dark:hover:!text-white dark:hover:border-gray-500 transition-all duration-200">
+              <Button asChild size="sm" variant="outline">
                 <Link href="/superadmin/organizations"><Building2 className="w-4 h-4" />{t('dashboard.manageOrgs')}</Link>
               </Button>
               <Button asChild size="sm" variant="default" className="bg-gradient-to-r from-[#1e40af] to-[#2563eb] hover:from-[#1e40af]/90 hover:to-[#2563eb]/90">

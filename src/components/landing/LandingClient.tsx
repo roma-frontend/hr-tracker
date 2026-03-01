@@ -65,6 +65,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 // ─── Stats Data ───────────────────────────────────────────────────────────────
 const getStatsData = (t: any) => [
@@ -200,6 +201,7 @@ function Navbar() {
   return (
     <>
       {/* nav-animate class uses CSS animation — zero JS cost vs framer-motion */}
+      {/* fixed position to keep navbar visible on scroll */}
       <nav
         className="nav-animate fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4"
         role="navigation"
@@ -258,6 +260,9 @@ function Navbar() {
 
         {/* Auth buttons / User menu */}
         <div className="relative flex items-center gap-3">
+          {/* Language Switcher */}
+          {mounted && <LanguageSwitcher />}
+          
           {/* Theme Toggle Button */}
           {mounted && (
             <button
@@ -423,7 +428,7 @@ function HeroSection() {
 
   return (
     <div
-      className="relative z-10 flex flex-col items-center text-center pt-40 pb-20 px-6 min-h-screen justify-center"
+      className="relative z-10 flex flex-col items-center text-center pt-56 pb-20 px-6 min-h-screen justify-center"
       role="banner"
       aria-label="Hero section"
     >
@@ -799,10 +804,10 @@ function Footer() {
       { nameKey: 'nav.help', href: '#faq' },
     ],
     legal: [
-      { name: t('landingExtra.footerPrivacy'), href: '/privacy' },
-      { name: t('landingExtra.footerTerms'), href: '/terms' },
-      { name: t('landingExtra.footerCookies'), href: '/privacy#cookies' },
-      { name: t('landingExtra.footerGdpr'), href: '/privacy#gdpr' },
+      { nameKey: 'landingExtra.footerPrivacy', href: '/privacy' },
+      { nameKey: 'landingExtra.footerTerms', href: '/terms' },
+      { nameKey: 'landingExtra.footerCookies', href: '/privacy#cookies' },
+      { nameKey: 'landingExtra.footerGdpr', href: '/privacy#gdpr' },
     ],
   };
 
@@ -870,21 +875,9 @@ function Footer() {
                 {category === 'product' ? t('landingExtra.footerProduct') : category === 'platform' ? t('landingExtra.footerPlatform') : category === 'account' ? t('landingExtra.footerAccount') : t('landingExtra.footerLegal')}
               </h4>
               <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.nameKey || link.name}>
-                    {link.href.startsWith('http') ? (
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm transition-colors focus:outline-none focus:underline underline-offset-4"
-                        style={{ color: 'var(--landing-text-secondary)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
-                      >
-                        {link.name}
-                      </a>
-                    ) : link.href.startsWith('#') ? (
+                {links.map((link: any) => (
+                  <li key={link.nameKey}>
+                    {link.href.startsWith('#') ? (
                       <a
                         href={link.href}
                         className="text-sm transition-colors focus:outline-none focus:underline underline-offset-4"
@@ -892,7 +885,7 @@ function Footer() {
                         onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
                         onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
                       >
-                        {link.name}
+                        {t(link.nameKey)}
                       </a>
                     ) : (
                       <Link
@@ -902,7 +895,7 @@ function Footer() {
                         onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
                         onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
                       >
-                        {link.nameKey ? t(link.nameKey) : link.name}
+                        {t(link.nameKey)}
                       </Link>
                     )}
                   </li>

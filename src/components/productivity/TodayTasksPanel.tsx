@@ -9,9 +9,9 @@ import { CheckCircle2, Circle, Clock, Loader2, AlertCircle } from "lucide-react"
 import { toast } from "sonner";
 
 export function TodayTasksPanel() {
-  
+
   const { t } = useTranslation();
-const { user } = useAuthStore();
+  const { user } = useAuthStore();
   const tasks = useQuery(
     api.productivity.getTodayTasks,
     user?.id ? { userId: user.id as Id<"users"> } : "skip"
@@ -28,22 +28,9 @@ const { user } = useAuthStore();
     }
   };
 
-  if (!tasks) {
-    return (
-      <div className="flex items-center justify-center py-6">
-        <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
-      </div>
-    );
-  }
-
-  if (tasks.length === 0) {
-    return (
-      <div className="px-2 py-4 text-center">
-        <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-500" />
-        <p className="text-sm font-medium text-[var(--text-primary)]">All caught up! 🎉</p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">No pending tasks</p>
-      </div>
-    );
+  // Hide section when loading or no tasks
+  if (!tasks || tasks.length === 0) {
+    return null;
   }
 
   const getPriorityColor = (priority?: string) => {
@@ -68,7 +55,7 @@ const { user } = useAuthStore();
 
     if (date.toDateString() === today.toDateString()) return "Today";
     if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
-    
+
     const isOverdue = date < today;
     return isOverdue ? "Overdue" : date.toLocaleDateString();
   };
@@ -89,11 +76,10 @@ const { user } = useAuthStore();
           return (
             <div
               key={task._id}
-              className={`group rounded-lg border p-3 transition-all hover:border-[var(--primary)]/50 ${
-                isCompleted
+              className={`group rounded-lg border p-3 transition-all hover:border-[var(--primary)]/50 ${isCompleted
                   ? "border-[var(--border)] bg-[var(--background-subtle)]/50 opacity-60"
                   : "border-[var(--border)] bg-[var(--background-subtle)]"
-              }`}
+                }`}
             >
               <div className="flex items-start gap-2">
                 <button
@@ -109,11 +95,10 @@ const { user } = useAuthStore();
 
                 <div className="flex-1 min-w-0">
                   <p
-                    className={`text-sm font-medium leading-snug ${
-                      isCompleted
+                    className={`text-sm font-medium leading-snug ${isCompleted
                         ? "line-through text-[var(--text-muted)]"
                         : "text-[var(--text-primary)]"
-                    }`}
+                      }`}
                   >
                     {task.title}
                   </p>
@@ -131,9 +116,8 @@ const { user } = useAuthStore();
                     {/* Due date */}
                     {dueText && (
                       <span
-                        className={`inline-flex items-center gap-1 text-[10px] ${
-                          isOverdue ? "text-red-500 font-semibold" : "text-[var(--text-muted)]"
-                        }`}
+                        className={`inline-flex items-center gap-1 text-[10px] ${isOverdue ? "text-red-500 font-semibold" : "text-[var(--text-muted)]"
+                          }`}
                       >
                         {isOverdue ? <AlertCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                         {dueText}

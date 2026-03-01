@@ -139,7 +139,7 @@ export function EmployeesClient() {
           { labelKey: "employeeTypes.contractors", value: stats.contractors, icon: Briefcase, color: "#f59e0b" },
           { labelKey: "roles.supervisors", value: stats.supervisors, icon: Shield, color: "#0ea5e9" },
         ].map((stat) => (
-          <div key={stat.label} className="p-4 rounded-2xl border flex items-center gap-3"
+          <div key={stat.labelKey} className="p-4 rounded-2xl border flex items-center gap-3"
             style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: `${stat.color}20` }}>

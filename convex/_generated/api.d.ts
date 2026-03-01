@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as aiEvaluator from "../aiEvaluator.js";
+import type * as aiSiteEditor from "../aiSiteEditor.js";
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
 import type * as employeeNotes from "../employeeNotes.js";
@@ -26,6 +27,7 @@ import type * as subscriptions from "../subscriptions.js";
 import type * as supervisorRatings from "../supervisorRatings.js";
 import type * as tasks from "../tasks.js";
 import type * as timeTracking from "../timeTracking.js";
+import type * as updateSuperadminPlan from "../updateSuperadminPlan.js";
 import type * as userPreferences from "../userPreferences.js";
 import type * as userStats from "../userStats.js";
 import type * as users from "../users.js";
@@ -39,6 +41,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   aiEvaluator: typeof aiEvaluator;
+  aiSiteEditor: typeof aiSiteEditor;
   analytics: typeof analytics;
   auth: typeof auth;
   employeeNotes: typeof employeeNotes;
@@ -55,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   supervisorRatings: typeof supervisorRatings;
   tasks: typeof tasks;
   timeTracking: typeof timeTracking;
+  updateSuperadminPlan: typeof updateSuperadminPlan;
   userPreferences: typeof userPreferences;
   userStats: typeof userStats;
   users: typeof users;

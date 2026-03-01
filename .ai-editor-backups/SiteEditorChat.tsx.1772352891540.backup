@@ -1,0 +1,570 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { usePlanFeatures } from "@/hooks/usePlanFeatures";
+import { useSubscription } from "@/hooks/useSubscription";
+import {
+  Send,
+  Loader2,
+  Sparkles,
+  Code2,
+  Palette,
+  Layout,
+  Zap,
+  History,
+  AlertCircle,
+  Crown,
+  Undo2,
+  CheckCircle2,
+  FileCode2,
+  RefreshCw,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface AppliedFile {
+  filePath: string;
+  timestamp: number;
+  description: string;
+}
+
+interface Message {
+  role: "user" | "assistant" | "system";
+  content: string;
+  editType?: "design" | "content" | "layout" | "logic" | "full_control";
+  timestamp: number;
+  appliedFiles?: AppliedFile[];
+}
+
+interface BackupMeta {
+  originalPath: string;
+  timestamp: number;
+  description: string;
+}
+
+interface SiteEditorChatProps {
+  userId: string;
+  organizationId: string;
+}
+
+// ─── Icon helpers ─────────────────────────────────────────────────────────────
+
+function getEditTypeIcon(type?: string) {
+  switch (type) {
+    case "design":      return <Palette className="h-3 w-3" />;
+    case "content":     return <Code2 className="h-3 w-3" />;
+    case "layout":      return <Layout className="h-3 w-3" />;
+    case "logic":       return <Zap className="h-3 w-3" />;
+    case "full_control": return <Crown className="h-3 w-3" />;
+    default:            return null;
+  }
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) {
+  const { t } = useTranslation();
+
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "system",
+      content: t("aiSiteEditor.greeting"),
+      timestamp: Date.now(),
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [rollingBack, setRollingBack] = useState<string | null>(null); // "filePath:timestamp"
+  const [backups, setBackups] = useState<BackupMeta[]>([]);
+  const [showBackups, setShowBackups] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { features, plan } = usePlanFeatures();
+  const { isActive } = useSubscription();
+
+  const usage = useQuery(api.aiSiteEditor.getCurrentMonthUsage, {
+    userId: userId as any,
+    organizationId: organizationId as any,
+  });
+
+  const history = useQuery(api.aiSiteEditor.getHistory, {
+    userId: userId as any,
+    limit: 10,
+  });
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Fetch backups list
+  const fetchBackups = useCallback(async () => {
+    try {
+      const res = await fetch("/api/ai-site-editor/apply");
+      if (res.ok) {
+        const data = await res.json();
+        setBackups(data.backups || []);
+      }
+    } catch {
+      // silent
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBackups();
+  }, [fetchBackups]);
+
+  // ─── Send message ──────────────────────────────────────────────────────────
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      role: "user",
+      content: input,
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
+    setInput("");
+    setIsLoading(true);
+
+    // Добавляем плейсхолдер «думает...»
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "",
+        timestamp: Date.now(),
+      },
+    ]);
+
+    try {
+      const response = await fetch("/api/ai-site-editor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: currentInput,
+          userId,
+          organizationId,
+          plan,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        setMessages((prev) => prev.slice(0, -1));
+
+        if (error.limitReached) {
+          toast.error(error.error, {
+            action: {
+              label: t("aiSiteEditor.upgradePlan"),
+              onClick: () => (window.location.href = "/settings?tab=billing"),
+            },
+          });
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "system",
+              content: `⚠️ ${error.error}`,
+              timestamp: Date.now(),
+            },
+          ]);
+          return;
+        }
+        throw new Error(error.error || "Server error");
+      }
+
+      // Парсим JSON ответ
+      const data = await response.json();
+      const { response: aiText, appliedFiles, editType } = data;
+
+      // Обновляем сообщение с результатом
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: "assistant",
+          content: aiText,
+          editType,
+          timestamp: Date.now(),
+        };
+        return updated;
+      });
+
+      // Показываем результат
+      if (appliedFiles && appliedFiles.length > 0) {
+        toast.success(`✅ Применено ${appliedFiles.length} изменений! Файлы обновлены.`, { duration: 5000 });
+        console.log('Applied files:', appliedFiles);
+      } else {
+        toast.info("AI ответил, но файлы не были изменены", { duration: 3000 });
+      }
+
+      // Обновляем список backup'ов
+      fetchBackups();
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: "system",
+          content: `❌ ${t("aiSiteEditor.error")}`,
+          timestamp: Date.now(),
+        };
+        return updated;
+      });
+      toast.error(t("aiSiteEditor.error"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ─── Rollback ──────────────────────────────────────────────────────────────
+
+  const handleRollback = async (filePath: string, timestamp: number) => {
+    const key = `${filePath}:${timestamp}`;
+    setRollingBack(key);
+
+    try {
+      const res = await fetch("/api/ai-site-editor/apply", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath, timestamp }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        toast.success(`↩️ Откат выполнен: ${filePath}`);
+        fetchBackups();
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "system",
+            content: `↩️ Откат выполнен для файла ${filePath}`,
+            timestamp: Date.now(),
+          },
+        ]);
+      } else {
+        toast.error(`Ошибка отката: ${data.error || "Неизвестная ошибка"}`);
+      }
+    } catch {
+      toast.error("Ошибка при выполнении отката");
+    } finally {
+      setRollingBack(null);
+    }
+  };
+
+  // ─── Render helpers ────────────────────────────────────────────────────────
+
+  const getEditTypeLabel = (type?: string) => {
+    switch (type) {
+      case "design":      return t("aiSiteEditor.design");
+      case "content":     return t("aiSiteEditor.content");
+      case "layout":      return t("aiSiteEditor.layout");
+      case "logic":       return t("aiSiteEditor.logic");
+      case "full_control": return t("aiSiteEditor.fullControl");
+      default:            return "";
+    }
+  };
+
+  const isProfessionalOrHigher = plan === "professional" || plan === "enterprise";
+
+  // ─── JSX ───────────────────────────────────────────────────────────────────
+
+  return (
+    <div className="flex flex-col h-full space-y-4">
+
+      {/* Usage Stats — только для starter */}
+      {!isProfessionalOrHigher && usage && (
+        <Card className="p-4 bg-gradient-to-r from-amber-50/20 to-orange-50/20 dark:from-amber-950/10 dark:to-orange-950/10 border-amber-200/30 dark:border-amber-900/20">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                {t("aiSiteEditor.usageThisMonth")}
+              </h4>
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <div className="text-amber-700 dark:text-amber-300">{t("aiSiteEditor.design")}</div>
+                  <div className="font-semibold text-amber-900 dark:text-amber-100">
+                    {usage.designChanges} / {features.aiSiteEditorDesignChanges}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-amber-700 dark:text-amber-300">{t("aiSiteEditor.content")}</div>
+                  <div className="font-semibold text-amber-900 dark:text-amber-100">
+                    {usage.contentChanges} / {features.aiSiteEditorContentChanges}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-amber-700 dark:text-amber-300">{t("aiSiteEditor.layout")}</div>
+                  <div className="font-semibold text-amber-900 dark:text-amber-100">
+                    {usage.layoutChanges} / {features.aiSiteEditorLayoutChanges}
+                  </div>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3 border-amber-300 dark:border-amber-700"
+                onClick={() => (window.location.href = "/settings?tab=billing")}
+              >
+                <Crown className="h-4 w-4 mr-2" />
+                {t("aiSiteEditor.upgradeForUnlimited")}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Professional/Enterprise badge */}
+      {isProfessionalOrHigher && (
+        <Card className="p-4 bg-gradient-to-r from-purple-900/10 to-blue-900/10 dark:from-purple-50/20 dark:to-blue-50/20 border-purple-700/30 dark:border-purple-300/20">
+          <div className="flex items-center gap-3">
+            <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div>
+              <h4 className="font-semibold text-purple-900 dark:text-purple-100">
+                {plan === "professional" ? t("aiSiteEditor.professionalPlan") : t("aiSiteEditor.enterprisePlan")}
+              </h4>
+              <p className="text-sm text-purple-700 dark:text-purple-300">
+                ✨ {t("aiSiteEditor.unlimited")} · AI автоматически применяет изменения в файлы
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Chat Messages */}
+      <Card className="flex-1 flex flex-col min-h-0">
+        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          <div className="space-y-4">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-lg p-4 ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : msg.role === "system"
+                      ? "bg-muted text-muted-foreground"
+                      : "bg-secondary text-secondary-foreground"
+                  }`}
+                >
+                  {/* Edit type badge */}
+                  {msg.editType && (
+                    <Badge variant="outline" className="mb-2">
+                      {getEditTypeIcon(msg.editType)}
+                      <span className="ml-1">{getEditTypeLabel(msg.editType)}</span>
+                    </Badge>
+                  )}
+
+                  {/* Message content */}
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {msg.content || (
+                      <span className="flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        AI читает файлы и применяет изменения…
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Applied files list with per-file rollback */}
+                  {msg.appliedFiles && msg.appliedFiles.length > 0 && (
+                    <div className="mt-3 space-y-1 border-t pt-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">
+                        📂 Изменённые файлы:
+                      </p>
+                      {msg.appliedFiles.map((af) => {
+                        const key = `${af.filePath}:${af.timestamp}`;
+                        const isRollingThisBack = rollingBack === key;
+                        return (
+                          <div
+                            key={key}
+                            className="flex items-center justify-between gap-2 rounded bg-background/50 px-2 py-1"
+                          >
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <FileCode2 className="h-3 w-3 shrink-0 text-green-500" />
+                              <span className="text-xs truncate font-mono">
+                                {af.filePath}
+                              </span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 shrink-0 text-xs"
+                              disabled={isRollingThisBack}
+                              onClick={() => handleRollback(af.filePath, af.timestamp)}
+                            >
+                              {isRollingThisBack ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <>
+                                  <Undo2 className="h-3 w-3 mr-1" />
+                                  Откат
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Global loading indicator */}
+            {isLoading && messages[messages.length - 1]?.content === "" && (
+              <div className="flex justify-start">
+                <div className="bg-secondary text-secondary-foreground rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Sparkles className="h-4 w-4 animate-pulse text-purple-500" />
+                    AI читает код и применяет изменения…
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Input area */}
+        <div className="p-4 border-t">
+          <div className="flex gap-2">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder={t("aiSiteEditor.inputPlaceholder")}
+              className="min-h-[60px] resize-none"
+              disabled={isLoading}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading}
+              size="icon"
+              className="h-[60px] w-[60px]"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Backup / Rollback panel */}
+      {backups.length > 0 && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold flex items-center gap-2 text-sm">
+              <History className="h-4 w-4" />
+              История изменений ({backups.length} backup-ов)
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowBackups((v) => !v);
+                fetchBackups();
+              }}
+            >
+              <RefreshCw className="h-3 w-3 mr-1" />
+              {showBackups ? "Скрыть" : "Показать"}
+            </Button>
+          </div>
+
+          {showBackups && (
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {backups.slice(0, 20).map((b) => {
+                const key = `${b.originalPath}:${b.timestamp}`;
+                const isRollingThisBack = rollingBack === key;
+                return (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between gap-2 text-sm p-2 rounded hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <FileCode2 className="h-3 w-3 shrink-0 text-blue-500" />
+                        <span className="font-mono text-xs truncate">{b.originalPath}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(b.timestamp).toLocaleString("ru-RU")} · {b.description}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 shrink-0"
+                      disabled={isRollingThisBack}
+                      onClick={() => handleRollback(b.originalPath, b.timestamp)}
+                    >
+                      {isRollingThisBack ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <>
+                          <Undo2 className="h-3 w-3 mr-1" />
+                          Откат
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Recent session history */}
+      {history && history.length > 0 && (
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
+            <History className="h-4 w-4" />
+            {t("aiSiteEditor.recentChanges")}
+          </h3>
+          <div className="space-y-2">
+            {history.slice(0, 5).map((session) => (
+              <div
+                key={session._id}
+                className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {getEditTypeIcon(session.editType)}
+                  <span className="text-muted-foreground truncate">
+                    {session.userMessage.substring(0, 60)}
+                    {session.userMessage.length > 60 ? "…" : ""}
+                  </span>
+                </div>
+                {session.status === "completed" && (
+                  <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}

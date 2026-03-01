@@ -18,6 +18,14 @@ export interface PlanFeatures {
   aiInsights: boolean;          // professional+
   aiLeaveAssistant: boolean;    // professional+
 
+  // AI Site Editor - NEW
+  aiSiteEditor: boolean;        // all plans
+  aiSiteEditorDesignChanges: number;    // starter: 5/month, pro: unlimited
+  aiSiteEditorContentChanges: number;   // starter: 10/month, pro: unlimited
+  aiSiteEditorLayoutChanges: number;    // starter: 2/month, pro: unlimited
+  aiSiteEditorLogicChanges: boolean;    // professional+ only
+  aiSiteEditorFullControl: boolean;     // professional+ only
+
   // SLA
   slaSettings: boolean;         // professional+
 
@@ -40,6 +48,13 @@ const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
     aiChat: true,
     aiInsights: true,
     aiLeaveAssistant: true,
+    // AI Site Editor - Limited for Starter
+    aiSiteEditor: true,
+    aiSiteEditorDesignChanges: 5,        // 5 design changes per month
+    aiSiteEditorContentChanges: 10,      // 10 content changes per month
+    aiSiteEditorLayoutChanges: 2,        // 2 layout changes per month
+    aiSiteEditorLogicChanges: false,     // No logic changes
+    aiSiteEditorFullControl: false,      // No full control
     slaSettings: true,
     maxEmployees: 50,
     calendarSync: true,
@@ -53,6 +68,13 @@ const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
     aiChat: true,
     aiInsights: true,
     aiLeaveAssistant: true,
+    // AI Site Editor - Unlimited for Professional
+    aiSiteEditor: true,
+    aiSiteEditorDesignChanges: Infinity,  // Unlimited design changes
+    aiSiteEditorContentChanges: Infinity, // Unlimited content changes
+    aiSiteEditorLayoutChanges: Infinity,  // Unlimited layout changes
+    aiSiteEditorLogicChanges: true,       // Logic changes allowed
+    aiSiteEditorFullControl: true,        // Full control allowed
     slaSettings: true,
     maxEmployees: 200,
     calendarSync: true,
@@ -66,6 +88,13 @@ const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
     aiChat: true,
     aiInsights: true,
     aiLeaveAssistant: true,
+    // AI Site Editor - Unlimited for Enterprise
+    aiSiteEditor: true,
+    aiSiteEditorDesignChanges: Infinity,  // Unlimited design changes
+    aiSiteEditorContentChanges: Infinity, // Unlimited content changes
+    aiSiteEditorLayoutChanges: Infinity,  // Unlimited layout changes
+    aiSiteEditorLogicChanges: true,       // Logic changes allowed
+    aiSiteEditorFullControl: true,        // Full control allowed
     slaSettings: true,
     maxEmployees: Infinity,
     calendarSync: true,

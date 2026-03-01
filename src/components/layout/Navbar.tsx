@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 // eliminate forced reflow from JS-driven animations, and defer the framer-motion bundle
 import {
   Menu, Bell, Sun, Moon, LogOut, User, Settings, ChevronDown, Check, X,
-  Plus, Calendar, Clock, FileText, Zap, Keyboard, History, Star, Circle,
+  Plus, Calendar, Clock, FileText, Zap, Keyboard, History, Star, Circle, Home,
 } from "lucide-react";
 
 type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";
@@ -35,7 +35,6 @@ import { Badge } from "@/components/ui/badge";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { KeyboardShortcutsModal } from "@/components/KeyboardShortcutsModal";
 import { QuickStatsWidget } from "@/components/productivity/QuickStatsWidget";
-import { TodayTasksPanel } from "@/components/productivity/TodayTasksPanel";
 import { TeamPresence } from "@/components/productivity/TeamPresence";
 import { PomodoroTimer } from "@/components/productivity/PomodoroTimer";
 import { FocusMode } from "@/components/productivity/FocusMode";
@@ -209,7 +208,7 @@ export function Navbar() {
 
   return (
     <>
-    <header className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] backdrop-blur-md flex items-center px-4 gap-4 sticky top-0 z-20 transition-colors duration-300">
+    <header className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] backdrop-blur-md flex items-center px-4 gap-4 fixed top-0 left-0 right-0 z-[60] transition-colors duration-300">
       {/* Mobile hamburger */}
       <Button
         variant="ghost"
@@ -218,6 +217,17 @@ export function Navbar() {
         onClick={() => setMobileOpen(true)}
       >
         <Menu className="w-5 h-5" />
+      </Button>
+
+      {/* Home button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        onClick={() => router.push("/")}
+        title={t('nav.home') || 'Home'}
+      >
+        <Home className="w-5 h-5" />
       </Button>
 
       {/* Page title */}
@@ -365,10 +375,6 @@ export function Navbar() {
 
                 {/* Pomodoro Timer */}
                 <PomodoroTimer />
-                <DropdownMenuSeparator className="bg-[var(--border)]" />
-
-                {/* Today's Tasks */}
-                <TodayTasksPanel />
                 <DropdownMenuSeparator className="bg-[var(--border)]" />
 
                 {/* Team Presence */}

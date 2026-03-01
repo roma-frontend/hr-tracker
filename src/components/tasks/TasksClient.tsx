@@ -136,6 +136,7 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
 
 // ── Draggable Task Card ────────────────────────────────────────────────────
 function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task._id });
   const style = { transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.4 : 1 };
 
