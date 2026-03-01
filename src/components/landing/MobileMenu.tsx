@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import { X, Home, Sparkles, BarChart3, DollarSign, Info } from 'lucide-react';
 import Link from 'next/link';
 
@@ -9,15 +10,17 @@ interface MobileMenuProps {
   onClose: () => void;
 }
 
-const menuItems = [
-  { name: 'Home',     href: '#home',      icon: Home },
-  { name: 'Features', href: '#features',  icon: Sparkles },
-  { name: 'Analytics',href: '#analytics', icon: BarChart3 },
-  { name: 'Pricing',  href: '#pricing',   icon: DollarSign },
-  { name: 'About',    href: '#about',     icon: Info },
+const menuItemsConfig = [
+  { key: 'home',      href: '#home',      icon: Home },
+  { key: 'features',  href: '#features',  icon: Sparkles },
+  { key: 'analytics', href: '#analytics', icon: BarChart3 },
+  { key: 'pricing',   href: '#pricing',   icon: DollarSign },
+  { key: 'about',     href: '#about',     icon: Info },
 ];
 
-export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+export default function MobileMenu({ 
+isOpen, onClose }: MobileMenuProps) {
+  const { t } = useTranslation();
   // Lock body scroll when menu open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -57,19 +60,19 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         }}
         role="dialog"
         aria-modal="true"
-        aria-label="Mobile navigation menu"
+        aria-label={t('mobileMenu.closeMenu')}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--landing-card-border)' }}>
-            <span className="font-bold text-lg" style={{ color: 'var(--landing-text-primary)' }}>HR<span style={{ color: 'var(--primary)' }}>Leave</span></span>
+            <span className="font-bold text-lg" style={{ color: 'var(--landing-text-primary)' }}>{t('departments.hr')}<span style={{ color: 'var(--primary)' }}>Leave</span></span>
             <button
               onClick={onClose}
               className="w-10 h-10 rounded-xl transition-colors flex items-center justify-center"
               style={{ backgroundColor: 'var(--landing-card-bg)' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-hover)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)'}
-              aria-label="Close menu"
+              aria-label={t('mobileMenu.closeMenu')}
             >
               <X size={20} style={{ color: 'var(--landing-text-primary)' }} />
             </button>
@@ -78,11 +81,11 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           {/* Navigation — staggered CSS fade-in via custom delay */}
           <nav className="flex-1 overflow-y-auto p-6" aria-label="Mobile navigation">
             <ul className="space-y-2">
-              {menuItems.map((item, index) => {
+              {menuItemsConfig.map((item, index) => {
                 const Icon = item.icon;
                 return (
                   <li
-                    key={item.name}
+                    key={item.key}
                     style={{
                       opacity: isOpen ? 1 : 0,
                       transform: isOpen ? 'translateX(0)' : 'translateX(20px)',
@@ -106,7 +109,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                       <div className="w-10 h-10 rounded-lg transition-colors flex items-center justify-center" style={{ backgroundColor: 'var(--landing-card-bg)' }}>
                         <Icon size={18} style={{ color: 'var(--primary)' }} />
                       </div>
-                      <span className="font-medium">{item.name}</span>
+                      <span className="font-medium">{t(`mobileMenu.${item.key}`)}</span>
                     </a>
                   </li>
                 );
@@ -129,7 +132,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   borderColor: 'var(--landing-card-border)',
                   backgroundColor: 'var(--landing-card-bg)'
                 }}>
-                Sign In
+                {t('mobileMenu.signIn')}
               </button>
             </Link>
             <Link href="/register" onClick={onClose}>
@@ -138,7 +141,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   background: 'linear-gradient(135deg, #2563eb, #93c5fd)',
                   color: '#ffffff'
                 }}>
-                Get Started Free
+                {t('mobileMenu.getStartedFree')}
               </button>
             </Link>
           </div>

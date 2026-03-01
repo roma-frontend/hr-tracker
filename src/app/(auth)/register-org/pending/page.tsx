@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { Clock, Mail, CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from 'react-i18next';
 
 export default function PendingPage() {
+  const { t } = useTranslation();
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4"
@@ -125,7 +127,7 @@ export default function PendingPage() {
                 className="w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-opacity-50"
                 style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
               >
-                Back to Home
+                {t('ui.backToHome')}
               </button>
             </Link>
           </div>

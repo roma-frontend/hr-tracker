@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,17 +37,31 @@ interface EditEmployeeModalProps {
 }
 
 const ADMIN_EMAIL = "romangulanyan@gmail.com";
-const DEPARTMENTS = ["Engineering", "HR", "Finance", "Marketing", "Operations", "Sales", "Design", "Management", "Legal", "IT"];
-const ALL_ROLES = [
-  { value: "admin", label: "Admin", icon: "👑", description: "Full access" },
-  { value: "supervisor", label: "Supervisor", icon: "🎯", description: "Manage team" },
-  { value: "employee", label: "Employee", icon: "👤", description: "Basic access" },
+// Departments will be translated using i18n in the component
+const ALL_ROLES_CONFIG = [
+  { value: "admin", icon: "👑", labelKey: "roles.admin", descKey: "editEmployee.fullAccess" },
+  { value: "supervisor", icon: "🎯", labelKey: "roles.supervisor", descKey: "editEmployee.manageTeam" },
+  { value: "employee", icon: "👤", labelKey: "roles.employee", descKey: "editEmployee.basicAccess" },
 ];
 
 export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: EditEmployeeModalProps) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const updateUser = useMutation(api.users.updateUser);
   const supervisors = useQuery(api.users.getSupervisors, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  
+  const DEPARTMENTS = [
+    { value: "Engineering", label: t('departments.engineering') },
+    { value: "HR", label: t('departments.hr') },
+    { value: "Finance", label: t('departments.finance') },
+    { value: "Marketing", label: t('departments.marketing') },
+    { value: "Operations", label: t('departments.operations') },
+    { value: "Sales", label: t('departments.sales') },
+    { value: "Design", label: t('departments.design') },
+    { value: "Management", label: t('departments.management') },
+    { value: "Legal", label: t('departments.legal') },
+    { value: "IT", label: t('departments.it') }
+  ];
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -67,6 +82,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
   const currentUser = useAuthStore((s) => s.user);
   // Only romangulanyan@gmail.com can assign admin role
   const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
+  const ALL_ROLES = ALL_ROLES_CONFIG.map(r => ({ ...r, label: t(r.labelKey), description: t(r.descKey) }));
   const ROLES = isActualAdmin ? ALL_ROLES : ALL_ROLES.filter((r) => r.value !== "admin");
 
   const handleSave = async () => {
@@ -92,10 +108,10 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
         sickLeaveBalance: form.sickLeaveBalance,
         familyLeaveBalance: form.familyLeaveBalance,
       });
-      toast.success("Employee updated successfully!");
+      toast.success(t('modals.editEmployee.updatedSuccess'));
       onClose();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
+      toast.error(err instanceof Error ? err.message : t('modals.editEmployee.failedToUpdate'));
     } finally {
       setLoading(false);
     }
@@ -133,7 +149,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                   size="md"
                 />
                 <div>
-                  <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Edit Employee</h2>
+                  <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>{t('modals.editEmployee.title')}</h2>
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>{employee.email}</p>
                 </div>
               </div>
@@ -147,7 +163,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
               {/* Name */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
-                  <User className="w-3.5 h-3.5" /> Full Name
+                  <User className="w-3.5 h-3.5" /> {t('labels.fullName')}
                 </label>
                 <input
                   value={form.name}
@@ -163,7 +179,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
               {canEditRole && (
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
-                    <Shield className="w-3.5 h-3.5" /> Role
+                    <Shield className="w-3.5 h-3.5" /> {t('labels.role')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {ROLES.map((r) => (
@@ -218,7 +234,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
-                    <Building2 className="w-3.5 h-3.5" /> Department
+                    <Building2 className="w-3.5 h-3.5" /> {t('labels.department')}
                   </label>
                   <select
                     value={form.department}
@@ -227,11 +243,11 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                     style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                   >
                     <option value="">Select...</option>
-                    {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    {DEPARTMENTS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Position</label>
+                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('labels.position')}</label>
                   <input
                     value={form.position}
                     onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
@@ -247,7 +263,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
               {/* Phone */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
-                  <Phone className="w-3.5 h-3.5" /> Phone
+                  <Phone className="w-3.5 h-3.5" /> {t('labels.phone')}
                 </label>
                 <input
                   value={form.phone}
@@ -263,7 +279,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
               {/* Leave Balances — admin only */}
               {canEditRole && (
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Leave Balances (days)</label>
+                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('labels.leaveBalances')}</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { key: "paidLeaveBalance", label: "Paid", color: "#2563eb" },
@@ -327,7 +343,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                 style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save Changes
+                {t('modals.editEmployee.saveChanges')}
               </button>
             </div>
           </motion.div>

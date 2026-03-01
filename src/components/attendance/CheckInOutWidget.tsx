@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -13,7 +14,9 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { format } from "date-fns";
 
 export function CheckInOutWidget() {
-  const { user } = useAuthStore();
+  
+  const { t } = useTranslation();
+const { user } = useAuthStore();
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   const todayStatus = useQuery(api.timeTracking.getTodayStatus, 

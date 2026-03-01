@@ -13,7 +13,7 @@ interface PersonalAnalyticsProps {
 
 const COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'];
 
-export function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
+export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
   const { t } = useTranslation();
   const analytics = useQuery(api.analytics.getUserAnalytics, { userId });
 

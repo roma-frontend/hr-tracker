@@ -67,28 +67,28 @@ import {
 import { useRouter } from 'next/navigation';
 
 // ─── Stats Data ───────────────────────────────────────────────────────────────
-const STATS = [
+const getStatsData = (t: any) => [
   {
     value: '500+',
-    label: 'Employees Tracked',
+    label: t('landingExtra.statsEmployees'),
     icon: <Users size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(37,99,235,0.2)',
   },
   {
     value: '99%',
-    label: 'Accuracy Rate',
+    label: t('landingExtra.statsAccuracy'),
     icon: <CheckCircle2 size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(96,165,250,0.2)',
   },
   {
     value: '24',
-    label: 'Real-time Tracking',
+    label: t('landingExtra.statsRealtime'),
     icon: <Activity size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(96,165,250,0.15)',
   },
   {
     value: '360',
-    label: 'Smart Analytics',
+    label: t('landingExtra.statsAnalytics'),
     icon: <BarChart3 size={22} style={{ color: 'var(--primary)' }} />,
     color: 'rgba(56,189,248,0.18)',
   },
@@ -267,7 +267,7 @@ function Navbar() {
                 background: 'var(--landing-card-bg)',
                 border: '1px solid var(--landing-card-border)',
               }}
-              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={theme === 'dark' ? t('landingExtra.switchToLight') : t('landingExtra.switchToDark')}
             >
               {theme === 'dark' ? (
                 <Sun size={18} style={{ color: 'var(--landing-text-muted)' }} />
@@ -309,7 +309,7 @@ function Navbar() {
                   borderColor: 'var(--border)'
                 }}
               >
-                <DropdownMenuLabel className="text-xs font-semibold tracking-widest uppercase px-2 py-1.5" style={{ color: 'var(--muted-foreground)' }}>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs font-semibold tracking-widest uppercase px-2 py-1.5" style={{ color: 'var(--muted-foreground)' }}>{t('landingExtra.myAccount')}</DropdownMenuLabel>
                 <DropdownMenuSeparator style={{ backgroundColor: 'var(--border)' }} />
                 <DropdownMenuItem
                   className="cursor-pointer gap-2 rounded-lg transition-colors focus:outline-none focus-visible:outline-none outline-none border-0 focus:border-0 focus:ring-0 focus-visible:ring-0"
@@ -342,7 +342,7 @@ function Navbar() {
                   onClick={handleLogout}
                 >
                   <LogOut className="w-4 h-4" />
-                  Log out
+                  {t('landingExtra.logOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -365,14 +365,14 @@ function Navbar() {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
-                Sign In
+                {t('landingExtra.signIn')}
               </Link>
               <Link
                 href="/register"
                 className="hidden md:inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
               >
-                Get Started
+                {t('landingExtra.getStarted')}
                 <ArrowRight size={14} />
               </Link>
 
@@ -436,7 +436,7 @@ function HeroSection() {
           color: '#ffffff'
         }}
       >
-        Skip to main content
+        {t('ui.skipToContent')}
       </a>
 
       {/* Badge — CSS shimmer, no JS */}
@@ -597,6 +597,8 @@ function HeroSection() {
 
 // ─── Stats Section ────────────────────────────────────────────────────────────
 function StatsSection() {
+  const { t } = useTranslation();
+  const STATS = getStatsData(t);
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
   React.useEffect(() => {
@@ -620,9 +622,9 @@ function StatsSection() {
           transition: 'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
-        <span className="section-eyebrow">By the Numbers</span>
+        <span className="section-eyebrow">{t('landing.byTheNumbers')}</span>
         <h2 className="mt-3 text-3xl md:text-4xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>
-          Trusted at <span className="heading-gradient">scale</span>
+          {t('landing.trustedAt')} <span className="heading-gradient">{t('landing.scale')}</span>
         </h2>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
@@ -664,11 +666,11 @@ function FeaturesSection() {
       >
         <span className="section-eyebrow">{t('landing.leaveTypes')}</span>
         <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
-          Every leave type,{' '}
-          <span className="heading-gradient">perfectly managed</span>
+          {t('landingExtra.everyLeaveType')}{' '}
+          <span className="heading-gradient">{t('landing.perfectlyManaged')}</span>
         </h2>
         <p className="mt-4 max-w-xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)' }}>
-          From vacation days to medical appointments — track and manage every absence with precision and elegance.
+          {t('landingExtra.featuresSubtitle')}
         </p>
       </div>
 
@@ -706,14 +708,14 @@ function CTABanner() {
           </div>
 
           <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
-            Ready to elevate your{' '}
+            {t('landingExtra.ctaTitle')}{' '}
             <span style={{ color: 'var(--primary)' }}>
-              HR operations?
+              {t('landingExtra.ctaTitleHighlight')}
             </span>
           </h2>
 
           <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
-            Join elite HR professionals who rely on HRLeave to manage their teams with sophistication.
+            {t('landingExtra.ctaSubtitle')}
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -777,10 +779,10 @@ function Footer() {
   const { t } = useTranslation();
   const footerLinks = {
     product: [
-      { name: 'Features', href: '#features' },
-      { name: 'Pricing', href: '#pricing' },
-      { name: 'Testimonials', href: '#testimonials' },
-      { name: 'FAQ', href: '#faq' },
+      { nameKey: 'landing.features', href: '#features' },
+      { nameKey: 'landing.pricing', href: '#pricing' },
+      { nameKey: 'landing.testimonials', href: '#testimonials' },
+      { nameKey: 'landing.faq', href: '#faq' },
     ],
     platform: [
       { nameKey: 'nav.dashboard', href: '/login' },
@@ -791,16 +793,16 @@ function Footer() {
       { nameKey: 'nav.calendar', href: '/login' },
     ],
     account: [
-      { name: 'Sign In', href: '/login' },
-      { name: 'Register', href: '/register' },
-      { name: 'Settings', href: '/login' },
-      { name: 'Help', href: '#faq' },
+      { nameKey: 'auth.signIn', href: '/login' },
+      { nameKey: 'auth.register', href: '/register' },
+      { nameKey: 'nav.settings', href: '/login' },
+      { nameKey: 'nav.help', href: '#faq' },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/privacy#cookies' },
-      { name: 'GDPR', href: '/privacy#gdpr' },
+      { name: t('landingExtra.footerPrivacy'), href: '/privacy' },
+      { name: t('landingExtra.footerTerms'), href: '/terms' },
+      { name: t('landingExtra.footerCookies'), href: '/privacy#cookies' },
+      { name: t('landingExtra.footerGdpr'), href: '/privacy#gdpr' },
     ],
   };
 
@@ -826,7 +828,7 @@ function Footer() {
               </span>
             </Link>
             <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
-              Premium HR leave management platform for sophisticated teams.
+              {t('landingExtra.footerBrand')}
             </p>
             {/* Social links */}
             <div className="flex gap-3">
@@ -865,7 +867,7 @@ function Footer() {
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h4 className="font-semibold text-sm uppercase tracking-wider mb-4" style={{ color: 'var(--landing-text-primary)' }}>
-                {category === 'product' ? 'Product' : category === 'platform' ? 'Platform' : category === 'account' ? 'Account' : 'Legal'}
+                {category === 'product' ? t('landingExtra.footerProduct') : category === 'platform' ? t('landingExtra.footerPlatform') : category === 'account' ? t('landingExtra.footerAccount') : t('landingExtra.footerLegal')}
               </h4>
               <ul className="space-y-3">
                 {links.map((link) => (
@@ -913,12 +915,12 @@ function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--landing-card-border)' }}>
           <p className="text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
-            © {new Date().getFullYear()} HRLeave Monitor. All rights reserved.
+            {t('landingExtra.footerCopyright', { year: new Date().getFullYear() })}
           </p>
           <div className="flex items-center gap-6 text-xs" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
-            <span>🔒 SSL Secured</span>
-            <span>✓ GDPR Compliant</span>
-            <span>✓ SOC 2 Certified</span>
+            <span>{t('landingExtra.footerSsl')}</span>
+            <span>{t('landingExtra.footerGdprCompliant')}</span>
+            <span>{t('landingExtra.footerSoc2')}</span>
           </div>
         </div>
       </div>

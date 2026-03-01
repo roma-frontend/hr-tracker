@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState } from "react"
+import { useTranslation } from 'react-i18next';;
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -28,6 +29,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 type Status = "pending" | "approved" | "rejected";
 
 export default function OrgRequestsPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [statusFilter, setStatusFilter] = useState<Status | "all">("pending");
   const [selectedRequest, setSelectedRequest] = useState<Id<"organizationRequests"> | null>(null);
@@ -336,7 +338,7 @@ export default function OrgRequestsPage() {
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="E.g., Incomplete information, duplicate request..."
+                placeholder={t('placeholders.incompleteInfo')}
                 rows={4}
                 className="w-full px-4 py-3 rounded-xl border text-sm outline-none resize-none mb-4"
                 style={{
@@ -350,9 +352,7 @@ export default function OrgRequestsPage() {
                   onClick={() => setShowRejectModal(false)}
                   className="flex-1 py-2.5 rounded-xl font-semibold text-sm border"
                   style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-                >
-                  Cancel
-                </button>
+                >{t('common.cancel')}</button>
                 <button
                   onClick={handleReject}
                   className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white"

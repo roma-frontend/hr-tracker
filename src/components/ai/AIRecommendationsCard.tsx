@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Calendar, AlertTriangle, TrendingUp, Users, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
@@ -13,8 +14,10 @@ interface Insights {
   bestDates: string[] | null;
 }
 
-export function AIRecommendationsCard() {
-  const user = useAuthStore((s) => s.user);
+export default function AIRecommendationsCard() {
+  
+  const { t } = useTranslation();
+const user = useAuthStore((s) => s.user);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
@@ -74,7 +77,7 @@ export function AIRecommendationsCard() {
               onClick={fetchInsights}
               disabled={loading}
               className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors disabled:opacity-50"
-              title="Refresh"
+              title={t('titles.refresh')}
             >
               <RefreshCw className={`w-3.5 h-3.5 text-[var(--text-muted)] ${loading ? "animate-spin" : ""}`} />
             </button>

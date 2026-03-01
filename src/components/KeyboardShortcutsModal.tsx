@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+import { useTranslation } from "react-i18next";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Keyboard, Zap } from "lucide-react";
@@ -9,32 +11,33 @@ interface KeyboardShortcutsModalProps {
   onClose: () => void;
 }
 
-const shortcuts = [
-  {
-    category: "Navigation",
-    items: [
-      { keys: ["⌘", "K"], description: "Command Palette" },
-      { keys: ["⌘", "/"], description: "Toggle Sidebar" },
-    ],
-  },
-  {
-    category: "Quick Actions",
-    items: [
-      { keys: ["⌘", "T"], description: "New Task" },
-      { keys: ["⌘", "L"], description: "Request Leave" },
-      { keys: ["⌘", "A"], description: "Attendance" },
-    ],
-  },
-  {
-    category: "Interface",
-    items: [
-      { keys: ["⌘", "B"], description: "Toggle Notifications" },
-      { keys: ["Esc"], description: "Close Modal" },
-    ],
-  },
-];
-
 export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsModalProps) {
+  const { t } = useTranslation();
+  
+  const shortcuts = [
+    {
+      category: t("keyboard.navigation"),
+      items: [
+        { keys: ["⌘", "K"], description: t("keyboard.commandPalette") },
+        { keys: ["⌘", "/"], description: t("keyboard.toggleSidebar") },
+      ],
+    },
+    {
+      category: t("keyboard.quickActions"),
+      items: [
+        { keys: ["⌘", "T"], description: t("keyboard.newTask") },
+        { keys: ["⌘", "L"], description: t("keyboard.requestLeave") },
+        { keys: ["⌘", "A"], description: t("keyboard.attendance") },
+      ],
+    },
+    {
+      category: t("keyboard.interface"),
+      items: [
+        { keys: ["⌘", "B"], description: t("keyboard.toggleNotifications") },
+        { keys: ["Esc"], description: t("keyboard.closeModal") },
+      ],
+    },
+  ];
   return (
     <AnimatePresence>
       {isOpen && (
@@ -132,7 +135,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
               <div className="border-t border-[var(--border)] bg-[var(--background-subtle)] px-6 py-4">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-[var(--text-muted)]">
-                    Press <kbd className="rounded border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> to close
+                    t("keyboard.closeHint")
                   </p>
                   <Button onClick={onClose} variant="secondary" size="sm">
                     Got it!
@@ -146,3 +149,4 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
     </AnimatePresence>
   );
 }
+

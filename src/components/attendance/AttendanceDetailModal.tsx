@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, LogIn, LogOut, AlertTriangle, CheckCircle, Calendar, Timer, TrendingUp, User, Building2 } from "lucide-react";
@@ -47,7 +48,9 @@ function formatDuration(minutes: number) {
   return `${h}h ${m}m`;
 }
 
-export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetailModalProps) {
+export function AttendanceDetailModal({ 
+record, open, onClose }: AttendanceDetailModalProps) {
+  const { t } = useTranslation();
   const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
   const monthlyStats = useQuery(
     api.timeTracking.getMonthlyStats,
@@ -271,9 +274,9 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                               {formatTime(r.checkInTime)} → {r.checkOutTime ? formatTime(r.checkOutTime) : "..."}
                             </span>
                           ) : null}
-                          {r.isLate && <Badge variant="destructive" className="text-xs py-0">Late</Badge>}
+                          {r.isLate && <Badge variant="destructive" className="text-xs py-0">{t('statuses.late')}</Badge>}
                           {r.status === "checked_out" && !r.isLate && <Badge className="bg-green-500 text-white text-xs py-0">✓</Badge>}
-                          {r.status === "checked_in" && <Badge className="bg-green-500 text-white text-xs py-0">Active</Badge>}
+                          {r.status === "checked_in" && <Badge className="bg-green-500 text-white text-xs py-0">{t('statuses.active')}Active</Badge>}
                         </div>
                       </div>
                     ))}

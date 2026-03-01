@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
 import {
@@ -12,18 +13,26 @@ import {
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-const TEAM_SIZES = ['1–10', '11–50', '51–200', '201–500', '500+'];
-
-const ENTERPRISE_FEATURES = [
-  { icon: <Users size={18} />,   text: '100+ employees supported' },
-  { icon: <Shield size={18} />,  text: 'Dedicated security review' },
-  { icon: <Zap size={18} />,     text: 'Custom integrations & API' },
-  { icon: <Star size={18} />,    text: 'Priority 24/7 support' },
-  { icon: <Globe size={18} />,   text: 'On-premise deployment option' },
-  { icon: <Clock size={18} />,   text: '99.99% uptime SLA' },
-];
-
 export default function ContactPage() {
+  const { t } = useTranslation();
+  
+  const TEAM_SIZES = [
+    t('contactPage.team1to10'),
+    t('contactPage.team11to50'),
+    t('contactPage.team51to200'),
+    t('contactPage.team201to500'),
+    t('contactPage.team500plus'),
+  ];
+
+  const ENTERPRISE_FEATURES = [
+    { icon: <Users size={18} />,   text: t('contactPage.employeesSupported') },
+    { icon: <Shield size={18} />,  text: t('contactPage.securityReview') },
+    { icon: <Zap size={18} />,     text: t('contactPage.customIntegrations') },
+    { icon: <Star size={18} />,    text: t('contactPage.prioritySupport') },
+    { icon: <Globe size={18} />,   text: t('contactPage.onPremise') },
+    { icon: <Clock size={18} />,   text: t('contactPage.uptime') },
+  ];
+
   const [form, setForm] = useState({ name: '', email: '', company: '', teamSize: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -31,7 +40,7 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) { setError('Please fill in all required fields.'); return; }
+    if (!form.name || !form.email || !form.message) { setError(t('contactPage.fillAllFields') || t('errors.required')); return; }
     setLoading(true); setError('');
     try {
       await convex.mutation(api.subscriptions.saveContactInquiry, {
@@ -44,7 +53,7 @@ export default function ContactPage() {
       });
       setSent(true);
     } catch (e: any) {
-      setError('Something went wrong. Please try again.');
+      setError(t('errors.somethingWentWrong'));
     } finally {
       setLoading(false);
     }
@@ -70,7 +79,7 @@ export default function ContactPage() {
         {/* Back link */}
         <Link href="/#pricing" className="inline-flex items-center gap-2 text-blue-400/70 hover:text-blue-300 text-sm mb-12 transition-colors group">
           <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-          Back to Pricing
+          {t('contactPage.backToPricing')}
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
@@ -80,20 +89,15 @@ export default function ContactPage() {
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 text-xs font-semibold uppercase tracking-widest mb-6">
               <Building2 size={12} />
-              Enterprise Plan
+              {t('contact.enterpriseSupport')}
             </div>
 
             <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-6">
-              Let's build something{' '}
-              <span style={{ background: 'linear-gradient(135deg, #38bdf8, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                great together
-              </span>
+              {t('contactPage.contactHeader')}
             </h1>
 
             <p className="text-blue-200/60 text-lg leading-relaxed mb-10">
-              Get a custom plan tailored to your organization's needs.
-              Our team will reach out within <strong className="text-blue-300/80">24 hours</strong> to
-              schedule a personalized demo.
+              {t('contactPage.enterpriseSubtitle')}
             </p>
 
             {/* Features */}
@@ -111,7 +115,7 @@ export default function ContactPage() {
 
             {/* Contact info */}
             <div className="space-y-4">
-              <p className="text-blue-200/40 text-xs uppercase tracking-widest font-semibold mb-3">Or reach us directly</p>
+              <p className="text-blue-200/40 text-xs uppercase tracking-widest font-semibold mb-3">{t('contactPage.directContact')}</p>
               {[
                 { icon: <Mail size={15} />, label: 'sales@hrleave.io', href: 'mailto:sales@hrleave.io' },
                 { icon: <Phone size={15} />, label: '+1 (800) 555-0199', href: 'tel:+18005550199' },
@@ -149,36 +153,35 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white mb-2">Message received! 🎉</h2>
+                      <h2 className="text-2xl font-bold text-white mb-2">{t('contactPage.messageSentTitle')}</h2>
                       <p className="text-blue-200/60 text-sm leading-relaxed">
-                        Thanks, <strong className="text-blue-200">{form.name}</strong>! Our sales team
-                        will reach out to <strong className="text-blue-200">{form.email}</strong> within 24 hours.
+                        {t('contactPage.messageSentDesc')}
                       </p>
                     </div>
                     <Link href="/"
                       className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-white transition-all hover:scale-105"
                       style={{ background: 'linear-gradient(135deg, #38bdf8, #6366f1)', boxShadow: '0 8px 24px rgba(56,189,248,0.25)' }}>
-                      Back to Home <ArrowRight size={15} />
+                      {t('ui.backToHome')} <ArrowRight size={15} />
                     </Link>
                   </div>
                 ) : (
                   /* ── Form ── */
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                      <h2 className="text-2xl font-bold text-white mb-1">Contact Sales</h2>
-                      <p className="text-blue-200/50 text-sm">Fill in the form and we'll be in touch shortly.</p>
+                      <h2 className="text-2xl font-bold text-white mb-1">{t('contact.title')}</h2>
+                      <p className="text-blue-200/50 text-sm">{t('contactPage.enterpriseSubtitle')}</p>
                     </div>
 
                     {/* Name + Email */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field label="Full Name *" icon={<Users size={14} />}>
+                      <Field label={t('contact.name') + ' *'} icon={<Users size={14} />}>
                         <input
-                          type="text" placeholder="John Smith" required
+                          type="text" placeholder={t('placeholders.johnSmith')} required
                           value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                           className="w-full bg-transparent text-white placeholder-blue-200/25 text-sm outline-none"
                         />
                       </Field>
-                      <Field label="Work Email *" icon={<Mail size={14} />}>
+                      <Field label={t('contact.email') + ' *'} icon={<Mail size={14} />}>
                         <input
                           type="email" placeholder="john@company.com" required
                           value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
@@ -189,29 +192,29 @@ export default function ContactPage() {
 
                     {/* Company + Team size */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field label="Company" icon={<Building2 size={14} />}>
+                      <Field label={t('contact.company')} icon={<Building2 size={14} />}>
                         <input
-                          type="text" placeholder="Acme Corp"
+                          type="text" placeholder={t('placeholders.acmeCorp')}
                           value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
                           className="w-full bg-transparent text-white placeholder-blue-200/25 text-sm outline-none"
                         />
                       </Field>
-                      <Field label="Team Size" icon={<Users size={14} />}>
+                      <Field label={t('contact.teamSize')} icon={<Users size={14} />}>
                         <select
                           value={form.teamSize} onChange={e => setForm(f => ({ ...f, teamSize: e.target.value }))}
                           className="w-full bg-transparent text-white text-sm outline-none appearance-none cursor-pointer"
                           style={{ colorScheme: 'dark' }}
                         >
-                          <option value="" className="bg-[#0f172a]">Select size</option>
-                          {TEAM_SIZES.map(s => <option key={s} value={s} className="bg-[#0f172a]">{s} employees</option>)}
+                          <option value="" className="bg-[#0f172a]">{t('contactPage.selectTeamSize')}</option>
+                          {TEAM_SIZES.map(s => <option key={s} value={s} className="bg-[#0f172a]">{s}</option>)}
                         </select>
                       </Field>
                     </div>
 
                     {/* Message */}
-                    <Field label="Message *" icon={<MessageSquare size={14} />}>
+                    <Field label={t('contact.message') + ' *'} icon={<MessageSquare size={14} />}>
                       <textarea
-                        placeholder="Tell us about your requirements, current challenges, or any specific features you need..."
+                        placeholder={t('contactPage.requirementsPlaceholder')}
                         required rows={4}
                         value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
                         className="w-full bg-transparent text-white placeholder-blue-200/25 text-sm outline-none resize-none"
@@ -235,7 +238,7 @@ export default function ContactPage() {
                       ) : (
                         <>
                           <MessageSquare size={16} />
-                          Send Message
+                          {t('contact.sendMessage')}
                           <ArrowRight size={16} />
                         </>
                       )}
@@ -243,7 +246,7 @@ export default function ContactPage() {
 
                     <p className="text-center text-blue-200/30 text-xs flex items-center justify-center gap-1.5">
                       <Shield size={11} />
-                      Your data is encrypted and never shared.
+                      {t('contact.securityNotice')}
                     </p>
                   </form>
                 )}

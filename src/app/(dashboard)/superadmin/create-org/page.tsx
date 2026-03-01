@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 export default function SuperadminCreateOrgPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const createOrg = useMutation(api.organizations.createOrganization);
 
@@ -33,8 +35,8 @@ export default function SuperadminCreateOrgPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-2">Access Denied</h1>
-          <p>Only superadmin can access this page.</p>
+          <h1 className="text-2xl font-bold text-red-600 mb-2">{t('ui.accessDenied')}</h1>
+          <p>{t('ui.onlySuperadminCanAccess')}</p>
           <p className="text-sm mt-2">Your email: {user.email}</p>
         </div>
       </div>
@@ -256,7 +258,7 @@ export default function SuperadminCreateOrgPage() {
               className="w-full py-3 px-4 text-white font-semibold rounded-xl transition-all disabled:opacity-50 hover:opacity-90"
               style={{ background: "var(--accent-gradient)" }}
             >
-              {loading ? "Creating Organization..." : "Create Organization"}
+              {loading ? t('organization.creatingOrganization') : t('organization.createOrganization')}
             </button>
 
             <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>

@@ -5,10 +5,12 @@ import { api } from "../../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Building2, Users, CheckCircle, XCircle, Edit, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function OrganizationsPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
   const organizations = useQuery(
@@ -36,8 +38,8 @@ export default function OrganizationsPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-muted-foreground">Superadmin access required</p>
+          <h1 className="text-2xl font-bold mb-2">{t('ui.accessDenied')}</h1>
+          <p className="text-muted-foreground">{t('ui.onlySuperadminCanAccess')}</p>
           <p className="text-xs text-muted-foreground mt-2">
             Your role: {user.role} | Email: {user.email}
           </p>
@@ -99,7 +101,7 @@ export default function OrganizationsPage() {
                 <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-sm text-muted-foreground">{t('statuses.active')}Active</p>
                 <p className="text-2xl font-bold">
                   {organizations?.filter((o) => o.isActive).length || 0}
                 </p>
@@ -125,7 +127,7 @@ export default function OrganizationsPage() {
                 <XCircle className="w-5 h-5 text-red-500 dark:text-red-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Inactive</p>
+                <p className="text-sm text-muted-foreground">{t('statuses.inactive')}Inactive</p>
                 <p className="text-2xl font-bold">
                   {organizations?.filter((o) => !o.isActive).length || 0}
                 </p>
@@ -173,11 +175,11 @@ export default function OrganizationsPage() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <p className="text-xs text-muted-foreground">Total Employees</p>
+                      <p className="text-xs text-muted-foreground">{t('organization.totalEmployees')}</p>
                       <p className="text-lg font-semibold">{org.totalEmployees}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Active Employees</p>
+                      <p className="text-xs text-muted-foreground">{t('organization.activeEmployees')}</p>
                       <p className="text-lg font-semibold text-green-500 dark:text-green-400">{org.activeEmployees}</p>
                     </div>
                     <div>
@@ -210,7 +212,7 @@ export default function OrganizationsPage() {
                 <button
                   onClick={() => router.push(`/superadmin/organizations/${org._id}/edit`)}
                   className="p-2 rounded-lg hover:bg-muted transition-colors"
-                  title="Edit organization"
+                  title={t('titles.editOrganization')}
                 >
                   <Edit className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
                 </button>
@@ -222,9 +224,9 @@ export default function OrganizationsPage() {
         {(!organizations || organizations.length === 0) && (
           <div className="text-center py-12">
             <Building2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">No organizations yet</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('emptyStates.noOrganizationsYet')}</h3>
             <p className="text-muted-foreground">
-              Create your first organization to get started
+              {t('organization.createFirstOrg')}
             </p>
           </div>
         )}

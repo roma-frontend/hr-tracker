@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect } from "react"
+import { useTranslation } from 'react-i18next';;
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -42,6 +43,7 @@ const STRENGTH_LABELS = ["Weak", "Fair", "Good", "Strong"];
 const TEAM_SIZES = ["1-10", "11-50", "51-200", "200+"];
 
 export default function RequestOrgPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -202,7 +204,7 @@ export default function RequestOrgPage() {
                     required
                     value={formData.orgName}
                     onChange={(e) => setFormData((p) => ({ ...p, orgName: e.target.value }))}
-                    placeholder="ACME Corporation"
+                    placeholder={t('placeholders.acmeCorporation')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: "var(--input)",
@@ -258,7 +260,7 @@ export default function RequestOrgPage() {
                       type="text"
                       value={formData.industry}
                       onChange={(e) => setFormData((p) => ({ ...p, industry: e.target.value }))}
-                      placeholder="Technology"
+                      placeholder={t('placeholders.technology')}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
                         background: "var(--input)",
@@ -319,7 +321,7 @@ export default function RequestOrgPage() {
                       required
                       value={formData.userName}
                       onChange={(e) => setFormData((p) => ({ ...p, userName: e.target.value }))}
-                      placeholder="John Doe"
+                      placeholder={t('placeholders.johnDoe')}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
                         background: "var(--input)",
@@ -333,9 +335,7 @@ export default function RequestOrgPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                    Email
-                  </label>
+                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.email')}</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                     <input
@@ -389,7 +389,7 @@ export default function RequestOrgPage() {
                     type="text"
                     value={formData.country}
                     onChange={(e) => setFormData((p) => ({ ...p, country: e.target.value }))}
-                    placeholder="United States"
+                    placeholder={t('placeholders.unitedStates')}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: "var(--input)",
@@ -403,9 +403,7 @@ export default function RequestOrgPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Password
-                </label>
+                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                   <input
@@ -413,7 +411,7 @@ export default function RequestOrgPage() {
                     required
                     value={formData.password}
                     onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                    placeholder="Min. 8 characters"
+                    placeholder={t('placeholders.minCharacters')}
                     className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: "var(--input)",
@@ -465,7 +463,7 @@ export default function RequestOrgPage() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
-                  placeholder="What features are most important to you? Any specific requirements?"
+                  placeholder={t('placeholders.whatFeaturesImportant')}
                   rows={3}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all resize-none"
                   style={{
@@ -524,7 +522,7 @@ export default function RequestOrgPage() {
             className="text-sm hover:underline flex items-center justify-center gap-1"
             style={{ color: "var(--text-muted)" }}
           >
-            <ArrowLeft className="w-3 h-3" /> Back to plans
+            <ArrowLeft className="w-3 h-3" /> {t('ui.backToPlans')}
           </Link>
         </div>
       </motion.div>

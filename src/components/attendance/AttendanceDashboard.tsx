@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import { useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { format } from "date-fns";
 
 export function AttendanceDashboard() {
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
 
   const monthlyStats = useQuery(
@@ -28,7 +30,7 @@ export function AttendanceDashboard() {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-center text-[var(--text-muted)]">Loading attendance data...</p>
+          <p className="text-center text-[var(--text-muted)]">{t('ui.loadingAttendanceData')}</p>
         </CardContent>
       </Card>
     );
@@ -36,7 +38,7 @@ export function AttendanceDashboard() {
 
   const stats = [
     {
-      label: "Days Worked",
+      label: t('attendanceExtra.daysWorked'),
       value: monthlyStats.totalDays,
       icon: Calendar,
       color: "text-blue-500",
@@ -44,7 +46,7 @@ export function AttendanceDashboard() {
       iconBg: "bg-blue-500/10",
     },
     {
-      label: "Total Hours",
+      label: t('attendanceExtra.totalHours'),
       value: `${monthlyStats.totalWorkedHours}h`,
       icon: Clock,
       color: "text-green-500",
@@ -52,7 +54,7 @@ export function AttendanceDashboard() {
       iconBg: "bg-green-500/10",
     },
     {
-      label: "Punctuality",
+      label: t('attendanceExtra.punctuality'),
       value: `${monthlyStats.punctualityRate}%`,
       icon: Target,
       color: "text-sky-400",
@@ -165,7 +167,7 @@ export function AttendanceDashboard() {
 
                   <div className="flex items-center gap-2">
                     {record.status === "checked_in" && (
-                      <Badge className="bg-green-500 text-white">In Progress</Badge>
+                      <Badge className="bg-green-500 text-white">{t('taskStatus.inProgress')}</Badge>
                     )}
                     {record.status === "checked_out" && record.totalWorkedMinutes && (
                       <Badge variant="secondary">
@@ -173,7 +175,7 @@ export function AttendanceDashboard() {
                         {record.totalWorkedMinutes % 60}m
                       </Badge>
                     )}
-                    {record.isLate && <Badge variant="destructive">Late</Badge>}
+                    {record.isLate && <Badge variant="destructive">{t('statuses.late')}</Badge>}
                     {record.isEarlyLeave && <Badge className="bg-orange-500 text-white">Early</Badge>}
                     {record.overtimeMinutes && record.overtimeMinutes > 0 && (
                       <Badge className="bg-sky-400 text-white">

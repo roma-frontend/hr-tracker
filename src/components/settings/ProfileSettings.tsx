@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface ProfileSettingsProps {
   user: any;
@@ -17,14 +18,16 @@ interface ProfileSettingsProps {
 }
 
 export function ProfileSettings({ user, onNameChange, onEmailChange, name, email }: ProfileSettingsProps) {
+  const { t } = useTranslation();
+  
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-[var(--primary)]" />
-          <CardTitle>Profile Information</CardTitle>
+          <CardTitle>{t('settingsProfile.profileInformation')}</CardTitle>
         </div>
-        <CardDescription>Update your personal details and profile picture</CardDescription>
+        <CardDescription>{t('settingsProfile.updateDetails')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Avatar Section */}
@@ -35,15 +38,15 @@ export function ProfileSettings({ user, onNameChange, onEmailChange, name, email
             name={user?.name ?? "User"}
             size="lg"
             onSuccess={(url) => {
-              toast.success("Avatar updated successfully!");
+              toast.success(t('settingsProfile.avatarUpdated'));
             }}
           />
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)]">Profile Picture</p>
+            <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsProfile.profilePicture')}</p>
             <p className="text-xs text-[var(--text-muted)] mt-1">
-              Click the camera icon to upload a new avatar
+              {t('settingsProfile.clickToUpload')}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">JPG, PNG or GIF. Max 5MB.</p>
+            <p className="text-xs text-[var(--text-muted)]">{t('settingsProfile.fileTypes')}</p>
           </div>
         </div>
 
@@ -51,29 +54,29 @@ export function ProfileSettings({ user, onNameChange, onEmailChange, name, email
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">{t('labels.fullName')}</Label>
               <Input 
                 id="name"
                 value={name} 
                 onChange={(e) => onNameChange(e.target.value)}
-                placeholder="Enter your full name"
+                placeholder={t('placeholders.enterFullName')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t('labels.emailAddress')}</Label>
               <Input 
                 id="email"
                 value={email} 
                 onChange={(e) => onEmailChange(e.target.value)} 
                 type="email"
-                placeholder="your.email@company.com"
+                placeholder={t('settingsProfile.emailPlaceholder')}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role">{t('labels.role')}</Label>
               <Input 
                 id="role"
                 value={user?.role || ""} 
@@ -82,10 +85,10 @@ export function ProfileSettings({ user, onNameChange, onEmailChange, name, email
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
+              <Label htmlFor="department">{t('labels.department')}</Label>
               <Input 
                 id="department"
-                defaultValue={user?.department ?? "Not assigned"} 
+                defaultValue={user?.department ?? t('settingsProfile.notAssigned')} 
                 disabled
                 className="opacity-60 bg-[var(--surface-hover)]"
               />

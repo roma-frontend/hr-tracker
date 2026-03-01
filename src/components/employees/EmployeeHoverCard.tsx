@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -26,7 +27,9 @@ interface Props {
   allUsers?: any[];
 }
 
-export function EmployeeHoverCard({ employee, children, canEditStatus = false, currentUserId, userRole, allUsers }: Props) {
+export function EmployeeHoverCard({ 
+employee, children, canEditStatus = false, currentUserId, userRole, allUsers }: Props) {
+  const { t } = useTranslation();
   const isAdmin = userRole === "admin";
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<"right" | "left">("right");

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap } from "lucide-react";
@@ -10,11 +11,12 @@ interface FocusModeIndicatorProps {
   workHoursEnd?: string;
 }
 
-export function FocusModeIndicator({
-  enabled,
+export default function FocusModeIndicator({ 
+enabled,
   workHoursStart = "09:00",
   workHoursEnd = "18:00",
 }: FocusModeIndicatorProps) {
+  const { t } = useTranslation();
   const [isWithinWorkHours, setIsWithinWorkHours] = React.useState(false);
 
   React.useEffect(() => {

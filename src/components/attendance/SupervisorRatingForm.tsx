@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -60,12 +61,13 @@ const categories: RatingCategory[] = [
   },
 ];
 
-export function SupervisorRatingForm({
-  employeeId,
+export function SupervisorRatingForm({ 
+employeeId,
   employeeName,
   onClose,
   onSuccess,
 }: SupervisorRatingFormProps) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const createRating = useMutation(api.supervisorRatings.createRating);
 
@@ -204,9 +206,9 @@ export function SupervisorRatingForm({
           </h3>
 
           <div className="space-y-2">
-            <Label>Strengths</Label>
+            <Label>{t('labels.strengths')}</Label>
             <Textarea
-              placeholder="What does this employee do well?"
+              placeholder={t('placeholders.whatDoesWell')}
               value={strengths}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setStrengths(e.target.value)}
               rows={2}
@@ -214,9 +216,9 @@ export function SupervisorRatingForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Areas for Improvement</Label>
+            <Label>{t('labels.areasForImprovement')}</Label>
             <Textarea
-              placeholder="What can this employee improve on?"
+              placeholder={t('placeholders.canImprove')}
               value={areasForImprovement}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAreasForImprovement(e.target.value)}
               rows={2}
@@ -224,9 +226,9 @@ export function SupervisorRatingForm({
           </div>
 
           <div className="space-y-2">
-            <Label>General Comments</Label>
+            <Label>{t('labels.generalComments')}</Label>
             <Textarea
-              placeholder="Additional feedback or notes..."
+              placeholder={t('placeholders.additionalFeedbackNotes')}
               value={generalComments}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setGeneralComments(e.target.value)}
               rows={3}

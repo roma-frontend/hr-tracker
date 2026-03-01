@@ -16,7 +16,7 @@ import Link from "next/link";
 import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from "@/lib/types";
 import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
 import { AttendanceDashboard } from "@/components/attendance/AttendanceDashboard";
-import { AIRecommendationsCard } from "@/components/ai/AIRecommendationsCard";
+import AIRecommendationsCard from "@/components/ai/AIRecommendationsCard";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -132,7 +132,7 @@ export function EmployeeDashboard() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  My Performance Score
+                  {t('dashboard.myPerformanceScore')}
                 </CardTitle>
                 <div className="text-right">
                   <p className="text-2xl font-bold text-[var(--primary)]">
@@ -303,7 +303,7 @@ export function EmployeeDashboard() {
                 <Button asChild size="sm" className="mt-4">
                   <Link href="/leaves">
                     <Plus className="w-4 h-4" />
-                    Create Your First Request
+                    {t('dashboard.createFirstRequest')}
                   </Link>
                 </Button>
               </div>

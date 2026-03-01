@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect } from "react"
+import { useTranslation } from 'react-i18next';;
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -39,6 +40,7 @@ const STRENGTH_COLORS = ["#ef4444", "#f59e0b", "#22c55e", "#10b981"];
 const STRENGTH_LABELS = ["Weak", "Fair", "Good", "Strong"];
 
 export default function CreateStarterOrgPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuthStore();
@@ -184,7 +186,7 @@ export default function CreateStarterOrgPage() {
                   required
                   value={formData.orgName}
                   onChange={(e) => setFormData((p) => ({ ...p, orgName: e.target.value }))}
-                  placeholder="ACME Inc."
+                  placeholder={t('placeholders.acmeInc')}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: "var(--input)",
@@ -243,7 +245,7 @@ export default function CreateStarterOrgPage() {
                     required
                     value={formData.userName}
                     onChange={(e) => setFormData((p) => ({ ...p, userName: e.target.value }))}
-                    placeholder="John Doe"
+                    placeholder={t('placeholders.johnDoe')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: "var(--input)",
@@ -258,9 +260,7 @@ export default function CreateStarterOrgPage() {
 
               {/* Email */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Email
-                </label>
+                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.email')}</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                   <input
@@ -316,7 +316,7 @@ export default function CreateStarterOrgPage() {
                   type="text"
                   value={formData.country}
                   onChange={(e) => setFormData((p) => ({ ...p, country: e.target.value }))}
-                  placeholder="United States"
+                  placeholder={t('placeholders.unitedStates')}
                   className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: "var(--input)",
@@ -340,7 +340,7 @@ export default function CreateStarterOrgPage() {
                   type="text"
                   value={formData.industry}
                   onChange={(e) => setFormData((p) => ({ ...p, industry: e.target.value }))}
-                  placeholder="Technology, Healthcare, Finance..."
+                  placeholder={t('placeholders.technologyHealthcare')}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: "var(--input)",
@@ -355,9 +355,7 @@ export default function CreateStarterOrgPage() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                Password
-              </label>
+              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <input
@@ -365,7 +363,7 @@ export default function CreateStarterOrgPage() {
                   required
                   value={formData.password}
                   onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                  placeholder="Min. 8 characters"
+                  placeholder={t('placeholders.minCharacters')}
                   className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: "var(--input)",
@@ -447,7 +445,7 @@ export default function CreateStarterOrgPage() {
 
         <div className="text-center mt-4">
           <Link href="/register-org" className="text-sm hover:underline flex items-center justify-center gap-1" style={{ color: "var(--text-muted)" }}>
-            <ArrowLeft className="w-3 h-3" /> Back to plans
+            <ArrowLeft className="w-3 h-3" /> {t('ui.backToPlans')}
           </Link>
         </div>
       </motion.div>

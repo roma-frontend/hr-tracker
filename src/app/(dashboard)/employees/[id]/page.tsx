@@ -11,8 +11,10 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function EmployeeProfilePage() {
+  const { t } = useTranslation();
   const params = useParams();
   const employeeId = params.id as string;
 
@@ -39,17 +41,17 @@ export default function EmployeeProfilePage() {
         <Link href="/employees">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Employees
+            {t('employees.backToEmployees')}
           </Button>
         </Link>
         <Card>
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-orange-500 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-              Employee Not Found
+              {t('employees.employeeNotFound')}
             </h3>
             <p className="text-sm text-[var(--text-muted)]">
-              The employee you're looking for doesn't exist or has been removed.
+              {t('employees.employeeNotFoundDesc')}
             </p>
           </CardContent>
         </Card>
@@ -66,7 +68,7 @@ export default function EmployeeProfilePage() {
       <Link href="/employees">
         <Button variant="ghost" size="sm">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Employees
+          {t('employees.backToEmployees')}
         </Button>
       </Link>
       <EmployeeProfileDetail employeeId={employeeId as Id<"users">} />

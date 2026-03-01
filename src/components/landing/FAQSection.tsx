@@ -2,23 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Plus, Minus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-interface FAQ { id: number; question: string; answer: string; }
-
-const faqs: FAQ[] = [
-  { id: 1, question: 'How does the leave tracking system work?',
-    answer: 'Our system automatically tracks all employee leave requests, approvals, and balances in real-time. Employees submit requests through an intuitive interface, managers receive instant notifications, and the system updates leave balances automatically upon approval.' },
-  { id: 2, question: 'Can I integrate HRLeave with existing HR software?',
-    answer: 'Yes! HRLeave offers seamless integration with popular HR platforms including Workday, BambooHR, and SAP SuccessFactors. We also provide a robust API for custom integrations.' },
-  { id: 3, question: 'Is my employee data secure?',
-    answer: 'Absolutely. We use bank-level encryption (AES-256) for all data at rest and in transit. Our platform is SOC 2 Type II certified and fully GDPR compliant. We never share your data with third parties.' },
-  { id: 4, question: 'What types of leave can I track?',
-    answer: 'You can track all types of leave including vacation days, sick leave, parental leave, bereavement, medical appointments, unpaid leave, and custom leave types specific to your organization.' },
-  { id: 5, question: 'Do you offer mobile apps?',
-    answer: 'Yes! Our responsive web app works perfectly on mobile devices, and we offer native iOS and Android apps for an even better mobile experience. Employees can request leave and check balances on the go.' },
-  { id: 6, question: 'What kind of support do you provide?',
-    answer: 'We offer 24/7 email support for all plans, live chat support during business hours, and dedicated account managers for enterprise customers. We also provide comprehensive documentation and video tutorials.' },
-];
+interface FAQ { id: number; questionKey: string; answerKey: string; }
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -38,13 +24,14 @@ function useReveal() {
 function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
   const [isOpen, setIsOpen] = useState(false);
   const { ref, visible } = useReveal();
+  const { t } = useTranslation();
 
   return (
     <div
       ref={ref}
       className="border-b last:border-0"
-      style={{ borderColor: 'var(--landing-card-border)' }}
-      style={{
+      style={{ 
+        borderColor: 'var(--landing-card-border)',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(20px)',
         transition: `opacity 0.5s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
@@ -59,7 +46,7 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
         <span className="font-semibold text-lg pr-4 transition-colors" style={{ color: 'var(--landing-text-primary)' }}
           onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
           onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-primary)'}>
-          {faq.question}
+          {t(faq.questionKey)}
         </span>
         {/* CSS rotate instead of motion.div */}
         <div className="flex-shrink-0 w-8 h-8 rounded-lg transition-colors flex items-center justify-center mt-1"
@@ -84,7 +71,7 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
           transition: 'max-height 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease',
         }}
       >
-        <p className="leading-relaxed pb-5 pr-12" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>{faq.answer}</p>
+        <p className="leading-relaxed pb-5 pr-12" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>{t(faq.answerKey)}</p>
       </div>
     </div>
   );
@@ -92,6 +79,17 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
 
 export default function FAQSection() {
   const { ref, visible } = useReveal();
+  const { t } = useTranslation();
+
+  const faqs: FAQ[] = [
+    { id: 1, questionKey: 'faq.q1', answerKey: 'faq.a1' },
+    { id: 2, questionKey: 'faq.q2', answerKey: 'faq.a2' },
+    { id: 3, questionKey: 'faq.q3', answerKey: 'faq.a3' },
+    { id: 4, questionKey: 'faq.q4', answerKey: 'faq.a4' },
+    { id: 5, questionKey: 'faq.q5', answerKey: 'faq.a5' },
+    { id: 6, questionKey: 'faq.q6', answerKey: 'faq.a6' },
+  ];
+
   return (
     <section id="faq" className="relative z-10 px-6 md:px-12 py-20">
       <div className="max-w-4xl mx-auto">
@@ -103,13 +101,13 @@ export default function FAQSection() {
             transition: 'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
           }}
         >
-          <span className="section-eyebrow">FAQ</span>
+          <span className="section-eyebrow">{t('faq.title')}</span>
           <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
-            Got questions?{' '}
-            <span className="heading-gradient">We&apos;ve got answers</span>
+            {t('faq.subtitle')}{' '}
+            <span className="heading-gradient">{t('faq.subtitleHighlight')}</span>
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
-            Everything you need to know about HRLeave and how it works.
+            {t('faq.description')}
           </p>
         </div>
 
@@ -122,7 +120,7 @@ export default function FAQSection() {
 
         {/* Still have questions */}
         <div className="text-center mt-10">
-          <p className="mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>Still have questions?</p>
+          <p className="mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{t('faq.stillHaveQuestions')}</p>
           <a
             href="mailto:support@hrleave.com"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border transition-all font-medium"
@@ -140,7 +138,7 @@ export default function FAQSection() {
               e.currentTarget.style.color = 'var(--landing-text-primary)';
             }}
           >
-            Contact Support
+            {t('faq.contactSupport')}
           </a>
         </div>
       </div>

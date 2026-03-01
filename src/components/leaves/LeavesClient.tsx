@@ -101,16 +101,16 @@ export function LeavesClient() {
         reviewerId: user.id as Id<"users">,
         comment 
       });
-      toast.success("Leave request approved");
+      toast.success(t('leave.approvedSuccess'));
     } catch (err) {
       console.error("Approve error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to approve");
+      toast.error(err instanceof Error ? err.message : t('leave.approveFailed'));
     }
   };
 
   const handleReject = async (id: Id<"leaveRequests">, comment?: string) => {
     if (!user?.id) {
-      toast.error("Please login again");
+      toast.error(t('errors.unauthorized'));
       return;
     }
     try {
@@ -119,24 +119,24 @@ export function LeavesClient() {
         reviewerId: user.id as Id<"users">,
         comment 
       });
-      toast.success("Leave request rejected");
+      toast.success(t('leave.rejectedSuccess'));
     } catch (err) {
       console.error("Reject error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to reject");
+      toast.error(err instanceof Error ? err.message : t('leave.rejectFailed'));
     }
   };
 
   const handleDelete = async (id: Id<"leaveRequests">) => {
     if (!user?.id) {
-      toast.error("Please login again");
+      toast.error(t('errors.unauthorized'));
       return;
     }
     try {
       await deleteLeave({ leaveId: id, requesterId: user.id as Id<"users"> });
-      toast.success("Leave request deleted");
+      toast.success(t('leave.deletedSuccess'));
     } catch (err) {
       console.error("Delete error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+      toast.error(err instanceof Error ? err.message : t('leave.deleteFailed'));
     }
   };
 
@@ -151,7 +151,7 @@ export function LeavesClient() {
       <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
         <Plus className="w-8 h-8 text-amber-500" />
       </div>
-      <h2 className="text-xl font-bold text-[var(--text-primary)]">Convex Not Deployed</h2>
+      <h2 className="text-xl font-bold text-[var(--text-primary)]">{t('dashboard.convexNotDeployed')}</h2>
       <p className="text-[var(--text-muted)] text-sm max-w-sm">
         Run <code className="bg-[var(--background-subtle)] px-2 py-0.5 rounded text-[#2563eb]">npx convex dev</code> in the terminal to connect to the database.
       </p>
@@ -164,13 +164,13 @@ export function LeavesClient() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">Leave Requests</h2>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t('leave.title')}</h2>
           <p className="text-[var(--text-muted)] text-sm mt-1">
-            Manage and track all leave requests in real time
+            {t('leave.manageAndTrack')}
           </p>
         </div>
         <Button size="sm" onClick={() => setModalOpen(true)}>
-          <Plus className="w-4 h-4" /> New Request
+          <Plus className="w-4 h-4" /> {t('dashboard.newRequest')}
         </Button>
       </motion.div>
 
@@ -182,7 +182,7 @@ export function LeavesClient() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
-                  placeholder="Search by employee, department, reason..."
+                  placeholder={t('placeholders.searchEmployee')}
                   className="pl-9"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -190,21 +190,21 @@ export function LeavesClient() {
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-36">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t('placeholders.selectStatus')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="all">{t('leave.allStatuses')}</SelectItem>
+                  <SelectItem value="pending">{t('statuses.pending')}</SelectItem>
+                  <SelectItem value="approved">{t('statuses.approved')}</SelectItem>
+                  <SelectItem value="rejected">{t('statuses.rejected')}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Type" />
+                  <SelectValue placeholder={t('placeholders.selectType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="all">{t('leave.allTypes')}</SelectItem>
                   {(Object.entries(LEAVE_TYPE_LABELS) as [LeaveType, string][]).map(([value, label]) => (
                     <SelectItem key={value} value={value}>{label}</SelectItem>
                   ))}
@@ -221,18 +221,18 @@ export function LeavesClient() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                {isLoading ? "Loading..." : `${filtered.length} request${filtered.length !== 1 ? "s" : ""}`}
+                {isLoading ? t('common.loading') : `${filtered.length} request${filtered.length !== 1 ? "s" : ""}`}
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="p-12 text-center text-[var(--text-muted)] text-sm">Loading data from Convex...</div>
+              <div className="p-12 text-center text-[var(--text-muted)] text-sm">{t('ui.loadingFromConvex')}</div>
             ) : filtered.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-[var(--text-muted)] text-sm">No leave requests found.</p>
+                <p className="text-[var(--text-muted)] text-sm">{t('leave.noLeaves')}</p>
                 <Button className="mt-4" size="sm" onClick={() => setModalOpen(true)}>
-                  <Plus className="w-4 h-4" /> Create First Request
+                  <Plus className="w-4 h-4" /> {t('leave.createFirst')}
                 </Button>
               </div>
             ) : (
@@ -240,13 +240,13 @@ export function LeavesClient() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-[var(--border)]">
-                      <th className="text-left px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Employee</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Type</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden md:table-cell">Dates</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden sm:table-cell">Days</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden lg:table-cell">Reason</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Status</th>
-                      {isAdmin && <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Actions</th>}
+                      <th className="text-left px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.employee')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.type')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden md:table-cell">{t('dashboard.dates')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden sm:table-cell">{t('dashboard.days')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden lg:table-cell">{t('common.reason')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.status')}</th>
+                      {isAdmin && <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('common.actions')}</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">

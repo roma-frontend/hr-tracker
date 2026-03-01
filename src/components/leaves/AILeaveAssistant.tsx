@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -16,7 +17,9 @@ interface AILeaveAssistantProps {
   onReject?: (comment?: string) => void;
 }
 
-export default function AILeaveAssistant({ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
+export default function AILeaveAssistant({ 
+leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
+  const { t } = useTranslation();
   const evaluation = useQuery(api.aiEvaluator.evaluateLeaveRequest, { leaveRequestId });
 
   if (!evaluation) {
@@ -92,7 +95,7 @@ export default function AILeaveAssistant({ leaveRequestId, userId, onApprove, on
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[var(--text-muted)]">Attendance</span>
+              <span className="text-[var(--text-muted)]">{t('employeeInfo.attendance')}Attendance</span>
               <span className={`font-medium ${getScoreColor(breakdown.attendance.score)}`}>
                 {breakdown.attendance.score}%
               </span>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useTranslation } from "react-i18next";
 // framer-motion removed — replaced with CSS transitions to reduce main-thread work,
 // eliminate forced reflow from JS-driven animations, and defer the framer-motion bundle
 import {
@@ -11,12 +12,12 @@ import {
 } from "lucide-react";
 
 type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";
-const PRESENCE_CONFIG: Record<PresenceStatus, { label: string; dot: string; icon: string }> = {
-  available:     { label: "Available",     dot: "bg-emerald-500", icon: "🟢" },
-  in_meeting:    { label: "In Meeting",    dot: "bg-amber-500",   icon: "📅" },
-  in_call:       { label: "In Call",       dot: "bg-blue-500",    icon: "📞" },
-  out_of_office: { label: "Out of Office", dot: "bg-rose-500",    icon: "🏠" },
-  busy:          { label: "Busy",          dot: "bg-orange-500",  icon: "⛔" },
+const PRESENCE_CONFIG: Record<PresenceStatus, { labelKey: string; dot: string; icon: string }> = {
+  available:     { labelKey: "presence.available",    dot: "bg-emerald-500", icon: "🟢" },
+  in_meeting:    { labelKey: "presence.inMeeting",    dot: "bg-amber-500",   icon: "📅" },
+  in_call:       { labelKey: "presence.inCall",       dot: "bg-blue-500",    icon: "📞" },
+  out_of_office: { labelKey: "presence.outOfOffice",  dot: "bg-rose-500",    icon: "🏠" },
+  busy:          { labelKey: "presence.busy",         dot: "bg-orange-500",  icon: "⛔" },
 };
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -131,6 +132,7 @@ export function Navbar() {
   );
   const currentPresence = ((currentUserData as any)?.presenceStatus ?? "available") as PresenceStatus;
   const presenceCfg = PRESENCE_CONFIG[currentPresence];
+  const presenceLabel = t(presenceCfg.labelKey);
 
   const unreadCount = notifications.filter((n: { isRead: boolean }) => !n.isRead).length;
   const leaveBalance = currentUserData?.paidLeaveBalance || 0;
@@ -251,7 +253,7 @@ export function Navbar() {
               >
                   <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                     <p className="text-sm font-semibold text-[var(--text-primary)]">
-                      Notifications
+                      {t('notifications.title')}
                     </p>
                     <div className="flex items-center gap-2">
                       {unreadCount > 0 && (
@@ -264,7 +266,7 @@ export function Navbar() {
                           onClick={handleMarkAllRead}
                           className="text-xs text-[#2563eb] hover:underline flex items-center gap-1"
                         >
-                          <Check className="w-3 h-3" /> All read
+                          <Check className="w-3 h-3" /> {t('notifications.markAllAsRead')}
                         </button>
                       )}
                     </div>
@@ -273,7 +275,7 @@ export function Navbar() {
                     {notifications.length === 0 ? (
                       <div className="px-4 py-6 text-center">
                         <Bell className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-40" />
-                        <p className="text-sm text-[var(--text-muted)]">No notifications</p>
+                        <p className="text-sm text-[var(--text-muted)]">{t('notifications.noNotifications')}</p>
                       </div>
                     ) : (
                       notifications.map((n: { _id: Id<"notifications">; title: string; message: string; isRead: boolean; type: string; relatedId?: string; _creationTime: number }) => (
@@ -316,7 +318,7 @@ export function Navbar() {
           size="icon"
           className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          title={mounted ? (theme === "dark" ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"}
+          title={mounted ? (theme === "dark" ? t('settings.lightMode') : t('settings.darkMode')) : t('settings.darkMode')}
         >
           {mounted ? (
             theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />
@@ -341,7 +343,7 @@ export function Navbar() {
               </div>
               <div className="hidden sm:block text-left">
                 <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">{user?.name ?? "User"}</p>
-                <p className="text-[10px] text-[var(--text-muted)] capitalize">{presenceCfg.icon} {presenceCfg.label}</p>
+                <p className="text-[10px] text-[var(--text-muted)] capitalize">{presenceCfg.icon} {presenceLabel}</p>
               </div>
               <ChevronDown className="w-3 h-3 text-[var(--text-muted)] hidden sm:block" />
             </button>
@@ -374,14 +376,14 @@ export function Navbar() {
                 <DropdownMenuSeparator className="bg-[var(--border)]" />
               </>
             )}
-            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">Quick Actions</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">{t('nav.quickActions')}</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-[var(--border)]" />
             <DropdownMenuItem
               className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2 font-medium"
               onClick={() => router.push("/tasks?new=true")}
             >
               <Plus className="w-4 h-4 text-blue-500" />
-              <span>New Task</span>
+              <span>{t('shortcuts.newTask')}</span>
               <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘T</kbd>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -389,7 +391,7 @@ export function Navbar() {
               onClick={() => router.push("/leaves?new=true")}
             >
               <Calendar className="w-4 h-4 text-purple-500" />
-              <span>Request Leave</span>
+              <span>{t('leave.requestLeave')}</span>
               <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘L</kbd>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -397,7 +399,7 @@ export function Navbar() {
               onClick={() => router.push("/attendance")}
             >
               <Clock className="w-4 h-4 text-green-500" />
-              <span>Clock In/Out</span>
+              <span>{t('navbar.clockInOut')}</span>
               <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘A</kbd>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -405,11 +407,11 @@ export function Navbar() {
               onClick={() => router.push("/reports")}
             >
               <FileText className="w-4 h-4 text-orange-500" />
-              My Reports
+              {t('navbar.myReports')}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-[var(--border)]" />
-            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">My Account</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">{t('nav.accountSettings')}</DropdownMenuLabel>
             <DropdownMenuItem
               className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
               onClick={() => router.push("/profile")}
@@ -439,7 +441,7 @@ export function Navbar() {
             >
               <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${presenceCfg.dot}`} />
               <span className="flex-1 text-left font-medium text-[var(--text-primary)]">
-                {presenceCfg.icon} {presenceCfg.label}
+                {presenceCfg.icon} {presenceLabel}
               </span>
               <ChevronDown 
                 className={`h-4 w-4 text-[var(--text-muted)] transition-transform duration-200 ${
@@ -468,7 +470,7 @@ export function Navbar() {
                   >
                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
                     <span className={`text-sm flex-1 ${currentPresence === key ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}>
-                      {cfg.label}
+                      {t(cfg.labelKey)}
                     </span>
                     {currentPresence === key && <Check className="w-3.5 h-3.5 text-[#2563eb]" />}
                   </DropdownMenuItem>
@@ -483,7 +485,7 @@ export function Navbar() {
               onClick={() => setShowShortcutsModal(true)}
             >
               <Keyboard className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Keyboard Shortcuts</span>
+              <span>{t('shortcuts.keyboardShortcuts')}</span>
               <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">⌘/</kbd>
             </DropdownMenuItem>
 
@@ -493,7 +495,7 @@ export function Navbar() {
               onClick={handleLogout}
             >
               <LogOut className="w-4 h-4" />
-              Log out
+              {t('nav.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

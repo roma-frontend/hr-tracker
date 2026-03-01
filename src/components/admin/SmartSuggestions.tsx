@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Lightbulb, Loader2, Sparkles } from "lucide-react";
 
 export default function SmartSuggestions() {
-  const suggestions = useQuery(api.admin.getSmartSuggestions);
+  
+  const { t } = useTranslation();
+const suggestions = useQuery(api.admin.getSmartSuggestions);
 
   if (!suggestions) {
     return (
@@ -52,7 +55,7 @@ export default function SmartSuggestions() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-sky-400" />
-          AI Smart Suggestions
+          {t("aiSuggestions.title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -60,10 +63,10 @@ export default function SmartSuggestions() {
           <div className="flex flex-col items-center justify-center p-8 text-center">
             <Lightbulb className="mb-3 h-12 w-12 text-sky-400 opacity-50" />
             <p className="text-sm font-medium text-[var(--text-primary)]">
-              No Suggestions Available
+              {t("aiSuggestions.noSuggestions")}
             </p>
             <p className="text-xs text-[var(--text-secondary)]">
-              Everything looks optimal!
+              {t("aiSuggestions.optimal")}
             </p>
           </div>
         ) : (
@@ -101,3 +104,4 @@ export default function SmartSuggestions() {
     </Card>
   );
 }
+

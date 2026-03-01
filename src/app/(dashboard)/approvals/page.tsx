@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import React from "react";
+import React from "react"
+import { useTranslation } from 'react-i18next';;
 import { motion } from "framer-motion";
 import { UserCheck, UserX, Clock, Mail, Calendar, CheckCircle } from "lucide-react";
 import { useQuery, useMutation } from "convex/react";
@@ -17,6 +18,7 @@ import dynamic from "next/dynamic";
 const AILeaveAssistant = dynamic(() => import("@/components/leaves/AILeaveAssistant"), { ssr: false });
 
 export default function ApprovalsPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   
   // Debug
@@ -61,8 +63,8 @@ export default function ApprovalsPage() {
         <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
           <UserX className="w-8 h-8 text-red-500" />
         </div>
-        <h2 className="text-xl font-bold text-[var(--text-primary)]">Access Denied</h2>
-        <p className="text-[var(--text-muted)] text-sm">Only admins can access this page.</p>
+        <h2 className="text-xl font-bold text-[var(--text-primary)]">{t('ui.accessDenied')}</h2>
+        <p className="text-[var(--text-muted)] text-sm">{t('ui.onlyAdminsCanAccess')}</p>
       </div>
     );
   }
@@ -76,9 +78,9 @@ export default function ApprovalsPage() {
       className="space-y-6"
     >
       <div>
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">User Approvals</h2>
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t('ui.userApprovals')}</h2>
         <p className="text-[var(--text-muted)] text-sm mt-1">
-          Review and approve new user registrations
+          {t('ui.noPendingApprovals')}
         </p>
       </div>
 
@@ -86,7 +88,7 @@ export default function ApprovalsPage() {
         <Card>
           <CardContent className="p-8 text-center">
             <Clock className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 animate-spin" />
-            <p className="text-sm text-[var(--text-muted)]">Loading...</p>
+            <p className="text-sm text-[var(--text-muted)]">{t('common.loading')}</p>
           </CardContent>
         </Card>
       ) : pendingUsers && pendingUsers.length === 0 ? (
@@ -94,10 +96,10 @@ export default function ApprovalsPage() {
           <CardContent className="p-8 text-center">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-              All caught up!
+              {t('ui.allCaughtUp')}
             </h3>
             <p className="text-sm text-[var(--text-muted)]">
-              No pending user approvals at the moment.
+              {t('ui.noPendingApprovals')}
             </p>
           </CardContent>
         </Card>
@@ -125,14 +127,14 @@ export default function ApprovalsPage() {
                   </div>
                   <Badge variant="warning" className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    Pending
+                    {t('ui.pending')}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                   <div>
-                    <p className="text-[var(--text-muted)] text-xs">Role</p>
+                    <p className="text-[var(--text-muted)] text-xs">{t('labels.role')}Role</p>
                     <p className="text-[var(--text-primary)] font-medium capitalize">
                       {pendingUser.role}
                     </p>
@@ -151,7 +153,7 @@ export default function ApprovalsPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[var(--text-muted)] text-xs">Phone</p>
+                    <p className="text-[var(--text-muted)] text-xs">{t('employeeInfo.phone')}Phone</p>
                     <p className="text-[var(--text-primary)] font-medium">
                       {pendingUser.phone ?? "—"}
                     </p>
@@ -165,7 +167,7 @@ export default function ApprovalsPage() {
                     className="flex-1"
                   >
                     <UserCheck className="w-4 h-4" />
-                    Approve
+                    {t('ui.approve')}
                   </Button>
                   <Button
                     size="sm"
@@ -174,7 +176,7 @@ export default function ApprovalsPage() {
                     className="flex-1"
                   >
                     <UserX className="w-4 h-4" />
-                    Reject
+                    {t('ui.reject')}
                   </Button>
                 </div>
               </CardContent>

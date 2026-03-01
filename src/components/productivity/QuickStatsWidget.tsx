@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -7,7 +8,9 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { Clock, CheckCircle2, Calendar, TrendingUp, Loader2 } from "lucide-react";
 
 export function QuickStatsWidget() {
-  const { user } = useAuthStore();
+  
+  const { t } = useTranslation();
+const { user } = useAuthStore();
   const stats = useQuery(
     api.productivity.getTodayStats,
     user?.id ? { userId: user.id as Id<"users"> } : "skip"

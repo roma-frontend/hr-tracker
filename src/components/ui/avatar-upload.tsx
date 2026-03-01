@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Loader2, X, User } from "lucide-react";
@@ -11,6 +12,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { Id } from "../../../convex/_generated/dataModel";
 import { useAuthStore } from "@/store/useAuthStore";
+import { log } from "@/lib/logger";
 
 interface AvatarUploadProps {
   userId: string;
@@ -27,14 +29,15 @@ const sizes = {
   lg: "w-24 h-24 text-2xl",
 };
 
-export function AvatarUpload({
-  userId,
+export function AvatarUpload({ 
+userId,
   currentUrl,
   name,
   size = "md",
   onSuccess,
   readonly = false,
 }: AvatarUploadProps) {
+  const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -51,23 +54,34 @@ export function AvatarUpload({
   const displayUrl = preview ?? currentUrl;
 
   const handleFile = async (file: File) => {
-    console.log("📷 Avatar upload started");
-    console.log("📁 File:", file.name, file.type, file.size);
+    const endTimer = log.time('Avatar Upload');
+    
+    log.info('Avatar upload started', {
+      component: 'AvatarUpload',
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      userId
+    });
     
     if (!file.type.startsWith("image/")) {
-      console.error("❌ Invalid file type:", file.type);
+      log.warn('Invalid file type selected', { fileType: file.type });
       toast.error("Please select an image file");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      console.error("❌ File too large:", file.size);
+      log.warn('File size exceeds limit', { 
+        fileSize: file.size, 
+        maxSize: 5 * 1024 * 1024 
+      });
       toast.error("Image must be smaller than 5MB");
       return;
     }
 
     setUploading(true);
     try {
-      console.log("🔄 Converting to base64...");
+      log.debug('Converting file to base64', { fileName: file.name });
+      
       // Convert to base64
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -76,48 +90,63 @@ export function AvatarUpload({
         reader.readAsDataURL(file);
       });
 
-      console.log("✅ Base64 converted, length:", base64.length);
+      log.debug('Base64 conversion complete', { 
+        base64Length: base64.length 
+      });
       setPreview(base64);
 
-      console.log("☁️ Uploading to Cloudinary...");
-      console.log("👤 User ID:", userId);
+      log.info('Uploading to Cloudinary', { userId });
       
       // Upload to Cloudinary
       const url = await uploadAvatarToCloudinary(base64, userId);
 
-      console.log("✅ Cloudinary upload complete!");
-      console.log("🔗 URL:", url);
+      log.info('Cloudinary upload complete', { url, userId });
 
-      console.log("💾 Saving to Convex...");
+      log.debug('Saving avatar URL to Convex', { userId });
+      
       // Save URL to Convex
       await updateAvatar({
         userId: userId as Id<"users">,
         avatarUrl: url,
       });
 
-      console.log("✅ Saved to Convex!");
+      log.debug('Avatar URL saved to Convex', { userId });
 
-      console.log("🔄 Updating session cookie...");
+      log.debug('Updating session cookie', { userId });
+      
       // Update JWT cookie with new avatar
       await updateSessionAvatarAction(userId, url);
-      console.log("✅ Session cookie updated!");
+      
+      log.debug('Session cookie updated', { userId });
 
       setPreview(null);
       
       // Update user in store
       if (user && user.id === userId) {
-        console.log("🔄 Updating user in store...");
+        log.debug('Updating user in store', { userId });
         setUser({ ...user, avatar: url });
       }
       
       onSuccess?.(url);
       toast.success("Avatar updated successfully!");
-      console.log("🎉 All done!");
+      
+      log.info('Avatar upload completed successfully', { 
+        userId, 
+        url 
+      });
+      
+      endTimer();
     } catch (err) {
-      console.error("❌ Upload error:", err);
-      console.error("Error details:", err instanceof Error ? err.message : err);
+      log.error('Avatar upload failed', err as Error, {
+        component: 'AvatarUpload',
+        userId,
+        fileName: file.name,
+        errorMessage: err instanceof Error ? err.message : String(err)
+      });
+      
       setPreview(null);
       toast.error(err instanceof Error ? err.message : "Upload failed");
+      endTimer();
     } finally {
       setUploading(false);
     }
@@ -173,7 +202,7 @@ export function AvatarUpload({
               borderColor: "var(--background)",
               color: "#fff",
             }}
-            title="Change avatar"
+            title={t('ariaLabels.changeAvatar')}
           >
             <Camera className="w-3 h-3" />
           </button>

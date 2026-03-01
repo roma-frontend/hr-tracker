@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useMutation } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ function formatCurrency(amount: number): string {
 }
 
 export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
+  const { t } = useTranslation();
   const createUser = useMutation(api.users.createUser);
   const currentUser = useAuthStore((s) => s.user);
   const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
@@ -60,11 +62,11 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!name.trim()) errs.name = "Name is required";
-    if (!email.trim()) errs.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Invalid email format";
-    if (!department) errs.department = "Department is required";
-    if (!position.trim()) errs.position = "Position is required";
+    if (!name.trim()) errs.name = t('modals.addEmployee.nameRequired');
+    if (!email.trim()) errs.email = t('modals.addEmployee.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t('modals.addEmployee.invalidEmail');
+    if (!department) errs.department = t('modals.addEmployee.departmentRequired');
+    if (!position.trim()) errs.position = t('modals.addEmployee.positionRequired');
     return errs;
   };
 
@@ -91,10 +93,10 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
         employeeType: type,
         phone: phone || undefined,
       });
-      toast.success(`${name} has been added successfully!`);
+      toast.success(t('modals.addEmployee.employeeAddedSuccess'));
       onClose();
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to add employee");
+      toast.error(err instanceof Error ? err.message : t('modals.addEmployee.failedToAdd'));
     } finally {
       setSubmitting(false);
     }
@@ -104,16 +106,16 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Employee</DialogTitle>
-          <DialogDescription>Create a new employee record in the system.</DialogDescription>
+          <DialogTitle>{t('modals.addEmployee.title')}</DialogTitle>
+          <DialogDescription>{t('modals.addEmployee.description')}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="emp-name">Full Name *</Label>
+            <Label htmlFor="emp-name">{t('common.name')} *</Label>
             <Input
-              id="emp-name" placeholder="John Smith"
+              id="emp-name" placeholder={t('placeholders.johnSmith')}
               value={name} onChange={(e) => setName(e.target.value)}
               className={errors.name ? "border-[var(--destructive)]" : ""}
             />
@@ -122,7 +124,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
           {/* Email */}
           <div className="space-y-1.5">
-            <Label htmlFor="emp-email">Email *</Label>
+            <Label htmlFor="emp-email">{t('common.email')} *</Label>
             <Input
               id="emp-email" type="email" placeholder="john.smith@company.com"
               value={email} onChange={(e) => setEmail(e.target.value)}
@@ -130,17 +132,17 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
             />
             {errors.email && <p className="text-xs text-[var(--destructive)]">{errors.email}</p>}
             <p className="text-xs text-[var(--text-muted)]">
-              Tip: include &quot;contractor&quot; in email → auto-sets contractor type (12,000 ֏ allowance)
+              {t('employeesExtra.contractorTip')}
             </p>
           </div>
 
           {/* Department + Position */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Department *</Label>
+              <Label>{t('employees.department')} *</Label>
               <Select value={department} onValueChange={setDepartment}>
                 <SelectTrigger className={errors.department ? "border-[var(--destructive)]" : ""}>
-                  <SelectValue placeholder="Select..." />
+                  <SelectValue placeholder={t('placeholders.selectEmployee')} />
                 </SelectTrigger>
                 <SelectContent>
                   {DEPARTMENTS.map((d) => (
@@ -151,7 +153,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
               {errors.department && <p className="text-xs text-[var(--destructive)]">{errors.department}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="emp-position">Position *</Label>
+              <Label htmlFor="emp-position">{t('employees.position')} *</Label>
               <Input
                 id="emp-position" placeholder="e.g. Developer"
                 value={position} onChange={(e) => setPosition(e.target.value)}
@@ -163,16 +165,16 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
           {/* Role */}
           <div className="space-y-1.5">
-            <Label>Role</Label>
+            <Label>{t('employees.role')}</Label>
             <Select value={role} onValueChange={(v) => setRole(v as "admin" | "supervisor" | "employee")}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="employee">Employee</SelectItem>
-                <SelectItem value="supervisor">Supervisor</SelectItem>
+                <SelectItem value="employee">{t('roles.employee')}</SelectItem>
+                <SelectItem value="supervisor">{t('roles.supervisor')}</SelectItem>
                 {isActualAdmin && (
-                  <SelectItem value="admin">Administrator</SelectItem>
+                  <SelectItem value="admin">{t('roles.admin')}</SelectItem>
                 )}
               </SelectContent>
             </Select>
@@ -180,7 +182,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
           {/* Phone */}
           <div className="space-y-1.5">
-            <Label htmlFor="emp-phone">Phone Number</Label>
+            <Label htmlFor="emp-phone">{t('common.phone')}</Label>
             <Input
               id="emp-phone" placeholder="+374 91 123456"
               value={phone} onChange={(e) => setPhone(e.target.value)}
@@ -189,7 +191,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
           {/* Employee type */}
           <div className="space-y-1.5">
-            <Label>Employee Type</Label>
+            <Label>{t('profile.employeeType')}</Label>
             <div className="grid grid-cols-2 gap-2">
               {(["staff", "contractor"] as const).map((t) => (
                 <button
@@ -215,16 +217,16 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
             <div>
               <p className="text-xs text-[var(--text-muted)]">Calculated Travel Allowance</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Based on {type === "contractor" ? "contractor" : "staff"} rate
+                {t('employeesExtra.basedOn')} {type === "contractor" ? t('employeesExtra.contractorType') : t('employeesExtra.staffType')} {t('employeesExtra.rate')}
               </p>
             </div>
             <p className="text-lg font-bold text-[var(--text-primary)]">{formatCurrency(allowance)}</p>
           </motion.div>
 
           <DialogFooter className="gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Adding..." : "Add Employee"}
+              {submitting ? t('modals.addEmployee.addingEmployee') : t('modals.addEmployee.addEmployeeButton')}
             </Button>
           </DialogFooter>
         </form>

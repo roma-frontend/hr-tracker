@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -20,6 +21,7 @@ function Avatar({ name, url }: { name: string; url?: string | null }) {
 }
 
 export function AssignSupervisorModal({ onClose }: Props) {
+  const { t } = useTranslation();
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [selectedSupervisor, setSelectedSupervisor] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -68,8 +70,8 @@ export function AssignSupervisorModal({ onClose }: Props) {
         <div style={{ background: "var(--accent-gradient)" }} className="px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold" style={{ color: "var(--text-on-accent)" }}>Assign Supervisor</h2>
-              <p className="text-sm mt-0.5" style={{ color: "var(--text-on-accent-secondary)" }}>Link an employee to their supervisor</p>
+              <h2 className="text-xl font-bold" style={{ color: "var(--text-on-accent)" }}>{t('modals.assignSupervisor.title')}</h2>
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-on-accent-secondary)" }}>{t('modals.assignSupervisor.description')}</p>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-white/30 flex items-center justify-center transition-colors" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "var(--text-on-accent)" }}>✕</button>
           </div>
@@ -78,7 +80,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
         <div className="p-6 space-y-5">
           {success && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm rounded-xl px-4 py-3 text-center font-medium">
-              ✅ Supervisor assigned successfully!
+              ✅ {t('modals.assignSupervisor.supervisorAssignedSuccess')}
             </div>
           )}
 
@@ -91,7 +93,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">Choose employee...</option>
-              {employees === undefined && <option disabled>Loading...</option>}
+              {employees === undefined && <option disabled>{t('commonUI.loading')}...</option>}
               {employees?.length === 0 && <option disabled>No employees found</option>}
               {employees?.map(emp => (
                 <option key={emp._id} value={emp._id}>

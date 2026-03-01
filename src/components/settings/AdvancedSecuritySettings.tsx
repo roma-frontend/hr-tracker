@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Shield, Smartphone, History, Key, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,7 +9,9 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 
 export function AdvancedSecuritySettings() {
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  
+  const { t } = useTranslation();
+const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [loginAlerts, setLoginAlerts] = useState(true);
 
   // Mock data for sessions and login history
@@ -31,18 +34,18 @@ export function AdvancedSecuritySettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Key className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Two-Factor Authentication</CardTitle>
+            <CardTitle>{t('settingsAdvancedSecurity.twoFactor')}</CardTitle>
           </div>
-          <CardDescription>Add an extra layer of security to your account</CardDescription>
+          <CardDescription>{t('settingsAdvancedSecurity.twoFactorDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
             <div className="flex items-start gap-3">
               <span className="text-2xl">🔐</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Enable 2FA</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsAdvancedSecurity.enable2fa')}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Require a verification code in addition to your password
+                  {t('settingsAdvancedSecurity.enable2faDesc')}
                 </p>
               </div>
             </div>
@@ -51,16 +54,16 @@ export function AdvancedSecuritySettings() {
 
           {twoFactorEnabled && (
             <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5 space-y-3">
-              <p className="text-sm font-medium text-[var(--text-primary)]">Choose 2FA Method:</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsAdvancedSecurity.choose2fa')}</p>
               <div className="space-y-2">
                 <Button variant="outline" className="w-full justify-start">
-                  📱 SMS Text Message
+                  {t('settingsAdvancedSecurity.smsSms')}
                 </Button>
                 <Button variant="outline" className="w-full justify-start">
-                  📧 Email Code
+                  {t('settingsAdvancedSecurity.emailCode')}
                 </Button>
                 <Button variant="outline" className="w-full justify-start">
-                  🔑 Authenticator App (Google, Microsoft)
+                  {t('settingsAdvancedSecurity.authenticatorApp')}
                 </Button>
               </div>
             </div>
@@ -75,9 +78,9 @@ export function AdvancedSecuritySettings() {
             <div>
               <div className="flex items-center gap-2">
                 <Smartphone className="w-5 h-5 text-[var(--primary)]" />
-                <CardTitle>Active Sessions</CardTitle>
+                <CardTitle>{t('settingsAdvancedSecurity.activeSessions')}</CardTitle>
               </div>
-              <CardDescription>Manage devices currently logged into your account</CardDescription>
+              <CardDescription>{t('settingsAdvancedSecurity.activeSessionsDesc')}</CardDescription>
             </div>
             <Badge variant="secondary">{activeSessions.length} active</Badge>
           </div>
@@ -96,14 +99,14 @@ export function AdvancedSecuritySettings() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-[var(--text-primary)]">{session.device}</p>
                     {session.current && (
-                      <Badge variant="default" className="text-xs">Current</Badge>
+                      <Badge variant="default" className="text-xs">{t('common.current') || 'Current'}</Badge>
                     )}
                   </div>
                   <p className="text-xs text-[var(--text-muted)] mt-1">
                     {session.location} • {session.ip}
                   </p>
                   <p className="text-xs text-[var(--text-muted)]">
-                    Last active: {session.lastActive}
+                    {t('settingsAdvancedSecurity.lastActive')} {session.lastActive}
                   </p>
                 </div>
               </div>

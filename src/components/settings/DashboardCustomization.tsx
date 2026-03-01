@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { LayoutDashboard, Eye, RefreshCw, Home } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +14,8 @@ interface DashboardCustomizationProps {
 }
 
 export function DashboardCustomization({ user, onSettingsChange }: DashboardCustomizationProps) {
+  const { t } = useTranslation();
+  
   const defaultWidgets = {
     quickStats: true,
     leaveCalendar: true,
@@ -58,13 +61,13 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
         <CardHeader>
           <div className="flex items-center gap-2">
             <Home className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Default Landing Page</CardTitle>
+            <CardTitle>{t("settingsDashboard.defaultLandingPage")}</CardTitle>
           </div>
-          <CardDescription>Choose which page opens when you log in</CardDescription>
+          <CardDescription>{t("settingsDashboard.defaultLandingPageDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="default-view">Landing Page</Label>
+            <Label htmlFor="default-view">{t("settingsDashboard.landingPage")}</Label>
             <Select value={defaultView} onValueChange={setDefaultView}>
               <SelectTrigger id="default-view">
                 <SelectValue />
@@ -79,7 +82,7 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
               </SelectContent>
             </Select>
             <p className="text-xs text-[var(--text-muted)]">
-              You'll be redirected to this page after login
+              {t("settingsDashboard.redirectAfterLogin")}
             </p>
           </div>
         </CardContent>
@@ -90,19 +93,19 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
         <CardHeader>
           <div className="flex items-center gap-2">
             <LayoutDashboard className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Dashboard Widgets</CardTitle>
+            <CardTitle>{t("settingsDashboard.dashboardWidgets")}</CardTitle>
           </div>
-          <CardDescription>Customize which widgets appear on your dashboard</CardDescription>
+          <CardDescription>{t("settingsDashboard.dashboardWidgetsDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {Object.entries(widgets).map(([key, enabled]) => {
             const widgetLabels: Record<string, { name: string; desc: string; emoji: string }> = {
-              quickStats: { name: "Quick Statistics", desc: "Overview of leaves, tasks, and attendance", emoji: "📊" },
-              leaveCalendar: { name: "Leave Calendar", desc: "Visual calendar of team absences", emoji: "📅" },
-              upcomingTasks: { name: "Upcoming Tasks", desc: "Your next tasks and deadlines", emoji: "✓" },
-              teamActivity: { name: "Team Activity", desc: "Recent team actions and updates", emoji: "👥" },
-              recentLeaves: { name: "Recent Leaves", desc: "Latest leave requests and approvals", emoji: "📋" },
-              analytics: { name: "Analytics Chart", desc: "Performance trends and insights", emoji: "📈" },
+              quickStats: { name: t("settingsDashboard.quickStatistics"), desc: t("settingsDashboard.quickStatisticsDesc"), emoji: "📊" },
+              leaveCalendar: { name: t("settingsDashboard.leaveCalendar"), desc: t("settingsDashboard.leaveCalendarDesc"), emoji: "📅" },
+              upcomingTasks: { name: t("settingsDashboard.upcomingTasks"), desc: t("settingsDashboard.upcomingTasksDesc"), emoji: "✓" },
+              teamActivity: { name: t("settingsDashboard.teamActivity"), desc: t("settingsDashboard.teamActivityDesc"), emoji: "👥" },
+              recentLeaves: { name: t("settingsDashboard.recentLeaves"), desc: t("settingsDashboard.recentLeavesDesc"), emoji: "📋" },
+              analytics: { name: t("settingsDashboard.analyticsChart"), desc: t("settingsDashboard.analyticsChartDesc"), emoji: "📈" },
             };
 
             const widget = widgetLabels[key];
@@ -134,18 +137,18 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
         <CardHeader>
           <div className="flex items-center gap-2">
             <Eye className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Display & Performance</CardTitle>
+            <CardTitle>{t("settingsDashboard.displayPerformance")}</CardTitle>
           </div>
-          <CardDescription>Optimize your viewing experience</CardDescription>
+          <CardDescription>{t("settingsDashboard.displayPerformanceDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
             <div className="flex items-start gap-3">
               <span className="text-2xl">📐</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Compact Mode</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsDashboard.compactMode")}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Reduce spacing to show more content on screen
+                  {t("settingsDashboard.compactModeDesc")}
                 </p>
               </div>
             </div>
@@ -153,25 +156,25 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="refresh-rate">Data Refresh Rate</Label>
+            <Label htmlFor="refresh-rate">{t("settingsDashboard.dataRefreshRate")}</Label>
             <Select value={refreshRate} onValueChange={setRefreshRate}>
               <SelectTrigger id="refresh-rate">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="realtime">⚡ Real-time (instant updates)</SelectItem>
-                <SelectItem value="5min">🔄 Every 5 minutes</SelectItem>
-                <SelectItem value="15min">⏱️ Every 15 minutes</SelectItem>
-                <SelectItem value="30min">⏰ Every 30 minutes</SelectItem>
-                <SelectItem value="manual">🤚 Manual refresh only</SelectItem>
+                <SelectItem value="realtime">⚡ {t("settingsDashboard.realtimeUpdates")}</SelectItem>
+                <SelectItem value="5min">🔄 {t("settingsDashboard.every5Minutes")}</SelectItem>
+                <SelectItem value="15min">⏱️ {t("settingsDashboard.every15Minutes")}</SelectItem>
+                <SelectItem value="30min">⏰ {t("settingsDashboard.every30Minutes")}</SelectItem>
+                <SelectItem value="manual">🤚 {t("settingsDashboard.manualRefreshOnly")}</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-[var(--text-muted)]">
               {refreshRate === "realtime" 
-                ? "Data updates instantly when changes occur" 
+                ? t("settingsDashboard.dataUpdatesInstantly")
                 : refreshRate === "manual"
-                ? "Refresh data manually using the refresh button"
-                : `Data refreshes automatically every ${refreshRate.replace("min", " minutes")}`}
+                ? t("settingsDashboard.refreshDataManually")
+                : t("settingsDashboard.dataRefreshesEvery", { interval: refreshRate.replace("min", " minutes") })}
             </p>
           </div>
         </CardContent>

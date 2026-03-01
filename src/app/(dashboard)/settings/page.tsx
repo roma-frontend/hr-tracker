@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -40,6 +41,7 @@ import { ProfileSettings } from "@/components/settings/ProfileSettings";
 const SLASettings = dynamic(() => import("@/components/admin/SLASettings"), { ssr: false });
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const { user, login } = useAuthStore();
   const [activeTab, setActiveTab] = useState("profile");
   const [emailNotifs, setEmailNotifs] = useState(true);
@@ -120,7 +122,7 @@ export default function SettingsPage() {
   const tabs = [
     {
       value: "profile",
-      label: "Profile",
+      label: t('nav.profile'),
       icon: User,
       description: "Personal information",
     },
@@ -156,7 +158,7 @@ export default function SettingsPage() {
     },
     {
       value: "dashboard",
-      label: "Dashboard",
+      label: t('nav.dashboard'),
       icon: LayoutDashboard,
       description: "Widgets",
     },
@@ -200,9 +202,7 @@ export default function SettingsPage() {
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-3xl font-bold text-[var(--text-primary)] flex items-center gap-3">
-            <SettingsIcon className="w-8 h-8 text-[var(--primary)]" />
-            Settings
-          </h2>
+            <SettingsIcon className="w-8 h-8 text-[var(--primary)]" />{t('nav.settings')}</h2>
           <p className="text-[var(--text-muted)] text-sm mt-2">
             Manage your account, preferences, and system configuration
           </p>
@@ -336,7 +336,7 @@ export default function SettingsPage() {
           className="shadow-lg shadow-[var(--primary)]/20"
         >
           <Save className="w-4 h-4 mr-2" />
-          {saving ? "Saving..." : "Save All Changes"}
+          {saving ? t('ui.saving') : t('ui.saveAllChanges')}
         </Button>
       </motion.div>
     </motion.div>

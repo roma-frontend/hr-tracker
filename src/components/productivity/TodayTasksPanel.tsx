@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -8,7 +9,9 @@ import { CheckCircle2, Circle, Clock, Loader2, AlertCircle } from "lucide-react"
 import { toast } from "sonner";
 
 export function TodayTasksPanel() {
-  const { user } = useAuthStore();
+  
+  const { t } = useTranslation();
+const { user } = useAuthStore();
   const tasks = useQuery(
     api.productivity.getTodayTasks,
     user?.id ? { userId: user.id as Id<"users"> } : "skip"

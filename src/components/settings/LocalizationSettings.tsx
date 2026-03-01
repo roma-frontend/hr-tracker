@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Globe, Calendar, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,7 +12,9 @@ interface LocalizationSettingsProps {
   onSettingsChange: (settings: any) => void;
 }
 
-export function LocalizationSettings({ user, onSettingsChange }: LocalizationSettingsProps) {
+export function LocalizationSettings({ 
+user, onSettingsChange }: LocalizationSettingsProps) {
+  const { t } = useTranslation();
   const [language, setLanguage] = useState(user?.language ?? "en");
   const [timezone, setTimezone] = useState(user?.timezone ?? "UTC");
   const [dateFormat, setDateFormat] = useState(user?.dateFormat ?? "DD/MM/YYYY");
@@ -47,14 +50,14 @@ export function LocalizationSettings({ user, onSettingsChange }: LocalizationSet
         <CardHeader>
           <div className="flex items-center gap-2">
             <Globe className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Language & Region</CardTitle>
+            <CardTitle>{t('settingsLocalization.languageRegion')}</CardTitle>
           </div>
-          <CardDescription>Customize your language and regional preferences</CardDescription>
+          <CardDescription>{t('settingsLocalization.customizeLanguage')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="language">Display Language</Label>
+              <Label htmlFor="language">{t('labels.displayLanguage')}</Label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger id="language">
                   <SelectValue />
@@ -73,7 +76,7 @@ export function LocalizationSettings({ user, onSettingsChange }: LocalizationSet
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="timezone">Time Zone</Label>
+              <Label htmlFor="timezone">{t('labels.timeZone')}</Label>
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger id="timezone">
                   <SelectValue />
@@ -103,14 +106,14 @@ export function LocalizationSettings({ user, onSettingsChange }: LocalizationSet
         <CardHeader>
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Date & Time Format</CardTitle>
+            <CardTitle>{t('settingsLocalization.dateTimeFormat')}</CardTitle>
           </div>
-          <CardDescription>Configure how dates and times are displayed</CardDescription>
+          <CardDescription>{t('settingsLocalization.configureDatetime')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date-format">Date Format</Label>
+              <Label htmlFor="date-format">{t('labels.dateFormat')}</Label>
               <Select value={dateFormat} onValueChange={setDateFormat}>
                 <SelectTrigger id="date-format">
                   <SelectValue />
@@ -128,14 +131,14 @@ export function LocalizationSettings({ user, onSettingsChange }: LocalizationSet
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="time-format">Time Format</Label>
+              <Label htmlFor="time-format">{t('labels.timeFormat')}</Label>
               <Select value={timeFormat} onValueChange={setTimeFormat}>
                 <SelectTrigger id="time-format">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="24h">24-hour (14:30)</SelectItem>
-                  <SelectItem value="12h">12-hour (2:30 PM)</SelectItem>
+                  <SelectItem value="24h">{t('settingsLocalization.hour24')}</SelectItem>
+                  <SelectItem value="12h">{t('settingsLocalization.hour12')}</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-[var(--text-muted)]">
@@ -151,21 +154,21 @@ export function LocalizationSettings({ user, onSettingsChange }: LocalizationSet
         <CardHeader>
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Calendar Preferences</CardTitle>
+            <CardTitle>{t('settingsLocalization.calendarPreferences')}</CardTitle>
           </div>
-          <CardDescription>Customize your calendar view</CardDescription>
+          <CardDescription>{t('settingsLocalization.customizeCalendar')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="first-day">First Day of Week</Label>
+            <Label htmlFor="first-day">{t('labels.firstDayOfWeek')}</Label>
             <Select value={firstDayOfWeek} onValueChange={setFirstDayOfWeek}>
               <SelectTrigger id="first-day">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sunday">Sunday</SelectItem>
-                <SelectItem value="monday">Monday</SelectItem>
-                <SelectItem value="saturday">Saturday</SelectItem>
+                <SelectItem value="sunday">{t('weekdays.sunday')}</SelectItem>
+                <SelectItem value="monday">{t('weekdays.monday')}</SelectItem>
+                <SelectItem value="saturday">{t('weekdays.saturday')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -176,7 +179,7 @@ export function LocalizationSettings({ user, onSettingsChange }: LocalizationSet
               <div>
                 <p className="text-sm font-medium text-[var(--text-primary)]">Week starts on {firstDayOfWeek}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  This affects your calendar, reports, and analytics views
+                  {t('settingsLocalization.weekStartNote')}
                 </p>
               </div>
             </div>

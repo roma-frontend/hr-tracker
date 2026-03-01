@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState } from "react"
+import { useTranslation } from 'react-i18next';;
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -18,13 +19,10 @@ import type { Id } from "@/convex/_generated/dataModel";
 
 type FilterStatus = "pending" | "approved" | "rejected" | "all";
 
-const STATUS_BADGES = {
-  pending:  <Badge variant="warning"  className="flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</Badge>,
-  approved: <Badge variant="success"  className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Approved</Badge>,
-  rejected: <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="w-3 h-3" /> Rejected</Badge>,
-};
+// Status badges will be rendered with translation in component
 
 export default function JoinRequestsPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [filter, setFilter] = useState<FilterStatus>("pending");
   const [search, setSearch] = useState("");
@@ -191,7 +189,7 @@ export default function JoinRequestsPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or email…"
+            placeholder={t('placeholders.searchByNameOrEmail')}
             className="w-full pl-9 pr-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-sm text-[var(--text-primary)] outline-none"
           />
         </div>
@@ -258,7 +256,7 @@ export default function JoinRequestsPage() {
                                 <input
                                   value={rejectReason}
                                   onChange={(e) => setRejectReason(e.target.value)}
-                                  placeholder="Reason (optional)"
+                                  placeholder={t('placeholders.reasonOptional')}
                                   className="text-xs px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--input)] text-[var(--text-primary)] outline-none w-36"
                                 />
                                 <Button
@@ -269,9 +267,7 @@ export default function JoinRequestsPage() {
                                 >
                                   {rejecting === req._id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Confirm"}
                                 </Button>
-                                <Button size="sm" variant="ghost" onClick={() => setRejectingId(null)}>
-                                  Cancel
-                                </Button>
+                                <Button size="sm" variant="ghost" onClick={() => setRejectingId(null)}>{t('common.cancel')}</Button>
                               </div>
                             ) : (
                               <>
@@ -281,7 +277,7 @@ export default function JoinRequestsPage() {
                                   className="gap-1 text-red-500 border-red-200 hover:bg-red-50"
                                   onClick={() => setRejectingId(req._id)}
                                 >
-                                  <XCircle className="w-3.5 h-3.5" /> Reject
+                                  <XCircle className="w-3.5 h-3.5" /> {t('ui.reject')}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -294,7 +290,7 @@ export default function JoinRequestsPage() {
                                   ) : (
                                     <CheckCircle2 className="w-3.5 h-3.5" />
                                   )}
-                                  Approve
+                                  {t('ui.approve')}
                                 </Button>
                               </>
                             )}

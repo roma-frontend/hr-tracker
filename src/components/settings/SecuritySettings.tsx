@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Shield, ScanFace } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,9 @@ interface SecuritySettingsProps {
   userId: string;
 }
 
-export function SecuritySettings({ userId }: SecuritySettingsProps) {
+export function SecuritySettings({ 
+userId }: SecuritySettingsProps) {
+  const { t } = useTranslation();
   const [showFaceRegistration, setShowFaceRegistration] = useState(false);
 
   // Get face descriptor status
@@ -31,9 +34,9 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Touch ID / Fingerprint</CardTitle>
+            <CardTitle>{t('settingsSecurity.touchId')}</CardTitle>
           </div>
-          <CardDescription>Register biometric authentication for quick and secure login</CardDescription>
+          <CardDescription>{t('settingsSecurity.touchIdDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -41,7 +44,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
               <span className="text-3xl">🔐</span>
               <div className="flex-1">
                 <p className="text-sm text-[var(--text-muted)]">
-                  Enable Touch ID or fingerprint for faster and more secure login
+                  {t('settingsSecurity.touchIdEnable')}
                 </p>
               </div>
             </div>
@@ -49,7 +52,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
               mode="register"
               userId={userId}
               onSuccess={() => {
-                toast.success("Biometric authentication registered successfully!");
+                toast.success(t('settingsSecurity.biometricRegistered'));
               }}
             />
           </div>
@@ -61,9 +64,9 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <ScanFace className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Face ID</CardTitle>
+            <CardTitle>{t('settingsSecurity.faceId')}</CardTitle>
           </div>
-          <CardDescription>Register your face for secure facial recognition login</CardDescription>
+          <CardDescription>{t('settingsSecurity.faceIdDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -85,24 +88,24 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                      ✓ Face ID Registered
+                      {t('settingsSecurity.faceIdRegistered')}
                     </p>
                     <p className="text-xs text-[var(--text-muted)] mt-1">
-                      Registered on {new Date(faceData.faceRegisteredAt || 0).toLocaleDateString()}
+                      {t('settingsSecurity.registeredOn')} {new Date(faceData.faceRegisteredAt || 0).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <Button
                   variant="outline"
                   onClick={async () => {
-                    if (confirm("Are you sure you want to remove Face ID registration?")) {
+                    if (confirm(t('settingsSecurity.removeFaceIdConfirm'))) {
                       await removeFaceRegistration({ userId: userId as any });
-                      toast.success("Face ID removed successfully");
+                      toast.success(t('settingsSecurity.faceIdRemoved'));
                     }
                   }}
                   className="w-full"
                 >
-                  Remove Face ID
+                  {t('settingsSecurity.removeFaceId')}
                 </Button>
               </>
             ) : (
@@ -113,7 +116,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
                       <span className="text-3xl">📸</span>
                       <div className="flex-1">
                         <p className="text-sm text-[var(--text-muted)]">
-                          Register your face to enable quick and secure login with Face ID
+                          {t('settingsSecurity.registerFaceDesc')}
                         </p>
                       </div>
                     </div>
@@ -122,7 +125,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
                       className="w-full"
                     >
                       <ScanFace className="w-4 h-4 mr-2" />
-                      Register Face ID
+                      {t('settingsSecurity.registerFaceId')}
                     </Button>
                   </div>
                 ) : (
@@ -130,7 +133,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
                     userId={userId as any}
                     onSuccess={() => {
                       setShowFaceRegistration(false);
-                      toast.success("Face ID registered successfully!");
+                      toast.success(t('settingsSecurity.faceIdSuccess'));
                     }}
                     onCancel={() => setShowFaceRegistration(false)}
                   />

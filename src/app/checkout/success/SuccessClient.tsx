@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const PLAN_LABELS: Record<string, string> = {
   starter:      'Starter',
@@ -11,6 +12,7 @@ const PLAN_LABELS: Record<string, string> = {
 };
 
 export default function SuccessClient() {
+  const { t } = useTranslation();
   const params  = useSearchParams();
   const plan    = params.get('plan') ?? 'starter';
   const [count, setCount] = useState(5);
@@ -42,21 +44,21 @@ export default function SuccessClient() {
 
         {/* Title */}
         <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
-          You're all set! 🎉
+          {t('checkout.allSet')} 🎉
         </h1>
         <p className="text-blue-200/70 text-lg mb-2">
-          Welcome to <span className="text-white font-bold">{PLAN_LABELS[plan] ?? plan}</span> plan
+          {t('checkout.welcomeToPlan', { plan: PLAN_LABELS[plan] ?? plan })}
         </p>
         <p className="text-blue-200/50 text-sm mb-10">
-          Your 14-day free trial has started. No charge until the trial ends.
+          {t('checkout.trialStarted')}
         </p>
 
         {/* Features reminder */}
         <div className="grid grid-cols-3 gap-4 mb-10">
           {[
-            { icon: <Zap size={20} />, label: 'Instant Access' },
-            { icon: <Shield size={20} />, label: 'SSL Secured' },
-            { icon: <Sparkles size={20} />, label: '14-day Trial' },
+            { icon: <Zap size={20} />, label: t('checkout.instantAccess') },
+            { icon: <Shield size={20} />, label: t('checkout.sslSecured') },
+            { icon: <Sparkles size={20} />, label: t('checkout.trial14Days') },
           ].map(({ icon, label }) => (
             <div key={label} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 flex flex-col items-center gap-2">
               <div className="text-blue-400">{icon}</div>
@@ -68,13 +70,13 @@ export default function SuccessClient() {
         {/* CTA */}
         <Link href="/register">
           <button className="group w-full py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3">
-            Create Your Account
+            {t('checkout.createAccount')}
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </Link>
 
         <p className="text-blue-200/30 text-sm mt-6">
-          Redirecting automatically in {count}s…
+          {t('checkout.redirecting', { count })}
         </p>
       </div>
     </div>

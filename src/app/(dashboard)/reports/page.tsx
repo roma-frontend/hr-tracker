@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -31,7 +32,9 @@ const itemVariants = {
 };
 
 export default function ReportsPage() {
-  const [tab, setTab] = useState("overview");
+  
+  const { t } = useTranslation();
+const [tab, setTab] = useState("overview");
   const [mounted, setMounted] = React.useState(false);
   const { user } = useAuthStore();
   React.useEffect(() => { setMounted(true); }, []);
@@ -101,7 +104,7 @@ export default function ReportsPage() {
   const handleExport = () => {
     if (!leaves || leaves.length === 0) { toast.error("No data to export"); return; }
     const csv = [
-      ["Employee", "Department", "Type", "Start Date", "End Date", "Days", "Status", "Reason"].join(","),
+      [t('employees.employee'), t('employeeInfo.department'), t('leave.type'), t('leave.startDate'), t('leave.endDate'), t('leave.days'), t('leave.status'), t('leave.reason')].join(","),
       ...leaves.map((l) => [
         l.userName ?? "", l.userDepartment ?? "", l.type,
         l.startDate, l.endDate, l.days, l.status,
@@ -139,10 +142,10 @@ export default function ReportsPage() {
       {/* KPI Cards */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Requests", value: isLoading ? "—" : totalLeaves, icon: FileText, color: "text-[var(--primary)]", bg: "bg-[var(--primary)]/10" },
-          { label: "Approval Rate", value: isLoading ? "—" : `${approvalRate}%`, icon: TrendingUp, color: "text-[var(--success)]", bg: "bg-[var(--success)]/10" },
+          { label: t('reports.totalRequests'), value: isLoading ? "—" : totalLeaves, icon: FileText, color: "text-[var(--primary)]", bg: "bg-[var(--primary)]/10" },
+          { label: t('reports.approvalRate'), value: isLoading ? "—" : `${approvalRate}%`, icon: TrendingUp, color: "text-[var(--success)]", bg: "bg-[var(--success)]/10" },
           { label: "Avg. Duration", value: isLoading ? "—" : `${avgDays}d`, icon: CalendarDays, color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10" },
-          { label: "Active Employees", value: isLoading ? "—" : (users?.length ?? 0), icon: Users, color: "text-[var(--text-secondary)]", bg: "bg-[var(--background-subtle)]" },
+          { label: t('organization.activeEmployees'), value: isLoading ? "—" : (users?.length ?? 0), icon: Users, color: "text-[var(--text-secondary)]", bg: "bg-[var(--background-subtle)]" },
         ].map((kpi) => (
           <Card key={kpi.label}>
             <CardContent className="pt-5 pb-4">
@@ -164,7 +167,7 @@ export default function ReportsPage() {
       <motion.div variants={itemVariants}>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="overview">{t('reports.overview')}Overview</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
             <TabsTrigger value="trends">Trends</TabsTrigger>
           </TabsList>
@@ -174,7 +177,7 @@ export default function ReportsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">Leave Type Distribution</CardTitle>
+                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">{t('reportsPage.leaveDistribution')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {pieData.length === 0 ? (
@@ -277,7 +280,7 @@ export default function ReportsPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {deptData.length === 0 ? (
-                    <p className="text-xs text-[var(--text-muted)]">No data yet</p>
+                    <p className="text-xs text-[var(--text-muted)]">{t('emptyStates.noDataYet')}</p>
                   ) : deptData.map((d) => (
                     <div key={d.dept} className="flex items-center justify-between py-2 border-b border-[var(--border)] last:border-0">
                       <div>
@@ -300,7 +303,7 @@ export default function ReportsPage() {
             <div className="grid grid-cols-1 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">Monthly Leave Trend (Last 6 Months)</CardTitle>
+                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">{t('reportsPage.attendanceTrends')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>

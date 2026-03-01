@@ -12,7 +12,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     // On client-side, detect and apply saved language
     if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('i18nextLng');
+      console.log('🔄 I18nProvider: saved language =', savedLang, ', current =', i18n.language);
       if (savedLang && savedLang !== i18n.language) {
+        console.log('🔄 Changing language to:', savedLang);
         i18n.changeLanguage(savedLang);
       }
     }

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 
@@ -22,24 +23,26 @@ export function NotificationSettings({
   onPushNotifsChange,
   onWeeklyReportChange,
 }: NotificationSettingsProps) {
+  const { t } = useTranslation();
+
   const notifications = [
     {
-      label: "Email Notifications",
-      desc: "Receive leave updates and system alerts via email",
+      label: t("settingsNotifications.emailNotifications"),
+      desc: t("settingsNotifications.emailNotificationsDesc"),
       value: emailNotifs,
       onChange: onEmailNotifsChange,
       icon: "📧",
     },
     {
-      label: "Push Notifications",
-      desc: "Get real-time browser push notifications",
+      label: t("settingsNotifications.pushNotifications"),
+      desc: t("settingsNotifications.pushNotificationsDesc"),
       value: pushNotifs,
       onChange: onPushNotifsChange,
       icon: "🔔",
     },
     {
-      label: "Weekly Report",
-      desc: "Receive a weekly summary digest every Monday",
+      label: t("settingsNotifications.weeklyReport"),
+      desc: t("settingsNotifications.weeklyReportDesc"),
       value: weeklyReport,
       onChange: onWeeklyReportChange,
       icon: "📊",
@@ -51,9 +54,9 @@ export function NotificationSettings({
       <CardHeader>
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-[var(--warning)]" />
-          <CardTitle>Notifications</CardTitle>
+          <CardTitle>{t("settingsNotifications.title")}</CardTitle>
         </div>
-        <CardDescription>Configure how you receive alerts and updates</CardDescription>
+        <CardDescription>{t("settingsNotifications.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {notifications.map((item, idx) => (

@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+import { useTranslation } from "react-i18next";
 
 import { useEffect, useState } from "react";
 import { useCookieConsent } from "@/store/cookieConsentStore";
@@ -9,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function CookieBanner() {
+  const { t } = useTranslation();
   const { hasConsent, showBanner, acceptAll, rejectAll } = useCookieConsent();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -47,23 +50,23 @@ export default function CookieBanner() {
                   
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-[var(--foreground)]">
-                      🍪 We value your privacy
+                      рџЌЄ We value your privacy
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                      We use cookies to enhance your browsing experience, ensure security, and analyze site performance. 
-                      By clicking "Accept All", you consent to our use of cookies.{" "}
+                      {t("cookies.description")} 
+                      {t("cookies.acceptConsent")}{" "}
                       <Link
                         href="/privacy"
                         className="inline-flex items-center font-medium text-[var(--primary)] hover:underline"
                       >
-                        Learn more
+                        {t("cookies.learnMore")}
                       </Link>
-                      {" or "}
+                      {t("cookies.or")}
                       <Link
                         href="/settings"
                         className="inline-flex items-center gap-1 font-medium text-[var(--primary)] hover:underline"
                       >
-                        customize settings
+                        {t("cookies.customizeSettings")}
                         <Settings className="h-3 w-3" />
                       </Link>
                     </p>
@@ -127,3 +130,4 @@ export default function CookieBanner() {
     </AnimatePresence>
   );
 }
+

@@ -1,4 +1,6 @@
-﻿"use client";
+"use client";
+
+import { useTranslation } from 'react-i18next';
 
 import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -14,6 +16,7 @@ import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { loginTourSteps } from "@/components/onboarding/loginTourSteps";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { login } = useAuthStore();
   const [isPending, startTransition] = useTransition();
@@ -31,9 +34,9 @@ export default function LoginPage() {
 
     startTransition(async () => {
       try {
-        console.log("🔐 Attempting login...");
+        console.log("рџ”ђ Attempting login...");
         const result = await loginAction(fd);
-        console.log("✅ Login successful, result:", result);
+        console.log("вњ… Login successful, result:", result);
         
         const userData = {
           id: result.userId,
@@ -46,18 +49,18 @@ export default function LoginPage() {
           avatar: result.avatar,
         };
         
-        console.log("💾 Saving user to store:", userData);
+        console.log("рџ’ѕ Saving user to store:", userData);
         login(userData);
         
         // Verify it was saved
         setTimeout(() => {
           const stored = localStorage.getItem('hr-auth-storage');
-          console.log("🔍 Verification - localStorage:", stored);
+          console.log("рџ”Ќ Verification - localStorage:", stored);
         }, 100);
         
         router.push("/dashboard");
       } catch (err) {
-        console.error("❌ Login failed:", err);
+        console.error("вќЊ Login failed:", err);
         setError(err instanceof Error ? err.message : "Login failed");
       }
     });
@@ -118,10 +121,10 @@ export default function LoginPage() {
               <Building2 className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-              Welcome back
+              {t('auth.welcomeBack')}
             </h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-              Sign in to HR Office Leave Monitor
+              {t('auth.signInToHROffice')}
             </p>
           </div>
 
@@ -138,9 +141,7 @@ export default function LoginPage() {
                 color: loginMode === "email" ? "var(--text-primary)" : "var(--text-muted)",
               }}
             >
-              <Mail className="w-4 h-4 inline mr-2" />
-              Email
-            </button>
+              <Mail className="w-4 h-4 inline mr-2" />{t('auth.email')}</button>
             <button
               type="button"
               onClick={() => setLoginMode("face")}
@@ -153,7 +154,7 @@ export default function LoginPage() {
               }}
             >
               <ScanFace className="w-4 h-4 inline mr-2" />
-              Face ID
+              {t('auth.faceId')}
             </button>
           </div>
 
@@ -176,7 +177,7 @@ export default function LoginPage() {
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
                 <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-                  or continue with email
+                  {t('auth.orContinueWith')}
                 </span>
                 <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
               </div>
@@ -188,9 +189,7 @@ export default function LoginPage() {
           <form id="email-login-form" onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                Email address
-              </label>
+              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.emailAddress')}</label>
               <div className="relative">
                 <Mail
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
@@ -217,15 +216,13 @@ export default function LoginPage() {
             {/* Password */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Password
-                </label>
+                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
                 <Link
                   href="/forgot-password"
                   className="text-xs hover:underline"
                   style={{ color: "#2563eb" }}
                 >
-                  Forgot password?
+                  {t('auth.forgotPassword')}
                 </Link>
               </div>
               <div className="relative">
@@ -238,7 +235,7 @@ export default function LoginPage() {
                   required
                   value={formData.password}
                   onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                  placeholder="••••••••"
+                  placeholder="вЂўвЂўвЂўвЂўвЂўвЂўвЂўвЂў"
                   className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: "var(--input)",
@@ -285,9 +282,9 @@ export default function LoginPage() {
               style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
             >
               {isPending ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</>
+                <><Loader2 className="w-4 h-4 animate-spin" /> {t('auth.signingIn')}</>
               ) : (
-                "Sign In"
+                t('auth.signIn')
               )}
             </motion.button>
           </form>
@@ -296,14 +293,14 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="text-center mt-6 space-y-3">
             <p id="join-team-link" className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Don&apos;t have an account?{" "}
+              {t('auth.dontHaveAccount')}{" "}
               <Link href="/register" className="font-semibold hover:underline" style={{ color: "#2563eb" }}>
-                Join existing team
+                {t('auth.joinExistingTeam')}
               </Link>
             </p>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>or</span>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t('common.or')}</span>
               <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
             </div>
             <Link href="/register-org" id="create-org-link">
@@ -311,7 +308,7 @@ export default function LoginPage() {
                 className="text-sm font-semibold hover:underline"
                 style={{ color: "#10b981" }}
               >
-                🏢 Create New Organization
+                🏢 {t('auth.createNewOrganization')}
               </button>
             </Link>
           </div>
@@ -320,7 +317,7 @@ export default function LoginPage() {
         {/* Back to home */}
         <div className="text-center mt-4">
           <Link href="/" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
-            ← Back to home
+            в†ђ {t('ui.backToHome')}
           </Link>
         </div>
       </motion.div>

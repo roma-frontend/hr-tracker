@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 // framer-motion removed from Sidebar — replaced with CSS transitions to eliminate
 // forced reflow, reduce main-thread work and reduce JS bundle on initial load
 import {
@@ -20,6 +21,7 @@ import {
   Clock,
   CheckSquare,
   User,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
@@ -29,7 +31,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { useTranslation } from "react-i18next";
 
 const navItems = [
   { href: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard, roles: ["admin", "supervisor", "employee"] },
@@ -41,6 +42,7 @@ const navItems = [
   { href: "/reports", labelKey: "nav.reports", icon: FileText, roles: ["admin", "supervisor"] },
   { href: "/tasks", labelKey: "nav.tasks", icon: CheckSquare, roles: ["admin", "supervisor", "employee"] },
   { href: "/approvals", labelKey: "nav.approvals", icon: UserCheck, roles: ["admin"] },
+  { href: "/ai-site-editor", labelKey: "nav.aiSiteEditor", icon: Sparkles, roles: ["admin", "supervisor", "employee"], badge: "AI" },
   { href: "/profile", labelKey: "nav.profile", icon: User, roles: ["admin", "supervisor", "employee"] },
   { href: "/settings", labelKey: "nav.settings", icon: Settings, roles: ["admin", "supervisor", "employee"] },
 ];
@@ -100,8 +102,8 @@ export function Sidebar() {
                 <Building2 className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-sm leading-tight truncate text-[var(--text-primary)]">HR Office</p>
-                <p className="text-[10px] truncate text-[var(--text-muted)]">Leave Monitoring</p>
+                <p className="font-bold text-sm leading-tight truncate text-[var(--text-primary)]">{t('sidebar.appName')}</p>
+                <p className="text-[10px] truncate text-[var(--text-muted)]">{t('sidebar.appSubtitle')}</p>
               </div>
             </Link>
           </div>
@@ -118,7 +120,7 @@ export function Sidebar() {
               borderColor: "color-mix(in srgb, var(--primary) 30%, transparent)",
               color: "var(--primary)",
             }}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
@@ -221,10 +223,10 @@ export function Sidebar() {
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-                  ADB-ARRM
+                  {t('sidebar.orgName')}
                 </p>
                 <p className="text-[9px] truncate" style={{ color: "var(--text-muted)" }}>
-                  HR Management
+                  {t('sidebar.orgSubtitle')}
                 </p>
               </div>
             )}
@@ -270,6 +272,7 @@ export default Sidebar;
 
 // ─── Mobile Sidebar ────────────────────────────────────────────────────────────
 export function MobileSidebar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { mobileOpen, setMobileOpen } = useSidebarStore();
   const { user } = useAuthStore();
@@ -324,8 +327,8 @@ export function MobileSidebar() {
                 <Building2 className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="font-bold text-sm leading-tight text-[var(--text-primary)]">HR Office</p>
-                <p className="text-[10px] text-[var(--text-muted)]">Leave Monitoring</p>
+                <p className="font-bold text-sm leading-tight text-[var(--text-primary)]">{t('sidebar.appName')}</p>
+                <p className="text-[10px] text-[var(--text-muted)]">{t('sidebar.appSubtitle')}</p>
               </div>
             </Link>
           </div>
@@ -398,10 +401,10 @@ export function MobileSidebar() {
               <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: "var(--primary)" }} />
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-                  ADB-ARRM
+                  {t('sidebar.orgName')}
                 </p>
                 <p className="text-[9px] truncate" style={{ color: "var(--text-muted)" }}>
-                  HR Management System
+                  {t('sidebar.orgSubtitleFull')}
                 </p>
               </div>
             </div>

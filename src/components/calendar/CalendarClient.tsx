@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
@@ -94,7 +95,7 @@ const LEAVE_TYPE_BG: Record<string, string> = {
   doctor: "#06b6d4",
 };
 
-const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// Days of week will be translated using i18n
 
 // --- Calendar Day Cell ---------------------------------------------------------
 function DayCell({
@@ -167,7 +168,7 @@ function DayCell({
                 className="text-[9px] font-medium truncate hidden sm:block"
                 style={{ color: LEAVE_TYPE_BG[l.type] }}
               >
-                {(l.userName ?? "Unknown").split(" ")[0]}
+                {(l.userName ?? t('calendar.unknown')).split(" ")[0]}
               </span>
             </div>
           ))}
@@ -184,11 +185,17 @@ function DayCell({
 
 // --- Main Component ------------------------------------------------------------
 export function CalendarClient() {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
   const [mounted, setMounted] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const { user } = useAuthStore();
+  
+  const DAYS_OF_WEEK = [
+    t('weekdays.sun'), t('weekdays.mon'), t('weekdays.tue'), t('weekdays.wed'),
+    t('weekdays.thu'), t('weekdays.fri'), t('weekdays.sat')
+  ];
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -393,7 +400,7 @@ export function CalendarClient() {
             ))}
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full border-2 border-[var(--primary)] bg-[var(--primary)]/10 flex-shrink-0" />
-              <span className="text-xs text-[var(--text-muted)]">Today</span>
+              <span className="text-xs text-[var(--text-muted)]">{t('timePeriods.today')}Today</span>
             </div>
           </motion.div>
         </motion.div>
@@ -409,7 +416,7 @@ export function CalendarClient() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm uppercase tracking-wider text-[var(--text-muted)]">
-                {selectedDay ? format(selectedDay, "EEEE, MMM d") : "Select a day"}
+                {selectedDay ? format(selectedDay, "EEEE, MMM d") : t('calendar.selectADay')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
@@ -485,7 +492,7 @@ export function CalendarClient() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm uppercase tracking-wider text-[var(--text-muted)]">
-                {format(currentMonth, "MMMM")} Summary
+                {format(currentMonth, "MMMM")} {t('calendar.summary')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 space-y-2">

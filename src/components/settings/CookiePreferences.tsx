@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useCookieConsent, type CookiePreferences as CookiePrefs } from "@/store/cookieConsentStore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -51,7 +52,9 @@ const cookieCategories: CookieCategory[] = [
 ];
 
 export function CookiePreferences() {
-  const { hasConsent, preferences, savePreferences, resetConsent } = useCookieConsent();
+  
+  const { t } = useTranslation();
+const { hasConsent, preferences, savePreferences, resetConsent } = useCookieConsent();
   const [localPreferences, setLocalPreferences] = useState<CookiePrefs>(preferences);
   const [hasChanges, setHasChanges] = useState(false);
 

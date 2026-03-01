@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { signJWT, verifyJWT } from "@/lib/jwt";
+import { log } from "@/lib/logger";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
@@ -136,7 +137,12 @@ export async function loginAction(formData: FormData | { email: string; password
   let isFaceLogin = false;
 
   try {
-    console.log("🔐 loginAction called with:", formData instanceof FormData ? "FormData" : "Object");
+    const endTimer = log.time('User Login');
+    
+    log.info('Login action initiated', {
+      action: 'login',
+      inputType: formData instanceof FormData ? 'FormData' : 'Object'
+    });
     
     if (formData instanceof FormData) {
       email = formData.get("email") as string;
@@ -147,9 +153,11 @@ export async function loginAction(formData: FormData | { email: string; password
       isFaceLogin = formData.isFaceLogin || false;
     }
 
-    console.log("📧 Email:", email);
-    console.log("🔑 Has password:", !!password);
-    console.log("👤 isFaceLogin:", isFaceLogin);
+    log.debug('Login credentials parsed', {
+      email,
+      hasPassword: !!password,
+      isFaceLogin
+    });
 
     // For Face ID login, we don't need password validation
     if (!isFaceLogin && (!email || !password)) {
@@ -159,7 +167,8 @@ export async function loginAction(formData: FormData | { email: string; password
     const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
-    console.log("📡 Calling Convex mutation auth:login...");
+    log.api.call('POST', 'auth:login', { email, isFaceLogin });
+    
     const result = await convexMutation("auth:login", {
       email,
       password: password || "", // Empty password for Face ID login
@@ -167,9 +176,14 @@ export async function loginAction(formData: FormData | { email: string; password
       sessionExpiry,
       isFaceLogin, // Pass Face ID login flag
     });
-    console.log("✅ Convex mutation successful:", result);
+    
+    log.api.response('POST', 'auth:login', 200, { 
+      userId: result.userId,
+      role: result.role
+    });
 
-    console.log("🔐 Creating JWT...");
+    log.debug('Creating JWT token', { userId: result.userId });
+    
     const jwt = await signJWT({
       userId: result.userId,
       name: result.name,
@@ -180,9 +194,11 @@ export async function loginAction(formData: FormData | { email: string; password
       employeeType: result.employeeType,
       avatar: result.avatarUrl,
     });
-    console.log("✅ JWT created");
+    
+    log.debug('JWT token created successfully');
 
-    console.log("🍪 Setting cookies...");
+    log.debug('Setting authentication cookies');
+    
     const cookieStore = await cookies();
     cookieStore.set("hr-auth-token", jwt, {
       httpOnly: true,
@@ -198,7 +214,15 @@ export async function loginAction(formData: FormData | { email: string; password
       maxAge: 7 * 24 * 60 * 60,
       path: "/",
     });
-    console.log("✅ Cookies set successfully");
+    
+    log.user('User logged in successfully', {
+      userId: result.userId,
+      email: result.email,
+      role: result.role,
+      isFaceLogin
+    });
+    
+    endTimer();
 
     return {
       success: true,
@@ -213,9 +237,11 @@ export async function loginAction(formData: FormData | { email: string; password
       travelAllowance: result.travelAllowance,
     };
   } catch (error: any) {
-    console.error("❌ Error in loginAction:", error);
-    console.error("Error message:", error?.message);
-    console.error("Error stack:", error?.stack);
+    log.error('Login action failed', error, {
+      action: 'login',
+      email,
+      isFaceLogin
+    });
     throw error;
   }
 }

@@ -21,7 +21,9 @@ export function LanguageSwitcher() {
   const currentLang = i18n.language || 'en';
 
   const changeLanguage = (lng: string) => {
+    console.log('🔄 LanguageSwitcher: Changing language from', i18n.language, 'to', lng);
     i18n.changeLanguage(lng);
+    console.log('✅ Language changed to:', i18n.language);
   };
 
   return (

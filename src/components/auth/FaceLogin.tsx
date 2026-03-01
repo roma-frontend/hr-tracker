@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useRef, useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -13,7 +14,9 @@ import { loginAction } from "@/actions/auth";
 import { useRouter } from "next/navigation";
 
 export function FaceLogin() {
-  const router = useRouter();
+  
+  const { t } = useTranslation();
+const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);

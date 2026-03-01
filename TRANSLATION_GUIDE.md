@@ -1,308 +1,343 @@
-# 🌍 Translation Guide (Armenian, Russian, English)
+# 🌍 Translation System Guide
 
-## Поддерживаемые языки
-
-- 🇬🇧 **English** - Английский (по умолчанию)
-- 🇦🇲 **Հայերեն** - Армянский
-- 🇷🇺 **Русский** - Русский
-
-## ✅ Статус переводов
-
-Все переводы **полностью завершены** и синхронизированы:
-- ✅ English (en.json) - 325 ключей
-- ✅ Armenian (hy.json) - 325 ключей  
-- ✅ Russian (ru.json) - 325 ключей
+**HR Office Leave Management System**  
+Complete guide for developers and translators
 
 ---
 
-# 🇦🇲 Armenian Translation Guide
+## 📊 Quick Stats
 
-## ✅ What's Done
-
-**Translation Files:**
-- ✅ `src/i18n/locales/en.json` - 500+ English strings
-- ✅ `src/i18n/locales/hy.json` - 500+ Armenian strings
-- ✅ Organized in sections: landing, common, nav, auth, dashboard, leave, attendance, employees, reports, settings, notifications, errors, success
-
-**Components Translated:**
-- ✅ Landing page (Navbar + Features section)
-- ✅ Test page (`/test-i18n`)
-- ✅ Language Switcher (🇬🇧 🇦🇲)
-
-**Infrastructure:**
-- ✅ react-i18next configured
-- ✅ I18nProvider added to root layout
-- ✅ Auto language detection + localStorage
-- ✅ Armenian holidays calendar
+- **Languages:** 3 (English, Russian, Armenian)
+- **Translation Keys:** 1,130 per language
+- **Coverage:** 100% across all languages
+- **Components Using Translations:** 80+
 
 ---
 
-## 📋 How to Translate a Component
+## 🚀 Quick Start
 
-### Step 1: Import useTranslation
+### Using Translations in Components
 
 ```tsx
-'use client';
-
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
 
 export default function MyComponent() {
   const { t } = useTranslation();
-  const [mounted, setMounted] = useState(false);
-
-  // Prevent hydration errors
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <div>Loading...</div>;
-  }
-
+  
   return (
     <div>
-      <h1>{t('dashboard.title')}</h1>
-      <p>{t('dashboard.welcome')}</p>
+      <h1>{t('dashboard.welcome')}</h1>
       <button>{t('common.save')}</button>
+      <p>{t('errors.required')}</p>
     </div>
   );
 }
 ```
 
-### Step 2: Replace Hardcoded Text
-
-**Before:**
-```tsx
-<h1>Dashboard</h1>
-<button>Save</button>
-```
-
-**After:**
-```tsx
-<h1>{t('dashboard.title')}</h1>
-<button>{t('common.save')}</button>
-```
-
----
-
-## 🗂️ Translation Keys Structure
-
-### Common Actions
-```typescript
-t('common.save')        // Պահպանել
-t('common.cancel')      // Չեղարկել
-t('common.delete')      // Ջնջել
-t('common.edit')        // Խմբագրել
-t('common.submit')      // Ուղարկել
-t('common.search')      // Փնտրել
-t('common.filter')      // Զտիչ
-```
-
-### Navigation
-```typescript
-t('nav.dashboard')      // Վահանակ
-t('nav.employees')      // Աշխատակիցներ
-t('nav.leave')          // Արձակուրդ
-t('nav.attendance')     // Ներկայություն
-t('nav.reports')        // Հաշվետվություններ
-t('nav.settings')       // Կարգավորումներ
-```
-
-### Dashboard
-```typescript
-t('dashboard.title')            // Վահանակ
-t('dashboard.welcome')          // Բարի գալուստ HR Office
-t('dashboard.quickActions')     // Արագ գործողություններ
-t('dashboard.recentActivity')   // Վերջին գործողությունները
-```
-
-### Leave Management
-```typescript
-t('leave.title')            // Արձակուրդների կառավարում
-t('leave.requestLeave')     // Արձակուրդի հայտ
-t('leave.myLeaves')         // Իմ արձակուրդները
-t('leave.pending')          // Սպասվող
-t('leave.approved')         // Հաստատված
-t('leave.rejected')         // Մերժված
-```
-
-### Employees
-```typescript
-t('employees.title')           // Աշխատակիցներ
-t('employees.addEmployee')     // Ավելացնել աշխատակից
-t('employees.totalEmployees')  // Ընդամենը աշխատակիցներ
-```
-
----
-
-## 📄 Components To Translate (Priority Order)
-
-### High Priority (Core Features)
-1. ✅ **Landing Page** - Partially done
-2. ⏳ **Dashboard** (`src/components/dashboard/DashboardClient.tsx`)
-3. ⏳ **Leave Management** (`src/app/(dashboard)/leaves/`)
-4. ⏳ **Employees** (`src/app/(dashboard)/employees/`)
-5. ⏳ **Attendance** (`src/app/(dashboard)/attendance/`)
-
-### Medium Priority
-6. ⏳ **Reports** (`src/app/(dashboard)/reports/`)
-7. ⏳ **Settings** (`src/app/(dashboard)/settings/`)
-8. ⏳ **Profile** (`src/app/(dashboard)/profile/`)
-
-### Low Priority
-9. ⏳ **Notifications**
-10. ⏳ **Calendar**
-11. ⏳ **Tasks**
-
----
-
-## 🎯 Quick Win Components
-
-Start with these simple components for quick results:
-
-### 1. Dashboard Welcome Message
-```tsx
-// src/components/dashboard/DashboardClient.tsx
-const { t } = useTranslation();
-
-<h1>{t('dashboard.welcome')}, {user.name}!</h1>
-```
-
-### 2. Quick Actions
-```tsx
-<h3>{t('dashboard.quickActions')}</h3>
-<button>{t('leave.requestLeave')}</button>
-<button>{t('attendance.checkIn')}</button>
-```
-
-### 3. Employee List
-```tsx
-<h1>{t('employees.title')}</h1>
-<button>{t('employees.addEmployee')}</button>
-<p>{t('employees.totalEmployees')}: {count}</p>
-```
-
----
-
----
-
-# 🇷🇺 Russian Translation Guide
-
-## ✅ Что готово
-
-Русский перевод **полностью завершен**! Переведены все 325 ключей во всех разделах:
-
-### 📦 Переведенные разделы (13 разделов)
-
-1. **landing** - Лендинг страница (21 ключ)
-2. **common** - Общие элементы (60 ключей)
-3. **nav** - Навигация (19 ключей)
-4. **auth** - Аутентификация (20 ключей)
-5. **dashboard** - Панель управления (21 ключ)
-6. **leave** - Управление отпусками (39 ключей)
-7. **attendance** - Посещаемость (30 ключей)
-8. **employees** - Сотрудники (35 ключей)
-9. **reports** - Отчеты (21 ключ)
-10. **settings** - Настройки (27 ключей)
-11. **notifications** - Уведомления (14 ключей)
-12. **errors** - Ошибки (10 ключей)
-13. **success** - Успешные операции (8 ключей)
-
-## 🎯 Использование
-
-Переключить язык на русский можно:
-- Через компонент **LanguageSwitcher** (флаг 🇷🇺)
-- Программно: `i18n.changeLanguage('ru')`
-
-## 📝 Файлы
-
-- Переводы: `src/i18n/locales/ru.json`
-- Конфигурация: `src/i18n/config.ts`
-- Переключатель: `src/components/LanguageSwitcher.tsx`
-
----
-
-## 🔧 Adding New Translations
-
-If you need a translation that doesn't exist:
+### Adding New Translations
 
 1. **Add to English** (`src/i18n/locales/en.json`):
-```json
-{
-  "mySection": {
-    "myKey": "My English Text"
-  }
-}
+   ```json
+   {
+     "myFeature": {
+       "title": "My Feature Title"
+     }
+   }
+   ```
+
+2. **Add to Russian** (`src/i18n/locales/ru.json`):
+   ```json
+   {
+     "myFeature": {
+       "title": "Заголовок моей функции"
+     }
+   }
+   ```
+
+3. **Add to Armenian** (`src/i18n/locales/hy.json`):
+   ```json
+   {
+     "myFeature": {
+       "title": "Իմ գործառույթի վերնագիր"
+     }
+   }
+   ```
+
+---
+
+## 📁 File Structure
+
+```
+src/
+├── i18n/
+│   ├── config.ts              # i18next configuration
+│   └── locales/
+│       ├── en.json            # English (base)
+│       ├── ru.json            # Russian
+│       └── hy.json            # Armenian
+├── components/
+│   └── I18nProvider.tsx       # Translation provider
+└── __tests__/
+    └── i18n.test.ts           # Automated tests
 ```
 
-2. **Add to Armenian** (`src/i18n/locales/hy.json`):
-```json
-{
-  "mySection": {
-    "myKey": "Իմ հայերեն տեքստը"
-  }
-}
-```
+---
 
-3. **Use in component**:
+## 🗂️ Translation Sections
+
+| Section | Purpose | Example Keys |
+|---------|---------|--------------|
+| `common` | Shared UI | `save`, `cancel`, `delete` |
+| `nav` | Navigation | `dashboard`, `employees` |
+| `auth` | Authentication | `login`, `register` |
+| `employees` | Employee mgmt | `addEmployee`, `backToEmployees` |
+| `analytics` | Analytics | `analyticsDashboard`, `approvalRate` |
+| `organization` | Organization | `totalEmployees`, `activeEmployees` |
+| `buttons` | Button text | `saving`, `saveChanges` |
+| `placeholders` | Form inputs | `searchEmployee`, `enterEmail` |
+| `errors` | Error messages | `required`, `invalidEmail` |
+| `ariaLabels` | Accessibility | `changeAvatar`, `closeMenu` |
+| `titles` | Title attributes | `refresh`, `editOrganization` |
+
+---
+
+## ✅ Best Practices
+
+### DO ✅
+
 ```tsx
-{t('mySection.myKey')}
+// Use translation keys
+<button>{t('common.save')}</button>
+
+// Use for accessibility
+<button title={t('ariaLabels.edit')}>...</button>
+
+// Use semantic keys
+t('employees.addEmployee')
+
+// Group related translations
+{
+  "employees": {
+    "add": "Add Employee",
+    "edit": "Edit Employee"
+  }
+}
+```
+
+### DON'T ❌
+
+```tsx
+// Don't hardcode text
+<button>Save</button> // ❌
+
+// Don't use vague keys
+t('button1') // ❌
+
+// Don't create duplicates
+{
+  "save": "Save",
+  "saveButton": "Save" // ❌ Use common.save instead
+}
 ```
 
 ---
 
-## 🧪 Testing Translations
+## 🧪 Testing
 
-1. Open http://localhost:3000/test-i18n
-2. Click Language Switcher (🌐) in navbar
-3. Select **Հայերեն 🇦🇲**
-4. Verify all texts change to Armenian
+### Run Tests
 
----
+```bash
+npm test -- i18n.test.ts
+```
 
-## 🚀 Next Steps
+### What Gets Tested
 
-1. Translate **Dashboard** components
-2. Translate **Leave Management** pages
-3. Translate **Employees** pages
-4. Test all pages with Armenian
-5. Fix any missing translations
-6. Commit and push
-
----
-
-## 💡 Tips
-
-- **Use existing keys** before creating new ones
-- **Keep keys organized** by section
-- **Test frequently** - switch language often
-- **Check hydration** - use `mounted` state for client components
-- **Reuse translations** - don't duplicate similar strings
+- ✅ All translation files exist
+- ✅ Valid JSON structure
+- ✅ Same number of keys in all languages
+- ✅ Identical key structure
+- ✅ No empty values
+- ✅ No missing translations
 
 ---
 
-## 📚 Full Translation Reference
+## 🛠️ Common Tasks
 
-See complete list of 500+ translations in:
-- `src/i18n/locales/en.json`
-- `src/i18n/locales/hy.json`
+### Switching Languages
 
-Sections available:
-- `landing.*` - Landing page
-- `common.*` - Common buttons/actions
-- `nav.*` - Navigation
-- `auth.*` - Authentication
-- `dashboard.*` - Dashboard
-- `leave.*` - Leave management
-- `attendance.*` - Attendance tracking
-- `employees.*` - Employee management
-- `reports.*` - Reports & analytics
-- `settings.*` - Settings
-- `notifications.*` - Notifications
-- `errors.*` - Error messages
-- `success.*` - Success messages
+```tsx
+import { useTranslation } from 'react-i18next';
+
+function LanguageSwitcher() {
+  const { i18n } = useTranslation();
+  
+  return (
+    <select value={i18n.language} onChange={(e) => i18n.changeLanguage(e.target.value)}>
+      <option value="en">English</option>
+      <option value="ru">Русский</option>
+      <option value="hy">Հայերեն</option>
+    </select>
+  );
+}
+```
+
+### Using Variables
+
+```tsx
+// Translation file:
+{
+  "greeting": "Hello, {{name}}!"
+}
+
+// Component:
+<p>{t('greeting', { name: 'John' })}</p>
+// Output: "Hello, John!"
+```
+
+### Pluralization
+
+```tsx
+// Translation file:
+{
+  "itemCount": "{{count}} item",
+  "itemCount_plural": "{{count}} items"
+}
+
+// Component:
+<p>{t('itemCount', { count: 5 })}</p>
+// Output: "5 items"
+```
 
 ---
 
-**Ready to translate! Start with Dashboard components and work your way through the list.** 🇦🇲
+## 🔍 Finding Hardcoded Text
+
+### PowerShell Script
+
+```powershell
+# Find hardcoded text in components
+Get-ChildItem -Path "src" -Include "*.tsx" -Recurse | 
+  Select-String -Pattern '>[A-Z][a-z]{5,}</' |
+  Where-Object { $_.Line -notmatch 't\(' }
+```
+
+### Manual Search
+
+```bash
+# Search for potential hardcoded strings
+grep -r ">" src/components/ | grep -v "t(" | grep "[A-Z]"
+```
+
+---
+
+## 📝 Translation Workflow
+
+### For Developers
+
+1. ✍️ Write component (can use hardcoded text initially)
+2. 🔍 Extract all user-facing text
+3. ➕ Add keys to all 3 translation files
+4. 🧪 Test with different languages
+5. ✅ Run translation tests
+6. 💾 Commit changes
+
+### For Translators
+
+1. 📥 Receive English translation file
+2. 🌍 Translate to target language
+3. 📐 Maintain JSON structure
+4. 🔍 Review for accuracy and context
+5. 📤 Submit translated file
+6. ✅ Developer integrates and tests
+
+---
+
+## 🚨 Troubleshooting
+
+### Issue: Missing Translation Key
+
+**Error:**
+```
+Missing translation for key: "myKey"
+```
+
+**Solution:**
+Add the key to all three translation files (en, ru, hy).
+
+---
+
+### Issue: Translations Not Loading
+
+**Check:**
+1. Is `I18nProvider` wrapping your app?
+2. Are files in `src/i18n/locales/`?
+3. Is i18next config correct?
+
+**Debug:**
+```tsx
+const { i18n } = useTranslation();
+console.log('Language:', i18n.language);
+console.log('Key exists:', i18n.exists('myKey'));
+```
+
+---
+
+### Issue: Language Not Switching
+
+**Solution:**
+```tsx
+// Force language change
+i18n.changeLanguage('ru');
+
+// Clear localStorage
+localStorage.removeItem('i18nextLng');
+```
+
+---
+
+## 📊 Current Status (March 2026)
+
+### Translation Coverage
+
+- ✅ **English:** 1,130 keys
+- ✅ **Russian:** 1,130 keys (100%)
+- ✅ **Armenian:** 1,130 keys (100%)
+
+### Recent Additions
+
+- ✅ `analytics` section (5 keys)
+- ✅ `employees.backToEmployees`
+- ✅ `employees.employeeNotFound`
+- ✅ `employees.employeeNotFoundDesc`
+- ✅ `organization.totalEmployees`
+- ✅ `organization.activeEmployees`
+- ✅ `organization.createFirstOrg`
+- ✅ `buttons.saving`
+- ✅ `buttons.saveChanges`
+- ✅ `ui.skipToContent`
+
+### Files Updated (Latest Session)
+
+1. `src/app/(dashboard)/employees/[id]/page.tsx`
+2. `src/app/(dashboard)/superadmin/organizations/[id]/edit/page.tsx`
+3. `src/app/(dashboard)/superadmin/organizations/page.tsx`
+4. `src/app/(dashboard)/reports/page.tsx`
+5. `src/app/(dashboard)/analytics/page.tsx`
+6. `src/app/(auth)/register/page.tsx`
+7. `src/components/ui/avatar-upload.tsx`
+8. `src/components/ai/WeeklyDigestWidget.tsx`
+9. `src/components/ai/AIRecommendationsCard.tsx`
+
+---
+
+## 📚 Resources
+
+- [react-i18next Docs](https://react.i18next.com/)
+- [i18next Docs](https://www.i18next.com/)
+- Project Tests: `src/__tests__/i18n.test.ts`
+
+---
+
+**Maintained by:** Development Team  
+**Last Updated:** March 1, 2026  
+**Status:** ✅ Production Ready

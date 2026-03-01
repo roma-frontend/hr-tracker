@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   CreditCard, Zap, Building2, Rocket,
   CheckCircle, XCircle, AlertCircle, Clock,
@@ -50,7 +51,9 @@ function StatusBadge({ status, isTrialing }: { status: string | null | undefined
 }
 
 export function SubscriptionPlanCard() {
-  const {
+  
+  const { t } = useTranslation();
+const {
     subscription,
     isLoading,
     plan,

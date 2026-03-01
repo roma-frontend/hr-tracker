@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Coffee } from "lucide-react";
@@ -17,12 +18,13 @@ interface BreakReminderServiceProps {
   workHoursEnd?: string;
 }
 
-export function BreakReminderService({
-  enabled,
+export default function BreakReminderService({ 
+enabled,
   intervalMinutes,
   workHoursStart = "09:00",
   workHoursEnd = "18:00",
 }: BreakReminderServiceProps) {
+  const { t } = useTranslation();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const lastReminderRef = useRef<number>(Date.now());

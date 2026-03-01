@@ -27,12 +27,12 @@ const ChatWidget = dynamic(
 );
 
 const BreakReminderService = dynamic(
-  () => import("@/components/productivity/BreakReminderService").then((m) => m.BreakReminderService),
+  () => import("@/components/productivity/BreakReminderService"),
   { ssr: false, loading: () => null }
 );
 
 const FocusModeIndicator = dynamic(
-  () => import("@/components/productivity/FocusModeIndicator").then((m) => m.FocusModeIndicator),
+  () => import("@/components/productivity/FocusModeIndicator"),
   { ssr: false, loading: () => null }
 );
 

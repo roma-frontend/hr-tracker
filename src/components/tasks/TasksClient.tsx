@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CreateTaskModal } from "./CreateTaskModal";
@@ -26,19 +27,19 @@ type Status = "pending" | "in_progress" | "review" | "completed" | "cancelled";
 type Priority = "low" | "medium" | "high" | "urgent";
 type ViewMode = "kanban" | "list";
 
-const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string; border: string; dot: string }> = {
-  pending:     { label: "Pending",     color: "text-[var(--text-muted)]",    bg: "bg-[var(--background-subtle)]",   border: "border-[var(--border)]",        dot: "bg-[var(--text-muted)]" },
-  in_progress: { label: "In Progress", color: "text-blue-500",               bg: "bg-blue-500/10",                  border: "border-blue-500/30",             dot: "bg-blue-500" },
-  review:      { label: "In Review",   color: "text-amber-500",              bg: "bg-amber-500/10",                 border: "border-amber-500/30",            dot: "bg-amber-500" },
-  completed:   { label: "Completed",   color: "text-emerald-500",            bg: "bg-emerald-500/10",               border: "border-emerald-500/30",          dot: "bg-emerald-500" },
-  cancelled:   { label: "Cancelled",   color: "text-rose-500",               bg: "bg-rose-500/10",                  border: "border-rose-500/30",             dot: "bg-rose-400" },
+const STATUS_CONFIG: Record<Status, { labelKey: string; color: string; bg: string; border: string; dot: string }> = {
+  pending:     { labelKey: "tasks.status.pending",    color: "text-[var(--text-muted)]",    bg: "bg-[var(--background-subtle)]",   border: "border-[var(--border)]",        dot: "bg-[var(--text-muted)]" },
+  in_progress: { labelKey: "tasks.status.inProgress", color: "text-blue-500",               bg: "bg-blue-500/10",                  border: "border-blue-500/30",             dot: "bg-blue-500" },
+  review:      { labelKey: "tasks.status.review",     color: "text-amber-500",              bg: "bg-amber-500/10",                 border: "border-amber-500/30",            dot: "bg-amber-500" },
+  completed:   { labelKey: "tasks.status.completed",  color: "text-emerald-500",            bg: "bg-emerald-500/10",               border: "border-emerald-500/30",          dot: "bg-emerald-500" },
+  cancelled:   { labelKey: "tasks.status.cancelled",  color: "text-rose-500",               bg: "bg-rose-500/10",                  border: "border-rose-500/30",             dot: "bg-rose-400" },
 };
 
-const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; bg: string; icon: string }> = {
-  low:    { label: "Low",    color: "text-[var(--text-muted)]", bg: "bg-[var(--background-subtle)]", icon: "↓" },
-  medium: { label: "Medium", color: "text-blue-500",            bg: "bg-blue-500/10",                icon: "→" },
-  high:   { label: "High",   color: "text-orange-500",          bg: "bg-orange-500/10",              icon: "↑" },
-  urgent: { label: "Urgent", color: "text-rose-500",            bg: "bg-rose-500/10",                icon: "⚡" },
+const PRIORITY_CONFIG: Record<Priority, { labelKey: string; color: string; bg: string; icon: string }> = {
+  low:    { labelKey: "tasks.priority.low",    color: "text-[var(--text-muted)]", bg: "bg-[var(--background-subtle)]", icon: "" },
+  medium: { labelKey: "tasks.priority.medium", color: "text-blue-500",            bg: "bg-blue-500/10",                icon: "" },
+  high:   { labelKey: "tasks.priority.high",   color: "text-orange-500",          bg: "bg-orange-500/10",              icon: "" },
+  urgent: { labelKey: "tasks.priority.urgent", color: "text-rose-500",            bg: "bg-rose-500/10",                icon: "?" },
 };
 
 const KANBAN_COLUMNS: Status[] = ["pending", "in_progress", "review", "completed"];
@@ -64,7 +65,8 @@ function DeadlineBadge({ deadline, status }: { deadline?: number; status: Status
   const soon = diff > 0 && days <= 2 && status !== "completed";
   const dateStr = new Date(deadline).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 
-  if (overdue) return <span className="text-xs font-medium text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full">⏰ Overdue</span>;
+  const { t } = useTranslation();
+  if (overdue) return <span className="text-xs font-medium text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full">{t('tasksClient.overdueTag')}</span>;
   if (soon) return <span className="text-xs font-medium text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">⚡ {dateStr}</span>;
   return <span className="text-xs text-[var(--text-muted)]">📅 {dateStr}</span>;
 }
@@ -147,7 +149,7 @@ function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) 
       onClick={onOpen}
     >
       {/* Drag indicator icon - visible on hover */}
-      <div className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-[var(--background-subtle)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" title="Drag to move">
+      <div className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-[var(--background-subtle)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" title={t('ariaLabels.dragToMove')}>
         <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
         </svg>
@@ -160,6 +162,7 @@ function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) 
 // ── Droppable Kanban Column ────────────────────────────────────────────────
 function DroppableKanbanColumn({ status, tasks, onOpen }: { status: Status; tasks: any[]; onOpen: (t: any) => void }) {
   const cfg = STATUS_CONFIG[status];
+  const { t } = useTranslation();
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
   return (
@@ -180,7 +183,7 @@ function DroppableKanbanColumn({ status, tasks, onOpen }: { status: Status; task
         ))}
         {tasks.length === 0 && (
           <div className={`rounded-2xl border-2 border-dashed ${cfg.border} p-6 text-center transition-colors ${isOver ? "bg-blue-500/5" : ""}`}>
-            <p className="text-xs text-[var(--text-muted)]">{isOver ? "Drop here" : "No tasks"}</p>
+            <p className="text-xs text-[var(--text-muted)]">{isOver ? t('tasksClient.dropHere') : t('tasksClient.noTasksFound')}</p>
           </div>
         )}
       </div>
@@ -237,6 +240,7 @@ interface TasksClientProps {
 }
 
 export function TasksClient({ userId, userRole }: TasksClientProps) {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
   const [showCreate, setShowCreate] = useState(false);
   const [showAssign, setShowAssign] = useState(false);
@@ -299,10 +303,10 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">
-              {userRole === "employee" ? "My Tasks" : "Task Manager"}
+              {userRole === "employee" ? t('tasksClient.myTasks') : t('tasksClient.taskManager')}
             </h1>
             <p className="text-[var(--text-muted)] mt-1">
-              {userRole === "employee" ? "Track your assignments and progress" : "Assign and monitor team tasks"}
+              {userRole === "employee" ? t('tasksClient.trackAssignments') : t('tasksClient.assignMonitor')}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -311,7 +315,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
                 onClick={() => setShowAssign(true)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--background-subtle)] transition-colors font-medium text-sm"
               >
-                <span>👥</span> Assign Supervisor
+                {t('tasksClient.assignSupervisor')}
               </button>
             )}
             {canManage && (
@@ -319,7 +323,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
                 onClick={() => setShowCreate(true)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-700 text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all"
               >
-                <span className="text-lg leading-none">+</span> New Task
+                {t('tasksClient.newTask')}
               </button>
             )}
           </div>
@@ -328,12 +332,12 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
           {[
-            { label: "Total",       value: stats.total,      color: "from-[var(--text-secondary)] to-[var(--text-muted)]" },
-            { label: "Pending",     value: stats.pending,    color: "from-[var(--text-muted)] to-[var(--text-muted)]" },
-            { label: "In Progress", value: stats.inProgress, color: "from-blue-400 to-blue-500" },
-            { label: "In Review",   value: stats.review,     color: "from-amber-400 to-amber-500" },
-            { label: "Completed",   value: stats.completed,  color: "from-emerald-400 to-emerald-500" },
-            { label: "Overdue",     value: stats.overdue,    color: "from-rose-400 to-rose-500" },
+            { label: t('tasksClient.total'),      value: stats.total,      color: "from-[var(--text-secondary)] to-[var(--text-muted)]" },
+            { label: t('tasksClient.pending'),    value: stats.pending,    color: "from-[var(--text-muted)] to-[var(--text-muted)]" },
+            { label: t('tasksClient.inProgress'), value: stats.inProgress, color: "from-blue-400 to-blue-500" },
+            { label: t('tasksClient.inReview'),   value: stats.review,     color: "from-amber-400 to-amber-500" },
+            { label: t('tasksClient.completed'),  value: stats.completed,  color: "from-emerald-400 to-emerald-500" },
+            { label: t('tasksClient.overdue'),    value: stats.overdue,    color: "from-rose-400 to-rose-500" },
           ].map(s => (
             <div key={s.label} className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm p-4 text-center">
               <p className={`text-2xl font-bold bg-gradient-to-r ${s.color} bg-clip-text text-transparent`}>{s.value}</p>
@@ -351,7 +355,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search tasks..."
+            placeholder={t('placeholders.searchTasks')}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
           />
         </div>
@@ -362,11 +366,11 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           onChange={e => setFilterPriority(e.target.value as any)}
           className="px-3 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
-          <option value="all">All Priorities</option>
-          <option value="urgent">⚡ Urgent</option>
-          <option value="high">↑ High</option>
-          <option value="medium">→ Medium</option>
-          <option value="low">↓ Low</option>
+          <option value="all">{t('tasksClient.allPriorities')}</option>
+          <option value="urgent">{t('tasksClient.urgent')}</option>
+          <option value="high">{t('tasksClient.high')}</option>
+          <option value="medium">{t('tasksClient.medium')}</option>
+          <option value="low">{t('tasksClient.low')}</option>
         </select>
 
         {/* Status filter */}
@@ -375,12 +379,12 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           onChange={e => setFilterStatus(e.target.value as any)}
           className="px-3 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
-          <option value="all">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="in_progress">In Progress</option>
-          <option value="review">In Review</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="all">{t('tasksClient.allStatuses')}</option>
+          <option value="pending">{t('statuses.pending')}</option>
+          <option value="in_progress">{t('taskStatus.inProgress')}</option>
+          <option value="review">{t('taskStatus.inReview')}</option>
+          <option value="completed">{t('statuses.completed')}</option>
+          <option value="cancelled">{t('taskStatus.cancelled')}</option>
         </select>
 
         {/* View toggle */}
@@ -389,13 +393,13 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
             onClick={() => setViewMode("kanban")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === "kanban" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
           >
-            ⊞ Kanban
+            {t('tasksClient.kanban')}
           </button>
           <button
             onClick={() => setViewMode("list")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === "list" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
           >
-            ☰ List
+            {t('tasksClient.list')}
           </button>
         </div>
       </div>
@@ -405,7 +409,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         <div className="flex items-center justify-center py-20">
           <div className="text-center space-y-3">
             <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto" />
-            <p className="text-[var(--text-muted)] text-sm">Loading tasks...</p>
+            <p className="text-[var(--text-muted)] text-sm">{t('ui.loadingTasks')}</p>
           </div>
         </div>
       ) : viewMode === "kanban" ? (
@@ -455,20 +459,20 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           {tasks.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-4xl mb-3">📋</p>
-              <p className="text-[var(--text-secondary)] font-medium">No tasks found</p>
+              <p className="text-[var(--text-secondary)] font-medium">{t('tasksClient.noTasksFound')}</p>
               <p className="text-[var(--text-muted)] text-sm mt-1">
-                {canManage ? "Create a new task to get started" : "Your supervisor hasn't assigned any tasks yet"}
+                {canManage ? t('tasksClient.createNewTask') : t('tasksClient.noTasksAssigned')}
               </p>
             </div>
           ) : (
             <table className="w-full">
               <thead>
                 <tr className="bg-[var(--background-subtle)] border-b border-[var(--border)]">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">Task</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">Assignee</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">Priority</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">Deadline</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">{t('tasksClient.task')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">{t('tasksClient.assignee')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">{t('tasksClient.priority')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">{t('common.status')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">{t('tasksClient.deadline')}</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"></th>
                 </tr>
               </thead>

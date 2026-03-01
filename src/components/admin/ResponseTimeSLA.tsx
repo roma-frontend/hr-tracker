@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +14,9 @@ interface SLAStatsProps {
   endDate?: number;
 }
 
-export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
+export function ResponseTimeSLA({ 
+startDate, endDate }: SLAStatsProps) {
+  const { t } = useTranslation();
   const stats = useQuery(api.sla.getSLAStats, { startDate, endDate });
   const trend = useQuery(api.sla.getSLATrend, { days: 30 });
   const pendingWithSLA = useQuery(api.sla.getPendingWithSLA, {});
@@ -48,7 +51,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
         {/* Compliance Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">SLA Compliance</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("responseSLA.compliance")}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -68,7 +71,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
         {/* Average Response Time */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("responseSLA.avgResponseTime")}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -88,7 +91,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
         {/* SLA Score */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average SLA Score</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("responseSLA.avgScore")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -108,17 +111,17 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
         {/* Alerts */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("responseSLA.activeAlerts")}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Critical</span>
+                <span className="text-sm text-muted-foreground">{t("responseSLA.critical")}</span>
                 <Badge variant="destructive">{stats.criticalCount}</Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Warning</span>
+                <span className="text-sm text-muted-foreground">{t("responseSLA.warning")}</span>
                 <Badge variant="secondary">{stats.warningCount}</Badge>
               </div>
             </div>
@@ -161,7 +164,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
                   type="monotone" 
                   dataKey="avgResponseTime" 
                   stroke="#8884d8" 
-                  name="Avg Response Time (h)"
+                  name={t("responseSLA.avgResponseTime")}
                   strokeWidth={2}
                 />
                 <Line 
@@ -182,7 +185,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
       {trend && trend.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>SLA Status Distribution</CardTitle>
+            <CardTitle>{t("responseSLA.slaStatusDistribution")}</CardTitle>
             <CardDescription>On-time vs breached requests by day</CardDescription>
           </CardHeader>
           <CardContent>
@@ -219,7 +222,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
       {pendingWithSLA && pendingWithSLA.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Pending Requests - SLA Status</CardTitle>
+            <CardTitle>{t("responseSLA.pendingRequests")}</CardTitle>
             <CardDescription>{pendingWithSLA.length} requests awaiting response</CardDescription>
           </CardHeader>
           <CardContent>
@@ -250,7 +253,7 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
                           <Badge variant="outline">{request.type}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {request.startDate} → {request.endDate} ({request.days} days)
+                          {request.startDate} в†’ {request.endDate} ({request.days} days)
                         </p>
                       </div>
                     </div>
@@ -286,36 +289,36 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-600">✅ On Time</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-600">вњ… On Time</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.onTime}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.total > 0 ? Math.round((stats.onTime / stats.total) * 100) : 0}% of total
+              {stats.total > 0 ? Math.round((stats.onTime / stats.total) * 100) : 0}% {t("responseSLA.ofTotal")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-blue-600">⏳ Pending</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-600">вЏі Pending</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.pending}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}% of total
+              {stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}% {t("responseSLA.ofTotal")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-600">❌ Breached</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-600">вќЊ Breached</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.breached}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.total > 0 ? Math.round((stats.breached / stats.total) * 100) : 0}% of total
+              {stats.total > 0 ? Math.round((stats.breached / stats.total) * 100) : 0}% {t("responseSLA.ofTotal")}
             </p>
           </CardContent>
         </Card>
@@ -325,3 +328,4 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
 }
 
 export default ResponseTimeSLA;
+

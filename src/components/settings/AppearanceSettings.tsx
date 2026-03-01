@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Palette, Sun, Moon, Monitor } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 
 export function AppearanceSettings() {
-  const { theme, setTheme, systemTheme } = useTheme();
+  
+  const { t } = useTranslation();
+const { theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
@@ -41,14 +44,14 @@ export function AppearanceSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Palette className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Appearance</CardTitle>
+            <CardTitle>{t('settingsExtended.appearance')}</CardTitle>
           </div>
           <CardDescription>Customize the look and feel of your interface</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-[var(--text-primary)] mb-3">Theme</p>
+              <p className="text-sm font-medium text-[var(--text-primary)] mb-3">{t('settingsExtended.theme')}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {themes.map((t) => (
                   <div
@@ -81,14 +84,14 @@ export function AppearanceSettings() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Palette className="w-5 h-5 text-[var(--primary)]" />
-          <CardTitle>Appearance</CardTitle>
+          <CardTitle>{t('settingsExtended.appearance')}</CardTitle>
         </div>
         <CardDescription>Customize the look and feel of your interface</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)] mb-3">Theme</p>
+            <p className="text-sm font-medium text-[var(--text-primary)] mb-3">{t('settingsExtended.theme')}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {themes.map((t) => {
                 const Icon = t.icon;

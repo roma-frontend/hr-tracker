@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2, Users } from "lucide-react";
 
 export default function ConflictDetection() {
-  const conflicts = useQuery(api.admin.detectConflicts);
+  
+  const { t } = useTranslation();
+const conflicts = useQuery(api.admin.detectConflicts);
 
   if (!conflicts) {
     return (
@@ -32,10 +35,10 @@ export default function ConflictDetection() {
           </CardTitle>
           <div className="flex gap-2">
             {criticalCount > 0 && (
-              <Badge variant="destructive">{criticalCount} Critical</Badge>
+              <Badge variant="destructive">{criticalCount} {t("conflicts.critical")}</Badge>
             )}
             {warningCount > 0 && (
-              <Badge variant="secondary">{warningCount} Warnings</Badge>
+              <Badge variant="secondary">{warningCount} {t("conflicts.warnings")}</Badge>
             )}
           </div>
         </div>
@@ -44,9 +47,9 @@ export default function ConflictDetection() {
         {conflicts.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
             <Users className="mb-3 h-12 w-12 text-green-500 opacity-50" />
-            <p className="text-sm font-medium text-[var(--text-primary)]">No Conflicts Detected</p>
+            <p className="text-sm font-medium text-[var(--text-primary)]">{t("conflicts.noConflicts")}</p>
             <p className="text-xs text-[var(--text-secondary)]">
-              Leave schedules are well balanced
+              {t("conflicts.balanced")}
             </p>
           </div>
         ) : (
@@ -86,7 +89,7 @@ export default function ConflictDetection() {
                 </p>
                 
                 <div className="text-xs text-[var(--text-secondary)]">
-                  <p className="mb-1 font-medium">Employees out:</p>
+                  <p className="mb-1 font-medium">{t("conflicts.employeesOut")}</p>
                   <div className="flex flex-wrap gap-1">
                     {conflict.employeesOut.map((name, idx) => (
                       <Badge key={idx} variant="outline" className="text-xs">
@@ -103,3 +106,4 @@ export default function ConflictDetection() {
     </Card>
   );
 }
+

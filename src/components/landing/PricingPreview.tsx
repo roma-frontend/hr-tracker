@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -8,15 +9,15 @@ import { useSubscription } from '@/hooks/useSubscription';
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface PricingTier {
   id: string;
-  name: string;
-  price: string;
+  nameKey: string;
+  priceKey: string;
   priceMonthly?: number;
-  description: string;
+  descriptionKey: string;
   icon: React.ReactNode;
-  features: string[];
-  buttonText: string;
+  featureKeys: string[];
+  buttonTextKey: string;
   popular?: boolean;
-  badge?: string;
+  badgeKey?: string;
   accentFrom: string;
   accentTo: string;
   glowColor: string;
@@ -26,64 +27,64 @@ interface PricingTier {
 const pricingTiers: PricingTier[] = [
   {
     id: 'starter',
-    name: 'Starter',
-    price: 'Free',
+    nameKey: 'pricing.starter',
+    priceKey: 'pricing.free',
     priceMonthly: 0,
-    description: 'Perfect for small teams getting started',
+    descriptionKey: 'pricing.starterDesc',
     icon: <Zap size={22} />,
-    features: [
-      'Up to 10 employees',
-      'Basic leave management',
-      'Time tracking',
-      'Employee profiles',
-      'Email notifications',
-      'Community support',
+    featureKeys: [
+      'pricing.upTo10Employees',
+      'pricing.basicLeaveManagement',
+      'pricing.timeTracking',
+      'pricing.employeeProfiles',
+      'pricing.emailNotifications',
+      'pricing.communitySupport',
     ],
-    buttonText: 'Start Free Trial',
+    buttonTextKey: 'pricing.startFreeTrial',
     accentFrom: '#10b981',
     accentTo: '#059669',
     glowColor: 'rgba(16,185,129,0.35)',
   },
   {
     id: 'professional',
-    name: 'Professional',
-    price: '$29',
+    nameKey: 'pricing.professional',
+    priceKey: '$29',
     priceMonthly: 29,
-    description: 'For growing teams with advanced needs',
+    descriptionKey: 'pricing.professionalDesc',
     icon: <Building2 size={22} />,
-    features: [
-      'Up to 50 employees',
-      'Everything in Starter',
-      'Advanced analytics',
-      'Custom workflows',
-      'Priority support',
-      'API access',
-      'Integrations',
+    featureKeys: [
+      'pricing.upTo50Employees',
+      'pricing.everythingInStarter',
+      'pricing.aiPoweredInsights',
+      'pricing.customReports',
+      'pricing.prioritySupport',
+      'pricing.apiAccess',
+      'pricing.customIntegrations',
     ],
-    buttonText: 'Start Free Trial',
+    buttonTextKey: 'pricing.startFreeTrial',
     popular: true,
-    badge: 'Most Popular',
+    badgeKey: 'pricing.mostPopular',
     accentFrom: '#3b82f6',
     accentTo: '#2563eb',
     glowColor: 'rgba(59,130,246,0.4)',
   },
   {
     id: 'enterprise',
-    name: 'Enterprise',
-    price: 'Custom',
-    description: 'Tailored for large organizations',
+    nameKey: 'pricing.enterprise',
+    priceKey: 'Custom',
+    descriptionKey: 'pricing.enterpriseDesc',
     icon: <Rocket size={22} />,
-    features: [
-      '100+ employees',
-      'Everything in Professional',
-      'White-label solution',
-      'Dedicated account manager',
-      'Custom integrations',
-      '24/7 phone support',
-      'SLA guarantee',
-      'On-premise option',
+    featureKeys: [
+      'pricing.unlimitedEmployees',
+      'pricing.everythingInProfessional',
+      'pricing.customBranding',
+      'pricing.dedicatedSupport',
+      'pricing.customIntegrations',
+      'pricing.prioritySupport',
+      'pricing.slaAgreement',
+      'pricing.advancedSecurity',
     ],
-    buttonText: 'Contact Sales',
+    buttonTextKey: 'pricing.contactSales',
     accentFrom: '#0ea5e9',
     accentTo: '#06b6d4',
     glowColor: 'rgba(14,165,233,0.35)',
@@ -116,6 +117,7 @@ function useReveal(delay = '0s') {
 // ── PricingCard ───────────────────────────────────────────────────────────────
 function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: number; currentPlan?: string }) {
   const { ref, style } = useReveal(`${delay}s`);
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
   const isCurrentPlan = currentPlan === tier.id;
@@ -213,8 +215,8 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
               >
                 {tier.icon}
               </div>
-              <h3 className="text-xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>{tier.name}</h3>
-              <p className="text-sm mt-1" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{tier.description}</p>
+              <h3 className="text-xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>{t(tier.nameKey)}</h3>
+              <p className="text-sm mt-1" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{t(tier.descriptionKey)}</p>
             </div>
           </div>
 
@@ -225,23 +227,23 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
                 className="text-5xl font-black leading-none"
                 style={{ color: 'var(--landing-text-primary)' }}
               >
-                {tier.price}
+                {t(tier.priceKey)}
               </span>
               {tier.priceMonthly !== undefined && (
-                <span className="text-sm pb-1.5" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>/month</span>
+                <span className="text-sm pb-1.5" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>{t('pricing.perMonth')}</span>
               )}
             </div>
             {tier.priceMonthly !== undefined && tier.priceMonthly >= 0 && (
               <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
                 <Shield size={11} />
-                14-day free trial · No credit card required
+                {t('pricing.freeTrial')}
               </p>
             )}
           </div>
 
           {/* Features */}
           <ul className="space-y-3 mb-8 flex-1">
-            {tier.features.map((feature, i) => (
+            {tier.featureKeys.map((feature, i) => (
               <li key={i} className="flex items-start gap-3">
                 <div
                   className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
@@ -287,12 +289,12 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
             ) : isCurrentPlan ? (
               <>
                 <CheckCircle2 size={15} />
-                Current Plan
+                {t('pricing.currentPlan')}
               </>
             ) : (
               <>
                 <Sparkles size={15} />
-                {tier.buttonText}
+                {t(tier.buttonTextKey)}
                 <ArrowRight size={15} className="group-hover/btn:translate-x-0.5 transition-transform" />
               </>
             )}
@@ -306,6 +308,7 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
 // ── Section ───────────────────────────────────────────────────────────────────
 export default function PricingPreview() {
   const { ref, style } = useReveal();
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { plan } = useSubscription();
   
@@ -322,27 +325,27 @@ export default function PricingPreview() {
 
       {/* Header */}
       <div ref={ref} className="text-center mb-20" style={style}>
-        <span className="section-eyebrow">Pricing</span>
+        <span className="section-eyebrow">{t('pricing.eyebrow')}</span>
         <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
-          Exclusive,{' '}
-          <span className="heading-gradient">transparent pricing</span>
+          {t('pricing.headingStart')}{' '}
+          <span className="heading-gradient">{t('pricing.headingHighlight')}</span>
         </h2>
         <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
-          Choose the plan that&apos;s right for your organization.{' '}
-          <span style={{ color: 'var(--landing-text-muted)' }}>All plans include a 14-day free trial.</span>
+          {t('pricing.subtitle')}{' '}
+          <span style={{ color: 'var(--landing-text-muted)' }}>{t('pricing.allPlansInclude')}</span>
         </p>
 
         {/* Trust badges */}
         <div className="flex items-center justify-center gap-6 mt-8 flex-wrap">
           {[
-            { icon: <Shield size={14} />, text: 'SSL Secured' },
-            { icon: <Check size={14} />, text: 'No setup fees' },
-            { icon: <Zap size={14} />, text: 'Cancel anytime' },
-            { icon: <Star size={14} />, text: 'GDPR compliant' },
-          ].map(({ icon, text }) => (
-            <div key={text} className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
+            { icon: <Shield size={14} />, textKey: 'pricing.sslSecured' },
+            { icon: <Check size={14} />, textKey: 'pricing.noSetupFees' },
+            { icon: <Zap size={14} />, textKey: 'pricing.cancelAnytime' },
+            { icon: <Star size={14} />, textKey: 'pricing.gdprCompliant' },
+          ].map(({ icon, textKey }) => (
+            <div key={textKey} className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
               <span style={{ color: 'var(--primary)' }}>{icon}</span>
-              {text}
+              {t(textKey)}
             </div>
           ))}
         </div>
@@ -358,8 +361,7 @@ export default function PricingPreview() {
       {/* Footer note */}
       <p className="text-center text-sm mt-14 flex items-center justify-center gap-2" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
         <Shield size={13} style={{ color: 'var(--primary)' }} />
-        All plans include SSL security, premium backups, and GDPR compliance.
-        Payments powered by{' '}
+        {t('pricing.footerNote')}{' '}
         <span className="font-semibold" style={{ color: 'var(--landing-text-muted)' }}>Stripe</span>.
       </p>
 

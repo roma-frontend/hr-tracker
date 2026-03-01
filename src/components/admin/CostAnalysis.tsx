@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -8,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { DollarSign, Loader2 } from "lucide-react";
 
 export default function CostAnalysis() {
-  const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
+  
+  const { t } = useTranslation();
+const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
   
   const data = useQuery(api.admin.getCostAnalysis, { period });
 
@@ -60,12 +63,12 @@ export default function CostAnalysis() {
         <div className="rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-secondary)]">Total Leave Cost</p>
+              <p className="text-sm text-[var(--text-secondary)]">{t("costAnalysis.totalCost")}</p>
               <p className="text-3xl font-bold text-[var(--text-primary)]">
                 ${data.totalCost.toLocaleString()}
               </p>
               <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                {data.totalLeaves} leaves · {data.totalDays} days
+                {data.totalLeaves} leaves В· {data.totalDays} days
               </p>
             </div>
           </div>
@@ -74,7 +77,7 @@ export default function CostAnalysis() {
         {/* By Department */}
         {data.byDepartment.length > 0 && (
           <div>
-            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">By Department</h4>
+            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">{t("costAnalysis.byDepartment")}</h4>
             <div className="space-y-2">
               {data.byDepartment.map((dept) => (
                 <div key={dept.name} className="space-y-1">
@@ -99,7 +102,7 @@ export default function CostAnalysis() {
         {/* By Type */}
         {data.byType.length > 0 && (
           <div>
-            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">By Leave Type</h4>
+            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">{t("costAnalysis.byLeaveType")}</h4>
             <div className="space-y-2">
               {data.byType.map((typeData) => (
                 <div key={typeData.type} className="space-y-1">
@@ -123,10 +126,11 @@ export default function CostAnalysis() {
 
         {data.totalCost === 0 && (
           <p className="text-center text-sm text-[var(--text-secondary)]">
-            No leave data for this period
+            {t("costAnalysis.noData")}
           </p>
         )}
       </CardContent>
     </Card>
   );
 }
+

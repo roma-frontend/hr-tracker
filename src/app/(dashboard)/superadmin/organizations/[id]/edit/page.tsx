@@ -4,12 +4,14 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter, useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"
+import { useTranslation } from 'react-i18next';;
 import { Building2, Save, ArrowLeft, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
 export default function EditOrganizationPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   const { user } = useAuthStore();
@@ -66,8 +68,8 @@ export default function EditOrganizationPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-muted-foreground">Superadmin access required</p>
+          <h1 className="text-2xl font-bold mb-2">{t('ui.accessDenied')}</h1>
+          <p className="text-muted-foreground">{t('ui.onlySuperadminCanAccess')}</p>
           <p className="text-xs text-muted-foreground mt-2">
             Your role: {user.role} | Email: {user.email}
           </p>
@@ -94,7 +96,7 @@ export default function EditOrganizationPage() {
             onClick={() => router.push("/superadmin/organizations")}
             className="mt-4 px-4 py-2 rounded-lg bg-primary text-white"
           >
-            Back to Organizations
+            {t('ui.backToOrganizations')}
           </button>
         </div>
       </div>
@@ -137,7 +139,7 @@ export default function EditOrganizationPage() {
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Organizations
+            {t('ui.backToOrganizations')}
           </button>
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
@@ -178,7 +180,7 @@ export default function EditOrganizationPage() {
                 borderColor: "var(--border)",
                 color: "var(--text-primary)",
               }}
-              placeholder="AURA Medical Center"
+              placeholder={t('placeholders.auraMedicalCenter')}
             />
           </div>
 
@@ -267,7 +269,7 @@ export default function EditOrganizationPage() {
                 borderColor: "var(--border)",
                 color: "var(--text-primary)",
               }}
-              placeholder="United States"
+              placeholder={t('placeholders.unitedStates')}
             />
           </div>
 
@@ -286,18 +288,18 @@ export default function EditOrganizationPage() {
                 borderColor: "var(--border)",
                 color: "var(--text-primary)",
               }}
-              placeholder="Healthcare, Technology, etc."
+              placeholder={t('placeholders.healthcareTechnology')}
             />
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted/30">
             <div>
-              <p className="text-xs text-muted-foreground">Total Employees</p>
+              <p className="text-xs text-muted-foreground">{t('organization.totalEmployees')}</p>
               <p className="text-lg font-semibold">{organization.totalEmployees || 0}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Active Employees</p>
+              <p className="text-xs text-muted-foreground">{t('organization.activeEmployees')}</p>
               <p className="text-lg font-semibold text-green-600">{organization.activeEmployees || 0}</p>
             </div>
           </div>
@@ -309,9 +311,7 @@ export default function EditOrganizationPage() {
               onClick={() => router.push("/superadmin/organizations")}
               className="flex-1 px-6 py-2.5 rounded-lg border font-semibold transition-all hover:bg-muted"
               style={{ borderColor: "var(--border)" }}
-            >
-              Cancel
-            </button>
+            >{t('common.cancel')}</button>
             <button
               type="submit"
               disabled={isLoading}
@@ -321,12 +321,12 @@ export default function EditOrganizationPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
+                  {t('buttons.saving')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  Save Changes
+                  {t('buttons.saveChanges')}
                 </>
               )}
             </button>

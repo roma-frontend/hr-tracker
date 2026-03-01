@@ -2,20 +2,22 @@
 
 import React, { useState } from "react";
 import { Link2, Calendar, Mail, MessageSquare, Download, Cloud } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 
 export function IntegrationSettings() {
+  const { t } = useTranslation();
   const [googleCalendarSync, setGoogleCalendarSync] = useState(false);
   const [emailReports, setEmailReports] = useState(true);
   const [slackNotifications, setSlackNotifications] = useState(false);
 
   const integrations = [
     {
-      name: "Google Calendar",
-      description: "Sync your leave requests and events with Google Calendar",
+      name: t("settingsIntegration.googleCalendar"),
+      description: t("settingsIntegration.googleCalendarDesc"),
       icon: Calendar,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
@@ -23,8 +25,8 @@ export function IntegrationSettings() {
       onToggle: setGoogleCalendarSync,
     },
     {
-      name: "Outlook Calendar",
-      description: "Integrate with Microsoft Outlook for calendar sync",
+      name: t("settingsIntegration.outlookCalendar"),
+      description: t("settingsIntegration.outlookCalendarDesc"),
       icon: Calendar,
       color: "text-blue-600",
       bgColor: "bg-blue-600/10",
@@ -32,8 +34,8 @@ export function IntegrationSettings() {
       onToggle: () => {},
     },
     {
-      name: "Slack",
-      description: "Receive notifications in your Slack workspace",
+      name: t("settingsIntegration.slack"),
+      description: t("settingsIntegration.slackDesc"),
       icon: MessageSquare,
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
@@ -41,8 +43,8 @@ export function IntegrationSettings() {
       onToggle: setSlackNotifications,
     },
     {
-      name: "Microsoft Teams",
-      description: "Get alerts and updates in Microsoft Teams",
+      name: t("settingsIntegration.microsoftTeams"),
+      description: t("settingsIntegration.microsoftTeamsDesc"),
       icon: MessageSquare,
       color: "text-indigo-500",
       bgColor: "bg-indigo-500/10",
@@ -58,9 +60,9 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Calendar Sync</CardTitle>
+            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
           </div>
-          <CardDescription>Synchronize your leave calendar with external services</CardDescription>
+          <CardDescription>{t("settingsIntegration.calendarSync")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {integrations.filter(i => i.icon === Calendar).map((integration) => {
@@ -78,7 +80,7 @@ export function IntegrationSettings() {
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-[var(--text-primary)]">{integration.name}</p>
                       {integration.connected && (
-                        <Badge variant="default" className="text-xs">Connected</Badge>
+                        <Badge variant="default" className="text-xs">{t('settingsIntegration.connected')}</Badge>
                       )}
                     </div>
                     <p className="text-xs text-[var(--text-muted)] mt-1">{integration.description}</p>
@@ -90,7 +92,7 @@ export function IntegrationSettings() {
                     size="sm"
                     onClick={() => integration.onToggle(false)}
                   >
-                    Disconnect
+                    {t('settingsIntegration.disconnect')}
                   </Button>
                 ) : (
                   <Button
@@ -98,7 +100,7 @@ export function IntegrationSettings() {
                     size="sm"
                     onClick={() => integration.onToggle(true)}
                   >
-                    Connect
+                    {t('settingsIntegration.connect')}
                   </Button>
                 )}
               </div>
@@ -112,18 +114,18 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Email Notifications</CardTitle>
+            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
           </div>
-          <CardDescription>Configure automatic email reports and alerts</CardDescription>
+          <CardDescription>{t("settingsIntegration.emailReports")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
             <div className="flex items-start gap-3">
               <span className="text-2xl">📧</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Automated Reports</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsIntegration.automatedReports')}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Send weekly summary reports to your email every Monday
+                  {t('settingsIntegration.automatedReportsDesc')}
                 </p>
               </div>
             </div>
@@ -132,11 +134,11 @@ export function IntegrationSettings() {
 
           {emailReports && (
             <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5 space-y-2">
-              <p className="text-sm font-medium text-[var(--text-primary)]">Report Schedule:</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsIntegration.reportSchedule')}</p>
               <div className="space-y-1 text-xs text-[var(--text-muted)]">
-                <p>• Weekly Summary: Every Monday at 9:00 AM</p>
-                <p>• Monthly Analytics: 1st of each month</p>
-                <p>• Leave Approvals: Instant notifications</p>
+                <p>• {t('settingsIntegration.weeklySummary')}</p>
+                <p>• {t('settingsIntegration.monthlyAnalytics')}</p>
+                <p>• {t('settingsIntegration.leaveApprovals')}</p>
               </div>
             </div>
           )}
@@ -148,9 +150,9 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Messaging Apps</CardTitle>
+            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
           </div>
-          <CardDescription>Connect with your team communication tools</CardDescription>
+          <CardDescription>{t("settingsIntegration.teamCommunication")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {integrations.filter(i => i.icon === MessageSquare).map((integration) => {
@@ -168,7 +170,7 @@ export function IntegrationSettings() {
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-[var(--text-primary)]">{integration.name}</p>
                       {integration.connected && (
-                        <Badge variant="default" className="text-xs">Connected</Badge>
+                        <Badge variant="default" className="text-xs">{t('settingsIntegration.connected')}</Badge>
                       )}
                     </div>
                     <p className="text-xs text-[var(--text-muted)] mt-1">{integration.description}</p>
@@ -180,7 +182,7 @@ export function IntegrationSettings() {
                     size="sm"
                     onClick={() => integration.onToggle(false)}
                   >
-                    Disconnect
+                    {t('settingsIntegration.disconnect')}
                   </Button>
                 ) : (
                   <Button
@@ -188,7 +190,7 @@ export function IntegrationSettings() {
                     size="sm"
                     onClick={() => integration.onToggle(true)}
                   >
-                    Connect
+                    {t('settingsIntegration.connect')}
                   </Button>
                 )}
               </div>
@@ -202,27 +204,27 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Download className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Data Export</CardTitle>
+            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
           </div>
-          <CardDescription>Export your data for backup or analysis</CardDescription>
+          <CardDescription>{t("settingsIntegration.dataManagement")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Button variant="outline" className="justify-start">
               <Download className="w-4 h-4 mr-2" />
-              Export as CSV
+              {t("settingsIntegration.exportAsCSV")}
             </Button>
             <Button variant="outline" className="justify-start">
               <Download className="w-4 h-4 mr-2" />
-              Export as Excel
+              {t("settingsIntegration.exportAsExcel")}
             </Button>
             <Button variant="outline" className="justify-start">
               <Download className="w-4 h-4 mr-2" />
-              Export as PDF Report
+              {t("settingsIntegration.exportAsPDFReport")}
             </Button>
             <Button variant="outline" className="justify-start">
               <Cloud className="w-4 h-4 mr-2" />
-              Backup to Cloud
+              {t("settingsIntegration.backupToCloud")}
             </Button>
           </div>
 
@@ -230,9 +232,9 @@ export function IntegrationSettings() {
             <div className="flex items-start gap-3">
               <span className="text-xl">💾</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Last Backup</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsIntegration.lastBackup")}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Never backed up. We recommend backing up your data regularly.
+                  {t("settingsIntegration.neverBackedUp")}
                 </p>
               </div>
             </div>

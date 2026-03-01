@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -66,6 +67,7 @@ const plans = [
 ];
 
 export default function RegisterOrgPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
 
@@ -174,7 +176,7 @@ export default function RegisterOrgPage() {
                   className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all"
                   style={{ background: `linear-gradient(135deg, ${plan.color})` }}
                 >
-                  {plan.instant ? "Get Started Free" : "Request Access"}
+                  {plan.instant ? t('auth.getStartedFree') : t('auth.requestAccess')}
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
@@ -191,13 +193,13 @@ export default function RegisterOrgPage() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
-            Already have an organization?{" "}
+            {t('auth.alreadyHaveOrg')}{" "}
             <Link href="/register" className="font-semibold hover:underline text-blue-500">
-              Join existing team
+              {t('auth.joinExistingTeam')}
             </Link>
           </p>
           <Link href="/login" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
-            ← Back to login
+            ← {t('ui.backToLogin')}
           </Link>
         </div>
       </motion.div>

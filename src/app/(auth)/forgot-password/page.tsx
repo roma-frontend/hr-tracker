@@ -1,11 +1,13 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Loader2, AlertCircle, Building2, CheckCircle2, ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -74,10 +76,10 @@ export default function ForgotPasswordPage() {
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="mb-6">
                   <h1 className="text-xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
-                    Forgot your password?
+                    {t('auth.forgotPassword')}
                   </h1>
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    No worries! Enter your email and we'll send you a reset link.
+                    {t('auth.forgotPasswordDesc')}
                   </p>
                 </div>
 
@@ -134,9 +136,9 @@ export default function ForgotPasswordPage() {
                     style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
                   >
                     {isPending ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+                      <><Loader2 className="w-4 h-4 animate-spin" /> {t('auth.sending')}</>
                     ) : (
-                      "Send Reset Link"
+                      t('auth.sendResetLink')
                     )}
                   </motion.button>
                 </form>
@@ -152,20 +154,19 @@ export default function ForgotPasswordPage() {
                   <CheckCircle2 className="w-8 h-8 text-green-500" />
                 </div>
                 <h2 className="text-xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Check your email!
+                  {t('auth.checkYourEmail')}
                 </h2>
                 <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
-                  If an account with <strong style={{ color: "var(--text-primary)" }}>{email}</strong> exists,
-                  we've sent a password reset link. It expires in 1 hour.
+                  {t('auth.resetLinkSent', { email })}
                 </p>
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  Didn't receive it? Check your spam folder or{" "}
+                  {t('auth.didntReceive')}{" "}
                   <button
                     onClick={() => setSent(false)}
                     className="underline"
                     style={{ color: "#2563eb" }}
                   >
-                    try again
+                    {t('auth.tryAgain')}
                   </button>
                 </p>
               </motion.div>

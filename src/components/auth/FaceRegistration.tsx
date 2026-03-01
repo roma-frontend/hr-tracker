@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useRef, useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -17,7 +18,9 @@ interface FaceRegistrationProps {
   onCancel?: () => void;
 }
 
-export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrationProps) {
+export function FaceRegistration({ 
+userId, onSuccess, onCancel }: FaceRegistrationProps) {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);

@@ -21,15 +21,15 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const ROLE_CONFIG = {
-  superadmin: { label: "Super Admin", icon: Shield, color: "#9333ea", bg: "rgba(147,51,234,0.1)" },
-  admin: { label: "Admin", icon: Crown, color: "#2563eb", bg: "rgba(99,102,241,0.1)" },
-  supervisor: { label: "Supervisor", icon: UserCheck, color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
-  employee: { label: "Employee", icon: User, color: "#10b981", bg: "rgba(16,185,129,0.1)" },
+  superadmin: { labelKey: "roles.superAdmin", icon: Shield, color: "#9333ea", bg: "rgba(147,51,234,0.1)" },
+  admin: { labelKey: "roles.admin", icon: Crown, color: "#2563eb", bg: "rgba(99,102,241,0.1)" },
+  supervisor: { labelKey: "roles.supervisor", icon: UserCheck, color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
+  employee: { labelKey: "roles.employee", icon: User, color: "#10b981", bg: "rgba(16,185,129,0.1)" },
 };
 
 const TYPE_CONFIG = {
-  staff: { label: "Staff", color: "#2563eb", bg: "rgba(99,102,241,0.1)" },
-  contractor: { label: "Contractor", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
+  staff: { labelKey: "employeeTypes.staff", color: "#2563eb", bg: "rgba(99,102,241,0.1)" },
+  contractor: { labelKey: "employeeTypes.contractor", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
 };
 
 export function EmployeesClient() {
@@ -94,10 +94,10 @@ export function EmployeesClient() {
     }
     try {
       await deleteUser({ adminId: user.id as Id<"users">, userId: userId as Id<"users"> });
-      toast.success("Employee deactivated");
+      toast.success(t('employees.deactivated'));
       setDeleteConfirm(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to deactivate");
+      toast.error(err instanceof Error ? err.message : t('employees.deactivateFailed'));
     }
   };
 
@@ -114,9 +114,9 @@ export function EmployeesClient() {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Employees</h1>
+          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{t('common.employees')}</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-            {stats.total} total · {stats.staff} staff · {stats.contractors} contractors
+            {stats.total} {t('employees.total')} · {stats.staff} {t('employeeTypes.staff')} · {stats.contractors} {t('employeeTypes.contractors')}
           </p>
         </div>
         {canManage && (
@@ -125,7 +125,7 @@ export function EmployeesClient() {
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-lg"
             style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
           >
-            <Plus className="w-4 h-4" /> Add Employee
+            <Plus className="w-4 h-4" /> {t('employees.addEmployee')}
           </button>
         )}
       </motion.div>
@@ -134,10 +134,10 @@ export function EmployeesClient() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total Active", value: stats.total, icon: Users, color: "#2563eb" },
-          { label: "Staff", value: stats.staff, icon: User, color: "#10b981" },
-          { label: "Contractors", value: stats.contractors, icon: Briefcase, color: "#f59e0b" },
-          { label: "Supervisors", value: stats.supervisors, icon: Shield, color: "#0ea5e9" },
+          { labelKey: "employees.totalActive", value: stats.total, icon: Users, color: "#2563eb" },
+          { labelKey: "employeeTypes.staff", value: stats.staff, icon: User, color: "#10b981" },
+          { labelKey: "employeeTypes.contractors", value: stats.contractors, icon: Briefcase, color: "#f59e0b" },
+          { labelKey: "roles.supervisors", value: stats.supervisors, icon: Shield, color: "#0ea5e9" },
         ].map((stat) => (
           <div key={stat.label} className="p-4 rounded-2xl border flex items-center gap-3"
             style={{ background: "var(--card)", borderColor: "var(--border)" }}>
@@ -147,7 +147,7 @@ export function EmployeesClient() {
             </div>
             <div>
               <p className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{stat.value}</p>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>{stat.label}</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t(stat.labelKey)}</p>
             </div>
           </div>
         ))}
@@ -161,7 +161,7 @@ export function EmployeesClient() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, department..."
+            placeholder={t('placeholders.searchByName')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none"
             style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--text-primary)" }}
           />
@@ -179,7 +179,7 @@ export function EmployeesClient() {
               className="px-3 py-2 rounded-xl border text-sm outline-none capitalize"
               style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--text-primary)" }}
             >
-              {options.map((o) => <option key={o} value={o} className="capitalize">{o === "all" ? `All ${label}s` : o}</option>)}
+              {options.map((o) => <option key={o} value={o} className="capitalize">{o === "all" ? t(`employees.all${label}s`) : t(`employees.filter_${o}`, { defaultValue: o })}</option>)}
             </select>
           ))}
           {/* View toggle */}
@@ -188,7 +188,7 @@ export function EmployeesClient() {
               onClick={() => setViewMode("grid")}
               className={`p-2.5 transition-colors ${viewMode === "grid" ? "text-white" : ""}`}
               style={{ background: viewMode === "grid" ? "linear-gradient(135deg,#2563eb,#0ea5e9)" : "var(--card)", color: viewMode === "grid" ? "white" : "var(--text-muted)" }}
-              title="Grid view"
+              title={t('ariaLabels.gridView')}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -196,7 +196,7 @@ export function EmployeesClient() {
               onClick={() => setViewMode("list")}
               className="p-2.5 transition-colors"
               style={{ background: viewMode === "list" ? "linear-gradient(135deg,#2563eb,#0ea5e9)" : "var(--card)", color: viewMode === "list" ? "white" : "var(--text-muted)" }}
-              title="List view"
+              title={t('ariaLabels.listView')}
             >
               <List className="w-4 h-4" />
             </button>
@@ -207,12 +207,12 @@ export function EmployeesClient() {
       {/* Presence badge helper */}
       {(() => {
         const getPresenceBadge = (status: string | undefined) => {
-          const cfg: Record<string, { label: string; cls: string }> = {
-            available:     { label: "🟢 Available",     cls: "bg-emerald-100 text-emerald-700" },
-            in_meeting:    { label: "📅 In Meeting",    cls: "bg-amber-100 text-amber-700" },
-            in_call:       { label: "📞 In Call",       cls: "bg-blue-100 text-blue-700" },
-            out_of_office: { label: "🏠 Out of Office", cls: "bg-rose-100 text-rose-700" },
-            busy:          { label: "⛔ Busy",          cls: "bg-orange-100 text-orange-700" },
+          const cfg: Record<string, { labelKey: string; cls: string }> = {
+            available:     { labelKey: "presence.available",   cls: "bg-emerald-100 text-emerald-700" },
+            in_meeting:    { labelKey: "presence.inMeeting",   cls: "bg-amber-100 text-amber-700" },
+            in_call:       { labelKey: "presence.inCall",      cls: "bg-blue-100 text-blue-700" },
+            out_of_office: { labelKey: "presence.outOfOffice", cls: "bg-rose-100 text-rose-700" },
+            busy:          { labelKey: "presence.busy",        cls: "bg-orange-100 text-orange-700" },
           };
           return cfg[status ?? "available"] ?? cfg["available"];
         };
@@ -237,16 +237,16 @@ export function EmployeesClient() {
                 >
                   <button onClick={(e) => { e.stopPropagation(); router.push(`/employees/${emp._id}`); setOpenMenuId(null); }}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80" style={{ color: "var(--text-primary)" }}>
-                    <Eye className="w-3.5 h-3.5" /> View Profile
+                    <Eye className="w-3.5 h-3.5" /> {t('common.viewProfile')}
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); setEditEmployee(emp as any); setOpenMenuId(null); }}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80" style={{ color: "var(--text-primary)" }}>
-                    <Edit2 className="w-3.5 h-3.5" /> Edit
+                    <Edit2 className="w-3.5 h-3.5" /> {t('common.edit')}
                   </button>
                   {isAdmin && emp.role !== "admin" && (
                     <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(emp._id); setOpenMenuId(null); }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80" style={{ color: "#ef4444" }}>
-                      <Trash2 className="w-3.5 h-3.5" /> Deactivate
+                      <Trash2 className="w-3.5 h-3.5" /> {t('employees.deactivate')}
                     </button>
                   )}
                 </motion.div>
@@ -285,7 +285,7 @@ export function EmployeesClient() {
                               <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{emp.position ?? "No position"}</p>
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mt-1"
                                 style={{ background: roleConf.bg, color: roleConf.color }}>
-                                <RoleIcon className="w-2.5 h-2.5" />{roleConf.label}
+                                <RoleIcon className="w-2.5 h-2.5" />{t(roleConf.labelKey)}
                               </span>
                             </div>
                           </div>
@@ -305,15 +305,15 @@ export function EmployeesClient() {
                             )}
                           </div>
                           <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
-                            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: typeConf.bg, color: typeConf.color }}>{typeConf.label}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: typeConf.bg, color: typeConf.color }}>{t(typeConf.labelKey)}</span>
                             {isAdmin
                               ? <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{emp.travelAllowance.toLocaleString()} AMD</span>
-                              : <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}>{presence.label}</span>
+                              : <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}>{t(presence.labelKey)}</span>
                             }
                           </div>
                           {!emp.isActive && (
                             <div className="absolute inset-0 rounded-2xl flex items-center justify-center" style={{ background: "rgba(0,0,0,0.05)" }}>
-                              <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>DEACTIVATED</span>
+                              <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>{t('employees.deactivatedBadge')}</span>
                             </div>
                           )}
                         </motion.div>
@@ -324,7 +324,7 @@ export function EmployeesClient() {
                 {filtered.length === 0 && (
                   <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
                     <Users className="w-12 h-12 opacity-20" style={{ color: "var(--text-muted)" }} />
-                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>No employees found</p>
+                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t('employees.noFound')}</p>
                   </div>
                 )}
               </div>
@@ -336,11 +336,11 @@ export function EmployeesClient() {
                 {/* Table header */}
                 <div className="grid grid-cols-12 gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
                   style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>
-                  <div className="col-span-4">Employee</div>
-                  <div className="col-span-2">Department</div>
-                  <div className="col-span-2">Supervisor</div>
-                  <div className="col-span-2">Status</div>
-                  <div className="col-span-1">Type</div>
+                  <div className="col-span-4">{t('dashboard.employee')}</div>
+                  <div className="col-span-2">{t('employeeInfo.department')}</div>
+                  <div className="col-span-2">{t('roles.supervisor')}</div>
+                  <div className="col-span-2">{t('dashboard.status')}</div>
+                  <div className="col-span-1">{t('dashboard.type')}</div>
                   <div className="col-span-1"></div>
                 </div>
                 <AnimatePresence mode="popLayout">
@@ -393,7 +393,7 @@ export function EmployeesClient() {
                           {/* Presence status */}
                           <div className="col-span-2">
                             <span className={`text-xs px-2 py-1 rounded-full font-medium ${presence.cls}`}>
-                              {presence.label}
+                              {t(presence.labelKey)}
                             </span>
                           </div>
 
@@ -401,7 +401,7 @@ export function EmployeesClient() {
                           <div className="col-span-1">
                             <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                               style={{ background: typeConf.bg, color: typeConf.color }}>
-                              {typeConf.label}
+                              {t(typeConf.labelKey)}
                             </span>
                           </div>
 
@@ -419,7 +419,7 @@ export function EmployeesClient() {
                 {filtered.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <Users className="w-12 h-12 opacity-20" style={{ color: "var(--text-muted)" }} />
-                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>No employees found</p>
+                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t('employees.noFound')}</p>
                   </div>
                 )}
               </div>
@@ -454,20 +454,20 @@ export function EmployeesClient() {
                 style={{ background: "rgba(239,68,68,0.1)" }}>
                 <AlertTriangle className="w-7 h-7" style={{ color: "#ef4444" }} />
               </div>
-              <h3 className="text-lg font-bold mb-2" style={{ color: "var(--text-primary)" }}>Deactivate Employee?</h3>
+              <h3 className="text-lg font-bold mb-2" style={{ color: "var(--text-primary)" }}>{t('employees.deactivateTitle')}</h3>
               <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
-                This will disable their access. You can reactivate them later from the edit panel.
+                {t('employees.deactivateDesc')}
               </p>
               <div className="flex gap-3">
                 <button onClick={() => setDeleteConfirm(null)}
                   className="flex-1 py-2 rounded-xl text-sm font-medium border"
                   style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button onClick={() => handleDelete(deleteConfirm)}
                   className="flex-1 py-2 rounded-xl text-sm font-semibold text-white"
                   style={{ background: "#ef4444" }}>
-                  Deactivate
+                  {t('employees.deactivate')}
                 </button>
               </div>
             </motion.div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { X, Clock, Calendar, TrendingUp, AlertTriangle, CheckCircle, LogIn, LogOut, Timer, Building2, UserCog } from "lucide-react";
@@ -29,14 +30,18 @@ function formatDuration(min: number) {
   return `${Math.floor(min / 60)}h ${min % 60}m`;
 }
 
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+// Months will be translated using i18n in the component
 
 export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
+  const { t } = useTranslation();
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.toISOString().slice(0, 7));
+  
+  const MONTHS = [
+    t('months.january'), t('months.february'), t('months.march'), t('months.april'),
+    t('months.may'), t('months.june'), t('months.july'), t('months.august'),
+    t('months.september'), t('months.october'), t('months.november'), t('months.december')
+  ];
 
   const history = useQuery(
     api.timeTracking.getEmployeeAttendanceHistory,
@@ -184,7 +189,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                             <div>
                               <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{dayLabel}</p>
                               {record.status === "absent" ? (
-                                <p className="text-xs text-rose-500 mt-0.5">Absent</p>
+                                <p className="text-xs text-rose-500 mt-0.5">{t('statuses.absent')}</p>
                               ) : (
                                 <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
                                   <span className="flex items-center gap-1">
@@ -194,7 +199,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                                   <span>→</span>
                                   <span className="flex items-center gap-1">
                                     <LogOut className="w-3 h-3 text-blue-500" />
-                                    {record.checkOutTime ? formatTime(record.checkOutTime) : <span className="text-green-500">Active</span>}
+                                    {record.checkOutTime ? formatTime(record.checkOutTime) : <span className="text-green-500">{t('statuses.active')}Active</span>}
                                   </span>
                                   {workedH && (
                                     <span className="flex items-center gap-1 text-blue-500">

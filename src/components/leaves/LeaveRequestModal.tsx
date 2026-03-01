@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { CalendarDays, Paperclip } from "lucide-react";
 import { format } from "date-fns";
@@ -39,6 +40,7 @@ const LEAVE_TYPES: { value: LeaveType; label: string; color: string }[] = [
 
 export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   const allUsers = useQuery(api.users.getAllUsers, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const createLeave = useMutation(api.leaves.createLeave);
 
@@ -126,7 +128,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           <form id="leave-request-form" onSubmit={handleSubmit} className="space-y-5">
           {/* Employee */}
           <div className="space-y-1.5">
-            <Label htmlFor="employee">Employee *</Label>
+            <Label htmlFor="employee">{t('labels.employee')} {t('forms.required')}</Label>
             {user?.role === "employee" ? (
               // Employees can only select themselves
               <div className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-sm text-[var(--text-primary)]">
@@ -136,11 +138,11 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
               // Admin and supervisor can select anyone
               <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                 <SelectTrigger id="employee" className={errors.employee ? "border-destructive" : ""}>
-                  <SelectValue placeholder="Select employee..." />
+                  <SelectValue placeholder={t('placeholders.selectEmployee')} />
                 </SelectTrigger>
                 <SelectContent>
                   {allUsers === undefined ? (
-                    <SelectItem value="loading" disabled>Loading...</SelectItem>
+                    <SelectItem value="loading" disabled>{t('commonUI.loading')}...</SelectItem>
                   ) : allUsers.length === 0 ? (
                     <SelectItem value="empty" disabled>No employees found</SelectItem>
                   ) : (
@@ -161,7 +163,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
 
           {/* Leave type */}
           <div className="space-y-1.5">
-            <Label>Leave Type *</Label>
+            <Label>{t('labels.leaveType')} {t('forms.required')}</Label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {LEAVE_TYPES.map((lt) => (
                 <button
@@ -184,7 +186,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Start Date *</Label>
+              <Label>{t('labels.startDate')} {t('forms.required')}</Label>
               <Popover modal={true}>
                 <PopoverTrigger asChild>
                   <Button
@@ -194,7 +196,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                     style={{ color: "var(--text-primary)" }}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
-                    {startDate ? format(new Date(startDate), "PPP") : "Pick a date"}
+                    {startDate ? format(new Date(startDate), "PPP") : t('leaveRequest.pickDate')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -213,7 +215,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
               {errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label>End Date *</Label>
+              <Label>{t('labels.endDate')} {t('forms.required')}</Label>
               <Popover modal={true}>
                 <PopoverTrigger asChild>
                   <Button
@@ -223,7 +225,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                     style={{ color: "var(--text-primary)" }}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
-                    {endDate ? format(new Date(endDate), "PPP") : "Pick a date"}
+                    {endDate ? format(new Date(endDate), "PPP") : t('leaveRequest.pickDate')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -264,9 +266,9 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
 
           {/* Reason */}
           <div className="space-y-1.5">
-            <Label htmlFor="reason">Reason *</Label>
+            <Label htmlFor="reason">{t('leaveRequest.reasonRequired')}</Label>
             <Input
-              id="reason" placeholder="Brief reason for leave..."
+              id="reason" placeholder={t('leaveRequest.reasonPlaceholder')}
               value={reason} onChange={(e) => setReason(e.target.value)}
               className={errors.reason ? "border-destructive" : ""}
             />
@@ -275,9 +277,9 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
 
           {/* Comment */}
           <div className="space-y-1.5">
-            <Label htmlFor="comment">Additional Comments</Label>
+            <Label htmlFor="comment">{t('leaveRequest.additionalComments')}</Label>
             <textarea
-              id="comment" placeholder="Any additional information..."
+              id="comment" placeholder={t('leaveRequest.commentsPlaceholder')}
               value={comment} onChange={(e) => setComment(e.target.value)}
               rows={3}
               className="flex w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] resize-none"
@@ -288,16 +290,16 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-[var(--border)] cursor-pointer hover:border-[#2563eb] transition-colors group">
             <Paperclip className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[#2563eb]" />
             <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">
-              Attach supporting documents (medical certificate, etc.)
+              {t('leaveRequest.attachDocuments')}
             </span>
           </div>
           </form>
         </div>
 
         <DialogFooter className="gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>{t('leaveRequest.cancel')}</Button>
           <Button type="submit" form="leave-request-form" disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit Request"}
+            {submitting ? t('leaveRequest.submitting') : t('leaveRequest.submitRequest')}
           </Button>
         </DialogFooter>
       </DialogContent>

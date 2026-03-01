@@ -1,12 +1,14 @@
 ﻿"use client";
 
 import React, { useState, useTransition, useEffect, Suspense } from "react";
+import { useTranslation } from 'react-i18next';
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Lock, Loader2, AlertCircle, Building2, CheckCircle2 } from "lucide-react";
 
 function ResetPasswordForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
@@ -148,7 +150,7 @@ function ResetPasswordForm() {
                         autoFocus
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Min. 8 characters"
+                        placeholder={t('placeholders.minCharacters')}
                         className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                         style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                         onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
@@ -171,7 +173,7 @@ function ResetPasswordForm() {
                         required
                         value={confirm}
                         onChange={(e) => setConfirm(e.target.value)}
-                        placeholder="Repeat password"
+                        placeholder={t('placeholders.repeatPassword')}
                         className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                         style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                         onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
@@ -203,7 +205,7 @@ function ResetPasswordForm() {
                     className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
                     style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
                   >
-                    {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</> : "Update Password"}
+                    {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('buttons.updating')}</> : t('auth.updatePassword')}
                   </motion.button>
                 </form>
               </motion.div>
@@ -213,7 +215,7 @@ function ResetPasswordForm() {
 
         <div className="text-center mt-4">
           <Link href="/login" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
-            ← Back to login
+            ← {t('ui.backToLogin')}
           </Link>
         </div>
       </motion.div>

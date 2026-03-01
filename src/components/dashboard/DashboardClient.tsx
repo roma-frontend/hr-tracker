@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -31,7 +31,7 @@ const CostAnalysis = dynamic(() => import("@/components/admin/CostAnalysis"), { 
 const ConflictDetection = dynamic(() => import("@/components/admin/ConflictDetection"), { ssr: false });
 const SmartSuggestions = dynamic(() => import("@/components/admin/SmartSuggestions"), { ssr: false });
 const ResponseTimeSLA = dynamic(() => import("@/components/admin/ResponseTimeSLA"), { ssr: false });
-const WeeklyDigestWidget = dynamic(() => import("@/components/ai/WeeklyDigestWidget").then(m => ({ default: m.WeeklyDigestWidget })), { ssr: false });
+const WeeklyDigestWidget = dynamic(() => import("@/components/ai/WeeklyDigestWidget"), { ssr: false });
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -71,7 +71,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
   );
 }
 
-export function DashboardClient() {
+export default function DashboardClient() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
@@ -170,10 +170,10 @@ export function DashboardClient() {
         <div className="flex gap-2 flex-wrap">
           {user?.email?.toLowerCase() === "romangulanyan@gmail.com" && (
             <>
-              <Button asChild size="sm" variant="outline" className="border-blue-200 hover:bg-blue-50">
+              <Button asChild size="sm" variant="outline" className="border-blue-500 dark:border-gray-600 !text-blue-600 dark:!text-gray-200 hover:bg-blue-50 dark:hover:!bg-gray-700 hover:!text-blue-700 dark:hover:!text-white dark:hover:border-gray-500 transition-all duration-200">
                 <Link href="/superadmin/organizations"><Building2 className="w-4 h-4" />{t('dashboard.manageOrgs')}</Link>
               </Button>
-              <Button asChild size="sm" variant="default" className="bg-gradient-to-r from-[#1e40af] to-[#2563eb] hover:opacity-90">
+              <Button asChild size="sm" variant="default" className="bg-gradient-to-r from-[#1e40af] to-[#2563eb] hover:from-[#1e40af]/90 hover:to-[#2563eb]/90">
                 <Link href="/superadmin/create-org"><Building2 className="w-4 h-4" />{t('dashboard.createOrg')}</Link>
               </Button>
             </>
@@ -189,10 +189,10 @@ export function DashboardClient() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatsCard title="Total Employees" value={isLoading ? "—" : totalEmployees} icon={<Users className="w-5 h-5" />} color="blue" index={0} />
-        <StatsCard title="Pending Requests" value={isLoading ? "—" : pendingRequests} icon={<Clock className="w-5 h-5" />} color="yellow" index={1} />
-        <StatsCard title="Approved This Month" value={isLoading ? "—" : approvedThisMonth} icon={<CheckCircle className="w-5 h-5" />} color="green" index={2} />
-        <StatsCard title="On Leave Now" value={isLoading ? "—" : onLeaveNow} icon={<UserCheck className="w-5 h-5" />} color="purple" index={3} />
+        <StatsCard title={t('titles.totalEmployees')} value={isLoading ? "—" : totalEmployees} icon={<Users className="w-5 h-5" />} color="blue" index={0} />
+        <StatsCard title={t('titles.pendingRequests')} value={isLoading ? "—" : pendingRequests} icon={<Clock className="w-5 h-5" />} color="yellow" index={1} />
+        <StatsCard title={t('titles.approvedThisMonth')} value={isLoading ? "—" : approvedThisMonth} icon={<CheckCircle className="w-5 h-5" />} color="green" index={2} />
+        <StatsCard title={t('titles.onLeaveNow')} value={isLoading ? "—" : onLeaveNow} icon={<UserCheck className="w-5 h-5" />} color="purple" index={3} />
       </div>
 
       {/* Charts */}
@@ -223,9 +223,9 @@ export function DashboardClient() {
                     cursor={{ fill: "rgba(99,102,241,0.05)" }} 
                   />
                   <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-muted)" }} />
-                  <Bar dataKey="approved" name="Approved" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="pending" name="Pending" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="rejected" name="Rejected" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="approved" name={t('statuses.approved')} fill="#10b981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="pending" name={t('statuses.pending')} fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="rejected" name={t('statuses.rejected')} fill="#ef4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -239,185 +239,114 @@ export function DashboardClient() {
             </CardHeader>
             <CardContent>
               {pieData.length > 0 ? (
-                <>
-                  <ResponsiveContainer width="100%" height={160}>
-                    <PieChart>
-                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
-                        {pieData.map((entry, index) => <Cell key={index} fill={entry.color} stroke="transparent" />)}
-                      </Pie>
-                      <RechartsTooltip 
-                        contentStyle={{ 
-                          background: "var(--card)", 
-                          border: "1px solid var(--border)", 
-                          borderRadius: "8px", 
-                          color: "var(--text-primary)" 
-                        }}
-                        itemStyle={{ color: "var(--text-primary)" }}
-                        labelStyle={{ color: "var(--text-primary)" }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="mt-2 space-y-1.5">
-                    {pieData.map((entry) => (
-                      <div key={entry.name} className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: entry.color }} />
-                          <span className="text-[var(--text-muted)] truncate">{entry.name}</span>
-                        </div>
-                        <span className="text-[var(--text-primary)] font-medium ml-2">{entry.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip 
+                      contentStyle={{ 
+                        background: "var(--card)", 
+                        border: "1px solid var(--border)", 
+                        borderRadius: "8px", 
+                        color: "var(--text-primary)" 
+                      }}
+                      itemStyle={{ color: "var(--text-primary)" }}
+                      labelStyle={{ color: "var(--text-primary)" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-40 text-[var(--text-muted)] text-sm">{t('dashboard.noDataYet')}</div>
+                <div className="flex flex-col items-center justify-center h-full gap-2">
+                  <CalendarDays className="w-6 h-6 text-[var(--text-muted)]" />
+                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noLeaveData')}</p>
+                </div>
               )}
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Recent requests */}
-      <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.recentLeaveRequests')}</CardTitle>
-              <Button asChild variant="ghost" size="sm" className="text-[#2563eb] hover:text-[#2563eb]">
-                <Link href="/leaves">{t('dashboard.viewAll')} <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            {isLoading ? (
-              <div className="p-8 text-center text-[var(--text-muted)] text-sm">{t('dashboard.loading')}</div>
-            ) : recentLeaves.length === 0 ? (
-              <div className="p-8 text-center text-[var(--text-muted)] text-sm">{t('dashboard.noLeaveRequests')}</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[var(--border)]">
-                      <th className="text-left px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.employee')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.type')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden md:table-cell">{t('dashboard.dates')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider hidden sm:table-cell">{t('dashboard.days')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.status')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border)]">
-                    {recentLeaves.map((req, i) => (
-                      <motion.tr
-                        key={req._id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="hover:bg-[var(--background-subtle)] transition-colors"
-                      >
-                        <td className="px-6 py-3">
-                          <div>
-                            <p className="text-sm font-medium text-[var(--text-primary)]">{req.userName ?? "Unknown"}</p>
-                            <p className="text-xs text-[var(--text-muted)]">{req.userDepartment ?? ""}</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3"><LeaveTypeBadge type={req.type as LeaveType} /></td>
-                        <td className="px-4 py-3 hidden md:table-cell">
-                          <p className="text-xs text-[var(--text-secondary)]">
-                            {formatDate(req.startDate, "MMM d")} – {formatDate(req.endDate, "MMM d, yyyy")}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3 hidden sm:table-cell">
-                          <span className="text-sm font-medium text-[var(--text-primary)]">{req.days}d</span>
-                        </td>
-                        <td className="px-4 py-3"><StatusBadge status={req.status as LeaveStatus} /></td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
+      {/* Recent Leaves & Admin Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <motion.div variants={itemVariants} className="lg:col-span-1">
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{t('dashboard.recentLeaves')}</CardTitle>
+                <ArrowRight className="w-4 h-4 text-[var(--text-muted)]" />
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+            </CardHeader>
+            <CardContent>
+              {recentLeaves.length > 0 ? (
+                <ul className="space-y-3">
+                  {recentLeaves.map((leave) => (
+                    <li key={leave._id} className="flex items-center justify-between text-sm">
+                      <div>
+                        <p className="font-medium text-[var(--text-primary)]">{leave.requesterName}</p>
+                        <p className="text-[var(--text-muted)]">{formatDate(leave.startDate, "MMM d")} - {formatDate(leave.endDate, "MMM d")}</p>
+                      </div>
+                      <StatusBadge status={leave.status} />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full gap-2">
+                  <Clock className="w-6 h-6 text-[var(--text-muted)]" />
+                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noRecentLeaves')}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-      {/* Quick actions */}
-      <motion.div variants={itemVariants}>
-        <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">{t('dashboard.quickActions')}</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#2563eb]">
-            <Link href="/leaves"><Plus className="w-5 h-5 text-[#2563eb]" /><span className="text-xs">{t('dashboard.newLeaveRequest')}</span></Link>
-          </Button>
-          <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#10b981]">
-            <Link href="/employees"><Users className="w-5 h-5 text-[#10b981]" /><span className="text-xs">{t('dashboard.addEmployee')}</span></Link>
-          </Button>
-          <Button asChild variant="outline" className="h-14 flex-col gap-1 border-[var(--border)] hover:border-[#0ea5e9]">
-            <Link href="/calendar"><CalendarDays className="w-5 h-5 text-[#0ea5e9]" /><span className="text-xs">{t('dashboard.viewCalendar')}</span></Link>
-          </Button>
-        </div>
-      </motion.div>
-
-      {/* Admin-Only Section */}
-      {user?.role === "admin" && (
-        <>
-          <motion.div variants={itemVariants} className="pt-6 border-t border-[var(--border)]">
-            <div className="flex items-center justify-between gap-2 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-1 bg-gradient-to-b from-sky-400 to-pink-500 rounded-full" />
-                <h3 className="text-base font-semibold text-[var(--text-primary)]" style={{ fontFamily: "var(--font-work-sans), sans-serif", letterSpacing: '0.01em', fontWeight: 600 }}>
-                  Admin Tools
-                </h3>
-                <span className="px-2 py-1 bg-gradient-to-r from-sky-400/10 to-pink-500/10 text-sky-500 dark:text-sky-400 text-xs font-semibold rounded-full">
-                  PREMIUM
-                </span>
-              </div>
-              <PlanGate
-                feature="aiChat"
-                title="AI Weekly Digest — Professional Plan Required"
-                description="AI-powered weekly digests are available on the Professional plan and above."
-                mode="overlay"
-              >
+        {/* Admin Widgets - Conditionally rendered */}
+        {organization?.plan === "enterprise" && (
+          <>
+            <motion.div variants={itemVariants} className="lg:col-span-1">
+              <PlanGate feature="response-time-sla">
+                <ResponseTimeSLA />
+              </PlanGate>
+            </motion.div>
+            <motion.div variants={itemVariants} className="lg:col-span-1">
+              <PlanGate feature="conflict-detection">
+                <ConflictDetection />
+              </PlanGate>
+            </motion.div>
+            <motion.div variants={itemVariants} className="lg:col-span-1">
+              <PlanGate feature="cost-analysis">
+                <CostAnalysis />
+              </PlanGate>
+            </motion.div>
+            <motion.div variants={itemVariants} className="lg:col-span-1">
+              <PlanGate feature="holiday-sync">
+                <HolidayCalendarSync />
+              </PlanGate>
+            </motion.div>
+            <motion.div variants={itemVariants} className="lg:col-span-1">
+              <PlanGate feature="smart-suggestions">
+                <SmartSuggestions />
+              </PlanGate>
+            </motion.div>
+            <motion.div variants={itemVariants} className="lg:col-span-1">
+              <PlanGate feature="weekly-digest">
                 <WeeklyDigestWidget />
               </PlanGate>
-            </div>
-            <p className="text-sm text-[var(--text-muted)] mb-6">
-              Advanced analytics and AI-powered insights for managing your team's leave schedule
-            </p>
-          </motion.div>
-
-          {/* Admin Grid - Row 1: Response Time SLA (Full Width) */}
-          <motion.div variants={itemVariants}>
-            <PlanGate
-              feature="slaSettings"
-              title="SLA Management — Professional Plan Required"
-              description="Response time SLA tracking and management is available on the Professional plan and above."
-            >
-              <ResponseTimeSLA />
-            </PlanGate>
-          </motion.div>
-
-          {/* Admin Grid - Row 2: Calendar Sync + Cost Analysis */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <motion.div variants={itemVariants}>
-              <HolidayCalendarSync />
             </motion.div>
-            <motion.div variants={itemVariants}>
-              <CostAnalysis />
-            </motion.div>
-          </div>
-
-          {/* Admin Grid - Row 3: Conflict Detection (Full Width) */}
-          <motion.div variants={itemVariants}>
-            <ConflictDetection />
-          </motion.div>
-
-          {/* Admin Grid - Row 4: Smart Suggestions (Full Width) */}
-          <motion.div variants={itemVariants}>
-            <SmartSuggestions />
-          </motion.div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </motion.div>
   );
 }
 
-export default DashboardClient;

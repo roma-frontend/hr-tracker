@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Zap, Clock, Bell, Target, Keyboard } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,8 @@ interface ProductivitySettingsProps {
 }
 
 export function ProductivitySettings({ user, onSettingsChange }: ProductivitySettingsProps) {
+  const { t } = useTranslation();
+  
   const [focusMode, setFocusMode] = useState(user?.focusModeEnabled ?? false);
   const [breakReminders, setBreakReminders] = useState(user?.breakRemindersEnabled ?? true);
   const [workHoursStart, setWorkHoursStart] = useState(user?.workHoursStart ?? "09:00");
@@ -54,18 +57,18 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
         <CardHeader>
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-[var(--warning)]" />
-            <CardTitle>Focus Mode</CardTitle>
+            <CardTitle>{t("settingsProductivity.focusMode")}</CardTitle>
           </div>
-          <CardDescription>Minimize distractions during work hours</CardDescription>
+          <CardDescription>{t("settingsProductivity.focusModeDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
             <div className="flex items-start gap-3">
               <span className="text-2xl">🎯</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Enable Focus Mode</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsProductivity.focusModeToggle")}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Automatically mute non-critical notifications during work hours
+                  {t("settingsProductivity.focusModeHelp")}
                 </p>
               </div>
             </div>
@@ -75,7 +78,7 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
           {focusMode && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
               <div className="space-y-2">
-                <Label htmlFor="work-start">Work Hours Start</Label>
+                <Label htmlFor="work-start">{t("settingsProductivity.workHoursStart")}</Label>
                 <Input
                   id="work-start"
                   type="time"
@@ -84,7 +87,7 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="work-end">Work Hours End</Label>
+                <Label htmlFor="work-end">{t("settingsProductivity.workHoursEnd")}</Label>
                 <Input
                   id="work-end"
                   type="time"
@@ -102,18 +105,18 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
         <CardHeader>
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Break Reminders</CardTitle>
+            <CardTitle>{t("settingsProductivity.breakReminders")}</CardTitle>
           </div>
-          <CardDescription>Stay healthy with regular break notifications</CardDescription>
+          <CardDescription>{t("settingsProductivity.breakRemindersDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
             <div className="flex items-start gap-3">
               <span className="text-2xl">☕</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Break Notifications</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsProductivity.breakNotifications')}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Get reminded to take breaks and stretch
+                  {t('settingsProductivity.getReminded')}
                 </p>
               </div>
             </div>
@@ -122,23 +125,23 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
 
           {breakReminders && (
             <div className="space-y-2 p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
-              <Label htmlFor="break-interval">Break Interval</Label>
+              <Label htmlFor="break-interval">{t('labels.breakInterval')}</Label>
               <Select value={breakInterval} onValueChange={setBreakInterval}>
                 <SelectTrigger id="break-interval">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">⚡ Every 1 minute (for testing)</SelectItem>
-                  <SelectItem value="60">Every 60 minutes (1 hour)</SelectItem>
-                  <SelectItem value="90">Every 90 minutes (1.5 hours)</SelectItem>
-                  <SelectItem value="120">Every 2 hours (recommended)</SelectItem>
-                  <SelectItem value="180">Every 3 hours</SelectItem>
+                  <SelectItem value="1">{t('settingsProductivity.every1min')}</SelectItem>
+                  <SelectItem value="60">{t('settingsProductivity.every60min')}</SelectItem>
+                  <SelectItem value="90">{t('settingsProductivity.every90min')}</SelectItem>
+                  <SelectItem value="120">{t('settingsProductivity.every2hours')}</SelectItem>
+                  <SelectItem value="180">{t('settingsProductivity.every3hours')}</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-[var(--text-muted)] mt-2">
                 {parseInt(breakInterval) === 1 
-                  ? "⚡ Testing mode: Break reminder every 1 minute" 
-                  : `You'll be reminded every ${parseInt(breakInterval)} minutes to take a short break`}
+                  ? t("settingsProductivity.breakTestingMode")
+                  : t("settingsProductivity.breakReminderMessage", { minutes: parseInt(breakInterval) })}
               </p>
             </div>
           )}
@@ -150,14 +153,14 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
         <CardHeader>
           <div className="flex items-center gap-2">
             <Target className="w-5 h-5 text-[var(--success)]" />
-            <CardTitle>Daily Goals</CardTitle>
+            <CardTitle>{t('settingsProductivity.dailyGoals')}</CardTitle>
           </div>
-          <CardDescription>Set productivity targets to stay motivated</CardDescription>
+          <CardDescription>{t('settingsProductivity.setTargets')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="daily-tasks">Daily Task Goal</Label>
+              <Label htmlFor="daily-tasks">{t('labels.dailyTaskGoal')}</Label>
               <Input
                 id="daily-tasks"
                 type="number"
@@ -167,13 +170,13 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
                 onChange={(e) => setDailyGoal(e.target.value)}
               />
               <p className="text-xs text-[var(--text-muted)]">
-                Number of tasks to complete per day
+                {t('settingsProductivity.tasksPerDay')}
               </p>
             </div>
             <div className="flex items-center justify-center p-6 rounded-lg bg-gradient-to-br from-[var(--primary)]/10 to-[var(--success)]/10 border border-[var(--border)]">
               <div className="text-center">
                 <p className="text-3xl font-bold text-[var(--primary)]">{dailyGoal}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">tasks/day</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('settingsProductivity.tasksDay')}</p>
               </div>
             </div>
           </div>
@@ -185,19 +188,19 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
         <CardHeader>
           <div className="flex items-center gap-2">
             <Keyboard className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>Keyboard Shortcuts</CardTitle>
+            <CardTitle>{t("settingsProductivity.keyboardShortcuts")}</CardTitle>
           </div>
-          <CardDescription>Speed up your workflow with quick actions</CardDescription>
+          <CardDescription>{t("settingsProductivity.keyboardShortcutsDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[
-              { key: "⌘ K", action: "Command Palette", desc: "Quick search and actions" },
-              { key: "⌘ T", action: "New Task", desc: "Create a new task instantly" },
-              { key: "⌘ L", action: "Request Leave", desc: "Open leave request form" },
-              { key: "⌘ A", action: "Attendance", desc: "Clock in/out" },
-              { key: "⌘ /", action: "Toggle Sidebar", desc: "Show/hide navigation" },
-              { key: "⌘ B", action: "Notifications", desc: "Open notification panel" },
+              { key: "⌘ K", action: t('settingsProductivity.commandPalette'), desc: t('settingsProductivity.quickSearch') },
+              { key: "⌘ T", action: t('settingsProductivity.newTaskShortcut'), desc: t('settingsProductivity.createInstantly') },
+              { key: "⌘ L", action: t('settingsProductivity.requestLeaveShortcut'), desc: t('settingsProductivity.requestInstantly') },
+              { key: "⌘ A", action: t('nav.attendance'), desc: t('settingsProductivity.clockInOut') },
+              { key: "⌘ /", action: t('settingsProductivity.toggleSidebar'), desc: t('settingsProductivity.showHideNav') },
+              { key: "⌘ B", action: t('nav.notifications'), desc: t('settingsProductivity.openNotifications') },
             ].map((shortcut, idx) => (
               <div key={idx}>
                 <div className="flex items-center justify-between py-2">

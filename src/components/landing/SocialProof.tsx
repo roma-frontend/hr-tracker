@@ -2,15 +2,17 @@
 
 import { Users, Award, TrendingUp, Globe } from 'lucide-react';
 import { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-const metrics = [
-  { icon: Users,     value: '10,000+', label: 'Active Users',    color: '#2563eb' },
-  { icon: Award,     value: '4.9/5',   label: 'Customer Rating', color: '#93c5fd' },
-  { icon: TrendingUp,value: '99.9%',   label: 'Uptime',          color: '#60a5fa' },
-  { icon: Globe,     value: '50+',     label: 'Countries',       color: '#94a3b8' },
+const metricKeys = [
+  { icon: Users,      value: '10,000+', labelKey: 'socialProof.activeUsers',    color: '#2563eb' },
+  { icon: Award,      value: '4.9/5',   labelKey: 'socialProof.customerRating', color: '#93c5fd' },
+  { icon: TrendingUp, value: '99.9%',   labelKey: 'socialProof.uptime',         color: '#60a5fa' },
+  { icon: Globe,      value: '50+',     labelKey: 'socialProof.countries',      color: '#94a3b8' },
 ];
 
-function MetricItem({ icon: Icon, value, label, color, delay }: typeof metrics[0] & { delay: number }) {
+function MetricItem({ icon: Icon, value, labelKey, color, delay }: typeof metricKeys[0] & { delay: number }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -41,7 +43,7 @@ function MetricItem({ icon: Icon, value, label, color, delay }: typeof metrics[0
       </div>
       <div>
         <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: 'var(--landing-text-primary)' }}>{value}</div>
-        <div className="text-sm" style={{ color: 'var(--landing-text-muted)', opacity: 0.7 }}>{label}</div>
+        <div className="text-sm" style={{ color: 'var(--landing-text-muted)', opacity: 0.7 }}>{t(labelKey)}</div>
       </div>
     </div>
   );
@@ -52,8 +54,8 @@ export default function SocialProof() {
     <section className="relative z-10 py-12 border-y" style={{ borderColor: 'var(--landing-card-border)' }}>
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {metrics.map((m, i) => (
-            <MetricItem key={m.label} {...m} delay={i * 0.1} />
+          {metricKeys.map((m, i) => (
+            <MetricItem key={m.labelKey} {...m} delay={i * 0.1} />
           ))}
         </div>
       </div>

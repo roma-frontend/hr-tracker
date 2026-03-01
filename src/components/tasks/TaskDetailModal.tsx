@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { TaskAttachments } from "./TaskAttachments";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -58,6 +59,7 @@ interface Props {
 }
 
 export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Props) {
+  const { t } = useTranslation();
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -156,16 +158,16 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {canManage && !editMode && (
-                <button onClick={() => setEditMode(true)} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-sm transition-colors" title="Edit">✏️</button>
+                <button onClick={() => setEditMode(true)} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-sm transition-colors" title={t('ariaLabels.editTask')}>✏️</button>
               )}
               {editMode && (
                 <>
-                  <button onClick={handleSaveEdit} className="px-3 py-1.5 rounded-lg bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-xs font-bold hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors">Save</button>
-                  <button onClick={() => setEditMode(false)} className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-medium hover:bg-white/30 transition-colors">Cancel</button>
+                  <button onClick={handleSaveEdit} className="px-3 py-1.5 rounded-lg bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-xs font-bold hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors">{t('buttons.save')}</button>
+                  <button onClick={() => setEditMode(false)} className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-medium hover:bg-white/30 transition-colors">{t('buttons.cancel')}</button>
                 </>
               )}
               {canManage && !editMode && (
-                <button onClick={handleDelete} className="w-8 h-8 rounded-full bg-white/20 hover:bg-rose-500/80 flex items-center justify-center text-white text-sm transition-colors" title="Delete">🗑️</button>
+                <button onClick={handleDelete} className="w-8 h-8 rounded-full bg-white/20 hover:bg-rose-500/80 flex items-center justify-center text-white text-sm transition-colors" title={t('ariaLabels.deleteTask')}>🗑️</button>
               )}
               <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">✕</button>
             </div>
@@ -317,7 +319,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 <input
                   value={comment}
                   onChange={e => setComment(e.target.value)}
-                  placeholder="Add a comment..."
+                  placeholder={t('placeholders.addAComment')}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-[var(--text-muted)]"
                 />
                 <button
@@ -325,7 +327,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                   disabled={submitting || !comment.trim()}
                   className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white text-sm font-semibold disabled:opacity-50 hover:from-blue-700 hover:to-sky-700 transition-all shadow-sm"
                 >
-                  Send
+                  {t('buttons.send')}
                 </button>
               </form>
             </div>

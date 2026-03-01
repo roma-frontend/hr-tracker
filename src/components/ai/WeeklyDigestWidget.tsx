@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useState } from 'react';
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next';;
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, RefreshCw, X, Loader2, BarChart3, Clock, Users, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -14,7 +15,8 @@ interface DigestStats {
   attendanceRate: string;
 }
 
-export function WeeklyDigestWidget() {
+export default function WeeklyDigestWidget() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [digest, setDigest] = useState<string | null>(null);
   const [stats, setStats] = useState<DigestStats | null>(null);
@@ -53,7 +55,7 @@ export function WeeklyDigestWidget() {
         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[#2563eb]/20"
       >
         <Sparkles className="w-4 h-4" />
-        Weekly AI Digest
+        {t("weeklyDigest.title")}
       </button>
 
       {/* Modal */}
@@ -80,11 +82,11 @@ export function WeeklyDigestWidget() {
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold">Weekly AI Digest</h2>
+                      <h2 className="text-lg font-bold">{t("weeklyDigest.title")}</h2>
                       <p className="text-xs opacity-80">
                         {generatedAt
-                          ? `Generated ${new Date(generatedAt).toLocaleTimeString()}`
-                          : 'AI-powered HR summary'}
+                          ? `{t("weeklyDigest.generated", { time: new Date(generatedAt).toLocaleTimeString() })}`
+                          : '{t("weeklyDigest.subtitle")}'}
                       </p>
                     </div>
                   </div>
@@ -93,7 +95,7 @@ export function WeeklyDigestWidget() {
                       onClick={generateDigest}
                       disabled={loading}
                       className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors disabled:opacity-50"
-                      title="Regenerate"
+                      title={t('titles.regenerate')}
                     >
                       <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     </button>
@@ -113,7 +115,7 @@ export function WeeklyDigestWidget() {
                       { icon: Users, label: 'On Leave', value: stats.onLeave, color: 'text-blue-200' },
                       { icon: Clock, label: 'Pending', value: stats.pending, color: 'text-yellow-200' },
                       { icon: AlertTriangle, label: 'Late Today', value: stats.lateToday, color: 'text-red-200' },
-                      { icon: BarChart3, label: 'Attendance', value: `${stats.attendanceRate}%`, color: 'text-green-200' },
+                      { icon: BarChart3, label: t('nav.attendance'), value: `${stats.attendanceRate}%`, color: 'text-green-200' },
                     ].map((s) => (
                       <div key={s.label} className="bg-white/10 rounded-xl p-3 text-center">
                         <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
@@ -136,8 +138,8 @@ export function WeeklyDigestWidget() {
                       <div className="absolute inset-0 rounded-full border-4 border-[#2563eb]/30 animate-ping" />
                     </div>
                     <div className="text-center">
-                      <p className="font-semibold text-[var(--text-primary)]">Generating AI Digest...</p>
-                      <p className="text-sm text-[var(--text-muted)] mt-1">Analyzing attendance, leaves & patterns</p>
+                      <p className="font-semibold text-[var(--text-primary)]">{t("weeklyDigest.generating")}</p>
+                      <p className="text-sm text-[var(--text-muted)] mt-1">{t("weeklyDigest.analyzing")}</p>
                     </div>
                   </div>
                 ) : digest ? (
@@ -149,7 +151,7 @@ export function WeeklyDigestWidget() {
                 ) : (
                   <div className="text-center py-16 text-[var(--text-muted)]">
                     <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                    <p>Click refresh to generate digest</p>
+                    <p>{t("weeklyDigest.clickRefresh")}</p>
                   </div>
                 )}
               </div>
@@ -157,7 +159,7 @@ export function WeeklyDigestWidget() {
               {/* Footer */}
               <div className="p-4 border-t border-[var(--border)] flex-shrink-0 flex items-center justify-between">
                 <p className="text-xs text-[var(--text-muted)]">
-                  🤖 Powered by AI — for informational purposes only
+                  {t("weeklyDigest.poweredBy")}
                 </p>
                 <Button
                   onClick={generateDigest}
@@ -176,3 +178,4 @@ export function WeeklyDigestWidget() {
     </>
   );
 }
+

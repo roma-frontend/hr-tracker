@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -51,7 +52,9 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function TaskAttachments({ taskId, attachments, currentUserId, canUpload }: Props) {
+export function TaskAttachments({ 
+taskId, attachments, currentUserId, canUpload }: Props) {
+  const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<Attachment | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -20,6 +21,7 @@ function useReveal() {
 }
 
 export default function NewsletterSection() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,12 +29,12 @@ export default function NewsletterSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) { toast.error('Please enter a valid email address'); return; }
+    if (!email || !email.includes('@')) { toast.error(t('newsletter.invalidEmail')); return; }
     setIsLoading(true);
     setTimeout(() => {
       setIsSubmitted(true);
       setIsLoading(false);
-      toast.success('Successfully subscribed to newsletter!');
+      toast.success(t('newsletter.successMessage'));
       setEmail('');
     }, 1000);
   };
@@ -65,10 +67,10 @@ export default function NewsletterSection() {
           </div>
 
           <h3 className="text-2xl md:text-4xl font-black mb-4" style={{ color: 'var(--landing-text-primary)' }}>
-            Stay in the loop
+            {t('newsletter.title')}
           </h3>
           <p className="text-lg mb-8 max-w-xl mx-auto" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
-            Get the latest updates on HR trends, premium features, and exclusive insights delivered to your inbox.
+            {t('newsletter.subtitle')}
           </p>
 
           {!isSubmitted ? (
@@ -77,7 +79,7 @@ export default function NewsletterSection() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={t('newsletter.emailPlaceholder')}
                 className="flex-1 px-5 py-4 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                 style={{
                   backgroundColor: 'var(--input)',
@@ -85,7 +87,7 @@ export default function NewsletterSection() {
                   color: 'var(--landing-text-primary)'
                 }}
                 disabled={isLoading}
-                aria-label="Email address"
+                aria-label={t('ariaLabels.emailAddress')}
               />
               <button
                 type="submit"
@@ -96,7 +98,7 @@ export default function NewsletterSection() {
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }} />
                 ) : (
-                  <><span>Subscribe</span><ArrowRight size={18} /></>
+                  <><span>{t('newsletter.subscribe')}</span><ArrowRight size={18} /></>
                 )}
               </button>
             </form>
@@ -104,12 +106,12 @@ export default function NewsletterSection() {
             /* CSS fade-in on success */
             <div className="flex items-center justify-center gap-3 font-semibold success-reveal" style={{ color: 'var(--primary)' }}>
               <CheckCircle2 size={24} />
-              <span>You&apos;re subscribed! Check your inbox.</span>
+              <span>{t('newsletter.subscribed')}</span>
             </div>
           )}
 
           <p className="text-xs mt-6" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
-            We respect your privacy. Unsubscribe at any time.
+            {t('newsletter.privacyNote')}
           </p>
         </div>
       </div>

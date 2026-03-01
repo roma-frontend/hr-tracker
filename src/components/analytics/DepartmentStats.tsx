@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+import { useTranslation } from "react-i18next";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -12,6 +14,7 @@ interface DepartmentStatsProps {
 }
 
 export function DepartmentStats({ users }: DepartmentStatsProps) {
+  const { t } = useTranslation();
   // Default balances (what employees start with)
   const DEFAULT_PAID = 24;
   const DEFAULT_SICK = 10;
@@ -48,7 +51,7 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
   return (
     <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
       <h3 className="text-xl font-bold mb-4 text-[var(--text-primary)]">
-        🏢 Department Leave Usage (Avg Days Used)
+        рџЏў Department Leave Usage (Avg Days Used)
       </h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
@@ -73,9 +76,9 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
             labelStyle={{ color: 'var(--text-primary)' }}
           />
           <Legend wrapperStyle={{ color: 'var(--text-primary)' }} />
-          <Bar dataKey="avgPaid" fill="#2563eb" name="Paid Leave (days)" />
-          <Bar dataKey="avgSick" fill="#0ea5e9" name="Sick Leave (days)" />
-          <Bar dataKey="avgFamily" fill="#EC4899" name="Family Leave (days)" />
+          <Bar dataKey="avgPaid" fill="#2563eb" name={t("departmentStats.paidLeave")} />
+          <Bar dataKey="avgSick" fill="#0ea5e9" name={t("departmentStats.sickLeave")} />
+          <Bar dataKey="avgFamily" fill="#EC4899" name={t("departmentStats.familyLeave")} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -83,3 +86,4 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
 }
 
 export default DepartmentStats;
+

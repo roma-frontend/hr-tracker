@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { format, eachDayOfInterval, startOfMonth, endOfMonth, isSameDay } from 'date-fns';
 
 interface LeaveHeatmapProps {
@@ -11,7 +12,9 @@ interface LeaveHeatmapProps {
   month?: Date;
 }
 
-export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) {
+export function LeaveHeatmap({ 
+leaves, month = new Date() }: LeaveHeatmapProps) {
+  const { t } = useTranslation();
   const days = eachDayOfInterval({
     start: startOfMonth(month),
     end: endOfMonth(month),
@@ -40,11 +43,11 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
   return (
     <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
       <h3 className="text-xl font-bold mb-4 text-[var(--text-primary)]">
-        🔥 Leave Heatmap - {format(month, 'MMMM yyyy')}
+        рџ”Ґ Leave Heatmap - {format(month, 'MMMM yyyy')}
       </h3>
       
       <div className="grid grid-cols-7 gap-2">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+        {[t('leaveHeatmap.daysSun'), t('leaveHeatmap.daysMon'), t('leaveHeatmap.daysTue'), t('leaveHeatmap.daysWed'), t('leaveHeatmap.daysThu'), t('leaveHeatmap.daysFri'), t('leaveHeatmap.daysSat')].map(day => (
           <div key={day} className="text-xs font-medium text-[var(--text-muted)] text-center">
             {day}
           </div>
@@ -56,7 +59,7 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
             <div
               key={day.toISOString()}
               className={`aspect-square rounded-lg ${getColor(count)} flex items-center justify-center text-xs font-medium text-white cursor-pointer hover:scale-110 transition-transform`}
-              title={`${format(day, 'MMM d')}: ${count} employee(s) on leave`}
+              title={count === 1 ? t("leaveHeatmap.tooltipSingle", { date: format(day, "MMM d"), count }) : t("leaveHeatmap.tooltipMultiple", { date: format(day, "MMM d"), count })}
             >
               {format(day, 'd')}
             </div>
@@ -65,7 +68,7 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
       </div>
       
       <div className="flex items-center gap-4 mt-4 text-xs text-[var(--text-muted)]">
-        <span>Less</span>
+        <span>{t("leaveHeatmap.less")}</span>
         <div className="flex gap-1">
           <div className="w-4 h-4 rounded bg-[var(--background-subtle)]" />
           <div className="w-4 h-4 rounded bg-green-500" />
@@ -73,10 +76,11 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
           <div className="w-4 h-4 rounded bg-orange-500" />
           <div className="w-4 h-4 rounded bg-red-500" />
         </div>
-        <span>More</span>
+        <span>{t("leaveHeatmap.more")}</span>
       </div>
     </div>
   );
 }
 
 export default LeaveHeatmap;
+

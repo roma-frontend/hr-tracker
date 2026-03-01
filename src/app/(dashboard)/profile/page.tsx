@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -20,6 +21,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user, login } = useAuthStore();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -179,7 +181,7 @@ export default function ProfilePage() {
                   disabled={deleting}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  {deleting ? "Deleting..." : "Delete Picture"}
+                  {deleting ? t('ui.deleting') : t('ui.deletePicture')}
                 </Button>
               )}
             </div>
@@ -199,7 +201,7 @@ export default function ProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="name">{t('labels.fullName')} {t('forms.required')}</Label>
               <div className="relative">
                 <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input 
@@ -207,13 +209,13 @@ export default function ProfilePage() {
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   className="pl-10"
-                  placeholder="John Doe"
+                  placeholder={t('placeholders.johnDoe')}
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email">{t('labels.emailAddress')} {t('forms.required')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input 
@@ -228,7 +230,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">{t('labels.phoneNumber')}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input 
@@ -243,7 +245,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">{t('labels.location')}</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input 
@@ -251,7 +253,7 @@ export default function ProfilePage() {
                   value={location} 
                   onChange={(e) => setLocation(e.target.value)} 
                   className="pl-10"
-                  placeholder="New York, USA"
+                  placeholder={t('placeholders.newYorkUSA')}
                 />
               </div>
             </div>
@@ -271,7 +273,7 @@ export default function ProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Role</Label>
+              <Label>{t('labels.role')}</Label>
               <div className="flex items-center gap-2">
                 <Badge variant={user?.role === "admin" ? "default" : "secondary"}>
                   {user?.role?.toUpperCase()}
@@ -280,7 +282,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Department</Label>
+              <Label>{t('employeeInfo.department')}Department</Label>
               <div className="relative">
                 <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input 
@@ -340,10 +342,10 @@ export default function ProfilePage() {
           {userStats ? (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { label: "Days Active", value: userStats.daysActive.toString(), icon: Clock },
-                { label: "Tasks Completed", value: userStats.tasksCompleted.toString(), icon: Award },
-                { label: "Leaves Taken", value: userStats.leavesTaken.toString(), icon: Calendar },
-                { label: "Projects", value: userStats.projects.toString(), icon: Briefcase },
+                { label: t('profile.daysActive'), value: userStats.daysActive.toString(), icon: Clock },
+                { label: t('profile.tasksCompleted'), value: userStats.tasksCompleted.toString(), icon: Award },
+                { label: t('profile.leavesTaken'), value: userStats.leavesTaken.toString(), icon: Calendar },
+                { label: t('profile.projects'), value: userStats.projects.toString(), icon: Briefcase },
               ].map((stat) => (
                 <div 
                   key={stat.label}
@@ -377,7 +379,7 @@ export default function ProfilePage() {
         </Button>
         <Button onClick={handleSave} disabled={saving}>
           <Save className="w-4 h-4 mr-2" />
-          {saving ? "Saving..." : "Save Changes"}
+          {saving ? t('ui.saving') : t('ui.saveChanges')}
         </Button>
       </div>
     </motion.div>

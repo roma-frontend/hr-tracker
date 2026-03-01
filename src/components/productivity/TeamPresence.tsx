@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -16,7 +17,9 @@ const PRESENCE_CONFIG = {
 } as const;
 
 export function TeamPresence() {
-  const { user } = useAuthStore();
+  
+  const { t } = useTranslation();
+const { user } = useAuthStore();
   const teamMembers = useQuery(
     api.productivity.getTeamPresence,
     user?.organizationId ? { organizationId: user.organizationId } : "skip"

@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -13,7 +14,9 @@ import { useUpgradeModal } from "@/components/subscription/PlanGate";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 
 export default function HolidayCalendarSync() {
-  const [isExporting, setIsExporting] = useState(false);
+  
+  const { t } = useTranslation();
+const [isExporting, setIsExporting] = useState(false);
   const [isSyncingGoogle, setIsSyncingGoogle] = useState(false);
   const [isSyncingOutlook, setIsSyncingOutlook] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
@@ -30,13 +33,13 @@ export default function HolidayCalendarSync() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("google_calendar") === "connected") {
       setGoogleConnected(true);
-      toast.success("Successfully connected to Google Calendar!");
+      toast.success(t("calendarSync.googleSuccess"));
       // Clean URL
       window.history.replaceState({}, "", window.location.pathname);
     }
     if (params.get("outlook_calendar") === "connected") {
       setOutlookConnected(true);
-      toast.success("Successfully connected to Outlook Calendar!");
+      toast.success(t("calendarSync.outlookSuccess"));
       // Clean URL
       window.history.replaceState({}, "", window.location.pathname);
     }
@@ -170,7 +173,7 @@ export default function HolidayCalendarSync() {
       <CardContent className="space-y-4">
         {/* Stats */}
         <div className="rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4">
-          <p className="text-sm text-[var(--text-secondary)]">Upcoming Leaves</p>
+          <p className="text-sm text-[var(--text-secondary)]">{t("calendarSync.upcomingLeaves")}</p>
           <p className="text-3xl font-bold text-[var(--text-primary)]">
             {calendarData.length}
           </p>
@@ -222,7 +225,7 @@ export default function HolidayCalendarSync() {
               ) : (
                 <ExternalLink className="mr-2 h-4 w-4" />
               )}
-              {googleConnected && hasCalendarSync ? "Sync with Google Calendar" : "Connect Google Calendar"}
+              {googleConnected && hasCalendarSync ? t("calendarSync.syncWithGoogle") : t("calendarSync.connectGoogle")}
             </Button>
             {googleConnected && hasCalendarSync && (
               <Badge
@@ -268,7 +271,7 @@ export default function HolidayCalendarSync() {
               ) : (
                 <ExternalLink className="mr-2 h-4 w-4" />
               )}
-              {outlookConnected && hasCalendarSync ? "Sync with Outlook" : "Connect Outlook"}
+              {outlookConnected && hasCalendarSync ? t("calendarSync.syncWithOutlook") : t("calendarSync.connectOutlook")}
             </Button>
             {outlookConnected && hasCalendarSync && (
               <Badge
@@ -291,7 +294,7 @@ export default function HolidayCalendarSync() {
 
         {calendarData.length === 0 && (
           <p className="text-center text-sm text-[var(--text-secondary)]">
-            No upcoming leaves to export
+            {t("calendarSync.noUpcoming")}
           </p>
         )}
       </CardContent>
@@ -299,3 +302,4 @@ export default function HolidayCalendarSync() {
     </>
   );
 }
+

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
@@ -18,6 +19,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 type Tab = "today" | "all_employees" | "rating";
 
 export default function AttendancePage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: Id<"users">; name: string } | null>(null);
   const [detailRecord, setDetailRecord] = useState<any | null>(null);
@@ -59,7 +61,11 @@ export default function AttendancePage() {
     mounted && isAdminOrSupervisor ? { month: selectedMonth } : "skip"
   );
 
-  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const MONTHS = [
+    t('months.january'), t('months.february'), t('months.march'), t('months.april'),
+    t('months.may'), t('months.june'), t('months.july'), t('months.august'),
+    t('months.september'), t('months.october'), t('months.november'), t('months.december')
+  ];
   const monthOptions = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(new Date().getFullYear(), new Date().getMonth() - i, 1);
     return d.toISOString().slice(0, 7);
@@ -75,12 +81,12 @@ export default function AttendancePage() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-          {isAdminOrSupervisor ? "Attendance Management" : "My Attendance"}
+          {isAdminOrSupervisor ? t('attendance.attendanceManagement') : t('attendance.myAttendance')}
         </h2>
         <p className="text-[var(--text-muted)] text-sm mt-1">
           {isAdminOrSupervisor
-            ? "Monitor employee attendance and manage performance ratings"
-            : "Track your work hours and view your performance scores"}
+            ? t('attendance.monitorEmployeeAttendance')
+            : t('attendance.trackWorkHours')}
         </p>
       </div>
 
@@ -101,9 +107,9 @@ export default function AttendancePage() {
         <div>
           <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: "var(--background-subtle)" }}>
             {([
-              { id: "today", label: "Today", icon: Clock },
-              { id: "all_employees", label: "All Employees", icon: Users },
-              { id: "rating", label: "Rating", icon: Star },
+              { id: "today", label: t('timePeriods.today'), icon: Clock },
+              { id: "all_employees", label: t('attendance.allEmployees'), icon: Users },
+              { id: "rating", label: t('attendance.rating'), icon: Star },
             ] as { id: Tab; label: string; icon: any }[]).map(tab => (
               <button
                 key={tab.id}
@@ -150,7 +156,7 @@ export default function AttendancePage() {
             <Card className="border border-red-200 dark:border-red-800">
               <CardContent className="p-5 text-center">
                 <p className="text-3xl font-bold text-red-500">{todaySummary.absent}</p>
-                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Absent</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{t('statuses.absent')}</p>
               </CardContent>
             </Card>
             <Card className="border border-orange-200 dark:border-orange-800">
@@ -181,7 +187,7 @@ export default function AttendancePage() {
                 <div className="text-center py-8">
                   <Clock className="w-10 h-10 mx-auto mb-3 text-[var(--text-muted)] opacity-40" />
                   <p className="text-sm text-[var(--text-muted)]">No attendance records yet today</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">Employees will appear here once they check in</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{t('emptyStates.employeesWillAppear')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -233,7 +239,7 @@ export default function AttendancePage() {
                           <Badge className="bg-blue-500 text-white text-xs">Done</Badge>
                         )}
                         {record.status === "absent" && (
-                          <Badge variant="destructive" className="text-xs">Absent</Badge>
+                          <Badge variant="destructive" className="text-xs">{t('statuses.absent')}</Badge>
                         )}
                       </div>
                     </div>
@@ -260,7 +266,7 @@ export default function AttendancePage() {
                     <input
                       value={empSearch}
                       onChange={e => setEmpSearch(e.target.value)}
-                      placeholder="Search..."
+                      placeholder={t('placeholders.searchPlaceholder')}
                       className="pl-8 pr-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 w-36"
                       style={{ 
                         border: "1px solid var(--border)", 
@@ -329,7 +335,7 @@ export default function AttendancePage() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-rose-500 dark:text-rose-400">{stats.lateDays}</p>
-                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Late</p>
+                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t('statuses.late')}</p>
                         </div>
                         <div>
                           <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{stats.totalWorkedHours}h</p>

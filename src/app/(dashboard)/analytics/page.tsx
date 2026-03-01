@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -28,7 +29,9 @@ import { redirect } from "next/navigation";
 import { PlanGate } from "@/components/subscription/PlanGate";
 
 export default function AnalyticsPage() {
-  const { user } = useAuthStore();
+  
+  const { t } = useTranslation();
+const { user } = useAuthStore();
   const analytics = useQuery(api.analytics.getAnalyticsOverview, {});
 
   // Only admin and supervisor can access
@@ -77,35 +80,35 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-          Analytics Dashboard
+          {t('analytics.analyticsDashboard')}
         </h2>
         <p className="text-[var(--text-muted)] text-sm mt-1">
-          Overview of your HR metrics and insights
+          {t('analytics.hrMetricsOverview')}
         </p>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total Employees"
+          title={t('titles.totalEmployees')}
           value={totalEmployees}
           icon={Users}
           color="blue"
         />
         <StatsCard
-          title="Pending Approvals"
+          title={t('titles.pendingApprovals')}
           value={pendingApprovals}
           icon={AlertCircle}
           color="yellow"
         />
         <StatsCard
-          title="Leave Requests"
+          title={t('titles.leaveRequests')}
           value={totalLeaves}
           icon={CheckCircle}
           color="purple"
         />
         <StatsCard
-          title="Avg. Approval Time"
+          title={t('titles.avgApprovalTime')}
           value={`${avgApprovalTime}h`}
           icon={Clock}
           color="green"
@@ -117,7 +120,7 @@ export default function AnalyticsPage() {
         <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">Pending Leaves</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('analytics.pendingLeaves')}</p>
               <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-1">{pendingLeaves}</p>
             </div>
             <div className="p-3 bg-yellow-500/20 dark:bg-yellow-500/30 rounded-xl">
@@ -129,7 +132,7 @@ export default function AnalyticsPage() {
         <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">Approved Leaves</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('analytics.approvedLeaves')}</p>
               <p className="text-2xl font-bold text-green-600 dark:text-green-500 mt-1">{approvedLeaves}</p>
             </div>
             <div className="p-3 bg-green-500/20 dark:bg-green-500/30 rounded-xl">
@@ -141,7 +144,7 @@ export default function AnalyticsPage() {
         <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">Approval Rate</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('analytics.approvalRate')}</p>
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-500 mt-1">{approvalRate}%</p>
             </div>
             <div className="p-3 bg-blue-500/20 dark:bg-blue-500/30 rounded-xl">

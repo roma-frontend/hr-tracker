@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { useTranslation } from "react-i18next";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -12,8 +13,8 @@ interface FeatureCardProps {
   badge?: string;
 }
 
-export default function FeatureCard({
-  icon,
+export default function FeatureCard({ 
+icon,
   title,
   description,
   gradient,
@@ -21,6 +22,7 @@ export default function FeatureCard({
   delay = 0,
   badge,
 }: FeatureCardProps) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 

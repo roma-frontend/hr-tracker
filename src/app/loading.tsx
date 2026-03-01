@@ -2,9 +2,12 @@
 
 import { motion } from 'framer-motion';
 import { Shield } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 export default function Loading() {
-  return (
+  
+  const { t } = useTranslation();
+return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020817] via-[#0a0f2e] to-[#120820]">
       <div className="flex flex-col items-center gap-6">
         {/* Animated logo */}

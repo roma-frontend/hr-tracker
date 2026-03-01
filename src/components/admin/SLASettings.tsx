@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+import { useTranslation } from "react-i18next";
 
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -12,6 +14,7 @@ import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/useAuthStore";
 
 function SLASettings() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const config = useQuery(api.sla.getSLAConfig);
   const updateConfig = useMutation(api.sla.updateSLAConfig);
@@ -85,7 +88,7 @@ function SLASettings() {
             className="max-w-xs"
           />
           <p className="text-xs text-[var(--text-muted)]">
-            Leave requests should be reviewed within {targetHours} hours
+            {t("sla.targetHint", { hours: targetHours })}
           </p>
         </div>
 
@@ -109,7 +112,7 @@ function SLASettings() {
             </span>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
-            Show warning when request reaches {warningThreshold}% of target time
+            {t("sla.warningHint", { percent: warningThreshold })}
           </p>
         </div>
 
@@ -133,7 +136,7 @@ function SLASettings() {
             </span>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
-            Show critical alert when request reaches {criticalThreshold}% of target time
+            {t("sla.criticalHint", { percent: criticalThreshold })}
           </p>
         </div>
 
@@ -146,7 +149,7 @@ function SLASettings() {
           >
             <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-600 dark:text-amber-400">
-              Warning threshold should be lower than critical threshold
+              {t("sla.thresholdError")}
             </div>
           </motion.div>
         )}
@@ -159,7 +162,7 @@ function SLASettings() {
             className="bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? "Saving..." : "Save Configuration"}
+            {isSaving ? t("common.loading") : t("sla.saveConfig")}
           </Button>
         </div>
       </CardContent>
@@ -168,3 +171,4 @@ function SLASettings() {
 }
 
 export default SLASettings;
+

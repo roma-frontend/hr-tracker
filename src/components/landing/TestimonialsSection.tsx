@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { useTranslation } from "react-i18next";
 import { Star, Quote } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -84,7 +85,9 @@ function TestimonialCard({ testimonial, delay }: { testimonial: Testimonial; del
 }
 
 export default function TestimonialsSection() {
-  const { ref, visible } = useReveal('-30px');
+  
+  const { t } = useTranslation();
+const { ref, visible } = useReveal('-30px');
   return (
     <section className="relative z-10 px-6 md:px-12 py-20">
       {/* Section header — reveal on scroll */}
@@ -95,12 +98,12 @@ export default function TestimonialsSection() {
           transition: 'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
-        <span className="section-eyebrow">Testimonials</span>
+        <span className="section-eyebrow">{t('testimonials.eyebrow')}</span>
         <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
-          Loved by <span className="heading-gradient">elite HR teams</span>
+          {t('testimonials.headingStart')} <span className="heading-gradient">{t('testimonials.headingHighlight')}</span>
         </h2>
         <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
-          Don't just take our word for it — hear what our distinguished clients have to say.
+          {t('testimonials.subtitle')}
         </p>
       </div>
 

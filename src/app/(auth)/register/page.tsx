@@ -84,7 +84,7 @@ function OrgSearch({
             setQuery(e.target.value);
             if (selected) setSelected(null);
           }}
-          placeholder="Search your organization…"
+          placeholder={t('placeholders.searchYourOrganization')}
           className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
           style={{
             background: "var(--input)",
@@ -407,7 +407,7 @@ export default function RegisterPage() {
                       type="text" required
                       value={formData.name}
                       onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                      placeholder="John Doe"
+                      placeholder={t('placeholders.johnDoe')}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                       onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
@@ -466,7 +466,7 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"} required
                       value={formData.password}
                       onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                      placeholder="Min. 8 characters"
+                      placeholder={t('placeholders.minCharacters')}
                       className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                       onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
