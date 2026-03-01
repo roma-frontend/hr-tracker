@@ -311,7 +311,7 @@ export const getJoinRequests = query({
       throw new Error("Admin must belong to an organization");
     }
     
-    const orgId = admin.organizationId as string; // TypeScript assertion after null check
+    const orgId = admin.organizationId; // Already checked for null above
 
     let invites;
 
@@ -563,7 +563,7 @@ export const getPendingJoinRequestCount = query({
     if (!admin || admin.role !== "admin") return 0;
     if (!admin.organizationId) return 0;
 
-    const orgId = admin.organizationId as string; // TypeScript assertion after null check
+    const orgId = admin.organizationId; // Already checked for null above
 
     const pending = await ctx.db
       .query("organizationInvites")

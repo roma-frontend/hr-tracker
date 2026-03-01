@@ -21,6 +21,10 @@ export const updatePlan = mutation({
       throw new Error(`User with email ${email} not found`);
     }
     
+    if (!user.organizationId) {
+      throw new Error(`User ${email} does not belong to any organization`);
+    }
+    
     // Найти организацию пользователя
     const org = await ctx.db.get(user.organizationId);
     

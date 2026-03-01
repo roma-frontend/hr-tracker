@@ -17,13 +17,13 @@ export const getTodayStats = query({
     weekStart.setHours(0, 0, 0, 0);
     const weekStartMs = weekStart.getTime();
 
-    // Get today's attendance
-    const todayAttendance = await ctx.db
-      .query("attendance")
+    // Get today's time tracking
+    const todayTracking = await ctx.db
+      .query("timeTracking")
       .filter((q) => 
         q.and(
           q.eq(q.field("userId"), userId),
-          q.gte(q.field("clockIn"), todayStartMs)
+          q.gte(q.field("checkInTime"), todayStartMs)
         )
       )
       .order("desc")
@@ -31,28 +31,26 @@ export const getTodayStats = query({
 
     // Calculate hours worked today
     let hoursWorkedToday = 0;
-    if (todayAttendance) {
-      const clockIn = todayAttendance.clockIn;
-      const clockOut = todayAttendance.clockOut || now;
-      hoursWorkedToday = (clockOut - clockIn) / (1000 * 60 * 60);
+    if (todayTracking && todayTracking.totalWorkedMinutes) {
+      hoursWorkedToday = todayTracking.totalWorkedMinutes / 60;
     }
 
-    // Get week's attendance for weekly hours
-    const weekAttendance = await ctx.db
-      .query("attendance")
+    // Get week's time tracking for weekly hours
+    const weekTracking = await ctx.db
+      .query("timeTracking")
       .filter((q) =>
         q.and(
           q.eq(q.field("userId"), userId),
-          q.gte(q.field("clockIn"), weekStartMs)
+          q.gte(q.field("checkInTime"), weekStartMs)
         )
       )
       .collect();
 
     let hoursWorkedWeek = 0;
-    weekAttendance.forEach((att) => {
-      const clockIn = att.clockIn;
-      const clockOut = att.clockOut || (att.clockIn === todayAttendance?.clockIn ? now : att.clockIn);
-      hoursWorkedWeek += (clockOut - clockIn) / (1000 * 60 * 60);
+    weekTracking.forEach((tt) => {
+      if (tt.totalWorkedMinutes) {
+        hoursWorkedWeek += tt.totalWorkedMinutes / 60;
+      }
     });
 
     // Get tasks
@@ -77,9 +75,9 @@ export const getTodayStats = query({
     const todayEnd = todayStart.getTime() + 24 * 60 * 60 * 1000;
     const todayDeadlines = allTasks.filter(
       (t) => 
-        t.dueDate && 
-        t.dueDate >= todayStartMs && 
-        t.dueDate < todayEnd &&
+        t.deadline && 
+        t.deadline >= todayStartMs && 
+        t.deadline < todayEnd &&
         t.status !== "completed"
     ).length;
 
@@ -95,7 +93,7 @@ export const getTodayStats = query({
       totalTasksWeek,
       todayDeadlines,
       weeklyGoalProgress: Math.round(weeklyGoalProgress),
-      isClockedIn: !!todayAttendance && !todayAttendance.clockOut,
+      isClockedIn: !!todayTracking && todayTracking.status === "checked_in",
     };
   },
 });
@@ -116,15 +114,15 @@ export const getTodayTasks = query({
       )
       .collect();
 
-    // Sort by priority and due date
-    const priorityMap = { high: 3, medium: 2, low: 1 };
+    // Sort by priority and deadline
+    const priorityMap: Record<string, number> = { urgent: 4, high: 3, medium: 2, low: 1 };
     const sorted = tasks.sort((a, b) => {
-      const priorityDiff = (priorityMap[b.priority || "medium"] || 0) - (priorityMap[a.priority || "medium"] || 0);
+      const priorityDiff = (priorityMap[b.priority] || 0) - (priorityMap[a.priority] || 0);
       if (priorityDiff !== 0) return priorityDiff;
       
-      if (a.dueDate && b.dueDate) return a.dueDate - b.dueDate;
-      if (a.dueDate) return -1;
-      if (b.dueDate) return 1;
+      if (a.deadline && b.deadline) return a.deadline - b.deadline;
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
       return 0;
     });
 
@@ -147,12 +145,12 @@ export const getTeamPresence = query({
 
     // Get only active users with presence status
     const onlineUsers = filteredUsers
-      .filter(u => u.isActive && u.presenceStatus && u.presenceStatus !== "offline")
+      .filter(u => u.isActive && u.presenceStatus)
       .map(u => ({
         _id: u._id,
         name: u.name,
         avatarUrl: u.avatarUrl,
-        presenceStatus: u.presenceStatus || "offline",
+        presenceStatus: u.presenceStatus!,
         department: u.department,
         role: u.role,
       }))
