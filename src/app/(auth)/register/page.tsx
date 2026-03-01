@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from 'react-i18next';
+
 import React, { useState, useTransition, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -47,6 +49,7 @@ function OrgSearch({
 }: {
   onSelect: (org: OrgResult) => void;
 }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selected, setSelected] = useState<OrgResult | null>(null);
@@ -188,6 +191,7 @@ function OrgSearch({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { login } = useAuthStore();
   const [isPending, startTransition] = useTransition();
@@ -249,7 +253,19 @@ export default function RegisterPage() {
           );
           setTimeout(() => router.push("/login"), 3000);
         } else {
-          if (result.user) login(result.user);
+          // Auto-login successful - user data is in result
+          if (result.userId) {
+            login({
+              id: result.userId,
+              name: result.name!,
+              email: result.email!,
+              role: result.role,
+              department: result.department,
+              position: result.position,
+              employeeType: result.employeeType,
+              avatar: result.avatar,
+            });
+          }
           toast.success("Welcome! Your account is ready. 🎉");
           router.push("/dashboard");
         }
