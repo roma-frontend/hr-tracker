@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { I18nProvider } from "@/components/I18nProvider";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface OrgResult {
@@ -278,10 +279,11 @@ export default function RegisterPage() {
   const isSuperadmin = formData.email.toLowerCase() === "romangulanyan@gmail.com";
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "var(--background)" }}
-    >
+    <I18nProvider>
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ background: "var(--background)" }}
+      >
       {/* Background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
@@ -572,6 +574,7 @@ export default function RegisterPage() {
           </Link>
         </div>
       </motion.div>
-    </div>
+      </div>
+    </I18nProvider>
   );
 }
