@@ -13,7 +13,6 @@ const PRESENCE_CONFIG = {
   in_call: { dot: "bg-blue-500", label: "In Call" },
   out_of_office: { dot: "bg-gray-500", label: "Out of Office" },
   busy: { dot: "bg-red-500", label: "Busy" },
-  offline: { dot: "bg-gray-400", label: "Offline" },
 } as const;
 
 export function TeamPresence() {
@@ -33,7 +32,7 @@ export function TeamPresence() {
     );
   }
 
-  const onlineCount = teamMembers.filter(m => m.presenceStatus !== "offline").length;
+  const onlineCount = teamMembers.length;
 
   return (
     <div className="px-2 py-3">
@@ -54,7 +53,7 @@ export function TeamPresence() {
       ) : (
         <div className="space-y-2">
           {teamMembers.map((member) => {
-            const presenceConfig = PRESENCE_CONFIG[member.presenceStatus as keyof typeof PRESENCE_CONFIG] || PRESENCE_CONFIG.offline;
+            const presenceConfig = PRESENCE_CONFIG[member.presenceStatus as keyof typeof PRESENCE_CONFIG] || PRESENCE_CONFIG.available;
             const initials = member.name
               .split(" ")
               .map((n) => n[0])
