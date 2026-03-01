@@ -9,8 +9,12 @@
     "customerRating": "Customer Rating",
     "uptime": "Uptime",
     "countries": "Countries",
-    "trustedBy": "Нам доверяют",
-    "companies": "компаний по всему миру"
+    "trustedBy": "Trusted by",
+    "companies": "companies worldwide",
+    "rating": "Rated 4.9/5",
+    "reviews": "from 1000+ reviews",
+    "customers": "Happy customers",
+    "growth": "Year over year growth"
   },
   "pricing": {
     "eyebrow": "Pricing",
@@ -591,7 +595,13 @@
     "save": "Save",
     "cancel": "Cancel",
     "saving": "Saving...",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "viewAll": "View All",
+    "showMore": "Show More",
+    "showLess": "Show Less",
+    "loadMore": "Load More"
   },
   "months": {
     "january": "January",
@@ -786,15 +796,24 @@
     "allTime": "All Time"
   },
   "emptyStates": {
-    "noData": "No data",
+    "noData": "No data available",
     "noDataYet": "No data yet",
-    "noResults": "No results",
+    "noResults": "No results found",
     "noOrganizationsYet": "No organizations yet",
     "noPerformanceRating": "No performance rating yet",
     "noAttendanceRecords": "No attendance records yet today",
     "employeesWillAppear": "Employees will appear here once they check in",
     "checkBackNextMonth": "Check back next month",
-    "nothingToShow": "Nothing to show"
+    "nothingToShow": "Nothing to show",
+    "noEmployees": "No employees yet",
+    "noLeaves": "No leave requests",
+    "noTasks": "No tasks assigned",
+    "noNotifications": "No new notifications",
+    "noReports": "No reports available",
+    "tryDifferentSearch": "Try a different search term",
+    "clearFilters": "Clear all filters",
+    "addFirst": "Add your first item",
+    "getStarted": "Get started by creating one"
   },
   "organization": {
     "organization": "Organization",
@@ -997,7 +1016,38 @@
     "statsEmployees": "Employees Tracked",
     "statsAccuracy": "Accuracy Rate",
     "statsRealtime": "Real-time Tracking",
-    "statsAnalytics": "Smart Analytics"
+    "statsAnalytics": "Smart Analytics",
+    "hero": {
+      "eyebrow": "Modern HR Management",
+      "title": "Simplify HR with AI",
+      "subtitle": "All-in-one platform for leave management, attendance tracking, and team collaboration",
+      "cta": "Get Started Free",
+      "secondaryCta": "Watch Demo",
+      "trustedBy": "Trusted by 500+ companies worldwide"
+    },
+    "features": {
+      "title": "Everything you need",
+      "subtitle": "Powerful features for modern teams",
+      "feature1Title": "Smart Leave Management",
+      "feature1Desc": "Automated leave tracking with AI-powered insights",
+      "feature2Title": "Real-time Attendance",
+      "feature2Desc": "Track attendance with face recognition and geolocation",
+      "feature3Title": "Team Collaboration",
+      "feature3Desc": "Built-in chat, tasks, and project management",
+      "feature4Title": "Advanced Analytics",
+      "feature4Desc": "Get insights with AI-powered reports and dashboards"
+    },
+    "stats": {
+      "stat1": "500+ Companies",
+      "stat2": "50K+ Employees",
+      "stat3": "99.9% Uptime",
+      "stat4": "24/7 Support"
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "subtitle": "Join thousands of companies using our platform",
+      "button": "Start Free Trial"
+    }
   },
   "newsletter": {
     "title": "Stay in the loop",
@@ -1401,5 +1451,22 @@
     "allSet": "You're all set!",
     "instantAccess": "Instant Access",
     "trialStarted": "Your 14-day free trial has started. No charge until the trial ends."
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPhone": "Invalid phone number",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "invalidDate": "Invalid date",
+    "dateTooEarly": "Date is too early",
+    "dateTooLate": "Date is too late",
+    "invalidFormat": "Invalid format",
+    "valueTooSmall": "Value is too small",
+    "valueTooLarge": "Value is too large",
+    "fileTooBig": "File size is too large",
+    "invalidFileType": "Invalid file type",
+    "maxLength": "Maximum length exceeded",
+    "minLength": "Minimum length not met"
   }
 }

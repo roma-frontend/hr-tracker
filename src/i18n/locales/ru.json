@@ -9,8 +9,12 @@
     "customerRating": "Customer Rating",
     "uptime": "Uptime",
     "countries": "Countries",
-    "trustedBy": "Нам доверяют",
-    "companies": "компаний по всему миру"
+    "trustedBy": "РќР°Рј РґРѕРІРµСЂСЏСЋС‚",
+    "companies": "РєРѕРјРїР°РЅРёР№ РїРѕ РІСЃРµРјСѓ РјРёСЂСѓ",
+    "rating": "Р РµР№С‚РёРЅРі 4.9/5",
+    "reviews": "РЅР° РѕСЃРЅРѕРІРµ 1000+ РѕС‚Р·С‹РІРѕРІ",
+    "customers": "Р”РѕРІРѕР»СЊРЅС‹С… РєР»РёРµРЅС‚РѕРІ",
+    "growth": "Р РѕСЃС‚ РёР· РіРѕРґР° РІ РіРѕРґ"
   },
   "pricing": {
     "eyebrow": "Цены",
@@ -591,7 +595,13 @@
     "save": "Save",
     "cancel": "Cancel",
     "saving": "Saving...",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "learnMore": "РЈР·РЅР°С‚СЊ Р±РѕР»СЊС€Рµ",
+    "getStarted": "РќР°С‡Р°С‚СЊ",
+    "viewAll": "РџРѕРєР°Р·Р°С‚СЊ РІСЃРµ",
+    "showMore": "РџРѕРєР°Р·Р°С‚СЊ РµС‰С‘",
+    "showLess": "РЎРєСЂС‹С‚СЊ",
+    "loadMore": "Р—Р°РіСЂСѓР·РёС‚СЊ РµС‰С‘"
   },
   "months": {
     "january": "January",
@@ -786,15 +796,24 @@
     "allTime": "All Time"
   },
   "emptyStates": {
-    "noData": "No data",
+    "noData": "РќРµС‚ РґР°РЅРЅС‹С…",
     "noDataYet": "No data yet",
-    "noResults": "No results",
-    "noOrganizationsYet": "No organizations yet",
+    "noResults": "РќРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕ",
+    "noOrganizationsYet": "РќРµС‚ РѕСЂРіР°РЅРёР·Р°С†РёР№",
     "noPerformanceRating": "No performance rating yet",
     "noAttendanceRecords": "No attendance records yet today",
     "employeesWillAppear": "Employees will appear here once they check in",
     "checkBackNextMonth": "Check back next month",
-    "nothingToShow": "Nothing to show"
+    "nothingToShow": "Nothing to show",
+    "noEmployees": "РќРµС‚ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ",
+    "noLeaves": "РќРµС‚ Р·Р°РїСЂРѕСЃРѕРІ РЅР° РѕС‚РїСѓСЃРє",
+    "noTasks": "РќРµС‚ РЅР°Р·РЅР°С‡РµРЅРЅС‹С… Р·Р°РґР°С‡",
+    "noNotifications": "РќРµС‚ РЅРѕРІС‹С… СѓРІРµРґРѕРјР»РµРЅРёР№",
+    "noReports": "РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… РѕС‚С‡С‘С‚РѕРІ",
+    "tryDifferentSearch": "РџРѕРїСЂРѕР±СѓР№С‚Рµ РґСЂСѓРіРѕР№ РїРѕРёСЃРєРѕРІС‹Р№ Р·Р°РїСЂРѕСЃ",
+    "clearFilters": "РћС‡РёСЃС‚РёС‚СЊ РІСЃРµ С„РёР»СЊС‚СЂС‹",
+    "addFirst": "Р”РѕР±Р°РІСЊС‚Рµ РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚",
+    "getStarted": "РќР°С‡РЅРёС‚Рµ СЃ СЃРѕР·РґР°РЅРёСЏ"
   },
   "organization": {
     "organization": "Organization",
@@ -997,7 +1016,38 @@
     "statsEmployees": "Employees Tracked",
     "statsAccuracy": "Accuracy Rate",
     "statsRealtime": "Real-time Tracking",
-    "statsAnalytics": "Smart Analytics"
+    "statsAnalytics": "Smart Analytics",
+    "hero": {
+      "eyebrow": "РЎРѕРІСЂРµРјРµРЅРЅРѕРµ HR СѓРїСЂР°РІР»РµРЅРёРµ",
+      "title": "РЈРїСЂРѕСЃС‚РёС‚Рµ HR СЃ РїРѕРјРѕС‰СЊСЋ AI",
+      "subtitle": "Р’СЃС‘-РІ-РѕРґРЅРѕРј РїР»Р°С‚С„РѕСЂРјР° РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РѕС‚РїСѓСЃРєР°РјРё, СѓС‡С‘С‚Р° РїРѕСЃРµС‰Р°РµРјРѕСЃС‚Рё Рё РєРѕРјР°РЅРґРЅРѕР№ СЂР°Р±РѕС‚С‹",
+      "cta": "РќР°С‡Р°С‚СЊ Р±РµСЃРїР»Р°С‚РЅРѕ",
+      "secondaryCta": "РЎРјРѕС‚СЂРµС‚СЊ РґРµРјРѕ",
+      "trustedBy": "РќР°Рј РґРѕРІРµСЂСЏСЋС‚ 500+ РєРѕРјРїР°РЅРёР№ РїРѕ РІСЃРµРјСѓ РјРёСЂСѓ"
+    },
+    "features": {
+      "title": "Р’СЃС‘ С‡С‚Рѕ РЅСѓР¶РЅРѕ",
+      "subtitle": "РњРѕС‰РЅС‹Рµ С„СѓРЅРєС†РёРё РґР»СЏ СЃРѕРІСЂРµРјРµРЅРЅС‹С… РєРѕРјР°РЅРґ",
+      "feature1Title": "РЈРјРЅРѕРµ СѓРїСЂР°РІР»РµРЅРёРµ РѕС‚РїСѓСЃРєР°РјРё",
+      "feature1Desc": "РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ СѓС‡С‘С‚ РѕС‚РїСѓСЃРєРѕРІ СЃ AI-Р°РЅР°Р»РёС‚РёРєРѕР№",
+      "feature2Title": "РџРѕСЃРµС‰Р°РµРјРѕСЃС‚СЊ РІ СЂРµР°Р»СЊРЅРѕРј РІСЂРµРјРµРЅРё",
+      "feature2Desc": "РћС‚СЃР»РµР¶РёРІР°РЅРёРµ СЃ СЂР°СЃРїРѕР·РЅР°РІР°РЅРёРµРј Р»РёС† Рё РіРµРѕР»РѕРєР°С†РёРµР№",
+      "feature3Title": "РљРѕРјР°РЅРґРЅР°СЏ СЂР°Р±РѕС‚Р°",
+      "feature3Desc": "Р’СЃС‚СЂРѕРµРЅРЅС‹Р№ С‡Р°С‚, Р·Р°РґР°С‡Рё Рё СѓРїСЂР°РІР»РµРЅРёРµ РїСЂРѕРµРєС‚Р°РјРё",
+      "feature4Title": "Р Р°СЃС€РёСЂРµРЅРЅР°СЏ Р°РЅР°Р»РёС‚РёРєР°",
+      "feature4Desc": "РџРѕР»СѓС‡Р°Р№С‚Рµ РёРЅСЃР°Р№С‚С‹ СЃ AI РѕС‚С‡С‘С‚Р°РјРё Рё РґР°С€Р±РѕСЂРґР°РјРё"
+    },
+    "stats": {
+      "stat1": "500+ РєРѕРјРїР°РЅРёР№",
+      "stat2": "50K+ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ",
+      "stat3": "99.9% РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹",
+      "stat4": "РџРѕРґРґРµСЂР¶РєР° 24/7"
+    },
+    "cta": {
+      "title": "Р“РѕС‚РѕРІС‹ РЅР°С‡Р°С‚СЊ?",
+      "subtitle": "РџСЂРёСЃРѕРµРґРёРЅСЏР№С‚РµСЃСЊ Рє С‚С‹СЃСЏС‡Р°Рј РєРѕРјРїР°РЅРёР№, РёСЃРїРѕР»СЊР·СѓСЋС‰РёС… РЅР°С€Сѓ РїР»Р°С‚С„РѕСЂРјСѓ",
+      "button": "РќР°С‡Р°С‚СЊ Р±РµСЃРїР»Р°С‚РЅС‹Р№ РїРµСЂРёРѕРґ"
+    }
   },
   "newsletter": {
     "title": "Stay in the loop",
@@ -1401,5 +1451,22 @@
     "allSet": "You're all set!",
     "instantAccess": "Instant Access",
     "trialStarted": "Your 14-day free trial has started. No charge until the trial ends."
+  },
+  "validation": {
+    "required": "Р­С‚Рѕ РїРѕР»Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ",
+    "invalidEmail": "РќРµРІРµСЂРЅС‹Р№ email Р°РґСЂРµСЃ",
+    "invalidPhone": "РќРµРІРµСЂРЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°",
+    "passwordTooShort": "РџР°СЂРѕР»СЊ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјРёРЅРёРјСѓРј 8 СЃРёРјРІРѕР»РѕРІ",
+    "passwordsDoNotMatch": "РџР°СЂРѕР»Рё РЅРµ СЃРѕРІРїР°РґР°СЋС‚",
+    "invalidDate": "РќРµРІРµСЂРЅР°СЏ РґР°С‚Р°",
+    "dateTooEarly": "Р”Р°С‚Р° СЃР»РёС€РєРѕРј СЂР°РЅРЅСЏСЏ",
+    "dateTooLate": "Р”Р°С‚Р° СЃР»РёС€РєРѕРј РїРѕР·РґРЅСЏСЏ",
+    "invalidFormat": "РќРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚",
+    "valueTooSmall": "Р—РЅР°С‡РµРЅРёРµ СЃР»РёС€РєРѕРј РјР°Р»РµРЅСЊРєРѕРµ",
+    "valueTooLarge": "Р—РЅР°С‡РµРЅРёРµ СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕРµ",
+    "fileTooBig": "Р Р°Р·РјРµСЂ С„Р°Р№Р»Р° СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№",
+    "invalidFileType": "РќРµРІРµСЂРЅС‹Р№ С‚РёРї С„Р°Р№Р»Р°",
+    "maxLength": "РџСЂРµРІС‹С€РµРЅР° РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР°",
+    "minLength": "РќРµ РґРѕСЃС‚РёРіРЅСѓС‚Р° РјРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР°"
   }
 }
