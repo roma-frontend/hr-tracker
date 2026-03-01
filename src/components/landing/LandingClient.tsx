@@ -207,12 +207,12 @@ function Navbar() {
         role="navigation"
         aria-label="Main navigation"
       >
-        {/* Glassmorphism nav background - uses CSS variable */}
+        {/* Glassmorphism nav background - same as dashboard navbar */}
         <div
-          className="absolute inset-0 backdrop-blur-xl border-b"
+          className="absolute inset-0 backdrop-blur-md border-b"
           style={{
-            background: 'var(--landing-navbar-bg)',
-            borderColor: 'var(--landing-card-border)'
+            background: 'var(--navbar-bg)',
+            borderColor: 'var(--border)'
           }}
         />
 
