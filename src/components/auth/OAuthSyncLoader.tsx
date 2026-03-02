@@ -86,7 +86,7 @@ export function OAuthSyncLoader() {
           className="flex flex-col items-center gap-3"
         >
           <span className="text-white font-bold text-xl">
-            HR<span className="text-blue-400">Office</span>
+            HR<span className="text-blue-400">Leave</span>
           </span>
 
           {/* Animated dots */}
