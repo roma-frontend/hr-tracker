@@ -182,10 +182,27 @@ export function Navbar() {
   const pageTitle = pageTitleKey ? t(pageTitleKey) : "HR Office";
 
   const handleLogout = async () => {
-    await logoutAction();
-    logout();
-    document.cookie = "hr-auth-token=; path=/; max-age=0";
-    router.push("/");
+    try {
+      // Logout from server session
+      await logoutAction();
+      
+      // Logout from NextAuth (OAuth)
+      await signOut({ redirect: false });
+      
+      // Logout from useAuthStore
+      logout();
+      
+      // Clear auth cookie
+      document.cookie = "hr-auth-token=; path=/; max-age=0";
+      
+      // Redirect to home
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Force logout even if error
+      logout();
+      router.push("/");
+    }
   };
 
   const handleMarkAllRead = async () => {

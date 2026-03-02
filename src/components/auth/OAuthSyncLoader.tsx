@@ -5,17 +5,32 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { motion } from 'framer-motion';
 import { Shield } from 'lucide-react';
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export function OAuthSyncLoader() {
   const { status } = useSession();
   const { isAuthenticated } = useAuthStore();
   const pathname = usePathname();
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  // Show loader when:
-  // 1. OAuth is authenticated via NextAuth
-  // 2. But NOT yet authenticated in useAuthStore (sync in progress)
-  // 3. And we're on the login page
-  if (status !== "authenticated" || isAuthenticated || pathname !== "/login") {
+  useEffect(() => {
+    // Start showing loader when OAuth authenticated but not yet in useAuthStore
+    if (status === "authenticated" && !isAuthenticated && pathname === "/login") {
+      setIsSyncing(true);
+      
+      // Hide loader after successful sync or timeout
+      const timer = setTimeout(() => {
+        setIsSyncing(false);
+      }, 5000); // Max 5 seconds
+      
+      return () => clearTimeout(timer);
+    } else if (isAuthenticated) {
+      setIsSyncing(false);
+    }
+  }, [status, isAuthenticated, pathname]);
+
+  // Show loader during sync
+  if (!isSyncing) {
     return null;
   }
 
