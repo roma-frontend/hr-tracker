@@ -83,3 +83,5 @@ export const { auth, signIn, signOut, store } = convexAuth({
     },
   },
 });
+
+export default auth;
