@@ -14,17 +14,22 @@ export function OAuthSyncLoader() {
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
+    console.log("[OAuthSyncLoader] status:", status, "isAuthenticated:", isAuthenticated, "pathname:", pathname, "isSyncing:", isSyncing);
+    
     // Start showing loader when OAuth authenticated but not yet in useAuthStore
     if (status === "authenticated" && !isAuthenticated && pathname === "/login") {
+      console.log("[OAuthSyncLoader] ✅ Starting sync loader!");
       setIsSyncing(true);
       
       // Hide loader after successful sync or timeout
       const timer = setTimeout(() => {
+        console.log("[OAuthSyncLoader] ⏰ Timeout - hiding loader");
         setIsSyncing(false);
       }, 5000); // Max 5 seconds
       
       return () => clearTimeout(timer);
     } else if (isAuthenticated) {
+      console.log("[OAuthSyncLoader] ✅ User authenticated - hiding loader");
       setIsSyncing(false);
     }
   }, [status, isAuthenticated, pathname]);
