@@ -934,8 +934,8 @@ export default function LandingClient() {
       {/* Navigation */}
       <Navbar />
 
-      {/* Page content */}
-      <main className="relative z-10">
+      {/* Page content - add pt-16 to compensate for fixed navbar (h-16 = 64px) */}
+      <main className="relative z-10 pt-16">
         <HeroSection />
         <div className="section-lazy">
           <SocialProof />
