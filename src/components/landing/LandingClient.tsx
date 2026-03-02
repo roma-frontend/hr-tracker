@@ -203,7 +203,7 @@ function Navbar() {
       {/* nav-animate class uses CSS animation — zero JS cost vs framer-motion */}
       {/* fixed position to keep navbar visible on scroll */}
       <nav
-        className="nav-animate fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4"
+        className="nav-animate fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 lg:px-12 py-3 md:py-4"
         role="navigation"
         aria-label="Main navigation"
       >
@@ -234,8 +234,8 @@ function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Nav links */}
-        <div className="relative hidden md:flex items-center gap-8">
+        {/* Desktop Nav links - show from lg (1024px) */}
+        <div className="relative hidden lg:flex items-center gap-6 xl:gap-8">
           {[
             { name: t('landing.features'), href: '#features' },
             { name: t('landing.pricing'), href: '#pricing' },
@@ -259,7 +259,7 @@ function Navbar() {
         </div>
 
         {/* Auth buttons / User menu */}
-        <div className="relative flex items-center gap-3">
+        <div className="relative flex items-center gap-2 md:gap-3">
           {/* Language Switcher */}
           {mounted && <LanguageSwitcher />}
           
@@ -356,7 +356,7 @@ function Navbar() {
             <>
               <Link
                 href="/login"
-                className="hidden md:inline-flex text-sm transition-colors font-medium px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="hidden lg:inline-flex text-sm transition-colors font-medium px-3 lg:px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 style={{
                   color: 'var(--landing-navbar-text)',
                   backgroundColor: 'transparent'
@@ -374,17 +374,17 @@ function Navbar() {
               </Link>
               <Link
                 href="/register"
-                className="hidden md:inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="hidden lg:inline-flex items-center gap-2 text-sm font-semibold px-4 lg:px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
               >
                 {t('landingExtra.getStarted')}
                 <ArrowRight size={14} />
               </Link>
 
-              {/* Mobile menu button */}
+              {/* Mobile/Tablet menu button - show up to lg (1024px) */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="md:hidden w-10 h-10 rounded-xl transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="lg:hidden w-10 h-10 rounded-xl transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 style={{
                   backgroundColor: 'var(--landing-card-bg)',
                   border: '1px solid var(--landing-card-border)'
