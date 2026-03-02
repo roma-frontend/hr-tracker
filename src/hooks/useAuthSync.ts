@@ -10,7 +10,12 @@ export function useAuthSync() {
   const { data: session, status } = useSession();
   const { login, logout } = useAuthStore();
   const createOAuthUser = useMutation(api.users.createOAuthUser);
-  const currentUser = useQuery(api.users.getCurrentUser);
+  
+  // Get user by email instead of using getCurrentUser
+  const currentUser = useQuery(
+    api.users.getUserByEmail,
+    session?.user?.email ? { email: session.user.email } : "skip"
+  );
 
   useEffect(() => {
     const syncAuth = async () => {
