@@ -56,6 +56,7 @@ export function useAuthSync() {
           
           if (currentUser) {
             console.log("[useAuthSync] Syncing to useAuthStore...");
+            
             // Sync to useAuthStore
             login({
               id: currentUser._id,
@@ -68,7 +69,34 @@ export function useAuthSync() {
               employeeType: currentUser.employeeType,
               organizationId: currentUser.organizationId,
             });
+            
             console.log("[useAuthSync] ✅ User logged into useAuthStore!");
+            
+            // Create server-side session cookie for dashboard auth
+            try {
+              const response = await fetch('/api/auth/create-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: currentUser._id,
+                  name: currentUser.name,
+                  email: currentUser.email,
+                  role: currentUser.role,
+                  department: currentUser.department,
+                  position: currentUser.position,
+                  employeeType: currentUser.employeeType,
+                  avatar: currentUser.avatarUrl,
+                }),
+              });
+              
+              if (response.ok) {
+                console.log("[useAuthSync] ✅ Server session created!");
+                // Redirect to dashboard
+                window.location.href = '/dashboard';
+              }
+            } catch (error) {
+              console.error("[useAuthSync] Failed to create server session:", error);
+            }
           } else {
             console.log("[useAuthSync] ⚠️ No current user found in Convex");
           }
