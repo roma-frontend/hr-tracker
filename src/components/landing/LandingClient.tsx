@@ -924,7 +924,7 @@ function Footer() {
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export default function LandingClient() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: 'var(--landing-bg)' }}>
+    <div className="relative min-h-screen" style={{ background: 'var(--landing-bg)' }}>
       {/* Background layers - lowest z-index */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <GradientOrbs />
