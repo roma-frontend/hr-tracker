@@ -12,6 +12,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
 import { FaceLogin } from "@/components/auth/FaceLogin";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { OAuthSyncLoader } from "@/components/auth/OAuthSyncLoader";
 import { toast } from "sonner";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { loginTourSteps } from "@/components/onboarding/loginTourSteps";
