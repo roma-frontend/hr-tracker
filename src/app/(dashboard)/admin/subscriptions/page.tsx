@@ -32,8 +32,8 @@ export default function SubscriptionsManagementPage() {
   const createManual = useMutation(api.subscriptions_admin.createManualSubscription);
   const cancelSub = useMutation(api.subscriptions_admin.cancelSubscription);
   
-  // Get current user from Convex Auth
-  const currentUser = useQuery(api.users.getCurrentUser);
+  // Get current user from useAuthStore (works with both email/password and OAuth)
+  const { user } = useAuthStore();
 
   const [showForm, setShowForm] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState("");

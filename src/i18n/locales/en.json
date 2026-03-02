@@ -242,7 +242,9 @@
     "comment": "Comment",
     "comments": "Comments",
     "attachment": "Attachment",
-    "attachments": "Attachments"
+    "attachments": "Attachments",
+    "employees": "Employees",
+    "current": "Current"
   },
   "nav": {
     "home": "Home",
@@ -393,6 +395,11 @@
     "thisWeek": "this week",
     "thisMonth": "this month",
     "thisYear": "this year",
+    "employee": "Employee",
+    "type": "Type",
+    "dates": "Dates",
+    "days": "Days",
+    "status": "Status",
     "statistics": "statistics",
     "quickActions": "quick actions",
     "upcomingLeaves": "upcoming leaves",
@@ -472,7 +479,10 @@
     "approveFailed": "Failed to approve",
     "rejectFailed": "Failed to reject",
     "deleteFailed": "Failed to delete",
-    "noLeaves": "No leave requests found"
+    "noLeaves": "No leave requests found",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
   },
   "leaveRequest": {
     "pickDate": "Pick a date",
@@ -980,6 +990,7 @@
   },
   "calendar": {
     "calendar": "Calendar",
+    "summary": "Summary",
     "today": "Today",
     "onLeaveToday": "On Leave Today",
     "week": "Week",
@@ -1220,7 +1231,11 @@
     "saveChanges": "Save Changes",
     "saveAllChanges": "Save All Changes",
     "backToHome": "Back to Home",
-    "loadingFromConvex": "Loading data..."
+    "loadingFromConvex": "Loading data...",
+    "loadingTasks": "Loading tasks...",
+    "userApprovals": "User Approvals",
+    "noPendingApprovals": "No pending approvals",
+    "allCaughtUp": "All caught up!"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Reports & Analytics",
