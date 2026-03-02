@@ -16,16 +16,21 @@ import { OAuthSyncLoader } from "@/components/auth/OAuthSyncLoader";
 import { toast } from "sonner";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { loginTourSteps } from "@/components/onboarding/loginTourSteps";
+import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, isAuthenticated } = useAuthStore();
+  const { status } = useSession();
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loginMode, setLoginMode] = useState<"email" | "face">("email");
+  
+  // Check if OAuth sync is in progress
+  const isOAuthSyncing = status === "authenticated" && !isAuthenticated;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,8 +83,11 @@ export default function LoginPage() {
       {/* OAuth Sync Loader */}
       <OAuthSyncLoader />
       
+      {/* Hide login page during OAuth sync */}
+      {isOAuthSyncing && <div style={{ display: 'none' }} />}
+      
       {/* Onboarding Tour */}
-      <OnboardingTour 
+      {!isOAuthSyncing && <OnboardingTour 
         steps={loginTourSteps} 
         tourId="login-tour"
         onComplete={() => console.log("Tour completed!")}

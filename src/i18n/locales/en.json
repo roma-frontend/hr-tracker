@@ -460,6 +460,7 @@
     "doctor": "Doctor Visit"
   },
   "leave": {
+    "title": "Leave Requests",
     "requestLeave": "Request Leave",
     "allStatuses": "All Statuses",
     "allTypes": "All Types",
@@ -470,7 +471,19 @@
     "deletedSuccess": "Leave request deleted",
     "approveFailed": "Failed to approve",
     "rejectFailed": "Failed to reject",
-    "deleteFailed": "Failed to delete"
+    "deleteFailed": "Failed to delete",
+    "noLeaves": "No leave requests found"
+  },
+  "leaveRequest": {
+    "pickDate": "Pick a date",
+    "reasonRequired": "Reason *",
+    "reasonPlaceholder": "Enter the reason for your leave request...",
+    "additionalComments": "Additional Comments",
+    "commentsPlaceholder": "Add any additional information...",
+    "attachDocuments": "Attach Documents",
+    "cancel": "Cancel",
+    "submitRequest": "Submit Request",
+    "submitting": "Submitting..."
   },
   "attendance": {
     "title": "Attendance",
@@ -545,10 +558,21 @@
     "allRoles": "All Roles",
     "allDepartments": "All Departments",
     "allTypes": "All Types",
+    "allStatuss": "All Statuses",
     "backToEmployees": "Back to Employees",
     "employeeNotFound": "Employee Not Found",
     "employeeNotFoundDesc": "The employee you're looking for doesn't exist or has been removed.",
-    "employee": "Employee"
+    "employee": "Employee",
+    "filter_admin": "Admin",
+    "filter_supervisor": "Supervisor",
+    "filter_employee": "Employee",
+    "filter_staff": "Staff",
+    "filter_contractor": "Contractor",
+    "filter_active": "Active",
+    "filter_inactive": "Inactive",
+    "department": "Department",
+    "position": "Position",
+    "role": "Role"
   },
   "reports": {
     "title": "Reports",
@@ -1178,7 +1202,9 @@
     "deletePicture": "Delete Picture",
     "saving": "Saving...",
     "saveChanges": "Save Changes",
-    "saveAllChanges": "Save All Changes"
+    "saveAllChanges": "Save All Changes",
+    "backToHome": "Back to Home",
+    "loadingFromConvex": "Loading data..."
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Reports & Analytics",
