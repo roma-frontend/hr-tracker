@@ -1,5 +1,8 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +31,7 @@ import { useUser } from "@clerk/nextjs";
 const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
 export default function SubscriptionsManagementPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const subscriptions = useQuery(api.subscriptions_admin.listAllWithUsers);
   const allOrganizations = useQuery(api.organizations.listAll);
   const createManual = useMutation(api.subscriptions_admin.createManualSubscription);
@@ -44,8 +47,17 @@ export default function SubscriptionsManagementPage() {
   // Check if user is superadmin
   const isSuperAdmin = user?.primaryEmailAddress?.emailAddress?.toLowerCase() === SUPERADMIN_EMAIL;
   
+  // Wait for user to load
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+  
   // If not superadmin, show access denied
-  if (user && !isSuperAdmin) {
+  if (!isSuperAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Card className="w-full max-w-md">
