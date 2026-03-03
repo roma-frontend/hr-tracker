@@ -118,13 +118,13 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg" style={{ maxHeight: '90vh' }}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[var(--text-primary)]">New Leave Request</DialogTitle>
           <DialogDescription className="text-[var(--text-muted)]">Submit a new leave request for an employee.</DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[calc(90vh-180px)] overflow-y-auto pr-2">
+        <div className="pr-2">
           <form id="leave-request-form" onSubmit={handleSubmit} className="space-y-5">
           {/* Employee */}
           <div className="space-y-1.5">
