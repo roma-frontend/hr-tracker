@@ -484,3 +484,20 @@ export const notifySuperadminSuspiciousActivity = mutation({
     return notificationId;
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Get login attempts by user ID
+// ─────────────────────────────────────────────────────────────────────────────
+export const getLoginAttemptsByUser = query({
+  args: { 
+    userId: v.id("users"),
+    limit: v.optional(v.number())
+  },
+  handler: async (ctx, { userId, limit = 10 }) => {
+    return await ctx.db
+      .query("loginAttempts")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(limit);
+  },
+});
