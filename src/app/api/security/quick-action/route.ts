@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
-import { fetchMutation } from "convex/nextjs";
 import { Id } from "@/convex/_generated/dataModel";
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /**
  * Quick Security Action API
@@ -36,7 +38,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      result = await fetchMutation(api.users.suspendUser, {
+      result = await convex.mutation(api.users.suspendUser, {
         adminId: adminId as Id<"users">,
         userId: userId as Id<"users">,
         reason,
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest) {
       });
     } else {
       // unsuspend
-      result = await fetchMutation(api.users.unsuspendUser, {
+      result = await convex.mutation(api.users.unsuspendUser, {
         adminId: adminId as Id<"users">,
         userId: userId as Id<"users">,
       });

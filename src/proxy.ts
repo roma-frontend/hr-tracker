@@ -242,16 +242,27 @@ export async function proxy(request: NextRequest) {
     // We trust client-side check because user data comes from server session
     if (pathname.startsWith('/superadmin')) {
       // If using NextAuth, check role
-      if (jwtToken && jwtToken.role !== 'superadmin') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+      if (jwtToken) {
+        // If role is not yet loaded (undefined), allow access temporarily
+        // The client-side will do the final check and redirect if needed
+        if (jwtToken.role && jwtToken.role !== 'superadmin') {
+          console.log('[Middleware] Blocking superadmin access for user with role:', jwtToken.role);
+          return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+        // If role is undefined or is superadmin, allow access
       }
       // If using hr-auth-token, allow (role check on client)
     }
 
     if (pathname.startsWith('/admin')) {
       // If using NextAuth, check role
-      if (jwtToken && !['admin', 'superadmin'].includes(jwtToken.role as string)) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+      if (jwtToken) {
+        // If role is not yet loaded (undefined), allow access temporarily
+        if (jwtToken.role && !['admin', 'superadmin'].includes(jwtToken.role as string)) {
+          console.log('[Middleware] Blocking admin access for user with role:', jwtToken.role);
+          return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+        // If role is undefined or is admin/superadmin, allow access
       }
       // If using hr-auth-token, allow (role check on client)
     }

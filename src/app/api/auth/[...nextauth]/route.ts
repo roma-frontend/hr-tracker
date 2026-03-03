@@ -15,13 +15,54 @@ export const authOptions: NextAuthOptions = {
       // User will be created/updated in Convex via client-side hook
       return true;
     },
-    async jwt({ token, user, account, profile }) {
-      // Persist user data to token on first sign in
+    async jwt({ token, user, account, profile, trigger }) {
+      // On first sign in, persist user data and fetch role
       if (user) {
         token.name = user.name;
         token.email = user.email;
         token.picture = user.image;
+        
+        // Fetch user role from Convex
+        try {
+          const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+          if (convexUrl && user.email) {
+            // Use the HTTP API to query Convex
+            const apiUrl = convexUrl.replace('/api', ''); // Remove /api if present
+            const queryUrl = `${apiUrl}/api/query`;
+            
+            const response = await fetch(queryUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                path: 'users:getUserByEmail',
+                args: { email: user.email },
+                format: 'json',
+              }),
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              // Convex returns data in 'value' field or directly
+              const userData = data.value || data;
+              if (userData?.role) {
+                token.role = userData.role;
+                console.log('[NextAuth] Set role in token:', userData.role, 'for', user.email);
+              } else {
+                console.warn('[NextAuth] No role found for user:', user.email);
+              }
+            } else {
+              console.error('[NextAuth] Failed to fetch user role:', response.status, response.statusText);
+            }
+          }
+        } catch (error) {
+          console.error('[NextAuth] Error fetching user role:', error);
+          // Don't block login if role fetch fails
+        }
       }
+      
+      // On subsequent calls, role is already in token
+      // If you need to refresh role, add logic here based on trigger === "update"
+      
       return token;
     },
     async redirect({ url, baseUrl }) {
@@ -38,6 +79,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email!;
         session.user.name = token.name || token.email!.split("@")[0];
         session.user.image = token.picture as string | undefined;
+        session.user.role = token.role as string | undefined;
       }
       return session;
     },
