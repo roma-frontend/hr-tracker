@@ -19,6 +19,8 @@ export default function OrganizationsPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const organizations = useQuery(api.organizations.getAllOrganizations);
+  
+  console.log("🔍 [Organizations] organizations query result:", organizations);
 
   const isSuperadmin = user?.role === "superadmin" || user?.email?.toLowerCase() === "romangulanyan@gmail.com";
   
