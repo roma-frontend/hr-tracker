@@ -31,11 +31,11 @@ function Calendar({
         nav_button_previous: "absolute left-0 sm:left-1",
         nav_button_next: "absolute right-0 sm:right-1",
         table: "w-full border-collapse space-y-1",
-        head_row: "flex gap-1",
+        head_row: "flex justify-between gap-1",
         head_cell:
-          "text-[var(--text-muted)] rounded-md flex-1 font-normal text-xs sm:text-sm flex items-center justify-center",
-        row: "flex w-full mt-1.5 sm:mt-2 gap-1",
-        cell: "flex-1 h-8 sm:h-9 text-center text-xs sm:text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-[var(--accent)]/50 [&:has([aria-selected])]:bg-[var(--accent)] first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+          "text-[var(--text-muted)] rounded-md w-7 sm:w-9 font-normal text-[0.7rem] sm:text-xs flex items-center justify-center",
+        row: "flex w-full mt-1.5 sm:mt-2 justify-between gap-1",
+        cell: "h-7 w-7 sm:h-9 sm:w-9 text-center text-xs sm:text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-[var(--accent)]/50 [&:has([aria-selected])]:bg-[var(--accent)] first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "h-7 w-7 sm:h-9 sm:w-9 p-0 font-normal aria-selected:opacity-100 text-xs sm:text-sm"
