@@ -21,6 +21,17 @@ export default function OrganizationsPage() {
 
   const isSuperadmin = user?.role === "superadmin" || user?.email?.toLowerCase() === "romangulanyan@gmail.com";
   
+  // Debug logging
+  useEffect(() => {
+    if (user) {
+      console.log("🔍 Organizations page - User data:", {
+        email: user.email,
+        role: user.role,
+        isSuperadmin,
+      });
+    }
+  }, [user, isSuperadmin]);
+  
   useEffect(() => {
     if (!user) {
       router.push("/login");
@@ -34,6 +45,8 @@ export default function OrganizationsPage() {
       </div>
     );
   }
+
+  console.log("🔍 Final check - isSuperadmin:", isSuperadmin, "user.role:", user.role, "user.email:", user.email);
 
   if (!isSuperadmin) {
     return (
