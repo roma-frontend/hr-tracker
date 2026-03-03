@@ -2407,12 +2407,61 @@
     "reportsTitle": "Reports — Professional Plan Required",
     "reportsDescription": "Detailed reports and CSV export are available on the Professional plan and above."
   },
-  "security": {
-    "title": "Security Control Center",
-    "subtitle": "Manage identity verification systems across all organizations",
-    "liveMonitoring": "Live monitoring",
-    "accessDenied": "Access denied — superadmin only",
-    "threatLevel": "Threat Level",
+  "superadmin": {
+    "security": {
+      "title": "Security Control Center",
+      "subtitle": "Manage identity verification systems across all organizations",
+      "liveMonitoring": "Live monitoring",
+      "accessDenied": "Access denied — superadmin only",
+      "blockedUsers": {
+        "title": "Blocked Users",
+        "subtitle": "Currently suspended users - review and unsuspend if needed",
+        "noUsers": "No suspended users",
+        "expiresIn": "Expires in",
+        "reviewButton": "Review & Unsuspend",
+        "autoBlocked": "AUTO-BLOCKED"
+      },
+      "alert": {
+        "title": "Security Alert Details",
+        "subtitle": "Review and manage suspicious activity",
+        "backButton": "Back to Security Center",
+        "accountSuspended": "Account Suspended",
+        "userInfo": "User Information",
+        "recentAttempts": "Recent Login Attempts",
+        "noAttempts": "No recent login attempts",
+        "successfulLogin": "Successful Login",
+        "failedLogin": "Failed Login",
+        "method": "Method",
+        "riskScore": "Risk Score",
+        "riskFactors": "Risk Factors",
+        "suspend": {
+          "title": "Suspend Account",
+          "duration": "Suspension Duration (hours)",
+          "durationHint": "User will be auto-unsuspended after this time",
+          "reason": "Reason for Suspension *",
+          "reasonPlaceholder": "e.g., Suspicious login activity from unknown location",
+          "button": "Suspend User",
+          "success": "User suspended successfully"
+        },
+        "unsuspend": {
+          "title": "Unsuspend Account",
+          "description": "This will immediately restore the user's access to the system.",
+          "button": "Unsuspend User",
+          "success": "User unsuspended successfully"
+        },
+        "presets": {
+          "title": "Quick Presets",
+          "oneHour": "1 hour (investigation)",
+          "twentyFourHours": "24 hours (suspicious)",
+          "oneWeek": "1 week (security breach)"
+        },
+        "suspensionDetails": "Suspension Details",
+        "reason": "Reason",
+        "until": "Until",
+        "suspendedAt": "Suspended at",
+        "autoBlockNotice": "This user was automatically blocked by the security system due to high-risk activity."
+      },
+      "threatLevel": "Threat Level",
     "logins24h": "Logins (24h)",
     "failed": "Failed",
     "highRisk": "High Risk",
