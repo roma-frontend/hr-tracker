@@ -29,7 +29,13 @@ export function useAuthSync() {
       }
 
       // If logged out via NextAuth, logout from useAuthStore
-      if (status === "unauthenticated") {
+      // BUT: Only logout if user is not authenticated via email/password (useAuthStore)
+      if (status === "unauthenticated" && isAuthenticated) {
+        console.log("[useAuthSync] NextAuth unauthenticated but useAuthStore is authenticated - keeping logged in");
+        return;
+      }
+      
+      if (status === "unauthenticated" && !isAuthenticated) {
         console.log("[useAuthSync] Unauthenticated - logging out");
         logout();
         setUserEmail(null);

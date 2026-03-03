@@ -55,6 +55,10 @@ export default function StripeDashboardPage() {
   // Check if user is superadmin
   const isSuperAdmin = currentUser?.email?.toLowerCase() === SUPERADMIN_EMAIL;
   
+  console.log("🔍 [Stripe Dashboard] currentUser:", currentUser);
+  console.log("🔍 [Stripe Dashboard] isSuperAdmin:", isSuperAdmin);
+  console.log("🔍 [Stripe Dashboard] email check:", currentUser?.email?.toLowerCase(), "===", SUPERADMIN_EMAIL);
+  
   // Wait for user to load
   if (!currentUser) {
     return (
