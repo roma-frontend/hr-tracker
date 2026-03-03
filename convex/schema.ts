@@ -141,6 +141,12 @@ export default defineSchema({
     faceIdBlockedAt: v.optional(v.number()),
     faceIdFailedAttempts: v.optional(v.number()),
     faceIdLastAttempt: v.optional(v.number()),
+    // Account Suspension (for security/suspicious activity)
+    isSuspended: v.optional(v.boolean()),
+    suspendedUntil: v.optional(v.number()),
+    suspendedReason: v.optional(v.string()),
+    suspendedBy: v.optional(v.id("users")),
+    suspendedAt: v.optional(v.number()),
     // Password Reset
     resetPasswordToken: v.optional(v.string()),
     resetPasswordExpiry: v.optional(v.number()),
@@ -242,6 +248,7 @@ export default defineSchema({
       v.literal("join_request"),             // new: employee wants to join
       v.literal("join_approved"),            // new: join request approved
       v.literal("join_rejected"),            // new: join request rejected
+      v.literal("security_alert"),           // new: suspicious activity detected
       v.literal("system"),
     ),
     title: v.string(),

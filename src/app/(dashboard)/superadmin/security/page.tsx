@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSession } from "next-auth/react";
 import type { Id } from "@/convex/_generated/dataModel";
 import {
   Shield,
@@ -136,6 +137,7 @@ function RiskBadge({ score }: { score: number }) {
 
 export default function SecurityDashboard() {
   const { user } = useAuthStore();
+  const { data: session, status } = useSession();
   const [toggling, setToggling] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<"settings" | "logs" | "attempts">("settings");
 
@@ -144,11 +146,35 @@ export default function SecurityDashboard() {
   const auditLogs = useQuery(api.security.getRecentAuditLogs, { limit: 50 });
   const toggleSetting = useMutation(api.security.toggleSetting);
 
-  if (!user || user.role !== "superadmin") {
+  // Check role from either useAuthStore or NextAuth session
+  const userRole = user?.role || (session?.user as any)?.role;
+  const isLoading = status === "loading" || (!user && status === "authenticated");
+
+  // Show loading state while user data is being fetched
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96" style={{ color: "var(--text-muted)" }}>
+        <RefreshCw className="w-8 h-8 mr-3 animate-spin" style={{ color: "var(--primary)" }} />
+        Loading security dashboard...
+      </div>
+    );
+  }
+
+  // Check authorization
+  if (!user && !session) {
     return (
       <div className="flex items-center justify-center h-96" style={{ color: "var(--text-muted)" }}>
         <ShieldAlert className="w-8 h-8 mr-3" style={{ color: "var(--destructive)" }} />
-        Access denied — superadmin only
+        Please log in to access this page
+      </div>
+    );
+  }
+
+  if (userRole !== "superadmin") {
+    return (
+      <div className="flex items-center justify-center h-96" style={{ color: "var(--text-muted)" }}>
+        <ShieldAlert className="w-8 h-8 mr-3" style={{ color: "var(--destructive)" }} />
+        Access denied — superadmin only (your role: {userRole || "unknown"})
       </div>
     );
   }
