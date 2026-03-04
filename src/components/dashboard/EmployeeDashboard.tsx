@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import React from "react";
+import React, { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Clock, CheckCircle, XCircle, Plus, Calendar as CalendarIcon, TrendingUp, Star } from "lucide-react";
@@ -15,8 +16,23 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from "@/lib/types";
 import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
-import { AttendanceDashboard } from "@/components/attendance/AttendanceDashboard";
-import AIRecommendationsCard from "@/components/ai/AIRecommendationsCard";
+
+// Lazy load heavy dashboard components to reduce initial JS bundle
+const AttendanceDashboard = dynamic(
+  () => import("@/components/attendance/AttendanceDashboard").then(mod => ({ default: mod.AttendanceDashboard })),
+  { 
+    loading: () => <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />,
+    ssr: true 
+  }
+);
+
+const AIRecommendationsCard = dynamic(
+  () => import("@/components/ai/AIRecommendationsCard"),
+  { 
+    loading: () => <div className="h-32 bg-gray-100 rounded-lg animate-pulse" />,
+    ssr: true 
+  }
+);
 
 const containerVariants = {
   hidden: { opacity: 0 },

@@ -46,17 +46,28 @@ export function initSentryClient() {
     // Capture breadcrumbs for better context
     maxBreadcrumbs: 50,
     
-    // Performance monitoring
+    // Performance monitoring - OPTIMIZED for TBT reduction
     integrations: [
+      // Only enable replay for errors to reduce overhead
       Sentry.replayIntegration({
         maskAllText: true,
         blockAllMedia: true,
+        // Reduce replay payload size
+        maxReplayDuration: 30000, // 30 seconds max
+      }),
+      // Reduce breadcrumbs for better performance
+      Sentry.breadcrumbs.consoleIntegration({
+        levels: ['warn', 'error'], // Only capture warnings and errors
       }),
     ],
     
-    // Session replay configuration
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
+    // Session replay configuration - OPTIMIZED
+    // Reduced sample rate to minimize blocking operations
+    replaysSessionSampleRate: 0.05, // Reduced from 0.1
+    replaysOnErrorSampleRate: 0.5, // Reduced from 1.0
+    
+    // Initialize request breadcrumbs plugin lazily
+    autoSessionTracking: false, // Manually manage sessions
   });
 }
 

@@ -1,4 +1,5 @@
 ﻿import type { Metadata, Viewport } from "next";
+import dynamic from "next/dynamic";
 import { 
   IBM_Plex_Sans,
   Montserrat,
@@ -9,11 +10,20 @@ import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { AuthSyncProvider } from '@/components/providers/AuthSyncProvider'
-import { MonitoringProvider } from '@/components/providers/MonitoringProvider'
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/components/I18nProvider";
-import PerformanceMonitor from "@/components/PerformanceMonitor";
+
+// Lazy load non-critical providers and monitors to reduce blocking time
+const MonitoringProvider = dynamic(
+  () => import('@/components/providers/MonitoringProvider').then(mod => ({ default: mod.MonitoringProvider })),
+  { ssr: false }
+);
+
+const PerformanceMonitor = dynamic(
+  () => import('@/components/PerformanceMonitor'),
+  { ssr: false, loading: () => null }
+);
 
 // Corporate & Professional - IBM PLEX SANS
 const ibmPlexSans = IBM_Plex_Sans({
@@ -270,18 +280,17 @@ export default function RootLayout({
         />
       </head>
       <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} antialiased`}>
-        <MonitoringProvider>
-          <SessionProvider>
-            <I18nProvider>
-              <ConvexClientProvider>
-                <AuthSyncProvider>
-                  <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem={true}
-                    disableTransitionOnChange
-                  >
-                    {children}
+        <SessionProvider>
+          <I18nProvider>
+            <ConvexClientProvider>
+              <AuthSyncProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem={true}
+                  disableTransitionOnChange
+                >
+                  {children}
                   <Toaster
                     position="top-right"
                     closeButton
@@ -296,13 +305,13 @@ export default function RootLayout({
                       className: 'sonner-toast',
                     }}
                   />
-                  </ThemeProvider>
-                </AuthSyncProvider>
-              </ConvexClientProvider>
-            </I18nProvider>
-          </SessionProvider>
-        </MonitoringProvider>
-        {/* Performance monitoring (только в dev) */}
+                </ThemeProvider>
+              </AuthSyncProvider>
+            </ConvexClientProvider>
+          </I18nProvider>
+        </SessionProvider>
+        {/* Lazy load monitoring and performance tracking after page is interactive */}
+        <MonitoringProvider />
         {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
       </body>
     </html>
