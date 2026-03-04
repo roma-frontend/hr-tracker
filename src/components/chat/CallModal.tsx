@@ -97,12 +97,22 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
   };
 
   const cleanup = useCallback(() => {
+    console.log('[CallModal] Cleaning up media resources...');
+    
     // Stop ALL tracks — browser immediately releases camera/mic indicator
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((t) => {
-        t.stop();
-        t.enabled = false;
+      const tracks = localStreamRef.current.getTracks();
+      console.log('[CallModal] Stopping', tracks.length, 'local tracks');
+      
+      tracks.forEach((t) => {
+        try {
+          t.stop();
+          console.log('[CallModal] Stopped track:', t.kind);
+        } catch (e) {
+          console.warn("Error stopping track:", e);
+        }
       });
+      // Clear all references to ensure garbage collection
       localStreamRef.current = null;
     }
     // Detach srcObject so browser fully releases camera/mic
@@ -114,10 +124,29 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
     }
     // Remove handlers before closing to avoid stale callbacks
     if (peerConnectionRef.current) {
-      peerConnectionRef.current.onconnectionstatechange = null;
-      peerConnectionRef.current.onicecandidate = null;
-      peerConnectionRef.current.ontrack = null;
-      peerConnectionRef.current.close();
+      try {
+        peerConnectionRef.current.onconnectionstatechange = null;
+        peerConnectionRef.current.onicecandidate = null;
+        peerConnectionRef.current.ontrack = null;
+        // Remove all transceiver tracks
+        const senders = peerConnectionRef.current.getSenders();
+        console.log('[CallModal] Stopping', senders.length, 'peer connection senders');
+        
+        senders.forEach((sender) => {
+          try {
+            if (sender.track) {
+              sender.track.stop();
+              console.log('[CallModal] Stopped sender track:', sender.track.kind);
+            }
+          } catch (e) {
+            console.warn("Error stopping sender track:", e);
+          }
+        });
+        peerConnectionRef.current.close();
+        console.log('[CallModal] Closed peer connection');
+      } catch (e) {
+        console.warn("Error closing peer connection:", e);
+      }
       peerConnectionRef.current = null;
     }
     if (durationTimerRef.current) {
@@ -128,16 +157,29 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
       clearTimeout(retryTimerRef.current);
       retryTimerRef.current = null;
     }
+    
+    console.log('[CallModal] Cleanup complete');
   }, []);
 
   // Initialize media and WebRTC
   const initMedia = useCallback(async () => {
     try {
       setMediaError(null);
+      console.log('[CallModal] Requesting media with constraints:', {
+        audio: true,
+        video: call.type === "video",
+      });
+      
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: call.type === "video",
       });
+      
+      console.log('[CallModal] Got media stream:', {
+        videoTracks: stream.getVideoTracks().length,
+        audioTracks: stream.getAudioTracks().length,
+      });
+      
       localStreamRef.current = stream;
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
@@ -182,21 +224,33 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         setCallStatus("connecting");
       }
     } catch (err: any) {
-      console.error("Media error:", err);
+      console.error("[CallModal] Media error:", {
+        name: err.name,
+        message: err.message,
+        code: err.code,
+      });
       
       if (err.name === "NotReadableError" || err.name === "TrackStartError") {
         // Device in use - show message and auto-retry
         const message = 
           retryCount >= 3
             ? "Не удалось получить доступ к камере/микрофону после нескольких попыток. Закройте все другие браузеры/приложения и попробуйте снова."
-            : `Камера или микрофон уже используются. Закройте другие вкладки браузера (особенно с этим же аккаунтом) и попробуйте ещё раз. Попытка ${retryCount + 1}...`;
+            : `Камера или микрофон уже используются. Закройте другие вкладки браузера (особенно с этим же аккаунтом). Попытка ${retryCount + 1}...`;
         
         setMediaError(message);
         
-        // Auto-retry after delay (exponential backoff)
+        // Clean up any partial state before retrying
+        cleanup();
+        
+        // Auto-retry after delay (exponential backoff with longer delays for device conflicts)
         if (retryCount < 3) {
-          const delay = Math.min(1000 * Math.pow(2, retryCount), 5000); // Max 5 seconds
+          // Longer delays to ensure device is fully released
+          const delays = [2000, 4000, 8000]; // 2s, 4s, 8s
+          const delay = retryCount < delays.length ? delays[retryCount] : 10000;
+          console.log(`[CallModal] Scheduling retry in ${delay}ms (attempt ${retryCount + 2})...`);
+          
           retryTimerRef.current = setTimeout(() => {
+            console.log(`[CallModal] Retrying media initialization (attempt ${retryCount + 2})`);
             setRetryCount((c) => c + 1);
             initMedia();
           }, delay);
@@ -351,8 +405,13 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
               {retryCount < 3 && (
                 <button
                   onClick={() => {
+                    cleanup();
+                    setMediaError(null);
                     setRetryCount((c) => c + 1);
-                    initMedia();
+                    // Give device a moment to fully release
+                    setTimeout(() => {
+                      initMedia();
+                    }, 500);
                   }}
                   className="text-xs px-3 py-1 rounded bg-blue-500/30 text-blue-300 hover:bg-blue-500/50 transition"
                 >
