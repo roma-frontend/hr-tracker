@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
 export default function SubscriptionsManagementPage() {
+  const { t } = useTranslation();
+  const { t } = useTranslation();
   const subscriptions = useQuery(api.subscriptions_admin.listAllWithUsers);
 
   // Get current user from useAuthStore (works with both email/password and OAuth)
@@ -117,13 +120,13 @@ export default function SubscriptionsManagementPage() {
   };
 
   const handleCancel = async (subId: Id<"subscriptions">) => {
-    if (!confirm("Are you sure you want to cancel this subscription?")) return;
+    if (!confirm(t('superadmin.subscriptions.confirmCancelSub'))) return;
 
     try {
       await cancelSub({ subscriptionId: subId });
-      toast.success("Subscription canceled");
+      toast.success(t('superadmin.subscriptions.cancelSuccess'));
     } catch (error: any) {
-      toast.error(error.message || "Failed to cancel");
+      toast.error(error.message || t('superadmin.subscriptions.failedToCancel'));
     }
   };
 
@@ -148,15 +151,15 @@ export default function SubscriptionsManagementPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">Subscription Management</h1>
-          <p className="text-[var(--text-muted)] mt-1">Manage customer subscriptions and Enterprise access</p>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">{t('superadmin.subscriptions.title')}</h1>
+          <p className="text-[var(--text-muted)] mt-1">{t('superadmin.subscriptions.subtitle')}</p>
         </div>
         <Button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          {showForm ? "Cancel" : "Add Manual Subscription"}
+          {showForm ? t('superadmin.subscriptions.cancelButtonText') : t('superadmin.subscriptions.addManualSubscription')}
         </Button>
       </div>
 
@@ -166,10 +169,10 @@ export default function SubscriptionsManagementPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-[var(--primary)]" />
-              Create Manual Subscription (Enterprise)
+              {t('superadmin.subscriptions.createManualSubscription')}
             </CardTitle>
             <CardDescription>
-              Manually assign Enterprise plan to a customer after agreement
+              {t('superadmin.subscriptions.createManualSubDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

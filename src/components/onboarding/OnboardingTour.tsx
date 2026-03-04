@@ -26,8 +26,6 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   const [isVisible, setIsVisible] = useState(false);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [isPositioned, setIsPositioned] = useState(false);
 
   // Get session token if user is logged in
   const [sessionToken, setSessionToken] = useState<string | undefined>();
@@ -67,117 +65,86 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   // Determine if tour should be shown
   const shouldShowTour = hasSeenTour === false || (hasSeenTour === null && localStorageChecked && hasSeenTourLocal === false);
 
-  // Update target element position with smooth scroll
-  const updateTargetPosition = useCallback((shouldScroll = true) => {
+  // Update target element position with smart scroll
+  const updateTargetPosition = useCallback(() => {
     const step = steps[currentStep];
-    if (!step?.target) {
-      // For center placement without target, position immediately
-      if (step?.placement === "center") {
-        setIsPositioned(false);
-        setTimeout(() => {
-          positionTooltip(null, "center");
-          setIsPositioned(true);
-        }, 100);
-      }
-      return;
-    }
+    if (!step?.target) return;
 
-    // Wait for DOM to be ready
-    setTimeout(() => {
-      const element = document.querySelector(step.target);
-      if (!element) {
-        console.warn(`Tour: Element not found: ${step.target}`);
-        return;
-      }
-
+    const element = document.querySelector(step.target);
+    if (element) {
       const rect = element.getBoundingClientRect();
       
-      // Check if element is fully visible in viewport
-      const isElementVisible = (
-        rect.top >= 80 &&
-        rect.left >= 20 &&
-        rect.bottom <= window.innerHeight - 80 &&
-        rect.right <= window.innerWidth - 20
+      // Check if element is visible in viewport (with margins)
+      const viewportHeight = window.innerHeight;
+      const elementTop = rect.top;
+      const elementBottom = rect.bottom;
+      
+      const isInViewport = (
+        elementTop >= 80 &&
+        elementBottom <= viewportHeight - 80
       );
 
-      // Smooth scroll to element if it's not fully visible or if placement is center
-      if (shouldScroll && (!isElementVisible || step.placement === "center")) {
-        setIsPositioned(false);
-        setIsScrolling(true);
+      // If element is NOT in viewport, scroll to it
+      if (!isInViewport && step.placement !== "center") {
+        // Calculate target scroll position
+        const elementCenterY = rect.top + window.pageYOffset + (rect.height / 2);
+        const targetScrollY = elementCenterY - (viewportHeight / 2);
         
-        const absoluteElementTop = rect.top + window.pageYOffset;
-        const absoluteElementLeft = rect.left + window.pageXOffset;
-        
-        // Calculate scroll position to center the element vertically
-        const scrollToY = absoluteElementTop - (window.innerHeight / 2) + (rect.height / 2);
-        const scrollToX = absoluteElementLeft - (window.innerWidth / 2) + (rect.width / 2);
-
-        // Smooth scroll to element
+        // Scroll to element
         window.scrollTo({
-          top: Math.max(0, scrollToY),
-          left: Math.max(0, scrollToX),
+          top: Math.max(0, targetScrollY),
           behavior: 'smooth'
         });
 
-        // Wait for scroll animation to complete before positioning tooltip
+        // Wait for scroll to complete, then update positions
         setTimeout(() => {
           const updatedRect = element.getBoundingClientRect();
           setTargetRect(updatedRect);
           positionTooltip(updatedRect, step.placement || "bottom");
-          setIsScrolling(false);
-          setIsPositioned(true);
-        }, 750);
+        }, 700);
       } else {
-        setIsPositioned(false);
+        // Element is already visible
         setTargetRect(rect);
-        // Small delay to ensure rect is updated
-        setTimeout(() => {
-          positionTooltip(rect, step.placement || "bottom");
-          setIsPositioned(true);
-        }, 50);
+        positionTooltip(rect, step.placement || "bottom");
       }
-    }, 100); // Initial delay to ensure DOM is ready
+    }
   }, [currentStep, steps]);
 
   // Helper function to calculate and set tooltip position
-  const positionTooltip = useCallback((rect: DOMRect | null, placement: string) => {
+  const positionTooltip = useCallback((rect: DOMRect, placement: string) => {
     let x = 0;
     let y = 0;
 
-    const tooltipWidth = 320; // Slightly wider for better readability
-    const tooltipHeight = 180; // Slightly taller
-    const spacing = 24;
+    const tooltipWidth = 280;
+    const tooltipHeight = 160;
+    const spacing = 20;
 
-    if (!rect || placement === "center") {
-      // Center placement
-      x = window.innerWidth / 2 - tooltipWidth / 2;
-      y = window.innerHeight / 2 - tooltipHeight / 2;
-    } else {
-      switch (placement) {
-        case "top":
-          x = rect.left + rect.width / 2 - tooltipWidth / 2;
-          y = rect.top - tooltipHeight - spacing;
-          break;
-        case "bottom":
-          x = rect.left + rect.width / 2 - tooltipWidth / 2;
-          y = rect.bottom + spacing;
-          break;
-        case "left":
-          x = rect.left - tooltipWidth - spacing;
-          y = rect.top + rect.height / 2 - tooltipHeight / 2;
-          break;
-        case "right":
-          x = rect.right + spacing;
-          y = rect.top + rect.height / 2 - tooltipHeight / 2;
-          break;
-      }
+    switch (placement) {
+      case "top":
+        x = rect.left + rect.width / 2 - tooltipWidth / 2;
+        y = rect.top - tooltipHeight - spacing;
+        break;
+      case "bottom":
+        x = rect.left + rect.width / 2 - tooltipWidth / 2;
+        y = rect.bottom + spacing;
+        break;
+      case "left":
+        x = rect.left - tooltipWidth - spacing;
+        y = rect.top + rect.height / 2 - tooltipHeight / 2;
+        break;
+      case "right":
+        x = rect.right + spacing;
+        y = rect.top + rect.height / 2 - tooltipHeight / 2;
+        break;
+      case "center":
+        x = window.innerWidth / 2 - tooltipWidth / 2;
+        y = window.innerHeight / 2 - tooltipHeight / 2;
+        break;
     }
 
-    // Keep tooltip on screen with proper margins
-    const marginX = 20;
-    const marginY = 20;
-    x = Math.max(marginX, Math.min(x, window.innerWidth - tooltipWidth - marginX));
-    y = Math.max(marginY, Math.min(y, window.innerHeight - tooltipHeight - marginY));
+    // Keep tooltip on screen
+    x = Math.max(20, Math.min(x, window.innerWidth - tooltipWidth - 20));
+    y = Math.max(20, Math.min(y, window.innerHeight - tooltipHeight - 20));
 
     setTooltipPosition({ x, y });
   }, []);
@@ -193,32 +160,33 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     }
   }, [shouldShowTour, updateTargetPosition]);
 
+  // Block user scroll but allow programmatic scroll
+  useEffect(() => {
+    if (isVisible) {
+      // Prevent user scroll with CSS
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        // Restore scroll
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isVisible]);
+
   // Update position on step change or resize
   useEffect(() => {
     if (!isVisible) return;
 
-    updateTargetPosition(true);
+    updateTargetPosition();
 
-    const handleResize = () => {
-      if (!isScrolling) {
-        updateTargetPosition(false);
-      }
-    };
-    
-    const handleScroll = () => {
-      if (!isScrolling) {
-        updateTargetPosition(false);
-      }
-    };
+    const handleResize = () => updateTargetPosition();
 
     window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleScroll);
     };
-  }, [isVisible, currentStep, updateTargetPosition, isScrolling]);
+  }, [isVisible, currentStep, updateTargetPosition]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -363,27 +331,15 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
           {/* Tooltip */}
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ 
-              opacity: isPositioned ? 1 : 0, 
-              scale: isPositioned ? 1 : 0.9,
-              x: 0, 
-              y: 0, 
-              rotate: 0 
-            }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 400, 
-              damping: 28,
-              opacity: { duration: isPositioned ? 0.3 : 0 }
-            }}
+            initial={getAnimationDirection(currentStep, 'initial')}
+            animate={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 }}
+            exit={getAnimationDirection(currentStep, 'exit')}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="fixed z-[10000] rounded-2xl shadow-2xl border"
             style={{
               left: tooltipPosition.x,
               top: tooltipPosition.y,
-              width: '320px',
-              visibility: isPositioned ? 'visible' : 'hidden',
+              width: '280px',
               background: "var(--card)",
               borderColor: "var(--border)",
             }}

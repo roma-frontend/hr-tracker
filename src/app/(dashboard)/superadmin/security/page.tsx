@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -135,6 +136,7 @@ function RiskBadge({ score }: { score: number }) {
 }
 
 export default function SecurityDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { data: session, status } = useSession();
   const [toggling, setToggling] = useState<Record<string, boolean>>({});
@@ -266,7 +268,7 @@ export default function SecurityDashboard() {
       {activeTab === "settings" && (
         <div className="space-y-3">
           <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
-            Toggle security systems on/off instantly. If employees report issues — simply disable the feature.
+            {t("superadmin.security.toggleSecuritySystems")}
           </p>
           {FEATURES.map((feature) => {
             const enabled = getSettingEnabled(feature.key);
@@ -347,12 +349,12 @@ export default function SecurityDashboard() {
       {activeTab === "blocked" && (
         <div>
           <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
-            Currently suspended users - review and unsuspend if needed
+            {t("superadmin.security.currentlySuspendedUsers")}
           </p>
           {!suspendedUsers?.length ? (
             <div className="text-center py-16" style={{ color: "var(--text-muted)" }}>
               <ShieldCheck className="w-12 h-12 mx-auto mb-3" style={{ color: "var(--success)" }} />
-              No suspended users
+              {t("superadmin.security.noSuspendedUsers")}
             </div>
           ) : (
             <div className="space-y-3">
@@ -442,11 +444,11 @@ export default function SecurityDashboard() {
       {/* ── TAB: Login Attempts ── */}
       {activeTab === "attempts" && (
         <div>
-          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>Recent suspicious and failed login attempts (last 24h)</p>
+          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{t("superadmin.security.recentSuspiciousLogins")}</p>
           {!loginStats?.suspicious?.length ? (
             <div className="text-center py-16" style={{ color: "var(--text-muted)" }}>
               <ShieldCheck className="w-12 h-12 mx-auto mb-3" style={{ color: "var(--success)" }} />
-              No suspicious activity in last 24 hours
+              {t("superadmin.security.noSuspiciousActivity")}
             </div>
           ) : (
             <div className="space-y-2">
@@ -494,11 +496,11 @@ export default function SecurityDashboard() {
       {/* ── TAB: Audit Logs ── */}
       {activeTab === "logs" && (
         <div>
-          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>All security-related actions across the platform</p>
+          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{t("superadmin.security.allSecurityActions")}</p>
           {!auditLogs?.length ? (
             <div className="text-center py-16" style={{ color: "var(--text-muted)" }}>
               <Eye className="w-12 h-12 mx-auto mb-3" style={{ color: "var(--text-disabled)" }} />
-              No audit logs yet
+              {t("superadmin.security.noAuditLogs")}
             </div>
           ) : (
             <div className="space-y-2">
