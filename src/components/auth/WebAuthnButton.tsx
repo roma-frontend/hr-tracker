@@ -149,23 +149,20 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
       disabled={disabled || loading}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border-2 font-medium transition-all disabled:opacity-50"
+      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 font-medium transition-all disabled:opacity-50"
       style={{
         borderColor: "var(--primary)",
         color: "var(--primary)",
         background: "var(--primary-muted)",
       }}
+      title={mode === "register" ? "Register biometric" : "Sign in with biometric"}
     >
       {loading ? (
         <ShieldLoader size="sm" variant="inline" />
       ) : (
-        <Fingerprint className="w-5 h-5" />
+        <Fingerprint className="w-4 h-4" />
       )}
-      {loading
-        ? "Authenticating..."
-        : mode === "register"
-        ? "Register Face ID / Touch ID"
-        : "Sign in with Face ID / Touch ID"}
+      {!loading && <span className="text-xs">ID</span>}
     </motion.button>
   );
 }

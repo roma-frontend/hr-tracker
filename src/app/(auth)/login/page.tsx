@@ -198,30 +198,30 @@ export default function LoginPage() {
         {/* Card */}
         <div
           id="login-card"
-          className="rounded-2xl p-8 shadow-2xl border"
+          className="rounded-2xl p-6 shadow-2xl border"
           style={{
             background: "var(--card)",
             borderColor: "var(--border)",
           }}
         >
           {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-6">
             <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-lg"
               style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
             >
-              <Building2 className="w-7 h-7 text-white" />
+              <Building2 className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
               {t('auth.welcomeBack')}
             </h1>
-            <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
               {t('auth.signInToHROffice')}
             </p>
           </div>
 
           {/* Login Mode Tabs */}
-          <div className="flex gap-2 mb-6 p-1 rounded-xl" style={{ background: "var(--muted)" }}>
+          <div className="flex gap-2 mb-4 p-1 rounded-xl" style={{ background: "var(--muted)" }}>
             <button
               type="button"
               onClick={() => setLoginMode("email")}
@@ -252,7 +252,7 @@ export default function LoginPage() {
 
           {/* Face ID Login */}
           {loginMode === "face" && (
-            <div className="mb-6">
+            <div className="mb-4">
               <FaceLogin />
             </div>
           )}
@@ -261,12 +261,12 @@ export default function LoginPage() {
           {loginMode === "email" && (
             <>
               {/* Google OAuth */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <GoogleSignInButton />
               </div>
 
               {/* Divider */}
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
                 <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
                   {t('auth.orContinueWith')}
@@ -275,12 +275,12 @@ export default function LoginPage() {
               </div>
 
               {/* WebAuthn */}
-              <div id="biometric-login" className="mb-6">
+              <div id="biometric-login" className="mb-4">
                 <WebAuthnButton mode="login" onSuccess={handleWebAuthnSuccess} />
               </div>
 
               {/* Divider */}
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
                 <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
                   or use email
@@ -292,7 +292,7 @@ export default function LoginPage() {
 
           {/* Form - Only show for email mode */}
           {loginMode === "email" && (
-          <form id="email-login-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="email-login-form" onSubmit={handleSubmit} className="space-y-3">
             {/* Email - Smart Input */}
             <SmartEmailInput
               value={formData.email}
@@ -303,7 +303,7 @@ export default function LoginPage() {
             />
 
             {/* Password - Smart Input */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
                 <Link
@@ -337,7 +337,7 @@ export default function LoginPage() {
               disabled={isPending}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+              className="w-full py-2 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
               style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
             >
               {isPending ? (
@@ -350,8 +350,8 @@ export default function LoginPage() {
           )}
 
           {/* Footer */}
-          <div className="text-center mt-6 space-y-3">
-            <p id="join-team-link" className="text-sm" style={{ color: "var(--text-muted)" }}>
+          <div className="text-center mt-4 space-y-2">
+            <p id="join-team-link" className="text-xs" style={{ color: "var(--text-muted)" }}>
               {t('auth.dontHaveAccount')}{" "}
               <Link href="/register" className="font-semibold hover:underline" style={{ color: "#2563eb" }}>
                 {t('auth.joinExistingTeam')}
@@ -364,7 +364,7 @@ export default function LoginPage() {
             </div>
             <Link href="/register-org" id="create-org-link">
               <button
-                className="text-sm font-semibold hover:underline"
+                className="text-xs font-semibold hover:underline"
                 style={{ color: "#10b981" }}
               >
                 🏢 {t('auth.createNewOrganization')}
@@ -374,8 +374,8 @@ export default function LoginPage() {
         </div>
 
         {/* Back to home */}
-        <div className="text-center mt-4">
-          <Link href="/" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
+        <div className="text-center mt-3">
+          <Link href="/" className="text-xs hover:underline" style={{ color: "var(--text-muted)" }}>
             ← {t('ui.backToHome')}
           </Link>
         </div>
