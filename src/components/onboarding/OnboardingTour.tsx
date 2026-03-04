@@ -25,7 +25,11 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  // Initialize tooltip in center to avoid visible jump from top-left
+  const [tooltipPosition, setTooltipPosition] = useState(() => ({
+    x: typeof window !== 'undefined' ? window.innerWidth / 2 - 140 : 0,
+    y: typeof window !== 'undefined' ? window.innerHeight / 2 - 80 : 0,
+  }));
 
   // Get session token if user is logged in
   const [sessionToken, setSessionToken] = useState<string | undefined>();
@@ -78,23 +82,30 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     // Determine best placement based on available space
     let finalPlacement = placement;
     
-    // If "top" placement would go off-screen and there's space below, use "bottom"
-    if (placement === "top") {
-      const topSpace = rect.top - tooltipHeight - spacing;
-      const bottomSpace = window.innerHeight - rect.bottom - spacing;
-      
-      if (topSpace < viewportPadding && bottomSpace > tooltipHeight + viewportPadding) {
+    const topSpace = rect.top - tooltipHeight - spacing;
+    const bottomSpace = window.innerHeight - rect.bottom - spacing;
+    const leftSpace = rect.left - tooltipWidth - spacing;
+    const rightSpace = window.innerWidth - rect.right - spacing;
+    
+    // If "top" placement would go off-screen, try alternatives
+    if (placement === "top" && topSpace < viewportPadding) {
+      if (bottomSpace > tooltipHeight + viewportPadding) {
         finalPlacement = "bottom";
+      } else if (rightSpace > tooltipWidth + viewportPadding) {
+        finalPlacement = "right";
+      } else if (leftSpace > tooltipWidth + viewportPadding) {
+        finalPlacement = "left";
       }
     }
     
     // If "bottom" placement would go off-screen and there's space above, use "top"
-    if (placement === "bottom") {
-      const bottomSpace = window.innerHeight - rect.bottom - spacing;
-      const topSpace = rect.top - tooltipHeight - spacing;
-      
-      if (bottomSpace < viewportPadding && topSpace > tooltipHeight + viewportPadding) {
+    if (placement === "bottom" && bottomSpace < viewportPadding) {
+      if (topSpace > tooltipHeight + viewportPadding) {
         finalPlacement = "top";
+      } else if (rightSpace > tooltipWidth + viewportPadding) {
+        finalPlacement = "right";
+      } else if (leftSpace > tooltipWidth + viewportPadding) {
+        finalPlacement = "left";
       }
     }
 
