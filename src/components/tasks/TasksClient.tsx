@@ -21,6 +21,7 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
+import { ShieldLoader } from "@/components/ui/ShieldLoader";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Status = "pending" | "in_progress" | "review" | "completed" | "cancelled";

@@ -19,6 +19,7 @@ import { EditEmployeeModal } from "./EditEmployeeModal";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { EmployeeHoverCard } from "./EmployeeHoverCard";
 import { toast } from "sonner";
+import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { useRouter } from "next/navigation";
 
 const ROLE_CONFIG = {

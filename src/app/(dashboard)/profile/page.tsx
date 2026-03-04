@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { useAuthStore } from "@/store/useAuthStore";
 import { updateSessionProfileAction } from "@/actions/auth";
 import { toast } from "sonner";
