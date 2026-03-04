@@ -26,6 +26,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   const [isVisible, setIsVisible] = useState(false);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Get session token if user is logged in
   const [sessionToken, setSessionToken] = useState<string | undefined>();
@@ -66,7 +67,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   const shouldShowTour = hasSeenTour === false || (hasSeenTour === null && localStorageChecked && hasSeenTourLocal === false);
 
   // Update target element position with smooth scroll
-  const updateTargetPosition = useCallback(() => {
+  const updateTargetPosition = useCallback((shouldScroll = true) => {
     const step = steps[currentStep];
     if (!step?.target) return;
 
@@ -77,18 +78,19 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
 
       // Check if element is fully visible in viewport
       const isElementVisible = (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= window.innerHeight &&
-        rect.right <= window.innerWidth
+        rect.top >= 80 &&
+        rect.left >= 20 &&
+        rect.bottom <= window.innerHeight - 80 &&
+        rect.right <= window.innerWidth - 20
       );
 
       // Smooth scroll to element if it's not fully visible or if placement is center
-      if (!isElementVisible || step.placement === "center") {
+      if (shouldScroll && (!isElementVisible || step.placement === "center")) {
+        setIsScrolling(true);
         const absoluteElementTop = rect.top + window.pageYOffset;
         const absoluteElementLeft = rect.left + window.pageXOffset;
         
-        // Calculate scroll position to center the element vertically
+        // Calculate scroll position to center the element vertically with some offset
         const scrollToY = absoluteElementTop - (window.innerHeight / 2) + (rect.height / 2);
         const scrollToX = absoluteElementLeft - (window.innerWidth / 2) + (rect.width / 2);
 
@@ -104,12 +106,13 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
           const updatedRect = element.getBoundingClientRect();
           setTargetRect(updatedRect);
           positionTooltip(updatedRect, step.placement || "bottom");
-        }, 600); // Increased timeout for smooth scroll
+          setIsScrolling(false);
+        }, 700);
       } else {
         positionTooltip(rect, step.placement || "bottom");
       }
     }
-  }, [currentStep, steps]);
+  }, [currentStep, steps, setIsScrolling]);
 
   // Helper function to calculate and set tooltip position
   const positionTooltip = useCallback((rect: DOMRect, placement: string) => {
@@ -165,17 +168,28 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   useEffect(() => {
     if (!isVisible) return;
 
-    updateTargetPosition();
+    updateTargetPosition(true);
 
-    const handleResize = () => updateTargetPosition();
+    const handleResize = () => {
+      if (!isScrolling) {
+        updateTargetPosition(false);
+      }
+    };
+    
+    const handleScroll = () => {
+      if (!isScrolling) {
+        updateTargetPosition(false);
+      }
+    };
+
     window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", updateTargetPosition);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", updateTargetPosition);
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [isVisible, currentStep, updateTargetPosition]);
+  }, [isVisible, currentStep, updateTargetPosition, isScrolling]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {

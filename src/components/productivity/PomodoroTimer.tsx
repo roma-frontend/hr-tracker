@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -16,6 +17,7 @@ const DURATIONS = {
 };
 
 export function PomodoroTimer() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [mode, setMode] = useState<"pomodoro" | "shortBreak" | "longBreak">("pomodoro");
   const [timeLeft, setTimeLeft] = useState(DURATIONS.pomodoro);
@@ -82,9 +84,9 @@ export function PomodoroTimer() {
       });
       setSessionId(id);
       setIsRunning(true);
-      toast.success(`${mode === "pomodoro" ? "Pomodoro" : "Break"} started!`);
+      toast.success(t('pomodoro.sessionStarted'));
     } catch (error) {
-      toast.error("Failed to start session");
+      toast.error(t('errors.sessionStartFailed'));
     }
   };
 
@@ -114,14 +116,14 @@ export function PomodoroTimer() {
 
     // Browser Notification
     if (mode === "pomodoro") {
-      toast.success("Pomodoro completed! 🎉 Time for a break!", {
+      toast.success(t('pomodoro.pomodoroCompleted'), {
         duration: 5000,
       });
 
       // Send browser notification
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("🎉 Pomodoro Complete!", {
-          body: "Great work! Time for a 5-minute break.",
+        new Notification(t('pomodoro.notificationTitle'), {
+          body: t('pomodoro.breakReadyMsg'),
           icon: "/icon.png",
           badge: "/badge.png",
           tag: "pomodoro-complete",
@@ -132,14 +134,14 @@ export function PomodoroTimer() {
       setMode("shortBreak");
       setTimeLeft(DURATIONS.shortBreak);
     } else if (mode === "shortBreak") {
-      toast.success("Break over! Ready to focus? 💪", {
+      toast.success(t('pomodoro.breakOver'), {
         duration: 5000,
       });
 
       // Send browser notification
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("💪 Break Over!", {
-          body: "Feeling refreshed? Ready to focus again?",
+        new Notification(t('pomodoro.breakTitle'), {
+          body: t('pomodoro.refreshedMsg'),
           icon: "/icon.png",
           badge: "/badge.png",
           tag: "break-complete",
@@ -150,13 +152,13 @@ export function PomodoroTimer() {
       setTimeLeft(DURATIONS.pomodoro);
     } else {
       // Long break
-      toast.success("Long break complete! ✨", {
+      toast.success(t('pomodoro.longBreakComplete'), {
         duration: 5000,
       });
 
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("✨ Long Break Complete!", {
-          body: "Time to get back to crushing your goals!",
+        new Notification(t('pomodoro.longBreakTitle'), {
+          body: t('pomodoro.goalsMsg'),
           icon: "/icon.png",
           badge: "/badge.png",
           tag: "long-break-complete",
@@ -259,7 +261,7 @@ export function PomodoroTimer() {
             {formatTime(timeLeft)}
           </div>
           <div className="text-xs text-[var(--text-muted)] mt-1 capitalize">
-            {mode === "pomodoro" ? "Focus Time" : mode === "shortBreak" ? "Short Break" : "Long Break"}
+            {mode === "pomodoro" ? t('pomodoro.focusTime') : mode === "shortBreak" ? t('pomodoro.shortBreak') : t('pomodoro.longBreak')}
           </div>
         </div>
       </div>
@@ -269,17 +271,17 @@ export function PomodoroTimer() {
         {!isRunning && timeLeft === DURATIONS[mode] ? (
           <Button onClick={handleStart} size="sm" className="w-full">
             <Play className="w-4 h-4 mr-2" />
-            Start
+            {t('buttons.start')}
           </Button>
         ) : !isRunning ? (
           <Button onClick={handleResume} size="sm" className="flex-1">
             <Play className="w-4 h-4 mr-2" />
-            Resume
+            {t('buttons.resume')}
           </Button>
         ) : (
           <Button onClick={handlePause} variant="secondary" size="sm" className="flex-1">
             <Pause className="w-4 h-4 mr-2" />
-            Pause
+            {t('buttons.pause')}
           </Button>
         )}
 
@@ -294,7 +296,7 @@ export function PomodoroTimer() {
       {mode === "pomodoro" && (
         <div className="mt-3 px-2 text-center">
           <p className="text-[10px] text-[var(--text-muted)]">
-            💡 25 min focus + 5 min break = peak productivity
+            {t('pomodoro.productivityTip')}
           </p>
         </div>
       )}

@@ -707,7 +707,22 @@
     "tryAgain": "Փորձեք կրկին",
     "unauthorized": "Չթույլատրված մուտք",
     "notFound": "Չի գտնվել",
-    "serverError": "Սերվերի սխալ"
+    "serverError": "Սերվերի սխալ",
+    "invalidOrgSlug": "Անվավեր կազմակերպության slameն",
+    "orgAlreadyExists": "Կազմակերպությունն արդեն գոյություն ունի",
+    "emailAlreadyRegistered": "Այս էլեկտրոնային թղթերը արդեն գրանցված են",
+    "superadminOnly": "Միայն supereadmin",
+    "superadminApproveOnly": "Միայն superadmin կարող է հաստատել հայցերը",
+    "requestNotFound": "Հայցը չի գտնվել",
+    "requestAlreadyReviewed": "Այս հայցն արդեն վերանայվել է",
+    "slugTaken": "Կազմակերպության slug արդեն զբաղված է",
+    "superadminRejectOnly": "Միայն superadmin կարող է մերժել հայցերը",
+    "tooManyLoginAttempts": "Չափազանց շատ մուտքի փորձեր",
+    "modelLoadFailed": "Սխալ Face-API մոդելների բեռնման մեջ",
+    "faceDetectionFailed": "Սխալ դեմքի հայտնաբերման մեջ",
+    "sessionStartFailed": "Սխալ նստաշրջանի մեկնարկման մեջ",
+    "taskUpdateFailed": "Սխալ առաջադրանքի թարմացման մեջ",
+    "localStorageSaveFailed": "Սխալ localStorage-ում պահպանելիս"
   },
   "success": {
     "saved": "Հաջողությամբ պահպանվել է",
@@ -2604,5 +2619,29 @@
       "quickActions": "Quick Actions",
       "suspendTemporarily": "Suspend Temporarily"
     }
+  },
+  "pomodoro": {
+    "sessionStarted": "Pomodoro նստաշրջանը սկսվել է!",
+    "pomodoroCompleted": "Pomodoro ավարտված! 🎉 Ժամանակ հանգստի համար!",
+    "notificationTitle": "🎉 Pomodoro ավարտված!",
+    "breakReadyMsg": "Հիանալի աշխատանք! Ժամանակ 5 րոպե հանգստի համար։",
+    "breakOver": "Հանգիստն ավարտվել է! Պատրաստ՞ ընդհանուր կենտրոնացման համար: 💪",
+    "breakTitle": "💪 Հանգիստ ավարտված!",
+    "refreshedMsg": "Նկատակ՞ եք հանգստացած: Պատրաստ՞ կենտրոնացման համար:",
+    "longBreakComplete": "Երկար հանգիստ ավարտված! ✨",
+    "longBreakTitle": "✨ Երկար հանգիստ ավարտված!",
+    "goalsMsg": "Ժամանակ ձեր նպատակներ հասնելու համար!",
+    "focusTime": "Կենտրոնացման ժամանակ",
+    "shortBreak": "Կարճ հանգիստ",
+    "longBreak": "Երկար հանգիստ",
+    "productivityTip": "💡 25 րոպե կենտրոնացում + 5 րոպե հանգիստ = հաճախորդի արտադրողականություն"
+  },
+  "tasks": {
+    "taskCompleted": "Առաջադրանք ավարտված! 🎉",
+    "taskReopened": "Առաջադրանքը վերաբացվել է"
+  },
+  "security": {
+    "ddosAttempt": "🚨 DDoS հարձակման հանդես տալու հայտնաբերված",
+    "sqlInjectionAttempt": "🚨 SQL ներարկման փորձ հայտնաբերված"
   }
 }

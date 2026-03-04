@@ -707,7 +707,22 @@
     "tryAgain": "Попробуйте снова",
     "unauthorized": "Неавторизован",
     "notFound": "Не найдено",
-    "serverError": "Ошибка сервера"
+    "serverError": "Ошибка сервера",
+    "invalidOrgSlug": "Неверный слаг организации",
+    "orgAlreadyExists": "Организация уже существует",
+    "emailAlreadyRegistered": "Этот email уже зарегистрирован",
+    "superadminOnly": "Только суперадмин",
+    "superadminApproveOnly": "Только суперадмин может одобрить запросы",
+    "requestNotFound": "Запрос не найден",
+    "requestAlreadyReviewed": "Этот запрос уже был рассмотрен",
+    "slugTaken": "Слаг организации уже занят",
+    "superadminRejectOnly": "Только суперадмин может отклонить запросы",
+    "tooManyLoginAttempts": "Слишком много попыток входа",
+    "modelLoadFailed": "Ошибка загрузки моделей Face-API",
+    "faceDetectionFailed": "Ошибка определения лица",
+    "sessionStartFailed": "Ошибка запуска сеанса",
+    "taskUpdateFailed": "Ошибка обновления задачи",
+    "localStorageSaveFailed": "Ошибка сохранения в localStorage"
   },
   "success": {
     "saved": "Сохранено",
@@ -2604,5 +2619,29 @@
       "quickActions": "Quick Actions",
       "suspendTemporarily": "Suspend Temporarily"
     }
+  },
+  "pomodoro": {
+    "sessionStarted": "Сеанс Помодоро начался!",
+    "pomodoroCompleted": "Помодоро завершен! 🎉 Пора на перерыв!",
+    "notificationTitle": "🎉 Помодоро завершен!",
+    "breakReadyMsg": "Отличная работа! Пора на 5-минутный перерыв.",
+    "breakOver": "Перерыв закончился! Готовы сосредоточиться? 💪",
+    "breakTitle": "💪 Перерыв завершен!",
+    "refreshedMsg": "Чувствуете себя отдохнувшим? Готовы сосредоточиться снова?",
+    "longBreakComplete": "Длинный перерыв завершен! ✨",
+    "longBreakTitle": "✨ Длинный перерыв завершен!",
+    "goalsMsg": "Время вернуться к достижению своих целей!",
+    "focusTime": "Время фокуса",
+    "shortBreak": "Короткий перерыв",
+    "longBreak": "Длинный перерыв",
+    "productivityTip": "💡 25 мин фокуса + 5 мин перерыва = пиковая продуктивность"
+  },
+  "tasks": {
+    "taskCompleted": "Задача выполнена! 🎉",
+    "taskReopened": "Задача переоткрыта"
+  },
+  "security": {
+    "ddosAttempt": "🚨 Обнаружена потенциальная DDoS-атака",
+    "sqlInjectionAttempt": "🚨 Попытка SQL-инъекции обнаружена"
   }
 }

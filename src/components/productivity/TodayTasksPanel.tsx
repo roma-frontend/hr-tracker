@@ -23,9 +23,9 @@ export function TodayTasksPanel() {
     try {
       const newStatus = currentStatus === "completed" ? "in_progress" : "completed";
       await updateTaskStatus({ taskId, status: newStatus, userId: user!.id as Id<"users"> });
-      toast.success(newStatus === "completed" ? "Task completed! 🎉" : "Task reopened");
+      toast.success(newStatus === "completed" ? t('tasks.taskCompleted') : t('tasks.taskReopened'));
     } catch (error) {
-      toast.error("Failed to update task");
+      toast.error(t('errors.taskUpdateFailed'));
     }
   };
 

@@ -524,7 +524,6 @@
     "holiday": "Holiday",
     "workingHours": "Working Hours",
     "totalHours": "Total Hours",
-    "overtime": "Overtime",
     "regularHours": "Regular Hours",
     "checkInTime": "Check-In Time",
     "checkOutTime": "Check-Out Time",
@@ -544,7 +543,6 @@
     "lunch": "Lunch",
     "attendanceHistory": "Attendance History",
     "dailyAttendance": "Daily Attendance",
-    "monthlyAttendance": "Monthly Attendance",
     "attendanceReport": "Attendance Report",
     "workedHours": "Worked Hours",
     "overtimeHours": "Overtime Hours",
@@ -709,7 +707,22 @@
     "tryAgain": "Please try again",
     "unauthorized": "Unauthorized access",
     "notFound": "Not found",
-    "serverError": "Server error"
+    "serverError": "Server error",
+    "invalidOrgSlug": "Invalid organization slug",
+    "orgAlreadyExists": "Organization already exists",
+    "emailAlreadyRegistered": "This email is already registered",
+    "superadminOnly": "Superadmin only",
+    "superadminApproveOnly": "Only superadmin can approve organization requests",
+    "requestNotFound": "Request not found",
+    "requestAlreadyReviewed": "This request has already been reviewed",
+    "slugTaken": "Organization slug is already taken",
+    "superadminRejectOnly": "Only superadmin can reject organization requests",
+    "tooManyLoginAttempts": "Too many login attempts",
+    "modelLoadFailed": "Error loading Face-API models",
+    "faceDetectionFailed": "Error detecting face",
+    "sessionStartFailed": "Failed to start session",
+    "taskUpdateFailed": "Failed to update task",
+    "localStorageSaveFailed": "Failed to save to localStorage"
   },
   "success": {
     "saved": "Saved successfully",
@@ -1760,11 +1773,10 @@
     "deadline": "Deadline",
     "tags": "Tags",
     "moveTo": "Move To",
-    "overdue": "Р В Р’В Р вЂ™Р’В Р В РІР‚в„ўР вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В РІР‚в„ўР вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р’В Р В Р РЏР В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р Р†РІР‚С›РЎС›Р В Р’В Р Р†Р вЂљРІвЂћСћР В РІР‚в„ўР вЂ™Р’В° Overdue",
+    "overdue": "Overdue",
     "noDeadline": "No deadline",
     "noComments": "No comments yet",
     "comments": "Comments",
-    "overdue": "Overdue",
     "deleteConfirm": "Delete this task? This cannot be undone."
   },
   "cookies": {
@@ -2607,5 +2619,29 @@
       "quickActions": "Quick Actions",
       "suspendTemporarily": "Suspend Temporarily"
     }
+  },
+  "pomodoro": {
+    "sessionStarted": "Pomodoro session started!",
+    "pomodoroCompleted": "Pomodoro completed! 🎉 Time for a break!",
+    "notificationTitle": "🎉 Pomodoro Complete!",
+    "breakReadyMsg": "Great work! Time for a 5-minute break.",
+    "breakOver": "Break over! Ready to focus? 💪",
+    "breakTitle": "💪 Break Over!",
+    "refreshedMsg": "Feeling refreshed? Ready to focus again?",
+    "longBreakComplete": "Long break complete! ✨",
+    "longBreakTitle": "✨ Long Break Complete!",
+    "goalsMsg": "Time to get back to crushing your goals!",
+    "focusTime": "Focus Time",
+    "shortBreak": "Short Break",
+    "longBreak": "Long Break",
+    "productivityTip": "💡 25 min focus + 5 min break = peak productivity"
+  },
+  "tasks": {
+    "taskCompleted": "Task completed! 🎉",
+    "taskReopened": "Task reopened"
+  },
+  "security": {
+    "ddosAttempt": "🚨 Potential DDoS attack detected",
+    "sqlInjectionAttempt": "🚨 SQL Injection attempt detected"
   }
 }
