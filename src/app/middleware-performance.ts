@@ -15,7 +15,8 @@ export function middleware(request: NextRequest) {
   // Early hints для критических ресурсов
   if (request.nextUrl.pathname === '/') {
     response.headers.set('Link', [
-      '</fonts/inter-var.woff2>; rel=preload; as=font; type=font/woff2; crossorigin',
+      '<https://fonts.googleapis.com>; rel=preconnect',
+      '<https://fonts.gstatic.com>; rel=preconnect; crossorigin',
       '<https://steady-jaguar-712.convex.cloud>; rel=preconnect',
     ].join(', '));
   }

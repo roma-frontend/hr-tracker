@@ -250,14 +250,13 @@ export default function RootLayout({
         
         {/* Preconnect ТОЛЬКО к критичным ресурсам */}
         <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
-        {/* Preload критических шрифтов - КРИТИЧНО для LCP */}
+        {/* Google Fonts - Inter Variable Font */}
         <link 
-          rel="preload" 
-          href="/fonts/inter-var.woff2" 
-          as="font" 
-          type="font/woff2" 
-          crossOrigin="anonymous"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" 
+          rel="stylesheet"
         />
         
         {/* Prefetch следующей страницы только после загрузки */}

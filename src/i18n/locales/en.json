@@ -2774,5 +2774,10 @@
     "plan": "Plan",
     "status": "Status",
     "periodEnd": "Period End"
-  }
+  },
+  "ui": {
+    "skipToContent": "Skip to main content"
+  },
+  "$29": "$29/month",
+  "Custom": "Custom plan"
 }
