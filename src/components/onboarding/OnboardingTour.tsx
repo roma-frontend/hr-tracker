@@ -65,7 +65,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   // Determine if tour should be shown
   const shouldShowTour = hasSeenTour === false || (hasSeenTour === null && localStorageChecked && hasSeenTourLocal === false);
 
-  // Update target element position
+  // Update target element position with smooth scroll
   const updateTargetPosition = useCallback(() => {
     const step = steps[currentStep];
     if (!step?.target) return;
@@ -75,45 +75,80 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
       const rect = element.getBoundingClientRect();
       setTargetRect(rect);
 
-      // Calculate tooltip position based on placement
-      const placement = step.placement || "bottom";
-      let x = 0;
-      let y = 0;
+      // Check if element is fully visible in viewport
+      const isElementVisible = (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.right <= window.innerWidth
+      );
 
-      const tooltipWidth = 280;
-      const tooltipHeight = 160;
-      const spacing = 20;
+      // Smooth scroll to element if it's not fully visible or if placement is center
+      if (!isElementVisible || step.placement === "center") {
+        const absoluteElementTop = rect.top + window.pageYOffset;
+        const absoluteElementLeft = rect.left + window.pageXOffset;
+        
+        // Calculate scroll position to center the element vertically
+        const scrollToY = absoluteElementTop - (window.innerHeight / 2) + (rect.height / 2);
+        const scrollToX = absoluteElementLeft - (window.innerWidth / 2) + (rect.width / 2);
 
-      switch (placement) {
-        case "top":
-          x = rect.left + rect.width / 2 - tooltipWidth / 2;
-          y = rect.top - tooltipHeight - spacing;
-          break;
-        case "bottom":
-          x = rect.left + rect.width / 2 - tooltipWidth / 2;
-          y = rect.bottom + spacing;
-          break;
-        case "left":
-          x = rect.left - tooltipWidth - spacing;
-          y = rect.top + rect.height / 2 - tooltipHeight / 2;
-          break;
-        case "right":
-          x = rect.right + spacing;
-          y = rect.top + rect.height / 2 - tooltipHeight / 2;
-          break;
-        case "center":
-          x = window.innerWidth / 2 - tooltipWidth / 2;
-          y = window.innerHeight / 2 - tooltipHeight / 2;
-          break;
+        // Smooth scroll to element
+        window.scrollTo({
+          top: Math.max(0, scrollToY),
+          left: Math.max(0, scrollToX),
+          behavior: 'smooth'
+        });
+
+        // Wait for scroll animation to complete before positioning tooltip
+        setTimeout(() => {
+          const updatedRect = element.getBoundingClientRect();
+          setTargetRect(updatedRect);
+          positionTooltip(updatedRect, step.placement || "bottom");
+        }, 600); // Increased timeout for smooth scroll
+      } else {
+        positionTooltip(rect, step.placement || "bottom");
       }
-
-      // Keep tooltip on screen
-      x = Math.max(20, Math.min(x, window.innerWidth - tooltipWidth - 20));
-      y = Math.max(20, Math.min(y, window.innerHeight - tooltipHeight - 20));
-
-      setTooltipPosition({ x, y });
     }
   }, [currentStep, steps]);
+
+  // Helper function to calculate and set tooltip position
+  const positionTooltip = useCallback((rect: DOMRect, placement: string) => {
+    let x = 0;
+    let y = 0;
+
+    const tooltipWidth = 280;
+    const tooltipHeight = 160;
+    const spacing = 20;
+
+    switch (placement) {
+      case "top":
+        x = rect.left + rect.width / 2 - tooltipWidth / 2;
+        y = rect.top - tooltipHeight - spacing;
+        break;
+      case "bottom":
+        x = rect.left + rect.width / 2 - tooltipWidth / 2;
+        y = rect.bottom + spacing;
+        break;
+      case "left":
+        x = rect.left - tooltipWidth - spacing;
+        y = rect.top + rect.height / 2 - tooltipHeight / 2;
+        break;
+      case "right":
+        x = rect.right + spacing;
+        y = rect.top + rect.height / 2 - tooltipHeight / 2;
+        break;
+      case "center":
+        x = window.innerWidth / 2 - tooltipWidth / 2;
+        y = window.innerHeight / 2 - tooltipHeight / 2;
+        break;
+    }
+
+    // Keep tooltip on screen
+    x = Math.max(20, Math.min(x, window.innerWidth - tooltipWidth - 20));
+    y = Math.max(20, Math.min(y, window.innerHeight - tooltipHeight - 20));
+
+    setTooltipPosition({ x, y });
+  }, []);
 
   // Initialize tour
   useEffect(() => {

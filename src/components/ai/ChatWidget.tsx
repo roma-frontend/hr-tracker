@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useUpgradeModal } from '@/components/subscription/PlanGate';
 import { usePlanFeatures } from '@/hooks/usePlanFeatures';
 import { useRouter } from 'next/navigation';
+import { getRoleSuggestions, type UserRole } from '@/lib/aiAssistant';
 
 // SpeechRecognition type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -150,15 +151,17 @@ const LEAVE_TYPE_LABELS: Record<string, string> = {
   doctor: '🏥 Doctor Visit',
 };
 
-// Initial quick suggestions shown before any messages
-const INITIAL_SUGGESTIONS = [
-  '💰 Show my leave balance',
-  '📆 Book a vacation',
-  '🤒 I feel sick today',
-  '👥 Who is on leave this week?',
-  '📅 Best dates for vacation',
-  '📊 Show my leave history',
-];
+// Dynamic suggestions based on user role - will be set in component
+const getInitialSuggestions = (role: UserRole | undefined): string[] => {
+  if (!role) return [
+    '💰 Show my leave balance',
+    '📆 Book a vacation',
+    '🤒 I feel sick today',
+    '👥 Who is on leave this week?',
+  ];
+  
+  return getRoleSuggestions(role as UserRole);
+};
 
 export function ChatWidget() {
   const { t } = useTranslation();
@@ -515,10 +518,28 @@ export function ChatWidget() {
       'настройки': '/settings',
       'settings': '/settings',
 
+      'безопасность': '/security',
+      'security': '/security',
+      'покажи безопасность': '/security',
+      'show security': '/security',
+      'открой безопасность': '/security',
+      'open security': '/security',
+
       'дашборд': '/dashboard',
       'dashboard': '/dashboard',
       'главная': '/dashboard',
       'home': '/dashboard',
+      
+      'организации': '/organizations',
+      'organizations': '/organizations',
+      'все организации': '/organizations',
+      'all organizations': '/organizations',
+      'покажи организации': '/organizations',
+      
+      'профиль': '/profile',
+      'profile': '/profile',
+      'мой профиль': '/profile',
+      'my profile': '/profile',
     };
 
     for (const [keyword, path] of Object.entries(navigationMap)) {
@@ -591,11 +612,23 @@ export function ChatWidget() {
       const { cleanContent, actions } = parseActions(fullContent);
       const suggestions = getFollowUpSuggestions(cleanContent, user?.role || 'employee', t);
 
+      // Check for navigation tags in response
+      const navMatch = fullContent.match(/<NAVIGATE>(.*?)<\/NAVIGATE>/);
+      if (navMatch && navMatch[1]) {
+        const route = navMatch[1];
+        console.log('🎯 AI requested navigation to:', route);
+        // Navigate after a short delay to show the message
+        setTimeout(() => {
+          router.push(route);
+          setIsOpen(false);
+        }, 800);
+      }
+
       setMessages(prev => prev.map(m =>
         m.id === assistantId
           ? {
             ...m,
-            content: cleanContent,
+            content: cleanContent.replace(/<NAVIGATE>.*?<\/NAVIGATE>/g, '').trim(),
             actions,
             bookingStates: Object.fromEntries(actions.map((_, i) => [i, { status: 'pending' as const }])),
             suggestions,
@@ -703,7 +736,7 @@ export function ChatWidget() {
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
                   <p className="text-xs text-[var(--text-muted)] text-center">👋 {t("chatWidget.greeting", { name: user?.name?.split(" ")[0] || "there" })}</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {INITIAL_SUGGESTIONS.map((s) => (
+                    {getInitialSuggestions(user?.role as UserRole).map((s) => (
                       <button
                         key={s}
                         onClick={() => handleSuggestion(s)}

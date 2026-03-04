@@ -20,6 +20,9 @@ import { loginTourSteps } from "@/components/onboarding/loginTourSteps";
 import { useSession } from "next-auth/react";
 import { useKeystrokeDynamics } from "@/hooks/useKeystrokeDynamics";
 import { getDeviceFingerprint } from "@/lib/deviceFingerprint";
+import { SmartEmailInput } from "@/components/auth/SmartEmailInput";
+import { SmartPasswordInput } from "@/components/auth/SmartPasswordInput";
+import { SmartErrorMessage, parseAuthError } from "@/components/auth/SmartErrorMessage";
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -290,33 +293,16 @@ export default function LoginPage() {
           {/* Form - Only show for email mode */}
           {loginMode === "email" && (
           <form id="email-login-form" onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.emailAddress')}</label>
-              <div className="relative">
-                <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                  style={{ color: "var(--text-muted)" }}
-                />
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                  placeholder="you@company.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
-                  style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
-                />
-              </div>
-            </div>
+            {/* Email - Smart Input */}
+            <SmartEmailInput
+              value={formData.email}
+              onChange={(val) => setFormData((p) => ({ ...p, email: val }))}
+              label={t('auth.emailAddress')}
+              placeholder="you@company.com"
+              autoFocus={true}
+            />
 
-            {/* Password */}
+            {/* Password - Smart Input */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
@@ -328,52 +314,20 @@ export default function LoginPage() {
                   {t('auth.forgotPassword')}
                 </Link>
               </div>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                  style={{ color: "var(--text-muted)" }}
-                />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                  onKeyDown={onKeyDown}
-                  onKeyUp={onKeyUp}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
-                  style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+              <SmartPasswordInput
+                value={formData.password}
+                onChange={(val) => setFormData((p) => ({ ...p, password: val }))}
+                label=""
+                placeholder="••••••••"
+                showStrength={false}
+                showGenerator={false}
+              />
             </div>
 
-            {/* Error */}
+            {/* Smart Error */}
             <AnimatePresence>
               {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-2 p-3 rounded-xl text-sm"
-                  style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}
-                >
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  {error}
-                </motion.div>
+                <SmartErrorMessage error={parseAuthError(error)} />
               )}
             </AnimatePresence>
 

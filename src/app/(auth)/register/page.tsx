@@ -19,6 +19,11 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { I18nProvider } from "@/components/I18nProvider";
+import { SmartEmailInput } from "@/components/auth/SmartEmailInput";
+import { SmartPasswordInput } from "@/components/auth/SmartPasswordInput";
+import { SmartErrorMessage, parseAuthError } from "@/components/auth/SmartErrorMessage";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
+import { registerTourSteps } from "@/components/onboarding/registerTourSteps";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface OrgResult {
@@ -192,7 +197,7 @@ function OrgSearch({
 }
 
 // ── Main page ─────────────────────────────────────────────────────────────────
-export default function RegisterPage() {
+function RegisterPageContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const { login } = useAuthStore();
@@ -401,6 +406,7 @@ export default function RegisterPage() {
             {/* ── STEP 2: Personal details ── */}
             {step === "details" && (
               <motion.form
+                id="personal-details-form"
                 key="details"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -435,24 +441,16 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                {/* Email */}
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Email address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                    <input
-                      type="email" required
-                      value={formData.email}
-                      onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                      placeholder="you@company.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
-                      style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                      onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
-                    />
-                  </div>
+                {/* Email - Smart Input */}
+                <div id="email-field">
+                  <SmartEmailInput
+                    value={formData.email}
+                    onChange={(val) => setFormData((p) => ({ ...p, email: val }))}
+                    label="Email address"
+                    placeholder="you@company.com"
+                  />
                   {isSuperadmin && (
-                    <p className="text-xs text-blue-500 flex items-center gap-1 px-1">
+                    <p className="text-xs text-blue-500 flex items-center gap-1 px-1 mt-2">
                       <CheckCircle2 className="w-3 h-3" /> Superadmin account
                     </p>
                   )}
@@ -476,54 +474,22 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                {/* Password */}
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                    <input
-                      type={showPassword ? "text" : "password"} required
-                      value={formData.password}
-                      onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                      placeholder={t('placeholders.minCharacters')}
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
-                      style={{ background: "var(--input)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                      onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
-                    />
-                    <button type="button" onClick={() => setShowPassword((p) => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {formData.password && (
-                    <div className="space-y-1">
-                      <div className="flex gap-1">
-                        {[0, 1, 2, 3].map((i) => (
-                          <div key={i} className="flex-1 h-1 rounded-full transition-all"
-                            style={{ background: i < strength ? STRENGTH_COLORS[strength - 1] : "var(--border)" }} />
-                        ))}
-                      </div>
-                      <p className="text-xs" style={{ color: strength > 0 ? STRENGTH_COLORS[strength - 1] : "var(--text-muted)" }}>
-                        {strength > 0 ? STRENGTH_LABELS[strength - 1] : ""}
-                      </p>
-                    </div>
-                  )}
+                {/* Password - Smart Input */}
+                <div id="password-field">
+                  <SmartPasswordInput
+                    value={formData.password}
+                    onChange={(val) => setFormData((p) => ({ ...p, password: val }))}
+                    label="Password"
+                    placeholder={t('placeholders.minCharacters')}
+                    showStrength={true}
+                    showGenerator={true}
+                  />
                 </div>
 
-                {/* Error */}
+                {/* Smart Error */}
                 <AnimatePresence>
                   {error && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="flex items-center gap-2 p-3 rounded-xl text-sm"
-                      style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}
-                    >
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                      {error}
-                    </motion.div>
+                    <SmartErrorMessage error={parseAuthError(error)} />
                   )}
                 </AnimatePresence>
 
@@ -576,6 +542,21 @@ export default function RegisterPage() {
         </div>
       </motion.div>
       </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <I18nProvider>
+      <RegisterPageContent />
+      
+      {/* Onboarding Tour */}
+      <OnboardingTour
+        steps={registerTourSteps}
+        tourId="register-tour"
+        onComplete={() => console.log("Registration tour completed!")}
+        onSkip={() => console.log("Registration tour skipped")}
+      />
     </I18nProvider>
   );
 }
