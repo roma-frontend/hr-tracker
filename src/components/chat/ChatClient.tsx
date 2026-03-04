@@ -72,6 +72,8 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
   useEffect(() => {
     if (!uid) return;
 
+    console.log('[ChatClient] Checking incoming calls for', uid, 'call data:', incomingCallData);
+
     // If there's an active ringing call and we're not in it, show incoming call UI
     if (incomingCallData && incomingCallData.status === "ringing") {
       // Get initiator name from conversation members if available
@@ -89,6 +91,12 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
             "Someone";
         }
       }
+
+      console.log('[ChatClient] Setting incoming call for', uid, {
+        callId: incomingCallData._id,
+        initiator: incomingCallData.initiatorId,
+        initiatorName,
+      });
 
       setIncomingCall({
         callId: incomingCallData._id,
@@ -133,6 +141,13 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
     participantIds: Id<"users">[],
     remoteUserName?: string,
   ) => {
+    console.log('[ChatClient] Starting call', {
+      convId,
+      initiator: uid,
+      participants: participantIds,
+      org: effectiveOrgId,
+    });
+
     const callId = await initiateCallMutation({
       conversationId: convId,
       organizationId: effectiveOrgId,
