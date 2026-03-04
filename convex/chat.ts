@@ -935,11 +935,42 @@ export const updateIceCandidates = mutation({
 export const getActiveCall = query({
   args: { conversationId: v.id("chatConversations") },
   handler: async (ctx, args) => {
+    // Get the most recent call that is still ringing or active
     return ctx.db
       .query("chatCalls")
       .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
       .order("desc")
+      .filter((q) => q.or(q.eq(q.field("status"), "ringing"), q.eq(q.field("status"), "active")))
       .first();
+  },
+});
+
+/** Get all incoming calls for a user (ringing calls where user is not initiator) */
+export const getIncomingCalls = query({
+  args: {
+    userId: v.id("users"),
+    organizationId: v.id("organizations"),
+  },
+  handler: async (ctx, args) => {
+    // Find all active/ringing calls in this organization where user is a participant but not initiator
+    const calls = await ctx.db
+      .query("chatCalls")
+      .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+      .filter((q) =>
+        q.and(
+          q.or(q.eq(q.field("status"), "ringing"), q.eq(q.field("status"), "active")),
+          q.neq(q.field("initiatorId"), args.userId)
+        )
+      )
+      .collect();
+
+    // Filter to only calls where user is a participant
+    const incomingCalls = calls.filter((call) =>
+      call.participants?.some((p: any) => p.userId === args.userId)
+    );
+
+    // Get the most recent one (or return null if none)
+    return incomingCalls.length > 0 ? incomingCalls[0] : null;
   },
 });
 

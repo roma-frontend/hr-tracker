@@ -712,6 +712,181 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),
 
+  // ── CHAT CONVERSATIONS ───────────────────────────────────────────────────
+  // Direct messages (DM) and group channels within an organization
+  chatConversations: defineTable({
+    organizationId: v.id("organizations"),
+    type: v.union(
+      v.literal("direct"),   // 1-on-1 between two users
+      v.literal("group"),    // group channel/room
+    ),
+    // Group-only fields
+    name: v.optional(v.string()),          // "Design Team", "General"
+    description: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
+    createdBy: v.id("users"),
+    // Last message preview (for conversation list)
+    lastMessageAt: v.optional(v.number()),
+    lastMessageText: v.optional(v.string()),
+    lastMessageSenderId: v.optional(v.id("users")),
+    // For direct chats: sorted pair of userIds for uniqueness
+    dmKey: v.optional(v.string()),  // e.g. "userId1_userId2" (sorted)
+    isPinned: v.optional(v.boolean()),
+    isArchived: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_org_last", ["organizationId", "lastMessageAt"])
+    .index("by_dm_key", ["dmKey"])
+    .index("by_creator", ["createdBy"]),
+
+  // ── CHAT MEMBERS ─────────────────────────────────────────────────────────
+  chatMembers: defineTable({
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    organizationId: v.id("organizations"),
+    role: v.union(
+      v.literal("owner"),    // group creator
+      v.literal("admin"),    // can manage members
+      v.literal("member"),   // regular member
+    ),
+    unreadCount: v.number(),
+    lastReadAt: v.optional(v.number()),
+    lastReadMessageId: v.optional(v.id("chatMessages")),
+    isMuted: v.boolean(),
+    joinedAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_user", ["userId"])
+    .index("by_org", ["organizationId"])
+    .index("by_conversation_user", ["conversationId", "userId"]),
+
+  // ── CHAT MESSAGES ─────────────────────────────────────────────────────────
+  chatMessages: defineTable({
+    conversationId: v.id("chatConversations"),
+    organizationId: v.id("organizations"),
+    senderId: v.id("users"),
+    type: v.union(
+      v.literal("text"),
+      v.literal("image"),
+      v.literal("file"),
+      v.literal("audio"),
+      v.literal("system"),  // "John joined the chat"
+      v.literal("call"),    // call event message
+    ),
+    content: v.string(),          // text or system message
+    // Attachments
+    attachments: v.optional(v.array(v.object({
+      url: v.string(),
+      name: v.string(),
+      type: v.string(),   // mime type
+      size: v.number(),
+    }))),
+    // Threading / Reply
+    replyToId: v.optional(v.id("chatMessages")),
+    replyToContent: v.optional(v.string()),  // cached preview
+    replyToSenderName: v.optional(v.string()),
+    // Reactions: { "👍": ["userId1", "userId2"], "❤️": ["userId3"] }
+    reactions: v.optional(v.any()),
+    // Mentions
+    mentionedUserIds: v.optional(v.array(v.id("users"))),
+    // Read receipts: array of { userId, readAt }
+    readBy: v.optional(v.array(v.object({
+      userId: v.id("users"),
+      readAt: v.number(),
+    }))),
+    // Poll
+    poll: v.optional(v.object({
+      question: v.string(),
+      options: v.array(v.object({
+        id: v.string(),
+        text: v.string(),
+        votes: v.array(v.id("users")),
+      })),
+      closedAt: v.optional(v.number()),
+    })),
+    // Thread
+    threadCount: v.optional(v.number()),
+    threadLastAt: v.optional(v.number()),
+    // Scheduled send
+    scheduledFor: v.optional(v.number()),
+    isSent: v.optional(v.boolean()),
+    // Link preview
+    linkPreview: v.optional(v.object({
+      url: v.string(),
+      title: v.optional(v.string()),
+      description: v.optional(v.string()),
+      image: v.optional(v.string()),
+      siteName: v.optional(v.string()),
+    })),
+    // Thread: parentMessageId for threaded replies
+    parentMessageId: v.optional(v.id("chatMessages")),
+    // Edit/Delete
+    isEdited: v.optional(v.boolean()),
+    editedAt: v.optional(v.number()),
+    isDeleted: v.optional(v.boolean()),
+    deletedAt: v.optional(v.number()),
+    // Delete for self only (array of userIds who deleted this message for themselves)
+    deletedForUsers: v.optional(v.array(v.id("users"))),
+    // Pinned
+    isPinned: v.optional(v.boolean()),
+    pinnedBy: v.optional(v.id("users")),
+    pinnedAt: v.optional(v.number()),
+    // Call info (for type === "call")
+    callDuration: v.optional(v.number()),  // seconds
+    callType: v.optional(v.union(v.literal("audio"), v.literal("video"))),
+    callStatus: v.optional(v.union(v.literal("missed"), v.literal("answered"), v.literal("declined"))),
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_conversation_created", ["conversationId", "createdAt"])
+    .index("by_org", ["organizationId"])
+    .index("by_sender", ["senderId"])
+    .index("by_pinned", ["conversationId", "isPinned"]),
+
+  // ── TYPING INDICATORS ────────────────────────────────────────────────────
+  chatTyping: defineTable({
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    organizationId: v.id("organizations"),
+    updatedAt: v.number(),   // TTL: if > 5s old, treat as stopped
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_conversation_user", ["conversationId", "userId"]),
+
+  // ── CALL SESSIONS (WebRTC signaling) ─────────────────────────────────────
+  chatCalls: defineTable({
+    conversationId: v.id("chatConversations"),
+    organizationId: v.id("organizations"),
+    initiatorId: v.id("users"),
+    type: v.union(v.literal("audio"), v.literal("video")),
+    status: v.union(
+      v.literal("ringing"),    // waiting for answer
+      v.literal("active"),     // call in progress
+      v.literal("ended"),      // call ended normally
+      v.literal("missed"),     // nobody answered
+      v.literal("declined"),   // explicitly declined
+    ),
+    participants: v.array(v.object({
+      userId: v.id("users"),
+      joinedAt: v.optional(v.number()),
+      leftAt: v.optional(v.number()),
+      // WebRTC ICE candidates and SDP offers stored here
+      offer: v.optional(v.string()),   // JSON stringified RTCSessionDescription
+      answer: v.optional(v.string()),
+      iceCandidates: v.optional(v.array(v.string())),
+    })),
+    startedAt: v.optional(v.number()),
+    endedAt: v.optional(v.number()),
+    duration: v.optional(v.number()),  // seconds
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_organization", ["organizationId"])
+    .index("by_initiator", ["initiatorId"])
+    .index("by_status", ["status"]),
+
   // ── AI SITE EDITOR USAGE LIMITS ──────────────────────────────────────────
   // Track monthly usage limits for different plans
   aiSiteEditorUsage: defineTable({
