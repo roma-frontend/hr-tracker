@@ -791,23 +791,33 @@ export const initiateCall = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
+    const participantList = [
+      {
+        userId: args.initiatorId,
+        joinedAt: now,
+        offer: args.offer,
+      },
+      ...args.participantIds
+        .filter((id) => id !== args.initiatorId)
+        .map((id) => ({ userId: id })),
+    ];
+
     const callId = await ctx.db.insert("chatCalls", {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       initiatorId: args.initiatorId,
       type: args.type,
       status: "ringing",
-      participants: [
-        {
-          userId: args.initiatorId,
-          joinedAt: now,
-          offer: args.offer,
-        },
-        ...args.participantIds
-          .filter((id) => id !== args.initiatorId)
-          .map((id) => ({ userId: id })),
-      ],
+      participants: participantList,
       createdAt: now,
+    });
+
+    console.log('[initiateCall]', {
+      callId,
+      initiator: args.initiatorId,
+      participants: participantList.map(p => p.userId),
+      type: args.type,
+      conv: args.conversationId,
     });
 
     // Post system message about call
@@ -962,6 +972,7 @@ export const getIncomingCalls = query({
           q.neq(q.field("initiatorId"), args.userId)
         )
       )
+      .order("desc")
       .collect();
 
     // Filter to only calls where user is a participant
@@ -970,7 +981,12 @@ export const getIncomingCalls = query({
     );
 
     // Get the most recent one (or return null if none)
-    return incomingCalls.length > 0 ? incomingCalls[0] : null;
+    if (incomingCalls.length > 0) {
+      console.log('[getIncomingCalls]', args.userId, 'has incoming call:', incomingCalls[0]._id, 'from', incomingCalls[0].initiatorId, 'with status:', incomingCalls[0].status);
+      return incomingCalls[0];
+    }
+    
+    return null;
   },
 });
 

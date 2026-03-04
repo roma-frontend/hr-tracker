@@ -70,21 +70,25 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
 
   // ── Detect incoming calls (using real-time query) ─────────────────────────
   useEffect(() => {
-    if (!conversations || !uid) return;
+    if (!uid) return;
 
     // If there's an active ringing call and we're not in it, show incoming call UI
     if (incomingCallData && incomingCallData.status === "ringing") {
-      const conv = conversations.find((c) => c._id === incomingCallData.conversationId);
-      if (!conv) return;
-
-      // Find initiator name
-      const initiatorMember = (conv as any).members?.find(
-        (m: any) => m.userId === incomingCallData.initiatorId
-      );
-      const initiatorName =
-        initiatorMember?.user?.name ??
-        (conv as any).otherUser?.name ??
-        "Someone";
+      // Get initiator name from conversation members if available
+      let initiatorName = "Someone";
+      
+      if (conversations) {
+        const conv = conversations.find((c) => c._id === incomingCallData.conversationId);
+        if (conv) {
+          const initiatorMember = (conv as any).members?.find(
+            (m: any) => m.userId === incomingCallData.initiatorId
+          );
+          initiatorName =
+            initiatorMember?.user?.name ??
+            (conv as any).otherUser?.name ??
+            "Someone";
+        }
+      }
 
       setIncomingCall({
         callId: incomingCallData._id,
