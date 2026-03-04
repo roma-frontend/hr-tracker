@@ -310,23 +310,22 @@ export default function LoginPage() {
 
             {/* Password - Smart Input */}
             <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs hover:underline"
-                  style={{ color: "#2563eb" }}
-                >
-                  {t('auth.forgotPassword')}
-                </Link>
-              </div>
               <SmartPasswordInput
                 value={formData.password}
                 onChange={(val) => setFormData((p) => ({ ...p, password: val }))}
-                label=""
+                label={t('auth.password')}
                 placeholder="••••••••"
                 showStrength={false}
                 showGenerator={false}
+                forgotPasswordLink={
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs hover:underline"
+                    style={{ color: "#2563eb" }}
+                  >
+                    {t('auth.forgotPassword')}
+                  </Link>
+                }
               />
             </div>
 

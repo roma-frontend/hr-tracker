@@ -18,6 +18,7 @@ interface SmartPasswordInputProps {
   showStrength?: boolean;
   showGenerator?: boolean;
   autoFocus?: boolean;
+  forgotPasswordLink?: React.ReactNode;
 }
 
 export function SmartPasswordInput({
@@ -29,6 +30,7 @@ export function SmartPasswordInput({
   showStrength = true,
   showGenerator = false,
   autoFocus = false,
+  forgotPasswordLink,
 }: SmartPasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -60,7 +62,13 @@ export function SmartPasswordInput({
           {required && <span className="text-red-500">*</span>}
         </Label>
 
-        {showGenerator && (
+        {forgotPasswordLink && (
+          <div className="ml-2">
+            {forgotPasswordLink}
+          </div>
+        )}
+
+        {showGenerator && !forgotPasswordLink && (
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
