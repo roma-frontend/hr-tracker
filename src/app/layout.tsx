@@ -22,7 +22,7 @@ const MonitoringProvider = dynamic(
 
 const PerformanceMonitor = dynamic(
   () => import('@/components/PerformanceMonitor'),
-  { ssr: false, loading: () => null }
+  { ssr: false }
 );
 
 // Corporate & Professional - IBM PLEX SANS
