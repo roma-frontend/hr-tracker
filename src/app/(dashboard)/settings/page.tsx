@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "@/lib/lazy-imports";
 import {
   Save,
   Bell,

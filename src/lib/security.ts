@@ -390,8 +390,11 @@ export function validateAPIKeyFormat(apiKey: string): boolean {
  * Маскировка чувствительных данных для логов
  */
 export function maskSensitiveData(data: string, showLast: number = 4): string {
-  if (!data || data.length <= showLast) return '***';
-  return '*'.repeat(data.length - showLast) + data.slice(-showLast);
+  if (!data) return '***';
+  if (data.length <= showLast) return data;
+  const maskLength = data.length - showLast;
+  if (maskLength <= 0) return data;
+  return '*'.repeat(maskLength) + data.slice(-showLast);
 }
 
 /**

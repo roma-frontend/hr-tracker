@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import React, { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "@/lib/lazy-imports";
 import { Eye, EyeOff, Mail, Lock, Fingerprint, AlertCircle, Building2, ScanFace } from "lucide-react";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { loginAction } from "@/actions/auth";

@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useTransition, useEffect, Suspense } from "react";
 import { useTranslation } from 'react-i18next';
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "@/lib/lazy-imports";
 import { Eye, EyeOff, Lock, AlertCircle, Building2, CheckCircle2 } from "lucide-react";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 
@@ -216,7 +216,7 @@ function ResetPasswordForm() {
 
         <div className="text-center mt-4">
           <Link href="/login" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
-            ← {t('ui.backToLogin')}
+            {t('ui.backToLogin')}
           </Link>
         </div>
       </motion.div>

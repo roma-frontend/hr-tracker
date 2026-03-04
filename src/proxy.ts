@@ -7,7 +7,7 @@ import { getToken } from 'next-auth/jwt';
 
 const SECURITY_CONFIG = {
   RATE_LIMIT_WINDOW: 60 * 1000, // 1 minute
-  RATE_LIMIT_MAX_REQUESTS: 100,
+  RATE_LIMIT_MAX_REQUESTS: 500, // Увеличено для dashboard
   MAX_LOGIN_ATTEMPTS: 5,
   LOGIN_BLOCK_DURATION: 15 * 60 * 1000, // 15 minutes
   DDOS_THRESHOLD: 200,

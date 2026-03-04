@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from 'react-i18next';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "@/lib/lazy-imports";
 import { Building2, Check, Zap, Crown, ArrowRight } from "lucide-react";
 
 type Plan = "starter" | "professional" | "enterprise";

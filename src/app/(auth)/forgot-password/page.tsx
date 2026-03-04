@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "@/lib/lazy-imports";
 import { Mail, AlertCircle, Building2, CheckCircle2, ArrowLeft } from "lucide-react";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { useTranslation } from "react-i18next";

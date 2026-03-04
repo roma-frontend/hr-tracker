@@ -1,5 +1,148 @@
 /** @type {import('next').NextConfig} */
+
+// Bundle analyzer (опционально для разработки)
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 const nextConfig = {
+  // ===== PERFORMANCE OPTIMIZATIONS =====
+  
+  // Компиляция только необходимых страниц в dev режиме
+  experimental: {
+    // Оптимизированный tree shaking для server components
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+      'framer-motion',
+      'recharts',
+      'date-fns',
+      'react',
+      'react-dom',
+    ],
+    // Оптимизация CSS - критично!
+    optimizeCss: true,
+  },
+  
+  // Компрессия
+  compress: true,
+  
+  // Оптимизация production build
+  productionBrowserSourceMaps: false, // Отключить source maps в production
+  
+  // Transpile только необходимое
+  transpilePackages: ['@radix-ui/react-icons'],
+  
+  // Оптимизация webpack - ЭКСТРЕМАЛЬНАЯ
+  webpack: (config, { isServer, dev }) => {
+    // Production оптимизации
+    if (!dev) {
+      // КРИТИЧНО: Минимизация JS
+      config.optimization = {
+        ...config.optimization,
+        
+        minimize: true,
+        
+        // Улучшенный code splitting
+        splitChunks: {
+          chunks: 'all',
+          maxAsyncRequests: 30,
+          maxInitialRequests: 25,
+          minSize: 20000,
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            
+            // React core - отдельно
+            react: {
+              name: 'react',
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              priority: 50,
+              chunks: 'all',
+              enforce: true,
+            },
+            
+            // UI библиотеки - ВЫСШИЙ ПРИОРИТЕТ
+            ui: {
+              name: 'ui',
+              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|class-variance-authority|tailwind-merge|clsx)[\\/]/,
+              priority: 45,
+              chunks: 'all',
+              enforce: true,
+            },
+            
+            // Framer Motion - ASYNC
+            framerMotion: {
+              name: 'framer-motion',
+              test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
+              priority: 40,
+              chunks: 'async',
+            },
+            
+            // Charts - ASYNC
+            charts: {
+              name: 'recharts',
+              test: /[\\/]node_modules[\\/](recharts|d3-)[\\/]/,
+              priority: 35,
+              chunks: 'async',
+            },
+            
+            // AI SDK - ASYNC
+            aiSdk: {
+              name: 'ai-sdk',
+              test: /[\\/]node_modules[\\/](@ai-sdk|ai|openai)[\\/]/,
+              priority: 35,
+              chunks: 'async',
+            },
+            
+            // Convex - критичный
+            convex: {
+              name: 'convex',
+              test: /[\\/]node_modules[\\/]convex[\\/]/,
+              priority: 30,
+              chunks: 'all',
+            },
+            
+            // Vendor fallback
+            vendors: {
+              name: 'vendors',
+              test: /[\\/]node_modules[\\/]/,
+              priority: 10,
+              chunks: 'all',
+              reuseExistingChunk: true,
+            },
+          },
+        },
+        
+        // Минимизация runtime
+        runtimeChunk: {
+          name: 'runtime',
+        },
+        
+        // НОВОЕ: Module concatenation для меньшего размера
+        concatenateModules: true,
+        
+        // НОВОЕ: Удаление мёртвого кода
+        usedExports: true,
+        sideEffects: true,
+      };
+    }
+    
+    // КРИТИЧНО: Исключаем ненужные модули
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      // Уменьшаем размер moment.js если используется
+      moment$: 'moment/moment.js',
+    };
+    
+    return config;
+  },
   reactStrictMode: true,
   
   // Ignore TypeScript errors during build (for deployment)
@@ -221,6 +364,43 @@ const nextConfig = {
       },
     ];
   },
+  // ===== HEADERS FOR CACHING & SECURITY =====
+  async headers() {
+    return [
+      // Безопасность для всех страниц
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+        ],
+      },
+      // Кэширование статики (1 год)
+      {
+        source: '/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      // Кэширование шрифтов
+      {
+        source: '/:all*.woff2',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      // Кэширование изображений
+      {
+        source: '/:all*.(png|jpg|jpeg|gif|webp|avif|ico|svg)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+    ];
+  },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

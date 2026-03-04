@@ -97,7 +97,7 @@ const apiRateLimits = new Map<string, { count: number; resetTime: number }>();
 
 export function checkAPIRateLimit(
   identifier: string,
-  maxRequests: number = 100,
+  maxRequests: number = 500, // Увеличено с 100 до 500 для dashboard
   windowMs: number = 60000
 ): { allowed: boolean; remaining: number } {
   const now = Date.now();

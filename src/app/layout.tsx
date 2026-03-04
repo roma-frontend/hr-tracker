@@ -12,6 +12,7 @@ import { AuthSyncProvider } from '@/components/providers/AuthSyncProvider'
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/components/I18nProvider";
+import PerformanceMonitor from "@/components/PerformanceMonitor";
 
 // Corporate & Professional - IBM PLEX SANS
 const ibmPlexSans = IBM_Plex_Sans({
@@ -240,12 +241,25 @@ export default function RootLayout({
         {/* Cloudinary for avatars/images */}
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        {/* NOTE: fonts.googleapis.com NOT needed — Inter is self-hosted via next/font */}
-        {/* Convex real-time backend */}
-        <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
+        {/* ═══ CRITICAL PERFORMANCE OPTIMIZATIONS ═══ */}
+        
+        {/* DNS Prefetch для внешних ресурсов */}
         <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
-
-        {/* ── Prefetch key navigation pages ── */}
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        
+        {/* Preconnect ТОЛЬКО к критичным ресурсам */}
+        <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
+        
+        {/* Preload критических шрифтов - КРИТИЧНО для LCP */}
+        <link 
+          rel="preload" 
+          href="/fonts/inter-var.woff2" 
+          as="font" 
+          type="font/woff2" 
+          crossOrigin="anonymous"
+        />
+        
+        {/* Prefetch следующей страницы только после загрузки */}
         <link rel="prefetch" href="/login" as="document" />
 
         {/* JSON-LD Structured Data — async so it never blocks rendering */}
@@ -286,6 +300,8 @@ export default function RootLayout({
             </ConvexClientProvider>
           </I18nProvider>
         </SessionProvider>
+        {/* Performance monitoring (только в dev) */}
+        {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
       </body>
     </html>
   );
