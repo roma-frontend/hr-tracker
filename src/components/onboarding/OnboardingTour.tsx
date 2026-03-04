@@ -73,8 +73,32 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     const tooltipWidth = 280;
     const tooltipHeight = 160;
     const spacing = 20;
+    const viewportPadding = 20;
 
-    switch (placement) {
+    // Determine best placement based on available space
+    let finalPlacement = placement;
+    
+    // If "top" placement would go off-screen and there's space below, use "bottom"
+    if (placement === "top") {
+      const topSpace = rect.top - tooltipHeight - spacing;
+      const bottomSpace = window.innerHeight - rect.bottom - spacing;
+      
+      if (topSpace < viewportPadding && bottomSpace > tooltipHeight + viewportPadding) {
+        finalPlacement = "bottom";
+      }
+    }
+    
+    // If "bottom" placement would go off-screen and there's space above, use "top"
+    if (placement === "bottom") {
+      const bottomSpace = window.innerHeight - rect.bottom - spacing;
+      const topSpace = rect.top - tooltipHeight - spacing;
+      
+      if (bottomSpace < viewportPadding && topSpace > tooltipHeight + viewportPadding) {
+        finalPlacement = "top";
+      }
+    }
+
+    switch (finalPlacement) {
       case "top":
         x = rect.left + rect.width / 2 - tooltipWidth / 2;
         y = rect.top - tooltipHeight - spacing;
@@ -98,8 +122,8 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     }
 
     // Keep tooltip on screen
-    x = Math.max(20, Math.min(x, window.innerWidth - tooltipWidth - 20));
-    y = Math.max(20, Math.min(y, window.innerHeight - tooltipHeight - 20));
+    x = Math.max(viewportPadding, Math.min(x, window.innerWidth - tooltipWidth - viewportPadding));
+    y = Math.max(viewportPadding, Math.min(y, window.innerHeight - tooltipHeight - viewportPadding));
 
     setTooltipPosition({ x, y });
   }, []);
@@ -113,9 +137,14 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     if (element) {
       const rect = element.getBoundingClientRect();
       
-      // Ensure element is visible by scrolling it into view
-      const isOffScreen = rect.top < 0 || rect.bottom > window.innerHeight || 
-                          rect.left < 0 || rect.right > window.innerWidth;
+      // Define safe viewport margins (leave space for tooltip above/below)
+      const tooltipSpace = 200; // Space needed for tooltip
+      const safeTop = tooltipSpace;
+      const safeBottom = window.innerHeight - tooltipSpace;
+      
+      // Check if element is off-screen or too close to edges
+      const isOffScreen = rect.top < safeTop || rect.bottom > safeBottom || 
+                          rect.left < 20 || rect.right > window.innerWidth - 20;
       
       if (isOffScreen) {
         // Scroll element into view with smooth behavior
