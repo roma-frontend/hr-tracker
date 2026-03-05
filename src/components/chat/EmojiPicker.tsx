@@ -20,7 +20,6 @@ interface Props {
 
 export default function EmojiPicker({ onSelect, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const [positionAbove, setPositionAbove] = React.useState(true);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -32,19 +31,10 @@ export default function EmojiPicker({ onSelect, onClose }: Props) {
     return () => document.removeEventListener("mousedown", handler);
   }, [onClose]);
 
-  useEffect(() => {
-    // Check if there's space below for the picker
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setPositionAbove(spaceBelow < 280); // 280px is approximate picker height
-    }
-  }, []);
-
   return (
     <div
       ref={ref}
-      className={`absolute right-0 w-72 rounded-2xl shadow-2xl border overflow-hidden z-50 transition-all ${positionAbove ? "bottom-full mb-2" : "top-full mt-2"}`}
+      className="absolute bottom-full right-0 mb-2 w-72 rounded-2xl shadow-2xl border overflow-hidden z-50"
       style={{ background: "var(--background)", borderColor: "var(--border)" }}
     >
       <div className="max-h-64 overflow-y-auto p-2">
