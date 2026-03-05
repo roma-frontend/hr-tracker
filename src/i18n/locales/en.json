@@ -2420,6 +2420,7 @@
     "tags": "Tags",
     "moveTo": "Move To",
     "noDescription": "No description",
+    "noDeadline": "No deadline",
     "deleteConfirm": "Delete this task? This cannot be undone.",
     "overdue": "Overdue",
     "kanban": "Kanban",

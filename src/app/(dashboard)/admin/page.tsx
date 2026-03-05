@@ -4,21 +4,24 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useTranslation } from "react-i18next";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Users, Shield, Mail, Building2, CheckCircle } from "lucide-react";
+import { AlertCircle, Users, Shield, Building2, CheckCircle } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
+import type { Doc } from "@/convex/_generated/dataModel";
 
 export default function AdminPage() {
-  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [assignEmail, setAssignEmail] = useState("");
   const [selectedOrgId, setSelectedOrgId] = useState("");
   const [isAssigning, setIsAssigning] = useState(false);
+
+  // Call hooks unconditionally before any early returns
+  const organizations = useQuery(api.organizations.listAll);
+  const assignUserAsOrgAdmin = useMutation(api.admin.assignUserAsOrgAdmin);
 
   // Check if user is superadmin
   if (!user || user.role !== "superadmin" || user.email?.toLowerCase() !== "romangulanyan@gmail.com") {
@@ -31,9 +34,6 @@ export default function AdminPage() {
       </div>
     );
   }
-
-  const organizations = useQuery(api.admin.listAll);
-  const assignUserAsOrgAdmin = useMutation(api.admin.assignUserAsOrgAdmin);
 
   const handleAssign = async () => {
     if (!assignEmail.trim() || !selectedOrgId) {
@@ -53,8 +53,9 @@ export default function AdminPage() {
       toast.success(`✅ User assigned as admin successfully!`);
       setAssignEmail("");
       setSelectedOrgId("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to assign user");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to assign user";
+      toast.error(errorMessage);
     } finally {
       setIsAssigning(false);
     }
@@ -107,9 +108,9 @@ export default function AdminPage() {
               className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[var(--primary)]"
             >
               <option value="">Select organization...</option>
-              {organizations?.map((org: any) => (
+              {organizations?.map((org: Doc<"organizations">) => (
                 <option key={org._id} value={org._id}>
-                  {org.name} ({org.employeeCount || 0} employees)
+                  {org.name}
                 </option>
               ))}
             </select>
@@ -153,12 +154,12 @@ export default function AdminPage() {
             <p className="text-[var(--text-muted)] text-center py-8">No organizations yet</p>
           ) : (
             <div className="space-y-3">
-              {organizations.map((org: any) => (
+              {organizations.map((org: Doc<"organizations">) => (
                 <div key={org._id} className="flex items-center justify-between p-4 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)]">
                   <div className="flex-1">
                     <p className="font-semibold text-[var(--text-primary)]">{org.name}</p>
                     <p className="text-sm text-[var(--text-muted)]">
-                      {org.employeeCount || 0} employees • Plan: <Badge variant="outline" className="ml-1">{org.plan}</Badge>
+                      Plan: <Badge variant="outline" className="ml-1">{org.plan}</Badge>
                     </p>
                   </div>
                   <div className="text-right">

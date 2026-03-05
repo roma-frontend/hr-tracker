@@ -133,7 +133,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   };
 
   const handleDelete = async () => {
-    if (!confirm("Delete this task? This cannot be undone.")) return;
+    if (!confirm(t('tasksClient.deleteConfirm'))) return;
     await deleteTask({ taskId: task._id });
     onClose();
   };
