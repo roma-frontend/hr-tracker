@@ -9,6 +9,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuLabel,
+  ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import { Search, Plus, Users, MessageCircle, Pin, Archive, Trash2, RotateCcw, Volume2, VolumeX, Loader2 } from "lucide-react";
@@ -230,22 +231,23 @@ export function ConversationList({
 
           return (
             <ContextMenu key={conv._id}>
-              <button
-                onClick={() => onSelect(conv._id)}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left relative",
-                  isSelected ? "shadow-sm scale-[1.01]" : "hover:opacity-90",
-                  "context-menu-trigger"
-                )}
-                style={{
-                  background: isSelected ? "var(--sidebar-item-active)" : "transparent",
-                  color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-primary)",
-                  animation: `conv-in 0.25s ease-out ${idx * 0.04}s both`,
-                  opacity: conv.isDeleted ? 0.5 : 1,
-                }}
-                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "var(--sidebar-item-hover)"; }}
-                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
-              >
+              <ContextMenuTrigger asChild>
+                <button
+                  onClick={() => onSelect(conv._id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left relative",
+                    isSelected ? "shadow-sm scale-[1.01]" : "hover:opacity-90",
+                    "context-menu-trigger"
+                  )}
+                  style={{
+                    background: isSelected ? "var(--sidebar-item-active)" : "transparent",
+                    color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-primary)",
+                    animation: `conv-in 0.25s ease-out ${idx * 0.04}s both`,
+                    opacity: conv.isDeleted ? 0.5 : 1,
+                  }}
+                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "var(--sidebar-item-hover)"; }}
+                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
+                >
                 {isLoading && <Loader2 className="absolute top-3 left-3 w-5 h-5 animate-spin" style={{ color: "var(--primary)" }} />}
                 
                 {/* Conversation avatar */}
@@ -308,6 +310,7 @@ export function ConversationList({
                   </div>
                 </div>
               </button>
+              </ContextMenuTrigger>
 
               {/* Context Menu */}
               <ContextMenuContent className="w-48">
