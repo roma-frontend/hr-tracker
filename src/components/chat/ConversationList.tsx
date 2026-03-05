@@ -3,8 +3,15 @@
 import React, { useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuLabel,
+} from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
-import { Search, Plus, Users, MessageCircle, Pin, Archive, Trash2, RotateCcw, Volume2, VolumeX } from "lucide-react";
+import { Search, Plus, Users, MessageCircle, Pin, Archive, Trash2, RotateCcw, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -71,8 +78,7 @@ export function ConversationList({
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
-  const [contextMenu, setContextMenu] = useState<{ convId: Id<"chatConversations">; x: number; y: number } | null>(null);
-  const [loadingOp, setLoadingOp] = useState<string | null>(null);
+  const [loadingOpId, setLoadingOpId] = useState<string | null>(null);
 
   // Apply filters
   const filtered = conversations.filter((c) => {
@@ -97,25 +103,19 @@ export function ConversationList({
 
   const totalUnread = conversations.reduce((s, c) => s + (c.membership.unreadCount ?? 0), 0);
 
-  const handleContextMenu = (e: React.MouseEvent, convId: Id<"chatConversations">) => {
-    e.preventDefault();
-    setContextMenu({ convId, x: e.clientX, y: e.clientY });
-  };
-
-  const handleOperation = async (operation: () => Promise<void>) => {
+  const handleOperation = async (operation: () => Promise<void>, convId: Id<"chatConversations">) => {
     try {
-      setLoadingOp("pending");
+      setLoadingOpId(convId);
       await operation();
-      setContextMenu(null);
     } catch (error) {
       console.error("Operation failed:", error);
     } finally {
-      setLoadingOp(null);
+      setLoadingOpId(null);
     }
   };
 
   return (
-    <div className="flex flex-col h-full" onClick={() => contextMenu && setContextMenu(null)}>
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-4 pt-4 pb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -226,146 +226,162 @@ export function ConversationList({
           const lastSenderAvatar = isOwnLast ? null : lastSenderMember?.user?.avatarUrl;
           const lastSenderInitial = isOwnLast ? null : (lastSenderMember?.user?.name?.[0]?.toUpperCase() ?? null);
 
-          return (
-            <button
-              key={conv._id}
-              onClick={() => onSelect(conv._id)}
-              onContextMenu={(e) => handleContextMenu(e, conv._id)}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left relative",
-                isSelected ? "shadow-sm scale-[1.01]" : "hover:opacity-90"
-              )}
-              style={{
-                background: isSelected ? "var(--sidebar-item-active)" : "transparent",
-                color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-primary)",
-                animation: `conv-in 0.25s ease-out ${idx * 0.04}s both`,
-                opacity: conv.isDeleted ? 0.5 : 1,
-              }}
-              onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "var(--sidebar-item-hover)"; }}
-              onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
-            >
-              {/* Conversation avatar */}
-              <div className="relative shrink-0">
-                <Avatar className="w-10 h-10">
-                  {avatarUrl && <AvatarImage src={avatarUrl} />}
-                  <AvatarFallback
-                    className="text-xs font-bold text-white"
-                    style={{ background: isGroup ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
-                  >
-                    {isGroup ? <Users className="w-4 h-4" /> : getInitials(displayName)}
-                  </AvatarFallback>
-                </Avatar>
-                {!isGroup && conv.otherUser?.presenceStatus && (
-                  <PresenceDot status={conv.otherUser.presenceStatus} />
-                )}
-              </div>
+          const isLoading = loadingOpId === conv._id;
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-1">
-                  <div className="flex items-center gap-1 min-w-0">
-                    <span className={cn("text-sm truncate", unread > 0 ? "font-semibold" : "font-medium")}>
-                      {displayName}
-                    </span>
-                    {conv.isPinned && <Pin className="w-3 h-3 shrink-0" style={{ color: "var(--primary)" }} />}
-                  </div>
-                  {lastTime && (
-                    <span className="text-[10px] shrink-0" style={{ color: "var(--text-disabled)" }}>
-                      {lastTime}
-                    </span>
+          return (
+            <ContextMenu key={conv._id}>
+              <button
+                onClick={() => onSelect(conv._id)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left relative",
+                  isSelected ? "shadow-sm scale-[1.01]" : "hover:opacity-90",
+                  "context-menu-trigger"
+                )}
+                style={{
+                  background: isSelected ? "var(--sidebar-item-active)" : "transparent",
+                  color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-primary)",
+                  animation: `conv-in 0.25s ease-out ${idx * 0.04}s both`,
+                  opacity: conv.isDeleted ? 0.5 : 1,
+                }}
+                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "var(--sidebar-item-hover)"; }}
+                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
+              >
+                {isLoading && <Loader2 className="absolute top-3 left-3 w-5 h-5 animate-spin" style={{ color: "var(--primary)" }} />}
+                
+                {/* Conversation avatar */}
+                <div className="relative shrink-0">
+                  <Avatar className="w-10 h-10">
+                    {avatarUrl && <AvatarImage src={avatarUrl} />}
+                    <AvatarFallback
+                      className="text-xs font-bold text-white"
+                      style={{ background: isGroup ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
+                    >
+                      {isGroup ? <Users className="w-4 h-4" /> : getInitials(displayName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {!isGroup && conv.otherUser?.presenceStatus && (
+                    <PresenceDot status={conv.otherUser.presenceStatus} />
                   )}
                 </div>
-                <div className="flex items-center justify-between gap-1 mt-0.5">
-                  <div className="flex items-center gap-1 min-w-0">
-                    {/* Last message sender mini-avatar (groups only, not own) */}
-                    {isGroup && conv.lastMessageText && !isOwnLast && (
-                      <div className="w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center text-[7px] font-bold text-white overflow-hidden"
-                        style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
-                      >
-                        {lastSenderAvatar
-                          ? <img src={lastSenderAvatar} alt="" className="w-full h-full object-cover" />
-                          : lastSenderInitial
-                        }
-                      </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <span className={cn("text-sm truncate", unread > 0 ? "font-semibold" : "font-medium")}>
+                        {displayName}
+                      </span>
+                      {conv.isPinned && <Pin className="w-3 h-3 shrink-0" style={{ color: "var(--primary)" }} />}
+                    </div>
+                    {lastTime && (
+                      <span className="text-[10px] shrink-0" style={{ color: "var(--text-disabled)" }}>
+                        {lastTime}
+                      </span>
                     )}
-                    <p className={cn("text-xs truncate", unread > 0 ? "font-medium" : "opacity-70")}
-                      style={{ color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-muted)" }}>
-                      {conv.isDeleted ? "[Удалено]" : lastMsgPreview}
-                    </p>
                   </div>
-                  {unread > 0 && !conv.membership.isMuted && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
-                      {unread > 99 ? "99+" : unread}
-                    </span>
-                  )}
-                  {conv.membership.isMuted && (
-                    <VolumeX className="w-3 h-3 shrink-0 opacity-50" />
-                  )}
+                  <div className="flex items-center justify-between gap-1 mt-0.5">
+                    <div className="flex items-center gap-1 min-w-0">
+                      {/* Last message sender mini-avatar (groups only, not own) */}
+                      {isGroup && conv.lastMessageText && !isOwnLast && (
+                        <div className="w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center text-[7px] font-bold text-white overflow-hidden"
+                          style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
+                        >
+                          {lastSenderAvatar
+                            ? <img src={lastSenderAvatar} alt="" className="w-full h-full object-cover" />
+                            : lastSenderInitial
+                          }
+                        </div>
+                      )}
+                      <p className={cn("text-xs truncate", unread > 0 ? "font-medium" : "opacity-70")}
+                        style={{ color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-muted)" }}>
+                        {conv.isDeleted ? "[Удалено]" : lastMsgPreview}
+                      </p>
+                    </div>
+                    {unread > 0 && !conv.membership.isMuted && (
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                        {unread > 99 ? "99+" : unread}
+                      </span>
+                    )}
+                    {conv.membership.isMuted && (
+                      <VolumeX className="w-3 h-3 shrink-0 opacity-50" />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+
+              {/* Context Menu */}
+              <ContextMenuContent className="w-48">
+                {!conv.isDeleted && (
+                  <>
+                    <ContextMenuLabel className="text-xs">{displayName}</ContextMenuLabel>
+                    <ContextMenuSeparator />
+                  </>
+                )}
+                
+                {conv.isDeleted ? (
+                  <ContextMenuItem
+                    onClick={() => handleOperation(() => onRestore?.(conv._id) || Promise.resolve(), conv._id)}
+                    disabled={isLoading}
+                    className="flex items-center gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Восстановить
+                  </ContextMenuItem>
+                ) : (
+                  <>
+                    <ContextMenuItem
+                      onClick={() => handleOperation(() => onTogglePin?.(conv._id) || Promise.resolve(), conv._id)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2"
+                    >
+                      <Pin className="w-4 h-4" />
+                      {conv.isPinned ? "Открепить" : "Закрепить"}
+                    </ContextMenuItem>
+                    
+                    <ContextMenuItem
+                      onClick={() => handleOperation(() => onToggleMute?.(conv._id) || Promise.resolve(), conv._id)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2"
+                    >
+                      {conv.membership.isMuted ? (
+                        <>
+                          <Volume2 className="w-4 h-4" />
+                          Включить звук
+                        </>
+                      ) : (
+                        <>
+                          <VolumeX className="w-4 h-4" />
+                          Отключить звук
+                        </>
+                      )}
+                    </ContextMenuItem>
+                    
+                    <ContextMenuItem
+                      onClick={() => handleOperation(() => onToggleArchive?.(conv._id) || Promise.resolve(), conv._id)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2"
+                    >
+                      <Archive className="w-4 h-4" />
+                      {conv.isArchived ? "Разархивировать" : "Архивировать"}
+                    </ContextMenuItem>
+                    
+                    <ContextMenuSeparator />
+                    
+                    <ContextMenuItem
+                      onClick={() => handleOperation(() => onDelete?.(conv._id) || Promise.resolve(), conv._id)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 text-red-500 focus:text-red-500 focus:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Удалить
+                    </ContextMenuItem>
+                  </>
+                )}
+              </ContextMenuContent>
+            </ContextMenu>
           );
         })}
       </div>
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <div
-          className="fixed bg-white rounded-lg shadow-lg z-50 py-1 min-w-[140px]"
-          style={{
-            top: `${contextMenu.y}px`,
-            left: `${contextMenu.x}px`,
-            background: "var(--background-primary)",
-            border: "1px solid var(--border)",
-          }}
-        >
-          {[
-            conv = conversations.find(c => c._id === contextMenu.convId),
-            {
-              label: conv?.isPinned ? "Открепить" : "Закрепить",
-              icon: Pin,
-              action: () => handleOperation(() => onTogglePin?.(contextMenu.convId) || Promise.resolve()),
-            },
-            {
-              label: conv?.isArchived ? "Разархивировать" : "Архивировать",
-              icon: Archive,
-              action: () => handleOperation(() => onToggleArchive?.(contextMenu.convId) || Promise.resolve()),
-            },
-            {
-              label: conv?.membership.isMuted ? "Включить звук" : "Отключить звук",
-              icon: conv?.membership.isMuted ? Volume2 : VolumeX,
-              action: () => handleOperation(() => onToggleMute?.(contextMenu.convId) || Promise.resolve()),
-            },
-            ...(conv?.isDeleted
-              ? [{
-                  label: "Восстановить",
-                  icon: RotateCcw,
-                  action: () => handleOperation(() => onRestore?.(contextMenu.convId) || Promise.resolve()),
-                }]
-              : [{
-                  label: "Удалить",
-                  icon: Trash2,
-                  action: () => handleOperation(() => onDelete?.(contextMenu.convId) || Promise.resolve()),
-                  className: "text-red-500",
-                }]
-            ),
-          ].filter(Boolean).slice(1).map((item: any) => (
-            <button
-              key={item.label}
-              onClick={() => !loadingOp && item.action()}
-              className={cn(
-                "w-full px-3 py-2 text-xs text-left flex items-center gap-2 hover:opacity-80 transition-all",
-                item.className
-              )}
-              disabled={loadingOp !== null}
-              style={{ color: item.className ? undefined : "var(--text-primary)" }}
-            >
-              <item.icon className="w-3.5 h-3.5" />
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
