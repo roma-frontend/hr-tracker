@@ -217,27 +217,34 @@ export function ConversationList({
           // Sender prefix for last message
           const isOwnLast = conv.lastMessageSenderId === currentUserId;
           const isSystemAnnouncements = conv.name === "System Announcements";
-          const senderName = isOwnLast
-            ? t('chat.youPrefix')
-            : conv.type === "direct"
-              ? ""
-              : conv.lastMessageSenderId
-                ? (conv.members?.find((m) => m.userId === conv.lastMessageSenderId)?.user?.name?.split(" ")[0] ?? "")
-                : "";
+          // Don't show sender name for System Announcements
+          const senderName = isSystemAnnouncements
+            ? ""
+            : isOwnLast
+              ? t('chat.youPrefix')
+              : conv.type === "direct"
+                ? ""
+                : conv.lastMessageSenderId
+                  ? (conv.members?.find((m) => m.userId === conv.lastMessageSenderId)?.user?.name?.split(" ")[0] ?? "")
+                  : "";
           const rawLastText = conv.lastMessageText === "This message was deleted" ? "" : conv.lastMessageText;
           
-          // Remove sender prefix for System Announcements
+          // Remove sender prefix for System Announcements (in case it's still there)
           let displayLastText = rawLastText;
-          if (isSystemAnnouncements && senderName && displayLastText.startsWith(senderName + ":")) {
-            displayLastText = displayLastText.substring(senderName.length + 1).trim();
+          if (isSystemAnnouncements && displayLastText) {
+            // Strip "Name: " from beginning if present
+            const match = displayLastText.match(/^[^:]+:\s*/);
+            if (match) {
+              displayLastText = displayLastText.substring(match[0].length);
+            }
           }
           
           const lastMsgPreview = displayLastText
             ? (senderName && !isSystemAnnouncements ? `${senderName}: ${displayLastText}` : displayLastText)
             : (isGroup ? `${conv.memberCount ?? 2} ${t('chat.members')}` : t('chat.startConversationHint'));
 
-          // Last message sender avatar (for groups)
-          const lastSenderMember = isGroup && conv.lastMessageSenderId
+          // Last message sender avatar (for groups, but NOT for System Announcements)
+          const lastSenderMember = isGroup && !isSystemAnnouncements && conv.lastMessageSenderId
             ? conv.members?.find((m) => m.userId === conv.lastMessageSenderId)
             : null;
           const lastSenderAvatar = isOwnLast ? null : lastSenderMember?.user?.avatarUrl;
@@ -299,8 +306,8 @@ export function ConversationList({
                   </div>
                   <div className="flex items-center justify-between gap-1 mt-1 sm:mt-0.5">
                     <div className="flex items-center gap-1 min-w-0">
-                      {/* Last message sender mini-avatar (groups only, not own) */}
-                      {isGroup && conv.lastMessageText && !isOwnLast && (
+                      {/* Last message sender mini-avatar (groups only, not own, not System Announcements) */}
+                      {isGroup && conv.lastMessageText && !isOwnLast && !isSystemAnnouncements && (
                         <div className="sm:w-3.5 sm:h-3.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center sm:text-[7px] text-[8px] font-bold text-white overflow-hidden"
                           style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
                         >
