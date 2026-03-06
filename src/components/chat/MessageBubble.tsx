@@ -260,17 +260,7 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
       return (
         <div className="flex justify-center my-4 animate-fade-in px-4">
           <div className="max-w-lg w-full">
-            {/* Sender info */}
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 dark:from-orange-500 dark:to-red-600 flex items-center justify-center text-white text-sm font-bold">
-                {senderIcon}
-              </div>
-              <span className="text-xs font-semibold text-orange-700 dark:text-orange-300 tracking-wide">
-                СИСТЕМА
-              </span>
-            </div>
-
-            {/* Message card */}
+            {/* Message card - no sender info for System Announcements */}
             <div 
               className="border-l-4 rounded-lg p-4 shadow-md animate-fade-in"
               style={{
