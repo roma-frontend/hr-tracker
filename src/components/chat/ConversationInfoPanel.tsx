@@ -32,6 +32,16 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
   const orgUsers = useQuery(api.users.getAllUsers, { requesterId: currentUserId });
   const addMember = useMutation(api.chat.addMember);
 
+  // Log for debugging
+  console.log("[ConversationInfoPanel] Debug:", {
+    conversationId,
+    conversationExists: !!conversation,
+    conversationType: conversation && "type" in conversation ? (conversation as Record<string, unknown>).type : "unknown",
+    membersCount: members?.length ?? 0,
+    availableUsersCount: orgUsers?.length ?? 0,
+    showAddMember,
+  });
+
   const isGroupConversation = conversation && "type" in conversation && (conversation as Record<string, unknown>).type === "group";
 
   // Filter users not already in the conversation
@@ -46,31 +56,38 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
 
   const handleAddMembers = async () => {
     try {
+      console.log("[handleAddMembers] Starting, selected users:", selectedUsers.length);
       setAdding(true);
       for (const userId of selectedUsers) {
+        console.log("[handleAddMembers] Adding user:", userId);
         await addMember({
           conversationId,
           requesterId: currentUserId,
           userId,
           organizationId,
         });
+        console.log("[handleAddMembers] User added successfully:", userId);
       }
       setSelectedUsers([]);
       setSearchQuery("");
       setShowAddMember(false);
+      console.log("[handleAddMembers] All members added successfully");
     } catch (err) {
-      console.error("Failed to add members:", err);
+      console.error("[handleAddMembers] Failed to add members:", err);
     } finally {
       setAdding(false);
     }
   };
 
   const toggleUserSelection = (userId: Id<"users">) => {
-    setSelectedUsers((prev) =>
-      prev.includes(userId)
+    console.log("[toggleUserSelection] Toggling user:", userId);
+    setSelectedUsers((prev) => {
+      const newState = prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
-    );
+        : [...prev, userId];
+      console.log("[toggleUserSelection] New selected users:", newState.length);
+      return newState;
+    });
   };
 
   return (
@@ -117,13 +134,17 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
             <p className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
               {t('chat.members')} ({members?.length ?? 0})
             </p>
-            {isGroupConversation && (
+            {isGroupConversation !== false && (
               <button
-                onClick={() => setShowAddMember(!showAddMember)}
+                onClick={() => {
+                  console.log("[PlusButton] Clicked, toggling showAddMember from", showAddMember, "to", !showAddMember);
+                  setShowAddMember(!showAddMember);
+                }}
                 className="w-6 h-6 flex items-center justify-center rounded-lg transition-all hover:scale-105"
                 style={{
                   background: showAddMember ? "var(--primary)" : "var(--sidebar-item-hover)",
                   color: showAddMember ? "white" : "var(--text-muted)",
+                  cursor: "pointer",
                 }}
                 title={t('chat.addMembers')}
               >
@@ -186,7 +207,10 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
               {selectedUsers.length > 0 && (
                 <div className="flex gap-2 mt-3">
                   <button
-                    onClick={handleAddMembers}
+                    onClick={() => {
+                      console.log("[AddButton] Clicked, calling handleAddMembers");
+                      handleAddMembers();
+                    }}
                     disabled={adding}
                     className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-all disabled:opacity-50"
                     style={{ background: "var(--primary)" }}
