@@ -241,9 +241,11 @@ export function ConversationList({
             displayLastText = displayLastText.replace(/^\d{1,2}\s*[AP]M\s*🔔?\s*/, "");
           }
           
-          const lastMsgPreview = displayLastText
-            ? (senderName && !isSystemAnnouncements ? `${senderName}: ${displayLastText}` : displayLastText)
-            : (isGroup ? `${conv.memberCount ?? 2} ${t('chat.members')}` : t('chat.startConversationHint'));
+          const lastMsgPreview = isSystemAnnouncements
+            ? "" // No preview text for System Announcements
+            : displayLastText
+              ? (senderName && !isSystemAnnouncements ? `${senderName}: ${displayLastText}` : displayLastText)
+              : (isGroup ? `${conv.memberCount ?? 2} ${t('chat.members')}` : t('chat.startConversationHint'));
 
           // Last message sender avatar (for groups, but NOT for System Announcements)
           const lastSenderMember = isGroup && !isSystemAnnouncements && conv.lastMessageSenderId
