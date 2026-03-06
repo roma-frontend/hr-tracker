@@ -216,6 +216,7 @@ export function ConversationList({
 
           // Sender prefix for last message
           const isOwnLast = conv.lastMessageSenderId === currentUserId;
+          const isSystemAnnouncements = conv.name === "System Announcements";
           const senderName = isOwnLast
             ? t('chat.youPrefix')
             : conv.type === "direct"
@@ -224,8 +225,15 @@ export function ConversationList({
                 ? (conv.members?.find((m) => m.userId === conv.lastMessageSenderId)?.user?.name?.split(" ")[0] ?? "")
                 : "";
           const rawLastText = conv.lastMessageText === "This message was deleted" ? "" : conv.lastMessageText;
-          const lastMsgPreview = rawLastText
-            ? (senderName ? `${senderName}: ${rawLastText}` : rawLastText)
+          
+          // Remove sender prefix for System Announcements
+          let displayLastText = rawLastText;
+          if (isSystemAnnouncements && senderName && displayLastText.startsWith(senderName + ":")) {
+            displayLastText = displayLastText.substring(senderName.length + 1).trim();
+          }
+          
+          const lastMsgPreview = displayLastText
+            ? (senderName && !isSystemAnnouncements ? `${senderName}: ${displayLastText}` : displayLastText)
             : (isGroup ? `${conv.memberCount ?? 2} ${t('chat.members')}` : t('chat.startConversationHint'));
 
           // Last message sender avatar (for groups)

@@ -251,6 +251,12 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
       const icon = message.broadcastIcon || "ℹ️";
       const senderIcon = "🔧"; // System icon
       
+      // Remove sender name prefix (e.g., "Roman: ") from content for system announcements
+      let cleanContent = message.content;
+      if (message.sender?.name && cleanContent.startsWith(message.sender.name + ":")) {
+        cleanContent = cleanContent.substring(message.sender.name.length + 1).trim();
+      }
+      
       return (
         <div className="flex justify-center my-4 animate-fade-in px-4">
           <div className="max-w-lg w-full">
@@ -283,7 +289,7 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
               
               {/* Message content */}
               <p className="text-sm leading-relaxed">
-                {message.content}
+                {cleanContent}
               </p>
               
               {/* Timestamp */}
