@@ -25,6 +25,168 @@ import { SmartPasswordInput } from "@/components/auth/SmartPasswordInput";
 import { SmartErrorMessage, parseAuthError } from "@/components/auth/SmartErrorMessage";
 import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 
+function MaintenanceBanner() {
+  return (
+    <div style={{
+      position: "fixed", 
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      zIndex: 999999,
+      background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)",
+      display: "flex", 
+      alignItems: "center", 
+      justifyContent: "center",
+      flexDirection: "column",
+      padding: "20px",
+      boxSizing: "border-box",
+      overflow: "hidden",
+    }}>
+      {/* Background gradient blobs */}
+      <div style={{
+        position: "absolute",
+        top: "-50%",
+        right: "-20%",
+        width: "600px",
+        height: "600px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent)",
+        filter: "blur(60px)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute",
+        bottom: "-30%",
+        left: "-10%",
+        width: "500px",
+        height: "500px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(168, 85, 247, 0.1), transparent)",
+        filter: "blur(60px)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Content Container */}
+      <div style={{
+        position: "relative",
+        zIndex: 10,
+        textAlign: "center",
+        maxWidth: 600,
+      }}>
+        {/* Animated Wrench */}
+        <div style={{
+          fontSize: 100,
+          marginBottom: 30,
+          animation: "pulse 2s ease-in-out infinite",
+          display: "inline-block",
+        }}>
+          🔧
+        </div>
+        
+        <h1 style={{ 
+          fontSize: 48, 
+          fontWeight: "800",
+          background: "linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)",
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          margin: "0 0 16px 0",
+          letterSpacing: "-0.5px",
+        }}>
+          Техническое обслуживание
+        </h1>
+        
+        <p style={{ 
+          fontSize: 18, 
+          color: "#cbd5e1", 
+          lineHeight: 1.8,
+          margin: "0 0 40px 0",
+          fontWeight: "400",
+        }}>
+          Система находится на техническом обслуживании.<br />
+          Пожалуйста, подождите.
+        </p>
+        
+        {/* Info Box */}
+        <div style={{
+          padding: "24px 32px",
+          borderRadius: "16px",
+          background: "linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(249, 115, 22, 0.05) 100%)",
+          border: "2px solid rgba(249, 115, 22, 0.4)",
+          marginBottom: 40,
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 8px 32px rgba(249, 115, 22, 0.1)",
+        }}>
+          <p style={{ 
+            color: "#fed7aa", 
+            fontSize: 16,
+            margin: "0",
+            fontWeight: "500",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+          }}>
+            <span>⏳</span>
+            Страница обновится автоматически после завершения обслуживания
+          </p>
+        </div>
+        
+        {/* Support Info */}
+        <div style={{
+          padding: "16px 24px",
+          borderRadius: "12px",
+          background: "rgba(51, 65, 85, 0.5)",
+          border: "1px solid rgba(148, 163, 184, 0.2)",
+          marginBottom: 24,
+        }}>
+          <p style={{ 
+            fontSize: 14, 
+            color: "#94a3b8",
+            margin: "0",
+            fontWeight: "400",
+          }}>
+            ℹ️ Если есть вопросы, обратитесь к администратору
+          </p>
+        </div>
+
+        {/* Status indicator */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          marginTop: 20,
+        }}>
+          <div style={{
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            background: "#ef4444",
+            animation: "pulse 2s ease-in-out infinite",
+          }} />
+          <p style={{
+            fontSize: 13,
+            color: "#94a3b8",
+            margin: "0",
+          }}>
+            Обслуживание в процессе
+          </p>
+        </div>
+      </div>
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -35,6 +197,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loginMode, setLoginMode] = useState<"email" | "face" | "touch">("email");
+  const [showMaintenanceBanner, setShowMaintenanceBanner] = useState(() => {
+    // Initialize based on URL parameter (client-side only)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("maintenance") === "true";
+    }
+    return false;
+  });
   const [isRedirecting, setIsRedirecting] = useState(false);
   const deviceFingerprintRef = useRef<string | undefined>(undefined);
   const { onKeyDown, onKeyUp, getSample, reset } = useKeystrokeDynamics();
@@ -44,6 +214,22 @@ export default function LoginPage() {
     getDeviceFingerprint().then(({ fingerprint }) => {
       deviceFingerprintRef.current = fingerprint;
     }).catch(() => {});
+  }, []);
+
+  // Detect maintenance mode from URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const isMaintenance = params.get("maintenance") === "true";
+      console.log("🔧 useEffect check - isMaintenance:", isMaintenance);
+      
+      if (isMaintenance) {
+        console.log("✅ Setting maintenance banner to true in useEffect");
+        setShowMaintenanceBanner(true);
+        document.documentElement.style.opacity = "1";
+        document.documentElement.style.transition = "none";
+      }
+    }
   }, []);
   
   // Check if OAuth sync is in progress OR redirecting
@@ -102,6 +288,11 @@ export default function LoginPage() {
 
         if (!response.ok) {
           const errorData = await response.json();
+          // If maintenance mode is active, redirect to maintenance screen
+          if (errorData.error === 'maintenance') {
+            window.location.href = `/login?maintenance=true${errorData.organizationId ? `&org=${errorData.organizationId}` : ''}`;
+            return;
+          }
           throw new Error(errorData.error || 'Login failed');
         }
 
@@ -163,33 +354,43 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : "WebAuthn login failed");
     }
   };
+  
 
   return (
     <>
-      {/* Maintenance Screen - Display if maintenance is active */}
-      <MaintenanceScreen />
-      
-      {/* OAuth Sync Loader */}
-      <OAuthSyncLoader />
-      
-      {/* Hide login page during OAuth sync */}
-      {isOAuthSyncing && <div style={{ display: 'none' }} />}
-      
-      {/* Onboarding Tour */}
-      {!isOAuthSyncing && <OnboardingTour 
-        steps={loginTourSteps} 
-        tourId="login-tour"
-        onComplete={() => console.log("Tour completed!")}
-        onSkip={() => console.log("Tour skipped")}
-      />}
+      {console.log("🔍 DEBUG: showMaintenanceBanner =", showMaintenanceBanner)}
+      {/* Maintenance Banner - Show if maintenance mode is enabled */}
+      {showMaintenanceBanner && (
+        <>
+          {console.log("✅ Rendering Maintenance Banner")}
+          <MaintenanceBanner />
+        </>
+      )}
 
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ 
-          display: isOAuthSyncing ? 'none' : 'flex',
-          background: "var(--background)" 
-        }}
-      >
+      {/* Normal Login Flow */}
+      {!showMaintenanceBanner && (
+        <>
+          {/* OAuth Sync Loader */}
+          <OAuthSyncLoader />
+
+          {/* Hide login page during OAuth sync */}
+          {isOAuthSyncing && <div style={{ display: 'none' }} />}
+
+          {/* Onboarding Tour */}
+          {!isOAuthSyncing && <OnboardingTour
+            steps={loginTourSteps}
+            tourId="login-tour"
+            onComplete={() => console.log("Tour completed!")}
+            onSkip={() => console.log("Tour skipped")}
+          />}
+
+          <div
+            className="min-h-screen flex items-center justify-center p-4"
+            style={{
+              display: isOAuthSyncing ? 'none' : 'flex',
+              background: "var(--background)"
+            }}
+          >
         {/* Background gradient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
@@ -398,7 +599,9 @@ export default function LoginPage() {
           </Link>
         </div>
       </motion.div>
-      </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
