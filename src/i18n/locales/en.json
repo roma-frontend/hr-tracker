@@ -2971,5 +2971,20 @@
     "needHelp": "If you have questions, contact your administrator",
     "serviceBroadcast": "Service Broadcast",
     "notificationLabel": "⚠️ Service Maintenance"
+  },
+  "broadcasts": {
+    "title": "Service Announcements",
+    "description": "Send official messages to all users",
+    "newButton": "New announcement",
+    "allUsersGetMessage": "All active organization users will receive your message in the special \"System Announcements\" channel with a serious appearance, icon and title.",
+    "typicalScenarios": "Typical scenarios:",
+    "maintenance": "🔧 Service and update announcements",
+    "warnings": "⚠️ Warnings about failures or issues",
+    "security": "🔒 Security messages",
+    "important": "🎉 Important announcements and thanks",
+    "critical": "🚨 Critical and urgent notifications",
+    "errorFillFields": "Fill in the title and message",
+    "errorSpecifyTime": "Specify the maintenance start time",
+    "errorOrgNotLoaded": "Organization not loaded"
   }
 }

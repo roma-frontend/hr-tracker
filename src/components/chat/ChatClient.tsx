@@ -220,9 +220,12 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
           // Mobile: full height of parent (parent already accounts for navbar)
           "absolute inset-0 md:relative md:inset-auto",
           "md:w-72 lg:w-80",
-          mobileShowChat
-            ? "opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto -translate-x-4 md:translate-x-0"
-            : "opacity-100 translate-x-0",
+          // Desktop: always visible and interactive
+          "md:opacity-100 md:translate-x-0 md:pointer-events-auto",
+          // Mobile: hide/show based on mobileShowChat
+          mobileShowChat 
+            ? "opacity-0 pointer-events-none -translate-x-4"
+            : "opacity-100 translate-x-0 pointer-events-auto",
           "z-10 md:z-auto"
         )}
         style={{ borderColor: "var(--border)", background: "var(--sidebar-bg)" }}

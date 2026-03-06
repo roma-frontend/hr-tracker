@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "convex/react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { ServiceBroadcastDialog } from "./ServiceBroadcastDialog";
@@ -20,6 +21,7 @@ interface SuperadminBroadcastsPanelProps {
  * Allows superadmin to send official company-wide announcements and manage them
  */
 export function SuperadminBroadcastsPanel({ organizationId, userId }: SuperadminBroadcastsPanelProps) {
+  const { t } = useTranslation();
   const [broadcastDialogOpen, setBroadcastDialogOpen] = useState(false);
   
   const currentUser = useQuery(api.users.getCurrentUser, {});
@@ -46,9 +48,9 @@ export function SuperadminBroadcastsPanel({ organizationId, userId }: Superadmin
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5" style={{ color: "#f97316" }} />
               <div>
-                <CardTitle>Сервисные Объявления</CardTitle>
+                <CardTitle>{t('broadcasts.title')}</CardTitle>
                 <CardDescription>
-                  Отправляйте официальные сообщения всем пользователям
+                  {t('broadcasts.description')}
                 </CardDescription>
               </div>
             </div>
@@ -58,7 +60,7 @@ export function SuperadminBroadcastsPanel({ organizationId, userId }: Superadmin
               size="sm"
             >
               <MessageSquare className="w-4 h-4" />
-              Новое объявление
+              {t('broadcasts.newButton')}
             </Button>
           </div>
         </CardHeader>
@@ -66,19 +68,17 @@ export function SuperadminBroadcastsPanel({ organizationId, userId }: Superadmin
         <CardContent>
           <div className="prose dark:prose-invert text-sm max-w-none">
             <p className="text-muted-foreground">
-              Все активные пользователи организации получат ваше сообщение в специальном канале 
-              <strong style={{ color: "var(--text-primary)" }}> &quot;System Announcements&quot; </strong>
-              с серьезным видом, иконкой и заголовком.
+              {t('broadcasts.allUsersGetMessage')}
             </p>
             
             <div className="mt-4 space-y-2">
-              <h4 className="font-semibold" style={{ color: "var(--text-primary)" }}>Типичные сценарии:</h4>
+              <h4 className="font-semibold" style={{ color: "var(--text-primary)" }}>{t('broadcasts.typicalScenarios')}</h4>
               <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                <li>🔧 Объявления об обслуживании и обновлениях</li>
-                <li>⚠️ Предупреждения о сбоях или проблемах</li>
-                <li>🔒 Сообщения о безопасности</li>
-                <li>🎉 Важные объявления и благодарности</li>
-                <li>🚨 Критические и срочные уведомления</li>
+                <li>{t('broadcasts.maintenance')}</li>
+                <li>{t('broadcasts.warnings')}</li>
+                <li>{t('broadcasts.security')}</li>
+                <li>{t('broadcasts.important')}</li>
+                <li>{t('broadcasts.critical')}</li>
               </ul>
             </div>
           </div>
