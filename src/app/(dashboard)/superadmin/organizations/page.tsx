@@ -155,7 +155,7 @@ export default function OrganizationsPage() {
                 <p className="text-2xl font-bold text-green-500">
                   {organizations?.filter((o) => o.isActive).length || 0}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">работают</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('superadmin.organizations.stats.working')}</p>
               </div>
               <div className="p-4 rounded-lg border" style={{ background: "var(--background-subtle)" }}>
                 <div className="flex items-center gap-2 mb-2">
@@ -165,7 +165,7 @@ export default function OrganizationsPage() {
                 <p className="text-2xl font-bold">
                   {organizations?.reduce((sum, o) => sum + (o.totalEmployees || 0), 0) || 0}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">всего</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('superadmin.organizations.stats.total')}</p>
               </div>
               <div className="p-4 rounded-lg border" style={{ background: "var(--background-subtle)" }}>
                 <div className="flex items-center gap-2 mb-2">
@@ -175,7 +175,7 @@ export default function OrganizationsPage() {
                 <p className="text-2xl font-bold text-red-500">
                   {organizations?.filter((o) => !o.isActive).length || 0}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">приостановлены</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('superadmin.organizations.stats.suspended')}</p>
               </div>
             </div>
 
@@ -229,19 +229,19 @@ export default function OrganizationsPage() {
                   {/* Stats Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 pb-3" style={{ borderBottom: "1px solid var(--border)" }}>
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Всего</p>
+                      <p className="text-xs text-muted-foreground">{t('superadmin.organizations.card.totalEmployees')}</p>
                       <p className="font-bold">{org.totalEmployees}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Активных</p>
+                      <p className="text-xs text-muted-foreground">{t('superadmin.organizations.card.activeEmployees')}</p>
                       <p className="font-bold text-green-500">{org.activeEmployees}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Лимит</p>
+                      <p className="text-xs text-muted-foreground">{t('superadmin.organizations.card.employeeLimit')}</p>
                       <p className="font-bold">{org.employeeLimit}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Отрасль</p>
+                      <p className="text-xs text-muted-foreground">{t('superadmin.organizations.card.industry')}</p>
                       <p className="text-sm font-mono">{org.industry || "—"}</p>
                     </div>
                   </div>

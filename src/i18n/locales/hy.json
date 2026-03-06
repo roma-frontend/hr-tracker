@@ -2502,8 +2502,17 @@
         "totalOrgs": "Ընդամենը կազմակերպություններ",
         "count": "կազմակերպություններ",
         "active": "Ակտիվ",
+        "working": "Աշխատում են",
         "viewed": "Դիտված",
-        "inactive": "Ոչ ակտիվ"
+        "total": "Ընդամենը",
+        "inactive": "Ոչ ակտիվ",
+        "suspended": "Կասեցված"
+      },
+      "card": {
+        "totalEmployees": "Ընդամենը",
+        "activeEmployees": "Ակտիվ",
+        "employeeLimit": "Սահման",
+        "industry": "Արդյունաբերություն"
       },
       "list": {
         "title": "Կազմակերպությունների ցուցակ",

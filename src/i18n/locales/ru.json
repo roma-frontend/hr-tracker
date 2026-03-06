@@ -2502,8 +2502,17 @@
         "totalOrgs": "Всего ОРГ",
         "count": "организаций",
         "active": "Активных",
+        "working": "работают",
         "viewed": "Смотрены",
-        "inactive": "Неактивных"
+        "total": "всего",
+        "inactive": "Неактивных",
+        "suspended": "приостановлены"
+      },
+      "card": {
+        "totalEmployees": "Всего",
+        "activeEmployees": "Активных",
+        "employeeLimit": "Лимит",
+        "industry": "Отрасль"
       },
       "list": {
         "title": "Список организаций",

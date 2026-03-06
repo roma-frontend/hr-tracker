@@ -2502,8 +2502,17 @@
         "totalOrgs": "Total ORGs",
         "count": "organizations",
         "active": "Active",
+        "working": "operating",
         "viewed": "Viewed",
-        "inactive": "Inactive"
+        "total": "total",
+        "inactive": "Inactive",
+        "suspended": "suspended"
+      },
+      "card": {
+        "totalEmployees": "Total",
+        "activeEmployees": "Active",
+        "employeeLimit": "Limit",
+        "industry": "Industry"
       },
       "list": {
         "title": "Organization List",
