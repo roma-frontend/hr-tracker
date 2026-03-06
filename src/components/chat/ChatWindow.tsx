@@ -537,9 +537,11 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
               const isOwn = msg.senderId === currentUserId;
               // Show avatar on first message of each sender streak (both own and others)
               const isFirstOfStreak = idx === 0 || prevMsg?.senderId !== msg.senderId;
-              const showAvatar = isFirstOfStreak;
-              // Show name only in group chats for other people's messages
-              const showName = isFirstOfStreak && !isOwn && conv?.type === "group";
+              // Don't show avatar in System Announcements
+              const isSystemAnnouncements = conv?.name === "System Announcements";
+              const showAvatar = isFirstOfStreak && !isSystemAnnouncements;
+              // Show name only in group chats for other people's messages, but NOT in System Announcements
+              const showName = isFirstOfStreak && !isOwn && conv?.type === "group" && !isSystemAnnouncements;
               return (
                 <MessageBubble
                   key={msg._id}
