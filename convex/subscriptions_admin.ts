@@ -21,7 +21,7 @@ export const createManualSubscription = mutation({
       .withIndex("by_email", (q) => q.eq("email", identity.email!))
       .first();
 
-    const isSuperAdmin = currentUser?.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const isSuperAdmin = currentUser?.role === "superadmin" || currentUser?.email.toLowerCase() === SUPERADMIN_EMAIL;
 
     if (!currentUser || !isSuperAdmin) {
       throw new Error("Not authorized - superadmin only");
@@ -86,7 +86,7 @@ export const listAllWithUsers = query({
       .withIndex("by_email", (q) => q.eq("email", identity.email!))
       .first();
 
-    const isSuperAdmin = currentUser?.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const isSuperAdmin = currentUser?.role === "superadmin" || currentUser?.email.toLowerCase() === SUPERADMIN_EMAIL;
 
     if (!currentUser || !isSuperAdmin) return [];
 
@@ -132,7 +132,7 @@ export const cancelSubscription = mutation({
       .withIndex("by_email", (q) => q.eq("email", identity.email!))
       .first();
 
-    const isSuperAdmin = currentUser?.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const isSuperAdmin = currentUser?.role === "superadmin" || currentUser?.email.toLowerCase() === SUPERADMIN_EMAIL;
 
     if (!currentUser || !isSuperAdmin) {
       throw new Error("Not authorized - superadmin only");

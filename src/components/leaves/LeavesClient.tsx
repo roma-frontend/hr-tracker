@@ -202,7 +202,7 @@ export function LeavesClient() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Unread Requests Banner */}
       {isAdmin && unreadCount && unreadCount > 0 && (
         <UnreadRequestsBanner userId={user?.id} />
@@ -217,9 +217,15 @@ export function LeavesClient() {
             {t('leave.manageAndTrack')}
           </p>
         </div>
-        <Button size="sm" onClick={() => setModalOpen(true)}>
-          <Plus className="w-4 h-4" /> {t('dashboard.newRequest')}
-        </Button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setModalOpen(true)}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all w-full sm:w-auto justify-center"
+          style={{ background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)" }}
+        >
+          <Plus className="w-5 h-5" /> {t('dashboard.newRequest')}
+        </motion.button>
       </motion.div>
 
       {/* Filters */}

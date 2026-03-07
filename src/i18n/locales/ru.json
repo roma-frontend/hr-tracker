@@ -243,7 +243,7 @@
     "comments": "Комментарии",
     "attachment": "Вложение",
     "attachments": "Вложения",
-    "employees": "сотрудники",
+    "employees": "Сотрудники",
     "current": "текущий",
     "viewProfile": "Просмотр профиля"
   },
@@ -598,7 +598,16 @@
     "filter_inactive": "Неактивно",
     "department": "Отдел",
     "position": "Должность",
-    "role": "роль"
+    "role": "роль",
+    "organization": "Организация",
+    "selectOrganization": "Выберите организацию",
+    "employeeType": "Тип сотрудника",
+    "travelAllowance": "Командировочные",
+    "enterDetails": "Введите данные сотрудника",
+    "contractorHint": "Добавьте \"contractor\" в email, если это подрядчик (определяется автоматически)",
+    "adding": "Добавление...",
+    "staff": "Штатный",
+    "contractor": "Подрядчик"
   },
   "reports": {
     "title": "Отчеты",
@@ -1650,18 +1659,18 @@
   "settingsSecurity": {
     "touchId": "Touch ID / Fingerprint",
     "touchIdDesc": "Зарегистрируйте биометрическую аутентификацию для быстрого и безопасного входа",
-    "touchIdEnable": "Enable Touch ID or fingerprint for faster and more secure login",
+    "touchIdEnable": "Включите Touch ID или отпечаток пальца для более быстрого и безопасного входа",
     "biometricRegistered": "Биометрическая аутентификация успешно зарегистрирована!",
     "faceId": "Face ID",
     "faceIdDesc": "Зарегистрируйте ваше лицо для безопасного входа по распознаванию лица",
-    "faceIdRegistered": "Р В Р’В Р вЂ™Р’В Р В РІР‚в„ўР вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р’В Р В РІР‚в„–Р В Р’В Р В Р вЂ№Р В Р вЂ Р Р†Р вЂљРЎвЂєР РЋРЎвЂєР В Р’В Р вЂ™Р’В Р В Р’В Р Р†Р вЂљР’В Р В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р РЋРІвЂћСћР В Р’В Р В Р вЂ№Р В Р Р‹Р Р†РІР‚С›РЎС› Face ID Registered",
+    "faceIdRegistered": "Face ID зарегистрирован",
     "registeredOn": "Зарегистрировано",
     "removeFaceIdConfirm": "Вы уверены, что хотите удалить регистрацию Face ID?",
-    "faceIdRemoved": "Face ID removed successfully",
-    "removeFaceId": "Remove Face ID",
+    "faceIdRemoved": "Face ID успешно удален",
+    "removeFaceId": "Удалить Face ID",
     "registerFaceDesc": "Зарегистрируйте ваше лицо для быстрого и безопасного входа с Face ID",
-    "registerFaceId": "Register Face ID",
-    "faceIdSuccess": "Face ID registered successfully!"
+    "registerFaceId": "Зарегистрировать Face ID",
+    "faceIdSuccess": "Face ID успешно зарегистрирован!"
   },
   "settingsLocalization": {
     "languageRegion": "Язык и регион",
@@ -2058,11 +2067,11 @@
     "whoOnLeaveToday": "Кто сегодня в отпуске?"
   },
   "analytics": {
-    "approvalRate": "Approval Rate",
-    "approvedLeaves": "Approved Leaves",
-    "analyticsDashboard": "Analytics Dashboard",
-    "pendingLeaves": "Pending Leaves",
-    "hrMetricsOverview": "Overview of your HR metrics and insights"
+    "approvalRate": "Процент одобрения",
+    "approvedLeaves": "Одобренные отпуска",
+    "analyticsDashboard": "Панель аналитики",
+    "pendingLeaves": "Ожидающие отпуска",
+    "hrMetricsOverview": "Обзор HR-метрик и аналитики"
   },
   "checkout": {
     "createAccount": "Создайте ваш аккаунт",
@@ -3021,7 +3030,14 @@
     "noUsersFound": "Пользователи не найдены",
     "allMembersAdded": "Все члены уже добавлены",
     "add": "Добавить",
-    "you": "Вы"
+    "you": "Вы",
+    "archive": "Архивировать",
+    "unarchive": "Разархивировать",
+    "mute": "Отключить звук",
+    "unmute": "Включить звук",
+    "deleted": "[Удалено]",
+    "restore": "Восстановить",
+    "filterArchived": "Архив"
   },
   "superadminStripe": {
     "accessDenied": "Доступ запрещен",
@@ -3171,5 +3187,28 @@
     "userResponsibilities": "Обязанности пользователя",
     "userResponsibilitiesDesc": "Как пользователь ShieldOffice, вы соглашаетесь:",
     "vectors": "Мониторинг векторов атак"
+  },
+  "joinRequestsPage": {
+    "title": "Запросы на вступление",
+    "subtitle": "Управляйте запросами сотрудников на присоединение к организации",
+    "generateInviteLink": "Создать ссылку-приглашение",
+    "noPendingRequests": "Нет ожидающих запросов",
+    "noFilteredRequests": "Нет запросов со статусом «{{filter}}»",
+    "shareInviteLink": "Поделитесь ссылкой-приглашением, чтобы сотрудники могли присоединиться",
+    "tipCheckFilters": "Совет: проверьте другие фильтры, чтобы увидеть одобренные или отклонённые запросы",
+    "orgNotAssigned": "Ваша организация ещё не назначена. Свяжитесь с суперадмином.",
+    "confirm": "Подтвердить",
+    "reason": "Причина",
+    "loadingRequests": "Загрузка запросов…",
+    "requestApproved": "Запрос одобрен! Аккаунт пользователя создан.",
+    "failedToApprove": "Не удалось одобрить",
+    "requestRejected": "Запрос отклонён.",
+    "failedToReject": "Не удалось отклонить",
+    "failedToGenerateLink": "Не удалось создать ссылку",
+    "inviteLinkCopied": "Ссылка-приглашение скопирована!",
+    "filterPending": "Ожидающие",
+    "filterApproved": "Одобренные",
+    "filterRejected": "Отклонённые",
+    "filterAll": "Все"
   }
 }

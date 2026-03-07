@@ -27,7 +27,7 @@
     "smartLeaveManagement": "Խելացի ցուցակի կառավարում",
     "aiPoweredInsights": "AI-ի շահվածքներ",
     "teamCollaboration": "Թիմային համագործակցություն",
-    "attendanceTracking": "Учет посещаемости",
+    "attendanceTracking": "Հdelays հաdelays հdelays Մdelays",
     "performanceReviews": "Կատարողականության ակտուալիզացիա",
     "hrAnalytics": "HR վերլուծություն",
     "automateLeaveRequests": "Խողովակել የፍቃድ ሌቂዎች",
@@ -3021,7 +3021,14 @@
     "noUsersFound": "Օգտատերեր չեն գտնվել",
     "allMembersAdded": "Բոլոր անդամները արդեն ավելացված են",
     "add": "Ավելացնել",
-    "you": "Դուք"
+    "you": "Դուք",
+    "archive": "Արխիվացնել",
+    "unarchive": "Վերադարձնել արխիվից",
+    "mute": "Մեղմացնել",
+    "unmute": "Միացնել",
+    "deleted": "[Ջնջված]",
+    "restore": "Վերականգնել",
+    "filterArchived": "Արխիվ"
   },
   "superadminStripe": {
     "accessDenied": "Մուտքը արգելված է",
@@ -3171,5 +3178,28 @@
     "errorFillFields": "Այս դաշտը պարտադիր է",
     "errorSpecifyTime": "Укажите время начала обслуживания",
     "errorOrgNotLoaded": "Организация не загружена"
+  },
+  "joinRequestsPage": {
+    "title": "Միացման հայտեր",
+    "subtitle": "Կառավարեք աշխատակիցների միացման հայտերը",
+    "generateInviteLink": "Ստեղծել հրավերի հղում",
+    "noPendingRequests": "Սպասվող հայտեր չկան",
+    "noFilteredRequests": "{{filter}} հայտեր չկան",
+    "shareInviteLink": "Տարածեք հրավերի հղումը՝ որպեսզի աշխատակիցները միանան",
+    "tipCheckFilters": "Հուշումնակ: ստուգեք այլ զտիչները՝ հաստատված կամ մերժված հայտերը տեսնելու",
+    "orgNotAssigned": "Ձեր կազմակերպությունը դեռ նշանակված չէ. Դիմեք սուպերադմինին.",
+    "confirm": "Հաստատել",
+    "reason": "Պատճառ",
+    "loadingRequests": "Հայտերի բեռնում…",
+    "requestApproved": "Հայտը հաստատված է! Օգտագործի հաշիվը ստեղծվել է.",
+    "failedToApprove": "Չհաջողվեց հաստատել",
+    "requestRejected": "Հայտը մերժված է.",
+    "failedToReject": "Չհաջողվեց մերժել",
+    "failedToGenerateLink": "Չհաջողվեց հղում ստեղծել",
+    "inviteLinkCopied": "Հրավերի հղումը պատճենված է!",
+    "filterPending": "Սպասվող",
+    "filterApproved": "Հաստատված",
+    "filterRejected": "Մերժված",
+    "filterAll": "Բոլորը"
   }
 }

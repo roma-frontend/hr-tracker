@@ -96,9 +96,9 @@ export function ConversationList({
       case "pinned":
         return c.isPinned;
       case "archived":
-        return c.membership.isArchived || c.isArchived;
+        return c.membership.isArchived || c.isArchived || c.membership.isDeleted || c.isDeleted;
       default:
-        return !(c.membership.isArchived || c.isArchived); // "all" shows non-archived only
+        return !(c.membership.isArchived || c.isArchived || c.membership.isDeleted || c.isDeleted); // "all" shows non-archived/deleted only
     }
   });
 
@@ -168,7 +168,7 @@ export function ConversationList({
       </div>
 
       {/* Filters */}
-      <div className="px-3 pb-2 flex gap-1 overflow-x-auto scrollbar-hide">
+      <div className="px-3 pb-2 flex gap-1 flex-wrap">
         {(["all", "unread", "groups", "pinned", "archived"] as const).map((f) => (
           <button
             key={f}
@@ -183,11 +183,11 @@ export function ConversationList({
               background: filter === f ? "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)" : "transparent",
             }}
           >
-            {f === "all" && "All"}
-            {f === "unread" && `Unread ${conversations.filter(c => c.membership.unreadCount > 0).length > 0 ? `(${conversations.filter(c => c.membership.unreadCount > 0).length})` : ""}`}
-            {f === "groups" && "Groups"}
-            {f === "pinned" && "Pinned"}
-            {f === "archived" && "Archived"}
+            {f === "all" && t('chat.filterAll', 'All')}
+            {f === "unread" && `${t('chat.filterUnread', 'Unread')} ${conversations.filter(c => c.membership.unreadCount > 0).length > 0 ? `(${conversations.filter(c => c.membership.unreadCount > 0).length})` : ""}`}
+            {f === "groups" && t('chat.filterGroups', 'Groups')}
+            {f === "pinned" && t('chat.filterPinned', 'Pinned')}
+            {f === "archived" && t('chat.filterArchived', 'Archived')}
           </button>
         ))}
       </div>
@@ -323,7 +323,7 @@ export function ConversationList({
                       )}
                       <p className={cn("sm:text-xs text-sm truncate", unread > 0 ? "font-medium" : "opacity-70")}
                         style={{ color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-muted)" }}>
-                        {(conv.membership.isDeleted || conv.isDeleted) ? "[Удалено]" : lastMsgPreview}
+                        {(conv.membership.isDeleted || conv.isDeleted) ? t('chat.deleted') || '[Удалено]' : lastMsgPreview}
                       </p>
                     </div>
                     {unread > 0 && !conv.membership.isMuted && (
@@ -336,6 +336,29 @@ export function ConversationList({
                     )}
                   </div>
                 </div>
+
+                {/* Action buttons for archived/deleted items (visible without right-click) */}
+                {filter === "archived" && (
+                  <div className="flex items-center gap-1 shrink-0 ml-1">
+                    {(conv.membership.isDeleted || conv.isDeleted) ? (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleOperation(() => onRestore?.(conv._id) || Promise.resolve(), conv._id); }}
+                        className="p-1.5 rounded-lg transition-colors hover:bg-[var(--sidebar-item-hover)]"
+                        title={t('chat.restore') || 'Восстановить'}
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" style={{ color: "var(--primary)" }} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleOperation(() => onToggleArchive?.(conv._id) || Promise.resolve(), conv._id); }}
+                        className="p-1.5 rounded-lg transition-colors hover:bg-[var(--sidebar-item-hover)]"
+                        title={t('chat.unarchive') || 'Разархивировать'}
+                      >
+                        <Archive className="w-3.5 h-3.5" style={{ color: "var(--primary)" }} />
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               </ContextMenuTrigger>
 
@@ -355,7 +378,7 @@ export function ConversationList({
                     className="flex items-center gap-2"
                   >
                     <RotateCcw className="w-4 h-4" />
-                    Восстановить
+                    {t('chat.restore') || 'Восстановить'}
                   </ContextMenuItem>
                 ) : (
                   <>
@@ -376,12 +399,12 @@ export function ConversationList({
                       {conv.membership.isMuted ? (
                         <>
                           <Volume2 className="w-4 h-4" />
-                          Включить звук
+                          {t('chat.unmute') || 'Включить звук'}
                         </>
                       ) : (
                         <>
                           <VolumeX className="w-4 h-4" />
-                          Отключить звук
+                          {t('chat.mute') || 'Отключить звук'}
                         </>
                       )}
                     </ContextMenuItem>
@@ -392,7 +415,7 @@ export function ConversationList({
                       className="flex items-center gap-2"
                     >
                       <Archive className="w-4 h-4" />
-                      {(conv.membership.isArchived || conv.isArchived) ? "Разархивировать" : "Архивировать"}
+                      {(conv.membership.isArchived || conv.isArchived) ? t('chat.unarchive') || 'Разархивировать' : t('chat.archive') || 'Архивировать'}
                     </ContextMenuItem>
                     
                     <ContextMenuSeparator />
