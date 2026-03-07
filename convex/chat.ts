@@ -143,11 +143,8 @@ export const getMyConversations = query({
           console.log(`[getMyConversations] Skipping conversation ${conv._id} - different org (${conv.organizationId} vs ${args.organizationId})`);
           return null;
         }
-        // Skip conversations deleted/archived by THIS user (per-user flags on membership)
-        if (m.isDeleted || m.isArchived) {
-          console.log(`[getMyConversations] Skipping conversation ${conv._id} - user deleted/archived (per-user)`);
-          return null;
-        }
+        // Include archived/deleted conversations with their flags so the client
+        // can show them in the "archived" tab and allow restore/unarchive
 
         console.log(`[getMyConversations] Including conversation: ${conv.name || conv._id} (type: ${conv.type}, unread: ${m.unreadCount})`);
 

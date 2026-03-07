@@ -69,6 +69,12 @@ export function Sidebar() {
 
   React.useEffect(() => setMounted(true), []);
 
+  // Get user's organization
+  const userOrg = useQuery(
+    api.organizations.getMyOrganization,
+    mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
+  );
+
   // Unread task notifications badge
   const notifications = useQuery(
     api.notifications.getUserNotifications,
@@ -349,52 +355,10 @@ export function Sidebar() {
             }}
           >
             <p className="text-[10px] font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-              {t('sidebar.orgName')}
+              {userOrg?.name ?? t('sidebar.orgName')}
             </p>
             <p className="text-[9px] truncate" style={{ color: "var(--text-muted)" }}>
               {t('sidebar.orgSubtitle')}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* User Info */}
-      <div className="border-t p-3" style={{ borderColor: "var(--sidebar-border)" }}>
-        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <Avatar 
-            className="w-8 h-8 shrink-0 ring-2 transition-all duration-200"
-            style={{
-              borderColor: "var(--primary)",
-              opacity: 0.3,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.6";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "0.3";
-            }}
-          >
-            {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-            <AvatarFallback 
-              className="text-xs text-white font-bold"
-              style={{
-                background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)",
-              }}
-            >
-              {user?.name ? getInitials(user.name) : "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div
-            className={cn(
-              "min-w-0 flex-1",
-              collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
-            )}
-            style={{
-              transition: "opacity 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 100ms, width 600ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-            }}
-          >
-            <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
-              {user?.name ?? "User"}
             </p>
           </div>
         </div>

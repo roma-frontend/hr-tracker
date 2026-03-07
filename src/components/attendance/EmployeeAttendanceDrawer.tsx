@@ -143,7 +143,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
 
             {/* Stats */}
             {monthlyStats && (
-              <div className="grid grid-cols-4 gap-0 border-b flex-shrink-0" style={{ borderColor: "var(--border)" }}>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-b flex-shrink-0" style={{ borderColor: "var(--border)" }}>
                 {[
                   { label: "Days", value: monthlyStats.totalDays, color: "text-blue-600" },
                   { label: "Late", value: monthlyStats.lateDays, color: "text-rose-500" },

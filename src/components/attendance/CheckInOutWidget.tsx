@@ -109,7 +109,7 @@ const { user } = useAuthStore();
 
         {/* Check In/Out Times */}
         {todayStatus && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-3 rounded-lg border" style={{ borderColor: "var(--border)" }}>
               <div className="flex items-center gap-2 mb-1">
                 <LogIn className="w-4 h-4 text-green-500" />

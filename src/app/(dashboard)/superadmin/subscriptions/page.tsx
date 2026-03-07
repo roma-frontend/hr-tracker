@@ -76,15 +76,15 @@ export default function SubscriptionsManagementPage() {
           <CardHeader>
             <div className="flex items-center gap-2 text-red-500">
               <ShieldAlert className="w-6 h-6" />
-              <CardTitle>Access Denied</CardTitle>
+              <CardTitle>{t('superadmin.subscriptions.accessDenied')}</CardTitle>
             </div>
             <CardDescription>
-              This page is only accessible to the superadmin.
+              {t('ui.onlySuperadminCanAccess')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Subscription management features are restricted to authorized personnel only.
+              {t('superadmin.subscriptions.accessDenied')}
             </p>
           </CardContent>
         </Card>
@@ -94,7 +94,7 @@ export default function SubscriptionsManagementPage() {
 
   const handleCreateSubscription = async () => {
     if (!selectedOrganization) {
-      toast.error("Please select an organization");
+      toast.error(t('superadmin.subscriptions.selectOrganization'));
       return;
     }
 
@@ -107,13 +107,13 @@ export default function SubscriptionsManagementPage() {
         notes: notes || undefined,
       });
 
-      toast.success(`Subscription ${result.action} successfully!`);
+      toast.success(t('superadmin.subscriptions.createSuccess'));
       setShowForm(false);
       setSelectedOrganization("");
       setCustomPrice("");
       setNotes("");
     } catch (error: any) {
-      toast.error(error.message || "Failed to create subscription");
+      toast.error(error.message || t('superadmin.subscriptions.failedToCreate'));
     } finally {
       setLoading(false);
     }
@@ -177,7 +177,7 @@ export default function SubscriptionsManagementPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="organization">Select Organization</Label>
+              <Label htmlFor="organization">{t('superadmin.subscriptions.selectOrganization')}</Label>
               <select
                 id="organization"
                 value={selectedOrganization}
@@ -186,56 +186,56 @@ export default function SubscriptionsManagementPage() {
               >
                 <option value="">
                   {allOrganizations === undefined
-                    ? "Loading organizations..."
+                    ? t('superadmin.subscriptions.loadingOrganizations')
                     : allOrganizations.length === 0
-                      ? "No organizations found"
-                      : "-- Select an organization --"}
+                      ? t('superadmin.subscriptions.noOrganizationsFound')
+                      : t('superadmin.subscriptions.selectOrganizationPlaceholder')}
                 </option>
                 {allOrganizations?.map((org: any) => (
                   <option key={org._id} value={org._id}>
-                    {org.name} ({org.slug}) - {org.totalEmployees || 0} employees
+                    {org.name} ({org.slug}) - {org.totalEmployees || 0} {t('superadmin.subscriptions.employees')}
                   </option>
                 ))}
               </select>
               {allOrganizations !== undefined && (
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Found {allOrganizations.length} organization(s)
+                  {t('superadmin.subscriptions.foundCount', { count: allOrganizations.length })}
                 </p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="plan">Plan</Label>
+              <Label htmlFor="plan">{t('superadmin.subscriptions.selectPlanLabel')}</Label>
               <select
                 id="plan"
                 value={selectedPlan}
                 onChange={(e) => setSelectedPlan(e.target.value)}
                 className="w-full mt-1.5 px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--text-primary)]"
               >
-                <option value="enterprise">Enterprise (Custom)</option>
+                <option value="enterprise">Enterprise</option>
                 <option value="professional">Professional</option>
                 <option value="starter">Starter</option>
               </select>
             </div>
 
             <div>
-              <Label htmlFor="price">Custom Price (Optional)</Label>
+              <Label htmlFor="price">{t('superadmin.subscriptions.customPrice')}</Label>
               <Input
                 id="price"
                 type="number"
-                placeholder="e.g., 299"
+                placeholder={t('superadmin.subscriptions.customPricePlaceholder')}
                 value={customPrice}
                 onChange={(e) => setCustomPrice(e.target.value)}
                 className="mt-1.5"
               />
-              <p className="text-xs text-[var(--text-muted)] mt-1">Leave empty for standard pricing</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">{t('superadmin.subscriptions.leaveEmptyForStandardPricing')}</p>
             </div>
 
             <div>
-              <Label htmlFor="notes">Internal Notes</Label>
+              <Label htmlFor="notes">{t('superadmin.subscriptions.internalNotes')}</Label>
               <Textarea
                 id="notes"
-                placeholder="Contract details, special terms, etc."
+                placeholder={t('superadmin.subscriptions.notesPlaceholder')}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="mt-1.5"
@@ -248,7 +248,7 @@ export default function SubscriptionsManagementPage() {
               disabled={loading || !selectedOrganization}
               className="w-full"
             >
-              {loading ? "Creating..." : "Create Subscription"}
+              {loading ? t('superadmin.subscriptions.creatingSubscription') : t('superadmin.subscriptions.createSubscriptionBtn')}
             </Button>
           </CardContent>
         </Card>
@@ -259,23 +259,23 @@ export default function SubscriptionsManagementPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            All Subscriptions
+            {t('superadmin.subscriptions.allSubscriptions')}
           </CardTitle>
-          <CardDescription>Total: {subscriptions?.length || 0}</CardDescription>
+          <CardDescription>{subscriptions?.length || 0}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Organization</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Employees</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Plan</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Status</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Type</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Price</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Expires</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">Actions</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.organization')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.employees')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.plan')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.status')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.type')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.price')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.expires')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -307,11 +307,11 @@ export default function SubscriptionsManagementPage() {
                     <td className="py-3 px-2">
                       {sub.isManual ? (
                         <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">
-                          Manual
+                          {t('superadmin.subscriptions.manual')}
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-                          Stripe
+                          {t('superadmin.subscriptions.stripe')}
                         </Badge>
                       )}
                     </td>

@@ -195,9 +195,9 @@ export function EmployeesClient() {
     <div className="space-y-6">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>👥 {t('common.employees')}</h1>
+        className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{t('common.employees')}</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
             {stats.total} {t('employees.total')} · {stats.staff} {t('employeeTypes.staff')} · {stats.contractors} {t('employeeTypes.contractors')}
           </p>
@@ -383,28 +383,6 @@ export function EmployeesClient() {
                         className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
                         style={{ background: "var(--card)", borderColor: emp.isActive ? "var(--border)" : "rgba(239,68,68,0.2)", opacity: emp.isActive ? 1 : 0.6 }}
                       >
-                          <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {canEditEmployee(emp) && (
-                              <>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setEditEmployee(emp as any); }}
-                                  className="p-2 rounded-lg bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 transition-colors"
-                                  title={t('common.edit')}
-                                >
-                                  <Edit2 className="w-5 h-5" />
-                                </button>
-                                {canDeleteEmployee(emp) && (
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm(emp._id); }}
-                                    className="p-2 rounded-lg bg-red-500/20 text-red-500 hover:bg-red-500/30 transition-colors"
-                                    title={t('employees.deactivate')}
-                                  >
-                                    <Trash2 className="w-5 h-5" />
-                                  </button>
-                                )}
-                              </>
-                            )}
-                          </div>
                           <div className="flex items-start gap-3 mb-4">
                             <AvatarUpload userId={emp._id} currentUrl={emp.avatarUrl} name={emp.name} size="md" readonly={!canManage && emp._id !== user?.id} />
                             <div className="min-w-0 flex-1">
@@ -440,10 +418,32 @@ export function EmployeesClient() {
                                 </span>
                               )}
                             </div>
-                            {isAdmin
-                              ? <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{emp.travelAllowance.toLocaleString()} AMD</span>
-                              : <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}>{t(presence.labelKey)}</span>
-                            }
+                            <div className="flex items-center gap-1">
+                              {canEditEmployee(emp) && (
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setEditEmployee(emp as any); }}
+                                    className="p-1.5 rounded-md text-amber-500 hover:bg-amber-500/20 transition-colors"
+                                    title={t('common.edit')}
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  {canDeleteEmployee(emp) && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(emp._id); }}
+                                      className="p-1.5 rounded-md text-red-500 hover:bg-red-500/20 transition-colors"
+                                      title={t('employees.deactivate')}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                              {isAdmin
+                                ? <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{emp.travelAllowance.toLocaleString()} AMD</span>
+                                : <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}>{t(presence.labelKey)}</span>
+                              }
+                            </div>
                           </div>
                           {!emp.isActive && (
                             <div className="absolute inset-0 rounded-2xl flex items-center justify-center" style={{ background: "rgba(0,0,0,0.05)" }}>
@@ -467,14 +467,13 @@ export function EmployeesClient() {
             {viewMode === "list" && (
               <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
                 {/* Table header */}
-                <div className="grid grid-cols-12 gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
+                <div className="hidden sm:grid grid-cols-12 gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
                   style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>
                   <div className="col-span-4">{t('dashboard.employee')}</div>
                   <div className="col-span-2">{t('employeeInfo.department')}</div>
                   <div className="col-span-2">{t('roles.supervisor')}</div>
                   <div className="col-span-2">{t('dashboard.status')}</div>
-                  <div className="col-span-1" style={{textAlign: "center"}}>{t('dashboard.type')}</div>
-                  <div className="col-span-1" style={{textAlign: "right"}}>🔧 Действия</div>
+                  <div className="col-span-2" style={{textAlign: "center"}}>{t('dashboard.type')}</div>
                 </div>
                 <AnimatePresence mode="popLayout">
                   {filtered.map((emp, i) => {
@@ -488,18 +487,18 @@ export function EmployeesClient() {
                         initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }} transition={{ delay: i * 0.02 }}
                         onClick={() => router.push(`/employees/${emp._id}`)}
-                        className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center group cursor-pointer border-t transition-colors hover:bg-[var(--background-subtle)]"
+                        className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-[var(--background-subtle)] relative"
                         style={{ borderColor: "var(--border)", opacity: emp.isActive ? 1 : 0.5 }}
                       >
                           {/* Employee name + avatar */}
-                          <div className="col-span-4 flex items-center gap-3 min-w-0">
+                          <div className="sm:col-span-4 flex items-center gap-3 min-w-0">
                             <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-xs font-bold">
                               {emp.avatarUrl
                                 ? <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 : emp.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
                               }
                             </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <p className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>{emp.name}</p>
                               <div className="flex items-center gap-1.5">
                                 <span className="inline-flex items-center gap-0.5 text-xs font-medium" style={{ color: roleConf.color }}>
@@ -507,60 +506,80 @@ export function EmployeesClient() {
                                 </span>
                               </div>
                             </div>
+                            {/* Mobile-only action chevron */}
+                            <ChevronRight className="w-4 h-4 sm:hidden flex-shrink-0" style={{ color: "var(--text-muted)" }} />
                           </div>
 
-                          {/* Department */}
-                          <div className="col-span-2 text-sm truncate" style={{ color: "var(--text-muted)" }}>
-                            {emp.department ?? "—"}
-                          </div>
-
-                          {/* Supervisor */}
-                          <div className="col-span-2 text-sm truncate text-blue-500 font-medium">
-                            {emp.supervisorId
-                              ? supervisors?.find(s => s._id === emp.supervisorId)?.name ?? "—"
-                              : "—"}
-                          </div>
-
-                          {/* Presence status */}
-                          <div className="col-span-2">
-                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${presence.cls}`}>
+                          {/* Mobile info row */}
+                          <div className="flex flex-wrap items-center gap-2 sm:hidden">
+                            {emp.department && (
+                              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>
+                                <Building2 className="w-3 h-3 inline mr-1" />{emp.department}
+                              </span>
+                            )}
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}>
                               {t(presence.labelKey)}
                             </span>
-                          </div>
-
-                          {/* Type */}
-                          <div className="col-span-1" style={{textAlign: "center"}}>
                             <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                               style={{ background: typeConf.bg, color: typeConf.color }}>
                               {t(typeConf.labelKey)}
                             </span>
                           </div>
 
-                          {/* Actions */}
-                          <div className="col-span-1 flex items-center justify-end gap-2">
+                          {/* Department - desktop only */}
+                          <div className="hidden sm:block sm:col-span-2 text-sm truncate" style={{ color: "var(--text-muted)" }}>
+                            {emp.department ?? "—"}
+                          </div>
+
+                          {/* Supervisor - desktop only */}
+                          <div className="hidden sm:block sm:col-span-2 text-sm truncate text-blue-500 font-medium">
+                            {emp.supervisorId
+                              ? supervisors?.find(s => s._id === emp.supervisorId)?.name ?? "—"
+                              : "—"}
+                          </div>
+
+                          {/* Presence status - desktop only */}
+                          <div className="hidden sm:block sm:col-span-2">
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${presence.cls}`}>
+                              {t(presence.labelKey)}
+                            </span>
+                          </div>
+
+                          {/* Type - desktop only */}
+                          <div className="hidden sm:block sm:col-span-2" style={{textAlign: "center"}}>
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                              style={{ background: typeConf.bg, color: typeConf.color }}>
+                              {t(typeConf.labelKey)}
+                            </span>
+                          </div>
+
+                          {/* Actions — floating overlay on hover */}
+                          <div className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-md border"
+                            style={{ background: "var(--card)", borderColor: "var(--border)" }}
+                          >
                             <button
                               onClick={(e) => { e.stopPropagation(); router.push(`/employees/${emp._id}`); }}
-                              className="p-2 rounded-lg text-blue-500 bg-blue-500/10 hover:bg-blue-500/20 transition-colors"
+                              className="p-1.5 rounded-md text-blue-500 hover:bg-blue-500/20 transition-colors"
                               title={t('common.view')}
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-3.5 h-3.5" />
                             </button>
                             {canEditEmployee(emp) && (
                               <>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setEditEmployee(emp as any); }}
-                                  className="p-2 rounded-lg text-amber-500 bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+                                  className="p-1.5 rounded-md text-amber-500 hover:bg-amber-500/20 transition-colors"
                                   title={t('common.edit')}
                                 >
-                                  <Edit2 className="w-4 h-4" />
+                                  <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 {canDeleteEmployee(emp) && (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm(emp._id); }}
-                                    className="p-2 rounded-lg text-red-500 bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                                    className="p-1.5 rounded-md text-red-500 hover:bg-red-500/20 transition-colors"
                                     title={t('employees.deactivate')}
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 )}
                               </>

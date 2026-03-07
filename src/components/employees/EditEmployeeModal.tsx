@@ -237,7 +237,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                   <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
                     <Shield className="w-3.5 h-3.5" /> {t('labels.role')}
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {ROLES.map((r) => (
                       <button
                         key={r.value}
@@ -264,7 +264,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
                 <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
                   <Briefcase className="w-3.5 h-3.5" /> Employee Type
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {["staff", "contractor"].map((type) => (
                     <button
                       key={type}
@@ -287,7 +287,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
               </div>
 
               {/* Department & Position */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
                     <Building2 className="w-3.5 h-3.5" /> {t('labels.department')}
@@ -336,7 +336,7 @@ export function EditEmployeeModal({ employee, open, onClose, currentUserRole }: 
               {canEditRole && (
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('labels.leaveBalances')}</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {[
                       { key: "paidLeaveBalance", label: "Paid", color: "#2563eb" },
                       { key: "sickLeaveBalance", label: "Sick", color: "#ef4444" },

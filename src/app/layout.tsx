@@ -1,9 +1,10 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { 
+import {
   IBM_Plex_Sans,
   Montserrat,
   Work_Sans,
-  Inter 
+  Inter,
+  Noto_Sans_Armenian,
 } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
@@ -19,7 +20,7 @@ import { MaintenanceAutoLogout } from "@/components/MaintenanceAutoLogout";
 // Corporate & Professional - IBM PLEX SANS
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   display: "swap",
   preload: true,
   weight: ["400", "500", "600", "700"],
@@ -30,7 +31,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 // Modern & Bold - MONTSERRAT
 const montserrat = Montserrat({
   variable: "--font-montserrat",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   display: "swap",
   preload: true,
   weight: ["400", "500", "600", "700", "800", "900"],
@@ -41,7 +42,7 @@ const montserrat = Montserrat({
 // Clean & Serious - WORK SANS
 const workSans = Work_Sans({
   variable: "--font-work-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   display: "swap",
   preload: true,
   weight: ["400", "500", "600", "700", "800"],
@@ -51,12 +52,22 @@ const workSans = Work_Sans({
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   display: "swap",
   preload: true,
   weight: ["400", "500", "600"],
   fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
   adjustFontFallback: true,
+});
+
+// Armenian script support
+const notoSansArmenian = Noto_Sans_Armenian({
+  variable: "--font-armenian",
+  subsets: ["armenian"],
+  display: "swap",
+  preload: false,
+  weight: ["400", "500", "600", "700"],
+  fallback: ["sans-serif"],
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://hroffice.app";
@@ -270,7 +281,7 @@ export default function RootLayout({
           async
         />
       </head>
-      <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} antialiased`}>
+      <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}>
         <MonitoringProvider>
           <SessionProvider>
             <I18nProvider>

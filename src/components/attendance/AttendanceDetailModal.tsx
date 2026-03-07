@@ -238,7 +238,7 @@ record, open, onClose }: AttendanceDetailModalProps) {
                     <TrendingUp className="w-4 h-4 text-sky-400" />
                     This Month
                   </h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="text-center">
                       <p className="text-xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Days worked</p>

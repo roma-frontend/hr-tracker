@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { DEPARTMENTS, getTravelAllowance } from "@/lib/types";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useQuery } from "convex/react";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 const ADMIN_EMAIL = "romangulanyan@gmail.com";
 
@@ -34,6 +36,13 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
   const createUser = useMutation(api.users.createUser);
   const currentUser = useAuthStore((s) => s.user);
   const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
+  const isSuperadmin = currentUser?.role === "superadmin";
+
+  // Fetch all organizations for superadmin to choose which org to add employee to
+  const organizations = useQuery(
+    api.organizations.getAllOrganizations,
+    isSuperadmin ? {} : "skip"
+  );
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,6 +51,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<"admin" | "supervisor" | "employee">("employee");
   const [type, setType] = useState<"staff" | "contractor">("staff");
+  const [selectedOrgId, setSelectedOrgId] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -50,7 +60,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
   useEffect(() => {
     if (open) {
       setName(""); setEmail(""); setDepartment(""); setPosition("");
-      setPhone(""); setType("staff"); setRole("employee"); setErrors({});
+      setPhone(""); setType("staff"); setRole("employee"); setSelectedOrgId(""); setErrors({});
     }
   }, [open]);
 
@@ -67,6 +77,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t('errors.invalidEmail');
     if (!department) errs.department = t('employees.department') + ' ' + t('errors.required').toLowerCase();
     if (!position.trim()) errs.position = t('employees.position') + ' ' + t('errors.required').toLowerCase();
+    if (isSuperadmin && !selectedOrgId) errs.organization = t('employees.organization') + ' ' + t('errors.required').toLowerCase();
     return errs;
   };
 
@@ -101,6 +112,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
         position,
         employeeType: type,
         phone: phone || undefined,
+        ...(isSuperadmin && selectedOrgId ? { organizationId: selectedOrgId as Id<"organizations"> } : {}),
       });
       toast.success(t('success.created'));
       onClose();
@@ -116,10 +128,28 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('employees.addEmployee')}</DialogTitle>
-          <DialogDescription>{'Enter the employee details'}</DialogDescription>
+          <DialogDescription>{t('employees.enterDetails')}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Organization (superadmin only) */}
+          {isSuperadmin && (
+            <div className="space-y-1.5">
+              <Label>{t('employees.organization')} *</Label>
+              <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
+                <SelectTrigger className={errors.organization ? "border-[var(--destructive)]" : ""}>
+                  <SelectValue placeholder={t('employees.selectOrganization')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations?.map((org: any) => (
+                    <SelectItem key={org._id} value={org._id}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.organization && <p className="text-xs text-[var(--destructive)]">{errors.organization}</p>}
+            </div>
+          )}
+
           {/* Name */}
           <div className="space-y-1.5">
             <Label htmlFor="emp-name">{t('common.name')} *</Label>
@@ -141,12 +171,12 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
             />
             {errors.email && <p className="text-xs text-[var(--destructive)]">{errors.email}</p>}
             <p className="text-xs text-[var(--text-muted)]">
-              {'Add "contractor" in email if this is a contractor (auto-detected)'}
+              {t('employees.contractorHint')}
             </p>
           </div>
 
           {/* Department + Position */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>{t('employees.department')} *</Label>
               <Select value={department} onValueChange={setDepartment}>
@@ -200,18 +230,18 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
           {/* Employee type */}
           <div className="space-y-1.5">
-            <Label>{'Employee Type'}</Label>
+            <Label>{t('employees.employeeType')}</Label>
             <div className="grid grid-cols-2 gap-2">
-              {(["staff", "contractor"] as const).map((t) => (
+              {(["staff", "contractor"] as const).map((empType) => (
                 <button
-                  key={t} type="button" onClick={() => setType(t)}
-                  className={`px-4 py-2.5 rounded-lg border text-sm font-medium capitalize transition-all ${
-                    type === t
+                  key={empType} type="button" onClick={() => setType(empType)}
+                  className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    type === empType
                       ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--text-primary)]"
                       : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-subtle)]"
                   }`}
                 >
-                  {t}
+                  {t(`employees.${empType}`)}
                 </button>
               ))}
             </div>
@@ -224,7 +254,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
             className="rounded-lg bg-[var(--background-subtle)] border border-[var(--border)] p-3 flex items-center justify-between"
           >
             <div>
-              <p className="text-xs text-[var(--text-muted)]">Travel Allowance</p>
+              <p className="text-xs text-[var(--text-muted)]">{t('employees.travelAllowance')}</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
                 {type === "contractor" ? t('employeeTypes.contractor') : t('employeeTypes.staff')} type
               </p>
@@ -235,7 +265,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
           <DialogFooter className="gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Adding...' : t('employees.addEmployee')}
+              {submitting ? t('employees.adding') : t('employees.addEmployee')}
             </Button>
           </DialogFooter>
         </form>

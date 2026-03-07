@@ -121,7 +121,7 @@ export default function OrganizationsPage() {
             <TabsTrigger value="organizations" className="flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               <span className="hidden sm:inline">{t('superadmin.organizations.title')}</span>
-              <span className="sm:hidden text-xs">(${organizations?.length || 0})</span>
+              <span className="sm:hidden text-xs">({organizations?.length || 0})</span>
             </TabsTrigger>
             <TabsTrigger value="announcements" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />

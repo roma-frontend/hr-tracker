@@ -27,22 +27,25 @@ const LeaveHeatmap = dynamic(
   () => import("@/components/analytics/LeaveHeatmap").then(mod => ({ default: mod.LeaveHeatmap })),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
-import { Users, Clock, CheckCircle, XCircle, AlertCircle, TrendingUp } from "lucide-react";
-import { redirect } from "next/navigation";
+import { Users, Clock, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { PlanGate } from "@/components/subscription/PlanGate";
 
 export default function AnalyticsPage() {
-  
+
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
+  const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
 
   // Only admin and supervisor can access
-  if (user && user.role === "employee") {
-    redirect("/dashboard");
-  }
+  React.useEffect(() => {
+    if (user && user.role === "employee") {
+      router.replace("/dashboard");
+    }
+  }, [user, router]);
 
   // Determine organizationId to query
   // - For admin: ALWAYS use their organizationId (not selectedOrgId)
@@ -55,20 +58,22 @@ export default function AnalyticsPage() {
   const analytics = useQuery(
     api.analytics.getAnalyticsOverview,
     mounted && user?.id
-      ? { organizationId: orgIdToQuery as Id<"organizations"> | undefined }
+      ? (orgIdToQuery
+          ? { organizationId: orgIdToQuery as Id<"organizations"> }
+          : {})
       : "skip"
   );
 
   if (!analytics) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
         <div className="h-10 bg-[var(--background-subtle)] animate-pulse rounded-lg w-64" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="h-32 bg-[var(--background-subtle)] animate-pulse rounded-2xl" />
           ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           {[1, 2].map(i => (
             <div key={i} className="h-96 bg-[var(--background-subtle)] animate-pulse rounded-2xl" />
           ))}
@@ -96,7 +101,7 @@ export default function AnalyticsPage() {
       title={t('planGate.analyticsTitle')}
       description={t('planGate.analyticsDescription')}
     >
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-[var(--text-primary)]">
@@ -108,7 +113,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         <StatsCard
           title={t('titles.totalEmployees')}
           value={totalEmployees}
@@ -136,46 +141,46 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Secondary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+        <div className="bg-[var(--background)] rounded-2xl p-4 sm:p-6 shadow-lg border border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">{t('analytics.pendingLeaves')}</p>
-              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-1">{pendingLeaves}</p>
+              <p className="text-xs sm:text-sm text-[var(--text-muted)]">{t('analytics.pendingLeaves')}</p>
+              <p className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-1">{pendingLeaves}</p>
             </div>
-            <div className="p-3 bg-yellow-500/20 dark:bg-yellow-500/30 rounded-xl">
-              <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-500" />
+            <div className="p-2 sm:p-3 bg-yellow-500/20 dark:bg-yellow-500/30 rounded-xl">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600 dark:text-yellow-500" />
             </div>
           </div>
         </div>
 
-        <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
+        <div className="bg-[var(--background)] rounded-2xl p-4 sm:p-6 shadow-lg border border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">{t('analytics.approvedLeaves')}</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-500 mt-1">{approvedLeaves}</p>
+              <p className="text-xs sm:text-sm text-[var(--text-muted)]">{t('analytics.approvedLeaves')}</p>
+              <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-500 mt-1">{approvedLeaves}</p>
             </div>
-            <div className="p-3 bg-green-500/20 dark:bg-green-500/30 rounded-xl">
-              <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-500" />
+            <div className="p-2 sm:p-3 bg-green-500/20 dark:bg-green-500/30 rounded-xl">
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-500" />
             </div>
           </div>
         </div>
 
-        <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
+        <div className="bg-[var(--background)] rounded-2xl p-4 sm:p-6 shadow-lg border border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">{t('analytics.approvalRate')}</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-500 mt-1">{approvalRate}%</p>
+              <p className="text-xs sm:text-sm text-[var(--text-muted)]">{t('analytics.approvalRate')}</p>
+              <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-500 mt-1">{approvalRate}%</p>
             </div>
-            <div className="p-3 bg-blue-500/20 dark:bg-blue-500/30 rounded-xl">
-              <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-500" />
+            <div className="p-2 sm:p-3 bg-blue-500/20 dark:bg-blue-500/30 rounded-xl">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-500" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         <LeavesTrendChart leaves={allLeaves} />
         <DepartmentStats users={allUsers} />
       </div>

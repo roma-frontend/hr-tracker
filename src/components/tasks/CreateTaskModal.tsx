@@ -126,7 +126,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
           </div>
 
           {/* Priority + Deadline row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('task.priority')}</label>
               <select

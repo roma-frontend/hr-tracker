@@ -219,7 +219,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             </div>
 
             {/* Meta info */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Assigned To</h3>
                 <div className="flex items-center gap-2">

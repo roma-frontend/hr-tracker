@@ -274,7 +274,7 @@ export function Navbar() {
               <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
               {/* CSS transition instead of motion.div — no JS-driven layout recalc */}
               <div
-                className="absolute right-0 top-full mt-2 w-80 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-20 overflow-hidden"
+                className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-20 overflow-hidden"
                 style={{
                   animation: "notif-dropdown 0.15s ease both",
                 }}
@@ -378,7 +378,7 @@ export function Navbar() {
             align="end"
             sideOffset={8}
             collisionPadding={{ top: 72, bottom: 16, left: 16, right: 16 }}
-            className="w-80 max-h-[calc(100vh-90px)] overflow-y-auto bg-[var(--card)] border-[var(--border)] shadow-xl"
+            className="w-[calc(100vw-2rem)] sm:w-80 max-h-[calc(100vh-90px)] overflow-y-auto bg-[var(--card)] border-[var(--border)] shadow-xl"
           >
             {/* Productivity Widgets */}
             {mounted && user && (
@@ -530,7 +530,7 @@ export function Navbar() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto w-80 bg-[var(--card)] border border-[#2563eb]/40 rounded-2xl shadow-2xl shadow-[#2563eb]/20 overflow-hidden"
+          className="pointer-events-auto w-[calc(100vw-2rem)] sm:w-80 bg-[var(--card)] border border-[#2563eb]/40 rounded-2xl shadow-2xl shadow-[#2563eb]/20 overflow-hidden"
           style={{ animation: "toast-slide-in 0.3s cubic-bezier(0.22,1,0.36,1) both" }}
         >
           {/* Progress bar — CSS animation instead of motion.div width */}

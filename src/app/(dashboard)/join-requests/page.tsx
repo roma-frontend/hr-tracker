@@ -87,9 +87,9 @@ export default function JoinRequestsPage() {
         role: "employee",
         passwordHash: Math.random().toString(36).slice(2) + Date.now().toString(36),
       });
-      toast.success("✅ Request approved! User account created.");
+      toast.success(t('joinRequestsPage.requestApproved'));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to approve");
+      toast.error(e instanceof Error ? e.message : t('joinRequestsPage.failedToApprove'));
     } finally {
       setApproving(null);
     }
@@ -100,11 +100,11 @@ export default function JoinRequestsPage() {
     setRejecting(inviteId);
     try {
       await rejectRequest({ adminId: userId, inviteId, reason: rejectReason || undefined });
-      toast.success("Request rejected.");
+      toast.success(t('joinRequestsPage.requestRejected'));
       setRejectingId(null);
       setRejectReason("");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to reject");
+      toast.error(e instanceof Error ? e.message : t('joinRequestsPage.failedToReject'));
     } finally {
       setRejecting(null);
     }
@@ -118,7 +118,7 @@ export default function JoinRequestsPage() {
       const link = `${window.location.origin}/register?invite=${result.token}`;
       setInviteLink(link);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to generate link");
+      toast.error(e instanceof Error ? e.message : t('joinRequestsPage.failedToGenerateLink'));
     } finally {
       setGeneratingLink(false);
     }
@@ -128,18 +128,17 @@ export default function JoinRequestsPage() {
     if (!inviteLink) return;
     await navigator.clipboard.writeText(inviteLink);
     setInviteCopied(true);
-    toast.success("Invite link copied!");
+    toast.success(t('joinRequestsPage.inviteLinkCopied'));
     setTimeout(() => setInviteCopied(false), 2000);
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-5xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Users className="w-6 h-6 text-[var(--primary)]" />
-            Join Requests
+            {t('joinRequestsPage.title')}
             {(pendingCount ?? 0) > 0 && (
               <span className="ml-1 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white">
                 {pendingCount}
@@ -147,7 +146,7 @@ export default function JoinRequestsPage() {
             )}
           </h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            Manage requests from employees who want to join your organization
+            {t('joinRequestsPage.subtitle')}
           </p>
         </div>
 
@@ -161,7 +160,7 @@ export default function JoinRequestsPage() {
             className="gap-1.5"
           >
             {generatingLink ? <ShieldLoader size="xs" variant="inline" /> : <Link2 className="w-4 h-4" />}
-            Generate Invite Link
+            {t('joinRequestsPage.generateInviteLink')}
           </Button>
           {inviteLink && (
             <div className="flex items-center gap-2">
@@ -191,7 +190,7 @@ export default function JoinRequestsPage() {
                 color: filter === f ? "#fff" : "var(--text-muted)",
               }}
             >
-              {f}
+              {t(`joinRequestsPage.filter${f.charAt(0).toUpperCase() + f.slice(1)}`)}
             </button>
           ))}
         </div>
@@ -209,7 +208,7 @@ export default function JoinRequestsPage() {
       {/* Request cards */}
       {requests === undefined ? (
         <div className="flex items-center justify-center py-16 gap-2 text-[var(--text-muted)]">
-          <ShieldLoader size="md" message="Loading requests…" />
+          <ShieldLoader size="md" message={t('joinRequestsPage.loadingRequests')} />
         </div>
       ) : filtered.length === 0 ? (
         <Card>
@@ -217,19 +216,19 @@ export default function JoinRequestsPage() {
             <Users className="w-10 h-10 text-[var(--text-muted)] opacity-40" />
             <div className="text-center space-y-2">
               <p className="text-[var(--text-muted)] font-medium">
-                {filter === "pending" ? "No pending join requests" : `No ${filter} requests`}
+                {filter === "pending" ? t('joinRequestsPage.noPendingRequests') : t('joinRequestsPage.noFilteredRequests', { filter: t(`joinRequestsPage.filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`).toLowerCase() })}
               </p>
               <p className="text-xs text-[var(--text-muted)]">
-                Share your invite link to let employees join your organization
+                {t('joinRequestsPage.shareInviteLink')}
               </p>
               {filter === "pending" && (
                 <p className="text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
-                  💡 Tip: Check other filters to see approved or rejected requests
+                  {t('joinRequestsPage.tipCheckFilters')}
                 </p>
               )}
               {!user?.organizationId && user?.role === "admin" && (
                 <p className="text-xs text-amber-600 bg-amber-50 rounded px-3 py-2 mt-2 border border-amber-200">
-                  ⚠️ Your organization hasn't been assigned yet. Contact superadmin.
+                  {t('joinRequestsPage.orgNotAssigned')}
                 </p>
               )}
             </div>
@@ -287,7 +286,7 @@ export default function JoinRequestsPage() {
                                   onClick={() => handleReject(req._id as Id<"organizationInvites">)}
                                   disabled={rejecting === req._id}
                                 >
-                                  {rejecting === req._id ? <ShieldLoader size="xs" variant="inline" /> : "Confirm"}
+                                  {rejecting === req._id ? <ShieldLoader size="xs" variant="inline" /> : t('joinRequestsPage.confirm')}
                                 </Button>
                                 <Button size="sm" variant="ghost" onClick={() => setRejectingId(null)}>{t('common.cancel')}</Button>
                               </div>
@@ -321,7 +320,7 @@ export default function JoinRequestsPage() {
 
                         {req.status === "rejected" && req.rejectionReason && (
                           <p className="text-xs text-[var(--text-muted)] italic">
-                            Reason: {req.rejectionReason}
+                            {t('joinRequestsPage.reason')}: {req.rejectionReason}
                           </p>
                         )}
                       </div>

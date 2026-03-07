@@ -85,7 +85,7 @@ export function EmployeeDashboard() {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4 sm:space-y-6">
       {/* Welcome header */}
       <motion.div variants={itemVariants}>
         <h2 className="text-2xl font-bold text-[var(--text-primary)]">
@@ -228,7 +228,7 @@ export function EmployeeDashboard() {
             <CardTitle className="text-base">{t('dashboard.leaveBalances')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-[#2563eb]">{userData?.paidLeaveBalance ?? 0}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.paidLeave')}</p>

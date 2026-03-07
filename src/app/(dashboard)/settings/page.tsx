@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslation } from 'react-i18next';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "@/lib/lazy-imports";
 import {
   Save,
@@ -16,7 +16,9 @@ import {
   LayoutDashboard,
   Link2,
   ShieldCheck,
-  User
+  User,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,6 +55,24 @@ export default function SettingsPage() {
   const [productivitySettings, setProductivitySettings] = useState({});
   const [localizationSettings, setLocalizationSettings] = useState({});
   const [dashboardSettings, setDashboardSettings] = useState({});
+
+  // Tabs scroll state
+  const tabsScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollState = useCallback(() => {
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    updateScrollState();
+    window.addEventListener("resize", updateScrollState);
+    return () => window.removeEventListener("resize", updateScrollState);
+  }, [updateScrollState]);
 
   // Debug: log user data on mount
   useEffect(() => {
@@ -199,8 +219,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] flex items-center gap-2 md:gap-3">
-            <SettingsIcon className="w-6 h-6 md:w-8 md:h-8 text-[var(--primary)]" />{t('nav.settings')}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">{t('nav.settings')}</h2>
           <p className="text-[var(--text-muted)] text-sm mt-2">
             {t('dashboard.settingsSubtitle')}
           </p>
@@ -208,25 +227,53 @@ export default function SettingsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        {/* Navigation Tabs - Scrollable on mobile */}
-        <div className="bg-[var(--surface)] p-1.5 rounded-xl border border-[var(--border)] overflow-x-auto">
-          <TabsList className="inline-flex w-auto min-w-full gap-1 bg-transparent h-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:text-[var(--text-muted)] transition-colors rounded-lg py-2.5 px-3 h-auto whitespace-nowrap"
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Icon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{tab.label}</span>
-                  </div>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+        {/* Navigation Tabs - Scrollable with arrow buttons */}
+        <div className="relative group">
+          <button
+            onClick={() => {
+              const el = tabsScrollRef.current;
+              if (el) el.scrollBy({ left: -200, behavior: "smooth" });
+            }}
+            className="absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-transparent rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ display: canScrollLeft ? undefined : "none" }}
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-4 h-4 text-[var(--text-muted)]" />
+          </button>
+          <div
+            ref={tabsScrollRef}
+            onScroll={updateScrollState}
+            className="bg-[var(--surface)] p-1.5 rounded-xl border border-[var(--border)] overflow-x-auto scrollbar-hide"
+          >
+            <TabsList className="inline-flex w-auto min-w-full gap-1 bg-transparent h-auto">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:text-[var(--text-muted)] transition-colors rounded-lg py-2.5 px-3 h-auto whitespace-nowrap"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{tab.label}</span>
+                    </div>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
+          <button
+            onClick={() => {
+              const el = tabsScrollRef.current;
+              if (el) el.scrollBy({ left: 200, behavior: "smooth" });
+            }}
+            className="absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-l from-[var(--surface)] via-[var(--surface)] to-transparent rounded-r-xl opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ display: canScrollRight ? undefined : "none" }}
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+          </button>
         </div>
 
         {/* Tab Content */}

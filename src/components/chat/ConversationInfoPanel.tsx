@@ -92,7 +92,7 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
 
   return (
     <div
-      className="fixed right-0 top-0 bottom-0 w-80 flex flex-col border-l"
+      className="fixed right-0 top-0 bottom-0 w-full sm:w-80 flex flex-col border-l"
       style={{
         borderColor: "var(--border)",
         background: "var(--background)",

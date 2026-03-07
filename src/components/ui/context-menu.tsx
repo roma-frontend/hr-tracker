@@ -46,9 +46,9 @@ const ContextMenuSubContent = React.forwardRef<
       className
     )}
     style={{
-      background: "var(--background-primary, #1a1a1a)",
-      borderColor: "var(--border, #333333)",
-      color: "var(--text-primary, #ffffff)",
+      background: "var(--card, var(--background))",
+      borderColor: "var(--border)",
+      color: "var(--text-primary)",
     }}
     {...props}
   />
@@ -68,9 +68,9 @@ const ContextMenuContent = React.forwardRef<
         className
       )}
       style={{
-        background: "var(--background-primary, #1a1a1a)",
-        borderColor: "var(--border, #333333)",
-        color: "var(--text-primary, #ffffff)",
+        background: "var(--card, var(--background))",
+        borderColor: "var(--border)",
+        color: "var(--text-primary)",
       }}
       {...props}
     />
@@ -177,7 +177,7 @@ const ContextMenuLabel = React.forwardRef<
       inset && "pl-8",
       className
     )}
-    style={{ color: "var(--text-muted, #999999)" }}
+    style={{ color: "var(--text-muted)" }}
     {...props}
   />
 ))
@@ -190,7 +190,7 @@ const ContextMenuSeparator = React.forwardRef<
   <ContextMenuPrimitive.Separator
     ref={ref}
     className={cn("-mx-1 my-1 h-px", className)}
-    style={{ background: "var(--border, #333333)" }}
+    style={{ background: "var(--border)" }}
     {...props}
   />
 ))
@@ -202,7 +202,7 @@ const ContextMenuShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => (
   <span
     className={cn("ml-auto text-xs tracking-widest opacity-60", className)}
-    style={{ color: "var(--text-disabled, #666666)" }}
+    style={{ color: "var(--text-disabled, var(--text-muted))" }}
     {...props}
   />
 )

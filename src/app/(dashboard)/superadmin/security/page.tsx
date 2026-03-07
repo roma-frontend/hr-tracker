@@ -32,56 +32,56 @@ import {
 const FEATURES = [
   {
     key: "audit_logging",
-    title: "Audit Logging",
-    description: "Log all login attempts with IP, device info, and risk score. Essential baseline.",
+    titleKey: "superadmin.security.auditLogging",
+    descKey: "superadmin.security.auditLoggingDesc",
     icon: Eye,
     color: "blue",
     critical: true,
   },
   {
     key: "adaptive_auth",
-    title: "Adaptive Authentication",
-    description: "Auto-block or challenge logins with high risk score (new device, many failed attempts, unusual hour).",
+    titleKey: "superadmin.security.adaptiveAuth",
+    descKey: "superadmin.security.adaptiveAuthDesc",
     icon: ShieldAlert,
     color: "orange",
     critical: false,
   },
   {
     key: "device_fingerprinting",
-    title: "Device Fingerprinting",
-    description: "Recognize known devices per employee. New device login triggers a higher risk score.",
+    titleKey: "superadmin.security.deviceFingerprinting",
+    descKey: "superadmin.security.deviceFingerprintingDesc",
     icon: Monitor,
     color: "purple",
     critical: false,
   },
   {
     key: "keystroke_dynamics",
-    title: "Keystroke Dynamics",
-    description: "Analyze typing rhythm to verify identity. Each person types like a fingerprint.",
+    titleKey: "superadmin.security.keystrokeDynamics",
+    descKey: "superadmin.security.keystrokeDynamicsDesc",
     icon: Brain,
     color: "indigo",
     critical: false,
   },
   {
     key: "continuous_face",
-    title: "Continuous Face Verification",
-    description: "Periodically verify employee identity via camera during active session.",
+    titleKey: "superadmin.security.continuousFace",
+    descKey: "superadmin.security.continuousFaceDesc",
     icon: Camera,
     color: "teal",
     critical: false,
   },
   {
     key: "failed_login_lockout",
-    title: "Auto Account Lockout",
-    description: "Automatically lock account after 5 failed login attempts in 15 minutes.",
+    titleKey: "superadmin.security.autoLockout",
+    descKey: "superadmin.security.autoLockoutDesc",
     icon: Lock,
     color: "red",
     critical: false,
   },
   {
     key: "new_device_alert",
-    title: "New Device Alert",
-    description: "Notify admin when an employee logs in from an unrecognized device.",
+    titleKey: "superadmin.security.newDeviceAlert",
+    descKey: "superadmin.security.newDeviceAlertDesc",
     icon: Bell,
     color: "yellow",
     critical: false,
@@ -157,7 +157,7 @@ export default function SecurityDashboard() {
     return (
       <div className="flex items-center justify-center h-96" style={{ color: "var(--text-muted)" }}>
         <RefreshCw className="w-8 h-8 mr-3 animate-spin" style={{ color: "var(--primary)" }} />
-        Loading security dashboard...
+        {t('superadmin.security.loadingDashboard')}
       </div>
     );
   }
@@ -167,7 +167,7 @@ export default function SecurityDashboard() {
     return (
       <div className="flex items-center justify-center h-96" style={{ color: "var(--text-muted)" }}>
         <ShieldAlert className="w-8 h-8 mr-3" style={{ color: "var(--destructive)" }} />
-        Please log in to access this page
+        {t('superadmin.security.pleaseLogIn')}
       </div>
     );
   }
@@ -176,7 +176,7 @@ export default function SecurityDashboard() {
     return (
       <div className="flex items-center justify-center h-96" style={{ color: "var(--text-muted)" }}>
         <ShieldAlert className="w-8 h-8 mr-3" style={{ color: "var(--destructive)" }} />
-        Access denied — superadmin only (your role: {userRole || "unknown"})
+        {t('superadmin.security.accessDenied')}
       </div>
     );
   }
@@ -199,13 +199,13 @@ export default function SecurityDashboard() {
 
   const enabledCount = FEATURES.filter((f) => getSettingEnabled(f.key)).length;
   const threatLevel =
-    (loginStats?.highRisk ?? 0) >= 10 ? "Critical" :
-      (loginStats?.highRisk ?? 0) >= 3 ? "Elevated" :
-        (loginStats?.failed ?? 0) >= 20 ? "Moderate" : "Normal";
+    (loginStats?.highRisk ?? 0) >= 10 ? t('superadmin.security.critical') :
+      (loginStats?.highRisk ?? 0) >= 3 ? t('superadmin.security.elevated') :
+        (loginStats?.failed ?? 0) >= 20 ? t('superadmin.security.moderate') : t('superadmin.security.normal');
   const threatColor =
-    threatLevel === "Critical" ? "text-red-400" :
-      threatLevel === "Elevated" ? "text-orange-400" :
-        threatLevel === "Moderate" ? "text-yellow-400" : "text-green-400";
+    threatLevel === t('superadmin.security.critical') ? "text-red-400" :
+      threatLevel === t('superadmin.security.elevated') ? "text-orange-400" :
+        threatLevel === t('superadmin.security.moderate') ? "text-yellow-400" : "text-green-400";
 
   return (
     <div className="min-h-screen p-3 sm:p-6" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
@@ -222,18 +222,18 @@ export default function SecurityDashboard() {
         </div>
         <div className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>
           <Activity className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: "var(--success)" }} />
-          Live
+          {t('superadmin.security.liveMonitoring')}
         </div>
       </div>
 
       {/* ── Stats bar ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 mb-6 sm:mb-8">
         {[
-          { label: "Threat Level", value: threatLevel, color: threatLevel === "Critical" ? "var(--destructive)" : threatLevel === "Elevated" ? "var(--warning)" : threatLevel === "Moderate" ? "#f59e0b" : "var(--success)" },
-          { label: "Logins (24h)", value: loginStats?.total ?? 0, color: "var(--text-primary)" },
-          { label: "Failed", value: loginStats?.failed ?? 0, color: "var(--destructive)" },
-          { label: "High Risk", value: loginStats?.highRisk ?? 0, color: "var(--warning)" },
-          { label: "Features ON", value: `${enabledCount}/${FEATURES.length}`, color: "var(--success)" },
+          { label: t('superadmin.security.threatLevel'), value: threatLevel, color: threatLevel === t('superadmin.security.critical') ? "var(--destructive)" : threatLevel === t('superadmin.security.elevated') ? "var(--warning)" : threatLevel === t('superadmin.security.moderate') ? "#f59e0b" : "var(--success)" },
+          { label: t('superadmin.security.logins24h'), value: loginStats?.total ?? 0, color: "var(--text-primary)" },
+          { label: t('superadmin.security.failed'), value: loginStats?.failed ?? 0, color: "var(--destructive)" },
+          { label: t('superadmin.security.highRisk'), value: loginStats?.highRisk ?? 0, color: "var(--warning)" },
+          { label: t('superadmin.security.featuresOn'), value: `${enabledCount}/${FEATURES.length}`, color: "var(--success)" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-lg sm:rounded-xl p-2 sm:p-4 text-center border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="text-lg sm:text-2xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
@@ -295,7 +295,7 @@ export default function SecurityDashboard() {
                   </div>
                   <div className="flex-1 sm:hidden">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{feature.title}</span>
+                      <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{t(feature.titleKey)}</span>
                       <Toggle
                         enabled={enabled}
                         onToggle={() => handleToggle(feature.key, enabled)}
@@ -306,23 +306,23 @@ export default function SecurityDashboard() {
                 </div>
                 <div className="flex-1 w-full sm:w-auto">
                   <div className="hidden sm:flex items-center gap-2 mb-1">
-                    <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{feature.title}</span>
+                    <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{t(feature.titleKey)}</span>
                     {feature.critical && (
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "rgba(37,99,235,0.12)", color: "var(--primary)" }}>Essential</span>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "rgba(37,99,235,0.12)", color: "var(--primary)" }}>{t('superadmin.security.criticalBadge')}</span>
                     )}
                     {!enabled && (
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "var(--muted)", color: "var(--text-muted)" }}>Disabled</span>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "var(--muted)", color: "var(--text-muted)" }}>{t('superadmin.security.disable')}</span>
                     )}
                   </div>
                   <div className="flex sm:hidden items-center gap-2 mb-2">
                     {feature.critical && (
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "rgba(37,99,235,0.12)", color: "var(--primary)" }}>Essential</span>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "rgba(37,99,235,0.12)", color: "var(--primary)" }}>{t('superadmin.security.criticalBadge')}</span>
                     )}
                     {!enabled && (
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "var(--muted)", color: "var(--text-muted)" }}>Disabled</span>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: "var(--muted)", color: "var(--text-muted)" }}>{t('superadmin.security.disable')}</span>
                     )}
                   </div>
-                  <p className="text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>{feature.description}</p>
+                  <p className="text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>{t(feature.descKey)}</p>
                   {savedAt && (
                     <p className="text-[10px] sm:text-xs mt-1" style={{ color: "var(--text-disabled)" }}>
                       Last changed: {new Date(savedAt).toLocaleString()}

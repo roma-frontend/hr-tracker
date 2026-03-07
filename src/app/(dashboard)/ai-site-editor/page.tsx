@@ -24,17 +24,27 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Id } from "@/convex/_generated/dataModel";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 export default function AISiteEditorPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const { features, plan } = usePlanFeatures();
+  const router = useRouter();
 
   // Get user details from Convex
   const currentUser = useQuery(
     api.users.getUserById,
     user?.id ? { userId: user.id as Id<"users"> } : "skip"
   );
+
+  // Only superadmin can access AI Site Editor
+  React.useEffect(() => {
+    if (user && user.role !== "superadmin") {
+      router.replace("/dashboard");
+    }
+  }, [user, router]);
 
   if (!user || !currentUser) {
     return (
@@ -44,11 +54,15 @@ export default function AISiteEditorPage() {
     );
   }
 
+  if (user.role !== "superadmin") {
+    return null;
+  }
+
   const isProfessionalOrHigher = plan === "professional" || plan === "enterprise";
 
   return (
     <PlanGate feature={"aiSiteEditor" as any}>
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>

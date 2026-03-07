@@ -168,7 +168,7 @@ function DroppableKanbanColumn({ status, tasks, onOpen }: { status: Status; task
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
   return (
-    <div className="flex-1 min-w-[260px] max-w-[320px]">
+    <div className="flex-1 min-w-[240px] sm:min-w-[260px] max-w-[320px]">
       <div className="flex items-center gap-2 mb-3 px-1">
         <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
         <span className={`font-semibold text-sm ${cfg.color}`}>{t(cfg.labelKey)}</span>
@@ -299,15 +299,15 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-3 sm:p-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
               {userRole === "employee" ? t('tasksClient.myTasks') : t('tasksClient.taskManager')}
             </h1>
-            <p className="text-[var(--text-muted)] mt-1">
+            <p className="mt-1" style={{ color: "var(--text-muted)" }}>
               {userRole === "employee" ? t('tasksClient.trackAssignments') : t('tasksClient.assignMonitor')}
             </p>
           </div>
@@ -454,7 +454,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           </DragOverlay>
         </DndContext>
       ) : (
-        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-x-auto">
           {tasks.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-4xl mb-3">📋</p>
