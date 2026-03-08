@@ -43,6 +43,8 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
   const answerCallMutation = useMutation(api.chat.answerCall);
   const updateOfferMutation = useMutation(api.chat.updateOffer);
   const updateIceMutation = useMutation(api.chat.updateIceCandidates);
+  const setInCallStatusMutation = useMutation(api.users.setInCallStatus);
+  const resetCallStatusMutation = useMutation(api.users.resetFromCallStatus);
   const callData = useQuery(api.chat.getActiveCall, { conversationId: call.conversationId });
   const addedIceCandidatesRef = useRef<Set<string>>(new Set());
 
@@ -216,6 +218,10 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         }
         setPeerConnected(true);
         setCallStatus("active");
+        // Set user status to "in_call"
+        setInCallStatusMutation({ userId: currentUserId }).catch(e => 
+          console.error('[CallModal] Failed to set in_call status:', e)
+        );
         // Start duration timer
         if (!durationTimerRef.current) {
           durationTimerRef.current = setInterval(() => setDuration((d) => d + 1), 1000);
@@ -225,6 +231,10 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === "connected") {
           setCallStatus("active");
+          // Set user status to "in_call"
+          setInCallStatusMutation({ userId: currentUserId }).catch(e => 
+            console.error('[CallModal] Failed to set in_call status:', e)
+          );
         } else if (pc.connectionState === "disconnected" || pc.connectionState === "failed") {
           handleEnd();
         }
@@ -369,7 +379,11 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
     setCallStatus("ended");
     try { 
       await endCallMutation({ callId: call.callId, userId: currentUserId }); 
-    } catch { }
+      // Reset status from "in_call" back to "available"
+      await resetCallStatusMutation({ userId: currentUserId });
+    } catch (e) {
+      console.error('[CallModal] Error ending call:', e);
+    }
     
     // Give a moment for cleanup to complete before closing
     setTimeout(() => {

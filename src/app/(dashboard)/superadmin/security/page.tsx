@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -21,6 +21,7 @@ import {
   Bell,
   RefreshCw,
   ChevronRight,
+  ChevronLeft,
   Activity,
 } from "lucide-react";
 
@@ -137,6 +138,30 @@ export default function SecurityDashboard() {
   const [toggling, setToggling] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<"settings" | "logs" | "attempts" | "blocked">("settings");
 
+  // ── Tabs slider logic ──
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = tabsRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener("resize", checkScroll);
+    return () => window.removeEventListener("resize", checkScroll);
+  }, [checkScroll]);
+
+  const scrollTabs = (dir: "left" | "right") => {
+    const el = tabsRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -150 : 150, behavior: "smooth" });
+  };
+
   const settings = useQuery(api.security.getAllSettings);
   const loginStats = useQuery(api.security.getLoginStats, { hours: 24 });
   const auditLogs = useQuery(api.security.getRecentAuditLogs, { limit: 50 });
@@ -221,26 +246,63 @@ export default function SecurityDashboard() {
         ))}
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 border-b" style={{ borderColor: "var(--border)" }}>
-        {(["settings", "blocked", "attempts", "logs"] as const).map((tab) => (
+      {/* ── Tabs Slider ── */}
+      <div className="relative mb-4 sm:mb-6 group">
+        {/* Left arrow */}
+        {canScrollLeft && (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className="px-2 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap"
+            onClick={() => scrollTabs("left")}
+            className="absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 transition-opacity"
             style={{
-              background: activeTab === tab ? "var(--card)" : "transparent",
-              color: activeTab === tab ? "var(--text-primary)" : "var(--text-muted)",
-              borderColor: activeTab === tab ? "var(--border)" : "transparent",
-              border: activeTab === tab ? "1px solid var(--border)" : "1px solid transparent",
-              borderBottom: activeTab === tab ? "1px solid var(--card)" : "1px solid transparent",
-              marginBottom: activeTab === tab ? "-1px" : "0",
+              background: "linear-gradient(to right, var(--background) 60%, transparent)",
             }}
           >
-            <span className="hidden sm:inline">{tab === "settings" ? `🛡️ ${t('superadminSecurity.securityFeatures')}` : tab === "blocked" ? `🚫 ${t('superadminSecurity.blockedUsers')}` : tab === "attempts" ? `🔐 ${t('superadminSecurity.loginAttempts')}` : `📋 ${t('superadminSecurity.auditLogs')}`}</span>
-            <span className="sm:hidden">{tab === "settings" ? "🛡️" : tab === "blocked" ? "🚫" : tab === "attempts" ? "🔐" : "📋"}</span>
+            <ChevronLeft className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
           </button>
-        ))}
+        )}
+
+        <div
+          ref={tabsRef}
+          onScroll={checkScroll}
+          className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide border-b scroll-smooth"
+          style={{
+            borderColor: "var(--border)",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {(["settings", "blocked", "attempts", "logs"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap shrink-0"
+              style={{
+                background: activeTab === tab ? "var(--card)" : "transparent",
+                color: activeTab === tab ? "var(--text-primary)" : "var(--text-muted)",
+                borderColor: activeTab === tab ? "var(--border)" : "transparent",
+                border: activeTab === tab ? "1px solid var(--border)" : "1px solid transparent",
+                borderBottom: activeTab === tab ? "1px solid var(--card)" : "1px solid transparent",
+                marginBottom: activeTab === tab ? "-1px" : "0",
+              }}
+            >
+              {tab === "settings" ? `🛡️ ${t('superadminSecurity.securityFeatures')}` : tab === "blocked" ? `🚫 ${t('superadminSecurity.blockedUsers')}` : tab === "attempts" ? `🔐 ${t('superadminSecurity.loginAttempts')}` : `📋 ${t('superadminSecurity.auditLogs')}`}
+            </button>
+          ))}
+        </div>
+
+        {/* Right arrow */}
+        {canScrollRight && (
+          <button
+            onClick={() => scrollTabs("right")}
+            className="absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 transition-opacity"
+            style={{
+              background: "linear-gradient(to left, var(--background) 60%, transparent)",
+            }}
+          >
+            <ChevronRight className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
+          </button>
+        )}
       </div>
 
       {/* ── TAB: Security Features ── */}
