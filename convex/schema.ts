@@ -251,6 +251,7 @@ export default defineSchema({
       v.literal("join_approved"),            // new: join request approved
       v.literal("join_rejected"),            // new: join request rejected
       v.literal("security_alert"),           // new: suspicious activity detected
+      v.literal("status_change"),            // new: presence status changed
       v.literal("system"),
     ),
     title: v.string(),
