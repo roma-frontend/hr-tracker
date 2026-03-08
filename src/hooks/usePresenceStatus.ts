@@ -4,6 +4,8 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { toast } from "sonner";
 
+type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";
+
 export function usePresenceStatus(userId?: Id<"users">) {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   
@@ -29,10 +31,24 @@ export function usePresenceStatus(userId?: Id<"users">) {
         return;
       }
 
+      // Validate status is one of the allowed types
+      const validStatuses: PresenceStatus[] = [
+        "available",
+        "in_meeting",
+        "in_call",
+        "out_of_office",
+        "busy",
+      ];
+      
+      if (!validStatuses.includes(status as PresenceStatus)) {
+        toast.error("Invalid status");
+        return;
+      }
+
       try {
         await updateStatusMutation({
           userId,
-          presenceStatus: status as any,
+          presenceStatus: status as PresenceStatus,
           outOfOfficeMessage: message,
         });
         return true;
