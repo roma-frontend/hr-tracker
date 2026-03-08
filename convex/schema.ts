@@ -180,6 +180,7 @@ export default defineSchema({
     })),
     // Metadata
     createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
     lastLoginAt: v.optional(v.number()),
   })
     .index("by_email", ["email"])
