@@ -112,9 +112,9 @@ export function StatusModal({
         outOfOfficeMessage: outOfOfficeMsg,
       });
 
-      // Show status update banner
+      // Show status update banner with status key for contextual hint
       const statusLabel = t(`status.${selectedStatus}.label`, selectedStatus);
-      showNotification(statusLabel);
+      showNotification(selectedStatus, statusLabel);
 
       onStatusChange?.(selectedStatus);
       setShowConfirm(false);

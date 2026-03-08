@@ -40,6 +40,7 @@ import { TeamPresence } from "@/components/productivity/TeamPresence";
 import { PomodoroTimer } from "@/components/productivity/PomodoroTimer";
 import { FocusMode } from "@/components/productivity/FocusMode";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useStatusUpdate } from "@/context/StatusUpdateContext";
 
 // Play a beautiful notification sound using Web Audio API
 function playNotificationSound() {
@@ -122,6 +123,7 @@ export function Navbar() {
   const markRead = useMutation(api.notifications.markAsRead);
   const markAllRead = useMutation(api.notifications.markAllAsRead);
   const updatePresence = useMutation(api.users.updatePresenceStatus);
+  const { showNotification } = useStatusUpdate();
   const currentUserData = useQuery(
     api.users.getUserById,
     user?.id ? { userId: user.id as Id<"users"> } : "skip"
@@ -490,6 +492,7 @@ export function Navbar() {
                     onClick={async () => {
                       if (user?.id) {
                         await updatePresence({ userId: user.id as Id<"users">, presenceStatus: key });
+                        showNotification(key, t(cfg.labelKey));
                         setStatusExpanded(false); // Close after selection
                       }
                     }}

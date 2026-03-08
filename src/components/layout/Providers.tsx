@@ -124,6 +124,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
           {user && <MaintenanceBanner />}
           {/* Status update banner — below maintenance banner */}
           <StatusUpdateBanner />
+          {/* Real-time notification banner — below status banner, full width, persistent */}
+          {user && <NotificationBanner />}
           {/* Main content area — min-h-0 prevents CLS when content loads */}
         <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
           {isChatPage ? (
@@ -143,8 +145,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {/* Global incoming call detection — works on ALL pages */}
       {hydrated && user && <IncomingCallProvider />}
 
-      {/* Real-time notification banners */}
-      {hydrated && user && <NotificationBanner />}
 
       {/* Productivity Services - only render when mounted to avoid SSR mismatch */}
       {hydrated && user && (

@@ -71,14 +71,14 @@ export function NotificationBanner() {
           : ("purple" as const);
 
   return (
-    <div className="fixed top-20 right-4 z-[100] w-80 sm:w-96">
+    <div className="w-full">
       <SmartBanner
         type={bannerType}
         message={newNotification.title}
         suggestion={newNotification.message}
         icon={<MessageSquare className="w-5 h-5" />}
-        autoDismiss={8000}
         onDismiss={handleDismiss}
+        className="rounded-none border-x-0 border-t-0"
         action={{
           label: "View",
           onClick: () => {

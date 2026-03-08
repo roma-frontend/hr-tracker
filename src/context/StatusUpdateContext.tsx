@@ -3,13 +3,14 @@
 import React, { createContext, useContext, useState } from "react";
 
 interface StatusUpdateNotification {
+  statusKey: string;
   statusLabel: string;
   timestamp: number;
 }
 
 interface StatusUpdateContextType {
   notification: StatusUpdateNotification | null;
-  showNotification: (statusLabel: string) => void;
+  showNotification: (statusKey: string, statusLabel: string) => void;
   hideNotification: () => void;
 }
 
@@ -18,8 +19,9 @@ const StatusUpdateContext = createContext<StatusUpdateContextType | undefined>(u
 export function StatusUpdateProvider({ children }: { children: React.ReactNode }) {
   const [notification, setNotification] = useState<StatusUpdateNotification | null>(null);
 
-  const showNotification = (statusLabel: string) => {
+  const showNotification = (statusKey: string, statusLabel: string) => {
     setNotification({
+      statusKey,
       statusLabel,
       timestamp: Date.now(),
     });

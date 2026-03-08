@@ -716,17 +716,6 @@ export const updatePresenceStatus = mutation({
       updatedAt: Date.now(),
     });
 
-    // Create notification for the update
-    await ctx.db.insert("notifications", {
-      userId,
-      type: "status_change",
-      title: `Status updated to ${presenceStatus}`,
-      message: `Your status is now ${presenceStatus}`,
-      isRead: false,
-      createdAt: Date.now(),
-      relatedId: userId,
-    });
-
     return { success: true, newStatus: presenceStatus };
   },
 });
