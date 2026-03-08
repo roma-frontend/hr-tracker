@@ -237,17 +237,13 @@ export default function RootLayout({
         {/* Safari pinned tab */}
         <link rel="mask-icon" href="/favicon.svg?v=3" color="#2563eb" />
 
-        {/* ── Critical resource hints (deduplicated) ── */}
+        {/* ── Resource hints: max 4 preconnect (Lighthouse), rest dns-prefetch ── */}
         <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
-        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-
-        {/* Google Fonts preconnect — fonts loaded via next/font, these just speed up the connection */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Google avatars (NextAuth/OAuth) — improves LCP for profile images */}
-        <link rel="preconnect" href="https://lh3.googleusercontent.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
 
         {/* JSON-LD Structured Data */}
         <script

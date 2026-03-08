@@ -110,14 +110,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <Navbar />
         {/* Maintenance warning banner — below navbar, above content */}
         {user && <MaintenanceBanner />}
-        {/* Main content area — chat page gets no padding and no scroll (manages its own) */}
-        <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden"}>
+        {/* Main content area — min-h-0 prevents CLS when content loads */}
+        <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
           {isChatPage ? (
             <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">
               {children}
             </div>
           ) : (
-            <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
+            <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto min-h-[calc(100vh-4rem)]">
               {children}
             </div>
           )}

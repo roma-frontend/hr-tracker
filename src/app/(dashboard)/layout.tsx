@@ -8,7 +8,10 @@ export const metadata: Metadata = {
     template: "%s | HR Office",
   },
   description: "HR Office - Manage attendance, leaves, tasks and employees in real-time.",
-  robots: { index: false, follow: false },
+  // Dashboard is noindex by default (private app). Set NEXT_PUBLIC_DASHBOARD_INDEXABLE=true to allow indexing.
+  robots: process.env.NEXT_PUBLIC_DASHBOARD_INDEXABLE === "true"
+    ? { index: true, follow: true }
+    : { index: false, follow: false },
 };
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
