@@ -105,18 +105,18 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://js.stripe.com https://maps.googleapis.com https://*.sentry.io",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://js.stripe.com https://maps.googleapis.com https://*.sentry.io https://*.vercel.app https://*.vercel-scripts.com",
       "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: https: blob:",
-      "connect-src 'self' https://*.convex.cloud https://*.googleapis.com https://api.groq.com https://api.openai.com https://api.stripe.com https://*.sentry.io https://*.metered.live wss://*.convex.cloud",
-      "frame-src 'self' https://js.stripe.com https://accounts.google.com",
+      "connect-src 'self' https://*.convex.cloud https://*.googleapis.com https://api.groq.com https://api.openai.com https://api.stripe.com https://*.sentry.io https://*.ingest.sentry.io https://*.metered.live https://*.metered.ca https://*.vercel.app https://*.vercel-scripts.com wss://*.convex.cloud",
+      "frame-src 'self' https://js.stripe.com https://accounts.google.com https://challenges.cloudflare.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
+      "manifest-src 'self'",
     ].join('; ')
   );
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
@@ -133,7 +133,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 // MAIN PROXY FUNCTION
 // ═══════════════════════════════════════════════════════════════
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const ip = getClientIP(request);
 
