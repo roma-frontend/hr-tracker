@@ -149,9 +149,9 @@ export default function SubscriptionsManagementPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">{t('superadmin.subscriptions.title')}</h1>
           <p className="text-sm md:text-base text-[var(--text-muted)] mt-1">{t('superadmin.subscriptions.subtitle')}</p>
         </div>
-        <Button className="w-full sm:w-auto"
+        <Button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           {showForm ? t('superadmin.subscriptions.cancelButtonText') : t('superadmin.subscriptions.addManualSubscription')}
