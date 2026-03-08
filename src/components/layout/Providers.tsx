@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useSession } from "next-auth/react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { usePathname } from "next/navigation";
+import { ShieldLoader } from "@/components/ui/ShieldLoader";
 
 const Sidebar = dynamic(
   () => import("@/components/layout/Sidebar").then((m) => m.Sidebar),
@@ -41,9 +43,15 @@ const NotificationBanner = dynamic(
   { ssr: false, loading: () => null }
 );
 
+const MaintenanceBanner = dynamic(
+  () => import("@/components/MaintenanceBanner").then((m) => m.MaintenanceBanner),
+  { ssr: false, loading: () => null }
+);
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
-  const [mounted, setMounted] = useState(false);
+  const { status } = useSession();
+  const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
   const isChatPage = pathname?.startsWith("/chat");
 
@@ -59,8 +67,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // so rehydrating stale data first is harmless.
     useAuthStore.persist.rehydrate();
 
-    setMounted(true);
+    setHydrated(true);
   }, []);
+
+  // Show Shield HR loader while:
+  // 1. Stores haven't hydrated from localStorage yet
+  // 2. OAuth session is active (Google login) but user data hasn't been synced from Convex yet
+  const isOAuthSyncing = status === "authenticated" && !user;
+  if (!hydrated || isOAuthSyncing) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+        <ShieldLoader size="lg" />
+      </div>
+    );
+  }
 
   // transition-colors removed from wrapper div — causes full-tree repaint on theme change
   return (
@@ -75,6 +95,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
         <Navbar />
+        {/* Maintenance warning banner — below navbar, above content */}
+        {user && <MaintenanceBanner />}
         {/* Main content area — chat page gets no padding and no scroll (manages its own) */}
         <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden"}>
           {isChatPage ? (
@@ -92,10 +114,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {!isChatPage && <ChatWidget />}
 
       {/* Real-time notification banners */}
-      {mounted && user && <NotificationBanner />}
+      {hydrated && user && <NotificationBanner />}
 
       {/* Productivity Services - only render when mounted to avoid SSR mismatch */}
-      {mounted && user && (
+      {hydrated && user && (
         <>
           <BreakReminderService
             enabled={false}

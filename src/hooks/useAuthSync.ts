@@ -115,7 +115,7 @@ export function useAuthSync() {
         department: currentUser.department,
         position: currentUser.position,
       });
-      
+
       // If user name is "User" but we have better name from session, use that
       let finalName = currentUser.name;
       if (currentUser.name === "User" || !currentUser.name) {
@@ -125,10 +125,10 @@ export function useAuthSync() {
           finalName = sessionName;
         }
       }
-      
+
       console.log("[useAuthSync] 📤 Syncing to useAuthStore from Convex...");
-      
-      // Sync to useAuthStore
+
+      // Sync to useAuthStore — only from Convex data (never from incomplete session data)
       const { login } = useAuthStore.getState();
       login({
         id: currentUser._id,
@@ -141,52 +141,22 @@ export function useAuthSync() {
         employeeType: currentUser.employeeType,
         organizationId: currentUser.organizationId,
       });
-      
+
       console.log("[useAuthSync] ✅ User logged into useAuthStore:", {
         id: currentUser._id,
         name: finalName,
         email: currentUser.email,
         role: currentUser.role,
       });
-      
+
       // Mark as synced to prevent race condition re-syncs
       lastSyncedUserRef.current = currentUser.email;
-    } else if (session.user.email) {
-      // Fallback: if Convex query hasn't returned yet, sync using NextAuth session data
-      console.log("[useAuthSync] ⏳ Convex query pending, using NextAuth session data as fallback...");
-      console.log("[useAuthSync]   session.user.name:", session.user.name);
-      const { login } = useAuthStore.getState();
-      
-      // Ensure name is properly extracted - session.user.name should already be set by NextAuth
-      const syncName = session.user.name?.trim() || session.user.email!.split("@")[0] || "User";
-      
-      console.log("[useAuthSync] Using final name for sync:", {
-        originalSessionName: session.user.name,
-        finalName: syncName,
-      });
-      
-      // Map NextAuth session to our User type
-      login({
-        id: session.user.id || `nextauth-${Date.now()}`,
-        name: syncName,
-        email: session.user.email!,
-        role: ((session.user as any).role as any) || 'employee',
-        avatar: session.user.image,
-        organizationId: ((session.user as any).organizationId as string | undefined),
-        department: ((session.user as any).department as string | undefined),
-        position: ((session.user as any).position as string | undefined),
-        employeeType: ((session.user as any).employeeType as any),
-      });
-      
-      console.log("[useAuthSync] ⚠️  User logged into useAuthStore from NextAuth fallback:", {
-        id: session.user.id,
-        name: syncName,
-        email: session.user.email,
-        role: (session.user as any).role,
-      });
-      
-      // Mark as synced to prevent race condition re-syncs
-      lastSyncedUserRef.current = session.user.email;
+    } else {
+      // Convex query hasn't returned yet — do NOT populate the store with
+      // incomplete NextAuth session data (which may have name "User").
+      // OAuthSyncLoader + Providers ShieldLoader will keep showing until
+      // Convex returns the full profile and login() is called above.
+      console.log("[useAuthSync] ⏳ Waiting for Convex query to return full user profile...");
     }
     
     // Create server-side session cookie for dashboard auth (only once per user)

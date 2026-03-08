@@ -2070,7 +2070,10 @@
     "viewUpcoming": "Просмотреть предстоящие",
     "voiceInput": "Голосовой ввод",
     "whoOnLeave": "Кто в отпуске?",
-    "whoOnLeaveToday": "Кто сегодня в отпуске?"
+    "whoOnLeaveToday": "Кто сегодня в отпуске?",
+    "subtitle": "Ваш умный HR-ассистент",
+    "smartHint": "Я знаю всё о Shield HR — спрашивайте что угодно!",
+    "thinking": "Анализирую..."
   },
   "analytics": {
     "approvalRate": "Процент одобрения",
@@ -3086,7 +3089,11 @@
     "autoRefresh": "Страница обновится автоматически после завершения обслуживания",
     "needHelp": "Если есть вопросы, обратитесь к администратору",
     "serviceBroadcast": "Сервисное объявление",
-    "notificationLabel": "⚠️ Техническое обслуживание"
+    "notificationLabel": "⚠️ Техническое обслуживание",
+    "bannerStartsIn": "начнётся через {{time}}",
+    "bannerStartsSoon": "начнётся скоро",
+    "bannerInProgress": "обслуживание идёт",
+    "bannerDuration": "Длительность"
   },
   "broadcasts": {
     "title": "Сервисные Объявления",

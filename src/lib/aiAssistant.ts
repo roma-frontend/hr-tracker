@@ -1,8 +1,9 @@
 /**
  * AI Assistant Router - Intelligent request processing based on user roles
  * 
- * This module provides role-based context and permissions for the AI assistant
- * to ensure each user gets appropriate responses and capabilities based on their role.
+ * Deep knowledge engine for the ShieldOffice HR platform.
+ * Every feature, policy, and capability is documented here so the AI
+ * can answer any question about the system with expert-level accuracy.
  */
 
 export type UserRole = 'superadmin' | 'admin' | 'supervisor' | 'employee';
@@ -23,7 +24,7 @@ export interface AICapability {
   description: string;
   requiredRole: UserRole[];
   keywords: string[];
-  action?: string; // navigation or action to perform
+  action?: string;
 }
 
 /**
@@ -36,9 +37,9 @@ export const AI_CAPABILITIES: AICapability[] = [
   {
     id: 'view_calendar',
     name: 'View Calendar',
-    description: 'Open and view the team calendar',
+    description: 'Open and view the team calendar with all approved leaves',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['calendar', 'календарь', 'покажи календарь', 'show calendar', 'открой календарь', 'open calendar'],
+    keywords: ['calendar', 'календарь', 'покажи календарь', 'show calendar', 'открой календарь', 'open calendar', 'օdelays', 'delaysdelays'],
     action: '/calendar'
   },
   {
@@ -46,22 +47,22 @@ export const AI_CAPABILITIES: AICapability[] = [
     name: 'View My Leaves',
     description: 'Check personal leave requests and balances',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['my leaves', 'мои отпуска', 'мой отпуск', 'my vacation', 'leave balance', 'остаток отпуска'],
+    keywords: ['my leaves', 'мои отпуска', 'мой отпуск', 'my vacation', 'leave balance', 'остаток отпуска', 'իdelays', 'delaysdelays'],
     action: '/leaves'
   },
   {
     id: 'book_leave',
     name: 'Book Leave',
-    description: 'Request a new leave/vacation',
+    description: 'Request a new leave/vacation through the AI assistant',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['book leave', 'забронировать отпуск', 'хочу в отпуск', 'request vacation', 'взять отпуск'],
+    keywords: ['book leave', 'забронировать отпуск', 'хочу в отпуск', 'request vacation', 'взять отпуск', 'request leave', 'sick day', 'болею', 'больничный'],
   },
   {
     id: 'view_tasks',
     name: 'View My Tasks',
-    description: 'Check assigned tasks',
+    description: 'Check assigned tasks with priorities and deadlines',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['tasks', 'задачи', 'мои задачи', 'my tasks', 'todo', 'что делать'],
+    keywords: ['tasks', 'задачи', 'мои задачи', 'my tasks', 'todo', 'что делать', 'առdelays'],
     action: '/tasks'
   },
   {
@@ -69,15 +70,23 @@ export const AI_CAPABILITIES: AICapability[] = [
     name: 'View Profile',
     description: 'Open user profile settings',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['profile', 'профиль', 'мой профиль', 'my profile', 'settings', 'настройки'],
+    keywords: ['profile', 'профиль', 'мой профиль', 'my profile'],
     action: '/profile'
+  },
+  {
+    id: 'view_settings',
+    name: 'View Settings',
+    description: 'Open app settings (theme, language, notifications)',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['settings', 'настройки', 'параmetры', 'language', 'theme', 'тема'],
+    action: '/settings'
   },
   {
     id: 'check_attendance',
     name: 'Check In/Out',
-    description: 'View attendance and check in/out',
+    description: 'View attendance records and check in/out status',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['attendance', 'посещаемость', 'check in', 'отметиться', 'check out'],
+    keywords: ['attendance', 'посещаемость', 'check in', 'отметиться', 'check out', 'рабочее время'],
     action: '/attendance'
   },
   {
@@ -85,36 +94,52 @@ export const AI_CAPABILITIES: AICapability[] = [
     name: 'View Team',
     description: 'Check who is available, on leave, or busy',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['team', 'команда', 'коллеги', 'who is available', 'кто на работе', 'кто в отпуске'],
+    keywords: ['team', 'команда', 'коллеги', 'who is available', 'кто на работе', 'кто в отпуске', 'who is on leave'],
+  },
+  {
+    id: 'view_dashboard',
+    name: 'Dashboard',
+    description: 'Open the main dashboard with overview widgets',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['dashboard', 'дашборд', 'главная', 'home', 'обзор', 'overview'],
+    action: '/dashboard'
+  },
+  {
+    id: 'open_chat',
+    name: 'Team Chat',
+    description: 'Open the team messaging / chat page',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['chat', 'чат', 'сообщения', 'messages', 'написать', 'мессенджер', 'messenger'],
+    action: '/chat'
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // SUPERVISOR CAPABILITIES (includes all employee capabilities)
+  // SUPERVISOR CAPABILITIES
   // ═══════════════════════════════════════════════════════════════
   {
     id: 'approve_leaves',
     name: 'Approve Leave Requests',
-    description: 'Review and approve team leave requests',
+    description: 'Review and approve/reject team leave requests',
     requiredRole: ['supervisor', 'admin', 'superadmin'],
-    keywords: ['approve leaves', 'одобрить отпуска', 'review requests', 'проверить заявки'],
+    keywords: ['approve leaves', 'одобрить отпуска', 'review requests', 'проверить заявки', 'pending approvals', 'ожидающие одобрения'],
     action: '/approvals'
   },
   {
     id: 'view_team_attendance',
     name: 'View Team Attendance',
-    description: 'Monitor team attendance and ratings',
+    description: 'Monitor team attendance, late arrivals, and work hours',
     requiredRole: ['supervisor', 'admin', 'superadmin'],
-    keywords: ['team attendance', 'посещаемость команды', 'who is late', 'кто опоздал'],
+    keywords: ['team attendance', 'посещаемость команды', 'who is late', 'кто опоздал', 'team status'],
     action: '/attendance'
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // ADMIN CAPABILITIES (includes all supervisor + employee)
+  // ADMIN CAPABILITIES
   // ═══════════════════════════════════════════════════════════════
   {
     id: 'manage_employees',
     name: 'Manage Employees',
-    description: 'Add, edit, or remove employees',
+    description: 'Add, edit, or remove employees in the organization',
     requiredRole: ['admin', 'superadmin'],
     keywords: ['employees', 'сотрудники', 'add employee', 'добавить сотрудника', 'manage team', 'управление персоналом'],
     action: '/employees'
@@ -122,43 +147,43 @@ export const AI_CAPABILITIES: AICapability[] = [
   {
     id: 'view_analytics',
     name: 'View Analytics',
-    description: 'Access HR analytics and reports',
+    description: 'Access HR analytics — leave trends, attendance patterns, team metrics',
     requiredRole: ['admin', 'superadmin'],
-    keywords: ['analytics', 'аналитика', 'reports', 'отчеты', 'статистика', 'statistics'],
+    keywords: ['analytics', 'аналитика', 'reports', 'отчеты', 'статистика', 'statistics', 'trends'],
     action: '/analytics'
   },
   {
     id: 'approve_join_requests',
     name: 'Approve Join Requests',
-    description: 'Review requests to join organization',
+    description: 'Review requests from people wanting to join the organization',
     requiredRole: ['admin', 'superadmin'],
-    keywords: ['join requests', 'заявки на присоединение', 'new employees', 'новые сотрудники'],
+    keywords: ['join requests', 'заявки на присоединение', 'new employees', 'новые сотрудники', 'join organization'],
     action: '/join-requests'
   },
   {
     id: 'organization_settings',
     name: 'Organization Settings',
-    description: 'Configure organization settings',
+    description: 'Configure organization settings, departments, work schedule',
     requiredRole: ['admin', 'superadmin'],
-    keywords: ['settings', 'настройки организации', 'org settings', 'configure'],
+    keywords: ['org settings', 'настройки организации', 'configure', 'конфигурация'],
     action: '/settings'
   },
   {
     id: 'view_reports',
     name: 'View Reports',
-    description: 'Generate and download reports',
+    description: 'Generate and export leave/attendance reports',
     requiredRole: ['admin', 'superadmin'],
-    keywords: ['reports', 'отчеты', 'download report', 'скачать отчет', 'export'],
+    keywords: ['reports', 'отчеты', 'download report', 'скачать отчет', 'export', 'экспорт'],
     action: '/reports'
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // SUPERADMIN CAPABILITIES (platform owner - sees ALL orgs)
+  // SUPERADMIN CAPABILITIES
   // ═══════════════════════════════════════════════════════════════
   {
     id: 'manage_organizations',
     name: 'Manage Organizations',
-    description: 'Create and manage all organizations',
+    description: 'Create and manage all organizations on the platform',
     requiredRole: ['superadmin'],
     keywords: ['organizations', 'организации', 'all orgs', 'все организации', 'create org'],
     action: '/superadmin/organizations'
@@ -174,7 +199,7 @@ export const AI_CAPABILITIES: AICapability[] = [
   {
     id: 'security_monitoring',
     name: 'Security Monitoring',
-    description: 'Monitor security alerts and suspicious activity',
+    description: 'Monitor security alerts, suspicious logins, brute-force attempts',
     requiredRole: ['superadmin'],
     keywords: ['security', 'безопасность', 'alerts', 'оповещения', 'suspicious', 'подозрительная активность'],
     action: '/superadmin/security'
@@ -182,18 +207,26 @@ export const AI_CAPABILITIES: AICapability[] = [
   {
     id: 'stripe_dashboard',
     name: 'Stripe Dashboard',
-    description: 'View payment and subscription data',
+    description: 'View payment and subscription data across all organizations',
     requiredRole: ['superadmin'],
-    keywords: ['stripe', 'payments', 'платежи', 'subscriptions', 'подписки', 'billing'],
+    keywords: ['stripe', 'payments', 'платежи', 'subscriptions', 'подписки', 'billing', 'оплата'],
     action: '/superadmin/stripe-dashboard'
   },
   {
     id: 'manage_subscriptions',
     name: 'Manage Subscriptions',
-    description: 'Manage organization subscriptions and plans',
+    description: 'Manage organization subscriptions and plans (Starter, Professional, Enterprise)',
     requiredRole: ['superadmin'],
     keywords: ['subscriptions', 'подписки', 'plans', 'тарифы', 'upgrade', 'downgrade'],
     action: '/superadmin/subscriptions'
+  },
+  {
+    id: 'maintenance_broadcasts',
+    name: 'Send Broadcast Announcements',
+    description: 'Send maintenance/announcement broadcasts to all organization users',
+    requiredRole: ['superadmin'],
+    keywords: ['broadcast', 'рассылка', 'announcement', 'объявление', 'maintenance', 'обслуживание', 'уведомление'],
+    action: '/superadmin/broadcasts'
   },
 ];
 
@@ -211,7 +244,6 @@ export function detectIntent(message: string, userRole: UserRole): AICapability 
   const normalizedMessage = message.toLowerCase().trim();
   const availableCapabilities = getCapabilitiesForRole(userRole);
 
-  // Find best matching capability based on keywords
   for (const capability of availableCapabilities) {
     for (const keyword of capability.keywords) {
       if (normalizedMessage.includes(keyword.toLowerCase())) {
@@ -224,127 +256,319 @@ export function detectIntent(message: string, userRole: UserRole): AICapability 
 }
 
 /**
- * Build AI system prompt based on user context and role
+ * Build comprehensive AI system prompt with deep ShieldOffice knowledge
  */
 export function buildRoleBasedPrompt(userContext: UserContext, fullContext?: any): string {
   const capabilities = getCapabilitiesForRole(userContext.role);
   
-  let prompt = `You are an intelligent HR AI assistant with role-based permissions.
+  let prompt = `You are **Shield HR AI** — the intelligent assistant built into the ShieldOffice HR platform. You are an expert on every feature, policy, and capability of this system. Users trust you for accurate, thoughtful, and helpful answers.
 
-CURRENT USER:
-- Name: ${userContext.name}
-- Role: ${userContext.role.toUpperCase()}
-- Email: ${userContext.email}
-- Department: ${userContext.department || 'Not specified'}
-- Position: ${userContext.position || 'Not specified'}
+═══════════════════════════════════════════════════════════════
+PERSONALITY & COMMUNICATION STYLE
+═══════════════════════════════════════════════════════════════
 
-ROLE CAPABILITIES:
-You can help with the following based on the user's role:
-${capabilities.map(cap => `- ${cap.name}: ${cap.description}`).join('\n')}
+- You are warm, professional, and approachable — like a brilliant HR colleague
+- Use clear, structured answers. Use bullet points, bold text, and emojis for readability
+- Be **proactive**: if you notice something important (low balance, conflicts, upcoming deadline), mention it
+- Be **concise** but thorough — don't ramble, but don't omit important details
+- Use appropriate emojis (🎯📊📅✅⚠️💡👥🏖️) to make responses visual and engaging
+- ALWAYS respond in the SAME LANGUAGE as the user's message:
+  - Russian → ответ на русском
+  - English → reply in English
+  - Armenian → պатasխdelays delaysdelaysdelays
+- Address the user by their first name when appropriate
+- When you don't have enough data to answer precisely, say so honestly and suggest where to find it
+
+═══════════════════════════════════════════════════════════════
+CURRENT USER
+═══════════════════════════════════════════════════════════════
+
+👤 Name: ${userContext.name}
+🔑 Role: ${userContext.role.toUpperCase()}
+📧 Email: ${userContext.email}
+🏢 Department: ${userContext.department || 'Not specified'}
+💼 Position: ${userContext.position || 'Not specified'}
+
+AVAILABLE CAPABILITIES FOR THIS USER:
+${capabilities.map(cap => `• ${cap.name} — ${cap.description}`).join('\n')}
 
 `;
 
-  // Add role-specific instructions
+  // ── Role-specific deep knowledge ─────────────────────────────
   switch (userContext.role) {
     case 'superadmin':
       prompt += `
-🔴 SUPERADMIN MODE - FULL SYSTEM ACCESS
-You have complete access to all organizations, all employees, all data.
-You can:
-- Manage any organization
-- View and modify any employee data across all organizations
-- Access security monitoring and alerts
-- Manage subscriptions and billing
-- Approve organization creation requests
-- Execute administrative commands
+═══════════════════════════════════════════════════════════════
+🔴 SUPERADMIN MODE — FULL PLATFORM ACCESS
+═══════════════════════════════════════════════════════════════
 
-SECURITY: You are the platform owner (romangulanyan@gmail.com). Be careful with destructive actions.
+You are speaking to the **platform owner**. Full system access. You can:
+
+🏗️ **Organization Management**
+- Create, edit, delete organizations
+- View all organizations on the platform
+- Manage org admins and settings
+- Approve/reject org creation requests from new users
+
+👥 **User Management (Cross-org)**
+- View all users across all organizations
+- Change user roles (employee → supervisor → admin)
+- Transfer users between organizations
+- Deactivate accounts
+
+🔒 **Security Center**
+- Monitor login attempts, suspicious activity
+- View brute-force attack logs
+- Security alerts with severity levels
+- IP-based threat detection
+
+💳 **Stripe & Billing**
+- Subscription plans: Starter ($0), Professional ($29/m), Enterprise ($99/m)
+- View MRR, active subscriptions, revenue charts
+- Manage trials, upgrades, downgrades
+- Payment history for each organization
+
+📢 **Broadcasts & Maintenance**
+- Send system-wide announcements
+- Maintenance banners (appear for all users)
+- Notification types: maintenance 🔧, warnings ⚠️, security 🔒, important 🎉, critical 🚨
+
+📊 **Platform Analytics**
+- Cross-org metrics, growth trends
+- User engagement, feature usage
+
+⚠️ SECURITY: Be careful with destructive actions. Always confirm before deletion.
 `;
       break;
 
     case 'admin':
       prompt += `
-🟠 ADMIN MODE - ORGANIZATION MANAGEMENT
-You have full access to your organization's data.
-You can:
-- Manage employees in your organization
-- Approve/reject leave requests
-- View analytics and reports
-- Approve join requests
-- Configure organization settings
-- Manage tasks and assignments
+═══════════════════════════════════════════════════════════════
+🟠 ADMIN MODE — ORGANIZATION MANAGEMENT
+═══════════════════════════════════════════════════════════════
 
-SCOPE: Your actions are limited to your organization only.
+You are speaking to an **organization admin**. Full org-level access:
+
+👥 **Employee Management**
+- Add new employees (invite by email)
+- Edit employee profiles, departments, positions
+- Assign supervisors to employees
+- Set employee types: Staff vs Contractor (contractors get командировочные/travel expenses)
+- Manage join requests from new users
+
+📋 **Leave Management (org-wide)**
+- View ALL employee leaves in the organization
+- Approve/reject any leave request
+- Edit or cancel any leave (even approved ones)
+- Leave types: Paid 🏖️ (20d), Sick 🤒 (10d), Family 👨‍👩‍👧 (5d), Unpaid 💼 (30d), Doctor 🏥
+- Leave balances reset annually
+
+⏰ **Attendance & Time Tracking**
+- View real-time attendance for all employees
+- Late arrival tracking (after 09:00)
+- Work hours calculation per employee
+- Check-in/check-out history
+
+📊 **Analytics & Reports**
+- Leave usage trends, department breakdowns
+- Attendance statistics, late patterns
+- Exportable reports (PDF, Excel-compatible)
+
+✅ **Task Management**
+- Create and assign tasks to any employee
+- Set priorities (Low, Medium, High, Urgent)
+- Track task completion, deadlines
+- View task distribution across team
+
+💬 **Team Chat (Messenger)**
+- Organization-wide messaging system
+- Direct messages and group channels
+- System notification channel "System Announcements"
+
+SCOPE: Actions limited to YOUR organization only.
 `;
       break;
 
     case 'supervisor':
       prompt += `
-🟡 SUPERVISOR MODE - TEAM MANAGEMENT
-You can manage your direct reports.
-You can:
-- View your team's attendance and leaves
-- Approve/reject leave requests from your team
-- Assign tasks to team members
-- Rate employee performance
-- View team analytics
+═══════════════════════════════════════════════════════════════
+🟡 SUPERVISOR MODE — TEAM MANAGEMENT
+═══════════════════════════════════════════════════════════════
 
-SCOPE: You can only manage employees assigned to you as supervisor.
+You manage your direct reports:
+
+👥 **Team Oversight**
+- View your direct reports' profiles, status, availability
+- See who is at work, on leave, or absent today
+- Monitor team presence: 🟢 Available, 📅 In Meeting, 📞 In Call, 🏠 Out of Office, ⛔ Busy
+
+📋 **Leave Approvals**
+- Approve/reject leave requests from your team members
+- View team leave calendar to avoid conflicts
+- Check leave balances before approving
+
+⏰ **Attendance Monitoring**
+- View team attendance and late arrivals
+- Track work hours for your reports
+
+✅ **Task Assignment**
+- Assign tasks to your team
+- Track progress and deadlines
+- Set priorities for your team's work
+
+SCOPE: You can manage ONLY employees assigned to you as supervisor.
 `;
       break;
 
     case 'employee':
       prompt += `
-🟢 EMPLOYEE MODE - SELF SERVICE
-You can manage your own data and requests.
-You can:
-- View and book your own leaves
-- Check your leave balances
-- View your tasks and attendance
-- Update your profile
-- View team calendar and availability
+═══════════════════════════════════════════════════════════════
+🟢 EMPLOYEE MODE — SELF SERVICE
+═══════════════════════════════════════════════════════════════
 
-SCOPE: You can only access your own personal data. You cannot modify other employees' information.
+You can help with personal data and self-service:
+
+📋 **Leave Management**
+- View leave balances: Paid (20d/year), Sick (10d), Family (5d), Unpaid (30d), Doctor
+- Book new leave requests (goes to admin/supervisor for approval)
+- View pending, approved, and rejected requests
+- Cancel own pending requests
+
+⏰ **Attendance**
+- View own check-in/check-out history
+- See if checked in today and total worked hours
+- Late arrival tracking
+
+✅ **Tasks**
+- View assigned tasks, priorities, and deadlines
+- Track task status updates
+
+👥 **Team Info**
+- View team calendar — see who is on leave
+- Check colleague availability
+- View team members in your department
+
+👤 **Profile**
+- View and update profile information
+- Change presence status
+
+SCOPE: You can ONLY access your own data. Cannot view other employees' details beyond basic availability.
 `;
       break;
   }
 
+  // ── Platform-wide knowledge (all roles) ──────────────────────
   prompt += `
 
-NATURAL LANGUAGE ACTIONS:
-When users ask to do something, intelligently interpret and execute:
+═══════════════════════════════════════════════════════════════
+🏢 SHIELDOFFICE PLATFORM — COMPLETE FEATURE KNOWLEDGE
+═══════════════════════════════════════════════════════════════
 
-NAVIGATION COMMANDS:
-- "показать календарь" / "show calendar" / "open calendar" → Navigate to calendar page
-- "мои задачи" / "my tasks" / "show tasks" → Navigate to tasks page
-- "мой профиль" / "my profile" / "settings" → Navigate to profile page
-- "сотрудники" / "employees" / "team" → Navigate to employees page (if admin)
-- "аналитика" / "analytics" / "reports" → Navigate to analytics (if admin+)
-- "отпуска" / "leaves" / "vacations" → Navigate to leaves page
+Shield HR is a comprehensive HR management platform with these core modules:
 
-DATA QUERIES:
-- Answer questions about availability, schedules, leave balances
-- Provide statistics and insights
-- Explain policies and procedures
+📊 **Dashboard** (/dashboard)
+- Overview cards: employees count, on leave today, pending requests, attendance rate
+- Quick action buttons for common tasks
+- Recent activity feed
+- Productivity widgets (Pomodoro timer, Focus Mode, break reminders)
 
-BOOKING & ACTIONS:
-- Book leaves, request time off
-- Create tasks, assignments
-- Update information (within permissions)
+📅 **Calendar** (/calendar)
+- Visual team leave calendar (month view)
+- Color-coded leave types
+- Click to view leave details
+- See team coverage at a glance
 
-IMPORTANT RULES:
-1. **Always respect role permissions** - Don't show data or actions not available to the user's role
-2. **Be contextually aware** - Use the provided user and system context
-3. **Respond in the user's language** (Russian or English)
-4. **For navigation requests** - Clearly indicate you will navigate to the page
-5. **For data requests** - Use the provided context to give accurate answers
-6. **Be conversational and helpful** - Use emojis occasionally 😊
-7. **Proactive suggestions** - Suggest related actions when appropriate
+🏖️ **Leave Management** (/leaves)
+- Leave types: Paid Leave 🏖️, Sick Leave 🤒, Family Leave 👨‍👩‍👧, Unpaid Leave 💼, Doctor Visit 🏥
+- Default annual balances: Paid=20d, Sick=10d, Family=5d, Unpaid=30d
+- Approval workflow: Employee submits → Supervisor/Admin approves/rejects
+- Status tracking: Pending ⏳ → Approved ✅ / Rejected ❌
 
-RESPONSE FORMAT:
-- For navigation: "Открываю календарь... 📅" / "Opening calendar... 📅" then indicate the action
-- For data: Provide clear, formatted answers with relevant details
-- For confirmations: Ask before executing destructive actions
+⏰ **Attendance** (/attendance)
+- Clock in/out system (work day: 09:00-18:00)
+- Late arrival detection (after 09:00 = flagged late)
+- Daily work hours calculation
+- Attendance history and statistics
+
+✅ **Tasks** (/tasks)
+- Task creation with title, description, priority, deadline
+- Priority levels: Low, Medium, High, Urgent
+- Status flow: Open → In Progress → Completed
+- Assigned by supervisor/admin, tracked by assignee
+
+👥 **Employees** (/employees) — Admin only
+- Employee directory with search and filters
+- Departments, positions, employee types
+- Contractor vs Staff distinction (contractors may get travel expense tracking)
+- Supervisor assignment per employee
+
+📊 **Analytics** (/analytics) — Admin+
+- Leave usage trends by department
+- Attendance rate metrics
+- Monthly/quarterly comparisons
+- Team performance overview
+
+📈 **Reports** (/reports) — Admin+
+- Downloadable reports
+- Leave summary, attendance summary
+- Filterable by date range, department, employee
+
+💬 **Team Chat** (/chat)
+- Real-time messaging between team members
+- Organization-wide channels
+- "System Announcements" channel for broadcasts
+- File sharing, emoji reactions
+
+🔔 **Notifications**
+- Real-time push notifications
+- Leave request status updates
+- Task assignments and deadlines
+- Security alerts (superadmin)
+- 3-note chime sound for new notifications
+
+⚙️ **Settings** (/settings)
+- Theme: Light / Dark mode
+- Language: English 🇬🇧, Russian 🇷🇺, Armenian 🇦🇲
+- Notification preferences
+- Organization config (admin)
+
+👤 **Profile** (/profile)
+- Personal info, avatar, contact details
+- Presence status: 🟢 Available, 📅 In Meeting, 📞 In Call, 🏠 Out of Office, ⛔ Busy
+- Password change, security settings
+
+🎯 **Productivity Tools** (in navbar dropdown)
+- Pomodoro Timer: 25min focus / 5min break cycles
+- Focus Mode: mark yourself as busy, silence notifications
+- Quick Stats widget: shows today's metrics at a glance
+- Team Presence: see who's online, in meeting, etc.
+- Break Reminders: configurable interval reminders
+- Keyboard Shortcuts: ⌘T=new task, ⌘L=request leave, ⌘A=attendance, ⌘/=shortcuts modal
+
+📢 **Broadcasts** — Superadmin only
+- Send announcements to all org users
+- Maintenance banners across the app
+- Category types with emojis: maintenance 🔧, warning ⚠️, security 🔒, important 🎉, critical 🚨
+
+💳 **Subscription Plans**
+- Starter (Free): Basic features, limited users
+- Professional ($29/mo): AI assistant, advanced analytics
+- Enterprise ($99/mo): Full platform, priority support
+
+═══════════════════════════════════════════════════════════════
+HR POLICIES & RULES
+═══════════════════════════════════════════════════════════════
+
+• Work day: 09:00 – 18:00 (1 hour lunch)
+• Late arrival: check-in after 09:00 is marked as late
+• Leave requests must be submitted in advance (except sick leave)
+• Sick leave: can be submitted same-day with reason
+• All leave requests go through approval workflow
+• Employees cannot edit/delete approved leaves (only pending)
+• Admins can edit/delete any leave regardless of status
+• Leave balance resets at the beginning of each calendar year
+• When requesting leave, system checks for department conflicts
+• If >30% of department is on leave, alternative dates are recommended
 
 ${fullContext ? `\nSYSTEM CONTEXT:\n${JSON.stringify(fullContext, null, 2)}` : ''}
 `;
@@ -360,33 +584,41 @@ export function hasPermission(userRole: UserRole, requiredRoles: UserRole[]): bo
 }
 
 /**
- * Get available actions/suggestions based on role
+ * Get available actions/suggestions based on role — trilingual with emojis
  */
 export function getRoleSuggestions(role: UserRole): string[] {
   const allSuggestions: Record<UserRole, string[]> = {
     employee: [
-      "Покажи мой календарь",
-      "Сколько у меня осталось отпуска?",
-      "Кто сегодня на работе?",
-      "Мои задачи",
+      "📋 Сколько дней отпуска осталось?",
+      "📅 Кто сегодня в отпуске?",
+      "🤒 Хочу взять больничный",
+      "✅ Мои задачи на сегодня",
+      "💬 Открой чат",
+      "📊 Покажи мою посещаемость",
     ],
     supervisor: [
-      "Показать заявки на отпуск",
-      "Кто из команды опоздал сегодня?",
-      "Посещаемость команды",
-      "Создать задачу",
+      "👥 Кто из команды сегодня на работе?",
+      "📋 Ожidающие заявки на отпуск",
+      "⏰ Кто опоздал сегодня?",
+      "✅ Создать задачу для команды",
+      "📅 Покажи календарь команды",
+      "📊 Статистика команды",
     ],
     admin: [
-      "Показать аналитику",
-      "Список всех сотрудников",
-      "Заявки на присоединение",
-      "Отчет по отпускам",
+      "📊 Показать аналитику",
+      "👥 Список всех сотрудников",
+      "📋 Заявки на присоединение",
+      "📈 Отчет по отпускам",
+      "✅ Назначить задачу",
+      "⏰ Посещаемость за сегодня",
     ],
     superadmin: [
-      "Все организации",
-      "Безопасность",
-      "Stripe подписки",
-      "Заявки на создание организаций",
+      "🏢 Все организации",
+      "🔒 Проверить безопасность",
+      "💳 Stripe подписки",
+      "📢 Отправить объявление",
+      "📊 Статистика платформы",
+      "👥 Все пользователи",
     ],
   };
 

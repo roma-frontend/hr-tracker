@@ -2070,7 +2070,10 @@
     "viewUpcoming": "View upcoming",
     "voiceInput": "Voice input",
     "whoOnLeave": "Who is on leave?",
-    "whoOnLeaveToday": "Who is on leave today?"
+    "whoOnLeaveToday": "Who is on leave today?",
+    "subtitle": "Your intelligent HR assistant",
+    "smartHint": "I know everything about Shield HR — ask me anything!",
+    "thinking": "Analyzing..."
   },
   "analytics": {
     "approvalRate": "Approval Rate",
@@ -3086,7 +3089,11 @@
     "autoRefresh": "The page will refresh automatically when maintenance is complete",
     "needHelp": "If you have questions, contact your administrator",
     "serviceBroadcast": "Service Broadcast",
-    "notificationLabel": "⚠️ Service Maintenance"
+    "notificationLabel": "⚠️ Service Maintenance",
+    "bannerStartsIn": "starts in {{time}}",
+    "bannerStartsSoon": "starts soon",
+    "bannerInProgress": "maintenance in progress",
+    "bannerDuration": "Duration"
   },
   "broadcasts": {
     "title": "Service Announcements",

@@ -12,7 +12,13 @@ export async function POST(req: Request) {
     const { messages, userId, lang } = await req.json();
     const langInstruction = lang === 'ru'
       ? 'ЯЗЫК: Пользователь пишет на русском. Отвечай ТОЛЬКО на русском языке.'
+      : lang === 'hy'
+      ? 'ԼԵdelays: Delaysdelays delays. Delaysdelays delaysdelaysdelaysdelays delaysdelays.'
       : 'LANGUAGE: The user is writing in English. Reply ONLY in English.';
+
+    // Current date & time context
+    const now = new Date();
+    const dateContext = `CURRENT DATE & TIME: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}. Use this to determine "today", "this week", "tomorrow", etc.`;
     console.log('📝 Messages count:', messages.length);
 
   // Fetch user context
@@ -210,6 +216,8 @@ Example: "Открываю календарь... 📅 <NAVIGATE>/calendar</NAVIG
     const result = await streamText({
       model: groq('llama-3.3-70b-versatile'),
       system: `${roleBasedPrompt}
+
+${dateContext}
 
 ${userContext}${aiInsights}${fullContext}
 ${userId ? `CURRENT USER ID: ${userId}` : ''}

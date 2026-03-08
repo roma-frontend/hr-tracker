@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -207,8 +207,10 @@ export function ChatWidget() {
     }
   }, [isOpen]);
 
-  // ── Detect language of text ──────────────────────────────────────
-  const detectLanguage = useCallback((text: string): 'ru' | 'en' => {
+  // ── Detect language of text (EN / RU / HY) ──────────────────────
+  const detectLanguage = useCallback((text: string): 'ru' | 'en' | 'hy' => {
+    const armenianCount = (text.match(/[\u0530-\u058F]/g) || []).length;
+    if (armenianCount > text.length * 0.15) return 'hy';
     const cyrillicCount = (text.match(/[\u0400-\u04FF]/g) || []).length;
     return cyrillicCount > text.length * 0.2 ? 'ru' : 'en';
   }, []);
@@ -720,8 +722,8 @@ export function ChatWidget() {
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[var(--text-primary)]">HR Assistant</p>
-                <p className="text-[10px] text-[var(--text-muted)]">Ask me anything about leaves & HR</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">Shield HR AI</p>
+                <p className="text-[10px] text-[var(--text-muted)]">{t('chatWidget.subtitle', { defaultValue: 'Your intelligent HR assistant' })}</p>
               </div>
               <button onClick={() => setIsOpen(false)} className="ml-auto p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors">
                 <X className="w-4 h-4 text-[var(--text-muted)]" />
@@ -734,8 +736,9 @@ export function ChatWidget() {
               {/* Initial suggestions (shown when no messages) */}
               {messages.length === 0 && (
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-                  <p className="text-xs text-[var(--text-muted)] text-center">👋 {t("chatWidget.greeting", { name: user?.name?.split(" ")[0] || "there" })}</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <p className="text-xs text-[var(--text-muted)] text-center mb-1">👋 {t("chatWidget.greeting", { name: user?.name?.split(" ")[0] || "there" })}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]/70 text-center mb-2">💡 {t('chatWidget.smartHint', { defaultValue: 'I know everything about Shield HR — ask me anything!' })}</p>
+                  <div className="grid grid-cols-2 gap-1.5">
                     {getInitialSuggestions(user?.role as UserRole).map((s) => (
                       <button
                         key={s}
@@ -865,7 +868,7 @@ export function ChatWidget() {
                 <div className="flex justify-start">
                   <div className="bg-[var(--background-subtle)] px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2">
                     <ShieldLoader size="xs" variant="inline" />
-                    <span className="text-xs text-[var(--text-muted)]">Thinking...</span>
+                    <span className="text-xs text-[var(--text-muted)]">{t('chatWidget.thinking', { defaultValue: 'Thinking...' })}</span>
                   </div>
                 </div>
               )}

@@ -1,4 +1,4 @@
-﻿import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   IBM_Plex_Sans,
   Montserrat,
@@ -34,7 +34,7 @@ const montserrat = Montserrat({
   subsets: ["latin", "cyrillic"],
   display: "swap",
   preload: true,
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
   fallback: ["sans-serif"],
   adjustFontFallback: true,
 });
@@ -42,10 +42,10 @@ const montserrat = Montserrat({
 // Clean & Serious - WORK SANS
 const workSans = Work_Sans({
   variable: "--font-work-sans",
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin"],
   display: "swap",
   preload: true,
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   fallback: ["sans-serif"],
   adjustFontFallback: true,
 });
@@ -234,51 +234,23 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Animated SVG Favicon - works in all modern browsers */}
-        <link rel="icon" href="/favicon-animated.svg?v=3" type="image/svg+xml" />
-        
-        {/* Multiple sizes for better browser support */}
-        <link rel="icon" type="image/svg+xml" sizes="16x16" href="/favicon-16x16.svg?v=3" />
-        <link rel="icon" type="image/svg+xml" sizes="32x32" href="/favicon-32x32.svg?v=3" />
-        
         {/* Safari pinned tab */}
         <link rel="mask-icon" href="/favicon.svg?v=3" color="#2563eb" />
-        
-        {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg?v=3" />
-        
-        {/* Web App Manifest */}
-        <link rel="manifest" href="/site.webmanifest" />
 
-        {/* ── Critical resource hints ── */}
-        {/* Cloudinary for avatars/images */}
+        {/* ── Critical resource hints (deduplicated) ── */}
+        <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        {/* ═══ CRITICAL PERFORMANCE OPTIMIZATIONS ═══ */}
-        
-        {/* DNS Prefetch для внешних ресурсов */}
-        <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        
-        {/* Preconnect ТОЛЬКО к критичным ресурсам */}
-        <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
+
+        {/* Google Fonts preconnect — fonts loaded via next/font, these just speed up the connection */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
-        {/* Google Fonts - Inter Variable Font */}
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" 
-          rel="stylesheet"
-        />
-        
-        {/* Prefetch следующей страницы только после загрузки */}
-        <link rel="prefetch" href="/login" as="document" />
 
-        {/* JSON-LD Structured Data — async so it never blocks rendering */}
+        {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          async
         />
       </head>
       <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}>
