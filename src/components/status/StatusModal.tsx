@@ -14,7 +14,7 @@ import {
   Zap,
   X,
 } from "lucide-react";
-import { toast } from "sonner";
+import { useStatusUpdate } from "@/context/StatusUpdateContext";
 
 interface StatusModalProps {
   isOpen: boolean;
@@ -41,6 +41,7 @@ export function StatusModal({
   onStatusChange,
 }: StatusModalProps) {
   const { t, i18n } = useTranslation();
+  const { showNotification } = useStatusUpdate();
   const [selectedStatus, setSelectedStatus] = useState<StatusType>(
     (currentStatus as StatusType) || "available"
   );
@@ -111,30 +112,16 @@ export function StatusModal({
         outOfOfficeMessage: outOfOfficeMsg,
       });
 
-      // Show elegant notification toast
+      // Show status update banner
       const statusLabel = t(`status.${selectedStatus}.label`, selectedStatus);
-      toast.success(
-        <div className="flex flex-col gap-1">
-          <span className="font-semibold text-sm">{t('status.updated', 'Status Updated')}</span>
-          <span className="text-xs text-gray-600 dark:text-gray-400">Your status is now <strong>{statusLabel}</strong></span>
-        </div>,
-        {
-          position: "top-right",
-          duration: 4000,
-          className: "status-change-toast",
-          descriptionClassName: "text-xs",
-        }
-      );
+      showNotification(statusLabel);
 
       onStatusChange?.(selectedStatus);
       setShowConfirm(false);
       onClose();
     } catch (error) {
       console.error("Failed to update status:", error);
-      toast.error(t("status.updateFailed", "Failed to update status"), {
-        position: "top-right",
-        duration: 3000,
-      });
+      // Could add error notification here if needed
     }
   };
 

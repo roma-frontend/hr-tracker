@@ -1486,7 +1486,8 @@
   },
   "navbar": {
     "clockInOut": "Clock In/Out",
-    "myReports": "My Reports"
+    "myReports": "My Reports",
+    "yourStatusNowWith": "Your status is now"
   },
   "sidebar": {
     "teamChat": "Team Chat",

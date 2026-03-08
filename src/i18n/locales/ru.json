@@ -1486,7 +1486,8 @@
   },
   "navbar": {
     "clockInOut": "Отметка прихода/ухода",
-    "myReports": "Мои отчеты"
+    "myReports": "Мои отчеты",
+    "yourStatusNowWith": "Ваш статус теперь"
   },
   "sidebar": {
     "teamChat": "Командный чат",

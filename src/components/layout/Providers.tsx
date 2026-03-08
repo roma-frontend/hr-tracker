@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { usePathname } from "next/navigation";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
 
 function SidebarSkeleton() {
   return (
@@ -66,6 +67,11 @@ const IncomingCallProvider = dynamic(
   { ssr: false, loading: () => null }
 );
 
+const StatusUpdateBanner = dynamic(
+  () => import("@/components/StatusUpdateBanner").then((m) => m.StatusUpdateBanner),
+  { ssr: false, loading: () => null }
+);
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
   const { status } = useSession();
@@ -102,20 +108,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // transition-colors removed from wrapper div — causes full-tree repaint on theme change
   return (
-    <div className="flex h-screen bg-[var(--background)] overflow-hidden">
-      {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
-      <Sidebar />
+    <StatusUpdateProvider>
+      <div className="flex h-screen bg-[var(--background)] overflow-hidden">
+        {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
+        <Sidebar />
 
-      {/* Mobile Sidebar */}
-      <MobileSidebar />
+        {/* Mobile Sidebar */}
+        <MobileSidebar />
 
-      {/* Main content — contain:layout reduces CLS from child layout changes */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{ contain: "layout" }}>
-        {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
-        <Navbar />
-        {/* Maintenance warning banner — below navbar, above content */}
-        {user && <MaintenanceBanner />}
-        {/* Main content area — min-h-0 prevents CLS when content loads */}
+        {/* Main content — contain:layout reduces CLS from child layout changes */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{ contain: "layout" }}>
+          {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
+          <Navbar />
+          {/* Maintenance warning banner — below navbar, above content */}
+          {user && <MaintenanceBanner />}
+          {/* Status update banner — below maintenance banner */}
+          <StatusUpdateBanner />
+          {/* Main content area — min-h-0 prevents CLS when content loads */}
         <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
           {isChatPage ? (
             <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">
@@ -154,5 +163,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </>
       )}
     </div>
+    </StatusUpdateProvider>
   );
 }

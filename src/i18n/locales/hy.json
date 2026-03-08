@@ -1477,7 +1477,8 @@
   },
   "navbar": {
     "clockInOut": "Ներկայանալ/Հեռանալ",
-    "myReports": "Իմ հաշվետվությունները"
+    "myReports": "Իմ հաշվետվությունները",
+    "yourStatusNowWith": "Ձեր կարգավիճակը այժմ"
   },
   "sidebar": {
     "appName": "HRLeave",
