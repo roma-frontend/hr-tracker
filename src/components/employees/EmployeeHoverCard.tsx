@@ -72,7 +72,7 @@ employee, children, canEditStatus = false, currentUserId, userRole, allUsers }: 
   useEffect(() => () => clearTimeout(timerRef.current), []);
 
   const handlePresenceChange = async (status: PresenceStatus) => {
-    await updatePresence({ userId: employee._id as Id<"users">, status });
+    await updatePresence({ userId: employee._id as Id<"users">, presenceStatus: status });
   };
 
   const initials = (employee.name ?? "?").split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);

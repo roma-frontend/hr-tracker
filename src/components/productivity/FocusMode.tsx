@@ -28,7 +28,7 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
       // Update presence status
       await updatePresence({
         userId: user.id as Id<"users">,
-        status: newFocusState ? "busy" : "available",
+        presenceStatus: newFocusState ? "busy" : "available",
       });
 
       setIsFocusMode(newFocusState);

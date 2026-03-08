@@ -489,7 +489,7 @@ export function Navbar() {
                     key={key}
                     onClick={async () => {
                       if (user?.id) {
-                        await updatePresence({ userId: user.id as Id<"users">, status: key });
+                        await updatePresence({ userId: user.id as Id<"users">, presenceStatus: key });
                         setStatusExpanded(false); // Close after selection
                       }
                     }}
