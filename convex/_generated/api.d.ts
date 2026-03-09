@@ -18,6 +18,7 @@ import type * as employeeNotes from "../employeeNotes.js";
 import type * as employeeProfiles from "../employeeProfiles.js";
 import type * as faceRecognition from "../faceRecognition.js";
 import type * as leaves from "../leaves.js";
+import type * as messenger from "../messenger.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
 import type * as organizationRequests from "../organizationRequests.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   employeeProfiles: typeof employeeProfiles;
   faceRecognition: typeof faceRecognition;
   leaves: typeof leaves;
+  messenger: typeof messenger;
   migrations: typeof migrations;
   notifications: typeof notifications;
   organizationRequests: typeof organizationRequests;

@@ -66,7 +66,7 @@ export default defineSchema({
   // ── JOIN REQUESTS ────────────────────────────────────────────────────────
   // When an employee types an org name → request goes to org admin
   organizationInvites: defineTable({
-    organizationId: v.id("organizations"),
+    organizationId: v.optional(v.id("organizations")),
     // For join requests (employee → org)
     requestedByEmail: v.string(),
     requestedByName: v.string(),
@@ -256,6 +256,7 @@ export default defineSchema({
       v.literal("join_rejected"),            // new: join request rejected
       v.literal("security_alert"),           // new: suspicious activity detected
       v.literal("status_change"),            // new: presence status changed
+      v.literal("message_mention"),
       v.literal("system"),
     ),
     title: v.string(),

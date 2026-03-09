@@ -1811,3 +1811,23 @@ export const getServiceBroadcasts = query({
     return enriched.sort((a, b) => b.createdAt - a.createdAt);
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET UNREAD MESSAGE COUNT — for badge display
+// ─────────────────────────────────────────────────────────────────────────────
+export const getUnreadMessageCount = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const memberships = await ctx.db
+      .query("chatMembers")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    let total = 0;
+    for (const m of memberships) {
+      if (m.isDeleted) continue;
+      total += m.unreadCount || 0;
+    }
+    return total;
+  },
+});

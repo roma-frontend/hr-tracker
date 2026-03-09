@@ -183,7 +183,7 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
       {/* ── Main: Chat Window ──────────────────────────────────────────── */}
       <div
         className={cn(
-          "flex-1 flex flex-col min-w-0",
+          "flex-1 flex flex-col min-w-0 overflow-x-hidden",
           // Mobile: absolute overlay sliding from right
           // Parent container already starts below navbar, so inset-0 is correct
           "absolute inset-0 md:relative md:inset-auto",

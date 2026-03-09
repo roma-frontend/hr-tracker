@@ -586,7 +586,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
       )}
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 custom-scrollbar" style={{ background: "var(--background)" }}>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 xs:px-3 sm:px-4 py-3 xs:py-4 space-y-1 custom-scrollbar" style={{ background: "var(--background)" }}>
         {messages === undefined && (
           <div className="space-y-3 animate-pulse">
             {[...Array(5)].map((_, i) => (
@@ -661,54 +661,54 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
       {/* Pending file previews */}
       {pendingFiles.length > 0 && (
         <div
-          className="px-4 py-2 border-t flex gap-2 flex-wrap"
+          className="px-2 xs:px-3 sm:px-4 py-2 border-t flex gap-2 flex-wrap"
           style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
         >
           {pendingFiles.map((pf, idx) => (
             <div key={idx} className="relative group/pf">
               {pf.previewUrl ? (
                 // Image preview
-                <div className="relative w-16 h-16 rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                <div className="relative w-14 xs:w-16 h-14 xs:h-16 rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={pf.previewUrl} alt={pf.file.name} className="w-full h-full object-cover" />
                 </div>
               ) : pf.isPDF ? (
                 // PDF preview
                 <div
-                  className="w-16 h-16 rounded-xl border flex flex-col items-center justify-center gap-0.5"
+                  className="w-14 xs:w-16 h-14 xs:h-16 rounded-xl border flex flex-col items-center justify-center gap-0.5"
                   style={{ borderColor: "var(--border)", background: "var(--background)" }}
                 >
-                  <FileText className="w-6 h-6 text-red-400" />
-                  <span className="sm:text-[9px] text-xs text-center px-1 truncate w-full" style={{ color: "var(--text-muted)" }}>PDF</span>
+                  <FileText className="w-5 xs:w-6 h-5 xs:h-6 text-red-400" />
+                  <span className="text-[8px] xs:text-[9px] text-center px-1 truncate w-full" style={{ color: "var(--text-muted)" }}>PDF</span>
                 </div>
               ) : (
                 // Generic file
                 <div
-                  className="w-16 h-16 rounded-xl border flex flex-col items-center justify-center gap-0.5 px-1"
+                  className="w-14 xs:w-16 h-14 xs:h-16 rounded-xl border flex flex-col items-center justify-center gap-0.5 px-1"
                   style={{ borderColor: "var(--border)", background: "var(--background)" }}
                 >
-                  <span className="text-xl">📎</span>
-                  <span className="sm:text-[9px] text-xs text-center truncate w-full" style={{ color: "var(--text-muted)" }}>
+                  <span className="text-lg">📎</span>
+                  <span className="text-[7px] xs:text-[9px] text-center truncate w-full" style={{ color: "var(--text-muted)" }}>
                     {pf.file.name.split(".").pop()?.toUpperCase()}
                   </span>
                 </div>
               )}
               {/* File name tooltip & size */}
               <div className="absolute -bottom-5 left-0 right-0 text-center">
-                <span className="sm:text-[9px] text-xs truncate block" style={{ color: "var(--text-disabled)" }}>
+                <span className="text-[8px] xs:text-[9px] truncate block" style={{ color: "var(--text-disabled)" }}>
                   {formatFileSize(pf.file.size)}
                 </span>
               </div>
               {/* Remove button */}
               <button
                 onClick={() => removePendingFile(idx)}
-                className="absolute -top-1.5 -right-1.5 sm:w-4 w-5 sm:h-4 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/pf:opacity-100 transition-opacity"
+                className="absolute -top-1.5 -right-1.5 w-4 xs:w-4.5 h-4 xs:h-4.5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/pf:opacity-100 transition-opacity"
               >
-                <X className="sm:w-2.5 w-3 sm:h-2.5 h-3" />
+                <X className="w-2.5 xs:w-3 h-2.5 xs:h-3" />
               </button>
             </div>
           ))}
-          <p className="w-full sm:text-[10px] text-xs mt-5" style={{ color: "var(--text-disabled)" }}>
+          <p className="w-full text-[9px] xs:text-[10px] mt-5" style={{ color: "var(--text-disabled)" }}>
             {pendingFiles.length} {pendingFiles.length > 1 ? t('chat.filesReadyToSend') : t('chat.fileReadyToSend')}
           </p>
         </div>
@@ -717,19 +717,19 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
       {/* Reply preview */}
       {replyTo && (
         <div
-          className="px-4 py-2 border-t flex items-center gap-2"
+          className="px-2 xs:px-3 sm:px-4 py-2 border-t flex items-center gap-2"
           style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
         >
           <div className="w-0.5 h-8 rounded-full" style={{ background: "var(--primary)" }} />
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-medium" style={{ color: "var(--primary)" }}>
+            <p className="text-[10px] xs:text-[11px] font-medium" style={{ color: "var(--primary)" }}>
               {t('chat.replyingTo')} {replyTo.senderName}
             </p>
-            <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+            <p className="text-[9px] xs:text-xs truncate" style={{ color: "var(--text-muted)" }}>
               {replyTo.content}
             </p>
           </div>
-          <button onClick={() => setReplyTo(null)} className="w-5 h-5 flex items-center justify-center rounded-full hover:opacity-70">
+          <button onClick={() => setReplyTo(null)} className="w-5 h-5 flex items-center justify-center rounded-full hover:opacity-70 shrink-0">
             ✕
           </button>
         </div>
@@ -737,18 +737,18 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
 
       {/* Poll Creator */}
       {showPollCreator && (
-        <div className="px-4 py-3 border-t animate-slide-up" style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}>
+        <div className="px-2 xs:px-3 sm:px-4 py-3 border-t animate-slide-up" style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold flex items-center gap-1" style={{ color: "var(--text-primary)" }}>
-              <BarChart2 className="w-3.5 h-3.5" style={{ color: "var(--primary)" }} /> {t('chat.createPoll')}
+            <p className="text-[10px] xs:text-xs font-semibold flex items-center gap-1" style={{ color: "var(--text-primary)" }}>
+              <BarChart2 className="w-3 xs:w-3.5 h-3 xs:h-3.5" style={{ color: "var(--primary)" }} /> {t('chat.createPoll')}
             </p>
-            <button onClick={() => setShowPollCreator(false)} className="text-[10px] hover:opacity-70" style={{ color: "var(--text-muted)" }}>✕</button>
+            <button onClick={() => setShowPollCreator(false)} className="text-[9px] hover:opacity-70" style={{ color: "var(--text-muted)" }}>✕</button>
           </div>
           <input
             value={pollQuestion}
             onChange={(e) => setPollQuestion(e.target.value)}
             placeholder={t('chat.pollQuestion')}
-            className="w-full sm:px-3 px-4 sm:py-1.5 py-2 sm:text-xs text-sm rounded-lg border outline-none mb-2"
+            className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border outline-none mb-2"
             style={{ background: "var(--background)", borderColor: "var(--border)", color: "var(--text-primary)" }}
           />
           {pollOptions.map((opt, i) => (
@@ -757,7 +757,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
                 value={opt}
                 onChange={(e) => { const o = [...pollOptions]; o[i] = e.target.value; setPollOptions(o); }}
                 placeholder={`${t('chat.option')} ${i + 1}`}
-                className="flex-1 sm:px-3 px-4 sm:py-1.5 py-2 sm:text-xs text-sm rounded-lg border outline-none"
+                className="flex-1 px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border outline-none"
                 style={{ background: "var(--background)", borderColor: "var(--border)", color: "var(--text-primary)" }}
               />
               {pollOptions.length > 2 && (
@@ -765,16 +765,16 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
               )}
             </div>
           ))}
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
             {pollOptions.length < 5 && (
-              <button onClick={() => setPollOptions([...pollOptions, ""])} className="text-[11px] hover:opacity-70" style={{ color: "var(--primary)" }}>
+              <button onClick={() => setPollOptions([...pollOptions, ""])} className="text-[10px] xs:text-[11px] hover:opacity-70" style={{ color: "var(--primary)" }}>
                 {t('chat.addOption')}
               </button>
             )}
             <button
               onClick={handleSendPoll}
               disabled={!pollQuestion.trim() || pollOptions.filter(Boolean).length < 2 || sending}
-              className="ml-auto sm:px-3 px-4 sm:py-1 py-1.5 sm:min-h-auto min-h-9 rounded-lg sm:text-xs text-sm font-medium text-white transition-all hover:opacity-80 disabled:opacity-40"
+              className="ml-auto px-2.5 xs:px-3 py-1 rounded-lg text-[10px] xs:text-xs font-medium text-white transition-all hover:opacity-80 disabled:opacity-40 min-h-8"
               style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
             >
               {t('chat.sendPoll')}
@@ -785,47 +785,47 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
 
       {/* Scheduled send picker */}
       {showSchedule && (
-        <div className="px-4 py-2 border-t flex items-center gap-2 animate-slide-up" style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}>
-          <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--primary)" }} />
+        <div className="px-2 xs:px-3 sm:px-4 py-2 border-t flex items-center gap-2 animate-slide-up flex-wrap" style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}>
+          <Clock className="w-3 xs:w-3.5 h-3 xs:h-3.5 shrink-0" style={{ color: "var(--primary)" }} />
           <input
             type="datetime-local"
             value={scheduledFor}
             min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
             onChange={(e) => setScheduledFor(e.target.value)}
-            className="flex-1 sm:text-xs text-sm sm:px-2 px-3 sm:py-1 py-1.5 rounded-lg border outline-none"
+            className="flex-1 text-[9px] xs:text-xs px-2 xs:px-2.5 py-1 rounded-lg border outline-none"
             style={{ background: "var(--background)", borderColor: "var(--border)", color: "var(--text-primary)" }}
           />
-          <button onClick={() => { setShowSchedule(false); setScheduledFor(""); }} className="text-[10px] hover:opacity-70" style={{ color: "var(--text-muted)" }}>✕</button>
+          <button onClick={() => { setShowSchedule(false); setScheduledFor(""); }} className="text-[9px] hover:opacity-70" style={{ color: "var(--text-muted)" }}>✕</button>
         </div>
       )}
       {scheduledFor && (
-        <div className="px-4 py-1 flex items-center gap-2" style={{ background: "var(--background-subtle)" }}>
-          <Clock className="w-3 h-3" style={{ color: "var(--primary)" }} />
-          <span className="text-[10px]" style={{ color: "var(--primary)" }}>
+        <div className="px-2 xs:px-3 sm:px-4 py-1 flex items-center gap-2 flex-wrap" style={{ background: "var(--background-subtle)" }}>
+          <Clock className="w-2.5 xs:w-3 h-2.5 xs:h-3" style={{ color: "var(--primary)" }} />
+          <span className="text-[8px] xs:text-[9px]" style={{ color: "var(--primary)" }}>
             {t('chat.scheduledFor')} {new Date(scheduledFor).toLocaleString()}
           </span>
-          <button onClick={() => setScheduledFor("")} className="ml-auto text-[10px] text-red-400 hover:opacity-70">{t('chat.cancel')}</button>
+          <button onClick={() => setScheduledFor("")} className="ml-auto text-[8px] xs:text-[9px] text-red-400 hover:opacity-70">{t('chat.cancel')}</button>
         </div>
       )}
 
       {/* Input area */}
       {canUserSendMessage ? (
-        <div className="px-4 py-3 border-t shrink-0" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
+        <div className="px-2 xs:px-3 sm:px-4 py-2 xs:py-3 border-t shrink-0" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
         <div
-          className="flex items-center gap-2 rounded-2xl border px-3 py-2 transition-all"
+          className="flex items-center gap-1.5 xs:gap-2 rounded-2xl border px-2 xs:px-3 py-1.5 xs:py-2 transition-all"
           style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
         >
           {/* Attachment */}
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="sm:w-7 w-8 sm:h-7 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-110 hover:opacity-100 relative group/attach"
+            className="w-6 xs:w-7 h-6 xs:h-7 flex items-center justify-center rounded-lg transition-all hover:scale-110 hover:opacity-100 relative group/attach shrink-0"
             style={{ color: pendingFiles.length > 0 ? "var(--primary)" : "var(--text-disabled)" }}
             title={t('chat.attachFile')}
             type="button"
           >
-            <Paperclip className="sm:w-4 w-5 sm:h-4 h-5" />
+            <Paperclip className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
             {pendingFiles.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full sm:text-[9px] text-xs font-bold text-white flex items-center justify-center" style={{ background: "var(--primary)" }}>
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full text-[7px] xs:text-[8px] font-bold text-white flex items-center justify-center" style={{ background: "var(--primary)" }}>
                 {pendingFiles.length}
               </span>
             )}
@@ -835,25 +835,25 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
           {/* Poll button */}
           <button
             onClick={() => { setShowPollCreator(!showPollCreator); setShowSchedule(false); }}
-            className="sm:w-7 w-8 sm:h-7 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-110"
+            className="w-6 xs:w-7 h-6 xs:h-7 flex items-center justify-center rounded-lg transition-all hover:scale-110 shrink-0"
             style={{ color: showPollCreator ? "var(--primary)" : "var(--text-disabled)" }}
             title={t('chat.createPollShort')}
           >
-            <BarChart2 className="sm:w-4 w-5 sm:h-4 h-5" />
+            <BarChart2 className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
           </button>
 
           {/* Scheduled send */}
           <button
             onClick={() => { setShowSchedule(!showSchedule); setShowPollCreator(false); }}
-            className="sm:w-7 w-8 sm:h-7 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-110"
+            className="w-6 xs:w-7 h-6 xs:h-7 flex items-center justify-center rounded-lg transition-all hover:scale-110 shrink-0"
             style={{ color: scheduledFor ? "var(--primary)" : "var(--text-disabled)" }}
             title={t('chat.scheduleMessage')}
           >
-            <Clock className="sm:w-4 w-5 sm:h-4 h-5" />
+            <Clock className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
           </button>
 
           {/* Text input + @mention popup */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative min-w-0">
             {/* @mention autocomplete popup */}
             {mentionQuery !== null && mentionSuggestions.length > 0 && (
               <div
@@ -864,22 +864,22 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
                   <button
                     key={m.userId}
                     onClick={() => m.user?.name && insertMention(m.user.name)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-all"
+                    className="w-full flex items-center gap-2 px-2 xs:px-3 py-1.5 xs:py-2 text-[9px] xs:text-xs transition-all"
                     style={{
                       background: idx === mentionIndex ? "var(--sidebar-item-active)" : "transparent",
                       color: idx === mentionIndex ? "var(--primary)" : "var(--text-primary)",
                     }}
                     onMouseEnter={() => setMentionIndex(idx)}
                   >
-                    <Avatar className="w-5 h-5">
+                    <Avatar className="w-4 xs:w-5 h-4 xs:h-5 shrink-0">
                       {m.user?.avatarUrl && <AvatarImage src={m.user.avatarUrl} />}
-                      <AvatarFallback className="text-[8px] font-bold text-white" style={{ background: "var(--primary)" }}>
+                      <AvatarFallback className="text-[6px] xs:text-[8px] font-bold text-white" style={{ background: "var(--primary)" }}>
                         {(m.user?.name ?? "?").slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="truncate font-medium">{m.user?.name ?? "Unknown"}</span>
+                    <span className="truncate font-medium text-[9px] xs:text-xs">{m.user?.name ?? "Unknown"}</span>
                     {m.user?.department && (
-                      <span className="text-[10px] truncate ml-auto" style={{ color: "var(--text-disabled)" }}>
+                      <span className="text-[7px] xs:text-[9px] truncate ml-auto" style={{ color: "var(--text-disabled)" }}>
                         {m.user.department}
                       </span>
                     )}
@@ -894,7 +894,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
               onKeyDown={handleKeyDown}
               placeholder={pendingFiles.length > 0 ? t('chat.addCaption') : t('chat.messagePlaceholder')}
               rows={1}
-              className="w-full resize-none bg-transparent outline-none text-sm leading-5"
+              className="w-full resize-none bg-transparent outline-none text-xs xs:text-sm leading-5"
               style={{ color: "var(--text-primary)", maxHeight: "120px" }}
             />
           </div>
@@ -903,10 +903,10 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
           <div className="relative">
             <button
               onClick={() => setShowEmoji(!showEmoji)}
-              className="sm:w-7 w-8 sm:h-7 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-110"
+              className="w-6 xs:w-7 h-6 xs:h-7 flex items-center justify-center rounded-lg transition-all hover:scale-110 shrink-0"
               style={{ color: showEmoji ? "var(--primary)" : "var(--text-disabled)" }}
             >
-              <Smile className="sm:w-4 w-5 sm:h-4 h-5" />
+              <Smile className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
             </button>
             {showEmoji && <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmoji(false)} />}
           </div>
@@ -915,32 +915,32 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
           <button
             onClick={handleSend}
             disabled={!canSend}
-            className="sm:w-8 w-9 sm:h-8 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-7 xs:w-8 h-7 xs:h-8 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
             style={{ background: canSend ? "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" : "var(--border)" }}
           >
             {sending ? (
-              <span className="sm:w-3.5 w-4 sm:h-3.5 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              <span className="w-3 xs:w-3.5 h-3 xs:h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
             ) : scheduledFor ? (
-              <Clock className="sm:w-3.5 w-4 sm:h-3.5 h-4 text-white" />
+              <Clock className="w-3 xs:w-3.5 h-3 xs:h-3.5 text-white" />
             ) : (
-              <svg className="sm:w-3.5 w-4 sm:h-3.5 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="w-3 xs:w-3.5 h-3 xs:h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13" />
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>
             )}
           </button>
         </div>
-        <p className="sm:text-[10px] text-xs mt-1 text-center" style={{ color: "var(--text-disabled)" }}>
+        <p className="text-[8px] xs:text-[9px] mt-1 text-center" style={{ color: "var(--text-disabled)" }}>
           {t('chat.enterHint')}
         </p>
       </div>
       ) : (
-        <div className="px-4 py-4 border-t text-center shrink-0" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
-          <div className="p-4 rounded-xl" style={{ background: "var(--background-elevated)" }}>
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+        <div className="px-2 xs:px-3 sm:px-4 py-3 xs:py-4 border-t text-center shrink-0" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
+          <div className="p-3 xs:p-4 rounded-xl" style={{ background: "var(--background-elevated)" }}>
+            <p className="text-xs xs:text-sm font-medium" style={{ color: "var(--text-primary)" }}>
               🔒 Read-Only Channel
             </p>
-            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+            <p className="text-[9px] xs:text-xs mt-1" style={{ color: "var(--text-muted)" }}>
               This is an information-only channel. Messages are sent by administrators only.
             </p>
           </div>

@@ -44,8 +44,8 @@ export function LinkPreview({ url, isOwn }: Props) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block mt-2 rounded-xl overflow-hidden border transition-all duration-200 hover:opacity-80 hover:scale-[1.01]"
-      style={{ borderColor: isOwn ? "rgba(255,255,255,0.2)" : "var(--border)", maxWidth: 280 }}
+      className="block mt-2 rounded-xl overflow-hidden border transition-all duration-200 hover:opacity-80 hover:scale-[1.01] w-full max-w-[200px] xs:max-w-[220px] sm:max-w-[240px]"
+      style={{ borderColor: isOwn ? "rgba(255,255,255,0.2)" : "var(--border)" }}
     >
       {preview?.image && (
         // eslint-disable-next-line @next/next/no-img-element

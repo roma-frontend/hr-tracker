@@ -1,49 +1,127 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GET USER ACTIVITY STATS
-// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Get user statistics - UNIFIED VERSION matching mobile
+ */
 export const getUserStats = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     const user = await ctx.db.get(userId);
     if (!user) throw new Error("User not found");
 
-    const now = Date.now();
-    const userCreatedAt = user.createdAt ?? now;
-
-    // Calculate days since joined
-    const daysActive = Math.floor((now - userCreatedAt) / (1000 * 60 * 60 * 24));
-
-    // Count completed tasks
-    const allTasks = await ctx.db
-      .query("tasks")
-      .filter((q) => q.eq(q.field("assignedTo"), userId))
-      .collect();
-
-    const completedTasks = allTasks.filter(t => t.status === "completed").length;
-
-    // Count approved leaves
-    const leaves = await ctx.db
+    // Get user's leaves
+    const userLeaves = await ctx.db
       .query("leaveRequests")
       .filter((q) => q.eq(q.field("userId"), userId))
       .collect();
 
-    const approvedLeaves = leaves.filter(l => l.status === "approved").length;
+    // Calculate leave statistics
+    const approved = userLeaves.filter(l => l.status === "approved");
+    const pending = userLeaves.filter(l => l.status === "pending");
+    const rejected = userLeaves.filter(l => l.status === "rejected");
 
-    // Count projects (from tasks - unique project references)
+    const totalDaysUsed = approved.reduce((sum, l) => sum + (l.days ?? 0), 0);
+    const totalDaysPending = pending.reduce((sum, l) => sum + (l.days ?? 0), 0);
+
+    // Get user's tasks
+    const userTasks = await ctx.db
+      .query("tasks")
+      .filter((q) => q.eq(q.field("assignedTo"), userId))
+      .collect();
+
+    const completedTasks = userTasks.filter(t => t.status === "completed").length;
+    const totalTasks = userTasks.length;
+    const taskCompletionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+    // Get user's messages/activity
+    const userMessages = await ctx.db
+      .query("chatMessages")
+      .filter((q) => q.eq(q.field("senderId"), userId))
+      .collect();
+
+    // Get attendance records if available
+    let attendanceStats = {
+      presentDays: 0,
+      absentDays: 0,
+      leaveDays: totalDaysUsed,
+      totalWorkingDays: 0,
+    };
+
+    try {
+      const attendance = await ctx.db
+        .query("attendance")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .collect();
+
+      if (attendance && attendance.length > 0) {
+        attendanceStats.presentDays = attendance.filter(a => a.status === "present").length;
+        attendanceStats.absentDays = attendance.filter(a => a.status === "absent").length;
+        attendanceStats.totalWorkingDays = attendance.length;
+      }
+    } catch (err) {
+      // Attendance table might not exist
+    }
+
+    // Calculate leave balances
+    const leaveBalances = {
+      paid: (user as any).paidLeaveBalance ?? 20,
+      sick: (user as any).sickLeaveBalance ?? 10,
+      family: (user as any).familyLeaveBalance ?? 5,
+    };
+
+    // Count projects from tasks
     const projects = new Set(
-      allTasks
+      userTasks
         .filter(t => (t as any).projectId)
         .map(t => (t as any).projectId)
     );
 
     return {
-      daysActive,
+      userId: user._id,
+      userName: user.name,
+      department: user.department,
+      position: (user as any).position ?? "N/A",
+      avatar: user.avatarUrl,
+      joinDate: (user as any).createdAt,
+      
+      leaveStats: {
+        totalDaysUsed,
+        totalDaysPending,
+        approvedLeaves: approved.length,
+        pendingLeaves: pending.length,
+        rejectedLeaves: rejected.length,
+        balances: leaveBalances,
+      },
+
+      taskStats: {
+        totalTasks,
+        completedTasks,
+        completionRate: Math.round(taskCompletionRate),
+        pendingTasks: userTasks.filter(t => t.status !== "completed").length,
+      },
+
+      activityStats: {
+        totalMessages: userMessages.length,
+        lastActive: userMessages.length > 0 
+          ? Math.max(...userMessages.map(m => m.createdAt ?? 0))
+          : null,
+      },
+
+      attendanceStats,
+
+      // Legacy fields for backward compatibility
+      daysActive: Math.floor((Date.now() - ((user as any).createdAt ?? Date.now())) / (1000 * 60 * 60 * 24)),
       tasksCompleted: completedTasks,
-      leavesTaken: approvedLeaves,
+      leavesTaken: approved.length,
       projects: projects.size,
+
+      // Overall productivity score (0-100)
+      productivityScore: Math.round(
+        (taskCompletionRate * 0.4) + 
+        (Math.min(userMessages.length / 100, 1) * 100 * 0.3) +
+        (attendanceStats.presentDays > 0 ? (attendanceStats.presentDays / (attendanceStats.presentDays + attendanceStats.absentDays)) * 100 * 0.3 : 0)
+      ),
     };
   },
 });

@@ -789,3 +789,28 @@ export const removeMemberFromOrganization = mutation({
     return userId;
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET ORGANIZATIONS FOR PICKER — for chat UI
+// ─────────────────────────────────────────────────────────────────────────────
+export const getOrganizationsForPicker = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    if (user.email.toLowerCase() === SUPERADMIN_EMAIL) {
+      const orgs = await ctx.db
+        .query("organizations")
+        .withIndex("by_active", (q) => q.eq("isActive", true))
+        .collect();
+      return orgs.map((o) => ({ _id: o._id, name: o.name, slug: o.slug }));
+    }
+
+    // Regular users: only their own org
+    if (!user.organizationId) return [];
+    const org = await ctx.db.get(user.organizationId);
+    if (!org) return [];
+    return [{ _id: org._id, name: org.name, slug: org.slug }];
+  },
+});

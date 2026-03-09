@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,7 +12,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
-import { Search, Plus, Users, MessageCircle, Pin, Archive, Trash2, RotateCcw, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { Search, Plus, Users, MessageCircle, Pin, Archive, Trash2, RotateCcw, Volume2, VolumeX, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -80,6 +80,45 @@ export function ConversationList({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterType>("chat");
   const [loadingOpId, setLoadingOpId] = useState<string | null>(null);
+  const filtersRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Handle wheel scroll for filters
+  const handleFilterWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (filtersRef.current) {
+      e.preventDefault();
+      filtersRef.current.scrollLeft += e.deltaY > 0 ? 100 : -100;
+      updateScrollButtons();
+    }
+  };
+
+  // Update scroll button visibility
+  const updateScrollButtons = () => {
+    if (filtersRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = filtersRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  // Scroll filters left/right
+  const scrollFilters = (direction: 'left' | 'right') => {
+    if (filtersRef.current) {
+      filtersRef.current.scrollBy({
+        left: direction === 'left' ? -120 : 120,
+        behavior: 'smooth',
+      });
+      setTimeout(updateScrollButtons, 300);
+    }
+  };
+
+  // Initialize scroll buttons on mount
+  React.useEffect(() => {
+    updateScrollButtons();
+    window.addEventListener('resize', updateScrollButtons);
+    return () => window.removeEventListener('resize', updateScrollButtons);
+  }, []);
 
   // Apply filters
   const filtered = conversations.filter((c) => {
@@ -171,35 +210,70 @@ export function ConversationList({
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="px-3 pb-2 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth">
-        {(["all", "chat", "unread", "groups", "pinned", "archived"] as const).map((f) => {
-          const unreadCount = conversations.filter(c => c.membership.unreadCount > 0 && !(c.membership.isArchived || c.isArchived || c.membership.isDeleted)).length;
-          return (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={cn(
-                "px-3 py-1 text-xs rounded-full whitespace-nowrap transition-all shrink-0 active:scale-95",
-                filter === f
-                  ? "text-white shadow-md"
-                  : "text-gray-500 opacity-60 hover:opacity-100"
-              )}
-              style={{
-                background: filter === f ? "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)" : "transparent",
-                cursor: "pointer",
-              }}
-              title={f === "archived" ? "Archived conversations - tap to restore" : undefined}
-            >
-              {f === "all" && t('chat.filterAll', 'All')}
-              {f === "chat" && t('chat.filterChat', 'Chat')}
-              {f === "unread" && `${t('chat.filterUnread', 'Unread')} ${unreadCount > 0 ? `(${unreadCount})` : ""}`}
-              {f === "groups" && t('chat.filterGroups', 'Groups')}
-              {f === "pinned" && t('chat.filterPinned', 'Pinned')}
-              {f === "archived" && t('chat.filterArchived', 'Archived')}
-            </button>
-          );
-        })}
+      {/* Filters with scroll controls */}
+      <div className="px-3 pb-2 flex items-center gap-1.5">
+        {/* Left scroll button */}
+        <button
+          onClick={() => scrollFilters('left')}
+          className={cn(
+            "flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all",
+            canScrollLeft ? "opacity-100 hover:opacity-70" : "opacity-30 cursor-not-allowed"
+          )}
+          style={{ background: "var(--background-subtle)" }}
+          disabled={!canScrollLeft}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        {/* Filters container */}
+        <div 
+          ref={filtersRef}
+          onWheel={handleFilterWheel}
+          onScroll={updateScrollButtons}
+          className="flex-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth"
+          style={{ scrollBehavior: 'smooth' }}
+        >
+          {(["all", "chat", "unread", "groups", "pinned", "archived"] as const).map((f) => {
+            const unreadCount = conversations.filter(c => c.membership.unreadCount > 0 && !(c.membership.isArchived || c.isArchived || c.membership.isDeleted)).length;
+            return (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "px-3 py-1 text-xs rounded-full whitespace-nowrap transition-all shrink-0 active:scale-95",
+                  filter === f
+                    ? "text-white shadow-md"
+                    : "text-gray-500 opacity-60 hover:opacity-100"
+                )}
+                style={{
+                  background: filter === f ? "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)" : "transparent",
+                  cursor: "pointer",
+                }}
+                title={f === "archived" ? "Archived conversations - tap to restore" : undefined}
+              >
+                {f === "all" && t('chat.filterAll', 'All')}
+                {f === "chat" && t('chat.filterChat', 'Chat')}
+                {f === "unread" && `${t('chat.filterUnread', 'Unread')} ${unreadCount > 0 ? `(${unreadCount})` : ""}`}
+                {f === "groups" && t('chat.filterGroups', 'Groups')}
+                {f === "pinned" && t('chat.filterPinned', 'Pinned')}
+                {f === "archived" && t('chat.filterArchived', 'Archived')}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right scroll button */}
+        <button
+          onClick={() => scrollFilters('right')}
+          className={cn(
+            "flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all",
+            canScrollRight ? "opacity-100 hover:opacity-70" : "opacity-30 cursor-not-allowed"
+          )}
+          style={{ background: "var(--background-subtle)" }}
+          disabled={!canScrollRight}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
 
       {/* List */}
@@ -450,8 +524,13 @@ export function ConversationList({
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Smooth scrolling for filter tabs */
+        .scroll-smooth { scroll-behavior: smooth; }
+        
         @keyframes conv-in {
           from { opacity: 0; transform: translateX(-8px); }
           to   { opacity: 1; transform: translateX(0); }
