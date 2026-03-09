@@ -114,6 +114,23 @@ export default function DriversPage() {
     mounted && userId ? { userId } : "skip"
   );
 
+  // Mutations - MUST be called unconditionally at top level
+  const requestDriver = useMutation(api.drivers.requestDriver);
+  const requestCalendarAccess = useMutation(api.drivers.requestCalendarAccess);
+
+  // Filter drivers by search
+  const filteredDrivers = useMemo(() => {
+    if (!availableDrivers) return [];
+    if (!searchQuery) return availableDrivers;
+
+    const query = searchQuery.toLowerCase();
+    return availableDrivers.filter((d) =>
+      d.userName.toLowerCase().includes(query) ||
+      d.vehicleInfo.model.toLowerCase().includes(query) ||
+      d.vehicleInfo.plateNumber.toLowerCase().includes(query)
+    );
+  }, [availableDrivers, searchQuery]);
+
   // Show loading while mounting
   if (!mounted) {
     return (
@@ -140,23 +157,6 @@ export default function DriversPage() {
       </div>
     );
   }
-
-  // Mutations
-  const requestDriver = useMutation(api.drivers.requestDriver);
-  const requestCalendarAccess = useMutation(api.drivers.requestCalendarAccess);
-
-  // Filter drivers by search
-  const filteredDrivers = useMemo(() => {
-    if (!availableDrivers) return [];
-    if (!searchQuery) return availableDrivers;
-
-    const query = searchQuery.toLowerCase();
-    return availableDrivers.filter((d) =>
-      d.userName.toLowerCase().includes(query) ||
-      d.vehicleInfo.model.toLowerCase().includes(query) ||
-      d.vehicleInfo.plateNumber.toLowerCase().includes(query)
-    );
-  }, [availableDrivers, searchQuery]);
 
   return (
     <div className="container mx-auto px-4 py-8">
