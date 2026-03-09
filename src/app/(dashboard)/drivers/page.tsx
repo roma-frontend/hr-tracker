@@ -226,7 +226,7 @@ export default function DriversPage() {
       return;
     }
 
-    if (!selectedDriverUserId) {
+    if (!selectedDriverUserId || selectedDriverUserId === "none") {
       toast.error("Please select a driver to register");
       return;
     }
@@ -651,13 +651,15 @@ export default function DriversPage() {
             {/* Select Driver */}
             <div>
               <Label>Select Driver *</Label>
-              <Select value={selectedDriverUserId} onValueChange={setSelectedDriverUserId}>
+              <Select value={selectedDriverUserId || undefined} onValueChange={(v) => setSelectedDriverUserId(v || "")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a driver to register" />
                 </SelectTrigger>
                 <SelectContent>
                   {unregisteredDrivers.length === 0 ? (
-                    <SelectItem value="" disabled>No unregistered drivers</SelectItem>
+                    <SelectItem value="none" disabled>
+                      No unregistered drivers
+                    </SelectItem>
                   ) : (
                     unregisteredDrivers.map((driver) => (
                       <SelectItem key={driver._id} value={driver._id}>
