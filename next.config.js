@@ -33,8 +33,6 @@ const nextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    // Lazy loading for better initial performance
-    loading: 'lazy',
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -80,13 +78,6 @@ const nextConfig = {
     ppr: false,
     optimizeCss: true,
     scrollRestoration: true,
-    // Better memory management
-    webWorkerTerser: true,
-    // Reduce bundle size
-    modularizeImports: {
-      'lodash': { transform: 'lodash/{{member}}' },
-      'moment': { transform: 'moment/{{member}}' },
-    },
   },
 
   // Silence "webpack config but no turbopack config" warning
