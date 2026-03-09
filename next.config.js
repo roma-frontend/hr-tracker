@@ -20,7 +20,7 @@ const nextConfig = {
   transpilePackages: ['@radix-ui/react-icons'],
 
   // ═══════════════════════════════════════════════════════════════
-  // IMAGES
+  // IMAGES — OPTIMIZED
   // ═══════════════════════════════════════════════════════════════
   images: {
     remotePatterns: [
@@ -33,6 +33,8 @@ const nextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Lazy loading for better initial performance
+    loading: 'lazy',
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -45,10 +47,15 @@ const nextConfig = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // EXPERIMENTAL — single unified block
+  // EXPERIMENTAL — OPTIMIZED
   // ═══════════════════════════════════════════════════════════════
   experimental: {
-    serverActions: { bodySizeLimit: '2mb' },
+    serverActions: { 
+      bodySizeLimit: '2mb',
+      // Faster action responses
+      allowedOrigins: ['*'],
+    },
+    // Aggressive package imports optimization
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
@@ -67,40 +74,52 @@ const nextConfig = {
       'recharts',
       'date-fns',
       'sonner',
+      'react-i18next',
+      'convex',
     ],
     ppr: false,
     optimizeCss: true,
     scrollRestoration: true,
+    // Better memory management
+    webWorkerTerser: true,
+    // Reduce bundle size
+    modularizeImports: {
+      'lodash': { transform: 'lodash/{{member}}' },
+      'moment': { transform: 'moment/{{member}}' },
+    },
   },
 
   // Silence "webpack config but no turbopack config" warning
   turbopack: {},
 
   // ═══════════════════════════════════════════════════════════════
-  // WEBPACK — aggressive bundle splitting (single unified block)
+  // WEBPACK — OPTIMIZED FOR PERFORMANCE
   // ═══════════════════════════════════════════════════════════════
-  webpack(config, { isServer }) {
+  webpack(config, { isServer, dev }) {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
         // Module concatenation for smaller bundle
-        concatenateModules: true,
+        concatenateModules: !dev,
         usedExports: true,
         sideEffects: true,
+        // Better chunk splitting
         splitChunks: {
           chunks: 'all',
           minSize: 20000,
           maxSize: 244000,
           maxAsyncRequests: 30,
           maxInitialRequests: 25,
+          minChunks: 1,
           cacheGroups: {
             // React + Next — highest priority, always loaded
             framework: {
               name: 'framework',
-              test: /[\\/]node_modules[\\/](react|react-dom|next|scheduler)[\\/]/,
+              test: /[\\/]node_modules[\\/](react|react-dom|next|scheduler|next-server)[\\/]/,
               priority: 50,
               chunks: 'all',
               enforce: true,
+              reuseExistingChunk: true,
             },
             // UI: Radix + Lucide + CVA + TailwindMerge
             ui: {
@@ -109,6 +128,7 @@ const nextConfig = {
               priority: 40,
               chunks: 'all',
               enforce: true,
+              reuseExistingChunk: true,
             },
             // Framer Motion — async (only when animated components load)
             framerMotion: {
@@ -116,6 +136,7 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
               priority: 35,
               chunks: 'async',
+              reuseExistingChunk: true,
             },
             // Charts — async (only on analytics/reports pages)
             charts: {
@@ -123,6 +144,7 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](recharts|d3-)[\\/]/,
               priority: 30,
               chunks: 'async',
+              reuseExistingChunk: true,
             },
             // AI SDK — async (only on chat routes)
             aiSdk: {
@@ -130,6 +152,7 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](@ai-sdk|ai|openai)[\\/]/,
               priority: 30,
               chunks: 'async',
+              reuseExistingChunk: true,
             },
             // Convex realtime client
             convex: {
@@ -137,6 +160,15 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/]convex[\\/]/,
               priority: 25,
               chunks: 'all',
+              reuseExistingChunk: true,
+            },
+            // i18n — load early
+            i18n: {
+              name: 'i18n',
+              test: /[\\/]node_modules[\\/](react-i18next|i18next)[\\/]/,
+              priority: 20,
+              chunks: 'all',
+              reuseExistingChunk: true,
             },
             // General vendor fallback
             vendors: {
@@ -146,15 +178,35 @@ const nextConfig = {
               chunks: 'all',
               reuseExistingChunk: true,
             },
+            // Common code shared between pages
+            common: {
+              name: 'common',
+              minChunks: 2,
+              priority: 5,
+              chunks: 'all',
+              reuseExistingChunk: true,
+            },
           },
         },
+        // Better minification
+        minimizer: config.optimization.minimizer,
+        // Remove unused code
+        usedExports: true,
+        // Tree shaking
+        sideEffects: true,
       };
     }
+    
+    // Reduce source map size
+    if (!dev) {
+      config.devtool = 'source-map';
+    }
+    
     return config;
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // SECURITY + CACHE HEADERS
+  // SECURITY + CACHE HEADERS — OPTIMIZED
   // ═══════════════════════════════════════════════════════════════
   async headers() {
     return [
@@ -222,6 +274,13 @@ const nextConfig = {
         source: '/api/:path*',
         headers: [
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
+        ],
+      },
+      // Chat pages — stale-while-revalidate for fast updates
+      {
+        source: '/chat',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
         ],
       },
     ];
