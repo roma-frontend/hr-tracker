@@ -74,6 +74,14 @@ export default function DriversPage() {
   
   React.useEffect(() => setMounted(true), []);
   
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[DriversPage] mounted:', mounted);
+    console.log('[DriversPage] user:', user);
+    console.log('[DriversPage] userId:', user?.id);
+    console.log('[DriversPage] orgId:', user?.orgId);
+  }, [mounted, user]);
+  
   const [selectedDriver, setSelectedDriver] = useState<Id<"drivers"> | null>(null);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showAccessModal, setShowAccessModal] = useState(false);
@@ -122,6 +130,11 @@ export default function DriversPage() {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-yellow-500" />
           <h2 className="text-xl font-semibold mb-2">Please log in</h2>
+          <p className="text-muted-foreground mb-4">
+            User: {user ? 'Loaded' : 'Not loaded'} | 
+            ID: {userId || 'N/A'} | 
+            Org: {organizationId || 'N/A'}
+          </p>
           <Button onClick={() => router.push("/login")}>Go to Login</Button>
         </div>
       </div>
