@@ -720,6 +720,44 @@ export const updatePresenceStatus = mutation({
   },
 });
 
+// GET EFFECTIVE PRESENCE STATUS (with active leave check)
+// ─────────────────────────────────────────────────────────────────────────────
+// This function checks if user has an approved leave today
+// If so, returns "out_of_office", otherwise returns user's presenceStatus
+export const getEffectivePresenceStatus = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    // Get all approved leaves for this user
+    const approvedLeaves = await ctx.db
+      .query("leaveRequests")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("status"), "approved"))
+      .collect();
+
+    // Check if any leave is active today
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const hasActiveLeave = approvedLeaves.some((leave) => {
+      const startDate = leave.startDate;
+      const endDate = leave.endDate;
+      return startDate <= today && today <= endDate;
+    });
+
+    // If currently on approved leave → out_of_office
+    // Otherwise → use user's presenceStatus
+    const effectiveStatus = hasActiveLeave ? "out_of_office" : (user.presenceStatus ?? "available");
+
+    return {
+      userId,
+      presenceStatus: user.presenceStatus ?? "available",
+      effectivePresenceStatus: effectiveStatus,
+      hasActiveLeave,
+    };
+  },
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // UPDATE AVATAR
 // ─────────────────────────────────────────────────────────────────────────────

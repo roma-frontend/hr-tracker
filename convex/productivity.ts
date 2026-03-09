@@ -152,20 +152,43 @@ export const getTeamPresence = query({
       users = users.filter(u => u.organizationId === requester.organizationId);
     }
 
-    // Get only active users with presence status
-    const onlineUsers = users
-      .filter(u => u.isActive && u.presenceStatus)
-      .map(u => ({
-        _id: u._id,
-        name: u.name,
-        avatarUrl: u.avatarUrl,
-        presenceStatus: u.presenceStatus!,
-        department: u.department,
-        role: u.role,
-      }))
-      .slice(0, 10); // Limit to 10 for performance
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
 
-    return onlineUsers;
+    // Get only active users with presence status
+    const onlineUsers = await Promise.all(
+      users
+        .filter(u => u.isActive && u.presenceStatus)
+        .map(async (u) => {
+          // Check if user has an approved leave today
+          let effectivePresenceStatus = u.presenceStatus!;
+
+          const approvedLeaves = await ctx.db
+            .query("leaveRequests")
+            .withIndex("by_user", (q) => q.eq("userId", u._id))
+            .filter((q) => q.eq(q.field("status"), "approved"))
+            .collect();
+
+          const hasActiveLeave = approvedLeaves.some((leave) => {
+            return leave.startDate <= today && today <= leave.endDate;
+          });
+
+          if (hasActiveLeave) {
+            effectivePresenceStatus = "out_of_office";
+          }
+
+          return {
+            _id: u._id,
+            name: u.name,
+            avatarUrl: u.avatarUrl,
+            presenceStatus: effectivePresenceStatus,
+            department: u.department,
+            role: u.role,
+          };
+        })
+    );
+
+    return onlineUsers.slice(0, 10); // Limit to 10 for performance
   },
 });
 

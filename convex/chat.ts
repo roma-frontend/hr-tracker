@@ -134,6 +134,12 @@ export const getMyConversations = query({
 
     const conversations = await Promise.all(
       memberships.map(async (m) => {
+        // Skip conversations deleted by this user (per-user deletion)
+        if (m.isDeleted) {
+          console.log(`[getMyConversations] Skipping conversation ${m.conversationId} - marked as deleted by user`);
+          return null;
+        }
+
         const conv = await ctx.db.get(m.conversationId);
         if (!conv) {
           console.log(`[getMyConversations] Conversation ${m.conversationId} not found for membership`);
@@ -143,7 +149,7 @@ export const getMyConversations = query({
           console.log(`[getMyConversations] Skipping conversation ${conv._id} - different org (${conv.organizationId} vs ${args.organizationId})`);
           return null;
         }
-        // Include archived/deleted conversations with their flags so the client
+        // Include archived conversations with their flags so the client
         // can show them in the "archived" tab and allow restore/unarchive
 
         console.log(`[getMyConversations] Including conversation: ${conv.name || conv._id} (type: ${conv.type}, unread: ${m.unreadCount})`);
@@ -157,7 +163,34 @@ export const getMyConversations = query({
             .collect();
           const otherMember = allMembers.find((mm) => mm.userId !== args.userId);
           if (otherMember) {
-            otherUser = await ctx.db.get(otherMember.userId);
+            const user = await ctx.db.get(otherMember.userId);
+            if (user) {
+              // Calculate effective presence status considering active leaves
+              let effectivePresenceStatus = user.presenceStatus ?? "available";
+
+              // Check if user has an approved leave today
+              const approvedLeaves = await ctx.db
+                .query("leaveRequests")
+                .withIndex("by_user", (q) => q.eq("userId", otherMember.userId))
+                .filter((q) => q.eq(q.field("status"), "approved"))
+                .collect();
+
+              const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+              const hasActiveLeave = approvedLeaves.some((leave) => {
+                return leave.startDate <= today && today <= leave.endDate;
+              });
+
+              if (hasActiveLeave) {
+                effectivePresenceStatus = "out_of_office";
+              }
+
+              otherUser = {
+                _id: user._id,
+                name: user.name,
+                avatarUrl: user.avatarUrl,
+                presenceStatus: effectivePresenceStatus,
+              };
+            }
           }
         }
 
@@ -184,7 +217,7 @@ export const getMyConversations = query({
         return {
           ...conv,
           membership: m,
-          otherUser: otherUser ? { _id: otherUser._id, name: otherUser.name, avatarUrl: otherUser.avatarUrl, presenceStatus: otherUser.presenceStatus } : null,
+          otherUser,
           memberCount,
           members,
         };
@@ -219,16 +252,38 @@ export const getConversationMembers = query({
       .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
       .collect();
 
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
     return Promise.all(
       members.map(async (m) => {
         const user = await ctx.db.get(m.userId);
+        let effectivePresenceStatus = user?.presenceStatus ?? "available";
+
+        // Check if user has an approved leave today
+        if (user) {
+          const approvedLeaves = await ctx.db
+            .query("leaveRequests")
+            .withIndex("by_user", (q) => q.eq("userId", user._id))
+            .filter((q) => q.eq(q.field("status"), "approved"))
+            .collect();
+
+          const hasActiveLeave = approvedLeaves.some((leave) => {
+            return leave.startDate <= today && today <= leave.endDate;
+          });
+
+          if (hasActiveLeave) {
+            effectivePresenceStatus = "out_of_office";
+          }
+        }
+
         return {
           ...m,
           user: user ? {
             _id: user._id,
             name: user.name,
             avatarUrl: user.avatarUrl,
-            presenceStatus: user.presenceStatus,
+            presenceStatus: effectivePresenceStatus,
             department: user.department,
             position: user.position,
           } : null,
@@ -1424,17 +1479,7 @@ export const restoreConversation = mutation({
       isArchived: false,
     });
 
-    // Also reset conversation-level flags if they were set
-    if (conv.isDeleted || conv.isArchived) {
-      await ctx.db.patch(args.conversationId, {
-        isDeleted: false,
-        isArchived: false,
-        deletedAt: undefined,
-        deletedBy: undefined,
-      });
-    }
-
-    console.log(`[Chat] Conversation ${args.conversationId} restored for user ${args.userId} (per-user + conversation-level)`);
+    console.log(`[Chat] Conversation ${args.conversationId} restored for user ${args.userId} (per-user only)`);
   },
 });
 
@@ -1624,17 +1669,41 @@ export const getOrgUsers = query({
       .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
       .collect();
 
-    return users
-      .filter((u) => u._id !== args.currentUserId && u.isActive && u.isApproved)
-      .map((u) => ({
-        _id: u._id,
-        name: u.name,
-        avatarUrl: u.avatarUrl,
-        department: u.department,
-        position: u.position,
-        presenceStatus: u.presenceStatus,
-        organizationId: u.organizationId,
-      }));
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
+    return await Promise.all(
+      users
+        .filter((u) => u._id !== args.currentUserId && u.isActive && u.isApproved)
+        .map(async (u) => {
+          // Check if user has an approved leave today
+          let effectivePresenceStatus = u.presenceStatus ?? "available";
+
+          const approvedLeaves = await ctx.db
+            .query("leaveRequests")
+            .withIndex("by_user", (q) => q.eq("userId", u._id))
+            .filter((q) => q.eq(q.field("status"), "approved"))
+            .collect();
+
+          const hasActiveLeave = approvedLeaves.some((leave) => {
+            return leave.startDate <= today && today <= leave.endDate;
+          });
+
+          if (hasActiveLeave) {
+            effectivePresenceStatus = "out_of_office";
+          }
+
+          return {
+            _id: u._id,
+            name: u.name,
+            avatarUrl: u.avatarUrl,
+            department: u.department,
+            position: u.position,
+            presenceStatus: effectivePresenceStatus,
+            organizationId: u.organizationId,
+          };
+        })
+    );
   },
 });
 

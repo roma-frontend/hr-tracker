@@ -88,7 +88,7 @@ export function ConversationList({
 
     if (!matchesSearch) return false;
 
-    const isHidden = c.membership.isArchived || c.isArchived || c.membership.isDeleted || c.isDeleted;
+    const isHidden = c.membership.isArchived || c.isArchived || c.membership.isDeleted;
 
     switch (filter) {
       case "chat":
@@ -174,7 +174,7 @@ export function ConversationList({
       {/* Filters */}
       <div className="px-3 pb-2 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth">
         {(["all", "chat", "unread", "groups", "pinned", "archived"] as const).map((f) => {
-          const unreadCount = conversations.filter(c => c.membership.unreadCount > 0 && !(c.membership.isArchived || c.isArchived || c.membership.isDeleted || c.isDeleted)).length;
+          const unreadCount = conversations.filter(c => c.membership.unreadCount > 0 && !(c.membership.isArchived || c.isArchived || c.membership.isDeleted)).length;
           return (
             <button
               key={f}
@@ -279,7 +279,7 @@ export function ConversationList({
                     background: isSelected ? "var(--sidebar-item-active)" : "transparent",
                     color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-primary)",
                     animation: `conv-in 0.25s ease-out ${idx * 0.04}s both`,
-                    opacity: (conv.membership.isDeleted || conv.isDeleted) ? 0.5 : 1,
+                    opacity: conv.membership.isDeleted ? 0.5 : 1,
                     userSelect: "none",
                   }}
                   onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "var(--sidebar-item-hover)"; }}
@@ -333,7 +333,7 @@ export function ConversationList({
                       )}
                       <p className={cn("sm:text-xs text-sm truncate", unread > 0 ? "font-medium" : "opacity-70")}
                         style={{ color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-muted)" }}>
-                        {(conv.membership.isDeleted || conv.isDeleted) ? t('chat.deleted') || '[Удалено]' : lastMsgPreview}
+                        {conv.membership.isDeleted ? t('chat.deleted') || '[Удалено]' : lastMsgPreview}
                       </p>
                     </div>
                     {unread > 0 && !conv.membership.isMuted && (
@@ -350,7 +350,7 @@ export function ConversationList({
                 {/* Action buttons for archived/deleted items (visible without right-click) */}
                 {filter === "archived" && (
                   <div className="flex items-center gap-1 shrink-0 ml-1">
-                    {(conv.membership.isDeleted || conv.isDeleted) ? (
+                    {conv.membership.isDeleted ? (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleOperation(async () => { await onRestore?.(conv._id); setFilter("chat"); }, conv._id); }}
                         className="p-1.5 rounded-lg transition-colors hover:bg-(--sidebar-item-hover)"
@@ -374,14 +374,14 @@ export function ConversationList({
 
               {/* Context Menu */}
               <ContextMenuContent className="w-48" side="right">
-                {!(conv.membership.isDeleted || conv.isDeleted) && (
+                {!conv.membership.isDeleted && (
                   <>
                     <ContextMenuLabel className="text-xs" style={{ color: "var(--text-muted)" }}>{displayName}</ContextMenuLabel>
                     <ContextMenuSeparator />
                   </>
                 )}
                 
-                {(conv.membership.isDeleted || conv.isDeleted) ? (
+                {conv.membership.isDeleted ? (
                   <ContextMenuItem
                     onClick={() => handleOperation(async () => { await onRestore?.(conv._id); setFilter("chat"); }, conv._id)}
                     disabled={isLoading}

@@ -405,6 +405,8 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
     if (lastPlayedMsgIdRef.current === latest._id) return;
     // Don't play for system service broadcasts (informational only)
     if (latest.isServiceBroadcast) return;
+    // Don't play if conversation is muted
+    if (conv?.membership?.isMuted) return;
     lastPlayedMsgIdRef.current = latest._id;
 
     // If chat is active (tab focused) — mark as read immediately, play sound
@@ -428,7 +430,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
     } else if (Notification.permission === "default") {
       Notification.requestPermission();
     }
-  }, [messages?.length]);
+  }, [messages?.length, conv?.membership?.isMuted, currentUserId]);
 
   // Group messages by date
   const groupedMessages: Array<{ date: string; ts: number; messages: typeof messages }> = [];

@@ -120,6 +120,12 @@ export const playChatMessageSound = () => {
   if (typeof window === "undefined") return;
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Resume context if it's suspended (common in browsers)
+    if (ctx.state === "suspended") {
+      ctx.resume().catch((err) => console.warn("Failed to resume AudioContext:", err));
+    }
+    
     const now = ctx.currentTime;
 
     // Layer 1: soft "ping" — sine wave at 880Hz (A5), short attack, long tail
@@ -162,8 +168,8 @@ export const playChatMessageSound = () => {
     sparkle.start(now + 0.07);
     sparkle.stop(now + 0.45);
 
-  } catch {
-    // silent fail
+  } catch (error) {
+    console.warn("Failed to play notification sound:", error);
   }
 };
 
