@@ -14,6 +14,8 @@ import type * as aiSiteEditor from "../aiSiteEditor.js";
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
+import type * as driverAI from "../driverAI.js";
+import type * as drivers from "../drivers.js";
 import type * as employeeNotes from "../employeeNotes.js";
 import type * as employeeProfiles from "../employeeProfiles.js";
 import type * as faceRecognition from "../faceRecognition.js";
@@ -50,6 +52,8 @@ declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   auth: typeof auth;
   chat: typeof chat;
+  driverAI: typeof driverAI;
+  drivers: typeof drivers;
   employeeNotes: typeof employeeNotes;
   employeeProfiles: typeof employeeProfiles;
   faceRecognition: typeof faceRecognition;

@@ -965,4 +965,123 @@ export default defineSchema({
   })
     .index("by_org", ["organizationId"])
     .index("by_active", ["isActive"]),
+
+  // ── DRIVER MANAGEMENT ──────────────────────────────────────────────────────
+  // Employees who can drive (designated drivers in the organization)
+  drivers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),              // the employee who is a driver
+    vehicleInfo: v.object({
+      model: v.string(),                // e.g., "Mercedes Sprinter"
+      plateNumber: v.string(),          // e.g., "34-AB-123"
+      capacity: v.number(),             // number of seats
+      color: v.optional(v.string()),
+      year: v.optional(v.number()),
+    }),
+    isAvailable: v.boolean(),           // currently available for bookings
+    workingHours: v.object({
+      startTime: v.string(),            // "09:00"
+      endTime: v.string(),              // "18:00"
+      workingDays: v.array(v.number()), // [1,2,3,4,5] (Monday-Friday)
+    }),
+    maxTripsPerDay: v.number(),         // maximum trips per day
+    currentTripsToday: v.number(),      // trips completed today
+    rating: v.number(),                 // average rating (1-5)
+    totalTrips: v.number(),             // lifetime trips
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_user", ["userId"])
+    .index("by_org_available", ["organizationId", "isAvailable"]),
+
+  // ── DRIVER SCHEDULE ────────────────────────────────────────────────────────
+  // Driver's schedule/availability (blocked times, existing trips)
+  driverSchedules: defineTable({
+    organizationId: v.id("organizations"),
+    driverId: v.id("drivers"),
+    userId: v.id("users"),              // employee who booked this slot
+    startTime: v.number(),              // timestamp
+    endTime: v.number(),                // timestamp
+    type: v.union(
+      v.literal("trip"),                // booked trip
+      v.literal("blocked"),             // blocked by driver
+      v.literal("maintenance"),         // vehicle maintenance
+    ),
+    status: v.union(
+      v.literal("scheduled"),
+      v.literal("in_progress"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+    ),
+    // Trip details
+    tripInfo: v.optional(v.object({
+      from: v.string(),                 // pickup location
+      to: v.string(),                   // destination
+      purpose: v.string(),              // e.g., "Airport transfer", "Client meeting"
+      passengerCount: v.number(),
+      notes: v.optional(v.string()),
+    })),
+    // For blocked/maintenance
+    reason: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_driver", ["driverId"])
+    .index("by_driver_time", ["driverId", "startTime"])
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"]),
+
+  // ── DRIVER BOOKING REQUESTS ───────────────────────────────────────────────
+  // When employee requests a driver
+  driverRequests: defineTable({
+    organizationId: v.id("organizations"),
+    requesterId: v.id("users"),         // employee requesting driver
+    driverId: v.id("drivers"),          // requested driver
+    startTime: v.number(),
+    endTime: v.number(),
+    tripInfo: v.object({
+      from: v.string(),
+      to: v.string(),
+      purpose: v.string(),
+      passengerCount: v.number(),
+      notes: v.optional(v.string()),
+    }),
+    status: v.union(
+      v.literal("pending"),             // waiting for driver approval
+      v.literal("approved"),            // driver accepted
+      v.literal("declined"),            // driver declined
+      v.literal("cancelled"),           // requester cancelled
+    ),
+    declineReason: v.optional(v.string()), // e.g., "Already booked", "Not available"
+    reviewedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_requester", ["requesterId"])
+    .index("by_driver", ["driverId"])
+    .index("by_status", ["status"])
+    .index("by_org_status", ["organizationId", "status"]),
+
+  // ── CALENDAR ACCESS PERMISSIONS ───────────────────────────────────────────
+  // Who can see whose calendar (driver calendar visibility)
+  calendarAccess: defineTable({
+    organizationId: v.id("organizations"),
+    ownerId: v.id("users"),             // calendar owner (driver)
+    viewerId: v.id("users"),            // who can view
+    accessLevel: v.union(
+      v.literal("full"),                // see all details
+      v.literal("busy_only"),           // see only busy/free slots
+      v.literal("none"),                // revoked access
+    ),
+    grantedAt: v.number(),
+    expiresAt: v.optional(v.number()),  // optional expiry
+    isActive: v.boolean(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_owner", ["ownerId"])
+    .index("by_viewer", ["viewerId"])
+    .index("by_owner_viewer", ["ownerId", "viewerId"]),
 });
