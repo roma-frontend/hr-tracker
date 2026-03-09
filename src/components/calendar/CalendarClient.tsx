@@ -13,6 +13,7 @@ import {
   Users,
   Plus,
   ExternalLink,
+  Car,
 } from "lucide-react";
 import {
   format,
@@ -38,6 +39,7 @@ import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, getLeaveTypeLabel, type LeaveType
 import { useAuthStore } from "@/store/useAuthStore";
 import { LeaveRequestModal } from "@/components/leaves/LeaveRequestModal";
 import { useSelectedOrganization } from "@/hooks/useSelectedOrganization";
+import { DriverRequestModal } from "./DriverRequestModal";
 
 type LeaveRequest = {
   _id: string;
@@ -230,8 +232,10 @@ export function CalendarClient() {
   const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [mounted, setMounted] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showDriverModal, setShowDriverModal] = useState(false);
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
 
@@ -411,7 +415,14 @@ export function CalendarClient() {
           </Button>
           <Button size="sm" onClick={() => setShowLeaveModal(true)}>
             <Plus className="w-4 h-4" />
-            New Leave
+            {t('calendar.newLeave')}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => {
+            setSelectedDate(selectedDay || new Date());
+            setShowDriverModal(true);
+          }}>
+            <Car className="w-4 h-4" />
+            {t('driver.requestDriver')}
           </Button>
         </div>
       </motion.div>
@@ -758,6 +769,13 @@ export function CalendarClient() {
       <LeaveRequestModal
         open={showLeaveModal}
         onClose={() => setShowLeaveModal(false)}
+      />
+
+      {/* Driver Request Modal */}
+      <DriverRequestModal
+        open={showDriverModal}
+        onOpenChange={setShowDriverModal}
+        selectedDate={selectedDate}
       />
     </div>
   );
