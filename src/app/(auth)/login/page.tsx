@@ -2,11 +2,11 @@
 
 import { useTranslation } from 'react-i18next';
 
-import React, { useState, useTransition, useEffect, useRef } from "react";
+import React, { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "@/lib/lazy-imports";
-import { Eye, EyeOff, Mail, Lock, Fingerprint, AlertCircle, Building2, ScanFace } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Fingerprint, AlertCircle, Building2, ScanFace, ShieldCheck } from "lucide-react";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { loginAction } from "@/actions/auth";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -199,6 +199,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loginMode, setLoginMode] = useState<"email" | "face" | "touch">("email");
+  // 2FA state
+  const [twoFactorPending, setTwoFactorPending] = useState(false);
+  const [tempToken, setTempToken] = useState<string | null>(null);
+  const [totpCode, setTotpCode] = useState("");
+  const [isBackupCode, setIsBackupCode] = useState(false);
+  const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
+  const totpInputRef = useRef<HTMLInputElement>(null);
   const [showMaintenanceBanner, setShowMaintenanceBanner] = useState(() => {
     // Initialize based on URL parameter (client-side only)
     if (typeof window !== 'undefined') {
@@ -299,8 +306,18 @@ export default function LoginPage() {
         }
 
         const result = await response.json();
+
+        // Check if 2FA is required
+        if (result.requiresTwoFactor) {
+          setTwoFactorPending(true);
+          setTempToken(result.tempToken);
+          // Focus TOTP input after render
+          setTimeout(() => totpInputRef.current?.focus(), 100);
+          return;
+        }
+
         console.log("✅ Login successful:", result);
-        
+
         const userData = {
           id: result.session.userId,
           name: result.session.name,
@@ -365,7 +382,55 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : "WebAuthn login failed");
     }
   };
-  
+
+  // 2FA verification handler
+  const handleTwoFactorSubmit = useCallback(async (codeToSubmit?: string) => {
+    const code = codeToSubmit ?? totpCode;
+    if (!code || !tempToken) return;
+    setTwoFactorError(null);
+
+    try {
+      const response = await fetch('/api/auth/totp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tempToken, code, isBackupCode }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setTwoFactorError(errorData.error || 'Invalid code');
+        setTotpCode("");
+        return;
+      }
+
+      const result = await response.json();
+      const userData = {
+        id: result.session.userId,
+        name: result.session.name,
+        email: result.session.email,
+        role: result.session.role,
+        organizationId: result.session.organizationId,
+        department: result.session.department,
+        position: result.session.position,
+        employeeType: result.session.employeeType,
+        avatar: result.session.avatar,
+      };
+
+      login(userData);
+      sessionStorage.setItem("just_logged_in", "true");
+      window.location.href = "/dashboard";
+    } catch (err) {
+      setTwoFactorError(err instanceof Error ? err.message : "Verification failed");
+      setTotpCode("");
+    }
+  }, [totpCode, tempToken, isBackupCode, login]);
+
+  // Auto-submit when 6 digits entered (TOTP mode only)
+  useEffect(() => {
+    if (!isBackupCode && totpCode.length === 6 && twoFactorPending) {
+      handleTwoFactorSubmit(totpCode);
+    }
+  }, [totpCode, isBackupCode, twoFactorPending, handleTwoFactorSubmit]);
 
   return (
     <>
@@ -445,6 +510,118 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* 2FA Verification Step */}
+          {twoFactorPending ? (
+            <div className="space-y-4">
+              <div className="flex flex-col items-center mb-2">
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
+                  style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
+                >
+                  <ShieldCheck className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                  Two-Factor Authentication
+                </h2>
+                <p className="text-xs mt-1 text-center" style={{ color: "var(--text-muted)" }}>
+                  {isBackupCode
+                    ? "Enter one of your backup codes"
+                    : "Enter the 6-digit code from your authenticator app"}
+                </p>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleTwoFactorSubmit();
+                }}
+                className="space-y-3"
+              >
+                <div>
+                  <input
+                    ref={totpInputRef}
+                    type="text"
+                    inputMode={isBackupCode ? "text" : "numeric"}
+                    maxLength={isBackupCode ? 8 : 6}
+                    value={totpCode}
+                    onChange={(e) => {
+                      const val = isBackupCode
+                        ? e.target.value.toUpperCase()
+                        : e.target.value.replace(/\D/g, "");
+                      setTotpCode(val);
+                      setTwoFactorError(null);
+                    }}
+                    placeholder={isBackupCode ? "XXXXXXXX" : "000000"}
+                    className="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 px-4 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{
+                      background: "var(--surface-hover)",
+                      borderColor: twoFactorError ? "#ef4444" : "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
+                    autoFocus
+                  />
+                </div>
+
+                <AnimatePresence>
+                  {twoFactorError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      className="flex items-center gap-2 text-sm text-red-500"
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                      {twoFactorError}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {isBackupCode && (
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full py-2 rounded-xl font-semibold text-sm text-white"
+                    style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
+                  >
+                    Verify Backup Code
+                  </motion.button>
+                )}
+              </form>
+
+              <div className="text-center space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBackupCode(!isBackupCode);
+                    setTotpCode("");
+                    setTwoFactorError(null);
+                    setTimeout(() => totpInputRef.current?.focus(), 100);
+                  }}
+                  className="text-xs hover:underline"
+                  style={{ color: "#2563eb" }}
+                >
+                  {isBackupCode ? "Use authenticator code instead" : "Use a backup code"}
+                </button>
+                <br />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTwoFactorPending(false);
+                    setTempToken(null);
+                    setTotpCode("");
+                    setTwoFactorError(null);
+                    setIsBackupCode(false);
+                  }}
+                  className="text-xs hover:underline"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Back to login
+                </button>
+              </div>
+            </div>
+          ) : (
+          <>
           {/* Login Mode Tabs */}
           <div className="flex gap-2 mb-4 p-1 rounded-xl" style={{ background: "var(--muted)" }}>
             <button
@@ -577,6 +754,8 @@ export default function LoginPage() {
               )}
             </motion.button>
           </form>
+          )}
+          </>
           )}
 
           {/* Footer */}

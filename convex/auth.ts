@@ -313,6 +313,7 @@ export const login = mutation({
       avatarUrl: userData.avatarUrl,
       travelAllowance: userData.travelAllowance,
       isApproved: userData.isApproved,
+      totpEnabled: user.totpEnabled ?? false,
       organizationName: org?.name || null,
       organizationSlug: org?.slug || null,
       organizationPlan: org?.plan || null,
@@ -458,6 +459,117 @@ export const verifyResetToken = query({
     }
 
     return { valid: true, email: user.email, name: user.name };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Save secret
+// ─────────────────────────────────────────────────────────────────────────────
+export const saveTotpSecret = mutation({
+  args: { userId: v.id("users"), secret: v.string() },
+  handler: async (ctx, { userId, secret }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+    await ctx.db.patch(userId, { totpSecret: secret });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Enable
+// ─────────────────────────────────────────────────────────────────────────────
+export const enableTotp = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+    if (!user.totpSecret) throw new Error("TOTP secret not set");
+    await ctx.db.patch(userId, { totpEnabled: true });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Disable
+// ─────────────────────────────────────────────────────────────────────────────
+export const disableTotp = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+    await ctx.db.patch(userId, {
+      totpEnabled: false,
+      totpSecret: undefined,
+      backupCodes: undefined,
+    });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Get status
+// ─────────────────────────────────────────────────────────────────────────────
+export const getTotpStatus = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
+    return {
+      totpEnabled: user.totpEnabled ?? false,
+      hasSecret: !!user.totpSecret,
+    };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Save backup codes
+// ─────────────────────────────────────────────────────────────────────────────
+export const saveBackupCodes = mutation({
+  args: { userId: v.id("users"), codes: v.array(v.string()) },
+  handler: async (ctx, { userId, codes }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+    await ctx.db.patch(userId, { backupCodes: codes });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Get backup codes (for verification)
+// ─────────────────────────────────────────────────────────────────────────────
+export const getBackupCodes = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
+    return user.backupCodes ?? [];
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Remove used backup code
+// ─────────────────────────────────────────────────────────────────────────────
+export const removeBackupCode = mutation({
+  args: { userId: v.id("users"), codeIndex: v.number() },
+  handler: async (ctx, { userId, codeIndex }) => {
+    const user = await ctx.db.get(userId);
+    if (!user || !user.backupCodes) throw new Error("No backup codes found");
+    const codes = [...user.backupCodes];
+    codes.splice(codeIndex, 1);
+    await ctx.db.patch(userId, { backupCodes: codes });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOTP 2FA — Get user for TOTP verification (returns secret + backup codes)
+// ─────────────────────────────────────────────────────────────────────────────
+export const getUserForTotpVerification = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
+    return {
+      totpSecret: user.totpSecret,
+      totpEnabled: user.totpEnabled ?? false,
+      backupCodes: user.backupCodes ?? [],
+      passwordHash: user.passwordHash,
+    };
   },
 });
 

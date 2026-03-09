@@ -114,11 +114,17 @@ userId,
       log.debug('Avatar URL saved to Convex', { userId });
 
       log.debug('Updating session cookie', { userId });
-      
-      // Update JWT cookie with new avatar
-      await updateSessionAvatarAction(userId, url);
-      
-      log.debug('Session cookie updated', { userId });
+
+      // Update JWT cookie with new avatar (non-blocking - avatar is already saved to DB)
+      try {
+        await updateSessionAvatarAction(userId, url);
+        log.debug('Session cookie updated', { userId });
+      } catch (sessionErr) {
+        log.warn('Session cookie update failed (avatar is saved, will reflect on refresh)', {
+          userId,
+          error: sessionErr instanceof Error ? sessionErr.message : String(sessionErr),
+        });
+      }
 
       setPreview(null);
       

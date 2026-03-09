@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const tokens = await exchangeCodeForTokens(code, "google");
+    // Build redirect URI from the actual request origin to match what was sent during auth
+    const origin = request.nextUrl.origin;
+    const redirectUri = `${origin}/api/calendar/google/callback`;
+    const tokens = await exchangeCodeForTokens(code, "google", redirectUri);
     
     // Store tokens securely (in production, save to database)
     const response = NextResponse.redirect(

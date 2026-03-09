@@ -12,13 +12,14 @@ export interface JWTPayload {
   position?: string;
   employeeType?: "staff" | "contractor";
   avatar?: string;
+  type?: "2fa-pending";
 }
 
-export async function signJWT(payload: JWTPayload): Promise<string> {
+export async function signJWT(payload: JWTPayload, expiresIn: string = "7d"): Promise<string> {
   return await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime(expiresIn)
     .sign(secret);
 }
 

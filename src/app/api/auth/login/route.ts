@@ -151,6 +151,30 @@ export async function POST(req: NextRequest) {
 
     const result = data.value;
 
+    // ── Check if 2FA is enabled ─────────────────────────────────────────────
+    if (result.totpEnabled) {
+      // Generate short-lived temp token (5 minutes)
+      const tempToken = await signJWT(
+        {
+          userId: result.userId,
+          name: result.name,
+          email: result.email,
+          role: result.role,
+          organizationId: result.organizationId,
+          department: result.department,
+          position: result.position,
+          employeeType: result.employeeType,
+          avatar: result.avatarUrl,
+          type: '2fa-pending',
+        },
+        '5m'
+      );
+      return NextResponse.json({
+        requiresTwoFactor: true,
+        tempToken,
+      });
+    }
+
     // ── Check maintenance mode — block non-superadmin login ──────────────────
     if (result.role !== 'superadmin' && result.organizationId) {
       const maintenanceData = await convexQuery('admin:getMaintenanceMode', {

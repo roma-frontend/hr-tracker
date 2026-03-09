@@ -147,6 +147,10 @@ export default defineSchema({
     suspendedReason: v.optional(v.string()),
     suspendedBy: v.optional(v.id("users")),
     suspendedAt: v.optional(v.number()),
+    // Two-Factor Authentication (TOTP)
+    totpSecret: v.optional(v.string()),          // encrypted TOTP secret
+    totpEnabled: v.optional(v.boolean()),        // is 2FA active
+    backupCodes: v.optional(v.array(v.string())), // hashed backup codes
     // Password Reset
     resetPasswordToken: v.optional(v.string()),
     resetPasswordExpiry: v.optional(v.number()),

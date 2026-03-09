@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/auth`;
+  const origin = request.nextUrl.origin;
+  const redirectUri = `${origin}/api/calendar/google/auth`;
 
   if (!clientId || !clientSecret) {
     return NextResponse.json({ error: "Google OAuth not configured" }, { status: 500 });

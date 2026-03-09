@@ -216,7 +216,8 @@ function getColorIdForLeaveType(type: string): string {
  */
 export async function exchangeCodeForTokens(
   code: string,
-  provider: "google" | "outlook"
+  provider: "google" | "outlook",
+  callbackRedirectUri?: string
 ): Promise<{
   access_token: string;
   refresh_token?: string;
@@ -226,7 +227,7 @@ export async function exchangeCodeForTokens(
     const tokenEndpoint = "https://oauth2.googleapis.com/token";
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`;
+    const redirectUri = callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`;
 
     if (!clientId || !clientSecret) {
       throw new Error("Google OAuth credentials not configured");
@@ -257,7 +258,7 @@ export async function exchangeCodeForTokens(
     const tokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
     const clientId = process.env.MICROSOFT_CLIENT_ID;
     const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/outlook/callback`;
+    const redirectUri = callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/outlook/callback`;
 
     if (!clientId || !clientSecret) {
       throw new Error("Microsoft OAuth credentials not configured");
