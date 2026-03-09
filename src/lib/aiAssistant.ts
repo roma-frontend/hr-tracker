@@ -96,6 +96,49 @@ export const AI_CAPABILITIES: AICapability[] = [
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
     keywords: ['team', 'команда', 'коллеги', 'who is available', 'кто на работе', 'кто в отпуске', 'who is on leave'],
   },
+  // ═══════════════════════════════════════════════════════════════
+  // DRIVER MANAGEMENT
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'request_driver',
+    name: 'Request Driver',
+    description: 'Book a driver for a business trip or airport transfer',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['driver', 'водитель', 'заказать водителя', 'book driver', 'трансфер', 'airport transfer', 'поездка', 'drive me', 'need a car'],
+    action: '/drivers'
+  },
+  {
+    id: 'check_driver_availability',
+    name: 'Check Driver Availability',
+    description: 'Check if a driver is available at a specific time',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['driver available', 'водитель свободен', 'driver availability', 'когда водитель', 'driver schedule', 'расписание водителя', 'занятость водителя'],
+    action: '/drivers'
+  },
+  {
+    id: 'view_driver_calendar',
+    name: 'View Driver Calendar',
+    description: 'View driver calendar and schedule (requires access permission)',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['driver calendar', 'календарь водителя', 'driver schedule', 'расписание', 'view availability', 'посмотреть занятость'],
+    action: '/drivers'
+  },
+  {
+    id: 'my_driver_requests',
+    name: 'My Driver Requests',
+    description: 'View status of your driver booking requests',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['my driver requests', 'мои заявки на водителя', 'driver booking status', 'статус заявки'],
+    action: '/drivers'
+  },
+  {
+    id: 'driver_access_request',
+    name: 'Request Driver Calendar Access',
+    description: 'Request permission to view a driver calendar',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['driver access', 'доступ к водителю', 'calendar permission', 'разрешение на календарь'],
+    action: '/drivers'
+  },
   {
     id: 'view_dashboard',
     name: 'Dashboard',
@@ -485,6 +528,31 @@ Shield HR is a comprehensive HR management platform with these core modules:
 - Status tracking: Pending ⏳ → Approved ✅ / Rejected ❌
 
 ⏰ **Attendance** (/attendance)
+- Real-time check-in/check-out tracking
+- Work hours calculation, late arrival monitoring
+- Attendance reports and statistics
+- Face recognition support (optional)
+
+🚗 **Driver Management** (/drivers) — NEW
+- Book drivers for business trips, airport transfers, client meetings
+- Check driver availability in real-time
+- View driver calendars (with permission)
+- Trip request workflow:
+  1. Employee requests driver (from, to, purpose, time)
+  2. Driver receives notification
+  3. Driver approves or declines with reason
+  4. Employee gets confirmation
+- Driver calendar access:
+  • Employees can request access to view driver schedules
+  • Drivers grant "Full Access" (see all trip details) or "Busy/Free Only"
+  • Access can be time-limited
+- AI Assistant integration:
+  • Ask: "Show me available drivers for tomorrow"
+  • Ask: "Is driver Arman free at 2 PM?"
+  • Ask: "Book a driver to Zvartnots Airport"
+  • Get instant availability and booking confirmation
+
+💬 **Team Chat** (/chat)
 - Clock in/out system (work day: 09:00-18:00)
 - Late arrival detection (after 09:00 = flagged late)
 - Daily work hours calculation
