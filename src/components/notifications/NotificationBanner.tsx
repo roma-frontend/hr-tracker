@@ -8,6 +8,7 @@ import { Id } from "../../../convex/_generated/dataModel";
 import { SmartBanner } from "@/components/ui/SmartBanner";
 import { useRouter } from "next/navigation";
 import { MessageSquare } from "lucide-react";
+import { playNotificationSound } from "@/lib/notificationSound";
 
 /**
  * Real-time notification banner that slides in from top
@@ -41,9 +42,10 @@ export function NotificationBanner() {
       return;
     }
 
-    // If new unread appeared, show the latest one
+    // If new unread appeared, show the latest one with sound
     if (currentCount > lastSeenCount && unread.length > 0) {
       const latest = unread[0]; // most recent
+      playNotificationSound("new_request");
       setNewNotification({
         title: latest.title,
         message: latest.message,

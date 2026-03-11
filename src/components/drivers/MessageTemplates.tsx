@@ -1,22 +1,17 @@
 /**
  * Driver Message Templates Component
  * Quick message templates for driver-passenger communication
+ * Integrates with Team Chat for in-app messaging and calling
  */
 
 "use client";
 
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,11 +19,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { MessageSquare, Phone, Copy, Send } from "lucide-react";
+import { MessageSquare, Phone, PhoneCall, Video, Send, Navigation } from "lucide-react";
+import { CallModal } from "@/components/chat/CallModal";
+import type { ActiveCall } from "@/components/chat/ChatClient";
 
 interface MessageTemplatesProps {
   passengerName?: string;
   passengerPhone?: string;
+  passengerUserId?: Id<"users">;
+  driverUserId?: Id<"users">;
+  driverName?: string;
+  driverAvatar?: string;
+  organizationId?: Id<"organizations">;
   tripInfo?: {
     from: string;
     to: string;
@@ -75,86 +77,184 @@ const TEMPLATES = [
   },
 ];
 
-export function MessageTemplates({ passengerName, passengerPhone, tripInfo, onSendMessage }: MessageTemplatesProps) {
+export function MessageTemplates({
+  passengerName,
+  passengerPhone,
+  passengerUserId,
+  driverUserId,
+  driverName,
+  driverAvatar,
+  organizationId,
+  tripInfo,
+  onSendMessage,
+}: MessageTemplatesProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [activeCall, setActiveCall] = useState<ActiveCall | null>(null);
+  const [calling, setCalling] = useState(false);
 
-  const handleSendMessage = (template: typeof TEMPLATES[0]) => {
+  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.sendMessage);
+  const initiateCallMutation = useMutation(api.chat.initiateCall);
+
+  const canUseChat = !!(passengerUserId && driverUserId && organizationId);
+
+  const sendViaChatMessage = useCallback(async (message: string) => {
+    if (!canUseChat) return false;
+    try {
+      const conversationId = await getOrCreateDM({
+        organizationId: organizationId!,
+        currentUserId: driverUserId!,
+        targetUserId: passengerUserId!,
+      });
+      await sendChatMessage({
+        conversationId,
+        senderId: driverUserId!,
+        organizationId: organizationId!,
+        type: "text",
+        content: message,
+      });
+      return true;
+    } catch (error: any) {
+      console.error("Failed to send chat message:", error);
+      return false;
+    }
+  }, [canUseChat, getOrCreateDM, sendChatMessage, organizationId, driverUserId, passengerUserId]);
+
+  const handleSendMessage = async (template: typeof TEMPLATES[0]) => {
     let message = template.message;
-    
+
     // Replace placeholders
     if (tripInfo) {
       message = message.replace("{from}", tripInfo.from);
       message = message.replace("{to}", tripInfo.to);
     }
-    
+
     if (passengerName) {
-      message = `Hi ${passengerName}! ` + message;
+      message = message.replace("Hi!", `Hi ${passengerName}!`);
     }
 
     if (onSendMessage) {
       onSendMessage(message);
-    } else {
-      // Copy to clipboard
-      navigator.clipboard.writeText(message);
-      toast.success("Message copied to clipboard");
+      setOpen(false);
+      return;
     }
-    
+
+    // Try sending via Team Chat
+    if (canUseChat) {
+      const sent = await sendViaChatMessage(message);
+      if (sent) {
+        toast.success("Message sent via Team Chat");
+        setOpen(false);
+        return;
+      }
+    }
+
+    // Fallback: copy to clipboard
+    navigator.clipboard.writeText(message);
+    toast.success("Message copied to clipboard");
     setOpen(false);
   };
 
-  const handleCall = () => {
+  const handleCall = useCallback(async () => {
+    // Try in-app call via Team Chat first
+    if (canUseChat && !calling) {
+      setCalling(true);
+      try {
+        const conversationId = await getOrCreateDM({
+          organizationId: organizationId!,
+          currentUserId: driverUserId!,
+          targetUserId: passengerUserId!,
+        });
+        const callId = await initiateCallMutation({
+          conversationId,
+          organizationId: organizationId!,
+          initiatorId: driverUserId!,
+          type: "audio",
+          participantIds: [driverUserId!, passengerUserId!],
+        });
+        setActiveCall({
+          callId,
+          conversationId,
+          type: "audio",
+          isInitiator: true,
+          remoteUserId: passengerUserId,
+          remoteUserName: passengerName,
+        });
+      } catch (error: any) {
+        console.error("Failed to initiate call:", error);
+        // Fallback to tel: link
+        if (passengerPhone) {
+          window.open(`tel:${passengerPhone}`);
+        } else {
+          toast.error("Failed to start call");
+        }
+      } finally {
+        setCalling(false);
+      }
+      return;
+    }
+
+    // Fallback: tel: protocol
     if (passengerPhone) {
       window.open(`tel:${passengerPhone}`);
     } else {
       toast.error("No phone number available");
     }
-  };
+  }, [canUseChat, calling, getOrCreateDM, initiateCallMutation, organizationId, driverUserId, passengerUserId, passengerName, passengerPhone]);
+
+  const handleEndCall = useCallback(() => {
+    setActiveCall(null);
+  }, []);
 
   return (
-    <div className="flex gap-2">
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Quick Messages
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-72">
-          {TEMPLATES.map((template) => (
-            <DropdownMenuItem
-              key={template.id}
-              onClick={() => handleSendMessage(template)}
-              className="flex flex-col items-start gap-1 py-3"
-            >
-              <span className="font-medium">{template.label}</span>
-              <span className="text-xs text-muted-foreground line-clamp-2">
-                {template.message}
-              </span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <>
+      <div className="flex flex-wrap gap-2">
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+              <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Quick Messages</span>
+              <span className="sm:hidden">Message</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-72">
+            {TEMPLATES.map((template) => (
+              <DropdownMenuItem
+                key={template.id}
+                onClick={() => handleSendMessage(template)}
+                className="flex flex-col items-start gap-1 py-3"
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <span className="font-medium">{template.label}</span>
+                  {canUseChat && (
+                    <Send className="w-3 h-3 text-blue-500 ml-auto" />
+                  )}
+                </div>
+                <span className="text-xs text-muted-foreground line-clamp-2">
+                  {template.message}
+                </span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-      <Button variant="outline" size="sm" onClick={handleCall}>
-        <Phone className="w-4 h-4 mr-2" />
-        Call
-      </Button>
-    </div>
+        <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={handleCall} disabled={calling}>
+          <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          Call
+        </Button>
+      </div>
+
+      {/* In-app Call Modal */}
+      {activeCall && driverUserId && (
+        <CallModal
+          call={activeCall}
+          currentUserId={driverUserId}
+          currentUserName={driverName || "Driver"}
+          currentUserAvatar={driverAvatar}
+          onEnd={handleEndCall}
+        />
+      )}
+    </>
   );
-}
-
-// SMS integration (for future use with SMS API)
-export async function sendSMS(phone: string, message: string) {
-  // In production, integrate with SMS API (Twilio, etc.)
-  // For now, open default SMS app
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    window.open(`sms:${phone}?body=${encodeURIComponent(message)}`);
-  } else {
-    // Copy to clipboard on desktop
-    await navigator.clipboard.writeText(message);
-    toast.success("Message copied to clipboard (SMS not supported on desktop)");
-  }
 }

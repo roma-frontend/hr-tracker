@@ -1151,6 +1151,74 @@ export const getActiveCall = query({
   },
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PIN CONVERSATION
+// ─────────────────────────────────────────────────────────────────────────────
+export const pinConversation = mutation({
+  args: {
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    pin: v.boolean(),
+  },
+  handler: async (ctx, { conversationId, userId, pin }) => {
+    const membership = await ctx.db
+      .query("chatMembers")
+      .withIndex("by_conversation_user", (q) =>
+        q.eq("conversationId", conversationId).eq("userId", userId)
+      )
+      .first();
+    if (!membership) throw new Error("Not a member");
+
+    await ctx.db.patch(conversationId, { isPinned: pin });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ARCHIVE CONVERSATION
+// ─────────────────────────────────────────────────────────────────────────────
+export const archiveConversation = mutation({
+  args: {
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    archive: v.boolean(),
+  },
+  handler: async (ctx, { conversationId, userId, archive }) => {
+    const membership = await ctx.db
+      .query("chatMembers")
+      .withIndex("by_conversation_user", (q) =>
+        q.eq("conversationId", conversationId).eq("userId", userId)
+      )
+      .first();
+    if (!membership) throw new Error("Not a member");
+
+    await ctx.db.patch(conversationId, { isArchived: archive });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE CONVERSATION (soft delete)
+// ─────────────────────────────────────────────────────────────────────────────
+export const deleteConversation = mutation({
+  args: {
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, { conversationId, userId }) => {
+    const membership = await ctx.db
+      .query("chatMembers")
+      .withIndex("by_conversation_user", (q) =>
+        q.eq("conversationId", conversationId).eq("userId", userId)
+      )
+      .first();
+    if (!membership) throw new Error("Not a member");
+
+    await ctx.db.patch(membership._id, {
+      isDeleted: true,
+      deletedAt: Date.now(),
+    });
+  },
+});
+
 /**
  * Get incoming calls for a user
  */

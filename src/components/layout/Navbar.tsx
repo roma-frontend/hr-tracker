@@ -157,19 +157,7 @@ export function Navbar() {
     );
 
     if (newNotifs.length > 0) {
-      playNotificationSound();
-
-      // Show toast for each new notification
-      newNotifs.forEach((n: any) => {
-        const toastId = n._id + Date.now();
-        setToasts(prev => [...prev, { id: toastId, title: n.title, message: n.message }]);
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-          setToasts(prev => prev.filter(t => t.id !== toastId));
-        }, 5000);
-      });
-
-      // Update seen IDs
+      // Sound + banner are handled by NotificationBanner — just track seen IDs here
       newNotifs.forEach((n: any) => prevNotifIds.current.add(n._id));
     }
 
@@ -535,47 +523,7 @@ export function Navbar() {
         </DropdownMenu>
       </div>
     </header>
-    {/* Notification Toasts — CSS keyframe animation instead of framer-motion spring */}
-    <div className="fixed top-20 right-4 z-[100] flex flex-col gap-3 pointer-events-none">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className="pointer-events-auto w-[calc(100vw-2rem)] sm:w-80 bg-[var(--card)] border border-[#2563eb]/40 rounded-2xl shadow-2xl shadow-[#2563eb]/20 overflow-hidden"
-          style={{ animation: "toast-slide-in 0.3s cubic-bezier(0.22,1,0.36,1) both" }}
-        >
-          {/* Progress bar — CSS animation instead of motion.div width */}
-          <div className="h-1 bg-gradient-to-r from-[#1d4ed8] to-[#0ea5e9] relative overflow-hidden">
-            <div
-              className="absolute inset-0 bg-white/30"
-              style={{ animation: "toast-progress 5s linear both" }}
-            />
-          </div>
-          <div className="p-4 flex items-start gap-3">
-            <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] flex items-center justify-center shadow-lg">
-                <Bell className="w-5 h-5 text-white" />
-              </div>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--card)]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-primary)] leading-tight">
-                {toast.title}
-              </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1 leading-snug">
-                {toast.message}
-              </p>
-            </div>
-            <button
-              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
-              className="flex-shrink-0 p-1 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
-              aria-label={t('notifications.dismiss', { defaultValue: 'Dismiss notification' })}
-            >
-              <X className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
+    {/* Notification toasts removed — NotificationBanner handles visual + sound */}
 
     {/* Keyboard Shortcuts Modal */}
     <KeyboardShortcutsModal 

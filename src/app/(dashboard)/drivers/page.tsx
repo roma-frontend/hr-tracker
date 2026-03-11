@@ -36,6 +36,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -58,7 +64,21 @@ import {
   Activity,
   Pencil,
   Trash2,
+  PhoneCall,
+  Navigation2,
+  Heart,
+  HeartOff,
+  Repeat,
+  Timer,
+  Navigation,
+  History,
+  ArrowRightLeft,
+  Filter,
+  SortAsc,
+  StickyNote,
+  MapPinned,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
@@ -68,6 +88,9 @@ import { DriverStatsCard } from "@/components/drivers/DriverStatsCard";
 import { DriverCalendar } from "@/components/drivers/DriverCalendar";
 import { MessageTemplates } from "@/components/drivers/MessageTemplates";
 import { DriverMap } from "@/components/drivers/DriverMap";
+import { PlaceAutocomplete } from "@/components/drivers/PlaceAutocomplete";
+import { CallModal } from "@/components/chat/CallModal";
+import type { ActiveCall } from "@/components/chat/ChatClient";
 
 interface TripInfo {
   from: string;
@@ -113,6 +136,16 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
   // Mutations
   const respondToRequest = useMutation(api.drivers.respondToDriverRequest);
   const updateAvailability = useMutation(api.drivers.updateDriverAvailability);
+  const addDriverNotes = useMutation(api.drivers.addDriverNotes);
+  const markArrived = useMutation(api.drivers.markDriverArrived);
+  const markPickedUp = useMutation(api.drivers.markPassengerPickedUp);
+  const updateETAMutation = useMutation(api.drivers.updateETA);
+  
+  // Driver notes state
+  const [notesScheduleId, setNotesScheduleId] = useState<string | null>(null);
+  const [notesText, setNotesText] = useState("");
+  const [etaScheduleId, setEtaScheduleId] = useState<string | null>(null);
+  const [etaValue, setEtaValue] = useState("");
 
   const handleRespond = async (requestId: Id<"driverRequests">, approved: boolean) => {
     if (!driver) return;
@@ -181,7 +214,7 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-8">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <h3 className="text-sm font-medium">{t("driver.todayTrips", "Today's Trips")}</h3>
@@ -232,36 +265,73 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
           {pendingRequests && pendingRequests.length > 0 ? (
             <div className="space-y-3">
               {pendingRequests.map((request) => (
-                <div key={request._id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="w-10 h-10">
-                      {request.requesterAvatar && <AvatarImage src={request.requesterAvatar} />}
-                      <AvatarFallback>
-                        {request.requesterName?.split(" ").map((n: string) => n[0]).join("") ?? "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-semibold">{request.requesterName ?? "Unknown"}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {request.tripInfo.from} → {request.tripInfo.to}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(request.startTime), "MMM dd, HH:mm")} - {format(new Date(request.endTime), "HH:mm")}
-                      </p>
-                      {request.tripInfo.notes && (
-                        <p className="text-xs text-muted-foreground mt-1">{request.tripInfo.notes}</p>
-                      )}
+                <div key={request._id} className="p-4 border rounded-lg space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar className="w-10 h-10 shrink-0">
+                        {request.requesterAvatar && <AvatarImage src={request.requesterAvatar} />}
+                        <AvatarFallback>
+                          {request.requesterName?.split(" ").map((n: string) => n[0]).join("") ?? "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold truncate">{request.requesterName ?? "Unknown"}</h3>
+                        <p className="text-sm text-muted-foreground break-words">
+                          {request.tripInfo.from} → {request.tripInfo.to}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(request.startTime), "MMM dd, HH:mm")} - {format(new Date(request.endTime), "HH:mm")}
+                        </p>
+                        {request.tripInfo.notes && (
+                          <p className="text-xs text-muted-foreground mt-1">{request.tripInfo.notes}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 ml-13 sm:ml-0">
+                      <Button size="sm" variant="outline" onClick={() => handleRespond(request._id, false)}>
+                        <ThumbsDown className="w-4 h-4 mr-1" />
+                        {t("driver.decline", "Decline")}
+                      </Button>
+                      <Button size="sm" onClick={() => handleRespond(request._id, true)}>
+                        <ThumbsUp className="w-4 h-4 mr-1" />
+                        {t("driver.approve", "Approve")}
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleRespond(request._id, false)}>
-                      <ThumbsDown className="w-4 h-4 mr-1" />
-                      {t("driver.decline", "Decline")}
-                    </Button>
-                    <Button size="sm" onClick={() => handleRespond(request._id, true)}>
-                      <ThumbsUp className="w-4 h-4 mr-1" />
-                      {t("driver.approve", "Approve")}
-                    </Button>
+
+                  {/* Driver actions: call passenger, message, navigate */}
+                  <div className="flex flex-wrap items-center gap-2 ml-13 sm:ml-0">
+                    {request.requesterId && (
+                      <InAppCallButton
+                        callerUserId={userId}
+                        callerName={driver?.userName || "Driver"}
+                        remoteUserId={request.requesterId}
+                        remoteName={request.requesterName || "Passenger"}
+                        remotePhone={request.requesterPhone}
+                        organizationId={organizationId}
+                      />
+                    )}
+                    {request.requesterId && (
+                      <DriverQuickMessage
+                        passengerUserId={request.requesterId}
+                        passengerName={request.requesterName}
+                        driverUserId={userId}
+                        organizationId={organizationId}
+                        tripInfo={request.tripInfo}
+                      />
+                    )}
+                    {request.tripInfo.pickupCoords && (
+                      <NavigatorDropdown
+                        label="Pickup"
+                        coords={request.tripInfo.pickupCoords}
+                      />
+                    )}
+                    {request.tripInfo.dropoffCoords && (
+                      <NavigatorDropdown
+                        label="Dropoff"
+                        coords={request.tripInfo.dropoffCoords}
+                      />
+                    )}
                   </div>
                 </div>
               ))}
@@ -286,26 +356,30 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
               {todaySchedule
                 .sort((a, b) => a.startTime - b.startTime)
                 .map((schedule) => (
-                  <div key={schedule._id} className="flex items-center gap-4 p-4 border rounded-lg">
-                    <div className={`w-2 h-12 rounded-full ${
+                  <div key={schedule._id} className="flex gap-3 p-3 sm:p-4 border rounded-lg">
+                    <div className={`w-2 shrink-0 rounded-full ${
                       schedule.status === "scheduled" ? "bg-blue-500" :
                       schedule.status === "completed" ? "bg-green-500" :
                       "bg-gray-400"
                     }`} />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm sm:text-base">
                             {format(new Date(schedule.startTime), "HH:mm")} - {format(new Date(schedule.endTime), "HH:mm")}
                           </span>
                           <Badge variant={schedule.type === "trip" ? "default" : "secondary"}>
                             {schedule.type}
                           </Badge>
                         </div>
-                        {schedule.type === "trip" && schedule.status === "scheduled" && (
+                        {schedule.type === "trip" && (schedule.status === "scheduled" || schedule.status === "in_progress") && (
                           <MessageTemplates
                             passengerName={schedule.userName}
                             passengerPhone={schedule.tripInfo?.passengerPhone}
+                            passengerUserId={schedule.userId}
+                            driverUserId={userId}
+                            driverName={driver?.userName || "Driver"}
+                            organizationId={organizationId}
                             tripInfo={schedule.tripInfo}
                           />
                         )}
@@ -322,6 +396,135 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
                         <p className="text-xs text-muted-foreground">
                           Distance: {schedule.tripInfo.distanceKm} km | Duration: {schedule.tripInfo.durationMinutes} min
                         </p>
+                      )}
+                      {/* Navigator buttons for driver */}
+                      {schedule.type === "trip" && (schedule.status === "scheduled" || schedule.status === "in_progress") && (
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          {schedule.tripInfo?.pickupCoords && (
+                            <NavigatorDropdown label="Pickup" coords={schedule.tripInfo.pickupCoords} />
+                          )}
+                          {schedule.tripInfo?.dropoffCoords && (
+                            <NavigatorDropdown label="Dropoff" coords={schedule.tripInfo.dropoffCoords} />
+                          )}
+
+                          {/* Feature #8: Arrived / Picked Up buttons */}
+                          {schedule.status === "scheduled" && !schedule.arrivedAt && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1 h-7 px-2 text-xs bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                              onClick={async () => {
+                                try {
+                                  await markArrived({ scheduleId: schedule._id, userId });
+                                  toast.success("Marked as arrived!");
+                                } catch (e: any) { toast.error(e.message); }
+                              }}
+                            >
+                              <MapPinned className="w-3 h-3" />
+                              I've Arrived
+                            </Button>
+                          )}
+                          {schedule.arrivedAt && !schedule.passengerPickedUpAt && (
+                            <>
+                              <Badge variant="outline" className="text-xs bg-yellow-50 border-yellow-200">
+                                <Timer className="w-3 h-3 mr-1" />
+                                Waiting: {Math.round((Date.now() - schedule.arrivedAt) / 60000)} min
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-1 h-7 px-2 text-xs bg-blue-50 border-blue-200 text-blue-700"
+                                onClick={async () => {
+                                  try {
+                                    await markPickedUp({ scheduleId: schedule._id, userId });
+                                    toast.success("Passenger picked up!");
+                                  } catch (e: any) { toast.error(e.message); }
+                                }}
+                              >
+                                <Users className="w-3 h-3" />
+                                Passenger In
+                              </Button>
+                            </>
+                          )}
+
+                          {/* Feature #9: ETA update */}
+                          {schedule.status === "scheduled" && !schedule.arrivedAt && (
+                            <>
+                              {etaScheduleId === schedule._id ? (
+                                <div className="flex items-center gap-1">
+                                  <Input
+                                    type="number"
+                                    min={1}
+                                    max={120}
+                                    value={etaValue}
+                                    onChange={(e) => setEtaValue(e.target.value)}
+                                    className="w-16 h-7 text-xs"
+                                    placeholder="min"
+                                  />
+                                  <Button size="sm" className="h-7 px-2 text-xs" onClick={async () => {
+                                    try {
+                                      await updateETAMutation({
+                                        scheduleId: schedule._id,
+                                        userId,
+                                        etaMinutes: parseInt(etaValue) || 10,
+                                      });
+                                      toast.success("ETA sent!");
+                                      setEtaScheduleId(null);
+                                    } catch (e: any) { toast.error(e.message); }
+                                  }}>
+                                    Send
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 px-1 text-xs" onClick={() => setEtaScheduleId(null)}>✕</Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="gap-1 h-7 px-2 text-xs"
+                                  onClick={() => { setEtaScheduleId(schedule._id); setEtaValue("10"); }}
+                                >
+                                  <Navigation className="w-3 h-3" />
+                                  Set ETA
+                                </Button>
+                              )}
+                            </>
+                          )}
+
+                          {/* Feature #7: Driver notes */}
+                          {notesScheduleId === schedule._id ? (
+                            <div className="flex items-center gap-1 w-full mt-1">
+                              <Input
+                                value={notesText}
+                                onChange={(e) => setNotesText(e.target.value)}
+                                className="h-7 text-xs flex-1"
+                                placeholder="Add note about trip..."
+                              />
+                              <Button size="sm" className="h-7 px-2 text-xs" onClick={async () => {
+                                try {
+                                  await addDriverNotes({ scheduleId: schedule._id, userId, notes: notesText });
+                                  toast.success("Note saved!");
+                                  setNotesScheduleId(null);
+                                } catch (e: any) { toast.error(e.message); }
+                              }}>
+                                Save
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 px-1 text-xs" onClick={() => setNotesScheduleId(null)}>✕</Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1 h-7 px-2 text-xs"
+                              onClick={() => { setNotesScheduleId(schedule._id); setNotesText(schedule.driverNotes || ""); }}
+                            >
+                              <StickyNote className="w-3 h-3" />
+                              {schedule.driverNotes ? "Edit Note" : "Add Note"}
+                            </Button>
+                          )}
+                          {schedule.driverNotes && notesScheduleId !== schedule._id && (
+                            <span className="text-xs text-muted-foreground italic">📝 {schedule.driverNotes}</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -356,6 +559,466 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Passenger helper components for "My Requests" section
+// ─────────────────────────────────────────────────────────────────────────────
+
+const NAVIGATOR_LINKS = [
+  { id: "google", name: "Google Maps", color: "#4285F4", icon: "🗺️", url: (lat: number, lng: number) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` },
+  { id: "yandex", name: "Yandex Maps", color: "#FC3F1D", icon: "🧭", url: (lat: number, lng: number) => `https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto` },
+  { id: "2gis", name: "2GIS", color: "#1DAD4E", icon: "🏢", url: (lat: number, lng: number) => `https://2gis.ru/routeSearch/rsType/car/to/${lng},${lat}` },
+  { id: "waze", name: "Waze", color: "#33CCFF", icon: "🚗", url: (lat: number, lng: number) => `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` },
+];
+
+function NavigatorDropdown({ label, coords }: { label: string; coords: { lat: number; lng: number } }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1 h-7 px-2 text-xs">
+          <Navigation2 className="w-3 h-3" />
+          {label}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-48">
+        {NAVIGATOR_LINKS.map((nav) => (
+          <DropdownMenuItem key={nav.id} asChild>
+            <a
+              href={nav.url(coords.lat, coords.lng)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              <span>{nav.icon}</span>
+              <span>{nav.name}</span>
+            </a>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Generic in-app call button — works for both driver→passenger and passenger→driver */
+function InAppCallButton({
+  callerUserId,
+  callerName,
+  remoteUserId,
+  remoteName,
+  remotePhone,
+  organizationId,
+  label,
+}: {
+  callerUserId: Id<"users">;
+  callerName: string;
+  remoteUserId: Id<"users">;
+  remoteName: string;
+  remotePhone?: string;
+  organizationId: Id<"organizations">;
+  label?: string;
+}) {
+  const [activeCall, setActiveCall] = React.useState<ActiveCall | null>(null);
+  const [calling, setCalling] = React.useState(false);
+  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
+  const initiateCallMutation = useMutation(api.chat.initiateCall);
+
+  const handleCall = async () => {
+    if (calling) return;
+    setCalling(true);
+    try {
+      const conversationId = await getOrCreateDM({
+        organizationId,
+        currentUserId: callerUserId,
+        targetUserId: remoteUserId,
+      });
+      const callId = await initiateCallMutation({
+        conversationId,
+        organizationId,
+        initiatorId: callerUserId,
+        type: "audio",
+        participantIds: [callerUserId, remoteUserId],
+      });
+      setActiveCall({
+        callId,
+        conversationId,
+        type: "audio",
+        isInitiator: true,
+        remoteUserId,
+        remoteUserName: remoteName,
+      });
+    } catch (error: any) {
+      console.error("Failed to start call:", error);
+      if (remotePhone) {
+        window.open(`tel:${remotePhone}`);
+      } else {
+        toast.error("Failed to start call");
+      }
+    } finally {
+      setCalling(false);
+    }
+  };
+
+  return (
+    <>
+      <Button variant="outline" size="sm" className="gap-1 h-7 px-2 text-xs" onClick={handleCall} disabled={calling}>
+        <PhoneCall className="w-3 h-3" />
+        {label || `Call ${remoteName}`}
+      </Button>
+      {activeCall && (
+        <CallModal
+          call={activeCall}
+          currentUserId={callerUserId}
+          currentUserName={callerName}
+          onEnd={() => setActiveCall(null)}
+        />
+      )}
+    </>
+  );
+}
+
+function DriverQuickMessage({
+  passengerUserId,
+  passengerName,
+  driverUserId,
+  organizationId,
+  tripInfo,
+}: {
+  passengerUserId: Id<"users">;
+  passengerName?: string;
+  driverUserId: Id<"users">;
+  organizationId: Id<"organizations">;
+  tripInfo: { from: string; to: string; purpose: string };
+}) {
+  const [open, setOpen] = React.useState(false);
+  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.sendMessage);
+
+  const DRIVER_TEMPLATES = [
+    { id: "arrived", label: "I've Arrived", message: "Hi! I've arrived at the pickup location. Ready when you are! 🚗" },
+    { id: "delayed", label: "Running Late", message: "Hi! I'm running about 5 minutes late due to traffic. Apologies! ⏰" },
+    { id: "waiting", label: "Waiting", message: "Hi! I'm waiting at the pickup point. Please let me know when you're ready. 👋" },
+    { id: "confirming", label: "Confirming Trip", message: `Hi! Confirming your trip from ${tripInfo.from} to ${tripInfo.to}. See you soon! ✅` },
+    { id: "cant_find", label: "Can't Find Location", message: "Hi! I'm having trouble finding the pickup location. Can you provide more details? 📍" },
+    { id: "completed", label: "Trip Completed", message: "Thank you for choosing our service! Hope you had a great trip. ⭐" },
+  ];
+
+  const handleSend = async (message: string) => {
+    try {
+      const msg = passengerName ? message.replace("Hi!", `Hi ${passengerName}!`) : message;
+      const conversationId = await getOrCreateDM({
+        organizationId,
+        currentUserId: driverUserId,
+        targetUserId: passengerUserId,
+      });
+      await sendChatMessage({
+        conversationId,
+        senderId: driverUserId,
+        organizationId,
+        type: "text",
+        content: msg,
+      });
+      toast.success("Message sent to passenger");
+      setOpen(false);
+    } catch (error: any) {
+      console.error("Failed to send message:", error);
+      toast.error("Failed to send message");
+    }
+  };
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1 h-7 px-2 text-xs">
+          <MessageSquare className="w-3 h-3" />
+          Message
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        {DRIVER_TEMPLATES.map((tpl) => (
+          <DropdownMenuItem
+            key={tpl.id}
+            onClick={() => handleSend(tpl.message)}
+            className="flex flex-col items-start gap-1 py-2"
+          >
+            <span className="font-medium text-sm">{tpl.label}</span>
+            <span className="text-xs text-muted-foreground line-clamp-1">{tpl.message}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function PassengerQuickMessage({
+  driverUserId,
+  passengerUserId,
+  organizationId,
+  tripInfo,
+}: {
+  driverUserId: Id<"users">;
+  passengerUserId: Id<"users">;
+  organizationId: Id<"organizations">;
+  tripInfo: { from: string; to: string; purpose: string };
+}) {
+  const [open, setOpen] = React.useState(false);
+  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.sendMessage);
+
+  const PASSENGER_TEMPLATES = [
+    { id: "omw", label: "On My Way", message: "Hi! I'm on my way to the pickup point. Be there shortly! 🚶" },
+    { id: "ready", label: "Ready", message: "Hi! I'm ready at the pickup location. 📍" },
+    { id: "delayed", label: "Running Late", message: "Hi! I'll be about 5 minutes late. Sorry for the wait! ⏰" },
+    { id: "cancel", label: "Need to Cancel", message: "Hi! I need to cancel/reschedule this trip. Sorry for the inconvenience. 🙏" },
+    { id: "thanks", label: "Thank You", message: "Thank you for the ride! Great service! ⭐" },
+  ];
+
+  const handleSend = async (message: string) => {
+    try {
+      const conversationId = await getOrCreateDM({
+        organizationId,
+        currentUserId: passengerUserId,
+        targetUserId: driverUserId,
+      });
+      await sendChatMessage({
+        conversationId,
+        senderId: passengerUserId,
+        organizationId,
+        type: "text",
+        content: message,
+      });
+      toast.success("Message sent to driver");
+      setOpen(false);
+    } catch (error: any) {
+      console.error("Failed to send message:", error);
+      toast.error("Failed to send message");
+    }
+  };
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1 h-7 px-2 text-xs">
+          <MessageSquare className="w-3 h-3" />
+          Message Driver
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        {PASSENGER_TEMPLATES.map((tpl) => (
+          <DropdownMenuItem
+            key={tpl.id}
+            onClick={() => handleSend(tpl.message)}
+            className="flex flex-col items-start gap-1 py-2"
+          >
+            <span className="font-medium text-sm">{tpl.label}</span>
+            <span className="text-xs text-muted-foreground line-clamp-1">{tpl.message}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feature #1: Rating Dialog (passenger rates driver after trip)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function RatingDialog({
+  open,
+  onOpenChange,
+  scheduleId,
+  requestId,
+  driverId,
+  driverName,
+  passengerId,
+  organizationId,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  scheduleId: Id<"driverSchedules">;
+  requestId?: Id<"driverRequests">;
+  driverId: Id<"drivers">;
+  driverName?: string;
+  passengerId: Id<"users">;
+  organizationId: Id<"organizations">;
+}) {
+  const { t } = useTranslation();
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const submitRating = useMutation(api.drivers.submitPassengerRating);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await submitRating({
+        scheduleId,
+        requestId,
+        passengerId,
+        driverId,
+        organizationId,
+        rating,
+        comment: comment || undefined,
+      });
+      toast.success(t("driver.ratingSubmitted", "Rating submitted! Thank you."));
+      onOpenChange(false);
+      setRating(5);
+      setComment("");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to submit rating");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Star className="w-5 h-5 text-yellow-500" />
+            {t("driver.rateDriver", "Rate Your Driver")}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {driverName && (
+            <p className="text-sm text-muted-foreground">
+              {t("driver.howWasTrip", "How was your trip with")} <strong>{driverName}</strong>?
+            </p>
+          )}
+          {/* Star rating */}
+          <div className="flex justify-center gap-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating(star)}
+                className="p-1 hover:scale-110 transition-transform"
+              >
+                <Star
+                  className={`w-8 h-8 ${
+                    star <= rating
+                      ? "fill-yellow-500 text-yellow-500"
+                      : "text-gray-300"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          <p className="text-center text-sm text-muted-foreground">
+            {rating === 1 && "Poor"}
+            {rating === 2 && "Fair"}
+            {rating === 3 && "Good"}
+            {rating === 4 && "Very Good"}
+            {rating === 5 && "Excellent"}
+          </p>
+          <div>
+            <Label>{t("driver.comment", "Comment")} ({t("optional", "Optional")})</Label>
+            <Textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder={t("driver.commentPlaceholder", "Share your experience...")}
+              rows={3}
+            />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t("cancel", "Cancel")}
+            </Button>
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting ? "..." : t("driver.submitRating", "Submit Rating")}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feature #3: Reassign Driver Dialog
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ReassignDriverDialog({
+  open,
+  onOpenChange,
+  requestId,
+  userId,
+  organizationId,
+  currentDriverId,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  requestId: Id<"driverRequests">;
+  userId: Id<"users">;
+  organizationId: Id<"organizations">;
+  currentDriverId: Id<"drivers">;
+}) {
+  const { t } = useTranslation();
+  const [selectedNewDriver, setSelectedNewDriver] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
+  const availableDrivers = useQuery(api.drivers.getAvailableDrivers, { organizationId });
+  const reassign = useMutation(api.drivers.reassignDriverRequest);
+
+  const otherDrivers = availableDrivers?.filter((d) => d && d._id !== currentDriverId) ?? [];
+
+  const handleReassign = async () => {
+    if (!selectedNewDriver) return;
+    setSubmitting(true);
+    try {
+      await reassign({
+        requestId,
+        userId,
+        newDriverId: selectedNewDriver as Id<"drivers">,
+      });
+      toast.success(t("driver.reassigned", "Request sent to new driver!"));
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to reassign");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ArrowRightLeft className="w-5 h-5" />
+            {t("driver.requestAnotherDriver", "Request Another Driver")}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Select value={selectedNewDriver} onValueChange={setSelectedNewDriver}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("driver.selectNewDriver", "Choose another driver")} />
+            </SelectTrigger>
+            <SelectContent>
+              {otherDrivers.map((driver) => (
+                <SelectItem key={driver._id} value={driver._id}>
+                  <div className="flex items-center gap-2">
+                    <span>{driver.userName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {driver.vehicleInfo.model} · ⭐{driver.rating.toFixed(1)}
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t("cancel", "Cancel")}
+            </Button>
+            <Button onClick={handleReassign} disabled={submitting || !selectedNewDriver}>
+              {submitting ? "..." : t("driver.reassign", "Send Request")}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -480,18 +1143,101 @@ export default function DriversPage() {
   const updateDriverRequest = useMutation(api.drivers.updateDriverRequest);
   const deleteDriverRequest = useMutation(api.drivers.deleteDriverRequest);
 
-  // Filter drivers by search
+  // New feature mutations
+  const addFavorite = useMutation(api.drivers.addFavoriteDriver);
+  const removeFavorite = useMutation(api.drivers.removeFavoriteDriver);
+  const createRecurring = useMutation(api.drivers.createRecurringTrip);
+  const toggleRecurring = useMutation(api.drivers.toggleRecurringTrip);
+  const deleteRecurring = useMutation(api.drivers.deleteRecurringTrip);
+  const reassignRequest = useMutation(api.drivers.reassignDriverRequest);
+
+  // New feature queries
+  const favoriteDrivers = useQuery(
+    api.drivers.getFavoriteDrivers,
+    mounted && userId ? { userId } : "skip"
+  );
+  const recurringTrips = useQuery(
+    api.drivers.getRecurringTrips,
+    mounted && userId ? { userId } : "skip"
+  );
+  const completedTrips = useQuery(
+    api.drivers.getCompletedTrips,
+    mounted && userId ? { userId, limit: 50 } : "skip"
+  );
+
+  // Feature #1: Rating dialog state
+  const [ratingDialog, setRatingDialog] = useState<{
+    open: boolean;
+    scheduleId?: Id<"driverSchedules">;
+    requestId?: Id<"driverRequests">;
+    driverId?: Id<"drivers">;
+    driverName?: string;
+  }>({ open: false });
+
+  // Feature #3: Reassign dialog state
+  const [reassignDialog, setReassignDialog] = useState<{
+    open: boolean;
+    requestId?: Id<"driverRequests">;
+    currentDriverId?: Id<"drivers">;
+  }>({ open: false });
+
+  // Feature #4: Filter state
+  const [filterCapacity, setFilterCapacity] = useState<number>(0);
+  const [filterSortBy, setFilterSortBy] = useState<string>("rating");
+
+  // Feature #5: Recurring trip form
+  const [showRecurringModal, setShowRecurringModal] = useState(false);
+  const [recurringDays, setRecurringDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [recurringStartTime, setRecurringStartTime] = useState("08:30");
+  const [recurringEndTime, setRecurringEndTime] = useState("09:00");
+
+  // Favorite driver IDs set for quick lookup
+  const favoriteDriverIds = useMemo(() => {
+    const ids = favoriteDrivers?.map((f: any) => f?.driver?._id).filter(Boolean) ?? [];
+    return new Set<string>(ids as string[]);
+  }, [favoriteDrivers]);
+
+  // Feature #4: active tab for requests section
+  const [requestsTab, setRequestsTab] = useState<string>("active");
+
+  // Filter drivers by search + capacity + sort
   const filteredDrivers = useMemo(() => {
     if (!availableDrivers) return [];
-    if (!searchQuery) return availableDrivers;
+    let result = [...availableDrivers].filter(Boolean) as NonNullable<typeof availableDrivers[number]>[];
 
-    const query = searchQuery.toLowerCase();
-    return availableDrivers.filter((d) =>
-      d.userName.toLowerCase().includes(query) ||
-      d.vehicleInfo.model.toLowerCase().includes(query) ||
-      d.vehicleInfo.plateNumber.toLowerCase().includes(query)
-    );
-  }, [availableDrivers, searchQuery]);
+    // Search filter
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((d) =>
+        d!.userName.toLowerCase().includes(q) ||
+        d!.vehicleInfo.model.toLowerCase().includes(q) ||
+        d!.vehicleInfo.plateNumber.toLowerCase().includes(q)
+      );
+    }
+
+    // Capacity filter
+    if (filterCapacity > 0) {
+      result = result.filter((d) => d!.vehicleInfo.capacity >= filterCapacity);
+    }
+
+    // Sort
+    if (filterSortBy === "rating") {
+      result.sort((a, b) => ((b?.rating ?? 0) - (a?.rating ?? 0)));
+    } else if (filterSortBy === "trips") {
+      result.sort((a, b) => ((b?.totalTrips ?? 0) - (a?.totalTrips ?? 0)));
+    } else if (filterSortBy === "name") {
+      result.sort((a, b) => (a?.userName ?? "").localeCompare(b?.userName ?? ""));
+    }
+
+    // Favorites first
+    result.sort((a, b) => {
+      const aFav = favoriteDriverIds.has(a?._id) ? 0 : 1;
+      const bFav = favoriteDriverIds.has(b?._id) ? 0 : 1;
+      return aFav - bFav;
+    });
+
+    return result;
+  }, [availableDrivers, searchQuery, filterCapacity, filterSortBy, favoriteDriverIds]);
 
   // Handle driver request
   const handleRequestDriver = async () => {
@@ -642,27 +1388,29 @@ export default function DriversPage() {
   return (
     <div className="max-w-[1600px] mx-auto p-2 sm:p-4 md:p-6">
       {/* Header */}
-      <div className="flex flex-col xs:flex-row items-start xs:items-center gap-4 justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">{t("driver.booking", "Driver Booking")}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{t("driver.booking", "Driver Booking")}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             {t("driver.bookingDesc", "Book a driver for your business trips and transfers")}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowRegisterModal(true)}>
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setShowRegisterModal(true)}>
             <Car className="w-4 h-4 mr-2" />
-            {t("driver.registerDriver", "Register as Driver")}
+            <span className="hidden sm:inline">{t("driver.registerDriver", "Register as Driver")}</span>
+            <span className="sm:hidden">Register</span>
           </Button>
-          <Button onClick={() => setShowRequestModal(true)}>
+          <Button size="sm" className="flex-1 sm:flex-none" onClick={() => setShowRequestModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            {t("driver.requestDriver", "Request Driver")}
+            <span className="hidden sm:inline">{t("driver.requestDriver", "Request Driver")}</span>
+            <span className="sm:hidden">Request</span>
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-8">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 mb-6 sm:mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <h3 className="text-sm font-medium">{t("driver.availableDrivers", "Available Drivers")}</h3>
@@ -697,18 +1445,47 @@ export default function DriversPage() {
       </div>
 
       {/* Available Drivers */}
-      <Card className="mb-8">
+      <Card className="mb-6 sm:mb-8">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">{t("driver.availableDrivers", "Available Drivers")}</h2>
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t("driver.searchDriver", "Search driver...")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 w-64"
-              />
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+              <h2 className="text-lg sm:text-xl font-semibold">{t("driver.availableDrivers", "Available Drivers")}</h2>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={t("driver.searchDriver", "Search driver...")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 w-full"
+                />
+              </div>
+            </div>
+            {/* Feature #4: Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Select value={String(filterCapacity)} onValueChange={(v) => setFilterCapacity(Number(v))}>
+                <SelectTrigger className="w-[140px] h-8 text-xs">
+                  <SelectValue placeholder="Min seats" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Any capacity</SelectItem>
+                  <SelectItem value="2">2+ seats</SelectItem>
+                  <SelectItem value="4">4+ seats</SelectItem>
+                  <SelectItem value="6">6+ seats</SelectItem>
+                  <SelectItem value="8">8+ seats</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterSortBy} onValueChange={setFilterSortBy}>
+                <SelectTrigger className="w-[130px] h-8 text-xs">
+                  <SortAsc className="w-3 h-3 mr-1" />
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rating">By Rating</SelectItem>
+                  <SelectItem value="trips">By Trips</SelectItem>
+                  <SelectItem value="name">By Name</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -734,7 +1511,7 @@ export default function DriversPage() {
               )}
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredDrivers.map((driver) => (
                 <Card key={driver._id} className="hover:shadow-md transition-shadow">
                   <CardContent className="pt-6">
@@ -794,6 +1571,31 @@ export default function DriversPage() {
                       >
                         <Calendar className="w-4 h-4" />
                       </Button>
+                      {/* Feature #6: Favorite */}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          if (!userId || !organizationId) return;
+                          try {
+                            if (favoriteDriverIds.has(driver._id)) {
+                              await removeFavorite({ userId, driverId: driver._id });
+                              toast.success("Removed from favorites");
+                            } else {
+                              await addFavorite({ organizationId, userId, driverId: driver._id });
+                              toast.success("Added to favorites");
+                            }
+                          } catch (e: any) {
+                            toast.error(e.message || "Failed");
+                          }
+                        }}
+                      >
+                        {favoriteDriverIds.has(driver._id) ? (
+                          <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                        ) : (
+                          <Heart className="w-4 h-4" />
+                        )}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -803,15 +1605,33 @@ export default function DriversPage() {
         </CardContent>
       </Card>
 
-      {/* My Requests */}
+      {/* My Requests - with tabs for Active / History / Recurring */}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">{t("driver.myRequests", "My Driver Requests")}</h2>
         </CardHeader>
         <CardContent>
+          <Tabs value={requestsTab} onValueChange={setRequestsTab} className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="active" className="gap-1">
+                <Clock className="w-3 h-3" />
+                {t("driver.active", "Active")}
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-1">
+                <History className="w-3 h-3" />
+                {t("driver.history", "History")}
+              </TabsTrigger>
+              <TabsTrigger value="recurring" className="gap-1">
+                <Repeat className="w-3 h-3" />
+                {t("driver.recurring", "Recurring")}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Active Requests Tab */}
+            <TabsContent value="active">
           {myRequests && myRequests.length > 0 ? (
             <div className="space-y-3">
-              {myRequests.map((request) => (
+              {myRequests.filter((r) => r.status !== "cancelled").map((request) => (
                 <div
                   key={request._id}
                   className="p-4 border rounded-lg space-y-3"
@@ -819,21 +1639,23 @@ export default function DriversPage() {
                   {editingRequestId === request._id ? (
                     /* Edit mode */
                     <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <Label className="text-xs">{t("driver.pickupLocation", "From")}</Label>
-                          <Input
+                          <PlaceAutocomplete
                             value={editTripInfo.from}
-                            onChange={(e) => setEditTripInfo({ ...editTripInfo, from: e.target.value })}
-                            className="h-8 text-sm"
+                            onChange={(val) => setEditTripInfo({ ...editTripInfo, from: val })}
+                            onSelect={(place) => setEditTripInfo((prev) => ({ ...prev, from: place.address }))}
+                            placeholder="From"
                           />
                         </div>
                         <div>
                           <Label className="text-xs">{t("driver.dropoffLocation", "To")}</Label>
-                          <Input
+                          <PlaceAutocomplete
                             value={editTripInfo.to}
-                            onChange={(e) => setEditTripInfo({ ...editTripInfo, to: e.target.value })}
-                            className="h-8 text-sm"
+                            onChange={(val) => setEditTripInfo({ ...editTripInfo, to: val })}
+                            onSelect={(place) => setEditTripInfo((prev) => ({ ...prev, to: place.address }))}
+                            placeholder="To"
                           />
                         </div>
                       </div>
@@ -845,7 +1667,7 @@ export default function DriversPage() {
                           className="h-8 text-sm"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <Label className="text-xs">{t("driver.startTime", "Start")}</Label>
                           <Input type="datetime-local" value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} className="h-8 text-sm" />
@@ -855,11 +1677,9 @@ export default function DriversPage() {
                           <Input type="datetime-local" value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} className="h-8 text-sm" />
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs">{t("driver.passengerCount", "Passengers")}</Label>
-                          <Input type="number" min={1} max={10} value={editTripInfo.passengerCount} onChange={(e) => setEditTripInfo({ ...editTripInfo, passengerCount: parseInt(e.target.value) || 1 })} className="h-8 text-sm" />
-                        </div>
+                      <div>
+                        <Label className="text-xs">{t("driver.passengerCount", "Passengers")}</Label>
+                        <Input type="number" min={1} max={10} value={editTripInfo.passengerCount} onChange={(e) => setEditTripInfo({ ...editTripInfo, passengerCount: parseInt(e.target.value) || 1 })} className="h-8 text-sm w-full sm:w-1/2" />
                       </div>
                       <div className="flex gap-2 justify-end">
                         <Button size="sm" variant="ghost" onClick={() => setEditingRequestId(null)}>
@@ -887,10 +1707,10 @@ export default function DriversPage() {
                     </div>
                   ) : (
                     /* View mode */
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className={`w-2 h-12 rounded-full ${
+                          className={`w-2 h-12 shrink-0 rounded-full ${
                             request.status === "approved"
                               ? "bg-green-500"
                               : request.status === "declined"
@@ -898,9 +1718,9 @@ export default function DriversPage() {
                               : "bg-yellow-500"
                           }`}
                         />
-                        <div>
-                          <h3 className="font-semibold">{request.driverName}</h3>
-                          <p className="text-sm text-muted-foreground">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold truncate">{request.driverName}</h3>
+                          <p className="text-sm text-muted-foreground break-words">
                             {request.tripInfo.from} → {request.tripInfo.to}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -908,7 +1728,7 @@ export default function DriversPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 ml-5 sm:ml-0">
                         <Badge
                           variant={
                             request.status === "approved"
@@ -984,9 +1804,97 @@ export default function DriversPage() {
                     </div>
                   )}
                   {request.status === "declined" && request.declineReason && !editingRequestId && (
-                    <p className="text-xs text-muted-foreground ml-6">
-                      {t("driver.declineReason", "Reason")}: {request.declineReason}
-                    </p>
+                    <div className="ml-6 space-y-2">
+                      <p className="text-xs text-muted-foreground">
+                        {t("driver.declineReason", "Reason")}: {request.declineReason}
+                      </p>
+                      {/* Feature #3: Reassign to another driver */}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 h-7 px-2 text-xs"
+                        onClick={() => setReassignDialog({
+                          open: true,
+                          requestId: request._id as Id<"driverRequests">,
+                          currentDriverId: request.driverId as Id<"drivers">,
+                        })}
+                      >
+                        <ArrowRightLeft className="w-3 h-3" />
+                        {t("driver.requestAnotherDriver", "Request Another Driver")}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Feature #9: ETA display for approved/in_progress trips */}
+                  {(request.status === "approved") && request.etaMinutes != null && !editingRequestId && (
+                    <div className="ml-6 flex items-center gap-2 text-sm">
+                      <Navigation className="w-4 h-4 text-blue-500" />
+                      <span className="text-blue-600 font-medium">
+                        ETA: ~{request.etaMinutes} min
+                      </span>
+                      {request.etaUpdatedAt && (
+                        <span className="text-xs text-muted-foreground">
+                          (updated {format(new Date(request.etaUpdatedAt), "HH:mm")})
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Feature #8: Wait time display */}
+                  {request.waitTimeMinutes != null && !editingRequestId && (
+                    <div className="ml-6 flex items-center gap-2 text-sm text-muted-foreground">
+                      <Timer className="w-4 h-4" />
+                      <span>Wait time: {request.waitTimeMinutes} min</span>
+                    </div>
+                  )}
+
+                  {/* Feature #7: Driver notes display */}
+                  {request.driverNotes && !editingRequestId && (
+                    <div className="ml-6 flex items-center gap-2 text-sm text-muted-foreground">
+                      <StickyNote className="w-3 h-3" />
+                      <span className="italic">{request.driverNotes}</span>
+                    </div>
+                  )}
+
+                  {/* Passenger actions for approved requests: contact driver + navigation */}
+                  {request.status === "approved" && !editingRequestId && (
+                    <div className="flex flex-wrap items-center gap-2 mt-2 ml-5">
+                      {/* Contact driver via Team Chat call */}
+                      {request.driverUserId && userId && user?.organizationId && (
+                        <InAppCallButton
+                          callerUserId={userId}
+                          callerName={user.name}
+                          remoteUserId={request.driverUserId as Id<"users">}
+                          remoteName={request.driverName || "Driver"}
+                          remotePhone={request.driverPhone}
+                          organizationId={user.organizationId as Id<"organizations">}
+                        />
+                      )}
+
+                      {/* Quick message to driver */}
+                      {request.driverUserId && userId && user?.organizationId && (
+                        <PassengerQuickMessage
+                          driverUserId={request.driverUserId as Id<"users">}
+                          passengerUserId={userId}
+                          organizationId={user.organizationId as Id<"organizations">}
+                          tripInfo={request.tripInfo}
+                        />
+                      )}
+
+                      {/* Navigator buttons for pickup/dropoff */}
+                      {request.tripInfo.pickupCoords && (
+                        <NavigatorDropdown
+                          label="Navigate to Pickup"
+                          coords={request.tripInfo.pickupCoords}
+                        />
+                      )}
+                      {request.tripInfo.dropoffCoords && (
+                        <NavigatorDropdown
+                          label="Navigate to Destination"
+                          coords={request.tripInfo.dropoffCoords}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
@@ -997,12 +1905,344 @@ export default function DriversPage() {
               <p>{t("driver.noRequests", "No driver requests yet")}</p>
             </div>
           )}
+            </TabsContent>
+
+            {/* Feature #2: History Tab - Completed Trips */}
+            <TabsContent value="history">
+              {completedTrips && completedTrips.length > 0 ? (
+                <div className="space-y-3">
+                  {completedTrips.map((trip) => (
+                    <div key={trip._id} className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-12 rounded-full bg-green-500" />
+                          <div>
+                            <h3 className="font-semibold">{trip.driverName}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {trip.tripInfo.from} → {trip.tripInfo.to}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(trip.startTime), "MMM dd, HH:mm")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Completed
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Driver notes */}
+                      {trip.driverNotes && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-5">
+                          <StickyNote className="w-3 h-3" />
+                          <span className="italic">{trip.driverNotes}</span>
+                        </div>
+                      )}
+
+                      {/* Wait time */}
+                      {trip.waitTimeMinutes != null && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-5">
+                          <Timer className="w-3 h-3" />
+                          <span>Wait time: {trip.waitTimeMinutes} min</span>
+                        </div>
+                      )}
+
+                      {/* Feature #1: Rating */}
+                      <div className="ml-5">
+                        {trip.hasRated ? (
+                          <div className="flex items-center gap-1 text-sm">
+                            <span className="text-muted-foreground">Your rating:</span>
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                className={`w-4 h-4 ${
+                                  s <= (trip.passengerRating ?? 0)
+                                    ? "fill-yellow-500 text-yellow-500"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1 h-7 text-xs"
+                            onClick={() =>
+                              setRatingDialog({
+                                open: true,
+                                scheduleId: trip.scheduleId as Id<"driverSchedules">,
+                                requestId: trip._id as Id<"driverRequests">,
+                                driverId: trip.driverId as Id<"drivers">,
+                                driverName: trip.driverName,
+                              })
+                            }
+                          >
+                            <Star className="w-3 h-3" />
+                            Rate Driver
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No completed trips yet</p>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Feature #5: Recurring Trips Tab */}
+            <TabsContent value="recurring">
+              <div className="space-y-4">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1"
+                  onClick={() => setShowRecurringModal(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Recurring Trip
+                </Button>
+
+                {recurringTrips && recurringTrips.length > 0 ? (
+                  <div className="space-y-3">
+                    {recurringTrips.map((trip) => (
+                      <div key={trip._id} className="p-4 border rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold text-sm">
+                              {trip.tripInfo.from} → {trip.tripInfo.to}
+                            </h3>
+                            <p className="text-xs text-muted-foreground">
+                              {trip.tripInfo.purpose} · {trip.driverName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {trip.schedule.startTime} - {trip.schedule.endTime} ·{" "}
+                              {trip.schedule.daysOfWeek
+                                .map((d: number) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d])
+                                .join(", ")}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={trip.isActive}
+                              onCheckedChange={async (checked) => {
+                                if (!userId) return;
+                                try {
+                                  await toggleRecurring({
+                                    recurringTripId: trip._id as any,
+                                    userId,
+                                    isActive: checked,
+                                  });
+                                  toast.success(checked ? "Activated" : "Paused");
+                                } catch (e: any) {
+                                  toast.error(e.message);
+                                }
+                              }}
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-red-500"
+                              onClick={async () => {
+                                if (!userId) return;
+                                try {
+                                  await deleteRecurring({
+                                    recurringTripId: trip._id as any,
+                                    userId,
+                                  });
+                                  toast.success("Deleted");
+                                } catch (e: any) {
+                                  toast.error(e.message);
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Repeat className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No recurring trips</p>
+                    <p className="text-sm mt-1">Create one for daily commutes!</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
+      {/* Feature #1: Rating Dialog */}
+      {ratingDialog.scheduleId && ratingDialog.driverId && userId && organizationId && (
+        <RatingDialog
+          open={ratingDialog.open}
+          onOpenChange={(open) => setRatingDialog((prev) => ({ ...prev, open }))}
+          scheduleId={ratingDialog.scheduleId}
+          requestId={ratingDialog.requestId}
+          driverId={ratingDialog.driverId}
+          driverName={ratingDialog.driverName}
+          passengerId={userId}
+          organizationId={organizationId}
+        />
+      )}
+
+      {/* Feature #3: Reassign Dialog */}
+      {reassignDialog.requestId && reassignDialog.currentDriverId && userId && organizationId && (
+        <ReassignDriverDialog
+          open={reassignDialog.open}
+          onOpenChange={(open) => setReassignDialog((prev) => ({ ...prev, open }))}
+          requestId={reassignDialog.requestId}
+          userId={userId}
+          organizationId={organizationId}
+          currentDriverId={reassignDialog.currentDriverId}
+        />
+      )}
+
+      {/* Feature #5: Recurring Trip Creation Modal */}
+      <Dialog open={showRecurringModal} onOpenChange={setShowRecurringModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Repeat className="w-5 h-5" />
+              Create Recurring Trip
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Driver</Label>
+              <Select value={selectedDriver || ""} onValueChange={(v) => setSelectedDriver(v as Id<"drivers">)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a driver" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableDrivers?.map((driver) => (
+                    <SelectItem key={driver._id} value={driver._id}>
+                      {driver.userName} - {driver.vehicleInfo.model}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>From</Label>
+                <Input
+                  value={tripInfo.from}
+                  onChange={(e) => setTripInfo({ ...tripInfo, from: e.target.value })}
+                  placeholder="Pickup"
+                />
+              </div>
+              <div>
+                <Label>To</Label>
+                <Input
+                  value={tripInfo.to}
+                  onChange={(e) => setTripInfo({ ...tripInfo, to: e.target.value })}
+                  placeholder="Destination"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Purpose</Label>
+              <Input
+                value={tripInfo.purpose}
+                onChange={(e) => setTripInfo({ ...tripInfo, purpose: e.target.value })}
+                placeholder="e.g., Daily commute"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Departure Time</Label>
+                <Input
+                  type="time"
+                  value={recurringStartTime}
+                  onChange={(e) => setRecurringStartTime(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Arrival Time</Label>
+                <Input
+                  type="time"
+                  value={recurringEndTime}
+                  onChange={(e) => setRecurringEndTime(e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Days</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, idx) => (
+                  <Button
+                    key={day}
+                    size="sm"
+                    variant={recurringDays.includes(idx) ? "default" : "outline"}
+                    className="h-8 w-10 p-0 text-xs"
+                    onClick={() =>
+                      setRecurringDays((prev) =>
+                        prev.includes(idx) ? prev.filter((d) => d !== idx) : [...prev, idx]
+                      )
+                    }
+                  >
+                    {day}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowRecurringModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!userId || !organizationId || !selectedDriver) {
+                    toast.error("Please fill all fields");
+                    return;
+                  }
+                  try {
+                    await createRecurring({
+                      organizationId,
+                      userId,
+                      driverId: selectedDriver,
+                      tripInfo: {
+                        from: tripInfo.from,
+                        to: tripInfo.to,
+                        purpose: tripInfo.purpose,
+                        passengerCount: tripInfo.passengerCount,
+                        notes: tripInfo.notes,
+                      },
+                      schedule: {
+                        daysOfWeek: recurringDays,
+                        startTime: recurringStartTime,
+                        endTime: recurringEndTime,
+                      },
+                    });
+                    toast.success("Recurring trip created!");
+                    setShowRecurringModal(false);
+                  } catch (e: any) {
+                    toast.error(e.message || "Failed");
+                  }
+                }}
+              >
+                Create
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Request Modal */}
       <Dialog open={showRequestModal} onOpenChange={setShowRequestModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>{t("driver.requestDriver", "Request Driver")}</DialogTitle>
           </DialogHeader>
@@ -1023,25 +2263,33 @@ export default function DriversPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label>{t("driver.pickupLocation", "Pickup Location")}</Label>
-                <Input
+                <PlaceAutocomplete
                   value={tripInfo.from}
-                  onChange={(e) => {
-                    setTripInfo({ ...tripInfo, from: e.target.value });
+                  onChange={(val) => {
+                    setTripInfo({ ...tripInfo, from: val });
                     setPickupCoords(undefined);
+                  }}
+                  onSelect={(place) => {
+                    setTripInfo((prev) => ({ ...prev, from: place.address }));
+                    setPickupCoords({ lat: place.lat, lng: place.lng, address: place.address });
                   }}
                   placeholder={t("driver.officePlaceholder", "e.g., Office")}
                 />
               </div>
               <div>
                 <Label>{t("driver.dropoffLocation", "Dropoff Location")}</Label>
-                <Input
+                <PlaceAutocomplete
                   value={tripInfo.to}
-                  onChange={(e) => {
-                    setTripInfo({ ...tripInfo, to: e.target.value });
+                  onChange={(val) => {
+                    setTripInfo({ ...tripInfo, to: val });
                     setDropoffCoords(undefined);
+                  }}
+                  onSelect={(place) => {
+                    setTripInfo((prev) => ({ ...prev, to: place.address }));
+                    setDropoffCoords({ lat: place.lat, lng: place.lng, address: place.address });
                   }}
                   placeholder={t("driver.airportPlaceholder", "e.g., Zvartnots Airport")}
                 />
@@ -1054,7 +2302,7 @@ export default function DriversPage() {
                 <MapPin className="w-4 h-4" />
                 {t("driver.selectOnMap", "Select on Map")}
               </Label>
-              <div className="h-[300px] rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <div className="h-[200px] sm:h-[300px] rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600">
                 <DriverMap
                   pickupLocation={tripInfo.from}
                   dropoffLocation={tripInfo.to}
@@ -1077,7 +2325,7 @@ export default function DriversPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label>{t("driver.startTime", "Start Time")}</Label>
                 <Input
@@ -1117,7 +2365,7 @@ export default function DriversPage() {
               />
             </div>
 
-            <div className="flex gap-2 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
               <Button variant="outline" onClick={() => setShowRequestModal(false)}>
                 {t("cancel", "Cancel")}
               </Button>
@@ -1131,7 +2379,7 @@ export default function DriversPage() {
 
       {/* Driver Registration Modal */}
       <Dialog open={showRegisterModal} onOpenChange={setShowRegisterModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Car className="w-5 h-5" />
@@ -1184,7 +2432,7 @@ export default function DriversPage() {
                 {t("driver.vehicleInfoTitle", "Vehicle Information")}
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <Label>{t("driver.vehicleModel", "Vehicle Model")} *</Label>
                   <Input
@@ -1203,7 +2451,7 @@ export default function DriversPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div>
                   <Label>{t("driver.capacity", "Capacity (seats)")}</Label>
                   <Input
@@ -1242,7 +2490,7 @@ export default function DriversPage() {
                 {t("driver.workingHoursTitle", "Working Hours")}
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <Label>{t("driver.startTime", "Start Time")}</Label>
                   <Input
@@ -1274,7 +2522,7 @@ export default function DriversPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
               <Button variant="outline" onClick={() => setShowRegisterModal(false)}>
                 {t("cancel", "Cancel")}
               </Button>
@@ -1291,7 +2539,7 @@ export default function DriversPage() {
         setShowCalendarModal(open);
         if (!open) setCalendarDriverId(null);
       }}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
@@ -1326,12 +2574,12 @@ export default function DriversPage() {
                   );
 
                   return (
-                    <div key={day} className="flex gap-3 items-start">
-                      <div className="w-20 pt-2 text-sm font-medium shrink-0">
+                    <div key={day} className="flex gap-2 sm:gap-3 items-start">
+                      <div className="w-14 sm:w-20 pt-2 text-xs sm:text-sm font-medium shrink-0">
                         <div>{day}</div>
                         <div className="text-xs text-muted-foreground">{format(dayDate, "MMM dd")}</div>
                       </div>
-                      <div className="flex-1 min-h-[40px] border-l pl-3">
+                      <div className="flex-1 min-w-0 min-h-[40px] border-l pl-2 sm:pl-3">
                         {daySchedules.length === 0 ? (
                           <p className="text-xs text-muted-foreground py-2">{t("driver.calendar.free", "Free")}</p>
                         ) : (
@@ -1342,15 +2590,15 @@ export default function DriversPage() {
                                 <button
                                   key={s._id}
                                   onClick={() => setSelectedScheduleDetail(s)}
-                                  className="flex items-center gap-2 py-1.5 px-2 -ml-2 rounded-lg hover:bg-muted/50 transition-colors w-full text-left"
+                                  className="flex flex-wrap items-center gap-1 sm:gap-2 py-1.5 px-1.5 sm:px-2 -ml-1.5 sm:-ml-2 rounded-lg hover:bg-muted/50 transition-colors w-full text-left"
                                 >
                                   <div className={`w-2 h-2 rounded-full shrink-0 ${
                                     s.type === "trip" ? "bg-blue-500" : "bg-orange-500"
                                   }`} />
-                                  <span className="text-sm font-mono">
+                                  <span className="text-xs sm:text-sm font-mono">
                                     {format(new Date(s.startTime), "HH:mm")}–{format(new Date(s.endTime), "HH:mm")}
                                   </span>
-                                  <Badge variant="secondary" className="text-xs">
+                                  <Badge variant="secondary" className="text-xs truncate max-w-[120px] sm:max-w-none">
                                     {s.type === "trip" ? (s.tripInfo?.from && s.tripInfo?.to ? `${s.tripInfo.from} → ${s.tripInfo.to}` : "Trip") : "Blocked"}
                                   </Badge>
                                 </button>
@@ -1369,13 +2617,13 @@ export default function DriversPage() {
 
       {/* Schedule Detail Modal */}
       <Dialog open={!!selectedScheduleDetail} onOpenChange={(open) => { if (!open) setSelectedScheduleDetail(null); }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               {selectedScheduleDetail?.type === "trip" ? (
-                <><Car className="w-5 h-5 text-blue-500" /> {t("driver.tripDetails", "Trip Details")}</>
+                <><Car className="w-5 h-5 text-blue-500 shrink-0" /> {t("driver.tripDetails", "Trip Details")}</>
               ) : (
-                <><AlertCircle className="w-5 h-5 text-orange-500" /> {selectedScheduleDetail?.type === "blocked" ? t("driver.blockedSlot", "Blocked Slot") : t("driver.maintenance", "Maintenance")}</>
+                <><AlertCircle className="w-5 h-5 text-orange-500 shrink-0" /> {selectedScheduleDetail?.type === "blocked" ? t("driver.blockedSlot", "Blocked Slot") : t("driver.maintenance", "Maintenance")}</>
               )}
             </DialogTitle>
           </DialogHeader>
@@ -1410,7 +2658,7 @@ export default function DriversPage() {
                 <div className="space-y-3">
                   {/* Map */}
                   {(selectedScheduleDetail.tripInfo.pickupCoords || selectedScheduleDetail.tripInfo.dropoffCoords) ? (
-                    <div className="h-[250px]">
+                    <div className="h-[180px] sm:h-[250px]">
                       <DriverMap
                         pickupLocation={selectedScheduleDetail.tripInfo.from}
                         dropoffLocation={selectedScheduleDetail.tripInfo.to}
@@ -1425,7 +2673,7 @@ export default function DriversPage() {
                       <div className="flex gap-2 text-sm">
                         <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
-                          <p className="font-medium">{selectedScheduleDetail.tripInfo.from} → {selectedScheduleDetail.tripInfo.to}</p>
+                          <p className="font-medium break-words">{selectedScheduleDetail.tripInfo.from} → {selectedScheduleDetail.tripInfo.to}</p>
                           <p className="text-muted-foreground text-xs">{selectedScheduleDetail.tripInfo.purpose}</p>
                         </div>
                       </div>

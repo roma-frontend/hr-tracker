@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { Car, MapPin, Clock, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DriverMap } from "@/components/drivers/DriverMap";
+import { PlaceAutocomplete } from "@/components/drivers/PlaceAutocomplete";
 import { Badge } from "@/components/ui/badge";
 
 interface DriverRequestModalProps {
@@ -302,63 +303,47 @@ export function DriverRequestModal({
           {/* Trip Details */}
           <div className="space-y-3">
             {/* Pickup */}
-            <div className="relative">
+            <div>
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-emerald-500" />
                 {t("driver.pickupLocation", "Pickup Location")}
               </Label>
-              <Input
+              <PlaceAutocomplete
                 value={pickupQuery || tripInfo.from}
-                onChange={(e) => handlePickupInputChange(e.target.value)}
+                onChange={(val) => {
+                  setPickupQuery(val);
+                  setTripInfo(prev => ({ ...prev, from: val }));
+                  setPickupCoords(undefined);
+                }}
+                onSelect={(place) => {
+                  setPickupCoords({ lat: place.lat, lng: place.lng, address: place.address });
+                  setTripInfo(prev => ({ ...prev, from: place.address }));
+                  setPickupQuery(place.address);
+                }}
                 placeholder={t("driver.fromPlaceholder", "e.g., Office")}
-                autoComplete="off"
-                className="pr-8"
-                data-geocode-input
               />
-              {pickupResults.length > 0 && showPickupResults && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto z-50">
-                  {pickupResults.map((r, i) => (
-                    <div
-                      key={i}
-                      className="px-3 py-2.5 text-sm hover:bg-emerald-50 dark:hover:bg-gray-700 border-b last:border-b-0 border-gray-100 dark:border-gray-700 cursor-pointer flex items-start gap-2 transition-colors"
-                      onClick={() => selectPickupResult(r)}
-                    >
-                      <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-emerald-500" />
-                      <span className="flex-1">{r.display_name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Dropoff */}
-            <div className="relative">
+            <div>
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-red-500" />
                 {t("driver.dropoffLocation", "Dropoff Location")}
               </Label>
-              <Input
+              <PlaceAutocomplete
                 value={dropoffQuery || tripInfo.to}
-                onChange={(e) => handleDropoffInputChange(e.target.value)}
+                onChange={(val) => {
+                  setDropoffQuery(val);
+                  setTripInfo(prev => ({ ...prev, to: val }));
+                  setDropoffCoords(undefined);
+                }}
+                onSelect={(place) => {
+                  setDropoffCoords({ lat: place.lat, lng: place.lng, address: place.address });
+                  setTripInfo(prev => ({ ...prev, to: place.address }));
+                  setDropoffQuery(place.address);
+                }}
                 placeholder={t("driver.toPlaceholder", "e.g., Airport")}
-                autoComplete="off"
-                className="pr-8"
-                data-geocode-input
               />
-              {dropoffResults.length > 0 && showDropoffResults && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto z-50">
-                  {dropoffResults.map((r, i) => (
-                    <div
-                      key={i}
-                      className="px-3 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-gray-700 border-b last:border-b-0 border-gray-100 dark:border-gray-700 cursor-pointer flex items-start gap-2 transition-colors"
-                      onClick={() => selectDropoffResult(r)}
-                    >
-                      <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-red-500" />
-                      <span className="flex-1">{r.display_name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

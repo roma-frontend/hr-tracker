@@ -215,11 +215,19 @@ export function DriverMap({
 
     mapInstanceRef.current = map;
 
+    // Safe invalidateSize helper — guards against detached containers
+    const safeInvalidate = () => {
+      const m = mapInstanceRef.current;
+      if (!m || !m._container || !m._container.parentNode) return;
+      try { m.getCenter(); } catch { return; }
+      try { m.invalidateSize(); } catch { /* map removed */ }
+    };
+
     // Force resize after dialog opens
-    const timeouts = [100, 300, 600, 1000, 1500, 2000].map(delay => 
+    const timeouts = [100, 300, 600, 1000, 1500, 2000].map(delay =>
       setTimeout(() => {
+        safeInvalidate();
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.invalidateSize();
           console.log("[DriverMap] Invalidated size at", delay, "ms");
         }
       }, delay)
@@ -227,9 +235,7 @@ export function DriverMap({
 
     // ResizeObserver
     const ro = new ResizeObserver(() => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.invalidateSize();
-      }
+      safeInvalidate();
     });
     ro.observe(el);
 
@@ -268,16 +274,26 @@ export function DriverMap({
     const L = LRef.current;
     const map = mapInstanceRef.current;
 
-    // Check if map container still exists
-    if (!map || !map._container) {
-      console.warn("[DriverMap] Map container not found, skipping update");
+    // Check if map container still exists and is attached to DOM
+    if (!map || !map._container || !map._container.parentNode) {
+      console.warn("[DriverMap] Map container not found or detached, skipping update");
+      return;
+    }
+
+    // Check if the map has been properly initialized with a position
+    try {
+      map.getCenter();
+    } catch {
+      console.warn("[DriverMap] Map not ready yet, skipping marker update");
       return;
     }
 
     console.log("[DriverMap] Updating markers:", { pickupCoords, dropoffCoords, driverCoords });
 
-    // Clear existing
-    markersRef.current.forEach((m) => m.remove());
+    // Clear existing - guard against removed map
+    markersRef.current.forEach((m) => {
+      try { m.remove(); } catch { /* marker already removed */ }
+    });
     markersRef.current = [];
     if (polylineRef.current) {
       polylineRef.current.remove();
@@ -325,28 +341,34 @@ export function DriverMap({
       ).addTo(map);
     }
 
-    // Center map on all markers
-    if (bounds.length >= 2) {
-      console.log("[DriverMap] Fitting bounds:", bounds);
-      // Use fitBounds with constraints to prevent over-zooming
-      map.fitBounds(bounds, { 
-        padding: [50, 50],
-        maxZoom: 16,
-        minZoom: 10
-      });
-    } else if (bounds.length === 1) {
-      console.log("[DriverMap] Setting view:", bounds[0]);
-      map.setView(bounds[0], 14);
+    // Center map on all markers — guard against detached map
+    try {
+      if (bounds.length >= 2) {
+        console.log("[DriverMap] Fitting bounds:", bounds);
+        map.fitBounds(bounds, {
+          padding: [50, 50],
+          maxZoom: 16,
+          minZoom: 10
+        });
+      } else if (bounds.length === 1) {
+        console.log("[DriverMap] Setting view:", bounds[0]);
+        map.setView(bounds[0], 14);
+      }
+    } catch (e) {
+      console.warn("[DriverMap] Error centering map:", e);
     }
   }, [pickupCoords, dropoffCoords, driverCoords, ready, pickupLocation, dropoffLocation, t, zoom, userLocation]);
 
   // Center map on user location when it becomes available
   useEffect(() => {
-    if (!mapInstanceRef.current || !ready || !userLocation) return;
+    const m = mapInstanceRef.current;
+    if (!m || !ready || !userLocation) return;
     if (pickupCoords || dropoffCoords || driverCoords) return; // Don't center if we already have coords
+    if (!m._container || !m._container.parentNode) return;
+    try { m.getCenter(); } catch { return; }
 
     console.log("[DriverMap] Centering on user location:", userLocation);
-    mapInstanceRef.current.setView([userLocation.lat, userLocation.lng], 14);
+    try { m.setView([userLocation.lat, userLocation.lng], 14); } catch { /* detached */ }
   }, [userLocation, ready, pickupCoords, dropoffCoords, driverCoords]);
 
   // Update click handler when pickupCoords changes
@@ -413,6 +435,142 @@ export function DriverMap({
             : !dropoffCoords
               ? t("driver.clickDropoff", "Click to set dropoff")
               : t("driver.clickToChange", "Click to change dropoff")}
+        </div>
+      )}
+
+      {/* Navigator buttons — shown on non-interactive maps with coords */}
+      {!interactive && (pickupCoords || dropoffCoords) && (
+        <NavigatorButtons
+          pickupCoords={pickupCoords}
+          dropoffCoords={dropoffCoords}
+          pickupLabel={pickupLocation}
+          dropoffLabel={dropoffLocation}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Navigator Buttons (open in external map app) ─────────────────────────────
+
+const NAVIGATORS = [
+  {
+    id: "google",
+    name: "Google Maps",
+    color: "#4285F4",
+    icon: "🗺️",
+    buildUrl: (lat: number, lng: number) =>
+      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+  },
+  {
+    id: "yandex",
+    name: "Yandex Maps",
+    color: "#FC3F1D",
+    icon: "🧭",
+    buildUrl: (lat: number, lng: number) =>
+      `https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto`,
+  },
+  {
+    id: "2gis",
+    name: "2GIS",
+    color: "#1DAD4E",
+    icon: "🏢",
+    buildUrl: (lat: number, lng: number) =>
+      `https://2gis.ru/routeSearch/rsType/car/to/${lng},${lat}`,
+  },
+  {
+    id: "waze",
+    name: "Waze",
+    color: "#33CCFF",
+    icon: "🚗",
+    buildUrl: (lat: number, lng: number) =>
+      `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+  },
+];
+
+function NavigatorButtons({
+  pickupCoords,
+  dropoffCoords,
+  pickupLabel,
+  dropoffLabel,
+}: {
+  pickupCoords?: Location;
+  dropoffCoords?: Location;
+  pickupLabel?: string;
+  dropoffLabel?: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [target, setTarget] = useState<"dropoff" | "pickup">(dropoffCoords ? "dropoff" : "pickup");
+
+  const coords = target === "dropoff" ? dropoffCoords : pickupCoords;
+  if (!coords) return null;
+
+  return (
+    <div className="absolute top-3 right-3 z-[1000] flex flex-col items-end gap-2">
+      {/* Toggle button */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg shadow-lg text-xs font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Navigate
+        <svg className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Expanded panel */}
+      {expanded && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-3 min-w-[200px] animate-in fade-in slide-in-from-top-2 duration-200">
+          {/* Target toggle */}
+          {pickupCoords && dropoffCoords && (
+            <div className="flex gap-1 mb-2.5 p-0.5 rounded-md bg-gray-100 dark:bg-gray-700">
+              <button
+                onClick={() => setTarget("pickup")}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
+                  target === "pickup"
+                    ? "bg-white dark:bg-gray-600 shadow-sm text-emerald-600 dark:text-emerald-400"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                Pickup
+              </button>
+              <button
+                onClick={() => setTarget("dropoff")}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
+                  target === "dropoff"
+                    ? "bg-white dark:bg-gray-600 shadow-sm text-red-600 dark:text-red-400"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                Dropoff
+              </button>
+            </div>
+          )}
+
+          {/* Navigator list */}
+          <div className="space-y-1">
+            {NAVIGATORS.map((nav) => (
+              <a
+                key={nav.id}
+                href={nav.buildUrl(coords.lat, coords.lng)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <span className="text-base leading-none">{nav.icon}</span>
+                <span className="font-medium">{nav.name}</span>
+                <svg className="w-3.5 h-3.5 ml-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </div>

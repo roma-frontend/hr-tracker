@@ -3,13 +3,25 @@
  * Beautiful notification sounds for leave requests, approvals, etc.
  */
 
+// Shared AudioContext — avoids "suspended" state issues with per-call contexts
+let _sharedCtx: AudioContext | null = null;
+function getAudioContext(): AudioContext {
+  if (!_sharedCtx || _sharedCtx.state === "closed") {
+    _sharedCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  if (_sharedCtx.state === "suspended") {
+    _sharedCtx.resume().catch(() => {});
+  }
+  return _sharedCtx;
+}
+
 // Create a pleasant notification sound
 export const playNotificationSound = (type: "new_request" | "approved" | "rejected" = "new_request") => {
   if (typeof window === "undefined") return;
 
   try {
     // Use Web Audio API for better control
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = getAudioContext();
     const now = audioContext.currentTime;
     const duration = 0.5;
 
@@ -119,13 +131,7 @@ function playNotification(
 export const playChatMessageSound = () => {
   if (typeof window === "undefined") return;
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
-    // Resume context if it's suspended (common in browsers)
-    if (ctx.state === "suspended") {
-      ctx.resume().catch((err) => console.warn("Failed to resume AudioContext:", err));
-    }
-    
+    const ctx = getAudioContext();
     const now = ctx.currentTime;
 
     // Layer 1: soft "ping" — sine wave at 880Hz (A5), short attack, long tail

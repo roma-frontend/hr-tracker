@@ -64,8 +64,13 @@ export const getAnalyticsOverview = query({
 
 // ── Get department statistics ──────────────────────────────────────────────
 export const getDepartmentStats = query({
-  args: { requesterId: v.id("users") },
+  args: { requesterId: v.optional(v.id("users")) },
   handler: async (ctx, { requesterId }) => {
+    // If no requesterId, return empty stats
+    if (!requesterId) {
+      return { departments: [], totalEmployees: 0 };
+    }
+    
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error("Requester not found");
 
@@ -73,7 +78,7 @@ export const getDepartmentStats = query({
     const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
 
     let users = await ctx.db.query("users").collect();
-    
+
     // Filter by organization if not superadmin
     if (!isSuperadmin) {
       if (!requester.organizationId) {

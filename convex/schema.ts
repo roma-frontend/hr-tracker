@@ -100,6 +100,7 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     passwordHash: v.string(),
+    googleId: v.optional(v.string()),     // Google OAuth sub ID
     role: v.union(
       v.literal("superadmin"),   // platform owner (you) — sees all orgs
       v.literal("admin"),        // org admin — sees only their org
@@ -1052,6 +1053,15 @@ export default defineSchema({
       durationSeconds: v.number(),
       polyline: v.optional(v.string()), // encoded polyline for route
     })),
+    // Driver notes (Feature #7)
+    driverNotes: v.optional(v.string()),  // e.g., "traffic jam on Lenin st", "passenger was 10min late"
+    // Wait time tracking (Feature #8)
+    arrivedAt: v.optional(v.number()),    // timestamp when driver marked "I've arrived"
+    passengerPickedUpAt: v.optional(v.number()), // timestamp when passenger got in
+    waitTimeMinutes: v.optional(v.number()), // calculated wait time
+    // ETA (Feature #9)
+    etaMinutes: v.optional(v.number()),   // estimated time of arrival to pickup
+    etaUpdatedAt: v.optional(v.number()), // when ETA was last updated
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -1092,6 +1102,7 @@ export default defineSchema({
     ),
     declineReason: v.optional(v.string()), // e.g., "Already booked", "Not available"
     reviewedAt: v.optional(v.number()),
+    passengerRated: v.optional(v.boolean()), // whether passenger has rated this trip
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -1120,4 +1131,59 @@ export default defineSchema({
     .index("by_owner", ["ownerId"])
     .index("by_viewer", ["viewerId"])
     .index("by_owner_viewer", ["ownerId", "viewerId"]),
+
+  // ── FAVORITE DRIVERS ──────────────────────────────────────────────────────
+  // Employees can save preferred drivers for quick booking
+  favoriteDrivers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),              // employee who favorited
+    driverId: v.id("drivers"),          // favorited driver
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_driver", ["userId", "driverId"]),
+
+  // ── RECURRING TRIPS ───────────────────────────────────────────────────────
+  // Scheduled recurring trip templates
+  recurringTrips: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),              // employee who created
+    driverId: v.id("drivers"),          // preferred driver
+    tripInfo: v.object({
+      from: v.string(),
+      to: v.string(),
+      purpose: v.string(),
+      passengerCount: v.number(),
+      notes: v.optional(v.string()),
+      pickupCoords: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+      dropoffCoords: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+    }),
+    schedule: v.object({
+      daysOfWeek: v.array(v.number()),  // [1,2,3,4,5] Mon-Fri
+      startTime: v.string(),            // "08:30"
+      endTime: v.string(),              // "09:00"
+    }),
+    isActive: v.boolean(),
+    lastGeneratedAt: v.optional(v.number()), // last time requests were auto-generated
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_org_active", ["organizationId", "isActive"]),
+
+  // ── PASSENGER RATINGS ─────────────────────────────────────────────────────
+  // Passengers rate drivers after completed trips
+  passengerRatings: defineTable({
+    organizationId: v.id("organizations"),
+    scheduleId: v.id("driverSchedules"),  // the completed trip
+    requestId: v.optional(v.id("driverRequests")), // original request
+    passengerId: v.id("users"),           // who rated
+    driverId: v.id("drivers"),            // rated driver
+    rating: v.number(),                   // 1-5
+    comment: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_schedule", ["scheduleId"])
+    .index("by_passenger", ["passengerId"])
+    .index("by_driver", ["driverId"]),
 });

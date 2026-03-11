@@ -144,7 +144,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <h3 className="text-sm font-medium">{t("driver.totalTrips", "Total Trips")}</h3>

@@ -92,7 +92,7 @@ export default function DashboardClient() {
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
 
-  const totalEmployees = users?.length ?? 0;
+  const totalEmployees = users?.filter(u => u.role !== "superadmin").length ?? 0;
   const pendingRequests = leaves?.filter((r) => r.status === "pending").length ?? 0;
   const onLeaveNow = leaves?.filter(
     (r) => r.status === "approved" && r.startDate <= todayStr && r.endDate >= todayStr

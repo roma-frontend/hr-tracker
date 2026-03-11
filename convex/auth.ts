@@ -228,31 +228,12 @@ export const login = mutation({
     isFaceLogin: v.optional(v.boolean()),
   },
   handler: async (ctx, { email, password: passwordHash, sessionToken, sessionExpiry, isFaceLogin }) => {
-    console.log('[auth:login] 🔐 Login attempt:', {
-      email,
-      isFaceLogin,
-      hasPassword: !!passwordHash,
-    });
-    
     const user = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", email.toLowerCase().trim()))
       .unique();
 
-    if (!user) {
-      console.log('[auth:login] ❌ User not found:', email);
-      throw new Error("Invalid email or password");
-    }
-    
-    console.log('[auth:login] 👤 Found user:', {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isActive: user.isActive,
-      isApproved: user.isApproved,
-    });
-    
+    if (!user) throw new Error("Invalid email or password");
     if (!user.isActive) throw new Error("Your account has been deactivated. Contact your administrator.");
     if (!user.isApproved) {
       throw new Error(
@@ -262,17 +243,13 @@ export const login = mutation({
     
     // Skip password check for Face ID login
     if (!isFaceLogin && user.passwordHash !== passwordHash) {
-      console.log('[auth:login] ❌ Password mismatch for:', email);
       throw new Error("Invalid email or password");
     }
 
-    // Verify org is still active (skip for superadmins who don't have an org)
-    let org = null;
-    if (user.organizationId) {
-      org = await ctx.db.get(user.organizationId);
-      if (!org || !org.isActive) {
-        throw new Error("Your organization account is inactive. Contact support.");
-      }
+    // Verify org is still active
+    const org = await ctx.db.get(user.organizationId);
+    if (!org || !org.isActive) {
+      throw new Error("Your organization account is inactive. Contact support.");
     }
 
     await ctx.db.patch(user._id, {
@@ -281,42 +258,11 @@ export const login = mutation({
       lastLoginAt: Date.now(),
     });
 
-    const userData = safeUser(user as Parameters<typeof safeUser>[0]);
-
-    // Fix placeholder name: if name is "User" or empty, use email prefix
-    const nameTrimmed = userData.name?.trim().toLowerCase();
-    const isPlaceholderName = !userData.name || nameTrimmed === "user";
-    let finalName = userData.name;
-    if (isPlaceholderName) {
-      finalName = email.split("@")[0] || "User";
-      // Also update in DB so it's fixed permanently
-      await ctx.db.patch(user._id, { name: finalName });
-      console.log('[auth:login] 📝 Fixed placeholder name from', userData.name, 'to', finalName);
-    }
-
-    console.log('[auth:login] ✅ Login successful, returning:', {
-      userId: userData.userId,
-      name: finalName,
-      email: userData.email,
-      role: userData.role,
-    });
-
     return {
-      userId: userData.userId,
-      name: finalName,
-      email: userData.email,
-      role: userData.role,
-      organizationId: userData.organizationId,
-      department: userData.department,
-      position: userData.position,
-      employeeType: userData.employeeType,
-      avatarUrl: userData.avatarUrl,
-      travelAllowance: userData.travelAllowance,
-      isApproved: userData.isApproved,
-      totpEnabled: user.totpEnabled ?? false,
-      organizationName: org?.name || null,
-      organizationSlug: org?.slug || null,
-      organizationPlan: org?.plan || null,
+      ...safeUser(user as Parameters<typeof safeUser>[0]),
+      organizationName: org.name,
+      organizationSlug: org.slug,
+      organizationPlan: org.plan,
     };
   },
 });
@@ -345,10 +291,7 @@ export const verifySession = query({
     if (!user) return null;
     if (user.sessionExpiry && user.sessionExpiry < Date.now()) return null;
 
-    let org = null;
-    if (user.organizationId) {
-      org = await ctx.db.get(user.organizationId);
-    }
+    const org = await ctx.db.get(user.organizationId);
 
     return {
       ...safeUser(user as Parameters<typeof safeUser>[0]),
@@ -370,10 +313,7 @@ export const getSession = query({
     if (!user) return null;
     if (user.sessionExpiry && user.sessionExpiry < Date.now()) return null;
 
-    let org = null;
-    if (user.organizationId) {
-      org = await ctx.db.get(user.organizationId);
-    }
+    const org = await ctx.db.get(user.organizationId);
 
     return {
       userId: user._id,
@@ -463,113 +403,32 @@ export const verifyResetToken = query({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Save secret
+// CHANGE PASSWORD — authenticated user changes their own password
 // ─────────────────────────────────────────────────────────────────────────────
-export const saveTotpSecret = mutation({
-  args: { userId: v.id("users"), secret: v.string() },
-  handler: async (ctx, { userId, secret }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
-    await ctx.db.patch(userId, { totpSecret: secret });
+export const changePassword = mutation({
+  args: {
+    userId: v.id("users"),
+    currentPassword: v.string(),
+    newPassword: v.string(),
   },
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Enable
-// ─────────────────────────────────────────────────────────────────────────────
-export const enableTotp = mutation({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
+  handler: async (ctx, { userId, currentPassword, newPassword }) => {
     const user = await ctx.db.get(userId);
     if (!user) throw new Error("User not found");
-    if (!user.totpSecret) throw new Error("TOTP secret not set");
-    await ctx.db.patch(userId, { totpEnabled: true });
-  },
-});
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Disable
-// ─────────────────────────────────────────────────────────────────────────────
-export const disableTotp = mutation({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
+    if (user.passwordHash !== currentPassword) {
+      throw new Error("Current password is incorrect");
+    }
+
+    if (newPassword.length < 6) {
+      throw new Error("New password must be at least 6 characters");
+    }
+
     await ctx.db.patch(userId, {
-      totpEnabled: false,
-      totpSecret: undefined,
-      backupCodes: undefined,
+      passwordHash: newPassword,
+      sessionToken: undefined, // force re-login on other devices
     });
-  },
-});
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Get status
-// ─────────────────────────────────────────────────────────────────────────────
-export const getTotpStatus = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) return null;
-    return {
-      totpEnabled: user.totpEnabled ?? false,
-      hasSecret: !!user.totpSecret,
-    };
-  },
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Save backup codes
-// ─────────────────────────────────────────────────────────────────────────────
-export const saveBackupCodes = mutation({
-  args: { userId: v.id("users"), codes: v.array(v.string()) },
-  handler: async (ctx, { userId, codes }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
-    await ctx.db.patch(userId, { backupCodes: codes });
-  },
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Get backup codes (for verification)
-// ─────────────────────────────────────────────────────────────────────────────
-export const getBackupCodes = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) return null;
-    return user.backupCodes ?? [];
-  },
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Remove used backup code
-// ─────────────────────────────────────────────────────────────────────────────
-export const removeBackupCode = mutation({
-  args: { userId: v.id("users"), codeIndex: v.number() },
-  handler: async (ctx, { userId, codeIndex }) => {
-    const user = await ctx.db.get(userId);
-    if (!user || !user.backupCodes) throw new Error("No backup codes found");
-    const codes = [...user.backupCodes];
-    codes.splice(codeIndex, 1);
-    await ctx.db.patch(userId, { backupCodes: codes });
-  },
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TOTP 2FA — Get user for TOTP verification (returns secret + backup codes)
-// ─────────────────────────────────────────────────────────────────────────────
-export const getUserForTotpVerification = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) return null;
-    return {
-      totpSecret: user.totpSecret,
-      totpEnabled: user.totpEnabled ?? false,
-      backupCodes: user.backupCodes ?? [],
-      passwordHash: user.passwordHash,
-    };
+    return { success: true };
   },
 });
 
@@ -636,12 +495,8 @@ export const loginWebauthn = mutation({
     if (!user.isActive) throw new Error("Account is deactivated");
     if (!user.isApproved) throw new Error("Account pending approval");
 
-    // Verify org is still active (skip for superadmins who don't have an org)
-    let org = null;
-    if (user.organizationId) {
-      org = await ctx.db.get(user.organizationId);
-      if (!org || !org.isActive) throw new Error("Organization is inactive");
-    }
+    const org = await ctx.db.get(user.organizationId);
+    if (!org || !org.isActive) throw new Error("Organization is inactive");
 
     // Replay attack prevention
     if (counter <= cred.counter) throw new Error("Invalid authenticator counter");
@@ -655,9 +510,165 @@ export const loginWebauthn = mutation({
 
     return {
       ...safeUser(user as Parameters<typeof safeUser>[0]),
-      organizationName: org?.name || null,
-      organizationSlug: org?.slug || null,
-      organizationPlan: org?.plan || null,
+      organizationName: org.name,
+      organizationSlug: org.slug,
+      organizationPlan: org.plan,
+    };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GOOGLE OAUTH LOGIN — for mobile app
+// Finds existing user by email, creates session. If user doesn't exist,
+// creates a new user (pending approval unless first in org).
+// ─────────────────────────────────────────────────────────────────────────────
+export const googleOAuthLogin = mutation({
+  args: {
+    email: v.string(),
+    name: v.string(),
+    avatarUrl: v.optional(v.string()),
+    googleId: v.string(),
+    sessionToken: v.string(),
+    sessionExpiry: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const email = args.email.toLowerCase().trim();
+
+    // ── 1. Find existing user ──────────────────────────────────────────────
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (user) {
+      // Existing user — validate
+      if (!user.isActive) throw new Error("Your account has been deactivated. Contact your administrator.");
+      if (!user.isApproved) throw new Error("Your account is pending approval from your organization administrator.");
+
+      const org = await ctx.db.get(user.organizationId);
+      if (!org || !org.isActive) throw new Error("Your organization account is inactive. Contact support.");
+
+      // Update avatar if not set, and update session
+      const patch: Record<string, any> = {
+        sessionToken: args.sessionToken,
+        sessionExpiry: args.sessionExpiry,
+        lastLoginAt: Date.now(),
+      };
+      if (!user.avatarUrl && args.avatarUrl) {
+        patch.avatarUrl = args.avatarUrl;
+      }
+      await ctx.db.patch(user._id, patch);
+
+      return {
+        isNewUser: false,
+        needsApproval: false,
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organizationId: user.organizationId,
+        organizationName: org.name,
+        organizationSlug: org.slug,
+        organizationPlan: org.plan,
+        department: user.department,
+        position: user.position,
+        employeeType: user.employeeType,
+        avatarUrl: user.avatarUrl ?? args.avatarUrl,
+        travelAllowance: user.travelAllowance,
+        isApproved: user.isApproved,
+        phone: user.phone,
+        paidLeaveBalance: user.paidLeaveBalance,
+        sickLeaveBalance: user.sickLeaveBalance,
+        familyLeaveBalance: user.familyLeaveBalance,
+      };
+    }
+
+    // ── 2. New user — create account ───────────────────────────────────────
+    const allOrgs = await ctx.db.query("organizations").filter((q) => q.eq(q.field("isActive"), true)).collect();
+    if (allOrgs.length === 0) {
+      throw new Error("No active organizations found. Please contact administrator.");
+    }
+
+    const org = allOrgs[0];
+    const organizationId = org._id;
+
+    // Check if first member → admin
+    const orgMembers = await ctx.db
+      .query("users")
+      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+      .collect();
+
+    const isFirstMember = orgMembers.length === 0;
+    const role = isFirstMember ? "admin" : "employee";
+    const isApproved = isFirstMember;
+
+    const userId = await ctx.db.insert("users", {
+      organizationId,
+      name: args.name || email.split("@")[0],
+      email,
+      passwordHash: "",
+      avatarUrl: args.avatarUrl,
+      role,
+      employeeType: "staff",
+      isActive: true,
+      isApproved,
+      approvedAt: isApproved ? Date.now() : undefined,
+      travelAllowance: 20000,
+      paidLeaveBalance: 24,
+      sickLeaveBalance: 10,
+      familyLeaveBalance: 5,
+      sessionToken: isApproved ? args.sessionToken : undefined,
+      sessionExpiry: isApproved ? args.sessionExpiry : undefined,
+      lastLoginAt: Date.now(),
+      createdAt: Date.now(),
+    });
+
+    // Notify admins if needs approval
+    if (!isApproved) {
+      const admins = await ctx.db
+        .query("users")
+        .withIndex("by_org_role", (q) =>
+          q.eq("organizationId", organizationId).eq("role", "admin")
+        )
+        .collect();
+
+      for (const admin of admins) {
+        await ctx.db.insert("notifications", {
+          organizationId,
+          userId: admin._id,
+          type: "join_request",
+          title: "🙋 New Google Sign-Up",
+          message: `${args.name} (${email}) signed up with Google and wants to join ${org.name}.`,
+          isRead: false,
+          relatedId: userId,
+          createdAt: Date.now(),
+        });
+      }
+
+      throw new Error("Your account has been created and is pending approval from your organization administrator.");
+    }
+
+    return {
+      isNewUser: true,
+      needsApproval: false,
+      userId,
+      name: args.name || email.split("@")[0],
+      email,
+      role,
+      organizationId,
+      organizationName: org.name,
+      organizationSlug: org.slug,
+      organizationPlan: org.plan,
+      department: undefined,
+      position: undefined,
+      employeeType: "staff",
+      avatarUrl: args.avatarUrl,
+      travelAllowance: 20000,
+      isApproved: true,
+      phone: undefined,
+      paidLeaveBalance: 24,
+      sickLeaveBalance: 10,
+      familyLeaveBalance: 5,
     };
   },
 });
