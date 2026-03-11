@@ -886,15 +886,23 @@ export const markMessageDelivered = mutation({
 
 /** Get total unread count across all conversations (excludes deleted/archived per-user) */
 export const getTotalUnread = query({
-  args: { userId: v.id("users"), organizationId: v.id("organizations") },
+  args: { 
+    userId: v.id("users"),
+    organizationId: v.optional(v.id("organizations"))
+  },
   handler: async (ctx, args) => {
     const memberships = await ctx.db
       .query("chatMembers")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
-    // Only count memberships that are not deleted/archived by this user and belong to the requested org
+    // Only count memberships that are not deleted/archived
+    // If organizationId provided, filter by org
     return memberships
-      .filter((m) => !m.isDeleted && !m.isArchived && m.organizationId === args.organizationId)
+      .filter((m) => {
+        if (m.isDeleted || m.isArchived) return false;
+        if (args.organizationId && m.organizationId !== args.organizationId) return false;
+        return true;
+      })
       .reduce((sum, m) => sum + (m.unreadCount ?? 0), 0);
   },
 });
