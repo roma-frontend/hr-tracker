@@ -73,11 +73,13 @@ const StatusUpdateBanner = dynamic(
 );
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const { user } = useAuthStore();
+  const { user, needsOnboarding } = useAuthStore();
   const { status } = useSession();
   const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
   const isChatPage = pathname?.startsWith("/chat");
+  const isOnboardingPage = pathname?.startsWith("/onboarding");
+  const redirectedRef = React.useRef(false);
 
   useEffect(() => {
     // Rehydrate persisted stores from localStorage on client only
@@ -94,11 +96,34 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setHydrated(true);
   }, []);
 
+  // Redirect to onboarding if user needs it (and not already on onboarding page)
+  useEffect(() => {
+    if (hydrated && user && !user.organizationId && !isOnboardingPage && !redirectedRef.current) {
+      console.log("[Providers] 🚨 User has no organizationId, redirecting to onboarding...");
+      redirectedRef.current = true;
+      window.location.href = '/onboarding/select-organization';
+    }
+  }, [hydrated, user, isOnboardingPage]);
+
+  // Don't redirect to login if user is on onboarding page
+  if (isOnboardingPage) {
+    return <>{children}</>;
+  }
+
   // Show Shield HR loader while:
   // 1. Stores haven't hydrated from localStorage yet
   // 2. OAuth session is active (Google login) but user data hasn't been synced from Convex yet
   const isOAuthSyncing = status === "authenticated" && !user;
   if (!hydrated || isOAuthSyncing) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+        <ShieldLoader size="lg" />
+      </div>
+    );
+  }
+
+  // Block dashboard access if user has no organization (onboarding required)
+  if (user && !user.organizationId && !isOnboardingPage) {
     return (
       <div className="flex h-screen items-center justify-center bg-[var(--background)]">
         <ShieldLoader size="lg" />

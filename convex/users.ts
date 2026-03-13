@@ -226,22 +226,22 @@ export const createOAuthUser = mutation({
       throw new Error("No organization found. Please create an organization first.");
     }
 
-    const organizationId = allOrgs[0]._id;
-    console.log("[createOAuthUser] 🏢 organizationId:", organizationId);
+    const organizationId = isSuperAdmin ? allOrgs[0]._id : undefined;
+    console.log("[createOAuthUser] 🏢 organizationId:", organizationId, isSuperAdmin ? "(superadmin)" : "(undefined - needs onboarding)");
 
-    // Check if user is first member of the org (becomes admin)
-    const orgMembers = await ctx.db
+    // Check if user is first member of the org (becomes admin) - only for superadmin
+    const orgMembers = isSuperAdmin ? await ctx.db
       .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
-      .collect();
+      .withIndex("by_org", (q) => q.eq("organizationId", organizationId!))
+      .collect() : [];
 
     const isFirstMember = orgMembers.length === 0;
-    const role = isSuperAdmin ? "superadmin" : (isFirstMember ? "admin" : "employee");
+    const role = isSuperAdmin ? "superadmin" : "employee";
 
-    console.log("[createOAuthUser] 🎯 isFirstMember:", isFirstMember, "role:", role, "orgMembers:", orgMembers.length);
+    console.log("[createOAuthUser] 🎯 role:", role, "isSuperAdmin:", isSuperAdmin);
 
-    // OAuth users are auto-approved (trusted authentication)
-    const isApproved = true;
+    // Superadmin is auto-approved, regular users need onboarding (isApproved: false)
+    const isApproved = isSuperAdmin;
 
     // Create new OAuth user
     console.log("[createOAuthUser] 🔨 Creating new user with:", {
@@ -250,21 +250,21 @@ export const createOAuthUser = mutation({
       email: emailLower,
       role,
       isSuperAdmin,
-      isFirstMember,
+      isApproved,
     });
 
     const userId = await ctx.db.insert("users", {
-      organizationId,
+      organizationId, // undefined for regular users (needs onboarding)
       name: finalName,
       email: emailLower,
       passwordHash: "", // OAuth users don't have password
       role,
       employeeType: "staff",
-      department: (isSuperAdmin || isFirstMember) ? "Management" : undefined,
-      position: (isSuperAdmin || isFirstMember) ? "Administrator" : undefined,
+      department: isSuperAdmin ? "Management" : undefined,
+      position: isSuperAdmin ? "Administrator" : undefined,
       isActive: true,
-      isApproved,
-      approvedAt: Date.now(),
+      isApproved, // false for regular users (needs onboarding)
+      approvedAt: isSuperAdmin ? Date.now() : undefined,
       travelAllowance: 20000,
       paidLeaveBalance: 24,
       sickLeaveBalance: 10,

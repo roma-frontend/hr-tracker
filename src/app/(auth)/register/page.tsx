@@ -22,8 +22,6 @@ import { I18nProvider } from "@/components/I18nProvider";
 import { SmartEmailInput } from "@/components/auth/SmartEmailInput";
 import { SmartPasswordInput } from "@/components/auth/SmartPasswordInput";
 import { SmartErrorMessage, parseAuthError } from "@/components/auth/SmartErrorMessage";
-import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
-import { registerTourSteps } from "@/components/onboarding/registerTourSteps";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface OrgResult {
@@ -554,13 +552,8 @@ export default function RegisterPage() {
     <I18nProvider>
       <RegisterPageContent />
       
-      {/* Onboarding Tour */}
-      <OnboardingTour
-        steps={registerTourSteps}
-        tourId="register-tour"
-        onComplete={() => console.log("Registration tour completed!")}
-        onSkip={() => console.log("Registration tour skipped")}
-      />
+      {/* Onboarding Tour — DISABLED on register page, shown only on login */}
+      {/* Tour is handled by login page to avoid showing twice */}
     </I18nProvider>
   );
 }

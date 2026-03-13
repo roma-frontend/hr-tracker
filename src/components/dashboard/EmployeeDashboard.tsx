@@ -17,6 +17,7 @@ import Link from "next/link";
 import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from "@/lib/types";
 import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
+import { ShieldLoader } from "@/components/ui/ShieldLoader";
 
 // Lazy load heavy dashboard components to reduce initial JS bundle
 const AttendanceDashboard = dynamic(
@@ -56,7 +57,17 @@ function StatusBadge({ status }: { status: LeaveStatus }) {
 export function EmployeeDashboard() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+
+  // Don't render anything if user is not loaded (Providers handles onboarding redirect)
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+        <ShieldLoader size="lg" />
+      </div>
+    );
+  }
+
+  const leaves = useQuery(api.leaves.getAllLeaves, user?.id && user.organizationId ? { requesterId: user.id as Id<"users"> } : "skip");
   const userData = useQuery(
     api.users.getUserById,
     user?.id ? { userId: user.id as any } : "skip"

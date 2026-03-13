@@ -85,7 +85,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             style={{ background: "var(--card)" }}
           >
             {/* Header */}
-            <div className="bg-gradient-to-br from-blue-600 to-sky-700 px-6 py-6 flex-shrink-0">
+            <div className="px-6 py-6 flex-shrink-0">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center text-xl font-bold flex-shrink-0" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)" }}>

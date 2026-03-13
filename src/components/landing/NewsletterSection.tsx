@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -89,18 +90,19 @@ export default function NewsletterSection() {
                 disabled={isLoading}
                 aria-label={t('ariaLabels.emailAddress')}
               />
-              <button
+              <Button
                 type="submit"
+                variant="cta"
+                size="lg"
+                className="gap-2"
                 disabled={isLoading}
-                className="cta-btn-primary px-6 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-300 font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ color: '#ffffff' }}
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }} />
                 ) : (
                   <><span>{t('newsletter.subscribe')}</span><ArrowRight size={18} /></>
                 )}
-              </button>
+              </Button>
             </form>
           ) : (
             /* CSS fade-in on success */

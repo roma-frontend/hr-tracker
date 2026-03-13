@@ -37,7 +37,7 @@ export const getAllLeaves = query({
 
     // Otherwise use requesterId
     if (!requesterId) return [];
-    
+
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error("Requester not found");
 
@@ -47,7 +47,8 @@ export const getAllLeaves = query({
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
       leaves = await ctx.db.query("leaveRequests").order("desc").collect();
     } else {
-      if (!requester.organizationId) throw new Error("User does not belong to an organization");
+      // User without organization — return empty array (needs onboarding)
+      if (!requester.organizationId) return [];
       leaves = await ctx.db
         .query("leaveRequests")
         .withIndex("by_org", (q) => q.eq("organizationId", requester.organizationId))

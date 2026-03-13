@@ -808,30 +808,75 @@ body {
   animation-range: entry 0% entry 30%;
 }
 
-/* CTA button hover — CSS only, no JS */
+/* ═══════════════════════════════════════════════════════════════
+   CTA BUTTONS — Unified design for landing page
+   Works with light/dark themes
+   ═══════════════════════════════════════════════════════════════ */
+
 .cta-btn-primary {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  @apply inline-flex items-center justify-center gap-3;
+  @apply px-8 py-4 sm:px-10 sm:py-4;
+  @apply rounded-2xl;
+  @apply font-bold text-lg;
+  @apply transition-all duration-300;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
+  
+  /* Gradient background — works in both themes */
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  
+  /* Hover effects */
+  transform: scale(1);
+  box-shadow: 0 10px 40px rgba(37, 99, 235, 0.3);
 }
 
 .cta-btn-primary:hover {
   transform: scale(1.05);
   box-shadow: 0 0 40px rgba(37, 99, 235, 0.6);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 
 .cta-btn-primary:active {
   transform: scale(0.97);
 }
 
+.cta-btn-primary:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none;
+}
+
+/* Secondary CTA — Glass morphism effect */
 .cta-btn-secondary {
-  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  @apply inline-flex items-center justify-center gap-3;
+  @apply px-8 py-4 sm:px-10 sm:py-4;
+  @apply rounded-2xl;
+  @apply font-semibold text-lg;
+  @apply transition-all duration-300;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
+  
+  /* Glass effect */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  
+  /* Hover effects */
+  transform: scale(1);
 }
 
 .cta-btn-secondary:hover {
   transform: scale(1.03);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .cta-btn-secondary:active {
   transform: scale(0.97);
+}
+
+.cta-btn-secondary:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none;
 }
 
 /* Floating particles — pure CSS, replaces framer-motion */

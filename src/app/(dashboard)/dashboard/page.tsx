@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useAuthStore } from "@/store/useAuthStore";
+import { ShieldLoader } from "@/components/ui/ShieldLoader";
 
 // Dynamically import heavy dashboard components — they are large bundles
 // with recharts, framer-motion etc. Loading them on demand saves ~120KB on
@@ -35,6 +36,15 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+
+  // Block rendering if user has no organization (needs onboarding)
+  if (user && !user.organizationId) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+        <ShieldLoader size="lg" />
+      </div>
+    );
+  }
 
   if (user?.role === "employee") {
     return <EmployeeDashboard />;

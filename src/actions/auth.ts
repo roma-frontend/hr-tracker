@@ -284,17 +284,21 @@ export async function loginAction(formData: FormData | { email: string; password
       name: result.name,
       email: result.email,
       role: result.role,
+      organizationId: result.organizationId,
+      isApproved: result.isApproved,
       department: result.department,
       position: result.position,
       employeeType: result.employeeType,
       avatar: result.avatarUrl,
     });
-    
+
     console.log('[loginAction] 🔐 Password login - JWT created with:', {
       userId: result.userId,
       name: result.name,
       email: result.email,
       role: result.role,
+      organizationId: result.organizationId,
+      isApproved: result.isApproved,
     });
 
     log.debug('JWT token created successfully');

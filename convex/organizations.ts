@@ -555,26 +555,59 @@ export const approveJoinRequest = mutation({
       );
     }
 
-    // Create user account
-    const userId = await ctx.db.insert("users", {
-      organizationId: invite.organizationId,
-      name: invite.requestedByName,
-      email: invite.requestedByEmail,
-      passwordHash: args.passwordHash,
-      role: args.role,
-      employeeType: "staff",
-      department: args.department,
-      position: args.position,
-      isActive: true,
-      isApproved: true,
-      approvedBy: args.adminId,
-      approvedAt: Date.now(),
-      travelAllowance: 20000,
-      paidLeaveBalance: 24,
-      sickLeaveBalance: 10,
-      familyLeaveBalance: 5,
-      createdAt: Date.now(),
-    });
+    // Check if user already exists (from OAuth sign up)
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", invite.requestedByEmail.toLowerCase()))
+      .first();
+
+    let userId;
+
+    if (existingUser) {
+      // User already exists (e.g., from OAuth) — update instead of creating new
+      console.log(`[approveJoinRequest] User ${invite.requestedByEmail} already exists, updating...`);
+      
+      userId = existingUser._id;
+      
+      await ctx.db.patch(userId, {
+        organizationId: invite.organizationId,
+        role: args.role,
+        employeeType: "staff",
+        department: args.department,
+        position: args.position,
+        isActive: true,
+        isApproved: true,
+        approvedBy: args.adminId,
+        approvedAt: Date.now(),
+        travelAllowance: 20000,
+        paidLeaveBalance: 24,
+        sickLeaveBalance: 10,
+        familyLeaveBalance: 5,
+      });
+    } else {
+      // No existing user — create new (for invite link flow)
+      console.log(`[approveJoinRequest] Creating new user for ${invite.requestedByEmail}`);
+      
+      userId = await ctx.db.insert("users", {
+        organizationId: invite.organizationId,
+        name: invite.requestedByName,
+        email: invite.requestedByEmail,
+        passwordHash: args.passwordHash,
+        role: args.role,
+        employeeType: "staff",
+        department: args.department,
+        position: args.position,
+        isActive: true,
+        isApproved: true,
+        approvedBy: args.adminId,
+        approvedAt: Date.now(),
+        travelAllowance: 20000,
+        paidLeaveBalance: 24,
+        sickLeaveBalance: 10,
+        familyLeaveBalance: 5,
+        createdAt: Date.now(),
+      });
+    }
 
     // Update invite record
     await ctx.db.patch(args.inviteId, {
@@ -585,7 +618,7 @@ export const approveJoinRequest = mutation({
     });
 
     // Notify the requester (they need to log in now)
-    // We can't notify by userId yet since account was just created — 
+    // We can't notify by userId yet since account was just created —
     // notify via the newly created userId
     await ctx.db.insert("notifications", {
       organizationId: invite.organizationId,
@@ -594,7 +627,7 @@ export const approveJoinRequest = mutation({
       title: "✅ Welcome to " + org.name + "!",
       message: `Your request to join ${org.name} has been approved by ${admin.name}. You can now log in.`,
       isRead: false,
-      relatedId: args.inviteId,
+      relatedId: userId, // Use userId instead of inviteId for proper navigation
       createdAt: Date.now(),
     });
 

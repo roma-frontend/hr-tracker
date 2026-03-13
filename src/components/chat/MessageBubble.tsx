@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Reply, Edit2, Trash2, Trash, Pin, Copy, MoreHorizontal, Phone, Video, FileText, Download, X, CheckCheck, Check, MessageSquare } from "lucide-react";
 import Link from "next/link";
@@ -371,12 +372,14 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
           className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in"
           onClick={() => setLightboxSrc(null)}
         >
-          <button
-            className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-110"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-110"
             onClick={() => setLightboxSrc(null)}
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lightboxSrc}
@@ -396,30 +399,24 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
           >
             <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{L.deleteMsg}</h3>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>{L.deleteDesc}</p>
-            <button
-              onClick={handleDeleteForMe}
-              className="w-full px-3 py-2 rounded-xl text-sm font-medium border transition-all duration-200 hover:opacity-80 active:scale-95"
-              style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-            >
-              {L.deleteForMe}
-            </button>
-            {isOwn && withinFiveMin && (
-              <button
-                onClick={handleDeleteForEveryone}
-                className="w-full px-3 py-2 rounded-xl text-sm font-medium text-white transition-all duration-200 hover:opacity-80 active:scale-95"
-                style={{ background: "#ef4444" }}
-              >
-                {L.deleteForEveryone}
-              </button>
-            )}
-            {isOwn && !withinFiveMin && (
-              <p className="text-[11px] text-center" style={{ color: "var(--text-disabled)" }}>
-                {L.canOnlyDelete}
-              </p>
-            )}
-            <button onClick={() => setShowDeleteDialog(false)} className="text-xs text-center hover:opacity-70 transition-opacity" style={{ color: "var(--text-muted)" }}>
+            <div className="flex flex-col gap-2">
+              <Button onClick={handleDeleteForMe} variant="outline" className="w-full text-sm">
+                {L.deleteForMe}
+              </Button>
+              {isOwn && withinFiveMin && (
+                <Button onClick={handleDeleteForEveryone} variant="destructive" className="w-full text-sm">
+                  {L.deleteForEveryone}
+                </Button>
+              )}
+              {isOwn && !withinFiveMin && (
+                <p className="text-[11px] text-center" style={{ color: "var(--text-disabled)" }}>
+                  {L.canOnlyDelete}
+                </p>
+              )}
+            </div>
+            <Button onClick={() => setShowDeleteDialog(false)} variant="ghost" className="text-xs hover:opacity-70 transition-opacity">
               {L.cancel}
-            </button>
+            </Button>
           </div>
         </div>
       )}

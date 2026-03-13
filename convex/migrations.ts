@@ -1,119 +1,63 @@
+/**
+ * Migrations for fixing duplicate users
+ */
+
+import { v } from "convex/values";
 import { mutation } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
 
-// Migration: Approve all existing users
-export const approveAllExistingUsers = mutation({
+// ─────────────────────────────────────────────────────────────────────────────
+// Fix duplicate users — merge users with same email
+// ─────────────────────────────────────────────────────────────────────────────
+export const fixDuplicateUsers = mutation({
   args: {},
   handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
+    const allUsers = await ctx.db.query("users").collect();
     
-    let approved = 0;
-    for (const user of users) {
-      // If user doesn't have isApproved field or it's false, approve them
-      if (user.isApproved === undefined || user.isApproved === false) {
-        await ctx.db.patch(user._id, {
-          isApproved: true,
-          approvedAt: Date.now(),
-        });
-        approved++;
-      }
+    // Group by email
+    const emailMap = new Map<string, typeof allUsers>();
+    
+    for (const user of allUsers) {
+      const email = user.email.toLowerCase();
+      const existing = emailMap.get(email) || [];
+      existing.push(user);
+      emailMap.set(email, existing);
     }
     
-    return { 
-      success: true, 
-      message: `Approved ${approved} users`,
-      total: users.length 
-    };
-  },
-});
-
-// Migration: Migrate driver notifications from leave_request to driver_request
-export const migrateDriverNotifications = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const notifications = await ctx.db.query("notifications").collect();
-
-    let migrated = 0;
-    for (const notif of notifications) {
-      // Migrate notifications with driver_request relatedId but wrong type
-      if (notif.type === "leave_request" && notif.relatedId?.startsWith("driver_request:")) {
-        await ctx.db.patch(notif._id, {
-          type: "driver_request",
-        });
-        migrated++;
-      }
-    }
-
-    return {
-      success: true,
-      message: `Migrated ${migrated} driver notifications`,
-      total: notifications.length
-    };
-  },
-});
-
-// Migration: Clean up reactions with invalid field names
-export const cleanReactionsFieldNames = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const messages = await ctx.db.query("chatMessages").collect();
+    let fixedCount = 0;
     
-    let cleaned = 0;
-    let processed = 0;
-    
-    for (const msg of messages) {
-      if (!msg.reactions) continue;
+    for (const [email, users] of emailMap.entries()) {
+      if (users.length <= 1) continue;
       
-      processed++;
-      const rawReactions = msg.reactions;
+      console.log(`[fixDuplicateUsers] Found ${users.length} users with email ${email}`);
       
-      if (typeof rawReactions !== 'object') {
-        // Invalid reactions data, clear it
-        await ctx.db.patch(msg._id, { reactions: {} });
-        cleaned++;
-        continue;
-      }
+      // Find the approved user (prefer approved over non-approved)
+      const approvedUser = users.find(u => u.isApproved);
+      const nonApprovedUsers = users.filter(u => u !== approvedUser);
       
-      const cleanedReactions: Record<string, Id<"users">[]> = {};
-      let needsCleaning = false;
-      
-      for (const [key, value] of Object.entries(rawReactions)) {
-        // Check if key has invalid characters
-        const hasInvalidChars = /[\s\x00-\x1F\x7F-\x9F]/.test(key);
-        
-        if (hasInvalidChars) {
-          needsCleaning = true;
+      if (approvedUser && nonApprovedUsers.length > 0) {
+        // Delete non-approved duplicates
+        for (const dupUser of nonApprovedUsers) {
+          console.log(`[fixDuplicateUsers] Deleting duplicate user ${dupUser._id}`);
+          await ctx.db.delete(dupUser._id);
+          fixedCount++;
         }
+        console.log(`[fixDuplicateUsers] Kept approved user ${approvedUser._id}`);
+      } else {
+        // No approved user — keep the one with organizationId
+        const userWithOrg = users.find(u => u.organizationId);
+        const usersWithoutOrg = users.filter(u => u !== userWithOrg);
         
-        // Remove all whitespace and control characters from keys
-        const cleanKey = key.replace(/[\s\x00-\x1F\x7F-\x9F]/g, '');
-        
-        if (cleanKey && Array.isArray(value) && value.length > 0) {
-          // If we already have this clean key, merge the user arrays
-          if (cleanedReactions[cleanKey]) {
-            const existingUsers = cleanedReactions[cleanKey];
-            const newUsers = value as Id<"users">[];
-            // Merge and deduplicate
-            cleanedReactions[cleanKey] = [...new Set([...existingUsers, ...newUsers])];
-          } else {
-            cleanedReactions[cleanKey] = value as Id<"users">[];
+        if (userWithOrg && usersWithoutOrg.length > 0) {
+          for (const dupUser of usersWithoutOrg) {
+            console.log(`[fixDuplicateUsers] Deleting duplicate user ${dupUser._id}`);
+            await ctx.db.delete(dupUser._id);
+            fixedCount++;
           }
         }
       }
-      
-      if (needsCleaning) {
-        await ctx.db.patch(msg._id, { reactions: cleanedReactions });
-        cleaned++;
-      }
     }
     
-    return {
-      success: true,
-      message: `Cleaned ${cleaned} messages with invalid reaction keys out of ${processed} messages with reactions`,
-      total: messages.length,
-      cleaned,
-      processed,
-    };
+    console.log(`[fixDuplicateUsers] Fixed ${fixedCount} duplicate users`);
+    return { fixed: fixedCount };
   },
 });
-

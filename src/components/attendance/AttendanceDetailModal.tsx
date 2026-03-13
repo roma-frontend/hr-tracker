@@ -7,6 +7,7 @@ import { X, Clock, LogIn, LogOut, AlertTriangle, CheckCircle, Calendar, Timer, T
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 interface AttendanceRecord {
@@ -92,12 +93,14 @@ record, open, onClose }: AttendanceDetailModalProps) {
           >
             {/* Header gradient */}
             <div className="relative h-28 bg-gradient-to-br from-blue-600 to-sky-700 flex items-end px-6 pb-4">
-              <button
+              <Button
                 onClick={onClose}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
               >
                 <X className="w-4 h-4 text-white" />
-              </button>
+              </Button>
 
               {/* Avatar */}
               <div className="flex items-end gap-4">

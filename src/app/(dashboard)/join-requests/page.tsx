@@ -61,12 +61,35 @@ export default function JoinRequestsPage() {
   const rejectRequest = useMutation(api.organizations.rejectJoinRequest);
   const generateToken = useMutation(api.organizations.generateInviteToken);
 
-  if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
+  // Check admin access — allow if admin OR superadmin (even without org)
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-2">
+          <ShieldLoader size="lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== "admin" && user.role !== "superadmin") {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
           <AlertCircle className="w-8 h-8 text-[var(--text-muted)] mx-auto" />
           <p className="text-[var(--text-muted)]">{t('ui.adminAccessRequired')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin without org — show message
+  if (user.role === "admin" && !user.organizationId) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-2">
+          <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
+          <p className="text-[var(--text-muted)]">{t('joinRequestsPage.orgNotAssigned')}</p>
         </div>
       </div>
     );

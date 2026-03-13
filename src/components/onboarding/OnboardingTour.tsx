@@ -67,7 +67,26 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   }, [tourId]);
 
   // Determine if tour should be shown
-  const shouldShowTour = hasSeenTour === false || (hasSeenTour === null && localStorageChecked && hasSeenTourLocal === false);
+  // Show tour only if:
+  // 1. User is authenticated AND hasSeenTour === false
+  // 2. OR user is not authenticated AND localStorage shows they haven't seen it
+  const shouldShowTour = React.useMemo(() => {
+    // If user is authenticated (has sessionToken)
+    if (sessionToken !== undefined) {
+      // Show only if they haven't seen the tour (hasSeenTour === false)
+      // Wait for hasSeenTour to load (not undefined)
+      if (hasSeenTour === undefined) return false;
+      return hasSeenTour === false;
+    }
+    
+    // If user is not authenticated, check localStorage
+    if (localStorageChecked) {
+      return hasSeenTourLocal === false;
+    }
+    
+    // Still loading, don't show yet
+    return false;
+  }, [hasSeenTour, sessionToken, localStorageChecked, hasSeenTourLocal]);
 
   // Helper function to calculate and set tooltip position
   const positionTooltip = useCallback((rect: DOMRect, placement: string) => {

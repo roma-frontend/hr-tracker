@@ -13,7 +13,8 @@ export function useAuthSync() {
   const sessionCreated = useRef(false);
   const lastSyncedUserRef = useRef<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  
+  const prevUserState = useRef<{ organizationId?: string | null; isApproved?: boolean }>({});
+
   // Get current user by email
   const currentUser = useQuery(
     api.users.getCurrentUser,
@@ -140,6 +141,7 @@ export function useAuthSync() {
         position: currentUser.position,
         employeeType: currentUser.employeeType,
         organizationId: currentUser.organizationId,
+        isApproved: currentUser.isApproved,
       });
 
       console.log("[useAuthSync] ✅ User logged into useAuthStore:", {
@@ -147,7 +149,52 @@ export function useAuthSync() {
         name: finalName,
         email: currentUser.email,
         role: currentUser.role,
+        organizationId: currentUser.organizationId,
+        isApproved: currentUser.isApproved,
       });
+
+      // Check if user was just approved (organizationId or isApproved changed)
+      const prevOrg = prevUserState.current.organizationId;
+      const prevApproved = prevUserState.current.isApproved;
+      const currOrg = currentUser.organizationId;
+      const currApproved = currentUser.isApproved;
+
+      // Only redirect if user was NOT approved before but IS approved now
+      // AND we're not already on a dashboard page
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+      const isDashboardPage = currentPath === '/dashboard' || 
+        currentPath.startsWith('/superadmin') || 
+        currentPath.startsWith('/admin') || 
+        currentPath.startsWith('/employees') || 
+        currentPath.startsWith('/tasks') || 
+        currentPath.startsWith('/calendar') || 
+        currentPath.startsWith('/leaves') || 
+        currentPath.startsWith('/attendance') || 
+        currentPath.startsWith('/settings') || 
+        currentPath.startsWith('/chat') || 
+        currentPath.startsWith('/analytics') || 
+        currentPath.startsWith('/reports') || 
+        currentPath.startsWith('/join-requests') || 
+        currentPath.startsWith('/org-requests') || 
+        currentPath.startsWith('/approvals') || 
+        currentPath.startsWith('/profile') || 
+        currentPath.startsWith('/ai-site-editor');
+
+      if (!prevApproved && currApproved && currOrg && !isDashboardPage) {
+        console.log("[useAuthSync] 🎉 User was just approved! Redirecting to dashboard...");
+        // User was just approved — redirect to dashboard
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1000);
+      } else if (prevApproved && currApproved) {
+        console.log("[useAuthSync] ℹ️  User already approved, skipping redirect");
+      }
+
+      // Update previous state
+      prevUserState.current = {
+        organizationId: currOrg,
+        isApproved: currApproved,
+      };
 
       // Mark as synced to prevent race condition re-syncs
       lastSyncedUserRef.current = currentUser.email;
@@ -158,7 +205,7 @@ export function useAuthSync() {
       // Convex returns the full profile and login() is called above.
       console.log("[useAuthSync] ⏳ Waiting for Convex query to return full user profile...");
     }
-    
+
     // Create server-side session cookie for dashboard auth (only once per user)
     if (!sessionCreated.current) {
       sessionCreated.current = true;
@@ -191,6 +238,13 @@ export function useAuthSync() {
           }
           
           const isDashboardPage = path === '/dashboard' || path.startsWith('/superadmin') || path.startsWith('/admin') || path.startsWith('/employees') || path.startsWith('/tasks') || path.startsWith('/calendar') || path.startsWith('/leaves') || path.startsWith('/attendance') || path.startsWith('/settings') || path.startsWith('/chat') || path.startsWith('/analytics') || path.startsWith('/reports') || path.startsWith('/join-requests') || path.startsWith('/org-requests') || path.startsWith('/approvals') || path.startsWith('/profile') || path.startsWith('/ai-site-editor');
+          
+          // Don't redirect to dashboard if user has no organization (needs onboarding)
+          if (currentUser && !currentUser.organizationId) {
+            console.log("[useAuthSync] 🚨 User has no organization - not redirecting to dashboard");
+            return;
+          }
+          
           if (!isDashboardPage && !isAuthPage) {
             console.log("[useAuthSync] Redirecting from", path, "to dashboard");
             window.location.href = '/dashboard';

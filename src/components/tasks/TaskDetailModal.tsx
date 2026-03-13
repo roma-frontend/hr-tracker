@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { TaskAttachments } from "./TaskAttachments";
+import { Button } from "@/components/ui/button";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 type Status = "pending" | "in_progress" | "review" | "completed" | "cancelled";
@@ -181,18 +182,41 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {canManage && !editMode && (
-                <button onClick={() => setEditMode(true)} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-sm transition-colors" title={t('ariaLabels.editTask')}>✏️</button>
+                <Button
+                  onClick={() => setEditMode(true)}
+                  variant="ghost"
+                  size="icon"
+                  className="w-8 h-8 rounded-full hover:bg-white/30"
+                  title={t('ariaLabels.editTask')}
+                >
+                  ✏️
+                </Button>
               )}
               {editMode && (
                 <>
-                  <button onClick={handleSaveEdit} className="px-3 py-1.5 rounded-lg bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-xs font-bold hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors">{t('buttons.save')}</button>
-                  <button onClick={() => setEditMode(false)} className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-medium hover:bg-white/30 transition-colors">{t('buttons.cancel')}</button>
+                  <Button onClick={handleSaveEdit} variant="default" size="sm">{t('buttons.save')}</Button>
+                  <Button onClick={() => setEditMode(false)} variant="ghost" size="sm">{t('buttons.cancel')}</Button>
                 </>
               )}
               {canManage && !editMode && (
-                <button onClick={handleDelete} className="w-8 h-8 rounded-full bg-white/20 hover:bg-rose-500/80 flex items-center justify-center text-white text-sm transition-colors" title={t('ariaLabels.deleteTask')}>🗑️</button>
+                <Button
+                  onClick={handleDelete}
+                  variant="ghost"
+                  size="icon"
+                  className="w-8 h-8 rounded-full hover:bg-rose-500/80"
+                  title={t('ariaLabels.deleteTask')}
+                >
+                  🗑️
+                </Button>
               )}
-              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">✕</button>
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="icon"
+                className="w-8 h-8 rounded-full hover:bg-white/30"
+              >
+                ✕
+              </Button>
             </div>
           </div>
         </div>

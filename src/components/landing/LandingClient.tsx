@@ -30,6 +30,7 @@ import StatsCard from './StatsCard';
 import FeatureCard from './FeatureCard';
 import MobileMenu from './MobileMenu';
 import CookieBanner from '@/components/CookieBanner';
+import { Button } from '@/components/ui/button';
 
 const FloatingParticles = dynamic(() => import('./FloatingParticles'), { ssr: false, loading: () => null });
 
@@ -512,56 +513,52 @@ function HeroSection() {
       <div className="hero-fade-2 flex flex-col sm:flex-row items-center gap-4 mb-16">
         {user ? (
           <>
-            <button
+            <Button
               onClick={() => router.push('/dashboard')}
-              className="cta-btn-primary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
+              variant="cta"
+              size="2xl"
+              className="gap-3"
               aria-label="Go to Dashboard"
             >
               <Activity size={20} aria-hidden="true" />
               {t('landing.goToDashboard')}
               <ArrowRight size={18} aria-hidden="true" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => router.push('/dashboard')}
-              className="cta-btn-secondary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              style={{
-                color: 'var(--landing-text-secondary)',
-                border: '1px solid var(--landing-card-border)',
-                background: 'var(--landing-card-bg)',
-              }}
+              variant="ctaSecondary"
+              size="2xl"
+              className="gap-3"
               aria-label="View analytics"
             >
               <BarChart3 size={20} aria-hidden="true" />
               {t('landing.viewAnalytics')}
-            </button>
+            </Button>
           </>
         ) : (
           <>
             <Link href="/register">
-              <button
-                className="cta-btn-primary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
+              <Button
+                variant="cta"
+                size="2xl"
+                className="gap-3"
                 aria-label="Get started for free"
               >
                 <Zap size={20} aria-hidden="true" />
                 {t('landing.getStartedFree')}
                 <ArrowRight size={18} aria-hidden="true" />
-              </button>
+              </Button>
             </Link>
             <Link href="/login">
-              <button
-                className="cta-btn-secondary inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                style={{
-                  color: 'var(--landing-text-secondary)',
-                  border: '1px solid var(--landing-card-border)',
-                  background: 'var(--landing-card-bg)',
-                }}
+              <Button
+                variant="ctaSecondary"
+                size="2xl"
+                className="gap-3"
                 aria-label="Sign in to your account"
               >
                 {t('landing.signIn')}
                 <ArrowRight size={18} aria-hidden="true" />
-              </button>
+              </Button>
             </Link>
           </>
         )}
@@ -734,49 +731,45 @@ function CTABanner() {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             {user ? (
               <>
-                <button
+                <Button
                   onClick={() => router.push('/dashboard')}
-                  className="cta-btn-primary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
+                  variant="cta"
+                  size="2xl"
+                  className="gap-3"
                 >
                   <Calendar size={20} />
                   {t('nav.leaves')}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => router.push('/employees')}
-                  className="cta-btn-secondary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg backdrop-blur-sm"
-                  style={{
-                    color: 'var(--landing-text-secondary)',
-                    border: '1px solid var(--landing-card-border)',
-                    background: 'var(--landing-card-bg)',
-                  }}
+                  variant="ctaSecondary"
+                  size="2xl"
+                  className="gap-3"
                 >
                   <Users size={20} />
                   {t('nav.employees')}
-                </button>
+                </Button>
               </>
             ) : (
               <>
                 <Link href="/register">
-                  <button
-                    className="cta-btn-primary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
+                  <Button
+                    variant="cta"
+                    size="2xl"
+                    className="gap-3"
                   >
                     <Zap size={20} />
                     {t('landing.getStartedFree')}
-                  </button>
+                  </Button>
                 </Link>
                 <Link href="/login">
-                  <button
-                    className="cta-btn-secondary inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-lg backdrop-blur-sm"
-                    style={{
-                      color: 'var(--landing-text-secondary)',
-                      border: '1px solid var(--landing-card-border)',
-                      background: 'var(--landing-card-bg)',
-                    }}
+                  <Button
+                    variant="ctaSecondary"
+                    size="2xl"
+                    className="gap-3"
                   >
                     {t('landing.signIn')}
-                  </button>
+                  </Button>
                 </Link>
               </>
             )}

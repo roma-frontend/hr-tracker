@@ -157,6 +157,21 @@ export function Navbar() {
     );
 
     if (newNotifs.length > 0) {
+      // Check for join_approved notification — auto-redirect user to dashboard
+      const joinApprovedNotif = newNotifs.find((n: any) => n.type === "join_approved");
+      if (joinApprovedNotif && user?.id) {
+        console.log("[Navbar] Join request approved! Updating user state...");
+        // Update user's isApproved status in useAuthStore
+        const { setUser } = useAuthStore.getState();
+        setUser({
+          ...user,
+          isApproved: true,
+        });
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 2000);
+      }
       // Sound + banner are handled by NotificationBanner — just track seen IDs here
       newNotifs.forEach((n: any) => prevNotifIds.current.add(n._id));
     }
@@ -164,7 +179,7 @@ export function Navbar() {
     // Also track all IDs
     notifications.forEach((n: any) => prevNotifIds.current.add(n._id));
     prevUnreadCount.current = unreadCount;
-  }, [notifications, unreadCount]);
+  }, [notifications, unreadCount, user]);
 
   const pageTitleKey = Object.entries(PAGE_TITLE_KEYS).find(([key]) =>
     pathname.startsWith(key)
@@ -301,11 +316,17 @@ export function Navbar() {
                       notifications.map((n: { _id: Id<"notifications">; title: string; message: string; isRead: boolean; type: string; relatedId?: string; _creationTime: number }) => (
                         <div
                           key={n._id}
-                          onClick={() => {
-                            handleMarkRead(n._id);
+                          onClick={async () => {
+                            await handleMarkRead(n._id);
                             // Navigate based on notification type
                             if (n.type === "security_alert" && n.relatedId) {
                               router.push(`/superadmin/security/alert/${n.relatedId}`);
+                            } else if (n.type === "join_request") {
+                              // Admin clicked on join request notification — go to join requests page
+                              router.push("/join-requests");
+                            } else if (n.type === "join_approved") {
+                              // User's join request was approved — go to dashboard
+                              router.push("/dashboard");
                             } else if (n.type === "leave_request" && n.relatedId) {
                               router.push("/leaves");
                             } else if (n.type === "driver_request") {

@@ -145,6 +145,16 @@ export default defineSchema({
     faceIdLastAttempt: v.optional(v.number()),
     // Birthday
     dateOfBirth: v.optional(v.string()), // ISO date format: "YYYY-MM-DD"
+    // User Settings
+    language: v.optional(v.string()), // "en" | "ru" | "hy" | etc.
+    timezone: v.optional(v.string()), // "UTC" | "America/New_York" | etc.
+    dateFormat: v.optional(v.string()), // "DD/MM/YYYY" | "MM/DD/YYYY" | etc.
+    timeFormat: v.optional(v.string()), // "24h" | "12h"
+    firstDayOfWeek: v.optional(v.string()), // "monday" | "sunday"
+    theme: v.optional(v.string()), // "system" | "light" | "dark"
+    notificationsEnabled: v.optional(v.boolean()),
+    emailNotifications: v.optional(v.boolean()),
+    pushNotifications: v.optional(v.boolean()),
     // Account Suspension (for security/suspicious activity)
     isSuspended: v.optional(v.boolean()),
     suspendedUntil: v.optional(v.number()),

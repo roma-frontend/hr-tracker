@@ -149,6 +149,16 @@ export const authOptions: NextAuthOptions = {
             } else {
               console.warn('[NextAuth JWT] ⚠️  No role found for user:', emailToQuery);
             }
+
+            // Also get organizationId and isApproved
+            if (userData?.organizationId) {
+              token.organizationId = userData.organizationId;
+              console.log('[NextAuth JWT] ✅ Set organizationId in token:', userData.organizationId);
+            }
+            if (userData?.isApproved !== undefined) {
+              token.isApproved = userData.isApproved;
+              console.log('[NextAuth JWT] ✅ Set isApproved in token:', userData.isApproved);
+            }
           } else {
             console.error('[NextAuth JWT] ❌ Failed to fetch user role:', response.status, response.statusText, await response.text());
           }
@@ -178,36 +188,48 @@ export const authOptions: NextAuthOptions = {
         email: token.email,
         picture: token.picture,
         role: token.role,
+        organizationId: token.organizationId,
+        isApproved: token.isApproved,
       });
-      
+
       if (session.user) {
         session.user.id = token.sub!;
         session.user.email = token.email!;
-        
+
         // Ensure name is ALWAYS set - never null, undefined, or just "User" without proper fallback
         session.user.name = token.name || token.email!.split("@")[0] || "User";
-        
+
         // CRITICAL: Validate that we don't have "User" when we should have a better name
         if (session.user.name === "User" && token.email) {
           console.warn("[NextAuth Session] ⚠️  WARNING: user has name 'User' but email is:", token.email);
         }
-        
+
         session.user.image = token.picture as string | undefined;
-        
+
         // Properly set role on the session user object
         if (token.role) {
           session.user.role = token.role as 'superadmin' | 'admin' | 'supervisor' | 'employee';
         }
-        
+
+        // Add organizationId and isApproved from token
+        if (token.organizationId) {
+          session.user.organizationId = token.organizationId as string;
+        }
+        if (token.isApproved !== undefined) {
+          session.user.isApproved = token.isApproved as boolean;
+        }
+
         console.log("[NextAuth Session] ✅ Final session.user:", {
           id: session.user.id,
           name: session.user.name,
           email: session.user.email,
           image: session.user.image,
           role: session.user.role,
+          organizationId: session.user.organizationId,
+          isApproved: session.user.isApproved,
         });
       }
-      
+
       return session;
     },
   },

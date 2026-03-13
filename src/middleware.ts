@@ -208,6 +208,7 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
+  const isOnboardingRoute = pathname.startsWith('/onboarding');
 
   console.log(`[Middleware] Path: ${pathname}, isAuth: ${isAuthRoute}, isProtected: ${isProtectedRoute}, isPublic: ${isPublicRoute}, hasToken: ${!!token || !!nextAuthToken}`);
 
@@ -241,6 +242,9 @@ export async function middleware(request: NextRequest) {
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
+
+  // Onboarding flow is handled CLIENT-SIDE by AuthContext
+  // Middleware only handles authentication gating, NOT authorization or onboarding state
 
   // 8. Role-based access control is handled CLIENT-SIDE by each page component
   // (e.g. superadmin/organizations checks user.role === 'superadmin' || user.email === SUPERADMIN_EMAIL)

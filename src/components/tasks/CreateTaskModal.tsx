@@ -7,6 +7,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { uploadTaskAttachment } from "@/actions/cloudinary";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   currentUserId: Id<"users">;
@@ -117,7 +118,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               <h2 className="text-xl font-bold ">{t('task.createTask')}</h2>
               <p className="text-black-200 text-sm mt-0.5">{t('task.assignTask')}</p>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">✕</button>
+            <Button onClick={onClose} variant="ghost" size="icon" className="w-8 h-8 rounded-full hover:bg-white/30">✕</Button>
           </div>
         </div>
 

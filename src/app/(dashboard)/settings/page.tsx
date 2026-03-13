@@ -23,7 +23,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthStore } from "@/store/useAuthStore";
-import { updateSessionProfileAction } from "@/actions/auth";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -174,10 +173,7 @@ export default function SettingsPage() {
         ...allSettings,
       });
 
-      // 2. Update JWT cookie (so data persists after page refresh)
-      await updateSessionProfileAction(user.id, newName, newEmail);
-
-      // 3. Update Zustand store (localStorage)
+      // 2. Update Zustand store (localStorage)
       login({
         ...user,
         ...allSettings,
@@ -406,6 +402,7 @@ export default function SettingsPage() {
             {/* Localization Tab */}
             <TabsContent value="localization" className="space-y-6 mt-0">
               <LocalizationSettings
+                userId={user?.id as Id<"users">}
                 user={user}
                 onSettingsChange={setLocalizationSettings}
               />

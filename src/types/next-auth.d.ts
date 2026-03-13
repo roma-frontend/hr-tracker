@@ -10,6 +10,7 @@ declare module "next-auth" {
       image?: string | null;
       role?: 'superadmin' | 'admin' | 'supervisor' | 'employee' | string;
       organizationId?: string;
+      isApproved?: boolean;
       department?: string;
       position?: string;
       employeeType?: 'staff' | 'contractor' | string;
@@ -23,6 +24,7 @@ declare module "next-auth" {
     image?: string | null;
     role?: 'superadmin' | 'admin' | 'supervisor' | 'employee' | string;
     organizationId?: string;
+    isApproved?: boolean;
     department?: string;
     position?: string;
     employeeType?: 'staff' | 'contractor' | string;
@@ -38,6 +40,7 @@ declare module "next-auth/jwt" {
     picture?: string | null;
     role?: 'superadmin' | 'admin' | 'supervisor' | 'employee' | string;
     organizationId?: string;
+    isApproved?: boolean;
     department?: string;
     position?: string;
     employeeType?: 'staff' | 'contractor' | string;
