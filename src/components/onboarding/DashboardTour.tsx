@@ -222,7 +222,7 @@ export function DashboardTour({ onComplete, onSkip }: DashboardTourProps) {
               {/* Кнопка закрытия */}
               <button
                 onClick={handleSkip}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -248,13 +248,13 @@ export function DashboardTour({ onComplete, onSkip }: DashboardTourProps) {
                       key={idx}
                       className={`w-2 h-2 rounded-full transition-colors ${
                         idx <= currentStep
-                          ? "bg-blue-600"
+                          ? "bg-blue-600 dark:bg-blue-400"
                           : "bg-gray-300 dark:bg-gray-600"
                       }`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   {currentStep + 1} / {steps.length}
                 </span>
               </div>
@@ -265,7 +265,7 @@ export function DashboardTour({ onComplete, onSkip }: DashboardTourProps) {
                   <Button
                     onClick={handlePrev}
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     {t("common.back")}
@@ -274,7 +274,7 @@ export function DashboardTour({ onComplete, onSkip }: DashboardTourProps) {
                   <Button
                     onClick={handleSkip}
                     variant="ghost"
-                    className="flex-1"
+                    className="flex-1 dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     {t("common.skip")}
                   </Button>
@@ -282,7 +282,7 @@ export function DashboardTour({ onComplete, onSkip }: DashboardTourProps) {
 
                 <Button
                   onClick={handleNext}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                 >
                   {currentStep === steps.length - 1 ? (
                     <>

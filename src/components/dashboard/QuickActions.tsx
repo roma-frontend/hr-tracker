@@ -146,7 +146,7 @@ export function QuickActions() {
           <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
             <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
           </div>
-          <CardTitle className="text-lg font-semibold">
+          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
             {t("quickActions.title")}
           </CardTitle>
         </div>
@@ -185,14 +185,14 @@ export function QuickActions() {
 
         {/* Keyboard shortcuts hint */}
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>{t("quickActions.shortcuts.hint")}</span>
             <div className="flex gap-1">
-              <kbd className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 font-mono text-xs">
+              <kbd className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-mono text-xs text-gray-700 dark:text-gray-300">
                 Ctrl
               </kbd>
               <span>+</span>
-              <kbd className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 font-mono text-xs">
+              <kbd className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-mono text-xs text-gray-700 dark:text-gray-300">
                 K
               </kbd>
             </div>
