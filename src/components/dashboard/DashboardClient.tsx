@@ -29,8 +29,6 @@ import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import LeaveStats from "@/components/dashboard/LeaveStats";
 import { DashboardTour } from "@/components/onboarding/DashboardTour";
 import { QuickActions } from "@/components/dashboard/QuickActions";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
 
 // Lazy load admin components
 const HolidayCalendarSync = dynamic(() => import("@/components/admin/HolidayCalendarSync"), { ssr: false });
