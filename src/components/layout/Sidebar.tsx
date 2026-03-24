@@ -29,8 +29,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
-import { useAuthStore } from "@/store/useAuthStore";
-import { shallow } from 'zustand/shallow';
+import { useAuthUser } from "@/store/useAuthStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSelector } from "@/components/layout/OrganizationSelector";
 import { useQuery } from "convex/react";
@@ -64,7 +63,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const { collapsed, toggle } = useSidebarStore();
-  const user = useAuthStore((state) => state.user, shallow);
+  const user = useAuthUser();
   const [mounted, setMounted] = React.useState(false);
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
 
@@ -81,7 +80,7 @@ export function Sidebar() {
     api.notifications.getUserNotifications,
     mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
   );
-  
+
   // Unread leaves count
   const unreadLeavesCount = useQuery(
     api.leaves.getUnreadCount,
@@ -409,7 +408,7 @@ export function MobileSidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const { mobileOpen, setMobileOpen } = useSidebarStore();
-  const { user } = useAuthStore();
+  const user = useAuthUser();
   const [mounted, setMounted] = React.useState(false);
   const sidebarRef = React.useRef<HTMLDivElement>(null);
 
@@ -425,7 +424,7 @@ export function MobileSidebar() {
     api.notifications.getUserNotifications,
     mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
   );
-  
+
   // Mobile Unread leaves count
   const mobileUnreadLeavesCount = useQuery(
     api.leaves.getUnreadCount,

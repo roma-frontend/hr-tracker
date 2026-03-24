@@ -105,7 +105,7 @@ export function useAuthStoreShallow() {
  * Селекторы для отдельных полей store
  * Используем для максимальной оптимизации ре-рендеров
  */
-export const useAuthUser = () => useAuthStore((state) => state.user, shallow)
+export const useAuthUser = (): User | null => useAuthStore((state) => state.user, shallow)
 export const useAuthIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated, shallow)
 export const useAuthNeedsOnboarding = () => useAuthStore((state) => state.needsOnboarding, shallow)
 export const useAuthLogout = () => useAuthStore((state) => state.logout)
