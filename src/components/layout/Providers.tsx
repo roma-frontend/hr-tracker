@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
-import { useAuthStore } from "@/store/useAuthStore";
-import { shallow } from 'zustand/shallow';
+import { useAuthStore, type User } from "@/store/useAuthStore";
+import { useShallow } from 'zustand/shallow';
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { usePathname } from "next/navigation";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
@@ -76,8 +76,8 @@ const StatusUpdateBanner = dynamic(
 );
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const user = useAuthStore((state) => state.user, shallow);
-  const needsOnboarding = useAuthStore((state) => state.needsOnboarding, shallow);
+  const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
+  const needsOnboarding = useAuthStore(useShallow((state: { needsOnboarding: boolean }) => state.needsOnboarding));
   const { status } = useSession();
   const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();

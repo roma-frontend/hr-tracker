@@ -23,7 +23,8 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { shallow } from 'zustand/shallow';
+import type { User as UserType } from "@/store/useAuthStore";
+import { useShallow } from 'zustand/shallow';
 import { logoutAction } from "@/actions/auth";
 import { signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -103,7 +104,7 @@ export function Navbar() {
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { setMobileOpen } = useSidebarStore();
-  const user = useAuthStore((state) => state.user, shallow);
+  const user = useAuthStore(useShallow((state: { user: UserType | null }) => state.user));
   const logout = useAuthStore((state) => state.logout);
   const [showNotifications, setShowNotifications] = useState(false);
   const [mounted, setMounted] = useState(false);

@@ -28,8 +28,9 @@ import {
   Eye,
   ChevronRight,
 } from "lucide-react";
-import { shallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/shallow';
 import { useAuthStore } from "@/store/useAuthStore";
+import type { User as UserType } from "@/store/useAuthStore";
 import { useSelectedOrganization } from "@/hooks/useSelectedOrganization";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { EditEmployeeModal } from "./EditEmployeeModal";
@@ -55,7 +56,7 @@ const TYPE_CONFIG = {
 
 export function EmployeesClient() {
   const { t } = useTranslation();
-  const user = useAuthStore((state) => state.user, shallow);
+  const user = useAuthStore(useShallow((state: { user: UserType | null }) => state.user));
   const selectedOrgId = useSelectedOrganization();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);

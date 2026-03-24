@@ -17,8 +17,8 @@ import { format, isSameMonth } from "date-fns";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { useAuthStore } from "@/store/useAuthStore";
-import { shallow } from 'zustand/shallow';
+import { useAuthUser, type User } from "@/store/useAuthStore";
+import { useShallow } from 'zustand/shallow';
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -79,7 +79,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
 
 export default function DashboardClient() {
   const { t } = useTranslation();
-  const user = useAuthStore((state) => state.user, shallow);
+  const user = useAuthUser();
   const [mounted, setMounted] = React.useState(false);
   const [showTour, setShowTour] = React.useState(false);
   React.useEffect(() => { 
@@ -96,14 +96,17 @@ export default function DashboardClient() {
     setShowTour(false);
   };
 
-  const leaves = useQuery(api.leaves.getAllLeaves, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
-  const users = useQuery(api.users.getAllUsers, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
-  const organization = useQuery(api.organizations.getMyOrganization, user?.id ? { userId: user.id as Id<"users"> } : "skip");
+  // Convex useQuery arguments - using any to avoid infinite type recursion
+  const userId = user?.id as Id<"users"> | undefined;
+  const leaves: any[] = (useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : "skip") as any) ?? [];
+  const users: any[] = (useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : "skip") as any) ?? [];
+  const organization = useQuery(api.organizations.getMyOrganization, userId ? { userId } : "skip") as any;
 
   // Security stats — only for superadmin
+  const isSuperadmin = user?.role === "superadmin";
   const securityStats = useQuery(
     api.security.getLoginStats,
-    mounted && user?.role === "superadmin" ? { hours: 24 } : "skip"
+    mounted && isSuperadmin ? { hours: 24 } : "skip"
   );
 
   const today = new Date();
