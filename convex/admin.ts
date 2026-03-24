@@ -740,13 +740,122 @@ export const assignUserAsOrgAdmin = mutation({
       updatedAt: Date.now(),
     });
 
-    console.log(`[assignUserAsOrgAdmin] User ${args.userEmail} assigned as admin of org ${org.name}`);
-
     return {
       userId: user._id,
       email: args.userEmail,
       role: "admin",
       organizationId: args.organizationId,
+    };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUPERADMIN DASHBOARD — All organizations statistics
+// OPTIMIZED: Batch loading for performance
+// ─────────────────────────────────────────────────────────────────────────────
+export const getSuperadminDashboard = query({
+  handler: async (ctx) => {
+    // Get all organizations
+    const orgs = await ctx.db.query("organizations").collect();
+
+    // Batch load all data
+    const allUsers = await ctx.db.query("users").collect();
+    const allLeaves = await ctx.db.query("leaveRequests").collect();
+    const allSubscriptions = await ctx.db.query("subscriptions").collect();
+
+    // Create lookup maps
+    const usersByOrg = new Map<string, any[]>();
+    const leavesByOrg = new Map<string, any[]>();
+    const subscriptionByOrg = new Map<string, any>();
+
+    allUsers.forEach(user => {
+      const orgId = user.organizationId?.toString() || "no-org";
+      if (!usersByOrg.has(orgId)) usersByOrg.set(orgId, []);
+      usersByOrg.get(orgId)!.push(user);
+    });
+
+    allLeaves.forEach(leave => {
+      const orgId = leave.organizationId?.toString() || "no-org";
+      if (!leavesByOrg.has(orgId)) leavesByOrg.set(orgId, []);
+      leavesByOrg.get(orgId)!.push(leave);
+    });
+
+    allSubscriptions.forEach(sub => {
+      const orgId = sub.organizationId?.toString() || "no-org";
+      subscriptionByOrg.set(orgId, sub);
+    });
+
+    // Build dashboard data
+    const dashboard = orgs.map(org => {
+      const orgId = org._id.toString();
+      const orgUsers = usersByOrg.get(orgId) || [];
+      const orgLeaves = leavesByOrg.get(orgId) || [];
+      const subscription = subscriptionByOrg.get(orgId);
+
+      const activeUsers = orgUsers.filter(u => u.isActive && u.isApproved);
+      const pendingUsers = orgUsers.filter(u => !u.isApproved);
+      const pendingLeaves = orgLeaves.filter(l => l.status === "pending");
+      const approvedLeaves = orgLeaves.filter(l => l.status === "approved");
+
+      // Calculate revenue based on plan
+      const monthlyRevenue = subscription?.plan === "professional" ? 99 :
+                            subscription?.plan === "enterprise" ? 299 : 0;
+
+      // Calculate utilization
+      const utilization = org.employeeLimit > 0
+        ? Math.round((activeUsers.length / org.employeeLimit) * 100)
+        : 0;
+
+      return {
+        organization: {
+          _id: org._id,
+          name: org.name,
+          slug: org.slug,
+          plan: org.plan,
+          isActive: org.isActive,
+          createdAt: org.createdAt,
+        },
+        stats: {
+          totalUsers: orgUsers.length,
+          activeUsers: activeUsers.length,
+          pendingUsers: pendingUsers.length,
+          employeeLimit: org.employeeLimit,
+          utilization,
+        },
+        leaves: {
+          total: orgLeaves.length,
+          pending: pendingLeaves.length,
+          approved: approvedLeaves.length,
+          rejected: orgLeaves.filter(l => l.status === "rejected").length,
+        },
+        subscription: subscription ? {
+          plan: subscription.plan,
+          status: subscription.status,
+          monthlyRevenue,
+          currentPeriodEnd: subscription.currentPeriodEnd,
+        } : null,
+      };
+    });
+
+    // Sort by revenue (highest first)
+    dashboard.sort((a, b) => {
+      const aRevenue = a.subscription?.monthlyRevenue || 0;
+      const bRevenue = b.subscription?.monthlyRevenue || 0;
+      return bRevenue - aRevenue;
+    });
+
+    // Calculate totals
+    const totalStats = {
+      organizations: orgs.length,
+      activeOrganizations: orgs.filter(o => o.isActive).length,
+      totalUsers: allUsers.filter(u => u.organizationId).length,
+      totalRevenue: dashboard.reduce((sum, d) => sum + (d.subscription?.monthlyRevenue || 0), 0),
+      pendingLeaves: dashboard.reduce((sum, d) => sum + d.leaves.pending, 0),
+    };
+
+    return {
+      organizations: dashboard,
+      totalStats,
     };
   },
 });

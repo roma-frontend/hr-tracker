@@ -400,3 +400,12 @@ export const getSLATrend = query({
     })).sort((a, b) => a.date.localeCompare(b.date));
   },
 });
+  
+"// 컴 Get All SLA Metrics (for dashboard) 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�"  
+"export const getAllSLAMetrics = query({"  
+"  args: {},"  
+"  handler: async (ctx) => {"  
+"    const metrics = await ctx.db.query(\"slaMetrics\").collect();"  
+"    return metrics;"  
+"  },"  
+"});" 

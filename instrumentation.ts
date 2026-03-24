@@ -1,6 +1,6 @@
 /**
  * instrumentation.ts
- * 
+ *
  * This file is loaded by Next.js at startup for server-side instrumentation
  * Use it to initialize monitoring, tracing, and error handling
  */
@@ -13,12 +13,12 @@ export async function register() {
     );
     initOpenTelemetryServer();
 
-    // Initialize Sentry on server
-    // const { initSentryServer } = await import("./sentry.server.config");
-    // initSentryServer();
+    // Initialize Sentry on server (for production error tracking)
+    const { initSentryServer } = await import("./sentry.server.config");
+    initSentryServer();
 
     console.log(
-      "✅ Server instrumentation initialized (OpenTelemetry only - Sentry disabled)"
+      "✅ Server instrumentation initialized (OpenTelemetry + Sentry)"
     );
   }
 

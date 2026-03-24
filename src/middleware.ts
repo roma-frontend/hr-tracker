@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, isBlocked, blockKey, logLoginAttempt } from '@/lib/redis'
 
 // ═══════════════════════════════════════════════════════════════
 // SECURITY CONFIGURATION
@@ -6,16 +7,14 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 const SECURITY_CONFIG = {
   RATE_LIMIT_WINDOW: 60 * 1000, // 1 minute
-  RATE_LIMIT_MAX_REQUESTS: 500, // Увеличено для dashboard
+  RATE_LIMIT_MAX_REQUESTS: 500,
   MAX_LOGIN_ATTEMPTS: 5,
   LOGIN_BLOCK_DURATION: 15 * 60 * 1000, // 15 minutes
   DDOS_THRESHOLD: 200,
   SUSPICIOUS_PATHS: ['/admin/php', '/wp-admin', '/phpmyadmin', '/.env', '/.git', '/config'],
 };
 
-// Rate limiting & security stores
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-const loginAttempts = new Map<string, { count: number; resetTime: number; blockedUntil?: number }>();
+// In-memory fallback for suspicious IPs (Redis handles rate limiting)
 const suspiciousIPs = new Set<string>();
 
 // Routes that require authentication
@@ -51,55 +50,10 @@ function getClientIP(request: NextRequest): string {
   return forwarded?.split(',')[0].trim() || realIP || 'unknown';
 }
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitStore.get(ip);
-
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + SECURITY_CONFIG.RATE_LIMIT_WINDOW });
-    return true;
-  }
-
-  if (record.count >= SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS) return false;
-  record.count++;
-  return true;
-}
-
-function checkDDoS(ip: string): boolean {
-  const record = rateLimitStore.get(ip);
-  if (record && record.count > SECURITY_CONFIG.DDOS_THRESHOLD) {
-    suspiciousIPs.add(ip);
-    console.error(`🚨 Potential DDoS attack from IP: ${ip}`);
-    return false;
-  }
-  return true;
-}
-
 function isSuspiciousPath(pathname: string): boolean {
-  return SECURITY_CONFIG.SUSPICIOUS_PATHS.some(path => 
+  return SECURITY_CONFIG.SUSPICIOUS_PATHS.some(path =>
     pathname.toLowerCase().includes(path.toLowerCase())
   );
-}
-
-function checkLoginAttempts(ip: string): { allowed: boolean; remainingAttempts?: number; blockedUntil?: number } {
-  const now = Date.now();
-  const record = loginAttempts.get(ip);
-
-  if (!record) return { allowed: true, remainingAttempts: SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS };
-  if (record.blockedUntil && now < record.blockedUntil) return { allowed: false, blockedUntil: record.blockedUntil };
-  if (record.blockedUntil && now >= record.blockedUntil) {
-    loginAttempts.delete(ip);
-    return { allowed: true, remainingAttempts: SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS };
-  }
-  if (now > record.resetTime) {
-    loginAttempts.set(ip, { count: 0, resetTime: now + SECURITY_CONFIG.LOGIN_BLOCK_DURATION });
-    return { allowed: true, remainingAttempts: SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS };
-  }
-
-  return {
-    allowed: record.count < SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS,
-    remainingAttempts: Math.max(0, SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS - record.count),
-  };
 }
 
 function addSecurityHeaders(response: NextResponse): NextResponse {
@@ -152,31 +106,36 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Not Found', { status: 404 });
   }
 
-  // 3. Rate Limiting
-  if (!checkRateLimit(ip)) {
+  // 3. Rate Limiting with Redis
+  const rateLimitResult = await checkRateLimit(ip, SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS, SECURITY_CONFIG.RATE_LIMIT_WINDOW);
+  if (!rateLimitResult.allowed) {
     console.warn(`⚠️ Rate limit exceeded: ${ip}`);
     return new NextResponse('Too Many Requests', {
       status: 429,
-      headers: { 'Retry-After': '60' },
+      headers: { 
+        'Retry-After': Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000).toString(),
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': new Date(rateLimitResult.resetAt).toUTCString(),
+      },
     });
   }
 
-  // 4. DDoS Protection
-  if (!checkDDoS(ip)) {
+  // 4. DDoS Protection (check request volume)
+  if (rateLimitResult.remaining < SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS - SECURITY_CONFIG.DDOS_THRESHOLD) {
+    suspiciousIPs.add(ip);
+    console.error(`🚨 Potential DDoS attack from IP: ${ip}`);
     return new NextResponse('Service Unavailable', { status: 503 });
   }
 
-  // 5. Brute Force Protection for login
+  // 5. Brute Force Protection for login with Redis
   if (pathname === '/login' || pathname === '/api/auth/signin') {
-    const loginCheck = checkLoginAttempts(ip);
-    if (!loginCheck.allowed) {
-      const blockedMinutes = loginCheck.blockedUntil 
-        ? Math.ceil((loginCheck.blockedUntil - Date.now()) / 60000)
-        : 15;
+    const blocked = await isBlocked(`login:${ip}`);
+    if (blocked) {
+      const reason = await blockKey(`login:${ip}`, 0, '').then(() => 'blocked');
       return new NextResponse(
         JSON.stringify({
           error: 'Too many login attempts',
-          message: `Blocked for ${blockedMinutes} minutes`,
+          message: 'Blocked for 15 minutes',
         }),
         { status: 429, headers: { 'Content-Type': 'application/json' } }
       );

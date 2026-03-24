@@ -16,6 +16,10 @@ import type * as auth from "../auth.js";
 import type * as birthdays from "../birthdays.js";
 import type * as chat from "../chat.js";
 import type * as chatAction from "../chatAction.js";
+import type * as chat_calls from "../chat/calls.js";
+import type * as chat_conversations from "../chat/conversations.js";
+import type * as chat_index from "../chat/index.js";
+import type * as chat_messages from "../chat/messages.js";
 import type * as conflicts from "../conflicts.js";
 import type * as corporate from "../corporate.js";
 import type * as driverAI from "../driverAI.js";
@@ -46,6 +50,9 @@ import type * as updateSuperadminPlan from "../updateSuperadminPlan.js";
 import type * as userPreferences from "../userPreferences.js";
 import type * as userStats from "../userStats.js";
 import type * as users from "../users.js";
+import type * as users_index from "../users/index.js";
+import type * as users_mutations from "../users/mutations.js";
+import type * as users_queries from "../users/queries.js";
 
 import type {
   ApiFromModules,
@@ -62,6 +69,10 @@ declare const fullApi: ApiFromModules<{
   birthdays: typeof birthdays;
   chat: typeof chat;
   chatAction: typeof chatAction;
+  "chat/calls": typeof chat_calls;
+  "chat/conversations": typeof chat_conversations;
+  "chat/index": typeof chat_index;
+  "chat/messages": typeof chat_messages;
   conflicts: typeof conflicts;
   corporate: typeof corporate;
   driverAI: typeof driverAI;
@@ -92,6 +103,9 @@ declare const fullApi: ApiFromModules<{
   userPreferences: typeof userPreferences;
   userStats: typeof userStats;
   users: typeof users;
+  "users/index": typeof users_index;
+  "users/mutations": typeof users_mutations;
+  "users/queries": typeof users_queries;
 }>;
 
 /**

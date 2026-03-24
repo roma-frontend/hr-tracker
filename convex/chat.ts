@@ -2,6 +2,44 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
+/**
+ * Helper to batch-load users and their leave status
+ * Eliminates N+1 queries for presence status calculation
+ */
+async function getUsersWithLeaveStatus(ctx: any, userIds: Id<"users">[]) {
+  if (userIds.length === 0) return new Map();
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Batch load all users
+  const users = await Promise.all(userIds.map((id) => ctx.db.get(id)));
+  const userMap = new Map(users.map((u) => [u?._id, u]));
+
+  // Batch load all approved leaves for these users
+  const allLeaves = await ctx.db.query("leaveRequests").collect();
+  const userLeavesMap = new Map<Id<"users">, any[]>();
+
+  userIds.forEach((id) => {
+    const leaves = allLeaves.filter(
+      (l: any) => l.userId === id && l.status === "approved" && l.startDate <= today && today <= l.endDate
+    );
+    userLeavesMap.set(id, leaves);
+  });
+
+  // Calculate effective presence status
+  const result = new Map<Id<"users">, { presenceStatus: string; hasActiveLeave: boolean }>();
+  userIds.forEach((id) => {
+    const user = userMap.get(id);
+    const leaves = userLeavesMap.get(id) || [];
+    const hasActiveLeave = leaves.length > 0;
+    const effectivePresenceStatus = hasActiveLeave ? "out_of_office" : (user?.presenceStatus ?? "available");
+
+    result.set(id, { presenceStatus: effectivePresenceStatus, hasActiveLeave });
+  });
+
+  return { userMap, result };
+}
+
 // ─── CONVERSATIONS ────────────────────────────────────────────────────────────
 
 /** Get or create a direct message conversation between two users */
@@ -116,131 +154,128 @@ export const createGroup = mutation({
   },
 });
 
-/** Get all conversations for a user in their organization */
+/**
+ * Get all conversations for a user in their organization
+ * OPTIMIZED: Batch loading eliminates N+1 queries
+ * - Single batch load for all conversations
+ * - Single batch load for all members
+ * - Single batch load for all users
+ * - Single batch load for all leaves
+ */
 export const getMyConversations = query({
   args: {
     userId: v.id("users"),
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
-    // Find all conversation memberships for this user in this org
+    // Step 1: Get all memberships for this user
     const memberships = await ctx.db
       .query("chatMembers")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
 
-    console.log(`\n[getMyConversations] ===== USER: ${args.userId}, ORG: ${args.organizationId} =====\n`);
-    console.log(`[getMyConversations] User has ${memberships.length} memberships total`);
+    // Step 2: Batch load all conversations
+    const conversationIds = memberships.map((m) => m.conversationId);
+    const conversations = await Promise.all(conversationIds.map((id) => ctx.db.get(id)));
 
-    const conversations = await Promise.all(
-      memberships.map(async (m) => {
-        // Skip conversations deleted by this user (per-user deletion)
-        if (m.isDeleted) {
-          console.log(`[getMyConversations] Skipping conversation ${m.conversationId} - marked as deleted by user`);
-          return null;
-        }
-
-        const conv = await ctx.db.get(m.conversationId);
-        if (!conv) {
-          console.log(`[getMyConversations] Conversation ${m.conversationId} not found for membership`);
-          return null;
-        }
-        if (conv.organizationId !== args.organizationId) {
-          console.log(`[getMyConversations] Skipping conversation ${conv._id} - different org (${conv.organizationId} vs ${args.organizationId})`);
-          return null;
-        }
-        // Include archived conversations with their flags so the client
-        // can show them in the "archived" tab and allow restore/unarchive
-
-        console.log(`[getMyConversations] Including conversation: ${conv.name || conv._id} (type: ${conv.type}, unread: ${m.unreadCount})`);
-
-        // For DMs: get the other user's info
-        let otherUser = null;
-        if (conv.type === "direct") {
-          const allMembers = await ctx.db
-            .query("chatMembers")
-            .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-            .collect();
-          const otherMember = allMembers.find((mm) => mm.userId !== args.userId);
-          if (otherMember) {
-            const user = await ctx.db.get(otherMember.userId);
-            if (user) {
-              // Calculate effective presence status considering active leaves
-              let effectivePresenceStatus = user.presenceStatus ?? "available";
-
-              // Check if user has an approved leave today
-              const approvedLeaves = await ctx.db
-                .query("leaveRequests")
-                .withIndex("by_user", (q) => q.eq("userId", otherMember.userId))
-                .filter((q) => q.eq(q.field("status"), "approved"))
-                .collect();
-
-              const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-              const hasActiveLeave = approvedLeaves.some((leave) => {
-                return leave.startDate <= today && today <= leave.endDate;
-              });
-
-              if (hasActiveLeave) {
-                effectivePresenceStatus = "out_of_office";
-              }
-
-              otherUser = {
-                _id: user._id,
-                name: user.name,
-                avatarUrl: user.avatarUrl,
-                presenceStatus: effectivePresenceStatus,
-              };
-            }
-          }
-        }
-
-        // Get member count for groups
-        const memberCount = conv.type === "group"
-          ? (await ctx.db.query("chatMembers").withIndex("by_conversation", (q) => q.eq("conversationId", conv._id)).collect()).length
-          : 2;
-
-        // For groups: fetch members with user info for last-message sender display
-        let members: Array<{ userId: Id<"users">; user: { name: string; avatarUrl?: string } | null }> = [];
-        if (conv.type === "group") {
-          const allMembers = await ctx.db
-            .query("chatMembers")
-            .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-            .collect();
-          members = await Promise.all(
-            allMembers.map(async (mm) => {
-              const u = await ctx.db.get(mm.userId);
-              return { userId: mm.userId, user: u ? { name: u.name, avatarUrl: u.avatarUrl } : null };
-            })
-          );
-        }
-
-        return {
-          ...conv,
-          membership: m,
-          otherUser,
-          memberCount,
-          members,
-        };
-      })
-    );
-
-    // Filter nulls and sort: pinned first, then by lastMessageAt desc
-    const result = conversations
-      .filter(Boolean)
-      .sort((a, b) => {
-        // Pinned conversations first
-        if (a!.isPinned && !b!.isPinned) return -1;
-        if (!a!.isPinned && b!.isPinned) return 1;
-        // Then by last message time
-        return (b!.lastMessageAt ?? b!.createdAt) - (a!.lastMessageAt ?? a!.createdAt);
-      });
-    
-    console.log(`[getMyConversations] ===== RESULT: ${result.length} conversations for user in org ${args.organizationId} =====\n`);
-    result.forEach(conv => {
-      if (!conv) return;
-      console.log(`  - ${conv.name || conv.type} (unread: ${conv.membership?.unreadCount ?? 0})`);
+    // Step 3: Filter valid conversations (same org, not deleted)
+    const validConvs = conversations.filter((conv, idx) => {
+      const membership = memberships[idx];
+      if (!conv) return false;
+      if (membership?.isDeleted) return false;
+      if (conv.organizationId !== args.organizationId) return false;
+      return true;
     });
-    return result;
+
+    const validMemberships = memberships.filter((m, idx) => validConvs[idx] !== null);
+    const filteredConvs = validConvs.filter(Boolean) as any[];
+
+    // Step 4: Collect all user IDs that we need to load
+    const allUserIds = new Set<Id<"users">>();
+    const dmOtherUserIds: Id<"users">[] = [];
+
+    filteredConvs.forEach((conv) => {
+      if (conv.type === "direct") {
+        allUserIds.add(conv.createdBy);
+        dmOtherUserIds.push(conv.createdBy);
+      } else if (conv.type === "group") {
+        allUserIds.add(conv.createdBy);
+      }
+    });
+
+    // Step 5: Batch load all users with leave status
+    const { userMap, result: userStatusMap } = await getUsersWithLeaveStatus(ctx, Array.from(allUserIds));
+
+    // Step 6: Batch load group members for groups
+    const groupConvs = filteredConvs.filter((c) => c.type === "group");
+    const groupMemberIds = groupConvs.flatMap((c) => c._id);
+
+    const allGroupMembers = await ctx.db.query("chatMembers").collect();
+    const groupMembersMap = new Map<Id<"chatConversations">, any[]>();
+    groupConvs.forEach((conv) => {
+      const members = allGroupMembers.filter((m) => m.conversationId === conv._id);
+      groupMembersMap.set(conv._id, members);
+    });
+
+    // Collect all group member user IDs
+    const groupMemberUserIds = new Set<Id<"users">>();
+    Array.from(groupMembersMap.values()).flat().forEach((m) => groupMemberUserIds.add(m.userId));
+
+    // Load group member users
+    const groupMemberUsers = await getUsersWithLeaveStatus(ctx, Array.from(groupMemberUserIds));
+
+    // Step 7: Build result with pre-loaded data
+    const conversationsWithDetails = filteredConvs.map((conv, idx) => {
+      const membership = validMemberships[idx];
+
+      // For DMs: get other user
+      let otherUser = null;
+      if (conv.type === "direct") {
+        const allMembers = allGroupMembers.filter((m) => m.conversationId === conv._id);
+        const otherMember = allMembers.find((m) => m.userId !== args.userId);
+        if (otherMember) {
+          const status = userStatusMap.get(otherMember.userId);
+          otherUser = {
+            _id: otherMember.userId,
+            name: userMap.get(otherMember.userId)?.name || "Unknown",
+            avatarUrl: userMap.get(otherMember.userId)?.avatarUrl,
+            presenceStatus: status?.presenceStatus || "available",
+          };
+        }
+      }
+
+      // For groups: build members list
+      let members: any[] = [];
+      if (conv.type === "group") {
+        const groupMembers = groupMembersMap.get(conv._id) || [];
+        members = groupMembers.map((m) => ({
+          userId: m.userId,
+          user: groupMemberUsers.userMap.get(m.userId)
+            ? {
+                name: groupMemberUsers.userMap.get(m.userId)!.name,
+                avatarUrl: groupMemberUsers.userMap.get(m.userId)!.avatarUrl,
+              }
+            : null,
+        }));
+      }
+
+      const memberCount = conv.type === "group" ? (groupMembersMap.get(conv._id)?.length || 0) : 2;
+
+      return {
+        ...conv,
+        membership,
+        otherUser,
+        memberCount,
+        members,
+      };
+    });
+
+    // Step 8: Sort (pinned first, then by last message time)
+    return conversationsWithDetails.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return (b.lastMessageAt ?? b.createdAt) - (a.lastMessageAt ?? a.createdAt);
+    });
   },
 });
 
@@ -548,11 +583,8 @@ export const getMessages = query({
       )
       .first();
     if (!membership) {
-      console.warn(`[getMessages] User ${args.userId} is not a member of conversation ${args.conversationId}`);
       return [];
     }
-
-    console.log(`[getMessages] User ${args.userId} is member of conversation ${args.conversationId}, fetching up to ${limit} messages`);
 
     const messages = await ctx.db
       .query("chatMessages")
@@ -561,8 +593,6 @@ export const getMessages = query({
       )
       .order("desc")
       .take(limit);
-    
-    console.log(`[getMessages] Found ${messages.length} raw messages for conversation ${args.conversationId}`);
 
     // Enrich with sender info, filter out messages deleted for this user
     const enriched = await Promise.all(
@@ -572,9 +602,6 @@ export const getMessages = query({
         if (deletedForUsers.includes(args.userId)) return null;
 
         const sender = await ctx.db.get(msg.senderId);
-        if (!sender) {
-          console.warn(`[getMessages] Message ${msg._id} has no sender: ${msg.senderId}`);
-        }
         return {
           ...msg,
           readBy: (msg.readBy as Array<{ userId: Id<"users">; readAt: number }> | undefined) ?? [],
@@ -587,9 +614,7 @@ export const getMessages = query({
       })
     );
 
-    const filtered = enriched.filter(Boolean).reverse() as typeof enriched;
-    console.log(`[getMessages] Returning ${filtered.length} enriched messages from conversation ${args.conversationId}`);
-    return filtered;
+    return enriched.filter(Boolean).reverse() as typeof enriched;
   },
 });
 
@@ -611,75 +636,55 @@ export const editMessage = mutation({
   },
 });
 
-/** Delete a message for everyone (sender only, within 5 minutes) */
 /** Delete a message only for the requesting user (hide from their view). For senders, can also delete for everyone within 5 minutes */
 export const deleteMessage = mutation({
   args: {
     messageId: v.id("chatMessages"),
     userId: v.id("users"),
-    deleteForEveryone: v.optional(v.boolean()), // sender can do this within 5 mins, superadmin always
+    deleteForEveryone: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    console.log(`[deleteMessage] Attempting to delete message ${args.messageId} by user ${args.userId}`);
-    
     const msg = await ctx.db.get(args.messageId);
     if (!msg) {
-      console.error(`[deleteMessage] Message not found: ${args.messageId}`);
       throw new Error("Message not found");
     }
 
-    // Check if user is superadmin
     const user = await ctx.db.get(args.userId);
     if (!user) {
-      console.error(`[deleteMessage] User not found: ${args.userId}`);
       throw new Error("User not found");
     }
 
     const isSuperadmin = user.role === "superadmin";
 
-    console.log(`[deleteMessage] User: ${user.name} (${args.userId})`);
-    console.log(`[deleteMessage] User data: role=${user.role}, isSuperadmin=${isSuperadmin}`);
-    console.log(`[deleteMessage] Message: sender=${msg.senderId}, isServiceBroadcast=${msg.isServiceBroadcast}, deleteForEveryone=${args.deleteForEveryone}`);
-    console.log(`[deleteMessage] Computed: isSuperadmin=${isSuperadmin}`);
-
     // If deleteForEveryone flag is set, sender can delete for everyone within 5 minutes (or superadmin anytime)
     if (args.deleteForEveryone) {
-      console.log(`[deleteMessage] deleteForEveryone=true, checking permissions...`);
-      console.log(`[deleteMessage] isServiceBroadcast=${msg.isServiceBroadcast}, isSuperadmin=${isSuperadmin}`);
-      
       // Superadmin can delete ANY message without time limit
       if (isSuperadmin) {
-        console.log(`[deleteMessage] ✓ Superadmin detected - deleting message`);
         await ctx.db.patch(args.messageId, {
           isDeleted: true,
           deletedAt: Date.now(),
           content: "This message was deleted",
         });
-        console.log(`[deleteMessage] ✓ Message deleted by superadmin successfully`);
         return;
       }
 
       // Regular messages: only sender (within 5 minutes)
       if (msg.senderId !== args.userId) {
-        console.error(`[deleteMessage] ✗ Not authorized - sender=${msg.senderId}, userId=${args.userId}`);
         throw new Error("Not authorized");
       }
-      
+
       const fiveMin = 5 * 60 * 1000;
       const timeSinceCreation = Date.now() - msg.createdAt;
       if (timeSinceCreation > fiveMin) {
-        console.error(`[deleteMessage] ✗ Cannot delete - time since creation: ${timeSinceCreation}ms > ${fiveMin}ms`);
         throw new Error("Cannot delete after 5 minutes");
       }
-      
+
       // Fully delete for everyone
-      console.log(`[deleteMessage] ✓ Deleting regular message`);
       await ctx.db.patch(args.messageId, {
         isDeleted: true,
         deletedAt: Date.now(),
         content: "This message was deleted",
       });
-      console.log(`[deleteMessage] ✓ Regular message deleted successfully`);
     } else {
       // Delete only for current user
       const existing: Id<"users">[] = (msg.deletedForUsers as Id<"users">[] | undefined) ?? [];
@@ -772,18 +777,14 @@ export const toggleReaction = mutation({
         let safeKey = key;
         try {
           // If key contains non-ASCII chars, it's an old format - skip it
-          // (we'll not include it in the new reactions)
           if (!/^[a-z0-9_]+$/.test(key)) {
-            console.warn('[chat] Skipping malformed reaction key:', key);
             continue;
           }
-        } catch (e) {
-          console.warn('[chat] Error processing reaction key:', key);
+        } catch {
           continue;
         }
-        
+
         if (safeKey && Array.isArray(value) && value.length > 0) {
-          // Keep the key if it's valid format
           reactions[safeKey] = value as Id<"users">[];
         }
       }
@@ -1000,14 +1001,6 @@ export const initiateCall = mutation({
       createdAt: now,
     });
 
-    console.log('[initiateCall]', {
-      callId,
-      initiator: args.initiatorId,
-      participants: participantList.map(p => p.userId),
-      type: args.type,
-      conv: args.conversationId,
-    });
-
     // Post system message about call
     const initiator = await ctx.db.get(args.initiatorId);
     await ctx.db.insert("chatMessages", {
@@ -1195,10 +1188,9 @@ export const getIncomingCalls = query({
 
     // Get the most recent one (or return null if none)
     if (incomingCalls.length > 0) {
-      console.log('[getIncomingCalls]', args.userId, 'has incoming call:', incomingCalls[0]._id, 'from', incomingCalls[0].initiatorId, 'with status:', incomingCalls[0].status);
       return incomingCalls[0];
     }
-    
+
     return null;
   },
 });
@@ -1426,8 +1418,6 @@ export const togglePin = mutation({
       isPinned: !conv.isPinned,
       updatedAt: Date.now(),
     });
-
-    console.log(`[Chat] Conversation ${args.conversationId} pin toggled by ${args.userId}`);
     return !conv.isPinned;
   },
 });
@@ -1457,8 +1447,6 @@ export const deleteConversation = mutation({
       deletedAt: Date.now(),
       unreadCount: 0,
     });
-
-    console.log(`[Chat] Conversation ${args.conversationId} deleted for user ${args.userId} (per-user)`);
   },
 });
 
@@ -1487,8 +1475,6 @@ export const restoreConversation = mutation({
       deletedAt: undefined,
       isArchived: false,
     });
-
-    console.log(`[Chat] Conversation ${args.conversationId} restored for user ${args.userId} (per-user only)`);
   },
 });
 
@@ -1515,8 +1501,6 @@ export const toggleArchive = mutation({
     await ctx.db.patch(member._id, {
       isArchived: newArchived,
     });
-
-    console.log(`[Chat] Conversation ${args.conversationId} archive toggled for user ${args.userId} (per-user)`);
     return newArchived;
   },
 });
@@ -1539,8 +1523,6 @@ export const toggleMute = mutation({
     await ctx.db.patch(member._id, {
       isMuted: !member.isMuted,
     });
-
-    console.log(`[Chat] ${args.userId} muted=${!member.isMuted} for ${args.conversationId}`);
     return !member.isMuted;
   },
 });

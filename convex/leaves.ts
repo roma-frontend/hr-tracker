@@ -1,11 +1,57 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+
+/**
+ * Helper function to batch load users and enrich leave data
+ * Eliminates N+1 queries by pre-loading all users in one batch
+ */
+async function enrichLeavesWithUserData(
+  ctx: any,
+  leaves: any[],
+  includeReviewer: boolean = true
+) {
+  if (leaves.length === 0) return [];
+
+  // Collect all unique user IDs and reviewer IDs
+  const userIds = [...new Set(leaves.map((l) => l.userId))];
+  const reviewerIds = includeReviewer
+    ? [...new Set(leaves.map((l) => l.reviewedBy).filter(Boolean))]
+    : [];
+
+  // Batch load all users and reviewers in parallel
+  const [users, reviewers] = await Promise.all([
+    Promise.all(userIds.map((id: Id<"users">) => ctx.db.get(id))),
+    Promise.all(reviewerIds.map((id: Id<"users">) => ctx.db.get(id))),
+  ]);
+
+  // Create lookup maps for O(1) access
+  const userMap = new Map(users.map((u) => [u?._id, u]));
+  const reviewerMap = new Map(reviewers.map((r) => [r?._id, r]));
+
+  // Enrich leaves with user data (no more N+1!)
+  return leaves.map((leave) => {
+    const user = userMap.get(leave.userId);
+    const reviewer = leave.reviewedBy ? reviewerMap.get(leave.reviewedBy) : null;
+
+    return {
+      ...leave,
+      userName: user?.name ?? "Unknown",
+      userEmail: user?.email ?? "",
+      userDepartment: user?.department ?? "",
+      userEmployeeType: user?.employeeType ?? "staff",
+      userAvatarUrl: user?.avatarUrl,
+      reviewerName: reviewer?.name,
+    };
+  });
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET ALL LEAVES — scoped to caller's organization
+// OPTIMIZED: Batch loading eliminates N+1 queries
 // ─────────────────────────────────────────────────────────────────────────────
 export const getAllLeaves = query({
-  args: { 
+  args: {
     requesterId: v.optional(v.id("users")),
     organizationId: v.optional(v.id("organizations")),
   },
@@ -18,21 +64,7 @@ export const getAllLeaves = query({
         .order("desc")
         .collect();
 
-      return await Promise.all(
-        leaves.map(async (leave) => {
-          const user = await ctx.db.get(leave.userId);
-          const reviewer = leave.reviewedBy ? await ctx.db.get(leave.reviewedBy) : null;
-          return {
-            ...leave,
-            userName: user?.name ?? "Unknown",
-            userEmail: user?.email ?? "",
-            userDepartment: user?.department ?? "",
-            userEmployeeType: user?.employeeType ?? "staff",
-            userAvatarUrl: user?.avatarUrl,
-            reviewerName: reviewer?.name,
-          };
-        })
-      );
+      return enrichLeavesWithUserData(ctx, leaves);
     }
 
     // Otherwise use requesterId
@@ -56,26 +88,13 @@ export const getAllLeaves = query({
         .collect();
     }
 
-    return await Promise.all(
-      leaves.map(async (leave) => {
-        const user = await ctx.db.get(leave.userId);
-        const reviewer = leave.reviewedBy ? await ctx.db.get(leave.reviewedBy) : null;
-        return {
-          ...leave,
-          userName: user?.name ?? "Unknown",
-          userEmail: user?.email ?? "",
-          userDepartment: user?.department ?? "",
-          userEmployeeType: user?.employeeType ?? "staff",
-          userAvatarUrl: user?.avatarUrl,
-          reviewerName: reviewer?.name,
-        };
-      })
-    );
+    return enrichLeavesWithUserData(ctx, leaves);
   },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET LEAVES FOR SPECIFIC ORGANIZATION (superadmin filtered view)
+// OPTIMIZED: Batch loading eliminates N+1 queries
 // ─────────────────────────────────────────────────────────────────────────────
 export const getLeavesForOrganization = query({
   args: { organizationId: v.id("organizations") },
@@ -86,21 +105,7 @@ export const getLeavesForOrganization = query({
       .order("desc")
       .collect();
 
-    return await Promise.all(
-      leaves.map(async (leave) => {
-        const user = await ctx.db.get(leave.userId);
-        const reviewer = leave.reviewedBy ? await ctx.db.get(leave.reviewedBy) : null;
-        return {
-          ...leave,
-          userName: user?.name ?? "Unknown",
-          userEmail: user?.email ?? "",
-          userDepartment: user?.department ?? "",
-          userEmployeeType: user?.employeeType ?? "staff",
-          userAvatarUrl: user?.avatarUrl,
-          reviewerName: reviewer?.name,
-        };
-      })
-    );
+    return enrichLeavesWithUserData(ctx, leaves);
   },
 });
 
@@ -120,6 +125,7 @@ export const getUserLeaves = query({
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET PENDING LEAVES — scoped to org
+// OPTIMIZED: Batch loading eliminates N+1 queries
 // ─────────────────────────────────────────────────────────────────────────────
 export const getPendingLeaves = query({
   args: { requesterId: v.id("users") },
@@ -132,7 +138,7 @@ export const getPendingLeaves = query({
     let leaves;
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
       const allLeaves = await ctx.db.query("leaveRequests").collect();
-      leaves = allLeaves.filter(l => l.status === "pending");
+      leaves = allLeaves.filter((l) => l.status === "pending");
     } else {
       if (!requester.organizationId) throw new Error("User does not belong to an organization");
       leaves = await ctx.db
@@ -143,18 +149,7 @@ export const getPendingLeaves = query({
         .collect();
     }
 
-    return await Promise.all(
-      leaves.map(async (leave) => {
-        const user = await ctx.db.get(leave.userId);
-        return {
-          ...leave,
-          userName: user?.name ?? "Unknown",
-          userEmail: user?.email ?? "",
-          userDepartment: user?.department ?? "",
-          userAvatarUrl: user?.avatarUrl,
-        };
-      })
-    );
+    return enrichLeavesWithUserData(ctx, leaves, false); // Don't need reviewer for pending
   },
 });
 
@@ -678,5 +673,199 @@ export const markAllLeavesAsRead = mutation({
     }
 
     return unreadLeaves.length;
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BULK APPROVE LEAVES — Manager efficiency
+// ─────────────────────────────────────────────────────────────────────────────
+export const bulkApproveLeaves = mutation({
+  args: {
+    leaveIds: v.array(v.id("leaveRequests")),
+    reviewerId: v.id("users"),
+    comment: v.optional(v.string()),
+  },
+  handler: async (ctx, { leaveIds, reviewerId, comment }) => {
+    const reviewer = await ctx.db.get(reviewerId);
+    if (!reviewer) throw new Error("Reviewer not found");
+    if (reviewer.role !== "admin" && reviewer.role !== "supervisor" && reviewer.role !== "superadmin") {
+      throw new Error("Only admins and supervisors can bulk approve leaves");
+    }
+
+    const now = Date.now();
+    const approved: Id<"leaveRequests">[] = [];
+    const errors: string[] = [];
+
+    for (const leaveId of leaveIds) {
+      try {
+        const leave = await ctx.db.get(leaveId);
+        if (!leave) {
+          errors.push(`Leave ${leaveId} not found`);
+          continue;
+        }
+        if (leave.status !== "pending") {
+          errors.push(`Leave ${leaveId} is not pending`);
+          continue;
+        }
+        if (reviewer.organizationId !== leave.organizationId && reviewer.role !== "superadmin") {
+          errors.push(`Access denied for leave ${leaveId}`);
+          continue;
+        }
+
+        // Approve leave
+        await ctx.db.patch(leaveId, {
+          status: "approved",
+          reviewedBy: reviewerId,
+          reviewComment: comment,
+          reviewedAt: now,
+          updatedAt: now,
+        });
+
+        // Notify employee
+        await ctx.db.insert("notifications", {
+          organizationId: leave.organizationId,
+          userId: leave.userId,
+          type: "leave_approved",
+          title: "✅ Leave Approved!",
+          message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) has been approved.${comment ? ` Note: ${comment}` : ""}`,
+          isRead: false,
+          relatedId: leaveId,
+          createdAt: now,
+        });
+
+        // Deduct balance
+        const user = await ctx.db.get(leave.userId);
+        if (user) {
+          if (leave.type === "paid") {
+            await ctx.db.patch(leave.userId, {
+              paidLeaveBalance: Math.max(0, (user.paidLeaveBalance ?? 24) - leave.days),
+            });
+          } else if (leave.type === "sick") {
+            await ctx.db.patch(leave.userId, {
+              sickLeaveBalance: Math.max(0, (user.sickLeaveBalance ?? 10) - leave.days),
+            });
+          } else if (leave.type === "family") {
+            await ctx.db.patch(leave.userId, {
+              familyLeaveBalance: Math.max(0, (user.familyLeaveBalance ?? 5) - leave.days),
+            });
+          }
+        }
+
+        // Update SLA metric
+        const metric = await ctx.db
+          .query("slaMetrics")
+          .withIndex("by_leave", (q) => q.eq("leaveRequestId", leaveId))
+          .first();
+
+        if (metric) {
+          const responseTimeHours = (now - metric.submittedAt) / (1000 * 60 * 60);
+          const onTime = responseTimeHours <= metric.targetResponseTime;
+          const slaScore = onTime
+            ? Math.max(80, 100 - (responseTimeHours / metric.targetResponseTime) * 20)
+            : Math.max(0, 79 - ((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40);
+
+          await ctx.db.patch(metric._id, {
+            respondedAt: now,
+            responseTimeHours: Math.round(responseTimeHours * 10) / 10,
+            slaScore: Math.round(slaScore * 10) / 10,
+            status: onTime ? "on_time" : "breached",
+          });
+        }
+
+        approved.push(leaveId);
+      } catch (error) {
+        errors.push(`Error processing leave ${leaveId}: ${error}`);
+      }
+    }
+
+    return { approved, errors };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BULK REJECT LEAVES — Manager efficiency
+// ─────────────────────────────────────────────────────────────────────────────
+export const bulkRejectLeaves = mutation({
+  args: {
+    leaveIds: v.array(v.id("leaveRequests")),
+    reviewerId: v.id("users"),
+    comment: v.string(),
+  },
+  handler: async (ctx, { leaveIds, reviewerId, comment }) => {
+    const reviewer = await ctx.db.get(reviewerId);
+    if (!reviewer) throw new Error("Reviewer not found");
+    if (reviewer.role !== "admin" && reviewer.role !== "supervisor" && reviewer.role !== "superadmin") {
+      throw new Error("Only admins and supervisors can bulk reject leaves");
+    }
+
+    const now = Date.now();
+    const rejected: Id<"leaveRequests">[] = [];
+    const errors: string[] = [];
+
+    for (const leaveId of leaveIds) {
+      try {
+        const leave = await ctx.db.get(leaveId);
+        if (!leave) {
+          errors.push(`Leave ${leaveId} not found`);
+          continue;
+        }
+        if (leave.status !== "pending") {
+          errors.push(`Leave ${leaveId} is not pending`);
+          continue;
+        }
+        if (reviewer.organizationId !== leave.organizationId && reviewer.role !== "superadmin") {
+          errors.push(`Access denied for leave ${leaveId}`);
+          continue;
+        }
+
+        // Reject leave
+        await ctx.db.patch(leaveId, {
+          status: "rejected",
+          reviewedBy: reviewerId,
+          reviewComment: comment,
+          reviewedAt: now,
+          updatedAt: now,
+        });
+
+        // Notify employee
+        await ctx.db.insert("notifications", {
+          organizationId: leave.organizationId,
+          userId: leave.userId,
+          type: "leave_rejected",
+          title: "❌ Leave Rejected",
+          message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) was rejected.${comment ? ` Reason: ${comment}` : ""}`,
+          isRead: false,
+          relatedId: leaveId,
+          createdAt: now,
+        });
+
+        // Update SLA metric
+        const metric = await ctx.db
+          .query("slaMetrics")
+          .withIndex("by_leave", (q) => q.eq("leaveRequestId", leaveId))
+          .first();
+
+        if (metric) {
+          const responseTimeHours = (now - metric.submittedAt) / (1000 * 60 * 60);
+          const onTime = responseTimeHours <= metric.targetResponseTime;
+          const slaScore = onTime
+            ? Math.max(80, 100 - (responseTimeHours / metric.targetResponseTime) * 20)
+            : Math.max(0, 79 - ((responseTimeHours - metric.targetResponseTime) / metric.targetResponseTime) * 40);
+
+          await ctx.db.patch(metric._id, {
+            respondedAt: now,
+            responseTimeHours: Math.round(responseTimeHours * 10) / 10,
+            slaScore: Math.round(slaScore * 10) / 10,
+            status: onTime ? "on_time" : "breached",
+          });
+        }
+
+        rejected.push(leaveId);
+      } catch (error) {
+        errors.push(`Error processing leave ${leaveId}: ${error}`);
+      }
+    }
+
+    return { rejected, errors };
   },
 });
