@@ -3985,5 +3985,65 @@
     "toast": {
       "success": "Opening..."
     }
+  },
+  "commandPalette": {
+    "placeholder": "Search functions... (e.g., leave, chat, tasks)",
+    "noResults": "Nothing found. Try a different query.",
+    "navigate": "to navigate",
+    "select": "to select",
+    "shortcut": "Ctrl+K to open"
+  },
+  "leaveWizard": {
+    "title": "Leave Request",
+    "description": "Create a request in 3 simple steps",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "totalDays": "{{count}} days",
+    "days": "days",
+    "type": "Leave Type",
+    "dates": "Dates",
+    "reason": "Reason",
+    "reasonPlaceholder": "e.g., Annual vacation",
+    "comment": "Comment",
+    "commentPlaceholder": "Additional information (optional)",
+    "optional": "optional",
+    "currentBalance": "Current Balance",
+    "afterLeave": "After Leave",
+    "balanceAfter": "Balance After",
+    "submit": "Submit Request",
+    "submitting": "Submitting...",
+    "steps": {
+      "dates": {
+        "title": "Select your leave dates",
+        "short": "Dates"
+      },
+      "details": {
+        "title": "Request details",
+        "short": "Details"
+      },
+      "confirm": {
+        "title": "Confirm request",
+        "short": "Confirm"
+      }
+    },
+    "info": {
+      "title": "What's next?",
+      "description": "Your request will be reviewed within 24 hours. You'll receive an email notification."
+    },
+    "errors": {
+      "insufficientBalance": "Insufficient leave balance"
+    },
+    "toast": {
+      "success": "Request created!",
+      "description": "Waiting for manager approval",
+      "error": "Failed to create request"
+    }
+  },
+  "common": {
+    "back": "Back",
+    "skip": "Skip",
+    "next": "Next",
+    "finish": "Finish",
+    "cancel": "Cancel"
   }
 }
