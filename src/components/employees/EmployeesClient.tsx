@@ -1,22 +1,41 @@
 ﻿"use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
+import { useDebouncedCallback } from "use-debounce";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus, Search, MoreVertical, Edit2, Trash2,
-  Shield, Users, Briefcase, Mail, Phone, Building2,
-  Crown, UserCheck, User, AlertTriangle, Eye, UserCog,
-  LayoutGrid, List, ChevronRight, Car,
+  Plus,
+  Search,
+  Shield,
+  Users,
+  Briefcase,
+  User,
+  AlertTriangle,
+  LayoutGrid,
+  List,
+  Car,
+  Crown,
+  UserCheck,
+  UserCog,
+  Mail,
+  Phone,
+  Building2,
+  Eye,
+  ChevronRight,
 } from "lucide-react";
+import { shallow } from 'zustand/shallow';
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSelectedOrganization } from "@/hooks/useSelectedOrganization";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { EditEmployeeModal } from "./EditEmployeeModal";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
+import { EmployeeCard, EmployeeMenu } from "./EmployeeCard";
+import { VirtualizedEmployeeList } from "./VirtualizedEmployeeList";
 import { toast } from "sonner";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { useRouter } from "next/navigation";
@@ -36,29 +55,49 @@ const TYPE_CONFIG = {
 
 export function EmployeesClient() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user, shallow);
   const selectedOrgId = useSelectedOrganization();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>(user?.role === "employee" ? "active" : "active");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editEmployee, setEditEmployee] = useState<typeof users extends (infer T)[] ? T : never | null>(null);
+  const [editEmployee, setEditEmployee] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  
+  // Pagination state
+  const [cursor, setCursor] = useState<Id<"users"> | undefined>(undefined);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
+  const PAGE_SIZE = 50;
+
+  // Debounced search - prevents excessive re-renders while typing
+  const handleSearchChange = useDebouncedCallback((value: string) => {
+    setSearch(value);
+    setDebouncedSearch(value);
+    // Reset pagination on search change
+    setCursor(undefined);
+    setAllUsers([]);
+    setHasMore(true);
+    setPageCount(0);
+  }, 300);
 
   // For superadmin with selected org, ALWAYS use getOrgMembers
   // For others, use getAllUsers which returns their org's members
   const isSuperadmin = user?.role === "superadmin";
   const useOrgFilter = mounted && isSuperadmin && selectedOrgId;
 
-  // Use organization-specific query if superadmin has selected an org
-  const users = useQuery(
+  // TEMP: Load all users without pagination for testing
+  const allUsersDirect = useQuery(
     useOrgFilter ? api.organizations.getOrgMembers : api.users.getAllUsers,
     mounted && user?.id
       ? useOrgFilter
@@ -66,8 +105,41 @@ export function EmployeesClient() {
         : { requesterId: user.id as Id<"users"> }
       : "skip"
   );
+  
+  console.log('[EmployeesClient] allUsersDirect:', {
+    length: allUsersDirect?.length,
+    value: allUsersDirect,
+    mounted,
+    hasUserId: !!user?.id,
+    useOrgFilter,
+    selectedOrgId
+  });
+  
+  // Use direct load for now
+  React.useEffect(() => {
+    console.log('[EmployeesClient] useEffect allUsersDirect:', allUsersDirect?.length);
+    if (allUsersDirect && allUsersDirect.length > 0) {
+      console.log('[EmployeesClient] Setting allUsers:', allUsersDirect.length);
+      setAllUsers(allUsersDirect);
+      setHasMore(false);
+    }
+  }, [allUsersDirect]);
+  
+  const usersPage = allUsersDirect; // For compatibility
+  
   const supervisors = useQuery(api.tasks.getSupervisors, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
   const deleteUser = useMutation(api.users.deleteUser);
+  
+  // Load more function
+  const loadMore = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!hasMore || isLoadingMore) return;
+    const lastUser = allUsers[allUsers.length - 1];
+    if (lastUser) {
+      setCursor(lastUser._id);
+      setIsLoadingMore(true);
+    }
+  };
 
   const isAdmin = user?.role === "admin";
   const isSupervisor = user?.role === "supervisor";
@@ -138,17 +210,17 @@ export function EmployeesClient() {
   };
 
   const filtered = useMemo(() => {
-    if (!users) return [];
-    return users.filter((u) => {
+    if (!allUsers || allUsers.length === 0) return [];
+    return allUsers.filter((u) => {
       // Filter out superadmins
       if (u.role === "superadmin" || u.email?.toLowerCase() === "romangulanyan@gmail.com") {
         return false;
       }
       const matchSearch =
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        (u.department ?? "").toLowerCase().includes(search.toLowerCase()) ||
-        (u.position ?? "").toLowerCase().includes(search.toLowerCase());
+        u.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        u.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (u.department ?? "").toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (u.position ?? "").toLowerCase().includes(debouncedSearch.toLowerCase());
       const matchRole = filterRole === "all" || u.role === filterRole;
       const matchType = filterType === "all" || (u as any).employeeType === filterType;
       const matchStatus =
@@ -157,11 +229,11 @@ export function EmployeesClient() {
         (filterStatus === "inactive" && !u.isActive);
       return matchSearch && matchRole && matchType && matchStatus;
     });
-  }, [users, search, filterRole, filterType, filterStatus]);
+  }, [allUsers, debouncedSearch, filterRole, filterType, filterStatus]);
 
   const stats = useMemo(() => {
-    if (!users) return { total: 0, staff: 0, contractors: 0, admins: 0, supervisors: 0 };
-    const active = users.filter((u) => u.isActive);
+    if (!allUsers || allUsers.length === 0) return { total: 0, staff: 0, contractors: 0, admins: 0, supervisors: 0 };
+    const active = allUsers.filter((u) => u.isActive);
     return {
       total: active.length,
       staff: active.filter((u: any) => (u as any).employeeType === "staff").length,
@@ -169,7 +241,7 @@ export function EmployeesClient() {
       admins: active.filter((u) => u.role === "admin").length,
       supervisors: active.filter((u) => u.role === "supervisor").length,
     };
-  }, [users]);
+  }, [allUsers]);
 
   const handleDelete = async (userId: string) => {
     if (!user?.id) {
@@ -186,7 +258,7 @@ export function EmployeesClient() {
   };
 
   if (!mounted) return null;
-  if (users === undefined) return (
+  if (allUsers === undefined) return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <ShieldLoader size="lg" />
     </div>
@@ -269,11 +341,23 @@ export function EmployeesClient() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={t('placeholders.searchByName')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none"
             style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--text-primary)" }}
           />
+          {search && (
+            <button
+              onClick={() => {
+                handleSearchChange("");
+                setSearch("");
+                setDebouncedSearch("");
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          )}
         </div>
         <div className="flex gap-2 items-center">
           {[
@@ -443,6 +527,24 @@ export function EmployeesClient() {
                 )}
               </div>
             )}
+            
+            {/* Load More Button */}
+            {hasMore && filtered.length > 0 && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                  className="px-6 py-3 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ 
+                    background: "var(--card)", 
+                    borderColor: "var(--border)", 
+                    color: "var(--text-primary)"
+                  }}
+                >
+                  {isLoadingMore ? t('common.loading') : t('common.loadMore')}
+                </button>
+              </div>
+            )}
 
             {/* LIST VIEW */}
             {viewMode === "list" && (
@@ -556,6 +658,24 @@ export function EmployeesClient() {
                     <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t('employees.noFound')}</p>
                   </div>
                 )}
+              </div>
+            )}
+            
+            {/* Load More Button for List View */}
+            {hasMore && filtered.length > 0 && viewMode === "list" && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                  className="px-6 py-3 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ 
+                    background: "var(--card)", 
+                    borderColor: "var(--border)", 
+                    color: "var(--text-primary)"
+                  }}
+                >
+                  {isLoadingMore ? t('common.loading') : t('common.loadMore')}
+                </button>
               </div>
             )}
           </>

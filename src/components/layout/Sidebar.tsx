@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { shallow } from 'zustand/shallow';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSelector } from "@/components/layout/OrganizationSelector";
 import { useQuery } from "convex/react";
@@ -58,16 +59,12 @@ const navItems = [
   { href: "/settings", labelKey: "nav.settings", icon: Settings, roles: ["superadmin", "admin", "supervisor", "employee", "driver"] },
 ];
 
-function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-}
-
 // ─── Desktop Sidebar ───────────────────────────────────────────────────────────
 export function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const { collapsed, toggle } = useSidebarStore();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user, shallow);
   const [mounted, setMounted] = React.useState(false);
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
 

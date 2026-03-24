@@ -23,6 +23,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { shallow } from 'zustand/shallow';
 import { logoutAction } from "@/actions/auth";
 import { signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -102,7 +103,8 @@ export function Navbar() {
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { setMobileOpen } = useSidebarStore();
-  const { user, logout } = useAuthStore();
+  const user = useAuthStore((state) => state.user, shallow);
+  const logout = useAuthStore((state) => state.logout);
   const [showNotifications, setShowNotifications] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [toasts, setToasts] = useState<ToastNotif[]>([]);
@@ -167,10 +169,10 @@ export function Navbar() {
           ...user,
           isApproved: true,
         });
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 2000);
+        // Redirect to dashboard after a short delay - TEMP DISABLED
+        // setTimeout(() => {
+        //   window.location.href = "/dashboard";
+        // }, 2000);
       }
       // Sound + banner are handled by NotificationBanner — just track seen IDs here
       newNotifs.forEach((n: any) => prevNotifIds.current.add(n._id));

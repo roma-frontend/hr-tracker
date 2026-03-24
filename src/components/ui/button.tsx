@@ -1,7 +1,6 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
-
+import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
@@ -19,14 +18,14 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        
+
         // ═══════════════════════════════════════════════════════════════
         // LANDING PAGE VARIANTS — Градиенты и эффекты для landing page
         // ═══════════════════════════════════════════════════════════════
         cta: "cta-btn-primary",
         ctaSecondary: "cta-btn-secondary",
         glass: "backdrop-blur-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white",
-        
+
         // ═══════════════════════════════════════════════════════════════
         // EXTENDED VARIANTS — Для dashboard и форм
         // ═══════════════════════════════════════════════════════════════
@@ -64,7 +63,7 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
   }) {
-  const Comp = asChild ? Slot.Root : "button"
+  const Comp = asChild ? Slot : "button"
 
   return (
     <Comp

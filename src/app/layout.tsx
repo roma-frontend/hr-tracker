@@ -17,6 +17,7 @@ import { I18nProvider } from "@/components/I18nProvider";
 import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import { MaintenanceAutoLogout } from "@/components/MaintenanceAutoLogout";
+import { GlobalErrorBoundaryProvider } from "@/components/error/GlobalErrorBoundaryProvider";
 
 // Corporate & Professional - IBM PLEX SANS
 const ibmPlexSans = IBM_Plex_Sans({
@@ -66,7 +67,7 @@ const notoSansArmenian = Noto_Sans_Armenian({
   variable: "--font-armenian",
   subsets: ["armenian"],
   display: "swap",
-  preload: false,
+  preload: true, // Changed to true for better performance
   weight: ["400", "500", "600", "700"],
   fallback: ["sans-serif"],
 });
@@ -245,6 +246,13 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
+        
+        {/* ── Preload critical fonts ── */}
+        <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap"
+          as="style"
+        />
 
         {/* JSON-LD Structured Data */}
         <script
@@ -252,8 +260,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}>
-        <MonitoringProvider>
+      <body className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`} suppressHydrationWarning>
+        <GlobalErrorBoundaryProvider>
+          <MonitoringProvider>
           <SessionProvider>
             <I18nProvider>
               <StatusUpdateProvider>
@@ -265,6 +274,7 @@ export default function RootLayout({
                       defaultTheme="system"
                       enableSystem={true}
                       disableTransitionOnChange
+                      suppressHydrationWarning
                     >
                       {children}
                       <Toaster
@@ -288,6 +298,7 @@ export default function RootLayout({
             </I18nProvider>
           </SessionProvider>
         </MonitoringProvider>
+        </GlobalErrorBoundaryProvider>
         {/* Performance monitoring (только в dev) */}
         {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
       </body>

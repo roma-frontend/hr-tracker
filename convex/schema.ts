@@ -208,7 +208,10 @@ export default defineSchema({
     .index("by_org_approval", ["organizationId", "isApproved"])
     .index("by_role", ["role"])
     .index("by_supervisor", ["supervisorId"])
-    .index("by_approval", ["isApproved"]),
+    .index("by_approval", ["isApproved"])
+    // Added for performance optimization
+    .index("by_org_email", ["organizationId", "email"])
+    .index("by_org_created", ["organizationId", "createdAt"]),
 
   webauthnCredentials: defineTable({
     userId: v.id("users"),
@@ -254,7 +257,11 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_org_status", ["organizationId", "status"])
     .index("by_status", ["status"])
-    .index("by_created", ["createdAt"]),
+    .index("by_created", ["createdAt"])
+    // Added for performance optimization
+    .index("by_status_created", ["status", "createdAt"])
+    .index("by_user_status", ["userId", "status"])
+    .index("by_org_created", ["organizationId", "createdAt"]),
 
   // ── NOTIFICATIONS ────────────────────────────────────────────────────────
   notifications: defineTable({
@@ -285,7 +292,10 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_org", ["organizationId"])
-    .index("by_user_unread", ["userId", "isRead"]),
+    .index("by_user_unread", ["userId", "isRead"])
+    // Added for performance optimization
+    .index("by_unread_date", ["userId", "isRead", "createdAt"])
+    .index("by_org_created", ["organizationId", "createdAt"]),
 
   // ── AUDIT LOGS ───────────────────────────────────────────────────────────
   auditLogs: defineTable({
@@ -521,7 +531,11 @@ export default defineSchema({
     .index("by_assigned_to", ["assignedTo"])
     .index("by_assigned_by", ["assignedBy"])
     .index("by_status", ["status"])
-    .index("by_deadline", ["deadline"]),
+    .index("by_deadline", ["deadline"])
+    // Added for performance optimization
+    .index("by_org_status", ["organizationId", "status"])
+    .index("by_assigned_status", ["assignedTo", "status"])
+    .index("by_org_deadline", ["organizationId", "deadline"]),
 
   // ── TASK COMMENTS ────────────────────────────────────────────────────────
   taskComments: defineTable({

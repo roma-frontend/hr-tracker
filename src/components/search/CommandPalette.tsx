@@ -10,7 +10,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Command, ArrowRight, FileText, Users, Calendar, Settings, BarChart3, MessageCircle, ClipboardList, Clock, CheckSquare, User, ShieldCheck, CreditCard, Sparkles, Car } from "lucide-react";
+import { Search, X, ArrowRight, FileText, Users, Calendar, Settings, BarChart3, MessageCircle, ClipboardList, Clock, CheckSquare, User, ShieldCheck, CreditCard, Sparkles, Car } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";
 import { cn } from "@/lib/utils";
@@ -212,7 +212,7 @@ export function CommandPalette() {
         className="fixed bottom-4 right-4 z-40 p-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors"
         aria-label="Open command palette"
       >
-        <Command className="w-5 h-5" />
+        <Search className="w-5 h-5" />
       </button>
 
       <AnimatePresence>

@@ -246,8 +246,14 @@ export const getOrgMembers = query({
   args: {
     superadminUserId: v.id("users"),
     organizationId: v.id("organizations"),
+    cursor: v.optional(v.id("users")),
+    limit: v.optional(v.number()) // Optional with default
   },
-  handler: async (ctx, { superadminUserId, organizationId }) => {
+  handler: async (ctx, { superadminUserId, organizationId, cursor, limit }) => {
+    const DEFAULT_LIMIT = 50;
+    const MAX_LIMIT = 100;
+    const effectiveLimit = Math.min(limit || DEFAULT_LIMIT, MAX_LIMIT);
+    
     const caller = await ctx.db.get(superadminUserId);
     if (!caller || caller.email.toLowerCase() !== SUPERADMIN_EMAIL) {
       throw new Error("Only the superadmin can view org members");
@@ -256,10 +262,15 @@ export const getOrgMembers = query({
     const org = await ctx.db.get(organizationId);
     if (!org) throw new Error("Organization not found");
 
-    const members = await ctx.db
+    let query = ctx.db
       .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
-      .collect();
+      .withIndex("by_org", (q) => q.eq("organizationId", organizationId));
+    
+    if (cursor) {
+      query = query.startAfter(cursor);
+    }
+    
+    const members = await query.take(effectiveLimit + 1);
 
     // Filter out superadmins (should never be in org, but just in case)
     const filteredMembers = members.filter(

@@ -181,11 +181,11 @@ export function useAuthSync() {
         currentPath.startsWith('/ai-site-editor');
 
       if (!prevApproved && currApproved && currOrg && !isDashboardPage) {
-        console.log("[useAuthSync] 🎉 User was just approved! Redirecting to dashboard...");
-        // User was just approved — redirect to dashboard
-        setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 1000);
+        console.log("[useAuthSync] 🎉 User was just approved! WOULD redirect to dashboard...");
+        // TEMP: Disabled for debugging
+        // setTimeout(() => {
+        //   window.location.href = "/dashboard";
+        // }, 1000);
       } else if (prevApproved && currApproved) {
         console.log("[useAuthSync] ℹ️  User already approved, skipping redirect");
       }
@@ -215,39 +215,87 @@ export function useAuthSync() {
           // Check if we're in maintenance mode
           const params = new URLSearchParams(window.location.search);
           const isMaintenance = params.get('maintenance') === 'true';
+          const isDebug = params.get('debug') === 'true';
 
           // Skip redirect if in maintenance mode or already on dashboard/login
           if (isMaintenance) {
             console.log("[useAuthSync] Maintenance mode detected - not redirecting");
             return;
           }
+          
+          // Debug mode - log but don't redirect
+          if (isDebug) {
+            console.log("[useAuthSync] Debug mode - logging but not redirecting");
+          }
 
           // Public routes that should NOT redirect
-          const publicRoutes = ['/', '/contact', '/privacy', '/terms', '/test-i18n'];
-          const isPublicRoute = publicRoutes.some(route => 
-            window.location.pathname === route || window.location.pathname.startsWith(`${route}/`)
+          const publicRoutes = ['/', '/contact', '/privacy', '/terms', '/test-i18n', '/landing'];
+          const path = window.location.pathname;
+
+          console.log("[useAuthSync] Checking route:", {
+            path,
+            publicRoutes,
+            isPublicRouteCheck: publicRoutes.some(route => path === route || path === route + '/' || path.startsWith(route + '/')),
+            isLandingPage: path === '/' || path.startsWith('/landing')
+          });
+
+          // Check for exact match or sub-route
+          const isPublicRoute = publicRoutes.some(route =>
+            path === route || path === route + '/' || path.startsWith(route + '/')
           );
 
+          // Landing page should never redirect
+          const isLandingPage = path === '/' || path.startsWith('/landing');
+
           // Only redirect if we're on auth pages (login/register), not if already on a dashboard page or public page
-          const path = window.location.pathname;
-          const isAuthPage = path === '/login' || path === '/register' || path.startsWith('/register-org');
-          
-          if (isPublicRoute) {
-            console.log("[useAuthSync] Public route - not redirecting:", path);
+          const isAuthPage = path === '/login' || path === '/register' || path === '/forgot-password' || path.startsWith('/register-org');
+
+          if (isPublicRoute || isLandingPage) {
+            console.log("[useAuthSync] ✅ Public/landing route - not redirecting:", path);
             return;
           }
           
-          const isDashboardPage = path === '/dashboard' || path.startsWith('/superadmin') || path.startsWith('/admin') || path.startsWith('/employees') || path.startsWith('/tasks') || path.startsWith('/calendar') || path.startsWith('/leaves') || path.startsWith('/attendance') || path.startsWith('/settings') || path.startsWith('/chat') || path.startsWith('/analytics') || path.startsWith('/reports') || path.startsWith('/join-requests') || path.startsWith('/org-requests') || path.startsWith('/approvals') || path.startsWith('/profile') || path.startsWith('/ai-site-editor');
+          const isDashboardPage = path === '/dashboard' ||
+            path.startsWith('/superadmin') ||
+            path.startsWith('/admin') ||
+            path.startsWith('/employees') ||
+            path.startsWith('/tasks') ||
+            path.startsWith('/calendar') ||
+            path.startsWith('/leaves') ||
+            path.startsWith('/attendance') ||
+            path.startsWith('/settings') ||
+            path.startsWith('/chat') ||
+            path.startsWith('/analytics') ||
+            path.startsWith('/reports') ||
+            path.startsWith('/join-requests') ||
+            path.startsWith('/org-requests') ||
+            path.startsWith('/approvals') ||
+            path.startsWith('/profile') ||
+            path.startsWith('/ai-site-editor') ||
+            path.startsWith('/drivers') ||
+            path.startsWith('/events') ||
+            path.startsWith('/admin/events');
           
+          console.log("[useAuthSync] Route check result:", {
+            isPublicRoute,
+            isLandingPage,
+            isAuthPage,
+            isDashboardPage,
+            path
+          });
+
           // Don't redirect to dashboard if user has no organization (needs onboarding)
           if (currentUser && !currentUser.organizationId) {
             console.log("[useAuthSync] 🚨 User has no organization - not redirecting to dashboard");
             return;
           }
-          
-          if (!isDashboardPage && !isAuthPage) {
-            console.log("[useAuthSync] Redirecting from", path, "to dashboard");
-            window.location.href = '/dashboard';
+
+          if (!isDashboardPage && !isAuthPage && !isPublicRoute) {
+            console.log("[useAuthSync] ⚠️ WOULD Redirect from", path, "to dashboard");
+            // TEMP: Disabled for debugging
+            // window.location.href = '/dashboard';
+          } else {
+            console.log("[useAuthSync] ✅ No redirect needed:", { isDashboardPage, isAuthPage, isPublicRoute });
           }
         } catch (error) {
           console.error("[useAuthSync] Session creation error:", error);

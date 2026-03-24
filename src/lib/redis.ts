@@ -320,6 +320,79 @@ export async function getRedisStats(): Promise<{
 }
 
 // ═══════════════════════════════════════════════════════════════
+// QUERY CACHING
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Get cached data
+ */
+export async function getCache<T>(key: string): Promise<T | null> {
+  const redis = getRedis();
+
+  if (!redis) return null;
+
+  try {
+    const data = await redis.get(`cache:${key}`);
+    return data as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Set cached data with TTL
+ */
+export async function setCache<T>(
+  key: string,
+  data: T,
+  ttlSeconds: number = 300 // 5 minutes default
+): Promise<void> {
+  const redis = getRedis();
+
+  if (!redis) return;
+
+  try {
+    await redis.set(`cache:${key}`, data);
+    await redis.expire(`cache:${key}`, ttlSeconds);
+  } catch (error) {
+    console.error('Redis cache set error:', error);
+  }
+}
+
+/**
+ * Delete cached data
+ */
+export async function deleteCache(key: string): Promise<void> {
+  const redis = getRedis();
+
+  if (!redis) return;
+
+  try {
+    await redis.del(`cache:${key}`);
+  } catch (error) {
+    console.error('Redis cache delete error:', error);
+  }
+}
+
+/**
+ * Invalidate cache pattern (e.g., "users:*")
+ */
+export async function invalidateCachePattern(pattern: string): Promise<void> {
+  const redis = getRedis();
+
+  if (!redis) return;
+
+  try {
+    const keys = await redis.keys(`cache:${pattern}`);
+    if (keys && keys.length > 0) {
+      await redis.del(...(keys as string[]));
+    }
+  } catch (error) {
+    console.error('Redis cache invalidate error:', error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // EXPORTS
 // ═══════════════════════════════════════════════════════════════
 
@@ -338,6 +411,12 @@ export default {
   // Security events
   logSecurityEvent,
   getSecurityEvents,
+
+  // Query caching
+  getCache,
+  setCache,
+  deleteCache,
+  invalidateCachePattern,
 
   // Utilities
   testRedisConnection,

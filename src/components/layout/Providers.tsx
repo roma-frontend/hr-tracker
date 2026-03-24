@@ -4,10 +4,13 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { shallow } from 'zustand/shallow';
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { usePathname } from "next/navigation";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
+import { ErrorBoundary } from "@/components/error/ErrorBoundary";
+import { ReactQueryProvider } from "@/components/providers/ReactQueryProvider";
 
 function SidebarSkeleton() {
   return (
@@ -73,7 +76,8 @@ const StatusUpdateBanner = dynamic(
 );
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const { user, needsOnboarding } = useAuthStore();
+  const user = useAuthStore((state) => state.user, shallow);
+  const needsOnboarding = useAuthStore((state) => state.needsOnboarding, shallow);
   const { status } = useSession();
   const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
@@ -133,61 +137,65 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // transition-colors removed from wrapper div — causes full-tree repaint on theme change
   return (
-    <StatusUpdateProvider>
-      <div className="flex h-screen bg-[var(--background)] overflow-hidden">
-        {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
-        <Sidebar />
+    <ErrorBoundary>
+      <ReactQueryProvider>
+        <StatusUpdateProvider>
+          <div className="flex h-screen bg-[var(--background)] overflow-hidden">
+            {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
+            <Sidebar />
 
-        {/* Mobile Sidebar */}
-        <MobileSidebar />
+            {/* Mobile Sidebar */}
+            <MobileSidebar />
 
-        {/* Main content — contain:layout reduces CLS from child layout changes */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{ contain: "layout" }}>
-          {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
-          <Navbar />
-          {/* Maintenance warning banner — below navbar, above content */}
-          {user && <MaintenanceBanner />}
-          {/* Status update banner — below maintenance banner */}
-          <StatusUpdateBanner />
-          {/* Real-time notification banner — below status banner, full width, persistent */}
-          {user && <NotificationBanner />}
-          {/* Main content area — min-h-0 prevents CLS when content loads */}
-        <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
-          {isChatPage ? (
-            <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">
-              {children}
+            {/* Main content — contain:layout reduces CLS from child layout changes */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{ contain: "layout" }}>
+              {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
+              <Navbar />
+              {/* Maintenance warning banner — below navbar, above content */}
+              {user && <MaintenanceBanner />}
+              {/* Status update banner — below maintenance banner */}
+              <StatusUpdateBanner />
+              {/* Real-time notification banner — below status banner, full width, persistent */}
+              {user && <NotificationBanner />}
+              {/* Main content area — min-h-0 prevents CLS when content loads */}
+              <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
+                {isChatPage ? (
+                  <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">
+                    {children}
+                  </div>
+                ) : (
+                  <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto min-h-[calc(100vh-4rem)]">
+                    {children}
+                  </div>
+                )}
+              </main>
             </div>
-          ) : (
-            <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto min-h-[calc(100vh-4rem)]">
-              {children}
-            </div>
-          )}
-        </main>
-      </div>
-      {/* AI Chat Widget - hidden on /chat page so it doesn't cover the send button */}
-      {!isChatPage && <ChatWidget />}
+            {/* AI Chat Widget - hidden on /chat page so it doesn't cover the send button */}
+            {!isChatPage && <ChatWidget />}
 
-      {/* Global incoming call detection — works on ALL pages */}
-      {hydrated && user && <IncomingCallProvider />}
+            {/* Global incoming call detection — works on ALL pages */}
+            {hydrated && user && <IncomingCallProvider />}
 
 
-      {/* Productivity Services - only render when mounted to avoid SSR mismatch */}
-      {hydrated && user && (
-        <>
-          <BreakReminderService
-            enabled={false}
-            intervalMinutes={120}
-            workHoursStart={undefined}
-            workHoursEnd={undefined}
-          />
-          <FocusModeIndicator
-            enabled={false}
-            workHoursStart={undefined}
-            workHoursEnd={undefined}
-          />
-        </>
-      )}
-    </div>
-    </StatusUpdateProvider>
+            {/* Productivity Services - only render when mounted to avoid SSR mismatch */}
+            {hydrated && user && (
+              <>
+                <BreakReminderService
+                  enabled={false}
+                  intervalMinutes={120}
+                  workHoursStart={undefined}
+                  workHoursEnd={undefined}
+                />
+                <FocusModeIndicator
+                  enabled={false}
+                  workHoursStart={undefined}
+                  workHoursEnd={undefined}
+                />
+              </>
+            )}
+          </div>
+        </StatusUpdateProvider>
+      </ReactQueryProvider>
+    </ErrorBoundary>
   );
 }

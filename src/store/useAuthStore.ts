@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { shallow } from 'zustand/shallow'
+import React from 'react'
 
 export interface User {
   id: string
@@ -77,3 +79,33 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 )
+
+/**
+ * Оптимизированный хук для использования auth store с shallow comparison
+ * Предотвращает лишние ре-рендеры при изменении несвязанных полей
+ *
+ * @example
+ * const { user, isAuthenticated } = useAuthStoreShallow();
+ */
+export function useAuthStoreShallow() {
+  const user = useAuthStore((state) => state.user, shallow)
+  const token = useAuthStore((state) => state.token, shallow)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated, shallow)
+  const needsOnboarding = useAuthStore((state) => state.needsOnboarding, shallow)
+  
+  return React.useMemo(() => ({
+    user,
+    token,
+    isAuthenticated,
+    needsOnboarding,
+  }), [user, token, isAuthenticated, needsOnboarding])
+}
+
+/**
+ * Селекторы для отдельных полей store
+ * Используем для максимальной оптимизации ре-рендеров
+ */
+export const useAuthUser = () => useAuthStore((state) => state.user, shallow)
+export const useAuthIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated, shallow)
+export const useAuthNeedsOnboarding = () => useAuthStore((state) => state.needsOnboarding, shallow)
+export const useAuthLogout = () => useAuthStore((state) => state.logout)

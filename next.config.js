@@ -11,13 +11,13 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
-  productionBrowserSourceMaps: false,
+  productionBrowserSourceMaps: false, // Disable for production (use hidden-source-map instead)
 
   // Ignore TS errors during build (for deployment)
   typescript: { ignoreBuildErrors: true },
 
   // Transpile Radix UI icons
-  transpilePackages: ['@radix-ui/react-icons'],
+  transpilePackages: ['@radix-ui/react-icons', 'face-api.js'],
 
   // ═══════════════════════════════════════════════════════════════
   // IMAGES — OPTIMIZED
@@ -48,7 +48,7 @@ const nextConfig = {
   // EXPERIMENTAL — OPTIMIZED
   // ═══════════════════════════════════════════════════════════════
   experimental: {
-    serverActions: { 
+    serverActions: {
       bodySizeLimit: '2mb',
       // Faster action responses
       allowedOrigins: ['*'],
@@ -75,7 +75,8 @@ const nextConfig = {
       'react-i18next',
       'convex',
     ],
-    ppr: false,
+    // Enable Partial Prerendering via cacheComponents (Next.js 16+)
+    cacheComponents: true,
     optimizeCss: true,
     scrollRestoration: true,
   },
@@ -188,9 +189,9 @@ const nextConfig = {
       };
     }
     
-    // Reduce source map size
+    // Reduce source map size - use hidden-source-map for production
     if (!dev) {
-      config.devtool = 'source-map';
+      config.devtool = 'hidden-source-map';
     }
     
     return config;

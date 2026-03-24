@@ -51,14 +51,26 @@ async function requireAdmin(ctx: QueryCtx, adminId: Id<"users">) {
 // GET ALL USERS — scoped to caller's organization
 // ─────────────────────────────────────────────────────────────────────────────
 export const getAllUsers = query({
-  args: { requesterId: v.id("users") },
-  handler: async (ctx, { requesterId }) => {
+  args: { 
+    requesterId: v.id("users"),
+    cursor: v.optional(v.id("users")),
+    limit: v.optional(v.number()) // Optional with default
+  },
+  handler: async (ctx, { requesterId, cursor, limit }) => {
+    const DEFAULT_LIMIT = 50;
+    const MAX_LIMIT = 100;
+    const effectiveLimit = Math.min(limit || DEFAULT_LIMIT, MAX_LIMIT);
+    
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error("Requester not found");
 
     // Superadmin sees all users across all orgs (with org info)
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      return await ctx.db.query("users").collect();
+      let query = ctx.db.query("users");
+      if (cursor) {
+        query = query.startAfter(cursor);
+      }
+      return await query.take(effectiveLimit + 1); // +1 to check if more exists
     }
 
     // Everyone else only sees their organization
@@ -66,11 +78,16 @@ export const getAllUsers = query({
       throw new Error("User does not belong to an organization");
     }
 
-    return await ctx.db
+    let query = ctx.db
       .query("users")
       .withIndex("by_org", (q) => q.eq("organizationId", requester.organizationId))
-      .filter((q) => q.eq(q.field("isActive"), true))
-      .collect();
+      .filter((q) => q.eq(q.field("isActive"), true));
+    
+    if (cursor) {
+      query = query.startAfter(cursor);
+    }
+    
+    return await query.take(effectiveLimit + 1);
   },
 });
 
@@ -83,8 +100,14 @@ export const getUsersByOrganizationId = query({
   args: {
     requesterId: v.id("users"),
     organizationId: v.id("organizations"),
+    cursor: v.optional(v.id("users")),
+    limit: v.optional(v.number()) // Optional with default
   },
-  handler: async (ctx, { requesterId, organizationId }) => {
+  handler: async (ctx, { requesterId, organizationId, cursor, limit }) => {
+    const DEFAULT_LIMIT = 50;
+    const MAX_LIMIT = 100;
+    const effectiveLimit = Math.min(limit || DEFAULT_LIMIT, MAX_LIMIT);
+    
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error("Requester not found");
 
@@ -94,11 +117,16 @@ export const getUsersByOrganizationId = query({
       throw new Error("Access denied: cross-organization access is not allowed");
     }
 
-    return await ctx.db
+    let query = ctx.db
       .query("users")
       .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
-      .filter((q) => q.eq(q.field("isActive"), true))
-      .collect();
+      .filter((q) => q.eq(q.field("isActive"), true));
+    
+    if (cursor) {
+      query = query.startAfter(cursor);
+    }
+    
+    return await query.take(effectiveLimit + 1);
   },
 });
 

@@ -19,6 +19,7 @@ import {
 import { LeaveRequestModal } from "@/components/leaves/LeaveRequestModal";
 import { LeaveRequestWizard } from "@/components/leaves/LeaveRequestWizard";
 import { useAuthStore } from "@/store/useAuthStore";
+import { shallow } from 'zustand/shallow';
 import { LEAVE_TYPE_LABELS, DEPARTMENTS, type LeaveType, type LeaveStatus } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { playNotificationSound, sendBrowserNotification } from "@/lib/notificationSound";
@@ -66,7 +67,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
 
 export function LeavesClient() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user, shallow);
   const selectedOrgId = useSelectedOrganization();
   const [wizardOpen, setWizardOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);

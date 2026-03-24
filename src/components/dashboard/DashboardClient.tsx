@@ -18,6 +18,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { useAuthStore } from "@/store/useAuthStore";
+import { shallow } from 'zustand/shallow';
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
 
 export default function DashboardClient() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user, shallow);
   const [mounted, setMounted] = React.useState(false);
   const [showTour, setShowTour] = React.useState(false);
   React.useEffect(() => { 
