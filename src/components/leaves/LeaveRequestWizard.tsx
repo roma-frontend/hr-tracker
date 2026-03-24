@@ -152,28 +152,30 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
               {/* Даты */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-gray-900 dark:text-white mb-2 block">{t("leaveWizard.startDate")}</Label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      min={format(new Date(), "yyyy-MM-dd")}
-                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:focus:ring-blue-400 [&::-webkit-calendar-picker-indicator]:dark:invert [&::-webkit-calendar-picker-indicator]:dark:cursor-pointer"
-                    />
-                  </div>
+                  <Label className="text-[var(--foreground)] mb-2 block">{t("leaveWizard.startDate")}</Label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    min={format(new Date(), "yyyy-MM-dd")}
+                    className="w-full p-3 rounded-lg border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                    style={{
+                      colorScheme: 'light',
+                    }}
+                  />
                 </div>
                 <div>
-                  <Label className="text-gray-900 dark:text-white mb-2 block">{t("leaveWizard.endDate")}</Label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      min={startDate || format(new Date(), "yyyy-MM-dd")}
-                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:focus:ring-blue-400 [&::-webkit-calendar-picker-indicator]:dark:invert [&::-webkit-calendar-picker-indicator]:dark:cursor-pointer"
-                    />
-                  </div>
+                  <Label className="text-[var(--foreground)] mb-2 block">{t("leaveWizard.endDate")}</Label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate || format(new Date(), "yyyy-MM-dd")}
+                    className="w-full p-3 rounded-lg border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                    style={{
+                      colorScheme: 'light',
+                    }}
+                  />
                 </div>
               </div>
 
@@ -224,25 +226,25 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
 
               {/* Причина */}
               <div className="mb-4">
-                <Label className="text-gray-900 dark:text-white">{t("leaveWizard.reason")} *</Label>
+                <Label className="text-[var(--foreground)] block mb-2">{t("leaveWizard.reason")} *</Label>
                 <input
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={t("leaveWizard.reasonPlaceholder")}
-                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                  className="w-full p-3 rounded-lg border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] placeholder-gray-400 focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                 />
               </div>
 
               {/* Комментарий */}
               <div>
-                <Label className="text-gray-900 dark:text-white">{t("leaveWizard.comment")} ({t("leaveWizard.optional")})</Label>
+                <Label className="text-[var(--foreground)] block mb-2">{t("leaveWizard.comment")} ({t("leaveWizard.optional")})</Label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder={t("leaveWizard.commentPlaceholder")}
                   rows={3}
-                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+                  className="w-full p-3 rounded-lg border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] placeholder-gray-400 focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none"
                 />
               </div>
             </div>
