@@ -25,14 +25,18 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
   const user = useQuery(api.users.getUserById, { userId });
 
   // ═══════════════════════════════════════════════════════════════
+  // Extract data BEFORE hooks (non-hook values)
+  // ═══════════════════════════════════════════════════════════════
+  const { balances, totalDaysTaken, userLeaves } = analytics || {};
+
+  // ═══════════════════════════════════════════════════════════════
   // OPTIMIZED: Memoize all calculations - MUST BE BEFORE CONDITIONAL RETURN
   // ═══════════════════════════════════════════════════════════════
   const stats = useMemo(() => {
-    if (!analytics || !user) {
+    if (!analytics || !user || !balances) {
       return null;
     }
 
-    const { balances, totalDaysTaken, userLeaves } = analytics;
     const currentYear = new Date().getFullYear();
     const leavesThisYear = userLeaves.filter((leave: any) => {
       return new Date(leave.startDate).getFullYear() === currentYear && leave.status === "approved";
@@ -79,9 +83,9 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
       nextAvailableDate,
       avgDuration: leavesThisYear.length > 0 ? (totalDaysThisYear / leavesThisYear.length).toFixed(1) : 0,
     };
-  }, [analytics, user]);
+  }, [analytics, user, balances]);
 
-  if (!analytics || !user || !stats) {
+  if (!analytics || !user || !stats || !balances) {
     return <div className="text-center p-8">Загрузка...</div>;
   }
 
