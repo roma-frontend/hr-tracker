@@ -139,7 +139,7 @@ export default function DashboardClient() {
       (r) => r.status === "approved" && r.startDate <= todayStr && r.endDate >= todayStr
     ).length ?? 0,
     approvedThisMonth: leaves?.filter(
-      (r) => r.status === "approved" && isSameMonth(new Date(r.startDate), today)
+      (r) => r.status === "approved" && isSameMonth(new Date(r.startDate), new Date())
     ).length ?? 0,
   }), [users, leaves, todayStr]);
 
