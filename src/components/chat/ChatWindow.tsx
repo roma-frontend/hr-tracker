@@ -8,18 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft, Phone, Video, Search, Pin, Info,
-  Send, Paperclip, Smile, X, FileText, Clock, BarChart2,
+  Send, Paperclip, Smile, X, FileText, Clock, BarChart2, Mic,
 } from "lucide-react";
 import Link from "next/link";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { ThreadPanel } from "./ThreadPanel";
 import { ConversationInfoPanel } from "./ConversationInfoPanel";
 import { format, isToday, isYesterday } from "date-fns";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import EmojiPicker from "./EmojiPicker";
+import { VoiceMessageRecorder } from "./VoiceMessageRecorder";
 import { uploadChatAttachment } from "@/actions/cloudinary";
 import { playChatMessageSound } from "@/lib/notificationSound";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 interface Props {
   conversationId: Id<"chatConversations">;
@@ -41,13 +44,6 @@ interface PendingFile {
 
 function getInitials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-}
-
-function formatDateSeparator(ts: number) {
-  const d = new Date(ts);
-  if (isToday(d)) return "Today";
-  if (isYesterday(d)) return "Yesterday";
-  return format(d, "MMMM d, yyyy");
 }
 
 function formatFileSize(bytes: number) {
@@ -77,12 +73,20 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionStart, setMentionStart] = useState<number>(-1);
   const [mentionIndex, setMentionIndex] = useState(0);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesParentRef = useRef<HTMLDivElement>(null);
 
-  const messages = useQuery(api.chat.getMessages, { conversationId, userId: currentUserId, limit: 60 });
+  const messages = useQuery(api.chat.getMessages, { conversationId, userId: currentUserId, limit: 200 });
+  
+  // Debug: Log first message sender
+  if (messages && messages.length > 0 && !messages[0]?.sender) {
+    console.warn('[ChatWindow] Message without sender:', messages[0]);
+  }
   const members = useQuery(api.chat.getConversationMembers, { conversationId });
   const typingUsers = useQuery(api.chat.getTypingUsers, { conversationId, currentUserId });
   const conversation = useQuery(api.chat.getMyConversations, { userId: currentUserId, organizationId });
@@ -92,6 +96,14 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
     api.chat.searchMessages,
     showSearch && searchQuery.length > 1 ? { conversationId, userId: currentUserId, query: searchQuery } : "skip"
   );
+
+  // Virtualization for messages
+  const virtualizer = useVirtualizer({
+    count: messages?.length ?? 0,
+    getScrollElement: () => messagesParentRef.current,
+    estimateSize: () => 100, // Estimate average message height
+    overscan: 5,
+  });
 
   const sendMessage = useMutation(api.chat.sendMessage);
   const scheduleMessage = useMutation(api.chat.scheduleMessage);
@@ -316,6 +328,54 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
     }, 0);
   };
 
+  // ── Voice Message ──────────────────────────────────────────────────────────
+  const handleVoiceMessage = useCallback(async (blob: Blob, duration: number) => {
+    try {
+      // Convert blob to base64 (without data URL prefix)
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Remove data URL prefix (e.g., "data:audio/webm;base64,")
+          const base64Data = result.split(',')[1] || result;
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      
+      // Upload audio file
+      const result = await uploadChatAttachment(base64, "voice.webm", "audio/webm");
+      
+      // Send voice message with attachments array
+      await sendMessage({
+        conversationId,
+        senderId: currentUserId,
+        organizationId,
+        type: "audio",
+        content: `Voice message (${duration}s)`,
+        attachments: [{
+          url: result.url,
+          name: "voice.webm",
+          type: "audio/webm",
+          size: blob.size,
+        }],
+        audioDuration: duration,
+      });
+
+      toast.success(t('chat.voiceMessageSent'));
+      setShowVoiceRecorder(false);
+      setIsRecording(false);
+    } catch (err) {
+      console.error("Error sending voice message:", err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error("Error details:", errorMessage);
+      toast.error(`${t('chat.voiceMessageFailed')}: ${errorMessage}`);
+      setShowVoiceRecorder(false);
+      setIsRecording(false);
+    }
+  }, [conversationId, currentUserId, organizationId, sendMessage, t]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value);
@@ -431,21 +491,6 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
       Notification.requestPermission();
     }
   }, [messages?.length, conv?.membership?.isMuted, currentUserId]);
-
-  // Group messages by date
-  const groupedMessages: Array<{ date: string; ts: number; messages: typeof messages }> = [];
-  if (messages) {
-    for (const msg of messages) {
-      if (!msg) continue;
-      const dateStr = formatDateSeparator(msg.createdAt);
-      const last = groupedMessages[groupedMessages.length - 1];
-      if (!last || last.date !== dateStr) {
-        groupedMessages.push({ date: dateStr, ts: msg.createdAt, messages: [msg] });
-      } else {
-        last.messages!.push(msg);
-      }
-    }
-  }
 
   const canSend = (input.trim().length > 0 || pendingFiles.length > 0) && !sending;
 
@@ -585,10 +630,10 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
         </div>
       )}
 
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 xs:px-3 sm:px-4 py-3 xs:py-4 space-y-1 custom-scrollbar" style={{ background: "var(--background)" }}>
-        {messages === undefined && (
-          <div className="space-y-3 animate-pulse">
+      {/* Messages area with virtualization */}
+      <div ref={messagesParentRef} className="flex-1 overflow-y-auto overflow-x-hidden px-2 xs:px-3 sm:px-4 py-3 xs:py-4 custom-scrollbar" style={{ background: "var(--background)" }}>
+        {messages === undefined ? (
+          <div className="space-y-3 animate-pulse" role="status" aria-label="Loading messages">
             {[...Array(5)].map((_, i) => (
               <div key={i} className={cn("flex gap-3", i % 2 === 0 ? "" : "flex-row-reverse")}>
                 <div className="w-8 h-8 rounded-full bg-white/5 shrink-0" />
@@ -599,64 +644,82 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
               </div>
             ))}
           </div>
-        )}
-
-        {groupedMessages.map((group) => (
-          <div key={group.date}>
-            <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>
-                {group.date}
-              </span>
-              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-            </div>
-
-            {group.messages?.map((msg, idx) => {
+        ) : messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No messages yet</p>
+          </div>
+        ) : (
+          <div
+            role="log"
+            aria-label="Chat messages"
+            aria-live="polite"
+            aria-relevant="additions"
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const msg = messages[virtualRow.index];
               if (!msg) return null;
-              const prevMsg = group.messages![idx - 1];
-              const nextMsg = group.messages![idx + 1];
+              
               const isOwn = msg.senderId === currentUserId;
-              // Show avatar on first message of each sender streak (both own and others)
-              const isFirstOfStreak = idx === 0 || prevMsg?.senderId !== msg.senderId;
-              // Don't show avatar or name in System Announcements
+              const prevMsg = messages[virtualRow.index - 1];
+              const isFirstOfStreak = virtualRow.index === 0 || prevMsg?.senderId !== msg.senderId;
               const isSystemAnnouncements = conv?.name === "System Announcements";
               const showAvatar = isFirstOfStreak && !isSystemAnnouncements;
-              // Never show name in System Announcements
               const showName = isSystemAnnouncements ? false : (isFirstOfStreak && !isOwn && conv?.type === "group");
+
               return (
-                <MessageBubble
+                <div
                   key={msg._id}
-                  message={msg}
-                  isOwn={isOwn}
-                  showAvatar={showAvatar}
-                  showName={!!showName}
-                  currentUserId={currentUserId}
-                  currentUserAvatar={currentUserAvatar}
-                  currentUserName={currentUserName}
-                  onReply={(id, content, senderName) => setReplyTo({ id, content, senderName })}
-                  onOpenThread={(id, content) => setThread({ id, content })}
-                  onSendMessage={async (text) => {
-                    await sendMessage({
-                      conversationId,
-                      senderId: currentUserId,
-                      organizationId,
-                      type: "text",
-                      content: text,
-                    });
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
                   }}
-                  lang={i18n.language || "en"}
-                />
+                >
+                  <MessageBubble
+                    message={msg}
+                    isOwn={isOwn}
+                    showAvatar={showAvatar}
+                    showName={!!showName}
+                    currentUserId={currentUserId}
+                    currentUserAvatar={currentUserAvatar}
+                    currentUserName={currentUserName}
+                    onReply={(id, content, senderName) => setReplyTo({ id, content, senderName })}
+                    onOpenThread={(id, content) => setThread({ id, content })}
+                    onSendMessage={async (text) => {
+                      await sendMessage({
+                        conversationId,
+                        senderId: currentUserId,
+                        organizationId,
+                        type: "text",
+                        content: text,
+                      });
+                    }}
+                    lang={i18n.language || "en"}
+                  />
+                </div>
               );
             })}
           </div>
-        ))}
-
-        {typingUsers && typingUsers.length > 0 && (
-          <TypingIndicator users={typingUsers} />
         )}
 
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Typing indicator */}
+      {typingUsers && typingUsers.length > 0 && (
+        <div className="px-4 py-2 border-t" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
+          <TypingIndicator users={typingUsers} />
+        </div>
+      )}
 
       {/* Pending file previews */}
       {pendingFiles.length > 0 && (
@@ -852,6 +915,16 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
             <Clock className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
           </button>
 
+          {/* Voice message button */}
+          <button
+            onClick={() => setShowVoiceRecorder(!showVoiceRecorder)}
+            className="w-6 xs:w-7 h-6 xs:h-7 flex items-center justify-center rounded-lg transition-all hover:scale-110 shrink-0"
+            style={{ color: showVoiceRecorder || isRecording ? "var(--primary)" : "var(--text-disabled)" }}
+            title="Voice message"
+          >
+            <Mic className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
+          </button>
+
           {/* Text input + @mention popup */}
           <div className="flex-1 relative min-w-0">
             {/* @mention autocomplete popup */}
@@ -910,6 +983,19 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
             </button>
             {showEmoji && <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmoji(false)} />}
           </div>
+
+          {/* Voice Message Recorder */}
+          {showVoiceRecorder && (
+            <VoiceMessageRecorder
+              onRecordingStart={() => setIsRecording(true)}
+              onRecordingStop={handleVoiceMessage}
+              onRecordingCancel={() => {
+                setShowVoiceRecorder(false);
+                setIsRecording(false);
+              }}
+              disabled={false}
+            />
+          )}
 
           {/* Send */}
           <button

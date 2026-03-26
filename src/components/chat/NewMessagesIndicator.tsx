@@ -1,0 +1,25 @@
+"use client";
+
+import React from "react";
+import { ArrowDown } from "lucide-react";
+
+interface NewMessagesIndicatorProps {
+  count: number;
+  onClick: () => void;
+}
+
+export function NewMessagesIndicator({ count, onClick }: NewMessagesIndicatorProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 animate-bounce-in z-10"
+      style={{ 
+        background: "var(--primary)", 
+        color: "var(--text-on-primary)",
+      }}
+    >
+      <span className="text-xs font-medium">{count} new {count === 1 ? 'message' : 'messages'}</span>
+      <ArrowDown className="w-3.5 h-3.5" />
+    </button>
+  );
+}

@@ -853,21 +853,22 @@ body {
   @apply font-semibold text-lg;
   @apply transition-all duration-300;
   @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
-  
-  /* Glass effect */
-  background: rgba(255, 255, 255, 0.1);
+
+  /* Glass effect — works on both light and dark backgrounds */
+  background: rgba(59, 130, 246, 0.1);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #2563eb;
+
   /* Hover effects */
   transform: scale(1);
 }
 
 .cta-btn-secondary:hover {
   transform: scale(1.03);
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #1d4ed8;
 }
 
 .cta-btn-secondary:active {

@@ -164,10 +164,10 @@ export default function CreateStarterOrgPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-                Create Starter Organization
+                {t('register.createStarterOrg')}
               </h1>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Free forever • Up to 10 employees • Instant setup
+                {t('register.starterOrgSubtitle')}
               </p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function CreateStarterOrgPage() {
             {/* Organization Name */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                Organization Name
+                {t('register.orgNameLabel')}
               </label>
               <div className="relative">
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -202,7 +202,7 @@ export default function CreateStarterOrgPage() {
             {/* Slug */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                Organization URL
+                {t('register.orgUrlLabel')}
               </label>
               <div className="relative">
                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -228,7 +228,7 @@ export default function CreateStarterOrgPage() {
                 />
               </div>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                yourteam.officehub.com/<strong>{formData.slug || "your-org"}</strong>
+                {t('register.yourTeamSubdomain')}
               </p>
             </div>
 
@@ -236,7 +236,7 @@ export default function CreateStarterOrgPage() {
               {/* Your Name */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Your Name
+                  {t('register.yourNameLabel')}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -268,7 +268,7 @@ export default function CreateStarterOrgPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                    placeholder="you@company.com"
+                    placeholder={t('placeholders.youAtCompany')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: "var(--input)",
@@ -286,7 +286,7 @@ export default function CreateStarterOrgPage() {
               {/* Phone */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Phone (optional)
+                  {t('register.phoneOptional')}
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -294,7 +294,7 @@ export default function CreateStarterOrgPage() {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-                    placeholder="+1 234 567 890"
+                    placeholder={t('placeholders.phonePlaceholder')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: "var(--input)",
@@ -310,7 +310,7 @@ export default function CreateStarterOrgPage() {
               {/* Country */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Country (optional)
+                  {t('register.countryOptional')}
                 </label>
                 <input
                   type="text"
@@ -332,7 +332,7 @@ export default function CreateStarterOrgPage() {
             {/* Industry */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                Industry (optional)
+                {t('register.industryOptional')}
               </label>
               <div className="relative">
                 <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -398,7 +398,7 @@ export default function CreateStarterOrgPage() {
                     className="text-xs"
                     style={{ color: strength > 0 ? STRENGTH_COLORS[strength - 1] : "var(--text-muted)" }}
                   >
-                    {strength > 0 ? STRENGTH_LABELS[strength - 1] : ""}
+                    {strength > 0 ? t(`register.passwordStrength${strength - 1}`) : ""}
                   </p>
                 </div>
               )}
@@ -428,18 +428,18 @@ export default function CreateStarterOrgPage() {
             >
               {isPending ? (
                 <>
-                  <ShieldLoader size="xs" variant="inline" className="mr-2" /> Creating organization...
+                  <ShieldLoader size="xs" variant="inline" className="mr-2" /> {t('register.creatingOrg')}
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" /> Create Free Organization
+                  <CheckCircle2 className="w-4 h-4" /> {t('register.createFreeOrg')}
                 </>
               )}
             </motion.button>
           </form>
 
           <p className="text-center text-xs mt-6" style={{ color: "var(--text-muted)" }}>
-            By creating an organization, you agree to our Terms of Service and Privacy Policy.
+            {t('register.termsAgreement')}
           </p>
         </div>
 

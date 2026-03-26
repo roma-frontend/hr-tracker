@@ -9,7 +9,14 @@ import { randomBytes, createHash, createHmac } from 'crypto';
 // CSRF PROTECTION
 // ═══════════════════════════════════════════════════════════════
 
-const CSRF_SECRET = process.env.CSRF_SECRET || 'change-me-in-production';
+const csrfSecret = process.env.CSRF_SECRET;
+
+// Validate CSRF_SECRET in production
+if (process.env.NODE_ENV === 'production' && !csrfSecret) {
+  throw new Error('CSRF_SECRET must be set in production environment');
+}
+
+const CSRF_SECRET = csrfSecret || 'dev-secret-change-me-in-production-min-32-chars';
 const CSRF_TOKEN_LENGTH = 32;
 
 /**

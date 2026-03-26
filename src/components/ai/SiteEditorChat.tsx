@@ -335,11 +335,11 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
           <div className="flex items-center gap-3">
             <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             <div>
-              <h4 className="font-semibold text-purple-900 dark:text-purple-100">
+              <h4 className="font-semibold">
                 {plan === "professional" ? t("aiSiteEditor.professionalPlan") : t("aiSiteEditor.enterprisePlan")}
               </h4>
-              <p className="text-sm text-purple-700 dark:text-purple-300">
-                ✨ {t("aiSiteEditor.unlimited")} · AI автоматически применяет изменения в файлы
+              <p className="text-sm">
+                ✨ {t("aiSiteEditor.unlimited")} · {t("aiSiteEditor.aiAutoApplies")}
               </p>
             </div>
           </div>

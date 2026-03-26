@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '../../../../../convex/_generated/api';
 
-export async function GET(req: Request) {
+// Opt out of static generation — uses request.url
+export const revalidate = 0;
+
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const requesterId = searchParams.get('requesterId');
+    const requesterId = req.nextUrl.searchParams.get('requesterId');
     if (!requesterId) return NextResponse.json({ error: 'requesterId required' }, { status: 400 });
 
     // Fetch ALL system data in parallel

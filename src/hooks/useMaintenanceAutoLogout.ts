@@ -103,7 +103,7 @@ export function useMaintenanceAutoLogout() {
 
           // 4. Manually clear all auth cookies from browser
           const cookies = document.cookie.split(";");
-          for (let cookie of cookies) {
+          for (const cookie of cookies) {
             const eqPos = cookie.indexOf("=");
             const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
             if (name.includes("auth") || name.includes("session")) {
@@ -172,7 +172,7 @@ export function useMaintenanceAutoLogout() {
             
             // 3. Clear auth cookies
             const cookies = document.cookie.split(";");
-            for (let cookie of cookies) {
+            for (const cookie of cookies) {
               const eqPos = cookie.indexOf("=");
               const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
               if (name.includes("auth") || name.includes("session")) {
@@ -251,7 +251,7 @@ export function useMaintenanceAutoLogout() {
             
             // 3. Clear auth cookies
             const cookies = document.cookie.split(";");
-            for (let cookie of cookies) {
+            for (const cookie of cookies) {
               const eqPos = cookie.indexOf("=");
               const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
               if (name.includes("auth") || name.includes("session")) {

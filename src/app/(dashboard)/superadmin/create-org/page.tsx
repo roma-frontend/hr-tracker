@@ -102,10 +102,10 @@ export default function SuperadminCreateOrgPage() {
       <div className="w-full max-w-2xl">
         <div className="rounded-2xl shadow-xl p-8" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <h1 className="text-3xl font-bold text-center mb-2" style={{ color: "var(--text-primary)" }}>
-            🏢 Create New Organization
+            🏢 {t('superadmin.organizations.createTitle')}
           </h1>
           <p className="text-center mb-8" style={{ color: "var(--text-secondary)" }}>
-            Create a new organization for a client
+            {t('superadmin.organizations.createSubtitle')}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -113,19 +113,19 @@ export default function SuperadminCreateOrgPage() {
               {/* Organization Name */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Organization Name *
+                  {t('superadmin.organizations.nameLabel')}
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ 
-                    background: "var(--background-subtle)", 
+                  style={{
+                    background: "var(--background-subtle)",
                     border: "1px solid var(--border)",
                     color: "var(--text-primary)"
                   }}
-                  placeholder="e.g., Acme Corp"
+                  placeholder={t('placeholders.acmeCorp')}
                   required
                 />
               </div>
@@ -133,19 +133,19 @@ export default function SuperadminCreateOrgPage() {
               {/* Slug */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Slug (URL-friendly) *
+                  {t('superadmin.organizations.slugLabel')}
                 </label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
                   className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ 
-                    background: "var(--background-subtle)", 
+                  style={{
+                    background: "var(--background-subtle)",
                     border: "1px solid var(--border)",
                     color: "var(--text-primary)"
                   }}
-                  placeholder="e.g., acme-corp"
+                  placeholder={t('placeholders.acmeInc')}
                   required
                 />
               </div>
@@ -153,19 +153,19 @@ export default function SuperadminCreateOrgPage() {
               {/* Admin Email */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Admin Email *
+                  {t('superadmin.organizations.adminEmailLabel')}
                 </label>
                 <input
                   type="email"
                   value={formData.adminEmail}
                   onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ 
-                    background: "var(--background-subtle)", 
+                  style={{
+                    background: "var(--background-subtle)",
                     border: "1px solid var(--border)",
                     color: "var(--text-primary)"
                   }}
-                  placeholder="admin@example.com"
+                  placeholder={t('placeholders.enterYourEmail')}
                   required
                 />
               </div>
@@ -173,54 +173,54 @@ export default function SuperadminCreateOrgPage() {
               {/* Plan */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Plan *
+                  {t('superadmin.organizations.planLabel')}
                 </label>
                 <select
                   value={formData.plan}
                   onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
                   className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ 
-                    background: "var(--background-subtle)", 
+                  style={{
+                    background: "var(--background-subtle)",
                     border: "1px solid var(--border)",
                     color: "var(--text-primary)"
                   }}
                 >
-                  <option value="starter">Starter (Free)</option>
-                  <option value="professional">Professional ($29/mo)</option>
-                  <option value="enterprise">Enterprise (Custom)</option>
+                  <option value="starter">{t('superadmin.organizations.planStarterFree')}</option>
+                  <option value="professional">{t('superadmin.organizations.planProfessionalPaid')}</option>
+                  <option value="enterprise">{t('superadmin.organizations.planEnterpriseCustom')}</option>
                 </select>
               </div>
 
               {/* Country */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Country
+                  {t('superadmin.organizations.countryLabel')}
                 </label>
                 <input
                   type="text"
                   value={formData.country}
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ 
-                    background: "var(--background-subtle)", 
+                  style={{
+                    background: "var(--background-subtle)",
                     border: "1px solid var(--border)",
                     color: "var(--text-primary)"
                   }}
-                  placeholder="e.g., United States"
+                  placeholder={t('placeholders.unitedStates')}
                 />
               </div>
 
               {/* Timezone */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Timezone
+                  {t('superadmin.organizations.timezoneLabel')}
                 </label>
                 <select
                   value={formData.timezone}
                   onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ 
-                    background: "var(--background-subtle)", 
+                  style={{
+                    background: "var(--background-subtle)",
                     border: "1px solid var(--border)",
                     color: "var(--text-primary)"
                   }}
@@ -240,19 +240,19 @@ export default function SuperadminCreateOrgPage() {
             {/* Industry */}
             <div>
               <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                Industry
+                {t('superadmin.organizations.industryLabel')}
               </label>
               <input
                 type="text"
                 value={formData.industry}
                 onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                style={{ 
-                  background: "var(--background-subtle)", 
+                style={{
+                  background: "var(--background-subtle)",
                   border: "1px solid var(--border)",
                   color: "var(--text-primary)"
                 }}
-                placeholder="e.g., Technology, Healthcare, Finance"
+                placeholder={t('placeholders.technologyHealthcare')}
               />
             </div>
 
@@ -262,11 +262,11 @@ export default function SuperadminCreateOrgPage() {
               className="w-full py-3 px-4 text-white font-semibold rounded-xl transition-all disabled:opacity-50 hover:opacity-90"
               style={{ background: "var(--accent-gradient)" }}
             >
-              {loading ? t('organization.creatingOrganization') : t('organization.createOrganization')}
+              {loading ? t('superadmin.organizations.creating') : t('superadmin.organizations.createOrganization')}
             </button>
 
             <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>
-              * Required fields. An invitation will be sent to the admin email.
+              {t('superadmin.organizations.requiredNotice')}
             </p>
           </form>
         </div>

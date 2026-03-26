@@ -113,10 +113,10 @@ export default function WeeklyDigestWidget() {
                 {stats && (
                   <div className="grid grid-cols-4 gap-3 mt-4">
                     {[
-                      { icon: Users, label: 'On Leave', value: stats.onLeave, color: 'text-blue-200' },
-                      { icon: Clock, label: 'Pending', value: stats.pending, color: 'text-yellow-200' },
-                      { icon: AlertTriangle, label: 'Late Today', value: stats.lateToday, color: 'text-red-200' },
-                      { icon: BarChart3, label: t('nav.attendance'), value: `${stats.attendanceRate}%`, color: 'text-green-200' },
+                      { icon: Users, label: 'On Leave', value: stats.onLeave, color: 'text-white' },
+                      { icon: Clock, label: 'Pending', value: stats.pending, color: 'text-white' },
+                      { icon: AlertTriangle, label: 'Late Today', value: stats.lateToday, color: 'text-white' },
+                      { icon: BarChart3, label: t('nav.attendance'), value: `${stats.attendanceRate}%`, color: 'text-white' },
                     ].map((s) => (
                       <div key={s.label} className="bg-white/10 rounded-xl p-3 text-center">
                         <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />

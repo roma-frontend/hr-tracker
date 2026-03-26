@@ -1,6 +1,13 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+const jwtSecret = process.env.JWT_SECRET;
+
+// Validate JWT_SECRET in production
+if (process.env.NODE_ENV === 'production' && (!jwtSecret || jwtSecret.length < 32)) {
+  throw new Error('JWT_SECRET must be at least 32 characters in production');
+}
+
+const secret = new TextEncoder().encode(jwtSecret || 'dev-secret-change-me-in-production-min-32-chars');
 
 export interface JWTPayload {
   userId: string;

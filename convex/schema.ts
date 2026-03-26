@@ -178,12 +178,6 @@ export default defineSchema({
     breakRemindersEnabled: v.optional(v.boolean()),
     breakInterval: v.optional(v.number()),
     dailyTaskGoal: v.optional(v.number()),
-    // Localization Settings
-    language: v.optional(v.string()),
-    timezone: v.optional(v.string()),
-    dateFormat: v.optional(v.string()),
-    timeFormat: v.optional(v.string()),
-    firstDayOfWeek: v.optional(v.string()),
     // Dashboard Settings
     defaultView: v.optional(v.string()),
     dataRefreshRate: v.optional(v.string()),
@@ -896,6 +890,18 @@ export default defineSchema({
     .index("by_org", ["organizationId"])
     .index("by_sender", ["senderId"])
     .index("by_pinned", ["conversationId", "isPinned"]),
+
+  // ── SAVED MESSAGES ───────────────────────────────────────────────────────
+  chatSavedMessages: defineTable({
+    userId: v.id("users"),
+    messageId: v.id("chatMessages"),
+    conversationId: v.id("chatConversations"),
+    organizationId: v.id("organizations"),
+    savedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_conversation", ["userId", "conversationId"])
+    .index("by_user_org", ["userId", "organizationId"]),
 
   // ── TYPING INDICATORS ────────────────────────────────────────────────────
   chatTyping: defineTable({

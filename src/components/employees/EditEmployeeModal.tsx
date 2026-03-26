@@ -288,9 +288,9 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                         color: form.employeeType === type ? "#2563eb" : "var(--text-muted)",
                       }}
                     >
-                      <span className="capitalize">{type}</span>
+                      <span className="capitalize">{t(`employeeTypes.${type}`)}</span>
                       <span className="text-xs opacity-70">
-                        {type === "contractor" ? "12,000 AMD" : "20,000 AMD"}
+                        {type === "contractor" ? `12,000 ${t('currency.amd')}` : `20,000 ${t('currency.amd')}`}
                       </span>
                     </button>
                   ))}

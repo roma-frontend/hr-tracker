@@ -530,7 +530,7 @@ function RegisterPageContent() {
                 className="text-sm font-semibold hover:underline"
                 style={{ color: "#10b981" }}
               >
-                🏢 Create New Organization
+                🏢 {t('register.createOrgWithPlan')}
               </button>
             </Link>
           </div>

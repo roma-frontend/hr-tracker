@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
-import { cookies } from 'next/headers';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
+
+// Opt out of static generation — uses cookies
+export const revalidate = 0;
 
 async function convexQuery(path: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/query`, {
@@ -15,9 +17,8 @@ async function convexQuery(path: string, args: Record<string, unknown>) {
   return data.value;
 }
 
-async function getUserIdFromCookie(): Promise<string | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('hr-auth-token')?.value;
+async function getUserIdFromCookie(req: NextRequest): Promise<string | null> {
+  const token = req.cookies.get('hr-auth-token')?.value;
   if (token) {
     const payload = await verifyJWT(token);
     if (payload) return payload.userId;
@@ -27,8 +28,7 @@ async function getUserIdFromCookie(): Promise<string | null> {
 
 export async function GET(req: NextRequest) {
   try {
-    // Try cookie first, then query param fallback
-    let userId = await getUserIdFromCookie();
+    let userId = await getUserIdFromCookie(req);
     if (!userId) {
       userId = req.nextUrl.searchParams.get('userId');
     }

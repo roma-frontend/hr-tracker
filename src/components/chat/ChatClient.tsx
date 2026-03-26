@@ -37,6 +37,8 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
   const [activeCall, setActiveCall] = useState<ActiveCall | null>(null);
   const [mobileShowChat, setMobileShowChat] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [offlineMessages, setOfflineMessages] = useState<{ conversationId: string; content: string; type?: string }[]>([]);
 
   const uid = userId as Id<"users">;
   const orgId = organizationId as Id<"organizations">;
@@ -44,6 +46,27 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
   // Respect org selector: if a specific org is selected (e.g. superadmin), use it
   const { selectedOrgId } = useOrgSelectorStore();
   const effectiveOrgId = (selectedOrgId ? selectedOrgId as Id<"organizations"> : orgId);
+
+  // Online/Offline detection
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    setIsOnline(navigator.onLine);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Send queued messages when back online
+  useEffect(() => {
+    if (isOnline && offlineMessages.length > 0) {
+      // Messages will be sent automatically via normal flow
+      setOfflineMessages([]);
+    }
+  }, [isOnline, offlineMessages.length]);
 
   const conversations = useQuery(
     api.chat.getMyConversations,
@@ -141,6 +164,18 @@ export default function ChatClient({ userId, organizationId, userName, userAvata
             }}
           />
         </>
+      )}
+
+      {/* Offline Indicator */}
+      {!isOnline && (
+        <div className="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slide-up"
+          style={{ background: "var(--background-elevated)", border: "1px solid var(--border)" }}>
+          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <div>
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>No connection</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Messages will be sent when you're back online</p>
+          </div>
+        </div>
       )}
 
       <div

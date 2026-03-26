@@ -82,7 +82,7 @@ export default function DashboardClient() {
   const user = useAuthUser();
   const [mounted, setMounted] = React.useState(false);
   const [showTour, setShowTour] = React.useState(false);
-  React.useEffect(() => { 
+  React.useEffect(() => {
     setMounted(true);
     // Show tour for new users (first time login)
     const hasSeenTour = localStorage.getItem("dashboard_tour_seen");
@@ -426,22 +426,23 @@ export default function DashboardClient() {
             </CardContent>
           </Card>
         </motion.div>
-
-        {/* ═══════════════════════════════════════════════════════════════
+      </div>
+      {/* ═══════════════════════════════════════════════════════════════
           PERSONAL LEAVE STATS — For all users
           ═══════════════════════════════════════════════════════════════ */}
       {user?.id && (
-        <motion.div variants={itemVariants} className="lg:col-span-1">
+        <motion.div variants={itemVariants} data-tour="leave-balance">
           <LeaveStats userId={user.id as Id<"users">} />
         </motion.div>
       )}
 
       {/* Quick Actions */}
-      <motion.div variants={itemVariants} className="lg:col-span-2">
+      <motion.div variants={itemVariants} data-tour="quick-actions" className="lg:col-span-2">
         <QuickActions />
       </motion.div>
 
-      {/* Admin Widgets - Conditionally rendered */}
+      {/* Recent Activity */}
+      <motion.div variants={itemVariants} data-tour="recent-activity" className="lg:col-span-1">
         {organization?.plan === "enterprise" && (
           <>
             <motion.div variants={itemVariants} className="lg:col-span-1">
@@ -476,7 +477,7 @@ export default function DashboardClient() {
             </motion.div>
           </>
         )}
-      </div>
+      </motion.div>
 
       {/* Dashboard Tour */}
       {showTour && <DashboardTour onComplete={handleTourComplete} onSkip={handleTourComplete} />}

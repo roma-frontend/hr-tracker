@@ -163,7 +163,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               {availableEmployees?.map(emp => (
                 <option key={emp._id} value={emp._id}>
                   {emp.name}
-                  {emp.role ? ` [${emp.role === 'admin' ? 'Admin' : emp.role === 'supervisor' ? 'Supervisor' : emp.role === 'driver' ? 'Driver' : 'Employee'}]` : ''}
+                  {emp.role ? ` [${t(`roles.${emp.role}`)}]` : ''}
                   {emp.position ? ` — ${emp.position}` : ""}
                   {emp.department ? ` (${emp.department})` : ""}
                 </option>

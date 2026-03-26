@@ -10,6 +10,15 @@
     "not dead",
     "not op_mini all"
   ],
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ],
+    "**/*.{json,md}": [
+      "git add"
+    ]
+  },
   "scripts": {
     "dev": "next dev --turbo",
     "dev:webpack": "next dev",
@@ -17,6 +26,9 @@
     "build:analyze": "set ANALYZE=true && next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "perf": "npm run build && npm run start",
     "test:delete-employees": "tsx scripts/delete-test-employees.ts",
     "test:add-org": "tsx scripts/add-test-org-data.ts",
@@ -26,7 +38,8 @@
     "stripe:export-pdf": "tsx scripts/export-stripe-to-pdf.ts",
     "stripe:growth-chart": "tsx scripts/stripe-growth-chart.ts",
     "stripe:sync": "tsx scripts/sync-stripe-data.ts",
-    "stripe:check-trials": "tsx scripts/check-trial-reminders.ts"
+    "stripe:check-trials": "tsx scripts/check-trial-reminders.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.34",
@@ -121,9 +134,13 @@
     "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "husky": "^9.1.7",
+    "jest": "^30.3.0",
+    "lint-staged": "^16.4.0",
     "pdfkit": "^0.17.2",
     "shadcn": "^3.8.5",
     "tailwindcss": "^4",
+    "ts-jest": "^29.4.6",
     "tsx": "^4.21.0",
     "typescript": "^5",
     "xlsx": "^0.18.5"

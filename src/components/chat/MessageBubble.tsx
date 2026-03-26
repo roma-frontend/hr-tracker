@@ -471,7 +471,7 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
         <div className={cn("flex flex-col max-w-[88%] xs:max-w-[85%] sm:max-w-[75%] md:max-w-[65%] min-w-0", isOwn ? "items-end" : "items-start")}>
           {showName && (
             <span className="text-[11px] font-medium mb-0.5 px-1" style={{ color: "var(--text-muted)" }}>
-              {message.sender?.name}
+              {message.sender?.name ?? "Unknown"}
             </span>
           )}
 
@@ -517,6 +517,53 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
             {message.attachments && message.attachments.length > 0 && (
               <div className={cn("space-y-2", message.content ? "mt-2" : "")}>
                 {message.attachments.map((att, i) => {
+                  // Voice/Audio message
+                  if (att.type.startsWith("audio/") || message.type === "audio") {
+                    const duration = message.callDuration || 0;
+                    const formatDuration = (secs: number) => {
+                      const m = Math.floor(secs / 60);
+                      const s = Math.floor(secs % 60);
+                      return `${m}:${s.toString().padStart(2, "0")}`;
+                    };
+                    return (
+                      <div key={i} className="flex items-center gap-2 p-2 rounded-xl min-w-[200px] max-w-[280px]"
+                        style={{ background: isOwn ? "rgba(255,255,255,0.15)" : "var(--background-subtle)" }}>
+                        {/* Play icon */}
+                        <button className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
+                          style={{ background: isOwn ? "rgba(255,255,255,0.2)" : "var(--primary)", color: "white" }}>
+                          <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </button>
+                        
+                        {/* Waveform visualization placeholder */}
+                        <div className="flex-1 flex items-center gap-0.5 h-8">
+                          {Array.from({ length: 20 }).map((_, j) => (
+                            <div key={j} className="w-1 rounded-full"
+                              style={{
+                                height: `${Math.random() * 20 + 8}px`,
+                                background: isOwn ? "rgba(255,255,255,0.6)" : "var(--primary)",
+                              }}
+                            />
+                          ))}
+                        </div>
+                        
+                        {/* Duration */}
+                        <span className="text-xs font-mono" style={{ color: isOwn ? "rgba(255,255,255,0.8)" : "var(--text-muted)" }}>
+                          {formatDuration(duration)}
+                        </span>
+                        
+                        {/* Download */}
+                        <a href={att.url} download={att.name} target="_blank" rel="noopener noreferrer"
+                          className="p-1.5 rounded-lg hover:opacity-80 transition-opacity"
+                          style={{ color: isOwn ? "rgba(255,255,255,0.8)" : "var(--text-muted)" }}>
+                          <Download className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    );
+                  }
+                  
+                  // Image
                   if (isImage(att.type)) {
                     return (
                       <div key={i} className="relative group/img">

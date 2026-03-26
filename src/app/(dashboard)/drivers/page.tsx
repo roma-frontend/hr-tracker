@@ -153,6 +153,15 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
   const [notesText, setNotesText] = useState("");
   const [etaScheduleId, setEtaScheduleId] = useState<string | null>(null);
   const [etaValue, setEtaValue] = useState("");
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // Update current time every minute for waiting calculation
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
 
   const handleRespond = async (requestId: Id<"driverRequests">, approved: boolean) => {
     if (!driver) return;
@@ -441,7 +450,7 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
                             <>
                               <Badge variant="outline" className="text-xs bg-yellow-50 border-yellow-200">
                                 <Timer className="w-3 h-3 mr-1" />
-                                Waiting: {Math.round((Date.now() - schedule.arrivedAt) / 60000)} min
+                                Waiting: {Math.round((currentTime - schedule.arrivedAt) / 60000)} min
                               </Badge>
                               <Button
                                 size="sm"
@@ -1105,7 +1114,7 @@ export default function DriversPage() {
   const [endTime, setEndTime] = useState<string>("");
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number; address?: string } | undefined>();
   const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number; address?: string } | undefined>();
-  
+
   // Corporate features state
   const [tripPriority, setTripPriority] = useState<"P0" | "P1" | "P2" | "P3">("P2");
   const [tripCategory, setTripCategory] = useState<"client_meeting" | "airport" | "office_transfer" | "emergency" | "team_event" | "personal">("office_transfer");
@@ -1655,7 +1664,7 @@ export default function DriversPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex flex-wrap gap-2 mt-4">
                       <Button
                         size="sm"
                         className="flex-1"
@@ -1666,6 +1675,7 @@ export default function DriversPage() {
                       >
                         {t("driver.book", "Book")}
                       </Button>
+                      <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
@@ -1701,6 +1711,7 @@ export default function DriversPage() {
                           <Heart className="w-4 h-4" />
                         )}
                       </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -2855,7 +2866,7 @@ export default function DriversPage() {
                     {selectedScheduleDetail?.type === "trip" ? t("driver.tripDetailsTitle", "Trip Details") : t("driver.blockedTimeSlot", "Blocked Time Slot")}
                   </h2>
                   <p className="text-primary-foreground/80 text-sm">
-                    {format(new Date(selectedScheduleDetail?.startTime || Date.now()), "EEEE, MMMM dd, yyyy")}
+                    {format(new Date(selectedScheduleDetail?.startTime || currentTime), "EEEE, MMMM dd, yyyy")}
                   </p>
                 </div>
               </div>

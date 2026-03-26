@@ -46,7 +46,7 @@ i18n
     lng: getInitialLanguage(), // Use saved language or default to 'en'
     supportedLngs: ['en', 'hy', 'ru'], // Explicitly define supported languages
     nonExplicitSupportedLngs: false, // Only use exact matches
-    debug: true, // Enable debug mode
+    debug: process.env.NODE_ENV === 'development', // Enable debug mode only in development
 
     interpolation: {
       escapeValue: false, // React already escapes

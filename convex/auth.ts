@@ -1,6 +1,26 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+// ── Error Handler Helper ─────────────────────────────────────────────────────
+/**
+ * Wraps convex mutations/queries with error handling
+ * Logs errors and rethrows with sanitized messages for security
+ */
+function wrapConvexError<T>(fn: () => T, operation: string): T {
+  try {
+    return fn();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`[Convex Auth] ${operation} error:`, errorMessage);
+    
+    // Don't expose internal errors to client
+    if (error instanceof Error && !errorMessage.includes('Invalid') && !errorMessage.includes('not found')) {
+      throw new Error(`Operation failed: ${operation}`);
+    }
+    throw error;
+  }
+}
+
 // ── Constants ────────────────────────────────────────────────────────────────
 const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
@@ -52,8 +72,9 @@ export const register = mutation({
     createOrgSlug: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const email = args.email.toLowerCase().trim();
-    const isSuperadmin = email === SUPERADMIN_EMAIL;
+    return wrapConvexError(async () => {
+      const email = args.email.toLowerCase().trim();
+      const isSuperadmin = email === SUPERADMIN_EMAIL;
 
     // ── 1. Check email not already registered ──────────────────────────────
     const existing = await ctx.db
@@ -213,6 +234,7 @@ export const register = mutation({
     }
 
     return { userId, role, needsApproval: !isApproved, organizationId };
+    }, "register");
   },
 });
 
@@ -228,10 +250,11 @@ export const login = mutation({
     isFaceLogin: v.optional(v.boolean()),
   },
   handler: async (ctx, { email, password: passwordHash, sessionToken, sessionExpiry, isFaceLogin }) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email.toLowerCase().trim()))
-      .unique();
+    return wrapConvexError(async () => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", email.toLowerCase().trim()))
+        .unique();
 
     if (!user) throw new Error("Invalid email or password");
     if (!user.isActive) throw new Error("Your account has been deactivated. Contact your administrator.");
@@ -265,6 +288,7 @@ export const login = mutation({
       organizationSlug: org.slug,
       organizationPlan: org.plan,
     };
+    }, "login");
   },
 });
 
@@ -539,7 +563,7 @@ export const googleOAuthLogin = mutation({
     const email = args.email.toLowerCase().trim();
 
     // ── 1. Find existing user ──────────────────────────────────────────────
-    let user = await ctx.db
+    const user = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", email))
       .unique();

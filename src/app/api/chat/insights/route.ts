@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../../convex/_generated/api';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-export async function GET(req: Request) {
+// Opt out of static generation — uses request.url
+export const revalidate = 0;
+
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId');
+    const userId = req.nextUrl.searchParams.get('userId');
     if (!userId) return NextResponse.json(null);
 
     const [user, userLeaves, allLeaves, timeHistory] = await Promise.all([

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, isBlocked, blockKey, logLoginAttempt } from '@/lib/redis'
+import { checkRateLimit, isBlocked, blockKey } from '@/lib/redis'
 
 // ═══════════════════════════════════════════════════════════════
 // SECURITY CONFIGURATION
@@ -13,9 +13,6 @@ const SECURITY_CONFIG = {
   DDOS_THRESHOLD: 200,
   SUSPICIOUS_PATHS: ['/admin/php', '/wp-admin', '/phpmyadmin', '/.env', '/.git', '/config'],
 };
-
-// In-memory fallback for suspicious IPs (Redis handles rate limiting)
-const suspiciousIPs = new Set<string>();
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [
@@ -93,16 +90,17 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const ip = getClientIP(request);
 
-  // 1. Check suspicious IPs
-  if (suspiciousIPs.has(ip) && !pathname.startsWith('/api/')) {
+  // 1. Check blocked IPs (persistent via Redis)
+  const isIpBlocked = await isBlocked(`ip:${ip}`);
+  if (isIpBlocked && !pathname.startsWith('/api/')) {
     console.warn(`🚨 Blocked suspicious IP: ${ip}`);
     return new NextResponse('Access Denied', { status: 403 });
   }
 
-  // 2. Check suspicious paths
+  // 2. Check suspicious paths - block IP persistently via Redis
   if (isSuspiciousPath(pathname)) {
-    suspiciousIPs.add(ip);
-    console.warn(`🚨 Suspicious path: ${pathname} from ${ip}`);
+    await blockKey(`ip:${ip}`, 24 * 60 * 60 * 1000, 'Suspicious path access attempt'); // 24 hours
+    console.warn(`🚨 Suspicious path: ${pathname} from ${ip} - blocked for 24h`);
     return new NextResponse('Not Found', { status: 404 });
   }
 
@@ -120,10 +118,10 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // 4. DDoS Protection (check request volume)
+  // 4. DDoS Protection (check request volume) - block IP persistently via Redis
   if (rateLimitResult.remaining < SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS - SECURITY_CONFIG.DDOS_THRESHOLD) {
-    suspiciousIPs.add(ip);
-    console.error(`🚨 Potential DDoS attack from IP: ${ip}`);
+    await blockKey(`ip:${ip}`, 60 * 60 * 1000, 'Potential DDoS attack'); // 1 hour
+    console.error(`🚨 Potential DDoS attack from IP: ${ip} - blocked for 1h`);
     return new NextResponse('Service Unavailable', { status: 503 });
   }
 
@@ -131,7 +129,6 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/login' || pathname === '/api/auth/signin') {
     const blocked = await isBlocked(`login:${ip}`);
     if (blocked) {
-      const reason = await blockKey(`login:${ip}`, 0, '').then(() => 'blocked');
       return new NextResponse(
         JSON.stringify({
           error: 'Too many login attempts',
@@ -142,7 +139,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 6. SQL Injection check in query params
+  // 6. SQL Injection check in query params - block IP persistently via Redis
   if (pathname.startsWith('/api/')) {
     const url = new URL(request.url);
     const suspiciousPatterns = [
@@ -152,8 +149,8 @@ export async function middleware(request: NextRequest) {
 
     for (const [, value] of url.searchParams.entries()) {
       if (suspiciousPatterns.some(pattern => pattern.test(value))) {
-        console.error(`🚨 SQL Injection attempt from ${ip}`);
-        suspiciousIPs.add(ip);
+        await blockKey(`ip:${ip}`, 24 * 60 * 60 * 1000, 'SQL/XSS injection attempt'); // 24 hours
+        console.error(`🚨 SQL Injection attempt from ${ip} - blocked for 24h`);
         return new NextResponse('Bad Request', { status: 400 });
       }
     }
@@ -167,7 +164,6 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
-  const isOnboardingRoute = pathname.startsWith('/onboarding');
 
   console.log(`[Middleware] Path: ${pathname}, isAuth: ${isAuthRoute}, isProtected: ${isProtectedRoute}, isPublic: ${isPublicRoute}, hasToken: ${!!token || !!nextAuthToken}`);
 

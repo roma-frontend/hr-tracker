@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../../convex/_generated/api';
 import { groq } from '@ai-sdk/groq';
@@ -6,12 +6,14 @@ import { generateText } from 'ai';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+// Opt out of static generation — uses request.url
+export const revalidate = 0;
+
 // GET /api/chat/weekly-digest?adminId=xxx
 // Returns AI-generated weekly digest for admin
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const adminId = searchParams.get('adminId');
+    const adminId = req.nextUrl.searchParams.get('adminId');
     if (!adminId) return NextResponse.json({ error: 'adminId required' }, { status: 400 });
 
     const today = new Date();

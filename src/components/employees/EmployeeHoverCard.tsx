@@ -10,12 +10,12 @@ import React from "react";
 
 type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";
 
-const PRESENCE_CONFIG: Record<PresenceStatus, { label: string; color: string; bg: string; dot: string; icon: string }> = {
-  available:     { label: "Available",     color: "text-emerald-600", bg: "bg-emerald-50",  dot: "bg-emerald-500", icon: "🟢" },
-  in_meeting:    { label: "In Meeting",    color: "text-amber-600",   bg: "bg-amber-50",    dot: "bg-amber-500",   icon: "📅" },
-  in_call:       { label: "In Call",       color: "text-blue-600",    bg: "bg-blue-50",     dot: "bg-blue-500",    icon: "📞" },
-  out_of_office: { label: "Out of Office", color: "text-slate-600",   bg: "bg-slate-50",    dot: "bg-slate-500",   icon: "🏠" },
-  busy:          { label: "Busy",          color: "text-orange-600",  bg: "bg-orange-50",   dot: "bg-orange-500",  icon: "⛔" },
+const PRESENCE_CONFIG: Record<PresenceStatus, { labelKey: string; color: string; bg: string; dot: string; icon: string }> = {
+  available:     { labelKey: "presence.available",     color: "text-emerald-600", bg: "bg-emerald-50",  dot: "bg-emerald-500", icon: "🟢" },
+  in_meeting:    { labelKey: "presence.inMeeting",    color: "text-amber-600",   bg: "bg-amber-50",    dot: "bg-amber-500",   icon: "📅" },
+  in_call:       { labelKey: "presence.inCall",       color: "text-blue-600",    bg: "bg-blue-50",     dot: "bg-blue-500",    icon: "📞" },
+  out_of_office: { labelKey: "presence.outOfOffice", color: "text-slate-600",   bg: "bg-slate-50",    dot: "bg-slate-500",   icon: "🏠" },
+  busy:          { labelKey: "presence.busy",          color: "text-orange-600",  bg: "bg-orange-50",   dot: "bg-orange-500",  icon: "⛔" },
 };
 
 interface Props {
@@ -127,7 +127,7 @@ employee, children, canEditStatus = false, currentUserId, userRole, allUsers }: 
               <div className="bg-gradient-to-br from-blue-600 to-sky-700 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)" }}>
-                    <span className="mr-1">{presenceCfg.icon}</span>{presenceCfg.label}
+                    <span className="mr-1">{presenceCfg.icon}</span>{t(presenceCfg.labelKey)}
                   </span>
                   {activeTasks > 0 && (
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "var(--text-on-primary)" }}>
@@ -183,11 +183,11 @@ employee, children, canEditStatus = false, currentUserId, userRole, allUsers }: 
                     <div className="flex items-center gap-2.5">
                       <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--background-subtle)" }}>👤</span>
                       <div>
-                        <span className="text-xs block" style={{ color: "var(--text-muted)" }}>Supervisor</span>
+                        <span className="text-xs block" style={{ color: "var(--text-muted)" }}>{t('roles.supervisor')}</span>
                         <span className="text-sm font-medium" style={{ color: "var(--accent-primary)" }}>
                           {supervisor.name && supervisor.name !== "admin"
                             ? supervisor.name
-                            : supervisor.email?.split("@")[0] ?? "Admin"}
+                            : supervisor.email?.split("@")[0] ?? t('roles.admin')}
                         </span>
                       </div>
                     </div>
@@ -196,30 +196,30 @@ employee, children, canEditStatus = false, currentUserId, userRole, allUsers }: 
                   {/* Financial info — admin only */}
                   {isAdmin && employee.travelAllowance != null && (
                     <div className="mt-1 pt-2.5 border-t" style={{ borderColor: "var(--border)" }}>
-                      <p className="text-xs mb-2 font-medium uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Finance (Admin only)</p>
+                      <p className="text-xs mb-2 font-medium uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t('employeeInfo.finance')}</p>
                       <div className="grid grid-cols-2 gap-2">
                         {employee.travelAllowance != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
-                            <p className="text-xs text-amber-500 font-medium">✈️ Travel</p>
-                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.travelAllowance.toLocaleString()} AMD</p>
+                            <p className="text-xs text-amber-500 font-medium">✈️ {t('employeeInfo.travel')}</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.travelAllowance.toLocaleString()} {t('currency.amd')}</p>
                           </div>
                         )}
                         {employee.sickLeaveBudget != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
-                            <p className="text-xs text-rose-500 font-medium">🏥 Sick Leave</p>
-                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.sickLeaveBudget.toLocaleString()} AMD</p>
+                            <p className="text-xs text-rose-500 font-medium">🏥 {t('employeeInfo.sickLeave')}</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.sickLeaveBudget.toLocaleString()} {t('currency.amd')}</p>
                           </div>
                         )}
                         {employee.vacationBudget != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
-                            <p className="text-xs text-blue-500 font-medium">🏖️ Vacation</p>
-                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.vacationBudget.toLocaleString()} AMD</p>
+                            <p className="text-xs text-blue-500 font-medium">🏖️ {t('employeeInfo.vacation')}</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.vacationBudget.toLocaleString()} {t('currency.amd')}</p>
                           </div>
                         )}
                         {employee.salary != null && (
                           <div className="rounded-xl p-2.5" style={{ backgroundColor: "var(--background-subtle)" }}>
-                            <p className="text-xs text-emerald-500 font-medium">💰 Salary</p>
-                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.salary.toLocaleString()} AMD</p>
+                            <p className="text-xs text-emerald-500 font-medium">💰 {t('employeeInfo.salary')}</p>
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{employee.salary.toLocaleString()} {t('currency.amd')}</p>
                           </div>
                         )}
                       </div>
@@ -257,7 +257,7 @@ employee, children, canEditStatus = false, currentUserId, userRole, allUsers }: 
                             }
                           }}
                         >
-                          {cfg.icon} {cfg.label}
+                          {cfg.icon} {t(cfg.labelKey)}
                         </button>
                       ))}
                     </div>

@@ -122,7 +122,7 @@ export default function AISiteEditorPage() {
               <Card className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-lg border border-blue-200 dark:border-blue-500/30">
-                    <Palette className="h-6 w-6 text-blue-600 dark:text-blue-200" />
+                    <Palette className="h-6 w-6 text-blue-700 dark:text-blue-300" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.designChanges")}</h3>
@@ -142,7 +142,7 @@ export default function AISiteEditorPage() {
               <Card className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-green-100 dark:bg-green-500/20 rounded-lg border border-green-200 dark:border-green-500/30">
-                    <Code2 className="h-6 w-6 text-green-600 dark:text-green-200" />
+                    <Code2 className="h-6 w-6 text-green-700 dark:text-green-300" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.contentChanges")}</h3>
@@ -162,7 +162,7 @@ export default function AISiteEditorPage() {
               <Card className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-purple-100 dark:bg-purple-500/20 rounded-lg border border-purple-200 dark:border-purple-500/30">
-                    <Layout className="h-6 w-6 text-purple-600 dark:text-purple-200" />
+                    <Layout className="h-6 w-6 text-purple-700 dark:text-purple-300" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.layoutChanges")}</h3>
@@ -182,7 +182,7 @@ export default function AISiteEditorPage() {
               <Card className={`p-6 ${!features.aiSiteEditorLogicChanges ? "opacity-60" : ""}`}>
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-orange-100 dark:bg-orange-500/20 rounded-lg border border-orange-200 dark:border-orange-500/30">
-                    <Zap className="h-6 w-6 text-orange-600 dark:text-orange-200" />
+                    <Zap className="h-6 w-6 text-orange-700 dark:text-orange-300" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
@@ -208,8 +208,8 @@ export default function AISiteEditorPage() {
               {/* Full Control */}
               <Card className={`p-6 md:col-span-2 ${!features.aiSiteEditorFullControl ? "opacity-60" : ""}`}>
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-gradient-to-br from-purple-500/70 to-pink-500/70 dark:from-purple-700/50 dark:to-pink-700/50 rounded-lg">
-                    <Crown className="h-6 w-6 text-white dark:text-purple-200" />
+                  <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-700/50 dark:to-pink-700/50 rounded-lg">
+                    <Crown className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">

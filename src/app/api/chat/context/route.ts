@@ -1,7 +1,9 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
+
+// Opt out of static generation — uses cookies
+export const revalidate = 0;
 
 async function convexQuery(name: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/query`, {
@@ -14,11 +16,9 @@ async function convexQuery(name: string, args: Record<string, unknown>) {
   return data.value;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    // Get session from cookie
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('hr-session-token')?.value;
+    const sessionToken = req.cookies.get('hr-session-token')?.value;
 
     if (!sessionToken) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });

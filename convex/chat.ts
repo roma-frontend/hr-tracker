@@ -459,6 +459,7 @@ export const sendMessage = mutation({
       })),
       closedAt: v.optional(v.number()),
     })),
+    audioDuration: v.optional(v.number()),  // Duration in seconds for voice messages
   },
   handler: async (ctx, args) => {
     const now = Date.now();
@@ -496,6 +497,7 @@ export const sendMessage = mutation({
       replyToSenderName,
       mentionedUserIds: args.mentionedUserIds,
       poll: args.poll,
+      callDuration: args.audioDuration,  // Reuse for voice message duration
       createdAt: now,
     });
 
@@ -756,7 +758,7 @@ export const toggleReaction = mutation({
     if (!msg) throw new Error("Message not found");
 
     // Sanitize emoji: trim whitespace
-    let sanitizedEmoji = args.emoji.trim();
+    const sanitizedEmoji = args.emoji.trim();
     
     if (!sanitizedEmoji) {
       throw new Error("Invalid emoji: must contain at least one character");
@@ -774,7 +776,7 @@ export const toggleReaction = mutation({
       for (const [key, value] of Object.entries(rawReactions)) {
         // Try to detect if this is already an old-format emoji key (contains non-ASCII)
         // If so, try to convert it, otherwise assume it's already in new format
-        let safeKey = key;
+        const safeKey = key;
         try {
           // If key contains non-ASCII chars, it's an old format - skip it
           if (!/^[a-z0-9_]+$/.test(key)) {

@@ -27,6 +27,9 @@ import {
   Building2,
   Eye,
   ChevronRight,
+  Edit2,
+  Trash2,
+  MoreVertical,
 } from "lucide-react";
 import { useShallow } from 'zustand/shallow';
 import { useAuthStore } from "@/store/useAuthStore";
@@ -271,7 +274,7 @@ export function EmployeesClient() {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{t('common.employees')}</h1>
+          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{t('nav.employees')}</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
             {stats.total} {t('employees.total')} · {stats.staff} {t('employeeTypes.staff')} · {stats.contractors} {t('employeeTypes.contractors')}
           </p>
@@ -291,9 +294,9 @@ export function EmployeesClient() {
 
       {/* Info Banner for Admins */}
       {canManage && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 }}
           className="p-4 rounded-xl border flex items-start gap-3"
           style={{ background: "rgba(37,99,235,0.08)", borderColor: "rgba(37,99,235,0.2)" }}
@@ -303,11 +306,9 @@ export function EmployeesClient() {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm" style={{ color: "#2563eb" }}>
-              💡 Управление сотрудниками
+              {t('employees.infoBannerTitle')}
             </h3>
-            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-              Вы можете <strong>добавлять новых сотрудников</strong> кнопкой выше, <strong>редактировать</strong> параметры (имя, отдел, роль, должность) через кнопку ✏️ в каждой строке/карточке, и <strong>удалять</strong> через 🗑️. Все изменения сохраняются автоматически.
-            </p>
+            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }} dangerouslySetInnerHTML={{ __html: t('employees.infoBannerDesc') }} />
           </div>
         </motion.div>
       )}
@@ -473,7 +474,7 @@ export function EmployeesClient() {
                             <AvatarUpload userId={emp._id} currentUrl={emp.avatarUrl} name={emp.name} size="md" readonly={!canManage && emp._id !== user?.id} />
                             <div className="min-w-0 flex-1">
                               <h3 className="font-semibold truncate cursor-pointer hover:text-blue-500 transition-colors" style={{ color: "var(--text-primary)" }}>{emp.name}</h3>
-                              <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{emp.position ?? "No position"}</p>
+                              <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{emp.position ?? t('employees.noPosition')}</p>
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mt-1"
                                 style={{ background: roleConf.bg, color: roleConf.color }}>
                                 <RoleIcon className="w-2.5 h-2.5" />{t(roleConf.labelKey)}
@@ -490,7 +491,7 @@ export function EmployeesClient() {
                               <div className="flex items-center gap-2">
                                 <UserCog className="w-3 h-3 flex-shrink-0 text-blue-400" />
                                 <span className="truncate text-blue-500 font-medium">
-                                  {supervisors?.find(s => s._id === (emp as any).supervisorId)?.name ?? "Supervisor"}
+                                  {supervisors?.find(s => s._id === (emp as any).supervisorId)?.name ?? t('employees.noSupervisor')}
                                 </span>
                               </div>
                             )}
@@ -500,13 +501,13 @@ export function EmployeesClient() {
                               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: typeConf.bg, color: typeConf.color }}>{t(typeConf.labelKey)}</span>
                               {(emp as any).supervisorId && (
                                 <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-500/10 text-blue-500">
-                                  {supervisors?.find(s => s._id === (emp as any).supervisorId)?.name ?? "Supervisor"}
+                                  {supervisors?.find(s => s._id === (emp as any).supervisorId)?.name ?? t('employees.noSupervisor')}
                                 </span>
                               )}
                             </div>
                             <div className="flex items-center gap-1">
                               {isAdmin
-                                ? <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{(emp as any).travelAllowance?.toLocaleString() ?? '0'} AMD</span>
+                                ? <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{(emp as any).travelAllowance?.toLocaleString() ?? '0'} {t('currency.amd')}</span>
                                 : <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}>{t(presence.labelKey)}</span>
                               }
                             </div>
@@ -612,14 +613,14 @@ export function EmployeesClient() {
 
                           {/* Department - desktop only */}
                           <div className="hidden sm:block sm:col-span-2 text-sm truncate" style={{ color: "var(--text-muted)" }}>
-                            {emp.department ?? "—"}
+                            {emp.department ?? t('common.none')}
                           </div>
 
                           {/* Supervisor - desktop only */}
                           <div className="hidden sm:block sm:col-span-2 text-sm truncate text-blue-500 font-medium">
                             {(emp as any).supervisorId
-                              ? supervisors?.find(s => s._id === (emp as any).supervisorId)?.name ?? "—"
-                              : "—"}
+                              ? supervisors?.find(s => s._id === (emp as any).supervisorId)?.name ?? t('common.none')
+                              : t('common.none')}
                           </div>
 
                           {/* Presence status - desktop only */}

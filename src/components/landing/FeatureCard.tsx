@@ -117,7 +117,7 @@ icon,
             className="mt-auto flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 transition-all duration-300"
             style={{ color: accentColor }}
           >
-            <span>Learn more</span>
+            <span>{t('landing.learnMore')}</span>
             <span className="arrow-bounce">→</span>
           </div>
         </div>

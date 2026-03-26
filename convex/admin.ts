@@ -612,7 +612,7 @@ export const enableMaintenanceMode = mutation({
     const now = Date.now();
 
     // Check if maintenance mode already exists
-    let existing = await ctx.db
+    const existing = await ctx.db
       .query("maintenanceMode")
       .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
       .first();

@@ -85,14 +85,14 @@ const FEATURES = [
   },
 ] as const;
 
-const COLOR_MAP: Record<string, { iconColor: string; accentBg: string; accentText: string }> = {
-  blue: { iconColor: "#2563eb", accentBg: "rgba(37,99,235,0.1)", accentText: "#2563eb" },
-  orange: { iconColor: "#f59e0b", accentBg: "rgba(245,158,11,0.1)", accentText: "#d97706" },
-  purple: { iconColor: "#8b5cf6", accentBg: "rgba(139,92,246,0.1)", accentText: "#8b5cf6" },
-  indigo: { iconColor: "#6366f1", accentBg: "rgba(99,102,241,0.1)", accentText: "#6366f1" },
-  teal: { iconColor: "#0ea5e9", accentBg: "rgba(14,165,233,0.1)", accentText: "#0ea5e9" },
-  red: { iconColor: "#ef4444", accentBg: "rgba(239,68,68,0.1)", accentText: "#ef4444" },
-  yellow: { iconColor: "#f59e0b", accentBg: "rgba(251,191,36,0.1)", accentText: "#d97706" },
+const COLOR_MAP: Record<string, { iconColor: string; iconColorDark: string; accentBg: string; accentBgDark: string; accentText: string }> = {
+  blue: { iconColor: "#2563eb", iconColorDark: "#3b82f6", accentBg: "rgba(37,99,235,0.1)", accentBgDark: "rgba(59,130,246,0.15)", accentText: "#2563eb" },
+  orange: { iconColor: "#f59e0b", iconColorDark: "#fbbf24", accentBg: "rgba(245,158,11,0.1)", accentBgDark: "rgba(251,191,36,0.15)", accentText: "#d97706" },
+  purple: { iconColor: "#8b5cf6", iconColorDark: "#a78bfa", accentBg: "rgba(139,92,246,0.1)", accentBgDark: "rgba(167,139,250,0.15)", accentText: "#8b5cf6" },
+  indigo: { iconColor: "#6366f1", iconColorDark: "#818cf8", accentBg: "rgba(99,102,241,0.1)", accentBgDark: "rgba(129,140,248,0.15)", accentText: "#6366f1" },
+  teal: { iconColor: "#0ea5e9", iconColorDark: "#38bdf8", accentBg: "rgba(14,165,233,0.1)", accentBgDark: "rgba(56,189,248,0.15)", accentText: "#0ea5e9" },
+  red: { iconColor: "#ef4444", iconColorDark: "#f87171", accentBg: "rgba(239,68,68,0.1)", accentBgDark: "rgba(248,113,113,0.15)", accentText: "#ef4444" },
+  yellow: { iconColor: "#f59e0b", iconColorDark: "#fbbf24", accentBg: "rgba(251,191,36,0.1)", accentBgDark: "rgba(251,191,36,0.15)", accentText: "#d97706" },
 };
 
 function Toggle({ enabled, onToggle, loading }: { enabled: boolean; onToggle: () => void; loading?: boolean }) {

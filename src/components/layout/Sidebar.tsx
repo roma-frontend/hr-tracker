@@ -118,6 +118,7 @@ export function Sidebar() {
 
   return (
     <aside
+      data-tour="sidebar"
       className={cn(
         "relative hidden lg:flex flex-col h-screen border-r z-60 shrink-0",
         collapsed ? "w-18" : "w-60"

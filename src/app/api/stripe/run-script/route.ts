@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 // Strip ANSI escape codes from terminal output
 function stripAnsi(str: string): string {
   // Remove ANSI color/style codes
-  // eslint-disable-next-line no-control-regex
+   
   return str.replace(/\x1B\[[0-9;]*[mGKHF]/g, "")
     .replace(/\x1B\[[0-9;]*m/g, "")
     .replace(/\x1B\[[\d;]*[A-Za-z]/g, "")

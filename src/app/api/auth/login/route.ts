@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
     // ── Get recent failed attempts for risk score ─────────────────────────────
     const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
     let recentFailedAttempts = 0;
-    let isKnownDevice = false;
-    let isTrustedDevice = false;
+    const isKnownDevice = false;
+    const isTrustedDevice = false;
     let lastLoginDaysAgo: number | undefined;
     let keystrokeSimilarity: number | undefined;
 

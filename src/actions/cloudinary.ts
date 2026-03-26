@@ -5,7 +5,7 @@ import { v2 as cloudinary } from 'cloudinary';
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+  api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
@@ -59,15 +59,70 @@ export async function uploadChatAttachment(
   fileName: string,
   mimeType: string
 ): Promise<{ url: string; name: string; type: string }> {
+  console.log("🎤 Voice message upload starting...");
+  console.log("📄 File name:", fileName);
+  console.log("📄 MIME type:", mimeType);
+  console.log("📄 Base64 size:", base64File.length);
+
+  // Validate environment variables
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    console.error("❌ Missing Cloudinary credentials:", {
+      cloudName: !!cloudName,
+      apiKey: !!apiKey,
+      apiSecret: !!apiSecret,
+    });
+    throw new Error("Cloudinary credentials not configured");
+  }
+
   const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60);
   const publicId = `chat_${Date.now()}_${safeFileName}`;
-  const result = await cloudinary.uploader.upload(base64File, {
-    folder: "hr-office/chat-attachments",
-    public_id: publicId,
-    resource_type: "auto",
-    overwrite: false,
-  });
-  return { url: result.secure_url, name: fileName, type: mimeType };
+
+  // Determine resource type based on mime type
+  let resourceType: "image" | "video" | "raw" | "auto" = "auto";
+  if (mimeType.startsWith("audio/") || mimeType.startsWith("video/")) {
+    resourceType = "video";  // Cloudinary stores audio files as video resources
+  }
+
+  // Add data URL prefix if not present (required for proper upload)
+  let uploadData = base64File;
+  if (!base64File.startsWith("data:")) {
+    uploadData = `data:${mimeType};base64,${base64File}`;
+    console.log("📝 Added data URL prefix");
+  }
+
+  console.log("📤 Uploading to Cloudinary...", { publicId, resourceType, folder: "hr-office/chat-attachments" });
+
+  try {
+    const result = await cloudinary.uploader.upload(uploadData, {
+      folder: "hr-office/chat-attachments",
+      public_id: publicId,
+      resource_type: resourceType,
+      overwrite: false,
+      unique_filename: true,
+      // For audio files, add specific transformations
+      ...(resourceType === "video" ? {
+        eager: [{ width: 0, height: 0, crop: "scale", audio_codec: "aac" }],
+        eager_async: true,
+      } : {}),
+    });
+
+    console.log("✅ Voice message uploaded successfully:", result.secure_url);
+    return { url: result.secure_url, name: fileName, type: mimeType };
+  } catch (error: any) {
+    console.error("❌ Voice message upload failed:", error);
+    console.error("❌ Error details:", {
+      message: error?.message,
+      error: error?.error,
+      status: error?.status,
+      http_code: error?.http_code,
+    });
+    const errorMessage = error instanceof Error ? error.message : "Upload failed";
+    throw new Error(`Voice message upload error: ${errorMessage}`);
+  }
 }
 
 export async function deleteAvatarFromCloudinary(userId: string): Promise<void> {

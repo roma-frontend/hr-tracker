@@ -5,6 +5,9 @@ import type { Id } from '@/convex/_generated/dataModel';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+// Opt out of static generation — uses nextUrl.searchParams
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   try {
     const organizationId = req.nextUrl.searchParams.get('organizationId');

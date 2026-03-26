@@ -76,7 +76,8 @@ const nextConfig = {
       'convex',
     ],
     // Enable Partial Prerendering via cacheComponents (Next.js 16+)
-    cacheComponents: true,
+    // Disabled: conflicts with API routes using cookies/request.url
+    // cacheComponents: true,
     optimizeCss: true,
     scrollRestoration: true,
   },

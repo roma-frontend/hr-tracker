@@ -114,25 +114,25 @@ export function AssignSupervisorModal({ onClose }: Props) {
                 </div>
               </div>
               <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mt-2">
-                <span>Current supervisor:</span>
-                <span className="font-semibold text-[var(--text-secondary)]">{currentSupervisor?.name ?? "None"}</span>
+                <span>{t('modals.assignSupervisor.currentSupervisor')}</span>
+                <span className="font-semibold text-[var(--text-secondary)]">{currentSupervisor?.name ?? t('common.none')}</span>
               </div>
             </div>
           )}
 
           {/* Supervisor select */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">Assign Supervisor</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('modals.assignSupervisor.assignSupervisor')}</label>
             <select
               value={selectedSupervisor}
               onChange={e => setSelectedSupervisor(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50"
               disabled={!selectedEmployee}
             >
-              <option value="">— Remove supervisor</option>
+              <option value="">— {t('modals.assignSupervisor.removeSupervisor')}</option>
               {supervisors?.map(sup => (
                 <option key={sup._id} value={sup._id}>
-                  {sup.name} ({sup.role}){sup.department ? ` · ${sup.department}` : ""}
+                  {sup.name} ({t(`roles.${sup.role}`)}{sup.department ? ` · ${sup.department}` : ""})
                 </option>
               ))}
             </select>
@@ -140,7 +140,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
 
           {/* All employees overview */}
           <div>
-            <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Current Assignments</h3>
+            <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">{t('modals.assignSupervisor.currentAssignments')}</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
               {employees?.map(emp => {
                 const sup = supervisors?.find(s => s._id === emp.supervisorId);
@@ -151,7 +151,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
                       <span className="text-xs font-medium text-[var(--text-primary)]">{emp.name}</span>
                     </div>
                     <span className="text-xs text-[var(--text-muted)]">
-                      {sup ? `→ ${sup.name}` : <span className="text-amber-400">No supervisor</span>}
+                      {sup ? `→ ${sup.name}` : <span className="text-amber-400">{t('modals.assignSupervisor.noSupervisor')}</span>}
                     </span>
                   </div>
                 );
@@ -162,18 +162,18 @@ export function AssignSupervisorModal({ onClose }: Props) {
           {/* Actions */}
           <div className="flex gap-3 pt-1">
             <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--background-subtle)] transition-colors">
-              Close
+              {t('common.close')}
             </button>
             <button
               onClick={handleAssign}
               disabled={!selectedEmployee || loading}
-              style={{ 
+              style={{
                 background: "var(--accent-gradient)",
                 color: "var(--text-on-accent)"
               }}
               className="flex-1 px-4 py-2.5 rounded-xl hover:opacity-90 text-sm font-semibold shadow-md transition-all disabled:opacity-50"
             >
-              {loading ? "Saving..." : "Save Assignment"}
+              {loading ? t('common.saving') : t('modals.assignSupervisor.saveAssignment')}
             </button>
           </div>
         </div>

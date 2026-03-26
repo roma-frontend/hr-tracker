@@ -19,7 +19,7 @@ import PerformanceMonitor from "@/components/PerformanceMonitor";
 import { MaintenanceAutoLogout } from "@/components/MaintenanceAutoLogout";
 import { GlobalErrorBoundaryProvider } from "@/components/error/GlobalErrorBoundaryProvider";
 
-// Corporate & Professional - IBM PLEX SANS
+// Corporate & Professional - IBM PLEX SANS (Primary font - preload)
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex",
   subsets: ["latin", "cyrillic"],
@@ -30,28 +30,29 @@ const ibmPlexSans = IBM_Plex_Sans({
   adjustFontFallback: true,
 });
 
-// Modern & Bold - MONTSERRAT
+// Modern & Bold - MONTSERRAT (Secondary - no preload to reduce initial load)
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin", "cyrillic"],
   display: "swap",
-  preload: true,
+  preload: false, // Lazy load
   weight: ["400", "500", "600", "700"],
   fallback: ["sans-serif"],
   adjustFontFallback: true,
 });
 
-// Clean & Serious - WORK SANS
+// Clean & Serious - WORK SANS (No preload)
 const workSans = Work_Sans({
   variable: "--font-work-sans",
   subsets: ["latin"],
   display: "swap",
-  preload: true,
+  preload: false, // Lazy load
   weight: ["400", "500", "600", "700"],
   fallback: ["sans-serif"],
   adjustFontFallback: true,
 });
 
+// Inter for UI elements (Primary - preload)
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "cyrillic"],
@@ -62,12 +63,12 @@ const inter = Inter({
   adjustFontFallback: true,
 });
 
-// Armenian script support
+// Armenian script support (No preload - only used when Armenian text is present)
 const notoSansArmenian = Noto_Sans_Armenian({
   variable: "--font-armenian",
   subsets: ["armenian"],
   display: "swap",
-  preload: true, // Changed to true for better performance
+  preload: false, // Lazy load - only needed for Armenian content
   weight: ["400", "500", "600", "700"],
   fallback: ["sans-serif"],
 });

@@ -1695,7 +1695,7 @@ export const getFilteredDrivers = query({
       })
     );
 
-    let result = enriched.filter(Boolean) as NonNullable<typeof enriched[number]>[];
+    const result = enriched.filter(Boolean) as NonNullable<typeof enriched[number]>[];
 
     // Sort
     if (sortBy === "rating") {

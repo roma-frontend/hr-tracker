@@ -44,7 +44,7 @@ export const getUserStats = query({
       .collect();
 
     // Get attendance records if available
-    let attendanceStats = {
+    const attendanceStats = {
       presentDays: 0,
       absentDays: 0,
       leaveDays: totalDaysUsed,
