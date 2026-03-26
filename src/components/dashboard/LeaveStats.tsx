@@ -24,16 +24,15 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
   const analytics = useQuery(api.analytics.getUserAnalytics, { userId });
   const user = useQuery(api.users.getUserById, { userId });
 
-  if (!analytics || !user) {
-    return <div className="text-center p-8">Загрузка...</div>;
-  }
-
-  const { balances, totalDaysTaken, userLeaves } = analytics;
-
   // ═══════════════════════════════════════════════════════════════
-  // OPTIMIZED: Memoize all calculations
+  // OPTIMIZED: Memoize all calculations - MUST BE BEFORE CONDITIONAL RETURN
   // ═══════════════════════════════════════════════════════════════
   const stats = useMemo(() => {
+    if (!analytics || !user) {
+      return null;
+    }
+
+    const { balances, totalDaysTaken, userLeaves } = analytics;
     const currentYear = new Date().getFullYear();
     const leavesThisYear = userLeaves.filter((leave: any) => {
       return new Date(leave.startDate).getFullYear() === currentYear && leave.status === "approved";
@@ -80,7 +79,11 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
       nextAvailableDate,
       avgDuration: leavesThisYear.length > 0 ? (totalDaysThisYear / leavesThisYear.length).toFixed(1) : 0,
     };
-  }, [userLeaves, balances]);
+  }, [analytics, user]);
+
+  if (!analytics || !user || !stats) {
+    return <div className="text-center p-8">Загрузка...</div>;
+  }
 
   const burnoutRisk = stats.daysSinceLastLeave !== null && stats.daysSinceLastLeave > 180;
 
