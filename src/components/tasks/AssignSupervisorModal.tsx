@@ -40,8 +40,10 @@ export function AssignSupervisorModal({ onClose }: Props) {
   // Debug: log to check if data is loading
   console.log("AssignSupervisorModal - user:", user);
   console.log("AssignSupervisorModal - user.id:", user?.id);
+  console.log("AssignSupervisorModal - user.organizationId:", user?.organizationId);
   console.log("AssignSupervisorModal - employees:", employees);
   console.log("AssignSupervisorModal - supervisors:", supervisors);
+  
   const assignSupervisor = useMutation(api.tasks.assignSupervisor);
 
   const selectedEmp = employees?.find(e => e._id === selectedEmployee);

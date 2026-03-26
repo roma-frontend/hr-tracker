@@ -198,18 +198,18 @@ export function EmployeesClient() {
   // Check if current user can edit a specific employee
   const canEditEmployee = (emp: any) => {
     if (!canManage) return false;
-    
+
     // Superadmin (by role OR email) can edit anyone
     const isSuperadminUser = isSuperadmin || user?.email?.toLowerCase() === "romangulanyan@gmail.com";
     if (isSuperadminUser) return true;
-    
+
     // Non-superadmin cannot edit superadmin (by role OR email)
     const isSuperadminEmployee = emp.role === "superadmin" || emp.email?.toLowerCase() === "romangulanyan@gmail.com";
     if (isSuperadminEmployee) return false;
-    
-    // Admin cannot edit other admins
-    if (emp.role === "admin" && isAdmin) return false;
-    
+
+    // Admin cannot edit OTHER admins (but can edit themselves)
+    if (emp.role === "admin" && isAdmin && emp._id !== user?.id) return false;
+
     return true;
   };
 

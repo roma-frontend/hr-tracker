@@ -391,6 +391,8 @@ export const getUsersForAssignment = query({
 export const getSupervisors = query({
   args: { requesterId: v.optional(v.id("users")) },
   handler: async (ctx, args) => {
+    console.log("[getSupervisors] args:", args);
+    
     let supervisors = await ctx.db
       .query("users")
       .withIndex("by_role", q => q.eq("role", "supervisor"))
@@ -399,16 +401,21 @@ export const getSupervisors = query({
       .query("users")
       .withIndex("by_role", q => q.eq("role", "admin"))
       .collect();
-    
+
+    console.log("[getSupervisors] raw supervisors:", supervisors.length, "admins:", admins.length);
+
     // Filter by organization if requesterId provided
     if (args.requesterId) {
       const requester = await ctx.db.get(args.requesterId);
+      console.log("[getSupervisors] requester:", requester);
       if (requester && requester.organizationId) {
         supervisors = supervisors.filter(u => u.organizationId === requester.organizationId);
         admins = admins.filter(u => u.organizationId === requester.organizationId);
       }
     }
-    
+
+    console.log("[getSupervisors] filtered supervisors:", supervisors.length, "admins:", admins.length);
+
     return [...supervisors, ...admins]
       .filter(u => u.isActive && u.isApproved)
       .map(u => ({

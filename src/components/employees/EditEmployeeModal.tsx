@@ -121,8 +121,8 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
     );
   }
 
-  // Protection: admin cannot edit other admins
-  if (employee.role === "admin" && user?.role === "admin" && !isActualAdmin) {
+  // Protection: admin cannot edit OTHER admins (but can edit themselves)
+  if (employee.role === "admin" && user?.role === "admin" && !isActualAdmin && employee._id !== user?.id) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
