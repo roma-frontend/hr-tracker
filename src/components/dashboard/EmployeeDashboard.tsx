@@ -108,6 +108,8 @@ export function EmployeeDashboard() {
     );
   }
 
+  const today = new Date();
+
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4 sm:space-y-6">
       {/* Smart Banners */}
