@@ -26,12 +26,16 @@ import {
   ShieldCheck,
   MessageCircle,
   Car,
+  Ticket,
+  AlertTriangle,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { useAuthUser } from "@/store/useAuthStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSelector } from "@/components/layout/OrganizationSelector";
+import { QuickActionsPalette } from "@/components/superadmin/QuickActionsPalette";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -50,7 +54,12 @@ const navItems = [
   { href: "/tasks", labelKey: "nav.tasks", icon: CheckSquare, roles: ["superadmin", "admin", "supervisor", "employee", "driver"] },
   { href: "/chat", labelKey: "nav.chat", icon: MessageCircle, roles: ["superadmin", "admin", "supervisor", "employee", "driver"], badge: "CHAT" },
   { href: "/approvals", labelKey: "nav.approvals", icon: UserCheck, roles: ["superadmin", "admin"] },
+  { href: "/help", labelKey: "nav.help", icon: HelpCircle, roles: ["superadmin", "admin", "supervisor", "employee", "driver"], badge: "HELP" },
   { href: "/admin", labelKey: "nav.admin", icon: ShieldCheck, roles: ["superadmin"] },
+  { href: "/superadmin/support", labelKey: "nav.support", icon: Ticket, roles: ["superadmin"], badge: "SUP" },
+  { href: "/superadmin/emergency", labelKey: "nav.emergency", icon: AlertTriangle, roles: ["superadmin"], badge: "URG" },
+  { href: "/superadmin/impersonate", labelKey: "nav.impersonate", icon: User, roles: ["superadmin"] },
+  { href: "/superadmin/bulk-actions", labelKey: "nav.bulkActions", icon: CheckSquare, roles: ["superadmin"] },
   { href: "/superadmin/subscriptions", labelKey: "nav.subscriptions", icon: CreditCard, roles: ["superadmin"] },
   { href: "/superadmin/security", labelKey: "nav.security", icon: ShieldCheck, roles: ["superadmin"], badge: "SEC" },
   { href: "/ai-site-editor", labelKey: "nav.aiSiteEditor", icon: Sparkles, roles: ["superadmin"], badge: "AI" },
@@ -232,6 +241,13 @@ export function Sidebar() {
           </button>
         )}
       </div>
+
+      {/* Quick Actions Palette (Cmd+K) - Only when expanded */}
+      {!collapsed && (
+        <div className="px-4 py-2 border-b" style={{ borderColor: "var(--sidebar-border)" }}>
+          <QuickActionsPalette />
+        </div>
+      )}
 
       {/* Organization Selector - Top Position */}
       <div className="px-2 py-3 border-b" style={{ borderColor: "var(--sidebar-border)" }}>

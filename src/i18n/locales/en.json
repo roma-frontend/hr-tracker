@@ -276,6 +276,12 @@
     "leaveManagement": "Leave Management",
     "myProfile": "My Profile",
     "quickActions": "Quick Actions",
+    "support": "Support",
+    "emergency": "Emergency",
+    "impersonate": "Impersonation",
+    "bulkActions": "Bulk Actions",
+    "help": "Help",
+    "aiChat": "AI Assistant",
     "newLeaveRequest": "New Leave Request",
     "viewCalendar": "View Calendar",
     "checkIn": "Check In",
@@ -291,6 +297,276 @@
     "aiSiteEditor": "AI Site Editor",
     "subscriptions": "Subscriptions",
     "security": "Security"
+  },
+  "superadmin": {
+    "support": {
+      "title": "Support",
+      "subtitle": "Support ticket management",
+      "createTicket": "Create Ticket",
+      "searchTickets": "Search tickets...",
+      "allStatuses": "All Statuses",
+      "allPriorities": "All Priorities",
+      "ticketsFound": "tickets found",
+      "noTickets": "No tickets found",
+      "total": "Total",
+      "open": "Open",
+      "inProgress": "In Progress",
+      "waitingCustomer": "Waiting Customer",
+      "resolved": "Resolved",
+      "critical": "Critical",
+      "overdue": "Overdue",
+      "avgTime": "Avg Time",
+      "create": {
+        "title": "Create Support Ticket",
+        "description": "Describe the issue in detail",
+        "titleLabel": "Title *",
+        "titlePlaceholder": "Brief description of the issue",
+        "priorityLabel": "Priority",
+        "categoryLabel": "Category",
+        "descriptionLabel": "Description *",
+        "descriptionPlaceholder": "Detailed description of the issue...",
+        "cancel": "Cancel",
+        "submit": "Create Ticket"
+      },
+      "detail": {
+        "status": "Status",
+        "priority": "Priority",
+        "category": "Category",
+        "created": "Created",
+        "description": "Description",
+        "comments": "Comments",
+        "internalNote": "Internal note (not visible to customer)",
+        "addComment": "Add comment...",
+        "send": "Send",
+        "resolve": "Resolve",
+        "close": "Close"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Dashboard",
+      "subtitle": "Critical issues requiring immediate attention",
+      "createIncident": "Create Incident",
+      "attentionRequired": "ATTENTION REQUIRED!",
+      "priorityScore": "priority points",
+      "criticalTickets": "Critical Tickets",
+      "criticalTicketsSubtitle": "in the last hour",
+      "activeIncidents": "Active Incidents",
+      "activeIncidentsSubtitle": "require resolution",
+      "slaBreaches": "SLA Breaches",
+      "slaBreachesSubtitle": "in 24 hours",
+      "suspiciousIPs": "Suspicious IPs",
+      "suspiciousIPsSubtitle": "potential attack",
+      "maintenanceMode": "Maintenance Mode",
+      "maintenanceModeSubtitle": "organizations",
+      "pendingOrgs": "Pending Confirmation",
+      "pendingOrgsSubtitle": "organizations",
+      "systemStatus": "System Status",
+      "systemStatusSubtitle": "Current status of all components",
+      "create": {
+        "title": "Create Incident",
+        "description": "Fill in system incident information",
+        "titleLabel": "Title *",
+        "titlePlaceholder": "Brief description of incident",
+        "severityLabel": "Severity",
+        "affectedUsersLabel": "Affected Users",
+        "affectedOrgsLabel": "Affected Orgs",
+        "descriptionLabel": "Description *",
+        "descriptionPlaceholder": "Detailed description of incident...",
+        "cancel": "Cancel",
+        "submit": "Create Incident"
+      }
+    },
+    "impersonate": {
+      "title": "Impersonation",
+      "subtitle": "Sign in as another user for debugging",
+      "activeSession": "Active impersonation session",
+      "activeSessionDesc": "You are signed in as",
+      "reason": "Reason",
+      "expires": "Expires",
+      "goToDashboard": "Go to Dashboard",
+      "exitMode": "Exit Mode",
+      "searchUser": "Search User",
+      "searchPlaceholder": "user@example.com or name...",
+      "noUsersFound": "No users found",
+      "history": "Impersonation History",
+      "historySubtitle": "Last 20 sessions",
+      "historyEmpty": "History is empty",
+      "start": {
+        "title": "Sign in as User",
+        "description": "You will have full access to the user's account",
+        "reasonLabel": "Reason (required) *",
+        "reasonPlaceholder": "e.g., debugging access issue...",
+        "auditWarning": "⚠️ All actions will be logged in audit log",
+        "importantTitle": "Important:",
+        "sessionExpires": "Session expires in 1 hour",
+        "userNotified": "User will be notified",
+        "actionsLogged": "All actions are logged in audit log",
+        "cannotChangePassword": "Cannot change password or email",
+        "cancel": "Cancel",
+        "submit": "Start Session"
+      }
+    },
+    "bulkActions": {
+      "title": "Bulk Actions",
+      "subtitle": "Approve or reject multiple requests at once",
+      "totalLeaves": "Total Requests",
+      "pending": "Pending",
+      "selected": "Selected",
+      "selectedCount": "Requests selected",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "approveSelected": "Approve Selected",
+      "rejectSelected": "Reject Selected",
+      "pendingLeaves": "Leave Requests (Pending)",
+      "pendingLeavesDesc": "Select requests for bulk approve or reject",
+      "noPending": "No pending requests",
+      "approve": {
+        "title": "Approve Requests",
+        "description": "You are about to approve {count} requests",
+        "commentLabel": "Comment (optional)",
+        "commentPlaceholder": "Add a comment...",
+        "cancel": "Cancel",
+        "submit": "Approve {count} Requests"
+      },
+      "reject": {
+        "title": "Reject Requests",
+        "description": "You are about to reject {count} requests",
+        "reasonLabel": "Rejection Reason *",
+        "reasonPlaceholder": "Specify rejection reason...",
+        "cancel": "Cancel",
+        "submit": "Reject {count} Requests"
+      }
+    },
+    "user360": {
+      "back": "Back",
+      "stats": {
+        "leaves": "Leaves",
+        "pending": "Pending",
+        "approved": "Approved",
+        "tasks": "Tasks",
+        "completed": "Completed",
+        "driverRequests": "Trips",
+        "tickets": "Tickets",
+        "logins": "Logins"
+      },
+      "tabs": {
+        "leaves": "Leaves",
+        "tasks": "Tasks",
+        "drivers": "Trips",
+        "tickets": "Tickets",
+        "activity": "Activity",
+        "security": "Security",
+        "chat": "Chat"
+      },
+      "leaves": {
+        "title": "Leave Requests",
+        "found": "requests found",
+        "noLeaves": "No leave requests found"
+      },
+      "tasks": {
+        "title": "Tasks",
+        "found": "tasks found",
+        "noTasks": "No tasks found"
+      },
+      "drivers": {
+        "title": "Trips",
+        "found": "trips found",
+        "noDrivers": "No trips found"
+      },
+      "tickets": {
+        "title": "Support Tickets",
+        "found": "tickets found",
+        "noTickets": "No tickets found"
+      },
+      "activity": {
+        "title": "Recent Activity",
+        "subtitle": "User notifications and actions"
+      },
+      "security": {
+        "title": "Login History",
+        "subtitle": "Recent login attempts",
+        "successful": "Successful login",
+        "failed": "Failed attempt",
+        "risk": "Risk"
+      },
+      "chat": {
+        "title": "Chat Messages",
+        "subtitle": "Recent user messages"
+      }
+    }
+  },
+  "help": {
+    "title": "Help & Support",
+    "subtitle": "Create a ticket and we'll help solve the problem",
+    "createTicket": "Create Ticket",
+    "stats": {
+      "total": "Total Tickets",
+      "open": "Open",
+      "resolved": "Resolved",
+      "avgResponse": "Avg Response"
+    },
+    "tabs": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "noOpenTickets": "No open tickets",
+    "noClosedTickets": "No closed tickets",
+    "ticketCreated": "Ticket {{ticketNumber}} created",
+    "createError": "Error creating ticket",
+    "create": {
+      "title": "Create Support Ticket",
+      "description": "Describe your issue",
+      "titleLabel": "Subject *",
+      "titlePlaceholder": "Briefly describe the issue",
+      "priorityLabel": "Priority",
+      "categoryLabel": "Category",
+      "descriptionLabel": "Description *",
+      "descriptionPlaceholder": "Describe in detail what happened...",
+      "cancel": "Cancel",
+      "submit": "Submit"
+    },
+    "quickHelp": {
+      "title": "Quick Help",
+      "subtitle": "Other ways to get help",
+      "email": {
+        "title": "Email",
+        "desc": "support@example.com"
+      },
+      "chat": {
+        "title": "Chat",
+        "desc": "Write to team chat"
+      },
+      "docs": {
+        "title": "Documentation",
+        "desc": "Knowledge base and FAQ"
+      }
+    }
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent",
+    "critical": "Critical"
+  },
+  "category": {
+    "technical": "Technical",
+    "billing": "Billing",
+    "access": "Access",
+    "featureRequest": "Feature Request",
+    "bug": "Bug",
+    "other": "Other"
+  },
+  "error": {
+    "fillRequiredFields": "Please fill all required fields"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit"
   },
   "auth": {
     "login": "Login",
@@ -915,7 +1191,8 @@
     "selectPriority": "Select priority",
     "addNote": "Add a note...",
     "enterTitle": "Enter title",
-    "enterDescription": "Enter description"
+    "enterDescription": "Enter description",
+    "searchOrganizations": "Search organizations..."
   },
   "ariaLabels": {
     "changeAvatar": "Change avatar",
@@ -2983,18 +3260,11 @@
       "organizationNotFound": "Organization Not Found"
     }
   },
-  "placeholders": {
-    "searchOrganizations": "Search organizations..."
-  },
   "filters": {
     "plan": "Plan",
     "status": "Status",
     "allPlans": "All Plans",
     "allStatuses": "All Statuses"
-  },
-  "statuses": {
-    "active": "Active",
-    "inactive": "Inactive"
   },
   "actions": {
     "clearSelection": "Clear Selection",
@@ -4393,5 +4663,498 @@
     "next": "Next",
     "finish": "Finish",
     "cancel": "Cancel"
+  },
+  "help": {
+    "title": "Help & Support",
+    "subtitle": "Create a ticket and we'll help solve the problem",
+    "createTicket": "Create Ticket",
+    "upgradePlan": "Upgrade Plan",
+    "planLimit": {
+      "starter": "Ticket creation is available on Professional and Enterprise plans",
+      "professional": "You've used {{used}} of {{limit}} tickets this month"
+    },
+    "stats": {
+      "total": "Total Tickets",
+      "open": "Open",
+      "resolved": "Resolved",
+      "avgResponse": "Avg Response"
+    },
+    "tabs": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "noOpenTickets": "No open tickets",
+    "noClosedTickets": "No closed tickets",
+    "ticketCreated": "Ticket {{ticketNumber}} created",
+    "createError": "Error creating ticket",
+    "create": {
+      "title": "Create Support Ticket",
+      "description": "Describe your issue",
+      "titleLabel": "Subject *",
+      "titlePlaceholder": "Briefly describe the issue",
+      "priorityLabel": "Priority",
+      "categoryLabel": "Category",
+      "descriptionLabel": "Description *",
+      "descriptionPlaceholder": "Describe in detail what happened...",
+      "cancel": "Cancel",
+      "submit": "Submit"
+    },
+    "quickHelp": {
+      "title": "Quick Help",
+      "subtitle": "Other ways to get help",
+      "email": {
+        "title": "Email",
+        "desc": "support@example.com"
+      },
+      "chat": {
+        "title": "Chat",
+        "desc": "Write to team chat"
+      },
+      "docs": {
+        "title": "Documentation",
+        "desc": "Knowledge base and FAQ"
+      }
+    }
+  },
+  "superadmin": {
+    "support": {
+      "title": "Support",
+      "subtitle": "Support ticket management",
+      "createTicket": "Create Ticket",
+      "searchTickets": "Search tickets...",
+      "allStatuses": "All Statuses",
+      "allPriorities": "All Priorities",
+      "ticketsFound": "tickets found",
+      "noTickets": "No tickets found",
+      "tickets": "Tickets",
+      "total": "Total",
+      "open": "Open",
+      "inProgress": "In Progress",
+      "waitingCustomer": "Waiting Customer",
+      "resolved": "Resolved",
+      "closed": "Closed",
+      "critical": "Critical",
+      "overdue": "Overdue",
+      "avgTime": "Avg Time",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "ticketCreated": "Ticket {{ticketNumber}} created",
+      "createError": "Error creating ticket",
+      "create": {
+        "title": "Create Support Ticket",
+        "description": "Describe the issue in detail",
+        "titleLabel": "Title *",
+        "titlePlaceholder": "Brief description of the issue",
+        "priorityLabel": "Priority",
+        "categoryLabel": "Category",
+        "descriptionLabel": "Description *",
+        "descriptionPlaceholder": "Detailed description of the issue...",
+        "cancel": "Cancel",
+        "submit": "Create Ticket"
+      },
+      "detail": {
+        "status": "Status",
+        "priority": "Priority",
+        "category": "Category",
+        "created": "Created",
+        "description": "Description",
+        "comments": "Comments",
+        "internalNote": "Internal note (not visible to customer)",
+        "addComment": "Add comment...",
+        "send": "Send",
+        "resolve": "Resolve",
+        "close": "Close"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Dashboard",
+      "subtitle": "Critical issues requiring immediate attention",
+      "createIncident": "Create Incident",
+      "attentionRequired": "ATTENTION REQUIRED!",
+      "priorityScore": "priority points",
+      "criticalTickets": "Critical Tickets",
+      "criticalTicketsSubtitle": "in the last hour",
+      "activeIncidents": "Active Incidents",
+      "activeIncidentsSubtitle": "require resolution",
+      "slaBreaches": "SLA Breaches",
+      "slaBreachesSubtitle": "in 24 hours",
+      "suspiciousIPs": "Suspicious IPs",
+      "suspiciousIPsSubtitle": "potential attack",
+      "maintenanceMode": "Maintenance Mode",
+      "maintenanceModeSubtitle": "organizations",
+      "pendingOrgs": "Pending Confirmation",
+      "pendingOrgsSubtitle": "organizations",
+      "systemStatus": "System Status",
+      "systemStatusSubtitle": "Current status of all components",
+      "create": {
+        "title": "Create Incident",
+        "description": "Fill in system incident information",
+        "titleLabel": "Title *",
+        "titlePlaceholder": "Brief description of incident",
+        "severityLabel": "Severity",
+        "affectedUsersLabel": "Affected Users",
+        "affectedOrgsLabel": "Affected Orgs",
+        "descriptionLabel": "Description *",
+        "descriptionPlaceholder": "Detailed description of incident...",
+        "cancel": "Cancel",
+        "submit": "Create Incident"
+      },
+      "systemComponents": {
+        "api": "API",
+        "database": "Database",
+        "emailService": "Email Service",
+        "stripe": "Stripe",
+        "convex": "Convex",
+        "redis": "Redis",
+        "cloudinary": "Cloudinary",
+        "sentry": "Sentry",
+        "operational": "operational"
+      },
+      "actions": {
+        "resolve": "Resolve",
+        "block": "Block",
+        "refresh": "Refresh",
+        "open": "Open"
+      },
+      "alerts": {
+        "incidentCreated": "Incident created",
+        "incidentResolved": "Incident resolved",
+        "errorCreatingIncident": "Error creating incident",
+        "errorResolvingIncident": "Error resolving incident",
+        "fillRequiredFields": "Fill required fields",
+        "specifyRootCause": "Specify root cause:",
+        "specifyResolution": "Specify resolution:"
+      },
+      "problemsDetected": "Problems detected: {{problems}}",
+      "activeIncidentsDesc": "System incidents in progress",
+      "usersAffected": "users affected",
+      "organizations": "organizations",
+      "minutesAgo": "min ago",
+      "minutesActive": "min active",
+      "suspiciousIPsDesc": "IPs with multiple failed login attempts",
+      "failedAttempts": "failed attempts",
+      "users": "users"
+    },
+    "impersonate": {
+      "title": "Impersonation",
+      "subtitle": "Sign in as another user for debugging",
+      "activeSession": "Active impersonation session",
+      "activeSessionDesc": "You are signed in as",
+      "reason": "Reason",
+      "expires": "Expires",
+      "goToDashboard": "Go to Dashboard",
+      "exitMode": "Exit Mode",
+      "searchUser": "Search User",
+      "searchPlaceholder": "user@example.com or name...",
+      "noUsersFound": "No users found",
+      "history": "Impersonation History",
+      "historySubtitle": "Last 20 sessions",
+      "historyEmpty": "History is empty",
+      "start": {
+        "title": "Sign in as User",
+        "description": "You will have full access to the user's account",
+        "reasonLabel": "Reason (required) *",
+        "reasonPlaceholder": "e.g., debugging access issue...",
+        "auditWarning": "⚠️ All actions will be logged in audit log",
+        "importantTitle": "Important:",
+        "sessionExpires": "Session expires in 1 hour",
+        "userNotified": "User will be notified",
+        "actionsLogged": "All actions are logged in audit log",
+        "cannotChangePassword": "Cannot change password or email",
+        "cancel": "Cancel",
+        "submit": "Start Session"
+      },
+      "alerts": {
+        "selectUserAndReason": "Select user and specify reason",
+        "impersonationStarted": "Impersonation started: {{name}}",
+        "impersonationError": "Error starting impersonation",
+        "impersonationEnded": "Impersonation ended",
+        "endImpersonationError": "Error ending impersonation"
+      },
+      "sessionInfo": {
+        "reason": "Reason",
+        "expiresAt": "Expires",
+        "targetUser": "Target User"
+      },
+      "searchDesc": "Enter email or name to search"
+    },
+    "bulkActions": {
+      "title": "Bulk Actions",
+      "subtitle": "Approve or reject multiple requests at once",
+      "totalLeaves": "Total Requests",
+      "pending": "Pending",
+      "selected": "Selected",
+      "selectedCount": "Requests selected",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "approveSelected": "Approve Selected",
+      "rejectSelected": "Reject Selected",
+      "pendingLeaves": "Leave Requests (Pending)",
+      "pendingLeavesDesc": "Select requests for bulk approve or reject",
+      "noPending": "No pending requests",
+      "close": "Close",
+      "approve": {
+        "title": "Approve Requests",
+        "description": "You are about to approve {count} requests",
+        "commentLabel": "Comment (optional)",
+        "commentPlaceholder": "Add a comment...",
+        "cancel": "Cancel",
+        "submit": "Approve {count} Requests"
+      },
+      "reject": {
+        "title": "Reject Requests",
+        "description": "You are about to reject {count} requests",
+        "reasonLabel": "Rejection Reason *",
+        "reasonPlaceholder": "Specify rejection reason...",
+        "cancel": "Cancel",
+        "submit": "Reject {count} Requests"
+      },
+      "alerts": {
+        "selectAtLeastOne": "Select at least one request",
+        "approved": "Approved {{count}} requests",
+        "rejected": "Rejected {{count}} requests",
+        "errors": "Errors: {{errors}}",
+        "bulkApproveError": "Error during bulk approval",
+        "bulkRejectError": "Error during bulk rejection"
+      },
+      "rejectedInBulk": "Rejected in bulk"
+    }
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent",
+    "critical": "Critical"
+  },
+  "category": {
+    "technical": "Technical",
+    "billing": "Billing",
+    "access": "Access",
+    "featureRequest": "Feature Request",
+    "bug": "Bug",
+    "other": "Other"
+  },
+  "error": {
+    "fillRequiredFields": "Please fill all required fields"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit"
+  },
+  "common": {
+    "daysShort": "days",
+    "minutesAgo": "min ago",
+    "minutesActive": "min active"
+  },
+  "superadmin": {
+    "subscriptions": {
+      "title": "Subscriptions Management",
+      "subtitle": "Manage organization subscriptions and plans",
+      "accessDenied": "Access Denied",
+      "selectOrganization": "Select Organization *",
+      "selectOrganizationPlaceholder": "Select an organization",
+      "loadingOrganizations": "Loading organizations...",
+      "noOrganizationsFound": "No organizations found",
+      "employees": "employees",
+      "foundCount": "Found {{count}} organizations",
+      "selectPlanLabel": "Select Plan",
+      "customPrice": "Custom Price (USD)",
+      "customPricePlaceholder": "Enter custom price",
+      "leaveEmptyForStandardPricing": "Leave empty for standard pricing",
+      "internalNotes": "Internal Notes",
+      "notesPlaceholder": "Add internal notes (optional)",
+      "creatingSubscription": "Creating subscription...",
+      "createSubscriptionBtn": "Create Subscription",
+      "createManualSubscription": "Create Manual Subscription",
+      "createManualSubDesc": "Manually create a subscription for an organization",
+      "cancelButtonText": "Cancel",
+      "addManualSubscription": "Add Manual Subscription",
+      "allSubscriptions": "All Subscriptions",
+      "organization": "Organization",
+      "plan": "Plan",
+      "status": "Status",
+      "type": "Type",
+      "manual": "Manual",
+      "stripe": "Stripe",
+      "price": "Price",
+      "expires": "Expires",
+      "actions": "Actions",
+      "createSuccess": "Subscription created successfully",
+      "failedToCreate": "Failed to create subscription",
+      "confirmCancelSub": "Are you sure you want to cancel this subscription?",
+      "cancelSuccess": "Subscription canceled successfully",
+      "failedToCancel": "Failed to cancel subscription"
+    },
+    "security": {
+      "threatLevel": "Threat Level",
+      "logins24h": "Logins (24h)",
+      "failed": "Failed",
+      "highRisk": "High Risk",
+      "featuresOn": "Features On",
+      "critical": "CRITICAL",
+      "elevated": "ELEVATED",
+      "moderate": "MODERATE",
+      "normal": "NORMAL",
+      "liveMonitoring": "Live Monitoring",
+      "toggleSecuritySystems": "Toggle security systems on/off",
+      "criticalBadge": "CRITICAL",
+      "disable": "DISABLED",
+      "currentlySuspendedUsers": "Currently suspended users",
+      "noSuspendedUsers": "No suspended users",
+      "reason": "Reason",
+      "reviewAndUnsuspend": "Review & Unsuspend",
+      "review": "Review",
+      "recentSuspiciousLogins": "Recent suspicious login attempts",
+      "noSuspiciousActivity": "No suspicious activity detected",
+      "ip": "IP",
+      "allSecurityActions": "All security audit logs",
+      "noAuditLogs": "No audit logs available",
+      "loadingDashboard": "Loading dashboard...",
+      "accessDenied": "Access Denied",
+      "auditLogging": "Audit Logging",
+      "auditLoggingDesc": "Log all security-related actions",
+      "adaptiveAuth": "Adaptive Authentication",
+      "adaptiveAuthDesc": "Risk-based authentication challenges",
+      "deviceFingerprinting": "Device Fingerprinting",
+      "deviceFingerprintingDesc": "Track and identify devices",
+      "keystrokeDynamics": "Keystroke Dynamics",
+      "keystrokeDynamicsDesc": "Analyze typing patterns",
+      "continuousFace": "Continuous Face Verification",
+      "continuousFaceDesc": "Ongoing facial recognition",
+      "autoLockout": "Auto Lockout",
+      "autoLockoutDesc": "Lock after failed attempts",
+      "newDeviceAlert": "New Device Alert",
+      "newDeviceAlertDesc": "Notify on new device login"
+    },
+    "viewingOrganization": "Viewing organization",
+    "announcements": {
+      "title": "Announcements",
+      "new": "New"
+    },
+    "maintenance": {
+      "title": "Maintenance",
+      "config": "Config"
+    },
+    "organizations": {
+      "title": "Organizations",
+      "subtitle": "Manage all organizations in the system",
+      "createTitle": "Create Organization",
+      "createSubtitle": "Create a new organization with admin access",
+      "nameLabel": "Organization Name",
+      "slugLabel": "Slug (URL-friendly)",
+      "adminEmailLabel": "Admin Email",
+      "planLabel": "Subscription Plan",
+      "planStarterFree": "Starter (Free)",
+      "planProfessionalPaid": "Professional (Paid)",
+      "planEnterpriseCustom": "Enterprise (Custom)",
+      "countryLabel": "Country",
+      "timezoneLabel": "Timezone",
+      "industryLabel": "Industry",
+      "creating": "Creating...",
+      "createOrganization": "Create Organization",
+      "requiredNotice": "All fields marked with * are required",
+      "list": {
+        "title": "All Organizations",
+        "description": "Click on any organization to view details and manage",
+        "notFound": "No organizations found",
+        "empty": "Create your first organization to get started"
+      },
+      "card": {
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "totalEmployees": "Total Employees",
+        "activeEmployees": "Active",
+        "employeeLimit": "Limit",
+        "industry": "Industry",
+        "manageAdmins": "Manage Admins",
+        "edit": "Edit Organization"
+      },
+      "stats": {
+        "totalOrgs": "Total Organizations",
+        "count": "organizations",
+        "active": "Active",
+        "working": "working",
+        "viewed": "Total Employees",
+        "total": "employees",
+        "inactive": "Inactive",
+        "suspended": "suspended"
+      }
+    }
+  },
+  "superadminSecurity": {
+    "securityControl": "Security Control Center",
+    "manageIdentityVerification": "Manage identity verification and threat detection",
+    "securityFeatures": "Security Features",
+    "blockedUsers": "Blocked Users",
+    "loginAttempts": "Login Attempts",
+    "auditLogs": "Audit Logs"
+  },
+  "ui": {
+    "accessDenied": "Access Denied",
+    "onlySuperadminCanAccess": "Only superadmins can access this page",
+    "yourEmail": "Your email",
+    "role": "Role"
+  },
+  "placeholders": {
+    "acmeCorp": "Acme Corp",
+    "acmeInc": "acme-inc",
+    "enterYourEmail": "admin@example.com",
+    "unitedStates": "United States",
+    "technologyHealthcare": "Technology, Healthcare, Finance...",
+    "searchOrganizations": "Search organizations..."
+  },
+  "filters": {
+    "plan": "Plan",
+    "allPlans": "All Plans",
+    "status": "Status",
+    "allStatuses": "All Statuses"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "actions": {
+    "clearSelection": "Clear Selection"
+  },
+  "admin": {
+    "superadminPanel": "Superadmin Panel"
+  },
+  "aiChat": {
+    "title": "Shield HR AI",
+    "subtitle": "Your AI Assistant",
+    "newChat": "New Chat",
+    "today": "Today",
+    "active": "Active",
+    "demo": "Demo",
+    "roleSuperadmin": "👑 Super Admin",
+    "roleAdmin": "🛡️ Admin",
+    "roleEmployee": "👤 Employee",
+    "welcomeTitle": "How can I help you, {{name}}?",
+    "welcomeSubtitle": "I'm your AI Assistant. I can help with leaves, tasks, employees, and reports.",
+    "quickQuestions": {
+      "leave": "📅 How to create a leave request?",
+      "tasks": "✅ What are my tasks?",
+      "employees": "👥 Show employees",
+      "attendance": "📊 Attendance report"
+    },
+    "aiTyping": "AI is typing...",
+    "typing": "typing...",
+    "you": "You",
+    "assistantName": "Shield HR AI",
+    "inputPlaceholder": "Ask anything...",
+    "disclaimer": "AI may make mistakes. Please verify important information.",
+    "copied": "Copied to clipboard!",
+    "aiResponses": {
+      "leave": "📅 **Leave Information**\n\nYou have access to the following leave types:\n\n• **Paid Leave** - Paid time off\n• **Sick Leave** - Sick leave\n• **Family Leave** - Family care leave\n\nWould you like to create a leave request?",
+      "tasks": "✅ **Your Tasks**\n\nYou have active tasks. Would you like to see the list or create a new one?",
+      "greeting": "👋 Hello, {{name}}! I'm your Shield HR AI Assistant.\n\nHow can I help?\n\n• Leaves\n• Tasks\n• Employees\n• Reports",
+      "default": "🤖 I received your request: \"{{query}}\"\n\nI can help you with:\n\n• 📅 Leaves\n• ✅ Tasks\n• 👥 Employees\n• 📊 Reports\n\nWhat would you like to know?"
+    }
   }
 }

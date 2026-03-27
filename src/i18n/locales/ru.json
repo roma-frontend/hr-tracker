@@ -276,6 +276,12 @@
     "leaveManagement": "Управление отпусками",
     "myProfile": "Мой профиль",
     "quickActions": "Быстрые действия",
+    "support": "Поддержка",
+    "emergency": "Режим ЧП",
+    "impersonate": "Имперсонация",
+    "bulkActions": "Массовые операции",
+    "help": "Помощь",
+    "aiChat": "AI Ассистент",
     "newLeaveRequest": "Новая заявка на отпуск",
     "viewCalendar": "Посмотреть календарь",
     "checkIn": "Отметиться",
@@ -291,6 +297,313 @@
     "aiSiteEditor": "AI Редактор сайта",
     "subscriptions": "Подписки",
     "security": "Безопасность"
+  },
+  "superadmin": {
+    "support": {
+      "title": "Поддержка",
+      "subtitle": "Управление тикетами поддержки",
+      "createTicket": "Создать тикет",
+      "searchTickets": "Поиск тикетов...",
+      "allStatuses": "Все статусы",
+      "allPriorities": "Все приоритеты",
+      "ticketsFound": "найдено тикетов",
+      "noTickets": "Тикеты не найдены",
+      "total": "Всего",
+      "open": "Открытые",
+      "inProgress": "В работе",
+      "waitingCustomer": "Ждут ответа",
+      "resolved": "Решены",
+      "closed": "Закрыты",
+      "critical": "Критические",
+      "overdue": "Просрочены",
+      "avgTime": "Среднее время",
+      "tickets": "Тикеты",
+      "high": "Высокий",
+      "medium": "Средний",
+      "low": "Низкий",
+      "ticketCreated": "Тикет {{ticketNumber}} создан",
+      "createError": "Ошибка при создании тикета",
+      "create": {
+        "title": "Создать тикет поддержки",
+        "description": "Опишите проблему максимально подробно",
+        "titleLabel": "Заголовок *",
+        "titlePlaceholder": "Краткое описание проблемы",
+        "priorityLabel": "Приоритет",
+        "categoryLabel": "Категория",
+        "descriptionLabel": "Описание *",
+        "descriptionPlaceholder": "Подробное описание проблемы...",
+        "cancel": "Отмена",
+        "submit": "Создать тикет"
+      },
+      "detail": {
+        "status": "Статус",
+        "priority": "Приоритет",
+        "category": "Категория",
+        "created": "Создан",
+        "description": "Описание",
+        "comments": "Комментарии",
+        "internalNote": "Внутренний комментарий (не видно клиенту)",
+        "addComment": "Добавить комментарий...",
+        "send": "Отправить",
+        "resolve": "Решить",
+        "close": "Закрыть"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Dashboard",
+      "subtitle": "Критические проблемы требующие немедленного внимания",
+      "createIncident": "Создать инцидент",
+      "attentionRequired": "ТРЕБУЕТСЯ ВНИМАНИЕ!",
+      "priorityScore": "очков приоритета",
+      "criticalTickets": "Критические тикеты",
+      "criticalTicketsSubtitle": "за последний час",
+      "activeIncidents": "Активные инциденты",
+      "activeIncidentsSubtitle": "требуют решения",
+      "slaBreaches": "SLA нарушения",
+      "slaBreachesSubtitle": "за 24 часа",
+      "suspiciousIPs": "Подозрительные IP",
+      "suspiciousIPsSubtitle": "потенциальная атака",
+      "maintenanceMode": "Режим обслуживания",
+      "maintenanceModeSubtitle": "организаций",
+      "pendingOrgs": "Ожидают подтверждения",
+      "pendingOrgsSubtitle": "организаций",
+      "systemStatus": "Статус системы",
+      "systemStatusSubtitle": "Текущее состояние всех компонентов",
+      "create": {
+        "title": "Создать инцидент",
+        "description": "Заполните информацию о системном инциденте",
+        "titleLabel": "Заголовок *",
+        "titlePlaceholder": "Краткое описание инцидента",
+        "severityLabel": "Серьезность",
+        "affectedUsersLabel": "Затронуто пользователей",
+        "affectedOrgsLabel": "Затронуто организаций",
+        "descriptionLabel": "Описание *",
+        "descriptionPlaceholder": "Подробное описание инцидента...",
+        "cancel": "Отмена",
+        "submit": "Создать инцидент"
+      }
+    },
+    "impersonate": {
+      "title": "Имперсонация",
+      "subtitle": "Войти как другой пользователь для отладки проблем",
+      "activeSession": "Активная сессия имперсонации",
+      "activeSessionDesc": "Вы вошли как",
+      "reason": "Причина",
+      "expires": "Истекает",
+      "goToDashboard": "Перейти в дашборд",
+      "exitMode": "Выйти из режима",
+      "searchUser": "Поиск пользователя",
+      "searchPlaceholder": "user@example.com или имя...",
+      "noUsersFound": "Пользователи не найдены",
+      "history": "История имперсонаций",
+      "historySubtitle": "Последние 20 сессий",
+      "historyEmpty": "История пуста",
+      "start": {
+        "title": "Войти как пользователь",
+        "description": "Вы получите полный доступ к аккаунту пользователя",
+        "reasonLabel": "Причина (обязательно) *",
+        "reasonPlaceholder": "Например: отладка проблемы с доступом...",
+        "auditWarning": "⚠️ Все действия будут залогированы в audit log",
+        "importantTitle": "Важно:",
+        "sessionExpires": "Сессия истекает через 1 час",
+        "userNotified": "Пользователь получит уведомление",
+        "actionsLogged": "Все действия записываются в audit log",
+        "cannotChangePassword": "Нельзя изменить пароль или email",
+        "cancel": "Отмена",
+        "submit": "Начать сессию"
+      }
+    },
+    "bulkActions": {
+      "title": "Массовые операции",
+      "subtitle": "Одобрение или отклонение нескольких заявок одновременно",
+      "totalLeaves": "Всего заявок",
+      "pending": "Ожидают",
+      "selected": "Выбрано",
+      "selectedCount": "Выбрано заявок",
+      "selectAll": "Выбрать все",
+      "deselectAll": "Снять все",
+      "approveSelected": "Одобрить выбранные",
+      "rejectSelected": "Отклонить выбранные",
+      "pendingLeaves": "Заявки на отпуск (ожидают)",
+      "pendingLeavesDesc": "Выберите заявки для массового одобрения или отклонения",
+      "noPending": "Нет заявок ожидающих рассмотрения",
+      "approve": {
+        "title": "Одобрить заявки",
+        "description": "Вы собираетесь одобрить {count} заявок",
+        "commentLabel": "Комментарий (необязательно)",
+        "commentPlaceholder": "Добавить комментарий...",
+        "cancel": "Отмена",
+        "submit": "Одобрить {count} заявок"
+      },
+      "reject": {
+        "title": "Отклонить заявки",
+        "description": "Вы собираетесь отклонить {count} заявок",
+        "reasonLabel": "Причина отклонения *",
+        "reasonPlaceholder": "Укажите причину отклонения...",
+        "cancel": "Отмена",
+        "submit": "Отклонить {count} заявок"
+      }
+    },
+    "user360": {
+      "back": "Назад",
+      "stats": {
+        "leaves": "Отпуска",
+        "pending": "Ожидают",
+        "approved": "Одобрено",
+        "tasks": "Задачи",
+        "completed": "Выполнено",
+        "driverRequests": "Поездки",
+        "tickets": "Тикеты",
+        "logins": "Входы"
+      },
+      "tabs": {
+        "leaves": "Отпуска",
+        "tasks": "Задачи",
+        "drivers": "Поездки",
+        "tickets": "Тикеты",
+        "activity": "Активность",
+        "security": "Безопасность",
+        "chat": "Чат"
+      },
+      "leaves": {
+        "title": "Заявки на отпуск",
+        "found": "заявок найдено",
+        "noLeaves": "Заявок не найдено"
+      },
+      "tasks": {
+        "title": "Задачи",
+        "found": "задач найдено",
+        "noTasks": "Задач не найдено"
+      },
+      "drivers": {
+        "title": "Поездки",
+        "found": "поездок найдено",
+        "noDrivers": "Поездок не найдено"
+      },
+      "tickets": {
+        "title": "Тикеты поддержки",
+        "found": "тикетов найдено",
+        "noTickets": "Тикетов не найдено"
+      },
+      "activity": {
+        "title": "Последняя активность",
+        "subtitle": "Уведомления и действия пользователя"
+      },
+      "security": {
+        "title": "История входов",
+        "subtitle": "Последние попытки входа в систему",
+        "successful": "Успешный вход",
+        "failed": "Неудачная попытка",
+        "risk": "Риск"
+      },
+      "chat": {
+        "title": "Сообщения в чате",
+        "subtitle": "Последние сообщения пользователя"
+      }
+    }
+  },
+  "help": {
+    "title": "Помощь и поддержка",
+    "subtitle": "Создайте тикет и мы поможем решить проблему",
+    "createTicket": "Создать тикет",
+    "upgradePlan": "Улучшить план",
+    "planLimit": {
+      "title": "Доступно по вашему плану",
+      "description": "Выберите план для получения полной поддержки",
+      "starter": "Поддержка тикетов недоступна на плане Starter. Улучшите план для создания тикетов.",
+      "professional": "Использовано тикетов: {{used}} из {{limit}} в этом месяце"
+    },
+    "plans": {
+      "current": "Текущий",
+      "recommended": "Рекомендуется",
+      "starter": {
+        "support": "Поддержка тикетами",
+        "docs": "Документация",
+        "community": "Community форум"
+      },
+      "professional": {
+        "tickets": "10 тикетов/месяц",
+        "limit": "Лимит 10 тикетов",
+        "email": "Email поддержка",
+        "sla": "SLA гарантия"
+      },
+      "enterprise": {
+        "unlimited": "Безлимитные тикеты",
+        "priority": "Приоритеты High/Critical",
+        "sla": "SLA 24/48 часов",
+        "manager": "Персональный менеджер"
+      }
+    },
+    "stats": {
+      "total": "Всего тикетов",
+      "open": "Открытые",
+      "resolved": "Решены",
+      "avgResponse": "Средний ответ"
+    },
+    "tabs": {
+      "open": "Открытые",
+      "closed": "Закрытые"
+    },
+    "noOpenTickets": "Нет открытых тикетов",
+    "noClosedTickets": "Нет закрытых тикетов",
+    "ticketCreated": "Тикет {{ticketNumber}} создан",
+    "createError": "Ошибка при создании тикета",
+    "create": {
+      "title": "Создать тикет в поддержку",
+      "description": "Опишите вашу проблему",
+      "slaNotice": "Ваш тикет будет обработан в соответствии с SLA",
+      "priorityLimit": "Доступны только Low/Medium приоритеты",
+      "titleLabel": "Тема *",
+      "titlePlaceholder": "Кратко опишите проблему",
+      "priorityLabel": "Приоритет",
+      "categoryLabel": "Категория",
+      "descriptionLabel": "Описание *",
+      "descriptionPlaceholder": "Подробно опишите что случилось...",
+      "cancel": "Отмена",
+      "submit": "Отправить"
+    },
+    "quickHelp": {
+      "title": "Быстрая помощь",
+      "subtitle": "Другие способы получить помощь",
+      "email": {
+        "title": "Email",
+        "desc": "support@example.com"
+      },
+      "chat": {
+        "title": "Чат",
+        "desc": "Написать в командный чат"
+      },
+      "docs": {
+        "title": "Документация",
+        "desc": "База знаний и FAQ"
+      }
+    }
+  },
+  "priority": {
+    "low": "Низкий",
+    "medium": "Средний",
+    "high": "Высокий",
+    "urgent": "Срочный",
+    "critical": "Критический"
+  },
+  "category": {
+    "technical": "Техническая",
+    "billing": "Биллинг",
+    "access": "Доступ",
+    "featureRequest": "Предложение",
+    "bug": "Ошибка",
+    "other": "Другое"
+  },
+  "error": {
+    "fillRequiredFields": "Заполните все обязательные поля"
+  },
+  "actions": {
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "create": "Создать",
+    "submit": "Отправить"
   },
   "auth": {
     "login": "Вход",
@@ -915,7 +1228,8 @@
     "selectPriority": "Выберите приоритет",
     "addNote": "Добавить заметку...",
     "enterTitle": "Введите заголовок",
-    "enterDescription": "Введите описание"
+    "enterDescription": "Введите описание",
+    "searchOrganizations": "Поиск организаций..."
   },
   "ariaLabels": {
     "changeAvatar": "Изменить аватар",
@@ -3002,18 +3316,11 @@
       "organizationNotFound": "Организация не найдена"
     }
   },
-  "placeholders": {
-    "searchOrganizations": "Поиск организаций..."
-  },
   "filters": {
     "plan": "План",
     "status": "Статус",
     "allPlans": "Все планы",
     "allStatuses": "Все статусы"
-  },
-  "statuses": {
-    "active": "Активен",
-    "inactive": "Неактивен"
   },
   "actions": {
     "clearSelection": "Очистить выбор",
@@ -4311,6 +4618,499 @@
       "success": "Заявка создана!",
       "description": "Ожидайте подтверждения от менеджера",
       "error": "Не удалось создать заявку"
+    }
+  },
+  "help": {
+    "title": "Помощь и поддержка",
+    "subtitle": "Создайте тикет и мы поможем решить проблему",
+    "createTicket": "Создать тикет",
+    "upgradePlan": "Улучшить план",
+    "planLimit": {
+      "starter": "Создание тикетов доступно на планах Professional и Enterprise",
+      "professional": "Вы использовали {{used}} из {{limit}} тикетов в этом месяце"
+    },
+    "stats": {
+      "total": "Всего тикетов",
+      "open": "Открытые",
+      "resolved": "Решены",
+      "avgResponse": "Средний ответ"
+    },
+    "tabs": {
+      "open": "Открытые",
+      "closed": "Закрытые"
+    },
+    "noOpenTickets": "Нет открытых тикетов",
+    "noClosedTickets": "Нет закрытых тикетов",
+    "ticketCreated": "Тикет {{ticketNumber}} создан",
+    "createError": "Ошибка при создании тикета",
+    "create": {
+      "title": "Создать тикет в поддержку",
+      "description": "Опишите вашу проблему",
+      "titleLabel": "Тема *",
+      "titlePlaceholder": "Кратко опишите проблему",
+      "priorityLabel": "Приоритет",
+      "categoryLabel": "Категория",
+      "descriptionLabel": "Описание *",
+      "descriptionPlaceholder": "Подробно опишите что случилось...",
+      "cancel": "Отмена",
+      "submit": "Отправить"
+    },
+    "quickHelp": {
+      "title": "Быстрая помощь",
+      "subtitle": "Другие способы получить помощь",
+      "email": {
+        "title": "Email",
+        "desc": "support@example.com"
+      },
+      "chat": {
+        "title": "Чат",
+        "desc": "Написать в командный чат"
+      },
+      "docs": {
+        "title": "Документация",
+        "desc": "База знаний и FAQ"
+      }
+    }
+  },
+  "superadmin": {
+    "support": {
+      "title": "Поддержка",
+      "subtitle": "Управление тикетами поддержки",
+      "createTicket": "Создать тикет",
+      "searchTickets": "Поиск тикетов...",
+      "allStatuses": "Все статусы",
+      "allPriorities": "Все приоритеты",
+      "ticketsFound": "найдено тикетов",
+      "noTickets": "Тикеты не найдены",
+      "tickets": "Тикеты",
+      "total": "Всего",
+      "open": "Открытые",
+      "inProgress": "В работе",
+      "waitingCustomer": "Ждут ответа",
+      "resolved": "Решены",
+      "closed": "Закрыты",
+      "critical": "Критические",
+      "overdue": "Просрочены",
+      "avgTime": "Среднее время",
+      "high": "Высокий",
+      "medium": "Средний",
+      "low": "Низкий",
+      "ticketCreated": "Тикет {{ticketNumber}} создан",
+      "createError": "Ошибка при создании тикета",
+      "create": {
+        "title": "Создать тикет поддержки",
+        "description": "Опишите проблему максимально подробно",
+        "titleLabel": "Заголовок *",
+        "titlePlaceholder": "Краткое описание проблемы",
+        "priorityLabel": "Приоритет",
+        "categoryLabel": "Категория",
+        "descriptionLabel": "Описание *",
+        "descriptionPlaceholder": "Подробное описание проблемы...",
+        "cancel": "Отмена",
+        "submit": "Создать тикет"
+      },
+      "detail": {
+        "status": "Статус",
+        "priority": "Приоритет",
+        "category": "Категория",
+        "created": "Создан",
+        "description": "Описание",
+        "comments": "Комментарии",
+        "internalNote": "Внутренний комментарий (не видно клиенту)",
+        "addComment": "Добавить комментарий...",
+        "send": "Отправить",
+        "resolve": "Решить",
+        "close": "Закрыть"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Dashboard",
+      "subtitle": "Критические проблемы требующие немедленного внимания",
+      "createIncident": "Создать инцидент",
+      "attentionRequired": "ТРЕБУЕТСЯ ВНИМАНИЕ!",
+      "priorityScore": "очков приоритета",
+      "criticalTickets": "Критические тикеты",
+      "criticalTicketsSubtitle": "за последний час",
+      "activeIncidents": "Активные инциденты",
+      "activeIncidentsSubtitle": "требуют решения",
+      "slaBreaches": "SLA нарушения",
+      "slaBreachesSubtitle": "за 24 часа",
+      "suspiciousIPs": "Подозрительные IP",
+      "suspiciousIPsSubtitle": "потенциальная атака",
+      "maintenanceMode": "Режим обслуживания",
+      "maintenanceModeSubtitle": "организаций",
+      "pendingOrgs": "Ожидают подтверждения",
+      "pendingOrgsSubtitle": "организаций",
+      "systemStatus": "Статус системы",
+      "systemStatusSubtitle": "Текущее состояние всех компонентов",
+      "create": {
+        "title": "Создать инцидент",
+        "description": "Заполните информацию о системном инциденте",
+        "titleLabel": "Заголовок *",
+        "titlePlaceholder": "Краткое описание инцидента",
+        "severityLabel": "Серьезность",
+        "affectedUsersLabel": "Затронуто пользователей",
+        "affectedOrgsLabel": "Затронуто организаций",
+        "descriptionLabel": "Описание *",
+        "descriptionPlaceholder": "Подробное описание инцидента...",
+        "cancel": "Отмена",
+        "submit": "Создать инцидент"
+      },
+      "systemComponents": {
+        "api": "API",
+        "database": "База данных",
+        "emailService": "Email сервис",
+        "stripe": "Stripe",
+        "convex": "Convex",
+        "redis": "Redis",
+        "cloudinary": "Cloudinary",
+        "sentry": "Sentry",
+        "operational": "работает"
+      },
+      "actions": {
+        "resolve": "Решить",
+        "block": "Блокировать",
+        "refresh": "Обновить",
+        "open": "Открыть"
+      },
+      "alerts": {
+        "incidentCreated": "Инцидент создан",
+        "incidentResolved": "Инцидент решен",
+        "errorCreatingIncident": "Ошибка при создании инцидента",
+        "errorResolvingIncident": "Ошибка при решении инцидента",
+        "fillRequiredFields": "Заполните обязательные поля",
+        "specifyRootCause": "Укажите корневую причину:",
+        "specifyResolution": "Укажите решение:"
+      },
+      "problemsDetected": "Обнаружено проблем: {{problems}}",
+      "activeIncidentsDesc": "Системные инциденты в работе",
+      "usersAffected": "пользователей затронуто",
+      "organizations": "организаций",
+      "minutesAgo": "мин назад",
+      "minutesActive": "мин активно",
+      "suspiciousIPsDesc": "IP с множественными неудачными попытками входа",
+      "failedAttempts": "неудачных попыток",
+      "users": "пользователей"
+    },
+    "impersonate": {
+      "title": "Имперсонация",
+      "subtitle": "Войти как другой пользователь для отладки проблем",
+      "activeSession": "Активная сессия имперсонации",
+      "activeSessionDesc": "Вы вошли как",
+      "reason": "Причина",
+      "expires": "Истекает",
+      "goToDashboard": "Перейти в дашборд",
+      "exitMode": "Выйти из режима",
+      "searchUser": "Поиск пользователя",
+      "searchPlaceholder": "user@example.com или имя...",
+      "noUsersFound": "Пользователи не найдены",
+      "history": "История имперсонаций",
+      "historySubtitle": "Последние 20 сессий",
+      "historyEmpty": "История пуста",
+      "start": {
+        "title": "Войти как пользователь",
+        "description": "Вы получите полный доступ к аккаунту пользователя",
+        "reasonLabel": "Причина (обязательно) *",
+        "reasonPlaceholder": "Например: отладка проблемы с доступом...",
+        "auditWarning": "⚠️ Все действия будут залогированы в audit log",
+        "importantTitle": "Важно:",
+        "sessionExpires": "Сессия истекает через 1 час",
+        "userNotified": "Пользователь получит уведомление",
+        "actionsLogged": "Все действия записываются в audit log",
+        "cannotChangePassword": "Нельзя изменить пароль или email",
+        "cancel": "Отмена",
+        "submit": "Начать сессию"
+      },
+      "alerts": {
+        "selectUserAndReason": "Выберите пользователя и укажите причину",
+        "impersonationStarted": "Имперсонация начата: {{name}}",
+        "impersonationError": "Ошибка при начале имперсонации",
+        "impersonationEnded": "Имперсонация завершена",
+        "endImpersonationError": "Ошибка при завершении имперсонации"
+      },
+      "sessionInfo": {
+        "reason": "Причина",
+        "expiresAt": "Истекает",
+        "targetUser": "Целевой пользователь"
+      },
+      "searchDesc": "Введите email или имя для поиска"
+    },
+    "bulkActions": {
+      "title": "Массовые операции",
+      "subtitle": "Одобрение или отклонение нескольких заявок одновременно",
+      "totalLeaves": "Всего заявок",
+      "pending": "Ожидают",
+      "selected": "Выбрано",
+      "selectedCount": "Выбрано заявок",
+      "selectAll": "Выбрать все",
+      "deselectAll": "Снять все",
+      "approveSelected": "Одобрить выбранные",
+      "rejectSelected": "Отклонить выбранные",
+      "pendingLeaves": "Заявки на отпуск (ожидают)",
+      "pendingLeavesDesc": "Выберите заявки для массового одобрения или отклонения",
+      "noPending": "Нет заявок ожидающих рассмотрения",
+      "close": "Закрыть",
+      "approve": {
+        "title": "Одобрить заявки",
+        "description": "Вы собираетесь одобрить {count} заявок",
+        "commentLabel": "Комментарий (необязательно)",
+        "commentPlaceholder": "Добавить комментарий...",
+        "cancel": "Отмена",
+        "submit": "Одобрить {count} заявок"
+      },
+      "reject": {
+        "title": "Отклонить заявки",
+        "description": "Вы собираетесь отклонить {count} заявок",
+        "reasonLabel": "Причина отклонения *",
+        "reasonPlaceholder": "Укажите причину отклонения...",
+        "cancel": "Отмена",
+        "submit": "Отклонить {count} заявок"
+      },
+      "alerts": {
+        "selectAtLeastOne": "Выберите хотя бы одну заявку",
+        "approved": "Одобрено {{count}} заявок",
+        "rejected": "Отклонено {{count}} заявок",
+        "errors": "Ошибки: {{errors}}",
+        "bulkApproveError": "Ошибка при массовом одобрении",
+        "bulkRejectError": "Ошибка при массовом отклонении"
+      },
+      "rejectedInBulk": "Отклонено массово"
+    }
+  },
+  "priority": {
+    "low": "Низкий",
+    "medium": "Средний",
+    "high": "Высокий",
+    "urgent": "Срочный",
+    "critical": "Критический"
+  },
+  "category": {
+    "technical": "Техническая",
+    "billing": "Биллинг",
+    "access": "Доступ",
+    "featureRequest": "Предложение",
+    "bug": "Ошибка",
+    "other": "Другое"
+  },
+  "error": {
+    "fillRequiredFields": "Заполните все обязательные поля"
+  },
+  "actions": {
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "create": "Создать",
+    "submit": "Отправить"
+  },
+  "common": {
+    "daysShort": "дн.",
+    "minutesAgo": "мин назад",
+    "minutesActive": "мин активно"
+  },
+  "superadmin": {
+    "subscriptions": {
+      "title": "Управление подписками",
+      "subtitle": "Управление подписками и планами организаций",
+      "accessDenied": "Доступ запрещен",
+      "selectOrganization": "Выберите организацию *",
+      "selectOrganizationPlaceholder": "Выберите организацию",
+      "loadingOrganizations": "Загрузка организаций...",
+      "noOrganizationsFound": "Организации не найдены",
+      "employees": "сотрудников",
+      "foundCount": "Найдено {{count}} организаций",
+      "selectPlanLabel": "Выберите план",
+      "customPrice": "Пользовательская цена (USD)",
+      "customPricePlaceholder": "Введите цену",
+      "leaveEmptyForStandardPricing": "Оставьте пустым для стандартной цены",
+      "internalNotes": "Внутренние заметки",
+      "notesPlaceholder": "Добавить внутренние заметки (необязательно)",
+      "creatingSubscription": "Создание подписки...",
+      "createSubscriptionBtn": "Создать подписку",
+      "createManualSubscription": "Создать ручную подписку",
+      "createManualSubDesc": "Вручную создать подписку для организации",
+      "cancelButtonText": "Отмена",
+      "addManualSubscription": "Добавить ручную подписку",
+      "allSubscriptions": "Все подписки",
+      "organization": "Организация",
+      "plan": "План",
+      "status": "Статус",
+      "type": "Тип",
+      "manual": "Ручная",
+      "stripe": "Stripe",
+      "price": "Цена",
+      "expires": "Истекает",
+      "actions": "Действия",
+      "createSuccess": "Подписка успешно создана",
+      "failedToCreate": "Не удалось создать подписку",
+      "confirmCancelSub": "Вы уверены, что хотите отменить эту подписку?",
+      "cancelSuccess": "Подписка успешно отменена",
+      "failedToCancel": "Не удалось отменить подписку"
+    },
+    "security": {
+      "threatLevel": "Уровень угрозы",
+      "logins24h": "Входы (24ч)",
+      "failed": "Неудачные",
+      "highRisk": "Высокий риск",
+      "featuresOn": "Функции вкл",
+      "critical": "КРИТИЧЕСКИЙ",
+      "elevated": "ПОВЫШЕННЫЙ",
+      "moderate": "УМЕРЕННЫЙ",
+      "normal": "НОРМАЛЬНЫЙ",
+      "liveMonitoring": "Мониторинг в реальном времени",
+      "toggleSecuritySystems": "Включить/выключить системы безопасности",
+      "criticalBadge": "ВАЖНО",
+      "disable": "ОТКЛЮЧЕНО",
+      "currentlySuspendedUsers": "Временно заблокированные пользователи",
+      "noSuspendedUsers": "Нет заблокированных пользователей",
+      "reason": "Причина",
+      "reviewAndUnsuspend": "Проверить и разблокировать",
+      "review": "Проверить",
+      "recentSuspiciousLogins": "Последние подозрительные попытки входа",
+      "noSuspiciousActivity": "Подозрительная активность не обнаружена",
+      "ip": "IP",
+      "allSecurityActions": "Все журналы аудита безопасности",
+      "noAuditLogs": "Журналы аудита отсутствуют",
+      "loadingDashboard": "Загрузка панели...",
+      "accessDenied": "Доступ запрещен",
+      "auditLogging": "Журналирование аудита",
+      "auditLoggingDesc": "Журналировать все действия, связанные с безопасностью",
+      "adaptiveAuth": "Адаптивная аутентификация",
+      "adaptiveAuthDesc": "Проверка подлинности на основе рисков",
+      "deviceFingerprinting": "Отпечаток устройства",
+      "deviceFingerprintingDesc": "Отслеживание и идентификация устройств",
+      "keystrokeDynamics": "Динамика нажатия клавиш",
+      "keystrokeDynamicsDesc": "Анализ паттернов набора текста",
+      "continuousFace": "Непрерывная проверка лица",
+      "continuousFaceDesc": "Постоянное распознавание лиц",
+      "autoLockout": "Автоматическая блокировка",
+      "autoLockoutDesc": "Блокировка после неудачных попыток",
+      "newDeviceAlert": "Оповещение о новом устройстве",
+      "newDeviceAlertDesc": "Уведомлять о входе с нового устройства"
+    },
+    "viewingOrganization": "Просмотр организации",
+    "announcements": {
+      "title": "Объявления",
+      "new": "Новое"
+    },
+    "maintenance": {
+      "title": "Обслуживание",
+      "config": "Конфиг"
+    },
+    "organizations": {
+      "title": "Организации",
+      "subtitle": "Управление всеми организациями в системе",
+      "createTitle": "Создать организацию",
+      "createSubtitle": "Создать новую организацию с доступом администратора",
+      "nameLabel": "Название организации",
+      "slugLabel": "Slug (URL-формат)",
+      "adminEmailLabel": "Email администратора",
+      "planLabel": "План подписки",
+      "planStarterFree": "Starter (Бесплатно)",
+      "planProfessionalPaid": "Professional (Платно)",
+      "planEnterpriseCustom": "Enterprise (Индивидуально)",
+      "countryLabel": "Страна",
+      "timezoneLabel": "Часовой пояс",
+      "industryLabel": "Отрасль",
+      "creating": "Создание...",
+      "createOrganization": "Создать организацию",
+      "requiredNotice": "Все поля, отмеченные *, обязательны для заполнения",
+      "list": {
+        "title": "Все организации",
+        "description": "Нажмите на любую организацию, чтобы просмотреть детали и управлять",
+        "notFound": "Организации не найдены",
+        "empty": "Создайте свою первую организацию, чтобы начать"
+      },
+      "card": {
+        "statusActive": "Активна",
+        "statusInactive": "Неактивна",
+        "totalEmployees": "Всего сотрудников",
+        "activeEmployees": "Активных",
+        "employeeLimit": "Лимит",
+        "industry": "Отрасль",
+        "manageAdmins": "Управление админами",
+        "edit": "Редактировать организацию"
+      },
+      "stats": {
+        "totalOrgs": "Всего организаций",
+        "count": "организаций",
+        "active": "Активные",
+        "working": "работают",
+        "viewed": "Всего сотрудников",
+        "total": "сотрудников",
+        "inactive": "Неактивные",
+        "suspended": "приостановлено"
+      }
+    }
+  },
+  "superadminSecurity": {
+    "securityControl": "Центр управления безопасностью",
+    "manageIdentityVerification": "Управление проверкой личности и обнаружением угроз",
+    "securityFeatures": "Функции безопасности",
+    "blockedUsers": "Заблокированные пользователи",
+    "loginAttempts": "Попытки входа",
+    "auditLogs": "Журналы аудита"
+  },
+  "ui": {
+    "accessDenied": "Доступ запрещен",
+    "onlySuperadminCanAccess": "Только супер-админы могут получить доступ к этой странице",
+    "yourEmail": "Ваш email",
+    "role": "Роль"
+  },
+  "placeholders": {
+    "acmeCorp": "Acme Corp",
+    "acmeInc": "acme-inc",
+    "enterYourEmail": "admin@example.com",
+    "unitedStates": "Соединенные Штаты",
+    "technologyHealthcare": "Технологии, Здравоохранение, Финансы...",
+    "searchOrganizations": "Поиск организаций..."
+  },
+  "filters": {
+    "plan": "План",
+    "allPlans": "Все планы",
+    "status": "Статус",
+    "allStatuses": "Все статусы"
+  },
+  "statuses": {
+    "active": "Активен",
+    "inactive": "Неактивен"
+  },
+  "actions": {
+    "clearSelection": "Очистить выбор"
+  },
+  "admin": {
+    "superadminPanel": "Панель супер-админа"
+  },
+  "aiChat": {
+    "title": "Shield HR AI",
+    "subtitle": "Ваш AI Ассистент",
+    "newChat": "Новый чат",
+    "today": "Сегодня",
+    "active": "Активен",
+    "demo": "Демо",
+    "roleSuperadmin": "👑 Супер-админ",
+    "roleAdmin": "🛡️ Админ",
+    "roleEmployee": "👤 Сотрудник",
+    "welcomeTitle": "Чем могу помочь, {{name}}?",
+    "welcomeSubtitle": "Я ваш AI Ассистент. Могу помочь с отпусками, задачами, сотрудниками и отчетами.",
+    "quickQuestions": {
+      "leave": "📅 Как создать заявку на отпуск?",
+      "tasks": "✅ Какие у меня задачи?",
+      "employees": "👥 Показать сотрудников",
+      "attendance": "📊 Отчет по посещаемости"
+    },
+    "aiTyping": "AI печатает...",
+    "typing": "печатает...",
+    "you": "Вы",
+    "assistantName": "Shield HR AI",
+    "inputPlaceholder": "Спросите что угодно...",
+    "disclaimer": "AI может допускать ошибки. Проверяйте важную информацию.",
+    "copied": "Скопировано в буфер обмена!",
+    "aiResponses": {
+      "leave": "📅 **Информация об отпусках**\n\nУ вас есть доступ к следующим типам отпусков:\n\n• **Paid Leave** - Оплачиваемый отпуск\n• **Sick Leave** - Больничный\n• **Family Leave** - Семейный отпуск\n\nХотите создать заявку на отпуск?",
+      "tasks": "✅ **Ваши задачи**\n\nУ вас есть активные задачи. Хотите посмотреть их список или создать новую?",
+      "greeting": "👋 Здравствуйте, {{name}}! Я ваш AI Ассистент Shield HR.\n\nЧем могу помочь?\n\n• Отпуска\n• Задачи\n• Сотрудники\n• Отчеты",
+      "default": "🤖 Я получил ваш запрос: \"{{query}}\"\n\nЯ могу помочь вам с:\n\n• 📅 Отпусками\n• ✅ Задачами\n• 👥 Сотрудниками\n• 📊 Отчетами\n\nЧто бы вы хотели узнать?"
     }
   }
 }

@@ -277,6 +277,12 @@
     "leaveManagement": "Արձակուրդների կառավարում",
     "myProfile": "Իմ պրոֆիլը",
     "quickActions": "Արագ գործողություններ",
+    "support": "Աջակցություն",
+    "emergency": "Արտակարգ",
+    "impersonate": "Իմպերսոնացիա",
+    "bulkActions": "Զանգվածային գործողություններ",
+    "help": "Օգնություն",
+    "aiChat": "AI Օգնական",
     "newLeaveRequest": "Նոր արձակուրդի հայտ",
     "viewCalendar": "Տեսնել օրացույցը",
     "checkIn": "Ներկայանալ",
@@ -292,6 +298,276 @@
     "aiSiteEditor": "AI Կայքի խմբագիր",
     "subscriptions": "Բաժանորդագրություններ",
     "security": "Անվտանգություն"
+  },
+  "superadmin": {
+    "support": {
+      "title": "Աջակցություն",
+      "subtitle": "Աջակցության տիկետների կառավարում",
+      "createTicket": "Ստեղծել տիկետ",
+      "searchTickets": "Փնտրել տիկետներ...",
+      "allStatuses": "Բոլոր կարգավիճակները",
+      "allPriorities": "Բոլոր առաջնահերթությունները",
+      "ticketsFound": "տիկետ գտնված",
+      "noTickets": "Տիկետներ չեն գտնվել",
+      "total": "Ընդհանուր",
+      "open": "Բաց",
+      "inProgress": "Աշխատանքում",
+      "waitingCustomer": "Սպասում է հաճախորդին",
+      "resolved": "Լուծված",
+      "critical": "Կրիտիկական",
+      "overdue": "Ժամկետանց",
+      "avgTime": "Միջին ժամանակ",
+      "create": {
+        "title": "Ստեղծել աջակցության տիկետ",
+        "description": "Մանրամասն նկարագրեք խնդիրը",
+        "titleLabel": "Վերնագիր *",
+        "titlePlaceholder": "Խնդրի համառոտ նկարագրություն",
+        "priorityLabel": "Առաջնահերթություն",
+        "categoryLabel": "Կատեգորիա",
+        "descriptionLabel": "Նկարագրություն *",
+        "descriptionPlaceholder": "Խնդրի մանրամասն նկարագրություն...",
+        "cancel": "Չեղարկել",
+        "submit": "Ստեղծել տիկետ"
+      },
+      "detail": {
+        "status": "Կարգավիճակ",
+        "priority": "Առաջնահերթություն",
+        "category": "Կատեգորիա",
+        "created": "Ստեղծված",
+        "description": "Նկարագրություն",
+        "comments": "Մեկնաբանություններ",
+        "internalNote": "Ներքին նշում (չի երևում հաճախորդին)",
+        "addComment": "Ավելացնել մեկնաբանություն...",
+        "send": "Ուղարկել",
+        "resolve": "Լուծել",
+        "close": "Փակել"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Dashboard",
+      "subtitle": "Կրիտիկական խնդիրներ որոնք պահանջում են անհապաղ ուշադրություն",
+      "createIncident": "Ստեղծել միջադեպ",
+      "attentionRequired": "ՊԱՀԱՆՋՎՈՒՄ Է ՈՒՇԱԴՐՈՒԹՅՈՒՆ!",
+      "priorityScore": "առաջնահերթության միավոր",
+      "criticalTickets": "Կրիտիկական տիկետներ",
+      "criticalTicketsSubtitle": "վերջին ժամում",
+      "activeIncidents": "Ակտիվ միջադեպեր",
+      "activeIncidentsSubtitle": "պահանջում են լուծում",
+      "slaBreaches": "SLA խախտումներ",
+      "slaBreachesSubtitle": "24 ժամվա ընթացքում",
+      "suspiciousIPs": "Կասկածելի IP հասցեներ",
+      "suspiciousIPsSubtitle": "հնարավոր հարձակում",
+      "maintenanceMode": "Սպասարկման ռեժիմ",
+      "maintenanceModeSubtitle": "կազմակերպություններ",
+      "pendingOrgs": "Սպասում է հաստատման",
+      "pendingOrgsSubtitle": "կազմակերպություններ",
+      "systemStatus": "Համակարգի կարգավիճակ",
+      "systemStatusSubtitle": "Բոլոր բաղադրիչների ներկայիս կարգավիճակը",
+      "create": {
+        "title": "Ստեղծել միջադեպ",
+        "description": "Լրացրեք համակարգի միջադեպի տեղեկատվությունը",
+        "titleLabel": "Վերնագիր *",
+        "titlePlaceholder": "Միջադեպի համառոտ նկարագրություն",
+        "severityLabel": "Լրջություն",
+        "affectedUsersLabel": "Ազդված օգտատերեր",
+        "affectedOrgsLabel": "Ազդված կազմակերպություններ",
+        "descriptionLabel": "Նկարագրություն *",
+        "descriptionPlaceholder": "Միջադեպի մանրամասն նկարագրություն...",
+        "cancel": "Չեղարկել",
+        "submit": "Ստեղծել միջադեպ"
+      }
+    },
+    "impersonate": {
+      "title": "Իմպերսոնացիա",
+      "subtitle": "Մուտք գործել որպես այլ օգտատեր կարգավորման համար",
+      "activeSession": "Ակտիվ իմպերսոնացիայի սեսիա",
+      "activeSessionDesc": "Դուք մուտք եք գործել որպես",
+      "reason": "Պատճառ",
+      "expires": "Ժամկետը լրանում է",
+      "goToDashboard": "Անցնել վահանակ",
+      "exitMode": "Դուրս գալ ռեժիմից",
+      "searchUser": "Փնտրել օգտատեր",
+      "searchPlaceholder": "user@example.com կամ անուն...",
+      "noUsersFound": "Օգտատերեր չեն գտնվել",
+      "history": "Իմպերսոնացիայի պատմություն",
+      "historySubtitle": "Վերջին 20 սեսիաներ",
+      "historyEmpty": "Պատմությունը դատարկ է",
+      "start": {
+        "title": "Մուտք գործել որպես օգտատեր",
+        "description": "Դուք կունենաք լիարժեք հասանելիություն օգտատիրոջ հաշվին",
+        "reasonLabel": "Պատճառ (պարտադիր) *",
+        "reasonPlaceholder": "օր․՝ կարգավորման հասանելիության խնդիր...",
+        "auditWarning": "⚠️ Բոլոր գործողությունները կգրանցվեն audit log-ում",
+        "importantTitle": "Կարևոր:",
+        "sessionExpires": "Սեսիան ավարտվում է 1 ժամից",
+        "userNotified": "Օգտատերը կծանուցվի",
+        "actionsLogged": "Բոլոր գործողությունները գրանցվում են audit log-ում",
+        "cannotChangePassword": "Հնարավոր չէ փոխել գաղտնաբառը կամ էլ. հասցեն",
+        "cancel": "Չեղարկել",
+        "submit": "Սկսել սեսիա"
+      }
+    },
+    "bulkActions": {
+      "title": "Զանգվածային գործողություններ",
+      "subtitle": "Հաստատել կամ մերժել մի քանի հայտեր միանգամից",
+      "totalLeaves": "Ընդհանուր հայտեր",
+      "pending": "Սպասում է",
+      "selected": "Ընտրված",
+      "selectedCount": "Հայտեր ընտրված",
+      "selectAll": "Ընտրել բոլորը",
+      "deselectAll": "Հանել բոլորը",
+      "approveSelected": "Հաստատել ընտրվածները",
+      "rejectSelected": "Մերժել ընտրվածները",
+      "pendingLeaves": "Արձակուրդի հայտեր (սպասում է)",
+      "pendingLeavesDesc": "Ընտրեք հայտերը զանգվածային հաստատման կամ մերժման համար",
+      "noPending": "Չկան սպասվող հայտեր",
+      "approve": {
+        "title": "Հաստատել հայտեր",
+        "description": "Դուք պատրաստվում եք հաստատել {count} հայտ",
+        "commentLabel": "Մեկնաբանություն (ոչ պարտադիր)",
+        "commentPlaceholder": "Ավելացնել մեկնաբանություն...",
+        "cancel": "Չեղարկել",
+        "submit": "Հաստատել {count} հայտ"
+      },
+      "reject": {
+        "title": "Մերժել հայտեր",
+        "description": "Դուք պատրաստվում եք մերժել {count} հայտ",
+        "reasonLabel": "Մերժման պատճառ *",
+        "reasonPlaceholder": "Նշեք մերժման պատճառը...",
+        "cancel": "Չեղարկել",
+        "submit": "Մերժել {count} հայտ"
+      }
+    },
+    "user360": {
+      "back": "Հետ",
+      "stats": {
+        "leaves": "Արձակուրդներ",
+        "pending": "Սպասում է",
+        "approved": "Հաստատված",
+        "tasks": "Առաջադրանքներ",
+        "completed": "Կատարված",
+        "driverRequests": "Ուղևորություններ",
+        "tickets": "Տիկետներ",
+        "logins": "Մուտքեր"
+      },
+      "tabs": {
+        "leaves": "Արձակուրդներ",
+        "tasks": "Առաջադրանքներ",
+        "drivers": "Ուղևորություններ",
+        "tickets": "Տիկետներ",
+        "activity": "Ակտիվություն",
+        "security": "Անվտանգություն",
+        "chat": "Չատ"
+      },
+      "leaves": {
+        "title": "Արձակուրդի հայտեր",
+        "found": "հայտ գտնված",
+        "noLeaves": "Արձակուրդի հայտեր չեն գտնվել"
+      },
+      "tasks": {
+        "title": "Առաջադրանքներ",
+        "found": "առաջադրանք գտնված",
+        "noTasks": "Առաջադրանքներ չեն գտնվել"
+      },
+      "drivers": {
+        "title": "Ուղևորություններ",
+        "found": "ուղևորություն գտնված",
+        "noDrivers": "Ուղևորություններ չեն գտնվել"
+      },
+      "tickets": {
+        "title": "Աջակցության տիկետներ",
+        "found": "տիկետ գտնված",
+        "noTickets": "Տիկետներ չեն գտնվել"
+      },
+      "activity": {
+        "title": "Վերջին ակտիվություն",
+        "subtitle": "Օգտատիրոջ ծանուցումներ և գործողություններ"
+      },
+      "security": {
+        "title": "Մուտքի պատմություն",
+        "subtitle": "Վերջին մուտքի փորձեր",
+        "successful": "Հաջողված մուտք",
+        "failed": "Ձախողված փորձ",
+        "risk": "Ռիսկ"
+      },
+      "chat": {
+        "title": "Չատի հաղորդագրություններ",
+        "subtitle": "Օգտատիրոջ վերջին հաղորդագրություններ"
+      }
+    }
+  },
+  "help": {
+    "title": "Օգնություն և աջակցություն",
+    "subtitle": "Ստեղծեք տիկետ և մենք կօգնենք լուծել խնդիրը",
+    "createTicket": "Ստեղծել տիկետ",
+    "stats": {
+      "total": "Ընդհանուր տիկետեր",
+      "open": "Բաց",
+      "resolved": "Լուծված",
+      "avgResponse": "Միջին պատասխան"
+    },
+    "tabs": {
+      "open": "Բաց",
+      "closed": "Փակ"
+    },
+    "noOpenTickets": "Բաց տիկետեր չկան",
+    "noClosedTickets": "Փակ տիկետեր չկան",
+    "ticketCreated": "Տիկետ {{ticketNumber}} ստեղծված է",
+    "createError": "Սխալ տիկետ ստեղծելիս",
+    "create": {
+      "title": "Ստեղծել աջակցության տիկետ",
+      "description": "Նկարագրեք ձեր խնդիրը",
+      "titleLabel": "Թեմա *",
+      "titlePlaceholder": "Համառոտ նկարագրեք խնդիրը",
+      "priorityLabel": "Առաջնահերթություն",
+      "categoryLabel": "Կատեգորիա",
+      "descriptionLabel": "Նկարագրություն *",
+      "descriptionPlaceholder": "Մանրամասն նկարագրեք ինչ է պատահել...",
+      "cancel": "Չեղարկել",
+      "submit": "Ուղարկել"
+    },
+    "quickHelp": {
+      "title": "Արագ օգնություն",
+      "subtitle": "Օգնություն ստանալու այլ եղանակներ",
+      "email": {
+        "title": "Email",
+        "desc": "support@example.com"
+      },
+      "chat": {
+        "title": "Չատ",
+        "desc": "Գրել թիմային չատ"
+      },
+      "docs": {
+        "title": "Փաստաթղթեր",
+        "desc": "Գիտելիքների բազա և ՀՏՀ"
+      }
+    }
+  },
+  "priority": {
+    "low": "Ցածր",
+    "medium": "Միջին",
+    "high": "Բարձր",
+    "urgent": "Շտապ",
+    "critical": "Կրիտիկական"
+  },
+  "category": {
+    "technical": "Տեխնիկական",
+    "billing": "Բիլինգ",
+    "access": "Հասանելիություն",
+    "featureRequest": "Առաջարկություն",
+    "bug": "Սխալ",
+    "other": "Այլ"
+  },
+  "error": {
+    "fillRequiredFields": "Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը"
+  },
+  "actions": {
+    "cancel": "Չեղարկել",
+    "save": "Պահպանել",
+    "delete": "Ջնջել",
+    "edit": "Խմբագրել",
+    "create": "Ստեղծել",
+    "submit": "Ուղարկել"
   },
   "auth": {
     "login": "Մուտք",
@@ -3004,18 +3280,11 @@
       "organizationNotFound": "Կազմակերպությունը չի գտնվել"
     }
   },
-  "placeholders": {
-    "searchOrganizations": "Փնտրել կազմակերպություններ..."
-  },
   "filters": {
     "plan": "Պլան",
     "status": "Կարգավիճակ",
     "allPlans": "Բոլոր պլանները",
     "allStatuses": "Բոլոր կարգավիճակները"
-  },
-  "statuses": {
-    "active": "Ակտիվ",
-    "inactive": "Ոչ ակտիվ"
   },
   "actions": {
     "clearSelection": "Մաքրել ընտրությունը",
@@ -4309,6 +4578,499 @@
       "success": "Հայտը ստեղծվեց!",
       "description": "Սպասում է մենեջերի հաստատմանը",
       "error": "Չհաջողվեց ստեղծել հայտ"
+    }
+  },
+  "help": {
+    "title": "Օգնություն և աջակցություն",
+    "subtitle": "Ստեղծեք տիկետ և մենք կօգնենք լուծել խնդիրը",
+    "createTicket": "Ստեղծել տիկետ",
+    "upgradePlan": "Բարելավել պլանը",
+    "planLimit": {
+      "starter": "Տիկետների ստեղծումը հասանելի է Professional և Enterprise պլաններում",
+      "professional": "Դուք օգտագործել եք {{used}}-ը {{limit}}-ից այս ամիս"
+    },
+    "stats": {
+      "total": "Ընդհանուր տիկետեր",
+      "open": "Բաց",
+      "resolved": "Լուծված",
+      "avgResponse": "Միջին պատասխան"
+    },
+    "tabs": {
+      "open": "Բաց",
+      "closed": "Փակ"
+    },
+    "noOpenTickets": "Բաց տիկետեր չկան",
+    "noClosedTickets": "Փակ տիկետեր չկան",
+    "ticketCreated": "Տիկետ {{ticketNumber}} ստեղծված է",
+    "createError": "Սխալ տիկետ ստեղծելիս",
+    "create": {
+      "title": "Ստեղծել աջակցության տիկետ",
+      "description": "Նկարագրեք ձեր խնդիրը",
+      "titleLabel": "Թեմա *",
+      "titlePlaceholder": "Համառոտ նկարագրեք խնդիրը",
+      "priorityLabel": "Առաջնահերթություն",
+      "categoryLabel": "Կատեգորիա",
+      "descriptionLabel": "Նկարագրություն *",
+      "descriptionPlaceholder": "Մանրամասն նկարագրեք ինչ է պատահել...",
+      "cancel": "Չեղարկել",
+      "submit": "Ուղարկել"
+    },
+    "quickHelp": {
+      "title": "Արագ օգնություն",
+      "subtitle": "Օգնություն ստանալու այլ եղանակներ",
+      "email": {
+        "title": "Email",
+        "desc": "support@example.com"
+      },
+      "chat": {
+        "title": "Չատ",
+        "desc": "Գրել թիմային չատ"
+      },
+      "docs": {
+        "title": "Փաստաթղթեր",
+        "desc": "Գիտելիքների բազա և ՀՏՀ"
+      }
+    }
+  },
+  "superadmin": {
+    "support": {
+      "title": "Աջակցություն",
+      "subtitle": "Աջակցության տիկետների կառավարում",
+      "createTicket": "Ստեղծել տիկետ",
+      "searchTickets": "Փնտրել տիկետներ...",
+      "allStatuses": "Բոլոր կարգավիճակները",
+      "allPriorities": "Բոլոր առաջնահերթությունները",
+      "ticketsFound": "տիկետ գտնված",
+      "noTickets": "Տիկետներ չեն գտնվել",
+      "tickets": "Տիկետներ",
+      "total": "Ընդհանուր",
+      "open": "Բաց",
+      "inProgress": "Աշխատանքում",
+      "waitingCustomer": "Սպասում է հաճախորդին",
+      "resolved": "Լուծված",
+      "closed": "Փակ",
+      "critical": "Կրիտիկական",
+      "overdue": "Ժամկետանց",
+      "avgTime": "Միջին ժամանակ",
+      "high": "Բարձր",
+      "medium": "Միջին",
+      "low": "Ցածր",
+      "ticketCreated": "Տիկետ {{ticketNumber}} ստեղծված է",
+      "createError": "Սխալ տիկետ ստեղծելիս",
+      "create": {
+        "title": "Ստեղծել աջակցության տիկետ",
+        "description": "Մանրամասն նկարագրեք խնդիրը",
+        "titleLabel": "Վերնագիր *",
+        "titlePlaceholder": "Խնդրի համառոտ նկարագրություն",
+        "priorityLabel": "Առաջնահերթություն",
+        "categoryLabel": "Կատեգորիա",
+        "descriptionLabel": "Նկարագրություն *",
+        "descriptionPlaceholder": "Խնդրի մանրամասն նկարագրություն...",
+        "cancel": "Չեղարկել",
+        "submit": "Ստեղծել տիկետ"
+      },
+      "detail": {
+        "status": "Կարգավիճակ",
+        "priority": "Առաջնահերթություն",
+        "category": "Կատեգորիա",
+        "created": "Ստեղծված",
+        "description": "Նկարագրություն",
+        "comments": "Մեկնաբանություններ",
+        "internalNote": "Ներքին նշում (չի երևում հաճախորդին)",
+        "addComment": "Ավելացնել մեկնաբանություն...",
+        "send": "Ուղարկել",
+        "resolve": "Լուծել",
+        "close": "Փակել"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Dashboard",
+      "subtitle": "Կրիտիկական խնդիրներ որոնք պահանջում են անհապաղ ուշադրություն",
+      "createIncident": "Ստեղծել միջադեպ",
+      "attentionRequired": "ՊԱՀԱՆՋՎՈՒՄ Է ՈՒՇԱԴՐՈՒԹՅՈՒՆ!",
+      "priorityScore": "առաջնահերթության միավոր",
+      "criticalTickets": "Կրիտիկական տիկետներ",
+      "criticalTicketsSubtitle": "վերջին ժամում",
+      "activeIncidents": "Ակտիվ միջադեպեր",
+      "activeIncidentsSubtitle": "պահանջում են լուծում",
+      "slaBreaches": "SLA խախտումներ",
+      "slaBreachesSubtitle": "24 ժամվա ընթացքում",
+      "suspiciousIPs": "Կասկածելի IP հասցեներ",
+      "suspiciousIPsSubtitle": "հնարավոր հարձակում",
+      "maintenanceMode": "Սպասարկման ռեժիմ",
+      "maintenanceModeSubtitle": "կազմակերպություններ",
+      "pendingOrgs": "Սպասում է հաստատման",
+      "pendingOrgsSubtitle": "կազմակերպություններ",
+      "systemStatus": "Համակարգի կարգավիճակ",
+      "systemStatusSubtitle": "Բոլոր բաղադրիչների ներկայիս կարգավիճակը",
+      "create": {
+        "title": "Ստեղծել միջադեպ",
+        "description": "Լրացրեք համակարգի միջադեպի տեղեկատվությունը",
+        "titleLabel": "Վերնագիր *",
+        "titlePlaceholder": "Միջադեպի համառոտ նկարագրություն",
+        "severityLabel": "Լրջություն",
+        "affectedUsersLabel": "Ազդված օգտատերեր",
+        "affectedOrgsLabel": "Ազդված կազմակերպություններ",
+        "descriptionLabel": "Նկարագրություն *",
+        "descriptionPlaceholder": "Միջադեպի մանրամասն նկարագրություն...",
+        "cancel": "Չեղարկել",
+        "submit": "Ստեղծել միջադեպ"
+      },
+      "systemComponents": {
+        "api": "API",
+        "database": "Տվյալների բազա",
+        "emailService": "Email ծառայություն",
+        "stripe": "Stripe",
+        "convex": "Convex",
+        "redis": "Redis",
+        "cloudinary": "Cloudinary",
+        "sentry": "Sentry",
+        "operational": "աշխատում է"
+      },
+      "actions": {
+        "resolve": "Լուծել",
+        "block": "Արգելափակել",
+        "refresh": "Թարմացնել",
+        "open": "Բացել"
+      },
+      "alerts": {
+        "incidentCreated": "Միջադեպ ստեղծված է",
+        "incidentResolved": "Միջադեպը լուծված է",
+        "errorCreatingIncident": "Սխալ միջադեպ ստեղծելիս",
+        "errorResolvingIncident": "Սխալ միջադեպը լուծելիս",
+        "fillRequiredFields": "Լրացրեք պարտադիր դաշտերը",
+        "specifyRootCause": "Նշեք արմատական պատճառը:",
+        "specifyResolution": "Նշեք լուծումը:"
+      },
+      "problemsDetected": "Հայտնաբերված խնդիրներ՝ {{problems}}",
+      "activeIncidentsDesc": "Համակարգային միջադեպեր աշխատանքի մեջ",
+      "usersAffected": "օգտատերեր ազդված",
+      "organizations": "կազմակերպություններ",
+      "minutesAgo": "րոպե առաջ",
+      "minutesActive": "րոպե ակտիվ",
+      "suspiciousIPsDesc": "IP հասցեներ բազմակի անհաջող մուտքի փորձերով",
+      "failedAttempts": "անհաջող փորձեր",
+      "users": "օգտատերեր"
+    },
+    "impersonate": {
+      "title": "Իմպերսոնացիա",
+      "subtitle": "Մուտք գործել որպես այլ օգտատեր կարգավորման համար",
+      "activeSession": "Ակտիվ իմպերսոնացիայի սեսիա",
+      "activeSessionDesc": "Դուք մուտք եք գործել որպես",
+      "reason": "Պատճառ",
+      "expires": "Ժամկետը լրանում է",
+      "goToDashboard": "Անցնել վահանակ",
+      "exitMode": "Դուրս գալ ռեժիմից",
+      "searchUser": "Փնտրել օգտատեր",
+      "searchPlaceholder": "user@example.com կամ անուն...",
+      "noUsersFound": "Օգտատերեր չեն գտնվել",
+      "history": "Իմպերսոնացիայի պատմություն",
+      "historySubtitle": "Վերջին 20 սեսիաներ",
+      "historyEmpty": "Պատմությունը դատարկ է",
+      "start": {
+        "title": "Մուտք գործել որպես օգտատեր",
+        "description": "Դուք կունենաք լիարժեք հասանելիություն օգտատիրոջ հաշվին",
+        "reasonLabel": "Պատճառ (պարտադիր) *",
+        "reasonPlaceholder": "օր․՝ կարգավորման հասանելիության խնդիր...",
+        "auditWarning": "⚠️ Բոլոր գործողությունները կգրանցվեն audit log-ում",
+        "importantTitle": "Կարևոր:",
+        "sessionExpires": "Սեսիան ավարտվում է 1 ժամից",
+        "userNotified": "Օգտատերը կծանուցվի",
+        "actionsLogged": "Բոլոր գործողությունները գրանցվում են audit log-ում",
+        "cannotChangePassword": "Հնարավոր չէ փոխել գաղտնաբառը կամ էլ. հասցեն",
+        "cancel": "Չեղարկել",
+        "submit": "Սկսել սեսիա"
+      },
+      "alerts": {
+        "selectUserAndReason": "Ընտրեք օգտատեր և նշեք պատճառ",
+        "impersonationStarted": "Իմպերսոնացիան սկսված է: {{name}}",
+        "impersonationError": "Սխալ իմպերսոնացիան սկսելիս",
+        "impersonationEnded": "Իմպերսոնացիան ավարտված է",
+        "endImpersonationError": "Սխալ իմպերսոնացիան ավարտելիս"
+      },
+      "sessionInfo": {
+        "reason": "Պատճառ",
+        "expiresAt": "Ժամկետը լրանում է",
+        "targetUser": "Թիրախային օգտատեր"
+      },
+      "searchDesc": "Մուտքագրեք էլ. հասցե կամ անուն փնտրելու համար"
+    },
+    "bulkActions": {
+      "title": "Զանգվածային գործողություններ",
+      "subtitle": "Հաստատել կամ մերժել մի քանի հայտեր միանգամից",
+      "totalLeaves": "Ընդհանուր հայտեր",
+      "pending": "Սպասում է",
+      "selected": "Ընտրված",
+      "selectedCount": "Հայտեր ընտրված",
+      "selectAll": "Ընտրել բոլորը",
+      "deselectAll": "Հանել բոլորը",
+      "approveSelected": "Հաստատել ընտրվածները",
+      "rejectSelected": "Մերժել ընտրվածները",
+      "pendingLeaves": "Արձակուրդի հայտեր (սպասում է)",
+      "pendingLeavesDesc": "Ընտրեք հայտերը զանգվածային հաստատման կամ մերժման համար",
+      "noPending": "Չկան սպասվող հայտեր",
+      "close": "Փակել",
+      "approve": {
+        "title": "Հաստատել հայտեր",
+        "description": "Դուք պատրաստվում եք հաստատել {count} հայտ",
+        "commentLabel": "Մեկնաբանություն (ոչ պարտադիր)",
+        "commentPlaceholder": "Ավելացնել մեկնաբանություն...",
+        "cancel": "Չեղարկել",
+        "submit": "Հաստատել {count} հայտ"
+      },
+      "reject": {
+        "title": "Մերժել հայտեր",
+        "description": "Դուք պատրաստվում եք մերժել {count} հայտ",
+        "reasonLabel": "Մերժման պատճառ *",
+        "reasonPlaceholder": "Նշեք մերժման պատճառը...",
+        "cancel": "Չեղարկել",
+        "submit": "Մերժել {count} հայտ"
+      },
+      "alerts": {
+        "selectAtLeastOne": "Ընտրեք առնվազն մեկ հայտ",
+        "approved": "Հաստատված է {{count}} հայտ",
+        "rejected": "Մերժված է {{count}} հայտ",
+        "errors": "Սխալներ: {{errors}}",
+        "bulkApproveError": "Սխալ զանգվածային հաստատման ժամանակ",
+        "bulkRejectError": "Սխալ զանգվածային մերժման ժամանակ"
+      },
+      "rejectedInBulk": "Մերժված զանգվածաբար"
+    }
+  },
+  "priority": {
+    "low": "Ցածր",
+    "medium": "Միջին",
+    "high": "Բարձր",
+    "urgent": "Շտապ",
+    "critical": "Կրիտիկական"
+  },
+  "category": {
+    "technical": "Տեխնիկական",
+    "billing": "Բիլինգ",
+    "access": "Հասանելիություն",
+    "featureRequest": "Առաջարկություն",
+    "bug": "Սխալ",
+    "other": "Այլ"
+  },
+  "error": {
+    "fillRequiredFields": "Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը"
+  },
+  "actions": {
+    "cancel": "Չեղարկել",
+    "save": "Պահպանել",
+    "delete": "Ջնջել",
+    "edit": "Խմբագրել",
+    "create": "Ստեղծել",
+    "submit": "Ուղարկել"
+  },
+  "common": {
+    "daysShort": "օր",
+    "minutesAgo": "րոպե առաջ",
+    "minutesActive": "րոպե ակտիվ"
+  },
+  "superadmin": {
+    "subscriptions": {
+      "title": "Բաժանորդագրությունների կառավարում",
+      "subtitle": "Կազմակերպությունների բաժանորդագրությունների և պլանների կառավարում",
+      "accessDenied": "Մուտքը արգելված է",
+      "selectOrganization": "Ընտրեք կազմակերպություն *",
+      "selectOrganizationPlaceholder": "Ընտրեք կազմակերպություն",
+      "loadingOrganizations": "Կազմակերպությունների բեռնում...",
+      "noOrganizationsFound": "Կազմակերպություններ չեն գտնվել",
+      "employees": "աշխատակիցներ",
+      "foundCount": "Գտնվել է {{count}} կազմակերպություն",
+      "selectPlanLabel": "Ընտրեք պլան",
+      "customPrice": "Հատուկ գին (USD)",
+      "customPricePlaceholder": "Մուտքագրեք գին",
+      "leaveEmptyForStandardPricing": "Թողեք դատարկ ստանդարտ գնի համար",
+      "internalNotes": "Ներքին նշումներ",
+      "notesPlaceholder": "Ավելացնել ներքին նշումներ (ոչ պարտադիր)",
+      "creatingSubscription": "Բաժանորդագրության ստեղծում...",
+      "createSubscriptionBtn": "Ստեղծել բաժանորդագրություն",
+      "createManualSubscription": "Ստեղծել ձեռքի բաժանորդագրություն",
+      "createManualSubDesc": "Ձեռքով ստեղծել բաժանորդագրություն կազմակերպության համար",
+      "cancelButtonText": "Չեղարկել",
+      "addManualSubscription": "Ավելացնել ձեռքի բաժանորդագրություն",
+      "allSubscriptions": "Բոլոր բաժանորդագրությունները",
+      "organization": "Կազմակերպություն",
+      "plan": "Պլան",
+      "status": "Կարգավիճակ",
+      "type": "Տեսակ",
+      "manual": "Ձեռքի",
+      "stripe": "Stripe",
+      "price": "Գին",
+      "expires": "Ժամկետը լրանում է",
+      "actions": "Գործողություններ",
+      "createSuccess": "Բաժանորդագրությունը հաջողությամբ ստեղծվեց",
+      "failedToCreate": "Չհաջողվեց ստեղծել բաժանորդագրություն",
+      "confirmCancelSub": "Համոզվա՞ծ եք, որ ցանկանում եք չեղարկել այս բաժանորդագրությունը",
+      "cancelSuccess": "Բաժանորդագրությունը հաջողությամբ չեղարկվեց",
+      "failedToCancel": "Չհաջողվեց չեղարկել բաժանորդագրություն"
+    },
+    "security": {
+      "threatLevel": "Սպառնալիքի մակարդակ",
+      "logins24h": "Մուտքեր (24ժ)",
+      "failed": "Ձախողված",
+      "highRisk": "Բարձր ռիսկ",
+      "featuresOn": "Ֆունկցիաները միացված",
+      "critical": "ԿՐԻՏԻԿԱԿԱՆ",
+      "elevated": "ԲԱՐՁՐԱՑՎԱԾ",
+      "moderate": "ՉԱՓԱՎՈՐ",
+      "normal": "ՆՈՐՄԱԼ",
+      "liveMonitoring": "Ուղիղ մոնիտորինգ",
+      "toggleSecuritySystems": "Միացնել/անջատել անվտանգության համակարգերը",
+      "criticalBadge": "ԿԱՐԵՎՈՐ",
+      "disable": "ԱՆՋԱՏՎԱԾ",
+      "currentlySuspendedUsers": "Ժամանակավորապես կասեցված օգտատերեր",
+      "noSuspendedUsers": "Չկան կասեցված օգտատերեր",
+      "reason": "Պատճառ",
+      "reviewAndUnsuspend": "Վերանայել և վերականգնել",
+      "review": "Վերանայել",
+      "recentSuspiciousLogins": "Վերջին կասկածելի մուտքի փորձեր",
+      "noSuspiciousActivity": "Կասկածելի ակտիվություն չի հայտնաբերվել",
+      "ip": "IP",
+      "allSecurityActions": "Բոլոր անվտանգության աուդիտի գրառումներ",
+      "noAuditLogs": "Աուդիտի գրառումներ չկան",
+      "loadingDashboard": "Վահանակի բեռնում...",
+      "accessDenied": "Մուտքը արգելված է",
+      "auditLogging": "Աուդիտի գրանցում",
+      "auditLoggingDesc": "Գրանցել բոլոր անվտանգությանը վերաբերող գործողությունները",
+      "adaptiveAuth": "Ադապտիվ նույնականացում",
+      "adaptiveAuthDesc": "Ռիսկի վրա հիմնված նույնականացման մարտահրավերներ",
+      "deviceFingerprinting": "Սարքի մատնահետք",
+      "deviceFingerprintingDesc": "Սարքերի հետևում և նույնականացում",
+      "keystrokeDynamics": "Ստեղնաշարի դինամիկա",
+      "keystrokeDynamicsDesc": "Տպագրման ոճի վերլուծություն",
+      "continuousFace": "Անընդհատ դեմքի ստուգում",
+      "continuousFaceDesc": "Շարունակական դեմքի ճանաչում",
+      "autoLockout": "Ավտոմատ բլոկավորում",
+      "autoLockoutDesc": "Բլոկավորում ձախողված փորձերից հետո",
+      "newDeviceAlert": "Նոր սարքի ծանուցում",
+      "newDeviceAlertDesc": "Ծանուցել նոր սարքից մուտքի մասին"
+    },
+    "viewingOrganization": "Դիտել կազմակերպությունը",
+    "announcements": {
+      "title": "Հայտարարություններ",
+      "new": "Նոր"
+    },
+    "maintenance": {
+      "title": "Սպասարկում",
+      "config": "Կոնֆիգուրացիա"
+    },
+    "organizations": {
+      "title": "Կազմակերպություններ",
+      "subtitle": "Կառավարել բոլոր կազմակերպությունները համակարգում",
+      "createTitle": "Ստեղծել կազմակերպություն",
+      "createSubtitle": "Ստեղծել նոր կազմակերպություն ադմինիստրատորի մուտքով",
+      "nameLabel": "Կազմակերպության անուն",
+      "slugLabel": "Slug (URL-հարմար)",
+      "adminEmailLabel": "Ադմինիստրատորի էլ. հասցե",
+      "planLabel": "Բաժանորդագրության պլան",
+      "planStarterFree": "Starter (Անվճար)",
+      "planProfessionalPaid": "Professional (Վճարովի)",
+      "planEnterpriseCustom": "Enterprise (Անհատական)",
+      "countryLabel": "Երկիր",
+      "timezoneLabel": "Ժամային գոտի",
+      "industryLabel": "Ոլորտ",
+      "creating": "Ստեղծում...",
+      "createOrganization": "Ստեղծել կազմակերպություն",
+      "requiredNotice": "* նշանով նշված բոլոր դաշտերը պարտադիր են",
+      "list": {
+        "title": "Բոլոր կազմակերպությունները",
+        "description": "Սեղմեք ցանկացած կազմակերպության վրա՝ մանրամասները դիտելու և կառավարելու համար",
+        "notFound": "Կազմակերպություններ չեն գտնվել",
+        "empty": "Ստեղծեք ձեր առաջին կազմակերպությունը սկսելու համար"
+      },
+      "card": {
+        "statusActive": "Ակտիվ",
+        "statusInactive": "Ոչ ակտիվ",
+        "totalEmployees": "Ընդհանուր աշխատակիցներ",
+        "activeEmployees": "Ակտիվ",
+        "employeeLimit": "Սահմանափակում",
+        "industry": "Ոլորտ",
+        "manageAdmins": "Կառավարել ադմիններին",
+        "edit": "Խմբագրել կազմակերպությունը"
+      },
+      "stats": {
+        "totalOrgs": "Ընդհանուր կազմակերպություններ",
+        "count": "կազմակերպություն",
+        "active": "Ակտիվ",
+        "working": "աշխատում են",
+        "viewed": "Ընդհանուր աշխատակիցներ",
+        "total": "աշխատակիցներ",
+        "inactive": "Ոչ ակտիվ",
+        "suspended": "կասեցված"
+      }
+    }
+  },
+  "superadminSecurity": {
+    "securityControl": "Անվտանգության կառավարման կենտրոն",
+    "manageIdentityVerification": "Կառավարել նույնականացման ստուգումը և սպառնալիքների հայտնաբերումը",
+    "securityFeatures": "Անվտանգության ֆունկցիաներ",
+    "blockedUsers": "Արգելափակված օգտատերեր",
+    "loginAttempts": "Մուտքի փորձեր",
+    "auditLogs": "Աուդիտի գրառումներ"
+  },
+  "ui": {
+    "accessDenied": "Մուտքը արգելված է",
+    "onlySuperadminCanAccess": "Միայն սուպեր-ադմինները կարող են մուտք գործել այս էջ",
+    "yourEmail": "Ձեր էլ. հասցեն",
+    "role": "Դեր"
+  },
+  "placeholders": {
+    "acmeCorp": "Acme Corp",
+    "acmeInc": "acme-inc",
+    "enterYourEmail": "admin@example.com",
+    "unitedStates": "Միացյալ Նահանգներ",
+    "technologyHealthcare": "Տեխնոլոգիաներ, Առողջապահություն, Ֆինանսներ...",
+    "searchOrganizations": "Փնտրել կազմակերպություններ..."
+  },
+  "filters": {
+    "plan": "Պլան",
+    "allPlans": "Բոլոր պլանները",
+    "status": "Կարգավիճակ",
+    "allStatuses": "Բոլոր կարգավիճակները"
+  },
+  "statuses": {
+    "active": "Ակտիվ",
+    "inactive": "Ոչ ակտիվ"
+  },
+  "actions": {
+    "clearSelection": "Մաքրել ընտրությունը"
+  },
+  "admin": {
+    "superadminPanel": "Սուպեր-ադմինի վահանակ"
+  },
+  "aiChat": {
+    "title": "Shield HR AI",
+    "subtitle": "Ձեր AI Օգնական",
+    "newChat": "Նոր չատ",
+    "today": "Այսօր",
+    "active": "Ակտիվ",
+    "demo": "Դեմո",
+    "roleSuperadmin": "👑 Սուպեր Ադմին",
+    "roleAdmin": "🛡️ Ադմին",
+    "roleEmployee": "👤 Աշխատակից",
+    "welcomeTitle": "Ինչպե՞ս կարող եմ օգնել ձեզ, {{name}}?",
+    "welcomeSubtitle": "Ես ձեր AI Օգնականն եմ: Կարող եմ օգնել արձակուրդներով, խնդիրներով, աշխատակիցներով և հաշվետվություններով:",
+    "quickQuestions": {
+      "leave": "📅 Ինչպե՞ս ստեղծել արձակուրդի հայտ",
+      "tasks": "✅ Ինչ խնդիրներ ունեմ",
+      "employees": "👥 Ցույց տալ աշխատակիցներին",
+      "attendance": "📊 Ներկայության հաշվետվություն"
+    },
+    "aiTyping": "AI-ը գրում է...",
+    "typing": "գրում է...",
+    "you": "Դուք",
+    "assistantName": "Shield HR AI",
+    "inputPlaceholder": "Հարցրեք ինչ ուզում եք...",
+    "disclaimer": "AI-ը կարող է սխալներ թույլ տալ: Խնդրում ենք ստուգել կարևոր տեղեկատվությունը:",
+    "copied": "Պատճենված է բուֆեր!",
+    "aiResponses": {
+      "leave": "📅 **Տեղեկատվություն արձակուրդների մասին**\n\nԴուք ունեք հասանելիություն հետևյալ արձակուրդների տեսակներին:\n\n• **Paid Leave** - Վճարովի արձակուրդ\n• **Sick Leave** - Հիվանդության արձակուրդ\n• **Family Leave** - Ընտանեկան արձակուրդ\n\nՑանկանու՞մ եք ստեղծել արձակուրդի հայտ:",
+      "tasks": "✅ **Ձեր խնդիրները**\n\nԴուք ունեք ակտիվ խնդիրներ: Ցանկանու՞մ եք դիտել դրանց ցուցակը կամ ստեղծել նորը:",
+      "greeting": "👋 Ողջույն, {{name}}: Ես ձեր Shield HR AI Օգնականն եմ:\n\nԻնչպե՞ս կարող եմ օգնել:\n\n• Արձակուրդներ\n• Խնդիրներ\n• Աշխատակիցներ\n• Հաշվետվություններ",
+      "default": "🤖 Ես ստացել եմ ձեր հարցումը. \"{{query}}\"\n\nԵս կարող եմ օգնել ձեզ:\n\n• 📅 Արձակուրդներ\n• ✅ Խնդիրներ\n• 👥 Աշխատակիցներ\n• 📊 Հաշվետվություններ\n\nԻ՞նչ կցանկանայիք իմանալ:"
     }
   }
 }

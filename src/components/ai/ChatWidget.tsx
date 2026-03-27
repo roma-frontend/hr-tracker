@@ -2,14 +2,14 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Sparkles, CheckCircle, AlertCircle, Calendar, Pencil, Trash2, Mic, MicOff, Car } from 'lucide-react';
+import { X, Send, Sparkles, CheckCircle, AlertCircle, Calendar, Pencil, Trash2, Mic, MicOff, Car, Maximize2 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUpgradeModal } from '@/components/subscription/PlanGate';
 import { usePlanFeatures } from '@/hooks/usePlanFeatures';
-import { useRouter } from 'next/navigation';
 import { getRoleSuggestions, type UserRole } from '@/lib/aiAssistant';
 
 // SpeechRecognition type declarations
@@ -181,6 +181,7 @@ const getInitialSuggestions = (role: UserRole | undefined): string[] => {
 export function ChatWidget() {
   const { t } = useTranslation();
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -822,7 +823,7 @@ export function ChatWidget() {
             className="fixed bottom-24 right-6 z-50 px-4 py-2 rounded-xl bg-[#2563eb] text-white text-sm font-medium shadow-lg flex items-center gap-2"
           >
             <Mic className="w-4 h-4 animate-pulse" />
-            Hey HR! I'm listening…
+            Hey HR! I&apos;m listening…
           </motion.div>
         )}
       </AnimatePresence>
@@ -830,35 +831,37 @@ export function ChatWidget() {
       {/* Upgrade modal (rendered at root level) */}
       {upgradeModal}
 
-      {/* Toggle Button */}
-      <motion.button
-        aria-label={t('chatWidget.openAssistant', { defaultValue: 'Open AI assistant' })}
-        onClick={() => {
-          if (!hasAiChat) {
-            openModal({
-              featureTitle: 'AI HR Assistant',
-              featureDescription: 'AI-powered leave assistant, smart suggestions, and voice commands are available on the Professional plan.',
-              recommendedPlan: 'professional',
-            });
-            return;
-          }
-          setIsOpen(o => !o);
-        }}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white shadow-2xl shadow-[#2563eb]/40 flex items-center justify-center hover:scale-105 transition-transform"
-        whileTap={{ scale: 0.95 }}
-      >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-              <X className="w-6 h-6" />
-            </motion.div>
-          ) : (
-            <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-              <Sparkles className="w-6 h-6" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+      {/* Toggle Button - Hidden on /ai-chat page */}
+      {pathname !== '/ai-chat' && (
+        <motion.button
+          aria-label={t('chatWidget.openAssistant', { defaultValue: 'Open AI assistant' })}
+          onClick={() => {
+            if (!hasAiChat) {
+              openModal({
+                featureTitle: 'AI HR Assistant',
+                featureDescription: 'AI-powered leave assistant, smart suggestions, and voice commands are available on the Professional plan.',
+                recommendedPlan: 'professional',
+              });
+              return;
+            }
+            setIsOpen(o => !o);
+          }}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white shadow-2xl shadow-[#2563eb]/40 flex items-center justify-center hover:scale-105 transition-transform"
+          whileTap={{ scale: 0.95 }}
+        >
+          <AnimatePresence mode="wait">
+            {isOpen ? (
+              <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                <X className="w-6 h-6" />
+              </motion.div>
+            ) : (
+              <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                <Sparkles className="w-6 h-6" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      )}
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -880,9 +883,22 @@ export function ChatWidget() {
                 <p className="text-sm font-semibold text-[var(--text-primary)]">Shield HR AI</p>
                 <p className="text-[10px] text-[var(--text-muted)]">{t('chatWidget.subtitle', { defaultValue: 'Your intelligent HR assistant' })}</p>
               </div>
-              <button onClick={() => setIsOpen(false)} className="ml-auto p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors" aria-label={t('chatWidget.closeChat', { defaultValue: 'Close chat' })}>
-                <X className="w-4 h-4 text-[var(--text-muted)]" />
-              </button>
+              <div className="flex items-center gap-1 ml-auto">
+                <button
+                  onClick={() => {
+                    router.push('/ai-chat');
+                    setIsOpen(false);
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                  aria-label="Open full screen chat"
+                  title="Открыть на весь экран"
+                >
+                  <Maximize2 className="w-4 h-4 text-[var(--text-muted)]" />
+                </button>
+                <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors" aria-label={t('chatWidget.closeChat', { defaultValue: 'Close chat' })}>
+                  <X className="w-4 h-4 text-[var(--text-muted)]" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}

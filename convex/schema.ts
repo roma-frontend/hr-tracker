@@ -291,6 +291,172 @@ export default defineSchema({
     .index("by_unread_date", ["userId", "isRead", "createdAt"])
     .index("by_org_created", ["organizationId", "createdAt"]),
 
+  // ── SUPPORT TICKETS ──────────────────────────────────────────────────────
+  // Unified support ticket system for superadmin
+  supportTickets: defineTable({
+    organizationId: v.optional(v.id("organizations")),
+    // Ticket info
+    ticketNumber: v.string(),        // Auto-generated: #SUP-12345
+    title: v.string(),
+    description: v.string(),
+    // Priority & status
+    priority: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("critical"),
+    ),
+    status: v.union(
+      v.literal("open"),
+      v.literal("in_progress"),
+      v.literal("waiting_customer"),
+      v.literal("resolved"),
+      v.literal("closed"),
+    ),
+    // Category
+    category: v.union(
+      v.literal("technical"),
+      v.literal("billing"),
+      v.literal("access"),
+      v.literal("feature_request"),
+      v.literal("bug"),
+      v.literal("other"),
+    ),
+    // People
+    createdBy: v.id("users"),        // Who created the ticket
+    assignedTo: v.optional(v.id("users")),  // Who is responsible (superadmin or org admin)
+    // Related entities
+    relatedLeaveId: v.optional(v.id("leaveRequests")),
+    relatedDriverRequestId: v.optional(v.id("driverRequests")),
+    relatedTaskId: v.optional(v.id("tasks")),
+    // Resolution
+    resolution: v.optional(v.string()),
+    resolvedAt: v.optional(v.number()),
+    resolvedBy: v.optional(v.id("users")),
+    closedAt: v.optional(v.number()),
+    // SLA tracking
+    slaDeadline: v.optional(v.number()),  // When response is due
+    firstResponseAt: v.optional(v.number()),
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_status", ["status"])
+    .index("by_priority", ["priority"])
+    .index("by_created_by", ["createdBy"])
+    .index("by_assigned_to", ["assignedTo"])
+    .index("by_status_priority", ["status", "priority"])
+    .index("by_created", ["createdAt"])
+    .index("by_ticket_number", ["ticketNumber"]),
+
+  // Ticket comments/messages
+  ticketComments: defineTable({
+    ticketId: v.id("supportTickets"),
+    organizationId: v.optional(v.id("organizations")),
+    authorId: v.id("users"),
+    message: v.string(),
+    isInternal: v.boolean(),       // Internal note (not visible to customer)
+    attachments: v.optional(v.array(v.string())),  // URLs
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_ticket", ["ticketId"])
+    .index("by_org", ["organizationId"])
+    .index("by_created", ["createdAt"]),
+
+  // ── AUTOMATION RULES ─────────────────────────────────────────────────────
+  // Auto-pilot rules for superadmin
+  automationRules: defineTable({
+    organizationId: v.optional(v.id("organizations")),
+    name: v.string(),
+    description: v.string(),
+    trigger: v.object({
+      type: v.union(
+        v.literal("leave_created"),
+        v.literal("leave_pending_hours"),
+        v.literal("user_inactive_days"),
+        v.literal("sla_breach"),
+        v.literal("multiple_failed_logins"),
+        v.literal("ticket_created"),
+        v.literal("ticket_priority"),
+      ),
+      conditions: v.any(),  // JSON conditions
+    }),
+    actions: v.array(v.object({
+      type: v.union(
+        v.literal("auto_approve"),
+        v.literal("auto_reject"),
+        v.literal("send_notification"),
+        v.literal("escalate"),
+        v.literal("create_ticket"),
+        v.literal("block_user"),
+        v.literal("assign_user"),
+      ),
+      parameters: v.any(),  // Action parameters
+    })),
+    isActive: v.boolean(),
+    executionCount: v.number(),
+    lastExecutedAt: v.optional(v.number()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_active", ["isActive"])
+    .index("by_trigger", ["trigger"]),
+
+  // ── IMPERSONATION SESSIONS ───────────────────────────────────────────────
+  // Track impersonation sessions for audit
+  impersonationSessions: defineTable({
+    superadminId: v.id("users"),
+    targetUserId: v.id("users"),
+    organizationId: v.id("organizations"),
+    reason: v.string(),
+    token: v.string(),
+    expiresAt: v.number(),
+    startedAt: v.number(),
+    endedAt: v.optional(v.number()),
+    isActive: v.boolean(),
+  })
+    .index("by_superadmin", ["superadminId"])
+    .index("by_target", ["targetUserId"])
+    .index("by_token", ["token"])
+    .index("by_active", ["isActive"]),
+
+  // ── EMERGENCY INCIDENTS ──────────────────────────────────────────────────
+  // Track system-wide incidents
+  emergencyIncidents: defineTable({
+    organizationId: v.optional(v.id("organizations")),
+    title: v.string(),
+    description: v.string(),
+    severity: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("critical"),
+    ),
+    status: v.union(
+      v.literal("investigating"),
+      v.literal("identified"),
+      v.literal("monitoring"),
+      v.literal("resolved"),
+    ),
+    affectedUsers: v.number(),
+    affectedOrgs: v.number(),
+    rootCause: v.optional(v.string()),
+    resolution: v.optional(v.string()),
+    startedAt: v.number(),
+    resolvedAt: v.optional(v.number()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_severity", ["severity"])
+    .index("by_org", ["organizationId"])
+    .index("by_created", ["createdAt"]),
+
   // ── AUDIT LOGS ───────────────────────────────────────────────────────────
   auditLogs: defineTable({
     organizationId: v.optional(v.id("organizations")),   // optional for migration

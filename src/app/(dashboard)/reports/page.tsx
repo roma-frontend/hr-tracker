@@ -184,19 +184,19 @@ export default function ReportsPage() {
               <FileText className="w-4 h-4 mr-2 inline-block" />
               {t('reports.overview')} Overview
             </TabsTrigger>
-            <TabsTrigger 
-              value="departments" 
+            <TabsTrigger
+              value="departments"
               className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium"
             >
               <Users className="w-4 h-4 mr-2 inline-block" />
-              Departments
+              {t('reportsExtended.departments')}
             </TabsTrigger>
-            <TabsTrigger 
-              value="trends" 
+            <TabsTrigger
+              value="trends"
               className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium"
             >
               <TrendingUp className="w-4 h-4 mr-2 inline-block" />
-              Trends
+              {t('reportsExtended.trends')}
             </TabsTrigger>
           </TabsList>
 
@@ -230,13 +230,13 @@ export default function ReportsPage() {
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">Request Status Breakdown</CardTitle>
+                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">{t('reportsExtended.requestStatusBreakdown')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-2">
                   {[
-                    { label: "Approved", count: approvedCount, color: "#10b981", variant: "success" as const },
-                    { label: "Pending", count: pendingCount, color: "#f59e0b", variant: "warning" as const },
-                    { label: "Rejected", count: rejectedCount, color: "#ef4444", variant: "destructive" as const },
+                    { label: t('statuses.approved'), count: approvedCount, color: "#10b981", variant: "success" as const },
+                    { label: t('statuses.pending'), count: pendingCount, color: "#f59e0b", variant: "warning" as const },
+                    { label: t('statuses.rejected'), count: rejectedCount, color: "#ef4444", variant: "destructive" as const },
                   ].map((s: any) => (
                     <div key={s.label}>
                       <div className="flex items-center justify-between mb-1.5">
@@ -289,13 +289,13 @@ export default function ReportsPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="dept" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
                           itemStyle={{ color: "var(--text-primary)" }}
                           labelStyle={{ color: "var(--text-primary)" }}
                         />
-                        <Bar dataKey="approved" name="Approved" fill="#10b981" radius={[4, 4, 0, 0]} stackId="a" />
-                        <Bar dataKey="pending" name="Pending" fill="#f59e0b" radius={[4, 4, 0, 0]} stackId="a" />
+                        <Bar dataKey="approved" name={t('statuses.approved')} fill="#10b981" radius={[4, 4, 0, 0]} stackId="a" />
+                        <Bar dataKey="pending" name={t('statuses.pending')} fill="#f59e0b" radius={[4, 4, 0, 0]} stackId="a" />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -304,7 +304,7 @@ export default function ReportsPage() {
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">Department Details</CardTitle>
+                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">{t('reportsExtended.departmentDetails')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {deptData.length === 0 ? (
@@ -355,8 +355,8 @@ export default function ReportsPage() {
                         labelStyle={{ color: "var(--text-primary)" }}
                       />
                       <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-muted)" }} />
-                      <Area type="monotone" dataKey="approved" name="Approved" stroke="#10b981" fill="url(#colorApproved)" strokeWidth={2} />
-                      <Area type="monotone" dataKey="pending" name="Pending" stroke="#f59e0b" fill="url(#colorPending)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="approved" name={t('statuses.approved')} stroke="#10b981" fill="url(#colorApproved)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="pending" name={t('statuses.pending')} stroke="#f59e0b" fill="url(#colorPending)" strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -364,7 +364,7 @@ export default function ReportsPage() {
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">Cumulative Leave Days</CardTitle>
+                  <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">{t('reportsExtended.cumulativeLeaveDays')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={200}>
@@ -372,13 +372,13 @@ export default function ReportsPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="month" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
                         itemStyle={{ color: "var(--text-primary)" }}
                         labelStyle={{ color: "var(--text-primary)" }}
                       />
-                      <Area type="monotone" dataKey="cumulative" name="Requests" stroke="#2563eb" fill="#2563eb" fillOpacity={0.1} strokeWidth={2} />
-                      <Area type="monotone" dataKey="days" name="Days" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.1} strokeWidth={2} />
+                      <Area type="monotone" dataKey="cumulative" name={t('leave.requests')} stroke="#2563eb" fill="#2563eb" fillOpacity={0.1} strokeWidth={2} />
+                      <Area type="monotone" dataKey="days" name={t('leave.days')} stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.1} strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
