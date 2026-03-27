@@ -129,7 +129,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
   };
 
   const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }).map((_, i) => addDays(startOfWeek(selectedDate, { weekStartsOn: 1 }), i));
+    return Array.from({ length: 7 }).map((_: any, i: any) => addDays(startOfWeek(selectedDate, { weekStartsOn: 1 }), i));
   }, [selectedDate]);
 
   const getScheduleForDay = (date: Date) => {
@@ -226,7 +226,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
       {/* Desktop Week View - Hidden on mobile */}
       <div className="hidden sm:block">
         <div className="grid grid-cols-7 gap-2">
-          {weekDays.map((day) => {
+          {weekDays.map((day: any) => {
             const daySchedule = getScheduleForDay(day);
             const today = isToday(day);
 
@@ -257,7 +257,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                   {daySchedule.length > 0 ? (
                     daySchedule
                       .sort((a, b) => a.startTime - b.startTime)
-                      .map((s) => (
+                      .map((s: any) => (
                         <div
                           key={s._id}
                           className={`p-2 rounded-lg border text-xs transition-all ${getStatusColor(s.status, s.type)}`}
@@ -327,7 +327,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
           <CardHeader className="p-3 pb-2 border-b">
             <ScrollArea className="w-full">
               <div className="flex gap-2 pb-2">
-                {weekDays.map((day, index) => {
+                {weekDays.map((day: any, index: any) => {
                   const today = isToday(day);
                   const isSelected = index === mobileViewDay;
                   const daySchedule = getScheduleForDay(day);
@@ -372,7 +372,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
             {getScheduleForDay(weekDays[mobileViewDay]).length > 0 ? (
               getScheduleForDay(weekDays[mobileViewDay])
                 .sort((a, b) => a.startTime - b.startTime)
-                .map((s) => (
+                .map((s: any) => (
                   <div
                     key={s._id}
                     className={`p-3 rounded-lg border text-sm transition-all ${getStatusColor(s.status, s.type)}`}

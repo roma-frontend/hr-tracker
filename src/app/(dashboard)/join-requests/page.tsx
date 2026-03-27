@@ -203,7 +203,7 @@ export default function JoinRequestsPage() {
       {/* Filters + Search */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex gap-2">
-          {(["pending", "approved", "rejected", "all"] as FilterStatus[]).map((f) => (
+          {(["pending", "approved", "rejected", "all"] as FilterStatus[]).map((f: any) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -260,7 +260,7 @@ export default function JoinRequestsPage() {
       ) : (
         <div className="space-y-3">
           <AnimatePresence>
-            {filtered.map((req) => (
+            {filtered.map((req: any) => (
               <motion.div
                 key={req._id}
                 initial={{ opacity: 0, y: 8 }}

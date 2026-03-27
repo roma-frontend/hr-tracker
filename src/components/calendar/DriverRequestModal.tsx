@@ -69,19 +69,6 @@ export function DriverRequestModal({
     reason: string;
   } | null>(null);
 
-  // Get alternative drivers when current driver is on leave
-  const alternativeDrivers = useQuery(
-    api.drivers.getAlternativeDrivers,
-    selectedDriver && startTime && endTime && leaveWarning
-      ? {
-          organizationId: organizationId!,
-          startTime: new Date(startTime).getTime(),
-          endTime: new Date(endTime).getTime(),
-          excludeDriverId: selectedDriver as Id<"drivers">,
-        }
-      : "skip"
-  );
-
   const [selectedDriver, setSelectedDriver] = useState<Id<"drivers"> | "">("");
   const [tripInfo, setTripInfo] = useState({
     from: "",
@@ -94,6 +81,19 @@ export function DriverRequestModal({
   const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number; address?: string } | undefined>();
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
+
+  // Get alternative drivers when current driver is on leave
+  const alternativeDrivers = useQuery(
+    api.drivers.getAlternativeDrivers,
+    selectedDriver && startTime && endTime && leaveWarning
+      ? {
+          organizationId: organizationId!,
+          startTime: new Date(startTime).getTime(),
+          endTime: new Date(endTime).getTime(),
+          excludeDriverId: selectedDriver as Id<"drivers">,
+        }
+      : "skip"
+  );
 
   // Geocode search state
   const [pickupQuery, setPickupQuery] = useState("");
@@ -291,7 +291,7 @@ export function DriverRequestModal({
       toast.error(
         t("driver.driverOnLeaveBlock", "Невозможно заказать водителя: он находится в отпуске"),
         {
-          description: leaveInfo.message || `Отпуск с ${leaveInfo.startDate} по ${leaveInfo.endDate}`,
+          description: (leaveInfo as any).message || `Отпуск с ${(leaveInfo as any).startDate} по ${(leaveInfo as any).endDate}`,
           duration: 6000,
         }
       );
@@ -364,7 +364,7 @@ export function DriverRequestModal({
                 <SelectValue placeholder={t("driver.chooseDriver", "Choose a driver")} />
               </SelectTrigger>
               <SelectContent>
-                {availableDrivers?.filter(Boolean).map((driver) => (
+                {availableDrivers?.filter(Boolean).map((driver: any) => (
                   <SelectItem key={driver!._id} value={driver!._id}>
                     {driver!.userName} - {driver!.vehicleInfo.model} ({driver!.vehicleInfo.plateNumber})
                   </SelectItem>
@@ -416,7 +416,7 @@ export function DriverRequestModal({
                       {t("driver.alternativeDrivers", "Доступные водители:")}
                     </p>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {alternativeDrivers.map((driver) => (
+                      {alternativeDrivers.map((driver: any) => (
                         <div
                           key={driver._id}
                           className="flex items-center justify-between p-2 rounded-md bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-700"
@@ -424,15 +424,15 @@ export function DriverRequestModal({
                           <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
                               <AvatarImage src={driver.userAvatar} />
-                              <AvatarFallback>{driver.userName.charAt(0)}</AvatarFallback>
+                              <AvatarFallback>{driver.userName?.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="text-sm">
                               <p className="font-medium text-amber-900 dark:text-amber-100">
                                 {driver.userName}
                               </p>
                               <p className="text-xs text-amber-700 dark:text-amber-300">
-                                {driver.vehicleInfo.model} • {driver.vehicleInfo.plateNumber}
-                                {driver.vehicleInfo.capacity && ` • ${driver.vehicleInfo.capacity} ${t("driver.seats", "мест")}`}
+                                {driver.vehicleInfo?.model} • {driver.vehicleInfo?.plateNumber}
+                                {driver.vehicleInfo?.capacity && ` • ${driver.vehicleInfo.capacity} ${t("driver.seats", "мест")}`}
                               </p>
                             </div>
                           </div>
@@ -605,7 +605,7 @@ export function DriverRequestModal({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!!leaveWarning || isCheckingLeave}
+              disabled={Boolean(leaveWarning) || Boolean(isCheckingLeave)}
             >
               {isCheckingLeave
                 ? t("driver.checking", "Проверка...")

@@ -4,6 +4,8 @@
 
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+
+// ... остальной код
 import type { Id } from "./_generated/dataModel";
 
 /**
@@ -49,16 +51,16 @@ export const checkBirthdaysToday = mutation({
         await ctx.db.insert("notifications", {
           organizationId,
           userId: user._id,
-          type: "birthday",
+          type: "system",
           title: `🎉 День рождения!`,
           message: `Сегодня день рождения у ${birthdayUser.name}! ${getAgeEmoji(age)}\n\n🎁 Поздравьте коллегу и подарите хорошее настроение!`,
           isRead: false,
           createdAt: Date.now(),
-          metadata: {
+          metadata: JSON.stringify({
             birthdayUserId: birthdayUser._id,
             birthdayUserName: birthdayUser.name,
             age,
-          },
+          }),
         });
       }
 
@@ -66,15 +68,15 @@ export const checkBirthdaysToday = mutation({
       await ctx.db.insert("notifications", {
         organizationId,
         userId: birthdayUser._id,
-        type: "birthday",
+        type: "system",
         title: `🎂 С Днём Рождения!`,
         message: `${birthdayUser.name}, поздравляем Вас с Днём Рождения! 🎉\n\nЖелаем успехов, здоровья и отличного настроения! 🎁\n\nВаш возраст: ${age} ${getAgeWord(age)}`,
         isRead: false,
         createdAt: Date.now(),
-        metadata: {
+        metadata: JSON.stringify({
           isBirthdayPerson: true,
           age,
-        },
+        }),
       });
     }
 
@@ -143,15 +145,15 @@ export const checkUpcomingBirthdays = mutation({
             await ctx.db.insert("notifications", {
               organizationId,
               userId: user._id,
-              type: "birthday_reminder",
+              type: "system",
               title: `🎁 Скоро день рождения!`,
               message: `Через 3 дня день рождения у ${birthdayUser.name}! Подумайте о поздравлении. 🎂`,
               isRead: false,
               createdAt: Date.now(),
-              metadata: {
+              metadata: JSON.stringify({
                 birthdayUserId: birthdayUser._id,
                 daysUntil: 3,
-              },
+              }),
             });
           }
         }
@@ -278,12 +280,12 @@ export const scheduledBirthdayCheck = mutation({
   },
   handler: async (ctx, { organizationId }) => {
     // Проверить сегодня
-    const today = await ctx.db.mutation("birthdays:checkBirthdaysToday", {
+    const today = await ctx.runMutation("birthdays:checkBirthdaysToday" as any, {
       organizationId,
     });
 
     // Проверить предстоящие (через 3 дня для напоминания)
-    const upcoming = await ctx.db.mutation("birthdays:checkUpcomingBirthdays", {
+    const upcoming = await ctx.runMutation("birthdays:checkUpcomingBirthdays" as any, {
       organizationId,
       daysAhead: 7,
     });
@@ -310,7 +312,7 @@ export const setupBirthdayScheduler = mutation({
       functionName: "birthdays:scheduledBirthdayCheck",
       schedule: "0 9 * * *", // Каждое утро в 9:00
       isActive: true,
-      lastRun: null,
+      lastRun: undefined,
       nextRun: new Date().setHours(9, 0, 0, 0), // Сегодня в 9:00
       createdAt: Date.now(),
     });

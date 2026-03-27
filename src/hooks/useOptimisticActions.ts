@@ -28,10 +28,11 @@ export function useOptimisticSendMessage(
   userId: Id<"users">,
   organizationId: Id<"organizations">
 ) {
-  const [optimisticMessages, addOptimisticMessage] = useOptimistic<OptimisticMessage[]>(
-    [],
-    (state, newMessage: OptimisticMessage) => [...state, newMessage]
-  );
+  const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([]);
+  
+  const addOptimisticMessage = useCallback((newMessage: OptimisticMessage) => {
+    setOptimisticMessages(prev => [...prev, newMessage]);
+  }, []);
 
   const sendMessage = useMutation(api.chat.sendMessage);
   const messages = useQuery(api.chat.getMessages, { conversationId, userId, limit: 60 }) ?? [];
@@ -41,7 +42,7 @@ export function useOptimisticSendMessage(
 
   const sendOptimistic = useCallback(async (
     content: string,
-    replyTo?: Id<"chatMessages">,
+    replyToId?: Id<"chatMessages">,
     attachmentUrl?: string,
     attachmentType?: 'image' | 'file'
   ) => {
@@ -59,7 +60,7 @@ export function useOptimisticSendMessage(
       createdAt: Date.now(),
       pending: true,
       type: attachmentUrl ? (attachmentType === 'image' ? 'image' : 'file') : 'text',
-      attachmentUrl,
+      attachmentUrl: attachmentUrl ?? undefined,
     };
 
     // Add to optimistic state (instant UI update)
@@ -72,9 +73,9 @@ export function useOptimisticSendMessage(
         senderId: userId,
         organizationId,
         content,
-        replyTo,
-        attachmentUrl,
-        attachmentType: attachmentType as any,
+        replyToId,
+        type: attachmentUrl ? (attachmentType === 'image' ? 'image' : 'file') : 'text',
+        attachments: attachmentUrl ? [{ url: attachmentUrl, name: 'attachment', type: attachmentType || 'file', size: 0 }] : undefined,
       });
 
       // Clear optimistic on success (real message will appear from Convex)
@@ -103,9 +104,11 @@ export function useOptimisticReaction(
   messageId: Id<"chatMessages">,
   userId: Id<"users">
 ) {
-  const [optimisticReactions, addOptimisticReaction] = useOptimistic<
-    Array<{ userId: Id<"users">; emoji: string }>
-  >([], (state, reaction) => [...state, reaction]);
+  const [optimisticReactions, setOptimisticReactions] = useState<Array<{ userId: Id<"users">; emoji: string }>>([]);
+  
+  const addOptimisticReaction = useCallback((reaction: { userId: Id<"users">; emoji: string }) => {
+    setOptimisticReactions(prev => [...prev, reaction]);
+  }, []);
 
   const toggleReaction = useMutation(api.chat.toggleReaction);
   const [isToggling, setIsToggling] = useState(false);
@@ -136,9 +139,11 @@ export function useOptimisticReaction(
  * useOptimisticLeaveRequest - Optimistic leave request hook
  */
 export function useOptimisticLeaveRequest() {
-  const [optimisticRequests, addOptimisticRequest] = useOptimistic<
-    Array<{ id: string; type: string; startDate: string; endDate: string; status: 'pending' }>
-  >([], (state, request) => [...state, request]);
+  const [optimisticRequests, setOptimisticRequests] = useState<Array<{ id: string; type: string; startDate: string; endDate: string; status: 'pending' }>>([]);
+  
+  const addOptimisticRequest = useCallback((request: { id: string; type: string; startDate: string; endDate: string; status: 'pending' }) => {
+    setOptimisticRequests(prev => [...prev, request]);
+  }, []);
 
   const createLeave = useMutation(api.leaves.createLeave);
   const [isCreating, setIsCreating] = useState(false);
@@ -189,9 +194,11 @@ export function useOptimisticLeaveRequest() {
  * useOptimisticTaskStatus - Optimistic task status update hook
  */
 export function useOptimisticTaskStatus() {
-  const [optimisticUpdates, addOptimisticUpdate] = useOptimistic<
-    Array<{ taskId: Id<"tasks">; status: string }>
-  >([], (state, update) => [...state, update]);
+  const [optimisticUpdates, setOptimisticUpdates] = useState<Array<{ taskId: Id<"tasks">; status: string }>>([]);
+  
+  const addOptimisticUpdate = useCallback((update: { taskId: Id<"tasks">; status: string }) => {
+    setOptimisticUpdates(prev => [...prev, update]);
+  }, []);
 
   const updateTaskStatus = useMutation(api.tasks.updateTaskStatus);
   const [isUpdating, setIsUpdating] = useState(false);

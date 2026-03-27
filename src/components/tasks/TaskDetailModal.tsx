@@ -299,7 +299,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               <div>
                 <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Tags</h3>
                 <div className="flex flex-wrap gap-2">
-                  {task.tags.map((tag: string) => (
+                  {task.tags.map((tag: any) => (
                     <span key={tag} className="text-xs bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-medium">#{tag}</span>
                   ))}
                 </div>

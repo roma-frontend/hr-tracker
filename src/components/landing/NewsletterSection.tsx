@@ -94,7 +94,7 @@ export default function NewsletterSection() {
                 type="submit"
                 variant="cta"
                 size="lg"
-                className="gap-2"
+                className="gap-2 h-14"
                 disabled={isLoading}
               >
                 {isLoading ? (

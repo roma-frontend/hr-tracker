@@ -274,7 +274,7 @@ export default function SubscriptionsManagementPage() {
                 </tr>
               </thead>
               <tbody>
-                {subscriptions?.map((sub) => (
+                {subscriptions?.map((sub: any) => (
                   <tr key={sub._id} className="border-b border-[var(--border)] hover:bg-[var(--background-subtle)] transition-colors">
                     <td className="py-3 px-2">
                       <div>

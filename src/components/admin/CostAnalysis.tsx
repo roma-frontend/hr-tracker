@@ -80,7 +80,7 @@ const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
           <div>
             <h4 className="mb-2 font-semibold text-[var(--text-primary)]">{t("costAnalysis.byDepartment")}</h4>
             <div className="space-y-2">
-              {data.byDepartment.map((dept) => (
+              {data.byDepartment.map((dept: any) => (
                 <div key={dept.name} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-[var(--text-secondary)]">{dept.name}</span>
@@ -105,7 +105,7 @@ const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
           <div>
             <h4 className="mb-2 font-semibold text-[var(--text-primary)]">{t("costAnalysis.byLeaveType")}</h4>
             <div className="space-y-2">
-              {data.byType.map((typeData) => (
+              {data.byType.map((typeData: any) => (
                 <div key={typeData.type} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-[var(--text-secondary)] capitalize">{typeData.type}</span>

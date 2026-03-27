@@ -265,11 +265,11 @@ export const getOrgMembers = query({
     let query = ctx.db
       .query("users")
       .withIndex("by_org", (q) => q.eq("organizationId", organizationId));
-    
+
     if (cursor) {
-      query = query.startAfter(cursor);
+      query = (query as any).startAfter(cursor);
     }
-    
+
     const members = await query.take(effectiveLimit + 1);
 
     // Filter out superadmins (should never be in org, but just in case)

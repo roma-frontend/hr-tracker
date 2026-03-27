@@ -16,19 +16,18 @@ import { format } from "date-fns";
 export function CheckInOutWidget() {
   
   const { t } = useTranslation();
-const { user } = useAuthStore();
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const { user } = useAuthStore();
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
-  const todayStatus = useQuery(api.timeTracking.getTodayStatus, 
+  const todayStatus = useQuery(api.timeTracking.getTodayStatus,
     user?.id ? { userId: user.id as any } : "skip"
   );
 
   const checkIn = useMutation(api.timeTracking.checkIn);
   const checkOut = useMutation(api.timeTracking.checkOut);
 
-  // Update current time every second — only on client to avoid hydration mismatch
+  // Update current time every second
   useEffect(() => {
-    setCurrentTime(new Date());
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);

@@ -434,7 +434,7 @@ export function FaceLogin() {
 
       // Find best match from registered faces
       console.log("🔍 Step 2: Finding best match from", allFaceDescriptors.length, "registered faces");
-      const knownFaces = allFaceDescriptors.map((user) => ({
+      const knownFaces = allFaceDescriptors.map((user: any) => ({
         userId: user.userId,
         name: user.name,
         descriptor: user.faceDescriptor,
@@ -748,7 +748,7 @@ export function FaceLogin() {
               onChange={(e) => setSelectedCamera(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-base)] text-[var(--text-primary)]"
             >
-              {cameras.map((camera) => (
+              {cameras.map((camera: any) => (
                 <option key={camera.deviceId} value={camera.deviceId}>
                   {camera.label || `Camera ${cameras.indexOf(camera) + 1}`}
                 </option>

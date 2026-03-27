@@ -98,7 +98,7 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
       )}
       {task.tags && task.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {task.tags.slice(0, 3).map((tag: string) => (
+          {task.tags.slice(0, 3).map((tag: any) => (
             <span key={tag} className="text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full">#{tag}</span>
           ))}
         </div>
@@ -264,7 +264,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
   // Queries
   const adminTasks = useQuery(api.tasks.getAllTasks, userRole === "admin" ? { requesterId: convexId } : "skip");
   const supervisorTasks = useQuery(api.tasks.getTasksAssignedBy, userRole === "supervisor" ? { supervisorId: convexId } : "skip");
-  const employeeTasks = useQuery(api.tasks.getTasksForEmployee, (userRole === "employee" || userRole === "driver") ? { userId: convexId } : "skip");
+  const employeeTasks = useQuery(api.tasks.getTasksForEmployee, (userRole === "employee" || userRole === "driver") && convexId ? { userId: convexId } : "skip");
 
   const rawTasks = userRole === "admin" ? adminTasks : userRole === "supervisor" ? supervisorTasks : employeeTasks;
 

@@ -18,7 +18,7 @@ interface Props {
 }
 
 function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
 export function ThreadPanel({ parentMessageId, parentContent, currentUserId, conversationId, organizationId, onClose }: Props) {
@@ -86,7 +86,7 @@ export function ThreadPanel({ parentMessageId, parentContent, currentUserId, con
             <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" style={{ color: "var(--primary)" }} />
           </div>
         )}
-        {replies?.map((r) => {
+        {replies?.map((r: any) => {
           const isOwn = r.senderId === currentUserId;
           return (
             <div key={r._id} className={`flex gap-2 animate-fade-in ${isOwn ? "flex-row-reverse" : ""}`}>

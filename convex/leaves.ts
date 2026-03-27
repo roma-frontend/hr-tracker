@@ -197,18 +197,11 @@ export const createLeave = mutation({
     // 1. Admin manually checking events before approving
     // 2. Future: scheduled job to check conflicts
 
-    // Notify admins and supervisors within same org only
+    // Notify admins within same org only
     const admins = await ctx.db
       .query("users")
       .withIndex("by_org_role", (q) =>
         q.eq("organizationId", user.organizationId).eq("role", "admin")
-      )
-      .collect();
-
-    const supervisors = await ctx.db
-      .query("users")
-      .withIndex("by_org_role", (q) =>
-        q.eq("organizationId", user.organizationId).eq("role", "supervisor")
       )
       .collect();
 
@@ -240,7 +233,7 @@ export const createLeave = mutation({
       createdAt: Date.now(),
     });
 
-    for (const recipient of [...admins, ...supervisors]) {
+    for (const recipient of admins) {
       if (recipient._id === args.userId) continue;
       await ctx.db.insert("notifications", {
         organizationId: user.organizationId,

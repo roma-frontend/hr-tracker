@@ -66,7 +66,7 @@ const user = useAuthStore((s) => s.user);
             <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#0ea5e9]">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            AI Recommendations
+            {t('aiFeatures.aiRecommendations')}
             {lastFetched && (
               <span className="text-xs text-[var(--text-muted)] font-normal">
                 · {lastFetched.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

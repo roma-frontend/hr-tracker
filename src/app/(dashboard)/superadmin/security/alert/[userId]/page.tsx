@@ -235,7 +235,7 @@ export default function SecurityAlertDetailPage() {
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>No recent login attempts</p>
               ) : (
                 <div className="space-y-3">
-                  {recentAttempts.map((attempt) => (
+                  {recentAttempts.map((attempt: any) => (
                     <div
                       key={attempt._id}
                       className="p-4 rounded-lg border"

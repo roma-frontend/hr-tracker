@@ -1019,10 +1019,10 @@ export function ChatWidget() {
                                                   // Вставляем даты в input
                                                   setInput(`Хочу отпуск ${dateRange}`);
                                                   // Обновляем состояние — убираем конфликт
-                                                  setMessages(prev => prev.map(m =>
-                                                    m.id === messageId
-                                                      ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'pending' } } }
-                                                      : m
+                                                  setMessages(prev => prev.map(msg =>
+                                                    msg.id === m.id
+                                                      ? { ...msg, bookingStates: { ...msg.bookingStates, [idx]: { status: 'pending' } } }
+                                                      : msg
                                                   ));
                                                 }}
                                                 className="px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-xs text-green-700 dark:text-green-400 font-medium transition-all"

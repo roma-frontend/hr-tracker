@@ -37,8 +37,6 @@ export default function AnalyticsPage() {
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
   const router = useRouter();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => { setMounted(true); }, []);
 
   // Only admin and supervisor can access
   React.useEffect(() => {
@@ -54,10 +52,10 @@ export default function AnalyticsPage() {
     user?.role === "admin"
       ? user?.organizationId
       : selectedOrgId;
-  
+
   const analytics = useQuery(
     api.analytics.getAnalyticsOverview,
-    mounted && user?.id
+    user?.id
       ? (orgIdToQuery
           ? { organizationId: orgIdToQuery as Id<"organizations"> }
           : {})

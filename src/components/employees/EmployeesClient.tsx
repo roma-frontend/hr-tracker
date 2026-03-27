@@ -76,7 +76,8 @@ export function EmployeesClient() {
   const [editEmployee, setEditEmployee] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  
+  const [isPanelOpen, setIsPanelOpen] = useState(false); // Закрыт по умолчанию
+
   // Pagination state
   const [cursor, setCursor] = useState<Id<"users"> | undefined>(undefined);
   const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -87,13 +88,7 @@ export function EmployeesClient() {
 
   // Debounced search - prevents excessive re-renders while typing
   const handleSearchChange = useDebouncedCallback((value: string) => {
-    setSearch(value);
     setDebouncedSearch(value);
-    // Reset pagination on search change
-    setCursor(undefined);
-    setAllUsers([]);
-    setHasMore(true);
-    setPageCount(0);
   }, 300);
 
   // For superadmin with selected org, ALWAYS use getOrgMembers
@@ -215,13 +210,16 @@ export function EmployeesClient() {
   };
 
   const filtered = useMemo(() => {
-    if (!allUsers || allUsers.length === 0) return [];
-    return allUsers.filter((u) => {
+    const usersToFilter = allUsers || [];
+    if (usersToFilter.length === 0) return [];
+    
+    return usersToFilter.filter((u) => {
       // Filter out superadmins
       if (u.role === "superadmin" || u.email?.toLowerCase() === "romangulanyan@gmail.com") {
         return false;
       }
       const matchSearch =
+        !debouncedSearch ||
         u.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         u.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         (u.department ?? "").toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -270,10 +268,18 @@ export function EmployeesClient() {
   );
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      style={{
+        transition: 'padding-right 600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        willChange: 'padding-right',
+        paddingRight: isPanelOpen ? '19rem' : '5rem'
+      }}
+    >
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4">
+        className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4"
+      >
         <div className="min-w-0">
           <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{t('nav.employees')}</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
@@ -316,12 +322,17 @@ export function EmployeesClient() {
 
       {/* Stats */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        className="grid xs:grid-cols-2 sm:grid-cols-3 gap-3"
+>
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
           <input
             value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearch(value); // Мгновенное обновление для input
+              handleSearchChange(value); // Debounced для фильтрации
+            }}
             placeholder={t('placeholders.searchByName')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none"
             style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--text-primary)" }}
@@ -329,7 +340,6 @@ export function EmployeesClient() {
           {search && (
             <button
               onClick={() => {
-                handleSearchChange("");
                 setSearch("");
                 setDebouncedSearch("");
               }}
@@ -344,22 +354,36 @@ export function EmployeesClient() {
             { value: filterRole, setter: setFilterRole, options: ["all", "admin", "supervisor", "employee"], label: "Role" },
             { value: filterType, setter: setFilterType, options: ["all", "staff", "contractor"], label: "Type" },
             ...(canManage ? [{ value: filterStatus, setter: setFilterStatus, options: ["all", "active", "inactive"], label: "Status" }] : []),
-          ].map(({ value, setter, options, label }) => (
-            <select
-              key={label}
-              value={value}
-              onChange={(e) => setter(e.target.value)}
-              className="px-3 py-2 rounded-xl border text-sm outline-none capitalize"
-              style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-            >
-              {options.map((o) => <option key={o} value={o} className="capitalize">{o === "all" ? t(`employees.all${label}s`) : t(`employees.filter_${o}`, { defaultValue: o })}</option>)}
-            </select>
-          ))}
+          ].map(({ value, setter, options, label }: any) => {
+            const getTranslation = (o: string) => {
+              if (o === "all") {
+                if (label === "Role") return t('employees.allRoles', { defaultValue: 'All Roles' });
+                if (label === "Type") return t('employees.allTypes', { defaultValue: 'All Types' });
+                if (label === "Status") return t('employees.allStatuses', { defaultValue: 'All Statuses' });
+              }
+              return t(`employees.filter_${o}`, { defaultValue: o });
+            };
+            return (
+              <select
+                key={label}
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                className="px-3 py-2 rounded-xl border text-sm outline-none capitalize"
+                style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+              >
+                {options.map((o: any) => (
+                  <option key={o} value={o} className="capitalize">
+                    {getTranslation(o)}
+                  </option>
+                ))}
+              </select>
+            );
+          })}
           {/* View toggle */}
-          <div className="flex rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+          <div className="flex rounded-xl" style={{ borderColor: "var(--border)" }}>
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2.5 transition-colors ${viewMode === "grid" ? "text-white" : ""}`}
+              className={`p-2.5 transition-colors ${viewMode === "grid" ? "text-white rounded-lg" : ""} rounded-lg`}
               style={{ background: viewMode === "grid" ? "linear-gradient(135deg,#2563eb,#0ea5e9)" : "var(--card)", color: viewMode === "grid" ? "white" : "var(--text-muted)" }}
               title={t('ariaLabels.gridView')}
             >
@@ -367,7 +391,7 @@ export function EmployeesClient() {
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className="p-2.5 transition-colors"
+              className="p-2.5 transition-colors rounded-lg"
               style={{ background: viewMode === "list" ? "linear-gradient(135deg,#2563eb,#0ea5e9)" : "var(--card)", color: viewMode === "list" ? "white" : "var(--text-muted)" }}
               title={t('ariaLabels.listView')}
             >
@@ -434,8 +458,8 @@ export function EmployeesClient() {
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <AnimatePresence mode="popLayout">
-                  {filtered.map((emp, i) => {
-                    const roleConf = ROLE_CONFIG[emp.role];
+                  {filtered.map((emp: any, i: any) => {
+                    const roleConf = ROLE_CONFIG[emp.role as keyof typeof ROLE_CONFIG];
                     const typeConf = TYPE_CONFIG[(emp as any).employeeType as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.staff;
                     const RoleIcon = roleConf.icon;
                     const presence = getPresenceBadge((emp as any).presenceStatus);
@@ -539,8 +563,8 @@ export function EmployeesClient() {
                   <div className="col-span-2" style={{textAlign: "center"}}>{t('dashboard.type')}</div>
                 </div>
                 <AnimatePresence mode="popLayout">
-                  {filtered.map((emp, i) => {
-                    const roleConf = ROLE_CONFIG[emp.role];
+                  {filtered.map((emp: any, i: any) => {
+                    const roleConf = ROLE_CONFIG[emp.role as keyof typeof ROLE_CONFIG];
                     const typeConf = TYPE_CONFIG[(emp as any).employeeType as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.staff;
                     const RoleIcon = roleConf.icon;
                     const presence = getPresenceBadge((emp as any).presenceStatus);
@@ -558,7 +582,7 @@ export function EmployeesClient() {
                             <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-xs font-bold">
                               {emp.avatarUrl
                                 ? <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                                : emp.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+                                : emp.name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2)
                               }
                             </div>
                             <div className="min-w-0 flex-1">
@@ -695,10 +719,8 @@ export function EmployeesClient() {
         <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
       )}
 
-      {/* Team Sidebar - Fixed at bottom right */}
-      <div className="fixed bottom-6 right-6 z-40 w-80">
-        <TeamSidebar userId={user?.id as Id<"users">} />
-      </div>
+      {/* Team Sidebar - Compact collapsible panel */}
+      <TeamSidebar userId={user?.id as Id<"users">} onToggle={setIsPanelOpen} />
     </div>
   );
 }

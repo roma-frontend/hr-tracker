@@ -22,13 +22,13 @@ async function enrichTasksWithUserData(ctx: any, tasks: any[]) {
   const allComments = await ctx.db.query("taskComments").collect();
   const commentsByTask = new Map<Id<"tasks">, any[]>();
   tasks.forEach((t) => {
-    commentsByTask.set(t._id, allComments.filter((c) => c.taskId === t._id));
+    commentsByTask.set(t._id, allComments.filter((c: any) => c.taskId === t._id));
   });
 
   // Collect all comment author IDs
-  const commentAuthorIds = [...new Set(allComments.map((c) => c.authorId))];
-  const commentAuthors = await Promise.all(commentAuthorIds.map((id: Id<"users">) => ctx.db.get(id)));
-  const commentAuthorMap = new Map(commentAuthors.map((a) => [a?._id, a]));
+  const commentAuthorIds = [...new Set(allComments.map((c: any) => c.authorId))];
+  const commentAuthors = await Promise.all(commentAuthorIds.map((id: any) => ctx.db.get(id as Id<"users">)));
+  const commentAuthorMap = new Map(commentAuthors.map((a: any) => [a?._id, a]));
 
   // Enrich tasks
   return tasks.map((task) => {
@@ -92,16 +92,19 @@ export const createTask = mutation({
       updatedAt: now,
     });
 
-    // Notify the employee
-    await ctx.db.insert("notifications", {
-      userId: args.assignedTo,
-      type: "system",
-      title: "New Task Assigned",
-      message: `You have a new task: "${args.title}"`,
-      isRead: false,
-      relatedId: taskId,
-      createdAt: now,
-    });
+    // Notify the person who assigned the task (skip superadmin)
+    const assigner = await ctx.db.get(args.assignedBy);
+    if (assigner?.role !== "superadmin") {
+      await ctx.db.insert("notifications", {
+        userId: args.assignedBy,
+        type: "system",
+        title: "Task Assigned",
+        message: `You assigned a task: "${args.title}"`,
+        isRead: false,
+        relatedId: taskId,
+        createdAt: now,
+      });
+    }
 
     return taskId;
   },
@@ -131,18 +134,21 @@ export const updateTaskStatus = mutation({
       completedAt: args.status === "completed" ? now : task.completedAt,
     });
 
-    // Notify supervisor when task goes to review or completed
+    // Notify supervisor when task goes to review or completed (skip superadmin)
     if (args.status === "review" || args.status === "completed") {
       const employee = await ctx.db.get(args.userId);
-      await ctx.db.insert("notifications", {
-        userId: task.assignedBy,
-        type: "system",
-        title: args.status === "completed" ? "Task Completed" : "Task Ready for Review",
-        message: `"${task.title}" has been ${args.status === "completed" ? "completed" : "submitted for review"} by ${employee?.name ?? "employee"}`,
-        isRead: false,
-        relatedId: args.taskId,
-        createdAt: now,
-      });
+      const supervisor = await ctx.db.get(task.assignedBy);
+      if (supervisor?.role !== "superadmin") {
+        await ctx.db.insert("notifications", {
+          userId: task.assignedBy,
+          type: "system",
+          title: args.status === "completed" ? "Task Completed" : "Task Ready for Review",
+          message: `"${task.title}" has been ${args.status === "completed" ? "completed" : "submitted for review"} by ${employee?.name ?? "employee"}`,
+          isRead: false,
+          relatedId: args.taskId,
+          createdAt: now,
+        });
+      }
     }
   },
 });

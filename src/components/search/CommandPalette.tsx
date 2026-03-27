@@ -162,6 +162,7 @@ export function CommandPalette() {
       href: "/ai-site-editor",
       icon: <Sparkles className="w-4 h-4" />,
       keywords: ["ai", "редактор", "editor", "искусственный интеллект"],
+      role: ["superadmin"],
     },
     {
       id: "subscriptions",

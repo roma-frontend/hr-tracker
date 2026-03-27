@@ -7,7 +7,7 @@ import type { Id } from "./_generated/dataModel";
  * Eliminates N+1 queries for presence status calculation
  */
 async function getUsersWithLeaveStatus(ctx: any, userIds: Id<"users">[]) {
-  if (userIds.length === 0) return new Map();
+  if (userIds.length === 0) return { userMap: new Map(), result: new Map() };
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -204,7 +204,9 @@ export const getMyConversations = query({
     });
 
     // Step 5: Batch load all users with leave status
-    const { userMap, result: userStatusMap } = await getUsersWithLeaveStatus(ctx, Array.from(allUserIds));
+    const usersWithLeaveStatus = await getUsersWithLeaveStatus(ctx, Array.from(allUserIds));
+    const userMap = usersWithLeaveStatus.userMap;
+    const userStatusMap = usersWithLeaveStatus.result;
 
     // Step 6: Batch load group members for groups
     const groupConvs = filteredConvs.filter((c) => c.type === "group");
@@ -223,6 +225,8 @@ export const getMyConversations = query({
 
     // Load group member users
     const groupMemberUsers = await getUsersWithLeaveStatus(ctx, Array.from(groupMemberUserIds));
+    const groupMemberUserMap = groupMemberUsers.userMap;
+    const groupMemberUserStatusMap = groupMemberUsers.result;
 
     // Step 7: Build result with pre-loaded data
     const conversationsWithDetails = filteredConvs.map((conv, idx) => {
@@ -250,10 +254,10 @@ export const getMyConversations = query({
         const groupMembers = groupMembersMap.get(conv._id) || [];
         members = groupMembers.map((m) => ({
           userId: m.userId,
-          user: groupMemberUsers.userMap.get(m.userId)
+          user: groupMemberUserMap.get(m.userId)
             ? {
-                name: groupMemberUsers.userMap.get(m.userId)!.name,
-                avatarUrl: groupMemberUsers.userMap.get(m.userId)!.avatarUrl,
+                name: groupMemberUserMap.get(m.userId)!.name,
+                avatarUrl: groupMemberUserMap.get(m.userId)!.avatarUrl,
               }
             : null,
         }));

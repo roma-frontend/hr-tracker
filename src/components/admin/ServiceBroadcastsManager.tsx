@@ -120,7 +120,7 @@ export function ServiceBroadcastsManager({
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {broadcasts.map((broadcast) => (
+            {broadcasts.map((broadcast: any) => (
               <div
                 key={broadcast._id}
                 className="flex flex-col sm:flex-row  items-start justify-between gap-4 p-4 rounded-lg transition-colors"

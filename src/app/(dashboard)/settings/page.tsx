@@ -305,7 +305,7 @@ export default function SettingsPage() {
             }`}
           >
             <TabsList className="inline-flex w-auto min-w-full gap-1 bg-transparent h-auto">
-              {tabs.map((tab) => {
+              {tabs.map((tab: any) => {
                 const Icon = tab.icon;
                 return (
                   <TabsTrigger
@@ -402,7 +402,7 @@ export default function SettingsPage() {
             {/* Localization Tab */}
             <TabsContent value="localization" className="space-y-6 mt-0">
               <LocalizationSettings
-                userId={user?.id as Id<"users">}
+                userId={user?.id as any}
                 user={user}
                 onSettingsChange={setLocalizationSettings}
               />

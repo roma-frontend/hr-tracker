@@ -42,7 +42,7 @@ export default function AISiteEditorPage() {
   // Only superadmin can access AI Site Editor
   React.useEffect(() => {
     if (user && user.role !== "superadmin") {
-      router.replace("/dashboard");
+      // Don't redirect, just show Coming Soon
     }
   }, [user, router]);
 
@@ -54,8 +54,35 @@ export default function AISiteEditorPage() {
     );
   }
 
+  // Show Coming Soon for non-superadmin users
   if (user.role !== "superadmin") {
-    return null;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] gap-6 text-center px-4">
+        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center animate-pulse">
+          <Sparkles className="w-12 h-12 text-purple-500" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">
+            {t("aiSiteEditor.comingSoon")}
+          </h1>
+          <p className="text-lg text-[var(--text-muted)] max-w-md">
+            {t("aiSiteEditor.comingSoonDesc")}
+          </p>
+          <div className="flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <Crown className="w-5 h-5 text-amber-500" />
+            <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+              {t("aiSiteEditor.superadminOnly")}
+            </span>
+          </div>
+        </div>
+        <Button
+          onClick={() => router.push("/dashboard")}
+          className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg"
+        >
+          {t("common.backToDashboard")}
+        </Button>
+      </div>
+    );
   }
 
   const isProfessionalOrHigher = plan === "professional" || plan === "enterprise";

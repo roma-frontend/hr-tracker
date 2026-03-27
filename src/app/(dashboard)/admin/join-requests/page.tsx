@@ -26,7 +26,7 @@ export default function JoinRequestsPage() {
 
   const requests = useQuery(
     api.organizationJoinRequests.getOrgJoinRequests,
-    user?.organizationId ? { organizationId: user.organizationId } : "skip"
+    user?.organizationId ? { organizationId: user.organizationId as Id<"organizations"> } : "skip"
   );
 
   const approveRequest = useMutation(api.organizationJoinRequests.approveJoinRequest);
@@ -36,12 +36,12 @@ export default function JoinRequestsPage() {
   const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   const handleApprove = async (inviteId: Id<"organizationInvites">) => {
-    if (!user?._id) return;
+    if (!user?.id) return;
 
     try {
       await approveRequest({
         inviteId,
-        reviewerId: user._id,
+        reviewerId: user.id as Id<"users">,
       });
       toast.success(t("joinRequests.approved", "Request approved"));
     } catch (error: any) {
@@ -50,7 +50,7 @@ export default function JoinRequestsPage() {
   };
 
   const handleReject = async (inviteId: Id<"organizationInvites">) => {
-    if (!user?._id) return;
+    if (!user?.id) return;
 
     if (!rejectReason.trim()) {
       toast.error(t("joinRequests.enterReason", "Please enter a reason"));
@@ -60,7 +60,7 @@ export default function JoinRequestsPage() {
     try {
       await rejectRequest({
         inviteId,
-        reviewerId: user._id,
+        reviewerId: user.id as Id<"users">,
         reason: rejectReason,
       });
       toast.success(t("joinRequests.rejected", "Request rejected"));
@@ -98,7 +98,7 @@ export default function JoinRequestsPage() {
                 <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{requests.filter(r => r.status === "pending").length}</p>
+                <p className="text-2xl font-bold">{requests.filter((r: any) => r.status === "pending").length}</p>
                 <p className="text-sm text-gray-500">{t("joinRequests.pending", "Pending")}</p>
               </div>
             </div>
@@ -112,7 +112,7 @@ export default function JoinRequestsPage() {
                 <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{requests.filter(r => r.status === "approved").length}</p>
+                <p className="text-2xl font-bold">{requests.filter((r: any) => r.status === "approved").length}</p>
                 <p className="text-sm text-gray-500">{t("joinRequests.approved", "Approved")}</p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function JoinRequestsPage() {
                 <XCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{requests.filter(r => r.status === "rejected").length}</p>
+                <p className="text-2xl font-bold">{requests.filter((r: any) => r.status === "rejected").length}</p>
                 <p className="text-sm text-gray-500">{t("joinRequests.rejected", "Rejected")}</p>
               </div>
             </div>

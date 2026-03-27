@@ -74,22 +74,19 @@ export function LeavesClient() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [mounted, setMounted] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [previousUnreadCount, setPreviousUnreadCount] = useState(0);
 
-  React.useEffect(() => { setMounted(true); }, []);
-
   // Determine which query to use based on selectedOrgId
-  const shouldUseOrgQuery = mounted && selectedOrgId && user?.id;
-  const queryParams = shouldUseOrgQuery 
+  const shouldUseOrgQuery = selectedOrgId && user?.id;
+  const queryParams = shouldUseOrgQuery
     ? { organizationId: selectedOrgId as Id<"organizations"> }
-    : (mounted && user?.id ? { requesterId: user.id as Id<"users"> } : null);
+    : (user?.id ? { requesterId: user.id as Id<"users"> } : null);
 
   // Use organization-specific query if superadmin has selected an org, otherwise use default
   const leaves = useQuery(
     shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    mounted && user?.id && queryParams !== null
+    user?.id && queryParams !== null
       ? queryParams
       : "skip"
   );
@@ -101,17 +98,22 @@ export function LeavesClient() {
   const markLeaveAsRead = useMutation(api.leaves.markLeaveAsRead);
   const markAllLeavesAsRead = useMutation(api.leaves.markAllLeavesAsRead);
 
-  // Play notification sound when new unread requests appear
+  // Play notification sound when new unread requests appear (only for admin, once per request)
   useEffect(() => {
-    if (unreadCount && unreadCount > previousUnreadCount) {
+    const isAdmin = user?.role === "admin";
+    if (!isAdmin || !unreadCount) return;
+
+    const hasPlayed = sessionStorage.getItem(`leave_sound_${unreadCount}`);
+    if (unreadCount > previousUnreadCount && !hasPlayed) {
+      sessionStorage.setItem(`leave_sound_${unreadCount}`, "1");
       playNotificationSound("new_request");
       sendBrowserNotification("New Leave Request! 🏖️", {
         body: `You have ${unreadCount} pending leave request(s)`,
         soundType: "new_request",
       });
     }
-    setPreviousUnreadCount(unreadCount ?? 0);
-  }, [unreadCount]);
+    setPreviousUnreadCount(unreadCount);
+  }, [unreadCount, user?.role]);
 
   const filtered = useMemo(() => {
     if (!leaves) return [];
@@ -185,8 +187,6 @@ export function LeavesClient() {
     }
   };
 
-  if (!mounted) return null;
-
   const isLoading = leaves === undefined;
   const isError = leaves === null;
   const isSuperadmin = user?.role === "superadmin";
@@ -255,7 +255,7 @@ export function LeavesClient() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('leave.allTypes')}</SelectItem>
-                  {(Object.entries(LEAVE_TYPE_LABELS) as [LeaveType, string][]).map(([value, label]) => (
+                  {(Object.entries(LEAVE_TYPE_LABELS) as [LeaveType, string][]).map(([value, label]: any) => (
                     <SelectItem key={value} value={value}>{label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -303,7 +303,7 @@ export function LeavesClient() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-(--border)">
-                    {filtered.map((req, i) => (
+                    {filtered.map((req: any, i: any) => (
                       <React.Fragment key={req._id}>
                         <motion.tr
                           initial={{ opacity: 0, x: -10 }}

@@ -122,7 +122,7 @@ export default function FAQSection() {
         <div className="text-center mt-10">
           <p className="mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{t('faq.stillHaveQuestions')}</p>
           <a
-            href="mailto:support@hrleave.com"
+            href="mailto:support@hroffice.io"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border transition-all font-medium"
             style={{ 
               backgroundColor: 'var(--landing-card-bg)', 

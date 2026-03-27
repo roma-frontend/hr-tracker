@@ -72,7 +72,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
   };
 
   const renderStars = (rating: number) =>
-    [1, 2, 3, 4, 5].map((i) => (
+    [1, 2, 3, 4, 5].map((i: any) => (
       <Star
         key={i}
         className={`w-3.5 h-3.5 ${i <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
@@ -100,7 +100,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 {(employee as any).avatarUrl ? (
                   <img src={(employee as any).avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
-                  employee.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+                  employee.name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2)
                 )}
               </div>
               <div>
@@ -211,37 +211,37 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="w-5 h-5 text-blue-500" />
-              This Month's Attendance
+              {t('attendance.thisMonthsAttendance')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Days Worked</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.daysWorked')}</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-green-500">{monthlyStats.totalWorkedHours}h</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Total Hours</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.totalHours')}</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Punctuality</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.punctuality')}</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
                 <p className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? "text-red-500" : "text-green-500"}`}>
                   {monthlyStats.lateDays}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Late Days</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.lateDays')}</p>
               </div>
             </div>
             {(Number(monthlyStats.lateDays) > 0 || Number(monthlyStats.earlyLeaveDays) > 0) && (
               <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
                 <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0" />
                 <p className="text-sm text-orange-700 dark:text-orange-200">
-                  {Number(monthlyStats.lateDays) > 0 && `${monthlyStats.lateDays} late arrival(s)`}
+                  {Number(monthlyStats.lateDays) > 0 && `${monthlyStats.lateDays} ${t('attendance.lateArrivals')}`}
                   {Number(monthlyStats.lateDays) > 0 && Number(monthlyStats.earlyLeaveDays) > 0 && " · "}
-                  {Number(monthlyStats.earlyLeaveDays) > 0 && `${monthlyStats.earlyLeaveDays} early leave(s)`}
+                  {Number(monthlyStats.earlyLeaveDays) > 0 && `${monthlyStats.earlyLeaveDays} ${t('attendance.earlyLeaves')}`}
                 </p>
               </div>
             )}
@@ -277,7 +277,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               { label: t('dashboard.initiative'), value: latestRating.initiative },
               { label: t('dashboard.communication'), value: latestRating.communication },
               { label: t('dashboard.reliability'), value: latestRating.reliability },
-            ].map(({ label, value }) => (
+            ].map(({ label, value }: any) => (
               <div key={label} className="flex items-center justify-between">
                 <span className="text-sm text-[var(--text-muted)] w-36">{label}</span>
                 <div className="flex items-center gap-2">
@@ -318,7 +318,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {ratingHistory.map((rating) => (
+              {ratingHistory.map((rating: any) => (
                 <div
                   key={rating._id}
                   className="flex items-center justify-between p-3 rounded-lg border"
@@ -425,7 +425,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               <div>
                 <p className="text-sm font-medium mb-2">Skills</p>
                 <div className="flex flex-wrap gap-2">
-                  {profile.profile.biography.skills.map((skill, i) => (
+                  {profile.profile.biography.skills.map((skill: any, i: any) => (
                     <Badge key={i} variant="secondary">{skill}</Badge>
                   ))}
                 </div>
@@ -435,7 +435,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               <div>
                 <p className="text-sm font-medium mb-2">Languages</p>
                 <div className="flex flex-wrap gap-2">
-                  {profile.profile.biography.languages.map((lang, i) => (
+                  {profile.profile.biography.languages.map((lang: any, i: any) => (
                     <Badge key={i} variant="outline">{lang}</Badge>
                   ))}
                 </div>
@@ -453,7 +453,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {profile.documents.map((doc) => (
+              {profile.documents.map((doc: any) => (
                 <div key={doc._id} className="flex items-center justify-between p-3 bg-[var(--card-hover)] rounded-lg">
                   <div className="flex items-center gap-3">
                     <Briefcase className="w-5 h-5 text-[var(--text-muted)]" />

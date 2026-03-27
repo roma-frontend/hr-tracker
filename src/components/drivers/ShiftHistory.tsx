@@ -68,7 +68,7 @@ export function ShiftHistory({ driverId }: ShiftHistoryProps) {
           </div>
         ) : (
           <div className="space-y-3">
-            {shifts.map((shift) => (
+            {shifts.map((shift: any) => (
               <div
                 key={shift._id}
                 className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"

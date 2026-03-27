@@ -287,14 +287,14 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
         <CardContent>
           {pendingRequests && pendingRequests.length > 0 ? (
             <div className="space-y-3">
-              {pendingRequests.map((request) => (
+              {pendingRequests.map((request: any) => (
                 <div key={request._id} className="p-4 border rounded-lg space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <Avatar className="w-10 h-10 shrink-0">
                         {request.requesterAvatar && <AvatarImage src={request.requesterAvatar} />}
                         <AvatarFallback>
-                          {request.requesterName?.split(" ").map((n: string) => n[0]).join("") ?? "?"}
+                          {request.requesterName?.split(" ").map((n: any) => n[0]).join("") ?? "?"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
@@ -378,7 +378,7 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
             <div className="space-y-3">
               {todaySchedule
                 .sort((a, b) => a.startTime - b.startTime)
-                .map((schedule) => (
+                .map((schedule: any) => (
                   <div key={schedule._id} className="flex gap-3 p-3 sm:p-4 border rounded-lg">
                     <div className={`w-2 shrink-0 rounded-full ${schedule.status === "scheduled" ? "bg-blue-500" :
                       schedule.status === "completed" ? "bg-green-500" :
@@ -612,7 +612,7 @@ function NavigatorDropdown({ label, coords }: { label: string; coords: { lat: nu
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-48">
-        {NAVIGATOR_LINKS.map((nav) => (
+        {NAVIGATOR_LINKS.map((nav: any) => (
           <DropdownMenuItem key={nav.id} asChild>
             <a
               href={nav.url(coords.lat, coords.lng)}
@@ -621,7 +621,7 @@ function NavigatorDropdown({ label, coords }: { label: string; coords: { lat: nu
               className="flex items-center gap-2"
             >
               <span>{nav.icon}</span>
-              <span>{t(`navigator.${nav.id}`, nav.name)}</span>
+              <span>{String(t(`navigator.${nav.id}`, nav.name))}</span>
             </a>
           </DropdownMenuItem>
         ))}
@@ -767,7 +767,7 @@ function DriverQuickMessage({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        {DRIVER_TEMPLATES.map((tpl) => (
+        {DRIVER_TEMPLATES.map((tpl: any) => (
           <DropdownMenuItem
             key={tpl.id}
             onClick={() => handleSend(tpl.message)}
@@ -837,7 +837,7 @@ function PassengerQuickMessage({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        {PASSENGER_TEMPLATES.map((tpl) => (
+        {PASSENGER_TEMPLATES.map((tpl: any) => (
           <DropdownMenuItem
             key={tpl.id}
             onClick={() => handleSend(tpl.message)}
@@ -921,7 +921,7 @@ function RatingDialog({
           )}
           {/* Star rating */}
           <div className="flex justify-center gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
+            {[1, 2, 3, 4, 5].map((star: any) => (
               <button
                 key={star}
                 onClick={() => setRating(star)}
@@ -1026,7 +1026,7 @@ function ReassignDriverDialog({
               <SelectValue placeholder={t("driver.selectNewDriver", "Choose another driver")} />
             </SelectTrigger>
             <SelectContent>
-              {otherDrivers.filter(Boolean).map((driver) => (
+              {otherDrivers.filter(Boolean).map((driver: any) => (
                 <SelectItem key={driver!._id} value={driver!._id}>
                   <div className="flex items-center gap-2">
                     <span>{driver!.userName}</span>
@@ -1635,14 +1635,14 @@ export default function DriversPage() {
             </div>
           ) : (
             <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredDrivers.map((driver) => (
+              {filteredDrivers.map((driver: any) => (
                 <Card key={driver._id} className="hover:shadow-md transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex flex-col items-start gap-4">
                       <Avatar className="w-12 h-12">
                         {driver.userAvatar && <AvatarImage src={driver.userAvatar} />}
                         <AvatarFallback>
-                          {driver.userName?.split(" ").map((n: string) => n[0]).join("")}
+                          {driver.userName?.split(" ").map((n: any) => n[0]).join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
@@ -1756,7 +1756,7 @@ export default function DriversPage() {
             <TabsContent value="active">
               {myRequests && myRequests.length > 0 ? (
                 <div className="space-y-3">
-                  {myRequests.filter((r) => r.status !== "cancelled" && r.scheduleStatus !== "completed").map((request) => (
+                  {myRequests.filter((r: any) => r.status !== "cancelled" && r.scheduleStatus !== "completed").map((request: any) => (
                     <div
                       key={request._id}
                       className="p-4 border rounded-lg space-y-3"
@@ -1865,7 +1865,7 @@ export default function DriversPage() {
                               {request.status === "approved" && <CheckCircle className="w-3 h-3 mr-1" />}
                               {request.status === "declined" && <XCircle className="w-3 h-3 mr-1" />}
                               {request.status === "pending" && <Clock className="w-3 h-3 mr-1" />}
-                              {t(`driver.status.${request.status}`, request.status)}
+                              {String(t(`driver.status.${request.status}`, request.status))}
                             </Badge>
 
                             {/* Edit button - for pending and approved requests */}
@@ -2035,7 +2035,7 @@ export default function DriversPage() {
             <TabsContent value="history">
               {completedTrips && completedTrips.length > 0 ? (
                 <div className="space-y-3">
-                  {completedTrips.map((trip) => (
+                  {completedTrips.map((trip: any) => (
                     <div key={trip._id} className="p-4 border rounded-lg space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -2079,7 +2079,7 @@ export default function DriversPage() {
                         {trip.hasRated ? (
                           <div className="flex items-center gap-1 text-sm">
                             <span className="text-muted-foreground">Your rating:</span>
-                            {[1, 2, 3, 4, 5].map((s) => (
+                            {[1, 2, 3, 4, 5].map((s: any) => (
                               <Star
                                 key={s}
                                 className={`w-4 h-4 ${s <= (trip.passengerRating ?? 0)
@@ -2135,7 +2135,7 @@ export default function DriversPage() {
 
                 {recurringTrips && recurringTrips.length > 0 ? (
                   <div className="space-y-3">
-                    {recurringTrips.map((trip) => (
+                    {recurringTrips.map((trip: any) => (
                       <div key={trip._id} className="p-4 border rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
                           <div>
@@ -2249,7 +2249,7 @@ export default function DriversPage() {
                   <SelectValue placeholder={t("driver.chooseDriver", "Choose a driver")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableDrivers?.filter(Boolean).map((driver) => (
+                  {availableDrivers?.filter(Boolean).map((driver: any) => (
                     <SelectItem key={driver!._id} value={driver!._id}>
                       {driver!.userName} - {driver!.vehicleInfo.model}
                     </SelectItem>
@@ -2304,7 +2304,7 @@ export default function DriversPage() {
             <div>
               <Label>{t("driver.days", "Days")}</Label>
               <div className="flex flex-wrap gap-2 mt-1">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, idx) => (
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day: any, idx: any) => (
                   <Button
                     key={day}
                     size="sm"
@@ -2377,7 +2377,7 @@ export default function DriversPage() {
                   <SelectValue placeholder="Choose a driver" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableDrivers?.filter(Boolean).map((driver) => (
+                  {availableDrivers?.filter(Boolean).map((driver: any) => (
                     <SelectItem key={driver!._id} value={driver!._id}>
                       {driver!.userName} - {driver!.vehicleInfo.model}
                     </SelectItem>
@@ -2596,7 +2596,7 @@ export default function DriversPage() {
                       {t("driver.noUnregisteredDrivers", "No unregistered drivers")}
                     </SelectItem>
                   ) : (
-                    unregisteredDrivers.map((driver) => (
+                    unregisteredDrivers.map((driver: any) => (
                       <SelectItem key={driver._id} value={driver._id}>
                         {driver.name} ({driver.email})
                       </SelectItem>
@@ -2771,7 +2771,7 @@ export default function DriversPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, idx) => {
+                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day: any, idx: any) => {
                   const dayDate = new Date(calendarWeekStart + idx * 24 * 60 * 60 * 1000);
                   const dayStart = dayDate.getTime();
                   const dayEnd = dayStart + 24 * 60 * 60 * 1000 - 1;
@@ -2805,7 +2805,7 @@ export default function DriversPage() {
                             <div className="space-y-2">
                               {daySchedules
                                 .sort((a, b) => a.startTime - b.startTime)
-                                .map((s) => (
+                                .map((s: any) => (
                                   <button
                                     key={s._id}
                                     onClick={() => setSelectedScheduleDetail(s)}
@@ -2945,7 +2945,7 @@ export default function DriversPage() {
                             <div className="flex items-center gap-3">
                               <Avatar className="w-12 h-12">
                                 <AvatarFallback className="bg-primary/20 text-primary font-semibold">
-                                  {selectedScheduleDetail.userName.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                                  {selectedScheduleDetail.userName.split(" ").map((n: any) => n[0]).join("").toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">

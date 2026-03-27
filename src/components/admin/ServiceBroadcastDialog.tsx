@@ -234,7 +234,7 @@ export function ServiceBroadcastDialog({
                                             color: "var(--text-primary)"
                                         }}
                                     >
-                                        {organizations.map((org) => (
+                                        {organizations.map((org: any) => (
                                             <option key={org._id} value={org._id}>
                                                 {org.name} ({org.activeEmployees ?? org.memberCount ?? 0} сотрудников)
                                             </option>
@@ -252,7 +252,7 @@ export function ServiceBroadcastDialog({
                     <div>
                         <label className="text-sm font-medium block mb-3">Иконка</label>
                         <div className="grid grid-cols-4 gap-2">
-                            {BROADCAST_ICONS.map(({ icon, label }) => (
+                            {BROADCAST_ICONS.map(({ icon, label }: any) => (
                                 <button
                                     key={icon}
                                     onClick={() => setSelectedIcon(icon)}
@@ -361,7 +361,7 @@ export function ServiceBroadcastDialog({
                                 <div>
                                     <label className="text-sm font-medium block mb-2">Примерная длительность</label>
                                     <div className="grid grid-cols-3 gap-2">
-                                        {DURATION_OPTIONS.map((option) => (
+                                        {DURATION_OPTIONS.map((option: any) => (
                                             <button
                                                 key={option.value || "unknown"}
                                                 onClick={() => setEstimatedDuration(option.value)}

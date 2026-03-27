@@ -43,7 +43,7 @@ interface PendingFile {
 }
 
 function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
 function formatFileSize(bytes: number) {
@@ -114,7 +114,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
   const otherUser = conv?.type === "direct" ? (conv as any).otherUser : null;
   const displayName = conv?.type === "group" ? (conv.name ?? "Group") : (otherUser?.name ?? "Chat");
   const otherMembers = members?.filter((m) => m.userId !== currentUserId) ?? [];
-  const otherMemberIds = otherMembers.map((m) => m.userId as Id<"users">);
+  const otherMemberIds = otherMembers.map((m: any) => m.userId as Id<"users">);
 
   // Track previous message count to only scroll on NEW messages, not on conversation switch
   const prevMsgCountRef = useRef<number>(0);
@@ -166,7 +166,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
     // reset input so same file can be picked again
     e.target.value = "";
 
-    const newPending: PendingFile[] = files.map((file) => ({
+    const newPending: PendingFile[] = files.map((file: any) => ({
       file,
       previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
       isPDF: file.type === "application/pdf",
@@ -418,7 +418,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
   // Send a poll
   const handleSendPoll = useCallback(async () => {
     const q = pollQuestion.trim();
-    const opts = pollOptions.map((o) => o.trim()).filter(Boolean);
+    const opts = pollOptions.map((o: any) => o.trim()).filter(Boolean);
     if (!q || opts.length < 2) return;
     setSending(true);
     try {
@@ -430,7 +430,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
         content: `📊 ${q}`,
         poll: {
           question: q,
-          options: opts.map((text, i) => ({ id: `opt_${i}`, text, votes: [] })),
+          options: opts.map((text: any, i: any) => ({ id: `opt_${i}`, text, votes: [] })),
         } as any,
       });
       setPollQuestion("");
@@ -634,7 +634,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
       <div ref={messagesParentRef} className="flex-1 overflow-y-auto overflow-x-hidden px-2 xs:px-3 sm:px-4 py-3 xs:py-4 custom-scrollbar" style={{ background: "var(--background)" }}>
         {messages === undefined ? (
           <div className="space-y-3 animate-pulse" role="status" aria-label="Loading messages">
-            {[...Array(5)].map((_, i) => (
+            {[...Array(5)].map((_: any, i: any) => (
               <div key={i} className={cn("flex gap-3", i % 2 === 0 ? "" : "flex-row-reverse")}>
                 <div className="w-8 h-8 rounded-full bg-white/5 shrink-0" />
                 <div className={cn("space-y-1", i % 2 === 0 ? "" : "items-end flex flex-col")}>
@@ -660,7 +660,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
               position: 'relative',
             }}
           >
-            {virtualizer.getVirtualItems().map((virtualRow) => {
+            {virtualizer.getVirtualItems().map((virtualRow: any) => {
               const msg = messages[virtualRow.index];
               if (!msg) return null;
               
@@ -727,7 +727,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
           className="px-2 xs:px-3 sm:px-4 py-2 border-t flex gap-2 flex-wrap"
           style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
         >
-          {pendingFiles.map((pf, idx) => (
+          {pendingFiles.map((pf: any, idx: any) => (
             <div key={idx} className="relative group/pf">
               {pf.previewUrl ? (
                 // Image preview
@@ -814,7 +814,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
             className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border outline-none mb-2"
             style={{ background: "var(--background)", borderColor: "var(--border)", color: "var(--text-primary)" }}
           />
-          {pollOptions.map((opt, i) => (
+          {pollOptions.map((opt: any, i: any) => (
             <div key={i} className="flex items-center gap-1 mb-1">
               <input
                 value={opt}
@@ -933,7 +933,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
                 className="absolute bottom-full left-0 right-0 mb-2 rounded-xl shadow-2xl border overflow-hidden z-50 animate-slide-up"
                 style={{ background: "var(--background)", borderColor: "var(--border)" }}
               >
-                {mentionSuggestions.map((m, idx) => (
+                {mentionSuggestions.map((m: any, idx: any) => (
                   <button
                     key={m.userId}
                     onClick={() => m.user?.name && insertMention(m.user.name)}

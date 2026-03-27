@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
             </div>
             <div>
               <p className="font-bold text-base leading-tight" style={{ color: "var(--text-primary)" }}>HR Office</p>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Leave Monitoring</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>HR Management System</p>
             </div>
           </div>
 

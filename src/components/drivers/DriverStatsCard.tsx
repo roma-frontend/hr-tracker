@@ -193,7 +193,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {stats.popularRoutes.map((route, index) => (
+              {stats.popularRoutes.map((route: any, index: any) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">

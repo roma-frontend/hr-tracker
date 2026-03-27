@@ -33,24 +33,22 @@ const itemVariants = {
 };
 
 export default function ReportsPage() {
-  
+
   const { t } = useTranslation();
-const [tab, setTab] = useState("overview");
-  const [mounted, setMounted] = React.useState(false);
+  const [tab, setTab] = useState("overview");
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
-  React.useEffect(() => { setMounted(true); }, []);
 
   // Determine which query to use based on selectedOrgId
-  const shouldUseOrgQuery = mounted && selectedOrgId && user?.id;
+  const shouldUseOrgQuery = selectedOrgId && user?.id;
   const leavesQueryParams = shouldUseOrgQuery
     ? { organizationId: selectedOrgId as Id<"organizations"> }
-    : (mounted && user?.id ? { requesterId: user.id as Id<"users"> } : "skip" as const);
+    : (user?.id ? { requesterId: user.id as Id<"users"> } : "skip" as const);
 
   // Use organization-specific query if superadmin has selected an org, otherwise use default
   const leaves = useQuery(
     shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    mounted && user?.id && leavesQueryParams !== "skip"
+    user?.id && leavesQueryParams !== "skip"
       ? leavesQueryParams
       : "skip"
   );
@@ -73,15 +71,15 @@ const [tab, setTab] = useState("overview");
   // Pie data
   const pieData = useMemo(() => {
     return (Object.keys(LEAVE_TYPE_COLORS) as LeaveType[]).map((key) => ({
-      name: LEAVE_TYPE_LABELS[key],
-      value: leaves?.filter((r) => r.type === key).length ?? 0,
-      color: LEAVE_TYPE_COLORS[key],
-    })).filter((d) => d.value > 0);
+      name: LEAVE_TYPE_LABELS[key as LeaveType],
+      value: leaves?.filter((r: any) => r.type === key).length ?? 0,
+      color: LEAVE_TYPE_COLORS[key as LeaveType],
+    })).filter((d: any) => d.value > 0);
   }, [leaves]);
 
   // Department breakdown
   const deptData = useMemo(() => {
-    return DEPARTMENTS.map((dept) => ({
+    return DEPARTMENTS.map((dept: any) => ({
       dept: dept.slice(0, 3),
       fullName: dept,
       total: leaves?.filter((r) => r.userDepartment === dept).length ?? 0,
@@ -108,10 +106,10 @@ const [tab, setTab] = useState("overview");
 
   // Cumulative
   const cumulativeData = useMemo(() => {
-    return monthlyTrend.map((m, i, arr) => ({
+    return monthlyTrend.map((m: any, i: any, arr: any) => ({
       month: m.month,
-      cumulative: arr.slice(0, i + 1).reduce((s, x) => s + x.approved, 0),
-      days: Math.round(arr.slice(0, i + 1).reduce((s, x) => s + x.approved * 1.8, 0)),
+      cumulative: arr.slice(0, i + 1).reduce((s: number, x: any) => s + x.approved, 0),
+      days: Math.round(arr.slice(0, i + 1).reduce((s: number, x: any) => s + x.approved * 1.8, 0)),
     }));
   }, [monthlyTrend]);
 
@@ -119,7 +117,7 @@ const [tab, setTab] = useState("overview");
     if (!leaves || leaves.length === 0) { toast.error("No data to export"); return; }
     const csv = [
       [t('employees.employee'), t('employeeInfo.department'), t('leave.type'), t('leave.startDate'), t('leave.endDate'), t('leave.days'), t('leave.status'), t('leave.reason')].join(","),
-      ...leaves.map((l) => [
+      ...leaves.map((l: any) => [
         l.userName ?? "", l.userDepartment ?? "", l.type,
         l.startDate, l.endDate, l.days, l.status,
         `"${l.reason.replace(/"/g, "'")}"`,
@@ -132,8 +130,6 @@ const [tab, setTab] = useState("overview");
     URL.revokeObjectURL(url);
     toast.success("Report exported successfully", { description: "CSV file downloaded" });
   };
-
-  if (!mounted) return null;
 
   return (
     <PlanGate
@@ -160,7 +156,7 @@ const [tab, setTab] = useState("overview");
           { label: t('reports.approvalRate'), value: isLoading ? "—" : `${approvalRate}%`, icon: TrendingUp, color: "text-[var(--success)]", bg: "bg-[var(--success)]/10" },
           { label: "Avg. Duration", value: isLoading ? "—" : `${avgDays}d`, icon: CalendarDays, color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10" },
           { label: t('organization.activeEmployees'), value: isLoading ? "—" : (users?.length ?? 0), icon: Users, color: "text-[var(--text-secondary)]", bg: "bg-[var(--background-subtle)]" },
-        ].map((kpi) => (
+        ].map((kpi: any) => (
           <Card key={kpi.label}>
             <CardContent className="pt-5 pb-4">
               <div className="flex items-start justify-between">
@@ -218,7 +214,7 @@ const [tab, setTab] = useState("overview");
                     <ResponsiveContainer width="100%" height={220}>
                       <PieChart>
                         <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} innerRadius={50} dataKey="value" paddingAngle={3}>
-                          {pieData.map((entry, i) => <Cell key={i} fill={entry.color} stroke="transparent" />)}
+                          {pieData.map((entry: any, i: any) => <Cell key={i} fill={entry.color} stroke="transparent" />)}
                         </Pie>
                         <Tooltip 
                           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
@@ -241,7 +237,7 @@ const [tab, setTab] = useState("overview");
                     { label: "Approved", count: approvedCount, color: "#10b981", variant: "success" as const },
                     { label: "Pending", count: pendingCount, color: "#f59e0b", variant: "warning" as const },
                     { label: "Rejected", count: rejectedCount, color: "#ef4444", variant: "destructive" as const },
-                  ].map((s) => (
+                  ].map((s: any) => (
                     <div key={s.label}>
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
@@ -313,7 +309,7 @@ const [tab, setTab] = useState("overview");
                 <CardContent className="space-y-3">
                   {deptData.length === 0 ? (
                     <p className="text-xs text-[var(--text-muted)]">{t('emptyStates.noDataYet')}</p>
-                  ) : deptData.map((d) => (
+                  ) : deptData.map((d: any) => (
                     <div key={d.dept} className="flex items-center justify-between py-2 border-b border-[var(--border)] last:border-0">
                       <div>
                         <p className="text-sm font-medium text-[var(--text-primary)]">{d.fullName}</p>

@@ -110,7 +110,7 @@ ${context.teamAvailability.map((l: any) => `- ${l.userName} (${l.department}): $
         if (dateMatch) {
           const day1 = parseInt(dateMatch[1] || dateMatch[3] || dateMatch[5]);
           const monthStr = dateMatch[2] || dateMatch[4] || dateMatch[6];
-          const monthMap: Record<string, number> = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, 'марта': 2, 'марта': 2, 'апреля': 3, 'апреля': 3, 'мая': 4, 'мая': 4, 'июня': 5, 'июня': 5 };
+          const monthMap: Record<string, number> = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, 'марта': 2, 'апреля': 3, 'мая': 4, 'июня': 5 };
           const month = monthMap[monthStr.toLowerCase()] || (parseInt(monthStr) - 1);
           const year = new Date().getFullYear();
           

@@ -28,11 +28,11 @@ export default function PendingApprovalPage() {
 
   const myRequests = useQuery(
     api.organizationJoinRequests.getMyJoinRequests,
-    user?._id ? { userId: user._id } : "skip"
+    user?.id ? { userId: user.id as any } : "skip"
   );
 
-  const pendingRequest = myRequests?.find((req) => req.status === "pending");
-  const rejectedRequest = myRequests?.find((req) => req.status === "rejected");
+  const pendingRequest = myRequests?.find((req: any) => req.status === "pending");
+  const rejectedRequest = myRequests?.find((req: any) => req.status === "rejected");
 
   // Check if user was approved while on this page
   React.useEffect(() => {

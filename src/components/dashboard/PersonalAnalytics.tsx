@@ -29,7 +29,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
   const { totalDaysTaken, pendingDays, leavesByType, balances, userLeaves } = analytics;
 
   // Data for pie chart
-  const pieData = Object.entries(leavesByType).map(([type, days]) => ({
+  const pieData = Object.entries(leavesByType).map(([type, days]: any) => ({
     name: type.charAt(0).toUpperCase() + type.slice(1),
     value: days as number,
   }));
@@ -94,7 +94,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {pieData.map((entry, index) => (
+                  {pieData.map((entry: any, index: any) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -122,7 +122,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
             {recentLeaves.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dashboard.noRecentRequests')}</p>
             ) : (
-              recentLeaves.map((leave) => (
+              recentLeaves.map((leave: any) => (
                 <div
                   key={leave._id}
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"

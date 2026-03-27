@@ -13,10 +13,15 @@ import { playNotificationSound } from "@/lib/notificationSound";
 /**
  * Real-time notification banner that slides in from top
  * when new unread notifications arrive (chat messages, leave requests, etc.)
+ * Shown only for admin users, sound plays only for admin
  */
 export function NotificationBanner() {
   const { user } = useAuthStore();
   const router = useRouter();
+  const isAdmin = user?.role === "admin";
+
+  // Only admin users see the banner and hear the sound
+  if (!isAdmin) return null;
 
   const notifications = useQuery(
     api.notifications.getUserNotifications,
@@ -42,10 +47,17 @@ export function NotificationBanner() {
       return;
     }
 
-    // If new unread appeared, show the latest one with sound
+    // If new unread appeared, show the banner with sound (admin only)
     if (currentCount > lastSeenCount && unread.length > 0) {
       const latest = unread[0]; // most recent
-      playNotificationSound("new_request");
+      
+      // Play sound with sessionStorage to prevent repeats
+      const hasPlayed = sessionStorage.getItem(`notif_sound_${currentCount}`);
+      if (!hasPlayed) {
+        sessionStorage.setItem(`notif_sound_${currentCount}`, "1");
+        playNotificationSound("new_request");
+      }
+      
       setNewNotification({
         title: latest.title,
         message: latest.message,

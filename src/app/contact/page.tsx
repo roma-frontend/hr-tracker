@@ -120,7 +120,7 @@ export default function ContactPage() {
             <div className="space-y-4">
               <p className="text-muted-foreground/60 text-xs uppercase tracking-widest font-semibold mb-3">{t('contactPage.directContact')}</p>
               {[
-                { icon: <Mail size={15} />, label: 'sales@hrleave.io', href: 'mailto:sales@hrleave.io' },
+                { icon: <Mail size={15} />, label: 'sales@hroffice.io', href: 'mailto:sales@hroffice.io' },
                 { icon: <Phone size={15} />, label: '+1 (800) 555-0199', href: 'tel:+18005550199' },
               ].map(({ icon, label, href }) => (
                 <a key={label} href={href}

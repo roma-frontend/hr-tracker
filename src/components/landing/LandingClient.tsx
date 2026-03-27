@@ -250,7 +250,7 @@ function Navbar() {
             className="font-bold text-lg tracking-tight transition-colors"
             style={{ color: 'var(--landing-text-primary)' }}
           >
-            HR<span style={{ color: 'var(--primary)' }}>Leave</span>
+            HR<span style={{ color: 'var(--primary)' }}>Office</span>
           </span>
         </Link>
 
@@ -830,7 +830,7 @@ function Footer() {
                 onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
                 onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-primary)'}
               >
-                HR<span style={{ color: 'var(--primary)' }}>Leave</span>
+                HR<span style={{ color: 'var(--primary)' }}>Office</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>

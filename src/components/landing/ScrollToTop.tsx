@@ -33,7 +33,8 @@ export default function ScrollToTop() {
     });
   };
 
-  if (!mounted) return null;
+  // Не рендерим пока document не доступен
+  if (!mounted || typeof document === 'undefined') return null;
 
   const buttonContent = (
     <>

@@ -306,13 +306,14 @@ export async function getRedisStats(): Promise<{
   if (!redis) return { connected: false };
 
   try {
-    const info = await redis.info('memory');
+    // Note: Upstash Redis doesn't support INFO command, using PING for health check
+    await redis.ping();
     const keys = await redis.dbsize();
 
     return {
       connected: true,
       keys: keys as number,
-      memory: typeof info === 'string' ? info : 'N/A',
+      memory: 'N/A', // Memory info not available in Upstash
     };
   } catch {
     return { connected: false };

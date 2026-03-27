@@ -28,10 +28,9 @@ import dynamic from "next/dynamic";
 import { PlanGate } from "@/components/subscription/PlanGate";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import LeaveStats from "@/components/dashboard/LeaveStats";
-import { DashboardTour } from "@/components/onboarding/DashboardTour";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 
-// Lazy load admin components
+// Lazy load admin components — SSR отключен
 const HolidayCalendarSync = dynamic(() => import("@/components/admin/HolidayCalendarSync"), { ssr: false });
 const CostAnalysis = dynamic(() => import("@/components/admin/CostAnalysis"), { ssr: false });
 const ConflictDetection = dynamic(() => import("@/components/admin/ConflictDetection"), { ssr: false });
@@ -89,39 +88,28 @@ StatusBadgeMemo.displayName = "StatusBadgeMemo";
 export default function DashboardClient() {
   const { t } = useTranslation();
   const user = useAuthUser();
-  
+
   // ═══════════════════════════════════════════════════════════════
   // HOOKS MUST BE CALLED IN THE SAME ORDER EVERY RENDER
   // ═══════════════════════════════════════════════════════════════
   const [mounted, setMounted] = React.useState(false);
-  const [showTour, setShowTour] = React.useState(false);
-  
+
   // Convex useQuery arguments - using any to avoid infinite type recursion
   const userId = user?.id as Id<"users"> | undefined;
   const leaves: any[] = (useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : "skip") as any) ?? [];
   const users: any[] = (useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : "skip") as any) ?? [];
   const organization = useQuery(api.organizations.getMyOrganization, userId ? { userId } : "skip") as any;
-  
+
   // Security stats — only for superadmin (always call, condition is in arguments)
   const isSuperadmin = user?.role === "superadmin";
   const securityStats = useQuery(
     api.security.getLoginStats,
     mounted && isSuperadmin ? { hours: 24 } : "skip"
   );
-  
+
   React.useEffect(() => {
     setMounted(true);
-    // Show tour for new users (first time login)
-    const hasSeenTour = localStorage.getItem("dashboard_tour_seen");
-    if (!hasSeenTour && user) {
-      setTimeout(() => setShowTour(true), 1000);
-    }
-  }, [user]);
-
-  const handleTourComplete = () => {
-    localStorage.setItem("dashboard_tour_seen", "true");
-    setShowTour(false);
-  };
+  }, []);
 
   // ═══════════════════════════════════════════════════════════════
   // Non-hook values (can be conditional)
@@ -139,9 +127,9 @@ export default function DashboardClient() {
       (r) => r.status === "approved" && r.startDate <= todayStr && r.endDate >= todayStr
     ).length ?? 0,
     approvedThisMonth: leaves?.filter(
-      (r) => r.status === "approved" && isSameMonth(new Date(r.startDate), new Date())
+      (r) => r.status === "approved" && isSameMonth(new Date(r.startDate), today)
     ).length ?? 0,
-  }), [users, leaves, todayStr]);
+  }), [users, leaves, todayStr, today]);
 
   const recentLeaves = useMemo(() => leaves?.slice(0, 6) ?? [], [leaves]);
 
@@ -158,13 +146,13 @@ export default function DashboardClient() {
     const months: Record<string, { month: string; approved: number; pending: number; rejected: number }> = {};
     const now = new Date();
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
+
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       months[key] = { month: monthNames[d.getMonth()], approved: 0, pending: 0, rejected: 0 };
     }
-    
+
     leaves?.forEach((l) => {
       const key = l.startDate.slice(0, 7);
       if (months[key]) {
@@ -421,7 +409,7 @@ export default function DashboardClient() {
       </div>
 
       {/* Recent Leaves & Admin Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         <motion.div variants={itemVariants} className="lg:col-span-1">
           <Card>
             <CardHeader className="pb-2">
@@ -452,15 +440,16 @@ export default function DashboardClient() {
             </CardContent>
           </Card>
         </motion.div>
+        {user?.id && (
+          <motion.div variants={itemVariants} data-tour="leave-balance">
+            <LeaveStats userId={user.id as Id<"users">} />
+          </motion.div>
+        )}
       </div>
       {/* ═══════════════════════════════════════════════════════════════
           PERSONAL LEAVE STATS — For all users
           ═══════════════════════════════════════════════════════════════ */}
-      {user?.id && (
-        <motion.div variants={itemVariants} data-tour="leave-balance">
-          <LeaveStats userId={user.id as Id<"users">} />
-        </motion.div>
-      )}
+
 
       {/* Quick Actions */}
       <motion.div variants={itemVariants} data-tour="quick-actions" className="lg:col-span-2">
@@ -504,9 +493,6 @@ export default function DashboardClient() {
           </>
         )}
       </motion.div>
-
-      {/* Dashboard Tour */}
-      {showTour && <DashboardTour onComplete={handleTourComplete} onSkip={handleTourComplete} />}
     </motion.div>
   );
 }

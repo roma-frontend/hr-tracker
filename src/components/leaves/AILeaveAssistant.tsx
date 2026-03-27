@@ -84,7 +84,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Brain className="w-5 h-5 text-[var(--primary)]" />
-            AI Leave Approval Assistant
+            {t('aiFeatures.aiLeaveAssistant')}
           </CardTitle>
           {getRecommendationBadge()}
         </div>
@@ -217,7 +217,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
         <div className="pt-3 border-t border-[var(--border)]">
           <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
             <Brain className="w-4 h-4" />
-            AI Analysis
+            {t('aiFeatures.aiAnalysis')}
           </h4>
           <p className="text-sm text-[var(--text-muted)] leading-relaxed">
             {reasoning}
@@ -228,7 +228,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
         <div className="space-y-2">
           <h4 className="text-sm font-medium">Key Factors</h4>
           <div className="space-y-1.5">
-            {breakdown.performance.factors.slice(0, 2).map((factor, i) => (
+            {breakdown.performance.factors.slice(0, 2).map((factor: any, i: any) => (
               <div key={i} className="flex items-start gap-2 text-xs">
                 {factor.startsWith("✅") ? (
                   <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
@@ -240,7 +240,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
                 <span className="text-[var(--text-muted)]">{factor.substring(2)}</span>
               </div>
             ))}
-            {breakdown.workload.factors.slice(0, 1).map((factor, i) => (
+            {breakdown.workload.factors.slice(0, 1).map((factor: any, i: any) => (
               <div key={i} className="flex items-start gap-2 text-xs">
                 {factor.startsWith("✅") ? (
                   <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />

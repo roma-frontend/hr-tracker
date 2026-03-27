@@ -222,14 +222,13 @@ export const checkConflictsForRequest = query({
               type: "driver_schedule",
               severity: "critical",
               title: "Водитель уже забронирован",
-              message: `Водитель уже забронирован на это время: ${trip.tripInfo.purpose}`,
+              message: `Водитель уже забронирован на это время: ${trip.tripInfo?.purpose || "Поездка"}`,
               suggestion: "Выберите другого водителя или измените время поездки.",
               date: new Date(trip.startTime).toISOString(),
               affectedUsers: [],
-              relatedRequestId: trip.requestId,
               metadata: {
                 tripId: trip._id,
-                tripPurpose: trip.tripInfo.purpose,
+                tripPurpose: trip.tripInfo?.purpose,
               },
             });
           }
@@ -297,16 +296,16 @@ async function detectLeaveEventConflicts(
   // Получаем все мероприятия в периоде
   const events = await ctx.db
     .query("companyEvents")
-    .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
     .collect();
 
   // Получаем все одобренные отпуска в периоде
   const leaves = await ctx.db
     .query("leaveRequests")
-    .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
     .collect();
 
-  const approvedLeaves = leaves.filter(l => l.status === "approved");
+  const approvedLeaves = leaves.filter((l: any) => l.status === "approved");
 
   for (const event of events) {
     for (const leave of approvedLeaves) {
@@ -322,7 +321,7 @@ async function detectLeaveEventConflicts(
 
       const userDepartment = user.department || "";
       const isRequiredDept = event.requiredDepartments.some(
-        dept => dept.toLowerCase() === userDepartment.toLowerCase()
+        (dept: string) => dept.toLowerCase() === userDepartment.toLowerCase()
       );
       const isRequiredEmployee = event.requiredEmployeeIds?.includes(leave.userId);
 
@@ -371,16 +370,16 @@ async function detectDepartmentConflicts(
   // Получаем всех пользователей
   const users = await ctx.db
     .query("users")
-    .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
     .collect();
 
   // Получаем все одобренные отпуска
   const leaves = await ctx.db
     .query("leaveRequests")
-    .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
     .collect();
 
-  const approvedLeaves = leaves.filter(l => l.status === "approved");
+  const approvedLeaves = leaves.filter((l: any) => l.status === "approved");
 
   // Группируем по отделам
   const deptUsers = new Map<string, typeof users>();
@@ -393,7 +392,7 @@ async function detectDepartmentConflicts(
   }
 
   for (const leave of approvedLeaves) {
-    const user = users.find(u => u._id === leave.userId);
+    const user = users.find((u: any) => u._id === leave.userId);
     if (!user) continue;
     
     const dept = user.department || "Unknown";
@@ -414,7 +413,7 @@ async function detectDepartmentConflicts(
       if (deptSize === 0) continue;
 
       // Считаем, кто в отпуске в этот день
-      const leavesOnThisDay = deptLeaves.get(dept)?.filter(leave => {
+      const leavesOnThisDay = deptLeaves.get(dept)?.filter((leave: any) => {
         const leaveStart = new Date(leave.startDate).getTime();
         const leaveEnd = new Date(leave.endDate).getTime();
         return timestamp >= leaveStart && timestamp <= leaveEnd;
@@ -438,7 +437,7 @@ async function detectDepartmentConflicts(
           message: `${outCount}/${deptSize} сотрудников (${(percentage * 100).toFixed(0)}%) в отпуске. Работа отдела может быть парализована.`,
           suggestion: "Рекомендуем отозвать кого-то из отпуска или перераспределить задачи.",
           date: dateStr,
-          affectedUsers: leavesOnThisDay.map(l => l.userId),
+          affectedUsers: leavesOnThisDay.map((l: any) => l.userId),
           affectedDepartments: [dept],
           metadata: {
             percentage: Math.round(percentage * 100),
@@ -454,7 +453,7 @@ async function detectDepartmentConflicts(
           message: `${outCount}/${deptSize} сотрудников (${(percentage * 100).toFixed(0)}%) отсутствуют. Возможны задержки.`,
           suggestion: "Планируйте нагрузку с учётом отсутствия сотрудников.",
           date: dateStr,
-          affectedUsers: leavesOnThisDay.map(l => l.userId),
+          affectedUsers: leavesOnThisDay.map((l: any) => l.userId),
           affectedDepartments: [dept],
           metadata: {
             percentage: Math.round(percentage * 100),
@@ -481,10 +480,10 @@ async function detectDriverConflicts(
   // Получаем все поездки в периоде
   const schedules = await ctx.db
     .query("driverSchedules")
-    .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
     .collect();
 
-  const activeSchedules = schedules.filter(s => 
+  const activeSchedules = schedules.filter((s: any) =>
     s.status === "approved" || s.status === "pending"
   );
 
@@ -547,20 +546,20 @@ async function detectTaskConflicts(
   // Получаем все задачи
   const tasks = await ctx.db
     .query("tasks")
-    .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
     .collect();
 
-  const activeTasks = tasks.filter(t => 
+  const activeTasks = tasks.filter((t: any) =>
     t.status !== "completed" && t.status !== "cancelled"
   );
 
   // Получаем все отпуска
   const leaves = await ctx.db
     .query("leaveRequests")
-    .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
     .collect();
 
-  const approvedLeaves = leaves.filter(l => l.status === "approved");
+  const approvedLeaves = leaves.filter((l: any) => l.status === "approved");
 
   // Проверяем каждую задачу
   for (const task of activeTasks) {
@@ -618,21 +617,21 @@ export const getConflictSummaryForAI = query({
     endDate: v.number(),
   },
   handler: async (ctx, args) => {
-    const conflicts = await detectAllConflicts(ctx, {
+    const conflicts = await ctx.runQuery("conflicts:detectAllConflicts" as any, {
       organizationId: args.organizationId,
       startDate: args.startDate,
       endDate: args.endDate,
       userId: args.userId,
     });
 
-    const critical = conflicts.filter(c => c.severity === "critical");
-    const warnings = conflicts.filter(c => c.severity === "warning");
+    const critical = conflicts.filter((c: any) => c.severity === "critical");
+    const warnings = conflicts.filter((c: any) => c.severity === "warning");
 
     return {
       total: conflicts.length,
       critical: critical.length,
       warnings: warnings.length,
-      messages: conflicts.map(c => ({
+      messages: conflicts.map((c: any) => ({
         type: c.type,
         severity: c.severity,
         title: c.title,

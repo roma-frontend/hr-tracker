@@ -32,7 +32,7 @@ interface SLAMetric {
   submittedAt: number;
   respondedAt?: number;
   responseTimeHours?: number;
-  targetResponseTime: number;
+  targetResponseTimeHours: number;
   status: 'pending' | 'on_time' | 'breached';
   warningTriggered: boolean;
   criticalTriggered: boolean;
@@ -41,19 +41,19 @@ interface SLAMetric {
 }
 
 export function SLADashboard() {
-  const slaMetrics = useQuery(api.sla.getAllSLAMetrics) ?? [];
+  const slaMetrics = useQuery(api.sla.getSLAStats as any) ?? [];
   const slaConfig = useQuery(api.sla.getSLAConfig);
 
   // Calculate statistics
   const totalMetrics = slaMetrics.length;
-  const pendingMetrics = slaMetrics.filter(m => m.status === 'pending').length;
-  const onTimeMetrics = slaMetrics.filter(m => m.status === 'on_time').length;
-  const breachedMetrics = slaMetrics.filter(m => m.status === 'breached').length;
+  const pendingMetrics = slaMetrics.filter((m: SLAMetric) => m.status === 'pending').length;
+  const onTimeMetrics = slaMetrics.filter((m: SLAMetric) => m.status === 'on_time').length;
+  const breachedMetrics = slaMetrics.filter((m: SLAMetric) => m.status === 'breached').length;
 
   // Calculate average response time (only for responded requests)
-  const respondedMetrics = slaMetrics.filter(m => m.responseTimeHours !== undefined);
+  const respondedMetrics = slaMetrics.filter((m: SLAMetric) => m.responseTimeHours !== undefined);
   const avgResponseTime = respondedMetrics.length > 0
-    ? respondedMetrics.reduce((sum, m) => sum + (m.responseTimeHours || 0), 0) / respondedMetrics.length
+    ? respondedMetrics.reduce((sum: number, m: SLAMetric) => sum + (m.responseTimeHours || 0), 0) / respondedMetrics.length
     : 0;
 
   // Calculate SLA compliance percentage
@@ -62,30 +62,30 @@ export function SLADashboard() {
     : 100;
 
   // Calculate warning and critical counts
-  const warningCount = slaMetrics.filter(m => m.warningTriggered && !m.criticalTriggered).length;
-  const criticalCount = slaMetrics.filter(m => m.criticalTriggered).length;
+  const warningCount = slaMetrics.filter((m: SLAMetric) => m.warningTriggered && !m.criticalTriggered).length;
+  const criticalCount = slaMetrics.filter((m: SLAMetric) => m.criticalTriggered).length;
 
   // Trend calculation (compare last 7 days vs previous 7 days)
   const now = Date.now();
   const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
   const fourteenDaysAgo = now - (14 * 24 * 60 * 60 * 1000);
 
-  const recentMetrics = slaMetrics.filter(m => m.createdAt >= sevenDaysAgo);
-  const previousMetrics = slaMetrics.filter(m => m.createdAt >= fourteenDaysAgo && m.createdAt < sevenDaysAgo);
+  const recentMetrics = slaMetrics.filter((m: SLAMetric) => m.createdAt >= sevenDaysAgo);
+  const previousMetrics = slaMetrics.filter((m: SLAMetric) => m.createdAt >= fourteenDaysAgo && m.createdAt < sevenDaysAgo);
 
   const recentCompliance = recentMetrics.length > 0
-    ? (recentMetrics.filter(m => m.status === 'on_time').length / recentMetrics.length) * 100
+    ? (recentMetrics.filter((m: SLAMetric) => m.status === 'on_time').length / recentMetrics.length) * 100
     : 100;
 
   const previousCompliance = previousMetrics.length > 0
-    ? (previousMetrics.filter(m => m.status === 'on_time').length / previousMetrics.length) * 100
+    ? (previousMetrics.filter((m: SLAMetric) => m.status === 'on_time').length / previousMetrics.length) * 100
     : 100;
 
   const trend = recentCompliance - previousCompliance;
   const isImproving = trend > 0;
 
   // Target response time from config
-  const targetHours = slaConfig?.targetResponseTime || 24;
+  const targetHours = slaConfig?.targetResponseTimeHours || 24;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -222,7 +222,7 @@ export function SLADashboard() {
             <div className="flex items-center gap-4">
               <div className="w-32 text-sm font-medium">Breached</div>
               <div className="flex-1">
-                <Progress value={100 - complianceRate} className="h-2" variant="destructive" />
+                <Progress value={100 - complianceRate} className="h-2 [&>div]:bg-destructive" />
               </div>
               <div className="w-20 text-right text-sm">
                 {breachedMetrics} ({(100 - complianceRate).toFixed(0)}%)
@@ -234,7 +234,7 @@ export function SLADashboard() {
             <div className="flex items-center gap-4">
               <div className="w-32 text-sm font-medium">Pending</div>
               <div className="flex-1">
-                <Progress value={(pendingMetrics / totalMetrics) * 100} className="h-2" variant="secondary" />
+                <Progress value={(pendingMetrics / totalMetrics) * 100} className="h-2 [&>div]:bg-muted-foreground" />
               </div>
               <div className="w-20 text-right text-sm">
                 {pendingMetrics} ({totalMetrics > 0 ? ((pendingMetrics / totalMetrics) * 100).toFixed(0) : 0}%)
@@ -250,14 +250,11 @@ export function SLADashboard() {
                 <div>
                   <p className="text-sm font-medium">SLA Configuration</p>
                   <p className="text-xs text-muted-foreground">
-                    Target response time: {slaConfig.targetResponseTime}h
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Warning threshold: {slaConfig.warningThreshold}h | Critical: {slaConfig.criticalThreshold}h
+                    Target response time: {slaConfig.targetResponseTimeHours}h
                   </p>
                 </div>
                 <Badge variant="outline">
-                  {slaConfig.businessHoursOnly ? 'Business Hours' : '24/7'}
+                  24/7
                 </Badge>
               </div>
             </div>

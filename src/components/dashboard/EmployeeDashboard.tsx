@@ -56,7 +56,7 @@ const StatusBadge = memo(({ status }: { status: LeaveStatus }) => {
 StatusBadge.displayName = "StatusBadge";
 
 const StarRating = memo(({ rating }: { rating: number }) => {
-  return [1, 2, 3, 4, 5].map((i) => (
+  return [1, 2, 3, 4, 5].map((i: any) => (
     <Star
       key={i}
       className={`w-4 h-4 ${i <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
@@ -206,7 +206,7 @@ export function EmployeeDashboard() {
                 { label: t('dashboard.initiative'), value: latestRating.initiative },
                 { label: t('dashboard.communication'), value: latestRating.communication },
                 { label: t('dashboard.reliability'), value: latestRating.reliability },
-              ].map(({ label, value }) => (
+              ].map(({ label, value }: any) => (
                 <div key={label} className="flex items-center justify-between">
                   <span className="text-sm text-[var(--text-muted)] w-36">{label}</span>
                   <div className="flex items-center gap-2">
@@ -349,7 +349,7 @@ export function EmployeeDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {myLeaves.length === 0 ? (
+            {leaveStats.myLeaves.length === 0 ? (
               <div className="text-center py-8">
                 <CalendarIcon className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3 opacity-40" />
                 <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noLeaveRequests')}</p>
@@ -362,7 +362,7 @@ export function EmployeeDashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                {myLeaves.slice(0, 5).map((leave) => (
+                {leaveStats.myLeaves.slice(0, 5).map((leave: any) => (
                   <div
                     key={leave._id}
                     className="flex items-center justify-between p-3 rounded-lg border border-[var(--border)] hover:bg-[var(--background-subtle)] transition-colors"
@@ -378,9 +378,9 @@ export function EmployeeDashboard() {
                     <StatusBadge status={leave.status as LeaveStatus} />
                   </div>
                 ))}
-                {myLeaves.length > 5 && (
+                {leaveStats.myLeaves.length > 5 && (
                   <Button asChild variant="ghost" size="sm" className="w-full">
-                    <Link href="/leaves">{t('dashboard.viewAllRequests', { count: myLeaves.length })}</Link>
+                    <Link href="/leaves">{t('dashboard.viewAllRequests', { count: leaveStats.myLeaves.length })}</Link>
                   </Button>
                 )}
               </div>

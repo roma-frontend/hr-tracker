@@ -18,7 +18,7 @@ interface Props {
 }
 
 function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
 export function CallModal({ call, currentUserId, currentUserName, currentUserAvatar, onEnd }: Props) {

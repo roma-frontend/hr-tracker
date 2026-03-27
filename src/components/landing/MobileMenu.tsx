@@ -68,8 +68,6 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     }, 300);
   };
 
-  if (!mounted) return null;
-
   const menuContent = (
     <>
       {/* Backdrop with blur */}
@@ -126,7 +124,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div>
                 <h2 className="font-bold text-base" style={{ color: 'var(--landing-text-primary)' }}>
-                  HRLeave
+                  {t('sidebar.appName')}
                 </h2>
                 <p className="text-[10px]" style={{ color: 'var(--landing-text-muted)' }}>
                   {t('sidebar.subtitle')}
@@ -289,5 +287,5 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     </>
   );
 
-  return createPortal(menuContent, document.body);
+  return mounted && typeof document !== 'undefined' ? createPortal(menuContent, document.body) : null;
 }

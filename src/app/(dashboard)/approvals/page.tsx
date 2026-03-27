@@ -115,7 +115,7 @@ export default function ApprovalsPage() {
                       {(pendingUser as any).avatarUrl ? (
                         <img src={(pendingUser as any).avatarUrl} alt={pendingUser.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       ) : (
-                        pendingUser.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+                        pendingUser.name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2)
                       )}
                     </div>
                     <div>

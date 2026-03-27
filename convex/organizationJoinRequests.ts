@@ -72,12 +72,12 @@ export const getOrgJoinRequests = query({
     // Enrich with requester info
     const enriched = await Promise.all(
       requests.map(async (req) => {
-        const requester = await ctx.db.get(req.userId || req.requestedByEmail as any);
+        const requester = req.userId ? await ctx.db.get(req.userId) : null;
         return {
           ...req,
-          requesterName: requester?.name || req.requestedByName,
-          requesterEmail: requester?.email || req.requestedByEmail,
-          requesterAvatar: requester?.avatarUrl,
+          requesterName: (requester as any)?.name || req.requestedByName,
+          requesterEmail: (requester as any)?.email || req.requestedByEmail,
+          requesterAvatar: (requester as any)?.avatarUrl,
         };
       })
     );

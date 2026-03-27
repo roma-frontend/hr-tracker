@@ -71,7 +71,7 @@ export default function SelectOrganizationPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRequesting, setIsRequesting] = useState<Id<"organizations"> | null>(null);
 
-  const filteredOrgs = organizations?.filter((org) =>
+  const filteredOrgs = organizations?.filter((org: any) =>
     org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     org.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -86,13 +86,13 @@ export default function SelectOrganizationPage() {
     orgsCount: organizations?.length,
     filteredCount: filteredOrgs?.length,
     userId: user?.id,
-    user_id: user?._id,
+    user_id: user?.id,
     buttonShouldBeDisabled: !user?.id,
   });
 
   const handleRequestJoin = async (organizationId: Id<"organizations">) => {
     console.log("[handleRequestJoin] Called with organizationId:", organizationId);
-    console.log("[handleRequestJoin] user:", { _id: user?._id, id: user?.id, email: user?.email });
+    console.log("[handleRequestJoin] user:", { id: user?.id, email: user?.email });
     
     if (!user?.id) {
       console.error("[handleRequestJoin] No user ID!");

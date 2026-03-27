@@ -238,7 +238,7 @@ export default function SecurityDashboard() {
           { label: t('superadmin.security.failed'), value: loginStats?.failed ?? 0, color: "var(--destructive)" },
           { label: t('superadmin.security.highRisk'), value: loginStats?.highRisk ?? 0, color: "var(--warning)" },
           { label: t('superadmin.security.featuresOn'), value: `${enabledCount}/${FEATURES.length}`, color: "var(--success)" },
-        ].map((stat) => (
+        ].map((stat: any) => (
           <div key={stat.label} className="rounded-lg sm:rounded-xl p-2 sm:p-4 text-center border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="text-lg sm:text-2xl font-bold truncate" style={{ color: stat.color }}>{stat.value}</div>
             <div className="text-[9px] sm:text-xs mt-0.5 sm:mt-1 truncate" style={{ color: "var(--text-muted)" }}>{stat.label}</div>
@@ -272,7 +272,7 @@ export default function SecurityDashboard() {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          {(["settings", "blocked", "attempts", "logs"] as const).map((tab) => (
+          {(["settings", "blocked", "attempts", "logs"] as const).map((tab: any) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -311,7 +311,7 @@ export default function SecurityDashboard() {
           <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
             {t("superadmin.security.toggleSecuritySystems")}
           </p>
-          {FEATURES.map((feature) => {
+          {FEATURES.map((feature: any) => {
             const enabled = getSettingEnabled(feature.key);
             const colors = COLOR_MAP[feature.color];
             const Icon = feature.icon;

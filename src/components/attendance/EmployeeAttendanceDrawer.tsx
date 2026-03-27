@@ -145,10 +145,10 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             {monthlyStats && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-b flex-shrink-0" style={{ borderColor: "var(--border)" }}>
                 {[
-                  { label: "Days", value: monthlyStats.totalDays, color: "text-blue-600" },
-                  { label: "Late", value: monthlyStats.lateDays, color: "text-rose-500" },
-                  { label: "Hours", value: monthlyStats.totalWorkedHours + "h", color: "text-emerald-600" },
-                  { label: "Punctuality", value: monthlyStats.punctualityRate + "%", color: "text-blue-600" },
+                  { label: t('attendance.days'), value: monthlyStats.totalDays, color: "text-blue-600" },
+                  { label: t('attendance.late'), value: monthlyStats.lateDays, color: "text-rose-500" },
+                  { label: t('attendance.hours'), value: monthlyStats.totalWorkedHours + "h", color: "text-emerald-600" },
+                  { label: t('attendance.punctuality'), value: monthlyStats.punctualityRate + "%", color: "text-blue-600" },
                 ].map(s => (
                   <div key={s.label} className="py-4 text-center border-r last:border-0" style={{ borderColor: "var(--border)" }}>
                     <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
@@ -167,8 +167,8 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
               ) : history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">
                   <Calendar className="w-12 h-12" style={{ color: "var(--border)" }} />
-                  <p className="font-medium" style={{ color: "var(--text-muted)" }}>No records for {monthLabel}</p>
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>Employee had no attendance this month</p>
+                  <p className="font-medium" style={{ color: "var(--text-muted)" }}>{t('attendance.noRecordsFor', { month: monthLabel })}</p>
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t('attendance.noAttendanceThisMonth')}</p>
                 </div>
               ) : (
                 <div className="divide-y" style={{ borderColor: "var(--border)" }}>
@@ -198,7 +198,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                                   <span>→</span>
                                   <span className="flex items-center gap-1">
                                     <LogOut className="w-3 h-3 text-blue-500" />
-                                    {record.checkOutTime ? formatTime(record.checkOutTime) : <span className="text-green-500">{t('statuses.active')}Active</span>}
+                                    {record.checkOutTime ? formatTime(record.checkOutTime) : <span className="text-green-500">{t('statuses.active')}</span>}
                                   </span>
                                   {workedH && (
                                     <span className="flex items-center gap-1 text-blue-500">
@@ -214,24 +214,24 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                           <div className="flex flex-wrap gap-1 justify-end">
                             {record.isLate && (
                               <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-medium">
-                                Late {record.lateMinutes}m
+                                {t('attendance.lateMinutes', { minutes: record.lateMinutes })}
                               </span>
                             )}
                             {record.isEarlyLeave && (
                               <span className="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full font-medium">
-                                Early -{record.earlyLeaveMinutes}m
+                                {t('attendance.earlyLeave', { minutes: record.earlyLeaveMinutes })}
                               </span>
                             )}
                             {record.overtimeMinutes && record.overtimeMinutes > 0 && (
                               <span className="text-xs bg-sky-100 text-sky-500 px-2 py-0.5 rounded-full font-medium">
-                                +{record.overtimeMinutes}m OT
+                                {t('attendance.overtime', { minutes: record.overtimeMinutes })}
                               </span>
                             )}
                             {record.status === "checked_out" && !record.isLate && !record.isEarlyLeave && (
-                              <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-medium">✓ Perfect</span>
+                              <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-medium">{t('attendance.perfect')}</span>
                             )}
                             {record.status === "checked_in" && (
-                              <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-medium animate-pulse">● Active</span>
+                              <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-medium animate-pulse">{t('attendance.active')}</span>
                             )}
                           </div>
                         </div>

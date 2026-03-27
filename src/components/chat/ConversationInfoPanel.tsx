@@ -16,7 +16,7 @@ interface Props {
 }
 
 function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
 export function ConversationInfoPanel({ conversationId, currentUserId, organizationId, onClose }: Props) {
@@ -191,7 +191,7 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
                         }}
                       >
                         <div className="max-h-40 overflow-y-auto custom-scrollbar">
-                          {allOrganizations.map((org) => (
+                          {allOrganizations.map((org: any) => (
                             <button
                               key={org._id}
                               onClick={() => {
@@ -243,7 +243,7 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
               {/* User list */}
               <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
                 {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
+                  filteredUsers.map((user: any) => (
                     <label
                       key={user._id}
                       className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
@@ -309,7 +309,7 @@ export function ConversationInfoPanel({ conversationId, currentUserId, organizat
 
           {/* Members list */}
           <div className="space-y-2">
-            {members?.map((member) => (
+            {members?.map((member: any) => (
               <div
                 key={member.userId}
                 className="flex items-center gap-2 p-2 rounded-lg"

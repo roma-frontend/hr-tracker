@@ -25,7 +25,7 @@ startDate, endDate }: SLAStatsProps) {
     return (
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map((i: any) => (
             <Card key={i} className="animate-pulse">
               <CardHeader className="pb-2">
                 <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -227,15 +227,15 @@ startDate, endDate }: SLAStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {pendingWithSLA.map((request) => {
+              {pendingWithSLA.map((request: any) => {
                 const statusConfig = {
                   normal: { color: "bg-green-100 text-green-800", icon: Activity, label: "Normal" },
                   warning: { color: "bg-yellow-100 text-yellow-800", icon: Clock, label: "Warning" },
                   critical: { color: "bg-orange-100 text-orange-800", icon: AlertTriangle, label: "Critical" },
                   breached: { color: "bg-red-100 text-red-800", icon: XCircle, label: "Breached" },
-                };
-                
-                const config = statusConfig[request.sla.status];
+                } as const;
+
+                const config = statusConfig[request.sla.status as keyof typeof statusConfig];
                 const StatusIcon = config.icon;
 
                 return (

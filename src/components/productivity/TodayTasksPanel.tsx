@@ -69,7 +69,7 @@ export function TodayTasksPanel() {
       </div>
 
       <div className="space-y-2">
-        {tasks.map((task) => {
+        {tasks.map((task: any) => {
           const isCompleted = task.status === "completed";
           const dueText = formatDueDate(task.deadline);
           const isOverdue = task.deadline && task.deadline < Date.now();

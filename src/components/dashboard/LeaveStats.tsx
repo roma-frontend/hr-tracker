@@ -27,17 +27,24 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
   // ═══════════════════════════════════════════════════════════════
   // Extract data BEFORE hooks (non-hook values)
   // ═══════════════════════════════════════════════════════════════
-  const { balances, totalDaysTaken, userLeaves } = analytics || {};
+  // Don't destructure here - do it inside useMemo to avoid stale closures
 
   // ═══════════════════════════════════════════════════════════════
   // OPTIMIZED: Memoize all calculations - MUST BE BEFORE CONDITIONAL RETURN
   // ═══════════════════════════════════════════════════════════════
   const stats = useMemo(() => {
-    if (!analytics || !user || !balances) {
+    if (!analytics || !user) {
       return null;
     }
 
-    const currentYear = new Date().getFullYear();
+    const { balances, userLeaves } = analytics;
+
+    if (!balances) {
+      return null;
+    }
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
     const leavesThisYear = userLeaves.filter((leave: any) => {
       return new Date(leave.startDate).getFullYear() === currentYear && leave.status === "approved";
     });
@@ -57,7 +64,7 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
     const lastLeave = approvedLeaves[0];
     const lastLeaveDate = lastLeave ? new Date(lastLeave.endDate) : null;
     const daysSinceLastLeave = lastLeaveDate
-      ? Math.floor((Date.now() - lastLeaveDate.getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.floor((now.getTime() - lastLeaveDate.getTime()) / (1000 * 60 * 60 * 24))
       : null;
 
     const burnoutRiskLevel = daysSinceLastLeave !== null
@@ -82,10 +89,11 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
       burnoutRiskLevel,
       nextAvailableDate,
       avgDuration: leavesThisYear.length > 0 ? (totalDaysThisYear / leavesThisYear.length).toFixed(1) : 0,
+      balances,
     };
-  }, [analytics, user, balances]);
+  }, [analytics, user]);
 
-  if (!analytics || !user || !stats || !balances) {
+  if (!analytics || !user || !stats) {
     return <div className="text-center p-8">Загрузка...</div>;
   }
 
@@ -177,17 +185,17 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
               <p className="text-xs text-muted-foreground">{t('leaveTypes.paid')}</p>
-              <p className="text-2xl font-bold text-blue-600">{balances.paid}</p>
+              <p className="text-2xl font-bold text-blue-600">{stats.balances.paid}</p>
               <p className="text-xs text-muted-foreground">{t('leaveStats.days')}</p>
             </div>
             <div className="text-center p-3 rounded-lg bg-red-500/5 border border-red-500/20">
               <p className="text-xs text-muted-foreground">{t('leaveTypes.sick')}</p>
-              <p className="text-2xl font-bold text-red-600">{balances.sick}</p>
+              <p className="text-2xl font-bold text-red-600">{stats.balances.sick}</p>
               <p className="text-xs text-muted-foreground">{t('leaveStats.days')}</p>
             </div>
             <div className="text-center p-3 rounded-lg bg-green-500/5 border border-green-500/20">
               <p className="text-xs text-muted-foreground">{t('leaveTypes.family')}</p>
-              <p className="text-2xl font-bold text-green-600">{balances.family}</p>
+              <p className="text-2xl font-bold text-green-600">{stats.balances.family}</p>
               <p className="text-xs text-muted-foreground">{t('leaveStats.days')}</p>
             </div>
           </div>

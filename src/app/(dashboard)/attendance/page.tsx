@@ -24,41 +24,38 @@ export default function AttendancePage() {
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: Id<"users">; name: string } | null>(null);
   const [detailRecord, setDetailRecord] = useState<any | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("today");
   const [drawerEmployee, setDrawerEmployee] = useState<any | null>(null);
   const [empSearch, setEmpSearch] = useState("");
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
 
-  React.useEffect(() => { setMounted(true); }, []);
-
-  const isAdminOrSupervisor = mounted && (user?.role === "admin" || user?.role === "supervisor");
-  const isEmployee = mounted && user?.role === "employee";
+  const isAdminOrSupervisor = user?.role === "admin" || user?.role === "supervisor";
+  const isEmployee = user?.role === "employee";
 
   // Admin/Supervisor: fetch today's attendance summary and employees needing rating
   // Use user?.id as dependency so queries only run after localStorage hydration
   const todaySummary = useQuery(
     api.timeTracking.getTodayAttendanceSummary,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor") ? { adminId: user.id as Id<"users"> } : "skip"
+    user?.id && isAdminOrSupervisor ? { adminId: user.id as Id<"users"> } : "skip"
   );
   const currentlyAtWork = useQuery(
     api.timeTracking.getCurrentlyAtWork,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor") ? { adminId: user.id as Id<"users"> } : "skip"
+    user?.id && isAdminOrSupervisor ? { adminId: user.id as Id<"users"> } : "skip"
   );
   const todayAllAttendance = useQuery(
     api.timeTracking.getTodayAllAttendance,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor") ? { adminId: user.id as Id<"users"> } : "skip"
+    user?.id && isAdminOrSupervisor ? { adminId: user.id as Id<"users"> } : "skip"
   );
   const needsRating = useQuery(
     api.supervisorRatings.getEmployeesNeedingRating,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor")
+    user?.id && isAdminOrSupervisor
       ? { supervisorId: user.id as Id<"users"> }
       : "skip"
   );
 
   const allEmployeesOverview = useQuery(
     api.timeTracking.getAllEmployeesAttendanceOverview,
-    mounted && user?.id && isAdminOrSupervisor ? { adminId: user.id as Id<"users">, month: selectedMonth } : "skip"
+    user?.id && isAdminOrSupervisor ? { adminId: user.id as Id<"users">, month: selectedMonth } : "skip"
   );
 
   const MONTHS = [
@@ -91,7 +88,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Employee: Check-In widget + full attendance dashboard */}
-      {mounted && !isAdminOrSupervisor && (
+      {!isAdminOrSupervisor && (
         <>
           <div>
             <CheckInOutWidget />
@@ -110,7 +107,7 @@ export default function AttendancePage() {
               { id: "today", label: t('timePeriods.today'), icon: Clock },
               { id: "all_employees", label: t('attendance.allEmployees'), icon: Users },
               { id: "rating", label: t('attendance.rating'), icon: Star },
-            ] as { id: Tab; label: string; icon: any }[]).map(tab => (
+            ] as { id: Tab; label: string; icon: any }[]).map((tab: any) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -176,7 +173,7 @@ export default function AttendancePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-blue-500" />
-                Today's Attendance — {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                {t('attendance.todaysAttendance')} — {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
                 <Badge className="ml-auto bg-blue-500/10 text-blue-500 border-blue-500/30">
                   {todayAllAttendance.length} recorded
                 </Badge>
@@ -191,7 +188,7 @@ export default function AttendancePage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {todayAllAttendance.map((record) => (
+                  {todayAllAttendance.map((record: any) => (
                     record && (
                     <div
                       key={record._id}
@@ -204,7 +201,7 @@ export default function AttendancePage() {
                           {record.user?.avatarUrl ? (
                             <img src={record.user.avatarUrl} alt={record.user?.name ?? ""} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                           ) : (
-                            record.user?.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2) ?? "?"
+                            record.user?.name?.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2) ?? "?"
                           )}
                         </div>
                         <div>
@@ -260,7 +257,7 @@ export default function AttendancePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 flex-wrap">
                 <BarChart2 className="w-5 h-5 text-blue-500" />
-                Attendance Overview
+                {t('attendance.attendanceOverview')}
                 <div className="ml-auto flex items-center gap-2">
                   {/* Search */}
                   <div className="relative">
@@ -288,8 +285,8 @@ export default function AttendancePage() {
                       color: "var(--text-primary)"
                     }}
                   >
-                    {monthOptions.map(m => {
-                      const [y, mo] = m.split("-").map(Number);
+                    {monthOptions.map((m: any) => {
+                      const [y, mo] = m.split("-").map((numFn: any) => numFn);
                       return <option key={m} value={m}>{MONTHS[mo-1]} {y}</option>;
                     })}
                   </select>
@@ -305,7 +302,7 @@ export default function AttendancePage() {
                 <div className="text-center py-10" style={{ color: "var(--text-muted)" }}>{t('attendance.noFound')}</div>
               ) : (
                 <div className="space-y-2">
-                  {filteredEmployees.map(({ user: emp, supervisor, stats, lastRecord }) => (
+                  {filteredEmployees.map(({ user: emp, supervisor, stats, lastRecord }: any) => (
                     <div
                       key={emp._id}
                       onClick={() => setDrawerEmployee({ ...emp, supervisorName: supervisor?.name })}
@@ -316,7 +313,7 @@ export default function AttendancePage() {
                         {emp.avatarUrl ? (
                           <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
-                          emp.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+                          emp.name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2)
                         )}
                       </div>
 
@@ -377,12 +374,12 @@ export default function AttendancePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                Employees Pending Rating ({needsRating.length})
+                {t('attendance.employeesPendingRating')} ({needsRating.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {needsRating.map(({ employee, lastRated }) => (
+                {needsRating.map(({ employee, lastRated }: any) => (
                   <div
                     key={employee._id}
                     className="flex items-center justify-between p-3 rounded-lg border"
@@ -393,7 +390,7 @@ export default function AttendancePage() {
                         {employee.avatarUrl ? (
                           <img src={employee.avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
-                          employee.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+                          employee.name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2)
                         )}
                       </div>
                       <div>

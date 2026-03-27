@@ -48,21 +48,27 @@ export async function POST(req: NextRequest) {
     // ═══════════════════════════════════════════════════════════════
     // CONFLICT DETECTION — Check task conflicts
     // ═══════════════════════════════════════════════════════════════
-    let conflictResult = { hasCritical: false, hasWarnings: false, conflicts: [] };
-    
+    let conflictResult: { hasCritical: boolean; hasWarnings: boolean; conflicts: any[] } = { hasCritical: false, hasWarnings: false, conflicts: [] };
+
     if (deadline) {
       // Проверяем конфликты задачи с отпусками
-      conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
+      const conflictData: any = await convex.query(api.conflicts.checkConflictsForRequest, {
         organizationId: organizationId as Id<"organizations">,
         requestType: "task" as const,
         userId: assignedTo as Id<"users">,
         startDate: Date.now(),
         endDate: new Date(deadline).getTime(),
-        metadata: { 
+        metadata: {
           assigneeId: assignedTo as Id<"users">,
           taskId: undefined,
         },
       });
+      // Merge conflict data
+      conflictResult = {
+        hasCritical: conflictData.hasCritical || false,
+        hasWarnings: conflictData.hasWarnings || false,
+        conflicts: conflictData.conflicts || [],
+      };
     }
 
     // Если есть критические конфликты — предупреждаем, но не блокируем

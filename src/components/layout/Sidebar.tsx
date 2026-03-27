@@ -53,7 +53,7 @@ const navItems = [
   { href: "/admin", labelKey: "nav.admin", icon: ShieldCheck, roles: ["superadmin"] },
   { href: "/superadmin/subscriptions", labelKey: "nav.subscriptions", icon: CreditCard, roles: ["superadmin"] },
   { href: "/superadmin/security", labelKey: "nav.security", icon: ShieldCheck, roles: ["superadmin"], badge: "SEC" },
-  { href: "/ai-site-editor", labelKey: "nav.aiSiteEditor", icon: Sparkles, roles: ["superadmin", "admin", "supervisor", "employee"], badge: "AI" },
+  { href: "/ai-site-editor", labelKey: "nav.aiSiteEditor", icon: Sparkles, roles: ["superadmin"], badge: "AI" },
   { href: "/profile", labelKey: "nav.profile", icon: User, roles: ["superadmin", "admin", "supervisor", "employee", "driver"] },
   { href: "/settings", labelKey: "nav.settings", icon: Settings, roles: ["superadmin", "admin", "supervisor", "employee", "driver"] },
 ];
@@ -81,10 +81,10 @@ export function Sidebar() {
     mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
   );
 
-  // Unread leaves count
+  // Unread leaves count (only for admin role)
   const unreadLeavesCount = useQuery(
     api.leaves.getUnreadCount,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor" || user.role === "superadmin")
+    mounted && user?.id && user.role === "admin"
       ? { requesterId: user.id as Id<"users"> }
       : "skip"
   );
@@ -157,7 +157,7 @@ export function Sidebar() {
               </div>
               <div>
                 <h1 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                  HRLeave
+                  {t('sidebar.appName')}
                 </h1>
                 <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                   {t('sidebar.subtitle')}
@@ -248,7 +248,7 @@ export function Sidebar() {
             const leaveBadgeCount = unreadLeavesCount ?? 0;
             const chatBadgeCount = chatUnreadCount ?? 0;
             const showTaskBadge = item.href === "/tasks" && taskBadgeCount > 0;
-            const showLeaveBadge = item.href === "/leaves" && leaveBadgeCount > 0 && user?.role !== "superadmin";
+            const showLeaveBadge = item.href === "/leaves" && leaveBadgeCount > 0 && user?.role === "admin";
             const showChatBadge = item.href === "/chat" && chatBadgeCount > 0;
             const showBadge = showTaskBadge || showLeaveBadge || showChatBadge;
             const badgeCount = item.href === "/leaves" ? leaveBadgeCount : item.href === "/tasks" ? taskBadgeCount : item.href === "/chat" ? chatBadgeCount : 0;
@@ -426,10 +426,10 @@ export function MobileSidebar() {
     mounted && user?.id ? { userId: user.id as Id<"users"> } : "skip"
   );
 
-  // Mobile Unread leaves count
+  // Mobile Unread leaves count (only for admin role)
   const mobileUnreadLeavesCount = useQuery(
     api.leaves.getUnreadCount,
-    mounted && user?.id && (user.role === "admin" || user.role === "supervisor" || user.role === "superadmin")
+    mounted && user?.id && user.role === "admin"
       ? { requesterId: user.id as Id<"users"> }
       : "skip"
   );
@@ -519,7 +519,7 @@ export function MobileSidebar() {
             </div>
             <div>
               <h1 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                HRLeave
+                {t('sidebar.appName')}
               </h1>
               <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                 {t('sidebar.subtitle')}
@@ -573,7 +573,7 @@ export function MobileSidebar() {
               const mobileTaskCount = mobileTaskBadge;
               const mobileLeaveCount = mobileUnreadLeavesCount ?? 0;
               const mobileChatCount = mobileChatUnreadCount ?? 0;
-              const mobileBadge = item.href === "/tasks" ? mobileTaskCount : item.href === "/leaves" && user?.role !== "superadmin" ? mobileLeaveCount : item.href === "/chat" ? mobileChatCount : 0;
+              const mobileBadge = item.href === "/tasks" ? mobileTaskCount : item.href === "/leaves" && user?.role === "admin" ? mobileLeaveCount : item.href === "/chat" ? mobileChatCount : 0;
 
               return (
                 <Link

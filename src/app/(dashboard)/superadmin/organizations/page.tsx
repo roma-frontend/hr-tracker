@@ -191,7 +191,7 @@ export default function OrganizationsPage() {
                 </p>
               </div>
 
-              {organizations?.map((org) => (
+              {organizations?.map((org: any) => (
                 <div
                   key={org._id}
                   className="p-4 rounded-lg border hover:border-blue-400/50 transition-all hover:shadow-md"
@@ -252,7 +252,7 @@ export default function OrganizationsPage() {
                     <div className="flex-1">
                       {org.adminNames && org.adminNames.length > 0 && (
                         <div className="flex gap-1 flex-wrap">
-                          {org.adminNames.map((name, idx) => (
+                          {org.adminNames.map((name: any, idx: any) => (
                             <span
                               key={idx}
                               className="px-2 py-1 rounded text-xs bg-blue-500/10 text-blue-500 border border-blue-500/30 whitespace-nowrap"

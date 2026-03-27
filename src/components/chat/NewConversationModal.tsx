@@ -20,7 +20,7 @@ interface Props {
 }
 
 function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
 export function NewConversationModal({ currentUserId, organizationId, userRole, onClose, onCreated }: Props) {
@@ -69,7 +69,7 @@ export function NewConversationModal({ currentUserId, organizationId, userRole, 
       const list = (allOrgUsers ?? []) as Doc<"users">[];
       return list
         .filter((u) => u._id !== currentUserId && u.isActive && u.isApproved)
-        .map((u) => ({
+        .map((u: any) => ({
           _id: u._id as Id<"users">,
           name: u.name ?? "",
           avatarUrl: u.avatarUrl,
@@ -146,7 +146,7 @@ export function NewConversationModal({ currentUserId, organizationId, userRole, 
           const orgIds = Array.from(
             new Set(
               selected
-                .map((u) => u.organizationId)
+                .map((u: any) => u.organizationId)
                 .filter((id): id is Id<"organizations"> => !!id)
             )
           );
@@ -228,7 +228,7 @@ export function NewConversationModal({ currentUserId, organizationId, userRole, 
                     >
                       {t('chat.allOrgs')}
                     </button>
-                    {organizations?.map((org) => (
+                    {organizations?.map((org: any) => (
                       <button
                         key={org._id}
                         onClick={() => {
@@ -256,7 +256,7 @@ export function NewConversationModal({ currentUserId, organizationId, userRole, 
 
         {/* Mode tabs */}
         <div className="flex p-3 gap-2">
-          {(["dm", "group"] as const).map((m) => (
+          {(["dm", "group"] as const).map((m: any) => (
             <button
               key={m}
               onClick={() => { setMode(m); setSelectedUsers([]); }}
@@ -306,7 +306,7 @@ export function NewConversationModal({ currentUserId, organizationId, userRole, 
         {/* Selected chips (group mode) */}
         {mode === "group" && selectedUsers.length > 0 && (
           <div className="px-3 pb-2 flex flex-wrap gap-1">
-            {selectedUsers.map((uid) => {
+            {selectedUsers.map((uid: any) => {
               const u = users?.find((x) => x._id === uid);
               return (
                 <span
@@ -326,7 +326,7 @@ export function NewConversationModal({ currentUserId, organizationId, userRole, 
 
         {/* User list */}
         <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
-          {filtered.map((u) => {
+          {filtered.map((u: any) => {
             const isSelected = selectedUsers.includes(u._id);
             return (
               <button

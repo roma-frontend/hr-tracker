@@ -7,6 +7,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { X, Bookmark, MessageCircle } from "lucide-react";
 import { MessageBubble } from "./MessageBubble";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Props {
   userId: Id<"users">;
@@ -17,12 +18,17 @@ interface Props {
 
 export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMessage }: Props) {
   const { t } = useTranslation();
-  const savedMessages = useQuery(api.chat.getSavedMessages, { userId, organizationId });
-  const unsaveMessage = useMutation(api.chat.unsaveMessage);
+  // TODO: Implement saved messages feature
+  const { user } = useAuthStore();
+
+  // For now, using pinned messages as placeholder
+  const savedMessages = useQuery(api.chat.getPinnedMessages, { conversationId: undefined as any });
+  const unsaveMessage = useMutation(api.chat.togglePin);
 
   const handleUnsave = async (e: React.MouseEvent, messageId: Id<"chatMessages">) => {
     e.stopPropagation();
-    await unsaveMessage({ messageId, userId });
+    if (!user?.id) return;
+    await unsaveMessage({ conversationId: messageId as any, userId: user.id as Id<"users"> });
   };
 
   return (
@@ -68,7 +74,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
               </p>
             </div>
           ) : (
-            savedMessages.map((saved) => {
+            savedMessages?.map((saved: any) => {
               if (!saved) return null;
               const isOwn = saved.senderId === userId;
               

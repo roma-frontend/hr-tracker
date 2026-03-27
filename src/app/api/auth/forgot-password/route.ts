@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
               <!-- Footer -->
               <p style="text-align: center; color: #4b5563; font-size: 12px; margin-top: 24px;">
-                © ${new Date().getFullYear()} HR Office • Leave Monitoring System
+                © ${new Date().getFullYear()} HR Office • HR Management System
               </p>
             </div>
           </body>

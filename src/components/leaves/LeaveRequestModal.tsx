@@ -186,7 +186,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                   ) : allUsers.length === 0 ? (
                     <SelectItem value="empty" disabled>No employees found</SelectItem>
                   ) : (
-                    allUsers.map((emp) => (
+                    allUsers.map((emp: any) => (
                       <SelectItem key={emp._id} value={emp._id}>
                         <div className="flex items-center gap-2">
                           <span>{emp.name}</span>
@@ -205,7 +205,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
           <div className="space-y-1.5">
             <Label className="text-sm">{t('labels.leaveType')} {t('forms.required')}</Label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {(Object.keys(LEAVE_TYPE_COLORS) as LeaveType[]).map((type) => (
+              {(Object.keys(LEAVE_TYPE_COLORS) as LeaveType[]).map((type: any) => (
                 <button
                   key={type}
                   type="button"
@@ -216,7 +216,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
                       : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:text-[var(--text-secondary)]"
                   }`}
                 >
-                  <span className={LEAVE_TYPE_COLORS[type]}>
+                  <span className={LEAVE_TYPE_COLORS[type as LeaveType]}>
                     {getLeaveTypeLabel(type, t)}
                   </span>
                 </button>

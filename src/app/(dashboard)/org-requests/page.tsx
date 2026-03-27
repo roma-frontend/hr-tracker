@@ -127,7 +127,7 @@ export default function OrgRequestsPage() {
 
       {/* Filters */}
       <div className="flex gap-2 mb-6">
-        {(["all", "pending", "approved", "rejected"] as const).map((status) => (
+        {(["all", "pending", "approved", "rejected"] as const).map((status: any) => (
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
@@ -157,7 +157,7 @@ export default function OrgRequestsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => {
+          {requests.map((request: any) => {
             const Icon = request.requestedPlan === "enterprise" ? Crown : Building2;
             const planColor =
               request.requestedPlan === "enterprise"

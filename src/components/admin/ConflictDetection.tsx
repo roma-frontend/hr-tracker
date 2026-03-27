@@ -55,7 +55,7 @@ const conflicts = useQuery(api.admin.detectConflicts);
           </div>
         ) : (
           <div className="max-h-[400px] space-y-3 overflow-y-auto">
-            {conflicts.map((conflict) => (
+            {conflicts.map((conflict: any) => (
               <div
                 key={conflict.id}
                 className={`rounded-lg border p-3 ${
@@ -92,7 +92,7 @@ const conflicts = useQuery(api.admin.detectConflicts);
                 <div className="text-xs text-[var(--text-secondary)]">
                   <p className="mb-1 font-medium">{t("conflicts.employeesOut")}</p>
                   <div className="flex flex-wrap gap-1">
-                    {conflict.employeesOut.map((name, idx) => (
+                    {conflict.employeesOut.map((name: any, idx: any) => (
                       <Badge key={idx} variant="outline" className="text-xs">
                         {name}
                       </Badge>

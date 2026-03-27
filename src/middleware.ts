@@ -29,6 +29,7 @@ const PROTECTED_ROUTES = [
   '/profile',
   '/admin',
   '/superadmin',
+  '/ai-site-editor',
 ]
 
 // Auth routes

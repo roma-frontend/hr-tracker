@@ -68,7 +68,7 @@ export const getAllUsers = query({
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
       let query = ctx.db.query("users");
       if (cursor) {
-        query = query.startAfter(cursor);
+        query = (query as any).startAfter(cursor);
       }
       return await query.take(effectiveLimit + 1); // +1 to check if more exists
     }
@@ -82,11 +82,11 @@ export const getAllUsers = query({
       .query("users")
       .withIndex("by_org", (q) => q.eq("organizationId", requester.organizationId))
       .filter((q) => q.eq(q.field("isActive"), true));
-    
+
     if (cursor) {
-      query = query.startAfter(cursor);
+      query = (query as any).startAfter(cursor);
     }
-    
+
     return await query.take(effectiveLimit + 1);
   },
 });
@@ -121,11 +121,11 @@ export const getUsersByOrganizationId = query({
       .query("users")
       .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
       .filter((q) => q.eq(q.field("isActive"), true));
-    
+
     if (cursor) {
-      query = query.startAfter(cursor);
+      query = (query as any).startAfter(cursor);
     }
-    
+
     return await query.take(effectiveLimit + 1);
   },
 });
