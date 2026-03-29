@@ -214,7 +214,7 @@ export default function ReportsPage() {
                     <ResponsiveContainer width="100%" height={220}>
                       <PieChart>
                         <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} innerRadius={50} dataKey="value" paddingAngle={3}>
-                          {pieData.map((entry: any, i: any) => <Cell key={i} fill={entry.color} stroke="transparent" />)}
+                          {pieData.map((entry: any, i: any) => <Cell key={i} fill={entry.color} stroke={t("common.transparent")} />)}
                         </Pie>
                         <Tooltip 
                           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}

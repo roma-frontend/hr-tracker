@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
 
   return (
     <PlanGate
-      feature="advancedAnalytics"
+      feature={t('common.advancedAnalytics')}
       title={t('planGate.analyticsTitle')}
       description={t('planGate.analyticsDescription')}
     >

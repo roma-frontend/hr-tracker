@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, Users, Star, UserCheck, BarChart2, Search } from "lucide-react";
 import type { Id } from "../../../../convex/_generated/dataModel";
 
-type Tab = "today" | "all_employees" | "rating";
+type Tab = "today" | "all" | "rating";
 
 export default function AttendancePage() {
   const { t } = useTranslation();
@@ -111,7 +111,7 @@ export default function AttendancePage() {
           <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: "var(--background-subtle)" }}>
             {([
               { id: "today", label: t('timePeriods.today'), icon: Clock },
-              { id: "all_employees", label: t('attendance.allEmployees'), icon: Users },
+              { id: t('common.allEmployees'), label: t('attendance.allEmployees'), icon: Users },
               { id: "rating", label: t('attendance.rating'), icon: Star },
             ] as { id: Tab; label: string; icon: any }[]).map((tab: any) => (
               <button
@@ -234,13 +234,13 @@ export default function AttendancePage() {
                         {record.isEarlyLeave && (
                           <Badge className="bg-orange-500 text-white text-xs">Early leave</Badge>
                         )}
-                        {record.status === "checked_in" && (
+                        {record.status === t('status.checkedIn') && (
                           <Badge className="bg-green-500 text-white text-xs">
-                            <Clock className="w-3 h-3 mr-1" />Active
+                            <Clock className="w-3 h-3 mr-1" />{t('attendance.active')}
                           </Badge>
                         )}
-                        {record.status === "checked_out" && (
-                          <Badge className="bg-blue-500 text-white text-xs">Done</Badge>
+                        {record.status === t('status.checkedOut') && (
+                          <Badge className="bg-blue-500 text-white text-xs">{t('attendance.checkedOut')}</Badge>
                         )}
                         {record.status === "absent" && (
                           <Badge variant="destructive" className="text-xs">{t('statuses.absent')}</Badge>
@@ -257,7 +257,7 @@ export default function AttendancePage() {
       )}
 
       {/* All Employees Tab */}
-      {isAdminOrSupervisor && activeTab === "all_employees" && (
+      {isAdminOrSupervisor && activeTab === t('common.allEmployees') && (
         <div>
           <Card>
             <CardHeader>
@@ -356,9 +356,9 @@ export default function AttendancePage() {
 
                       {/* Last record badge */}
                       <div className="flex-shrink-0">
-                        {lastRecord?.status === "checked_in" ? (
+                        {lastRecord?.status === t('status.checkedIn') ? (
                           <span className="text-xs bg-green-500/20 dark:bg-green-500/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full font-medium animate-pulse">● Active</span>
-                        ) : lastRecord?.status === "checked_out" ? (
+                        ) : lastRecord?.status === t('status.checkedOut') ? (
                           <span className="text-xs bg-blue-500/20 dark:bg-blue-500/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">Done</span>
                         ) : (
                           <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>—</span>

@@ -279,7 +279,7 @@ export default function OrgRequestsPage() {
                     <div className="flex items-start gap-2 text-sm">
                       <XCircle className="w-4 h-4 mt-0.5 text-red-500" />
                       <div>
-                        <p className="font-semibold text-red-500 mb-1">Rejection Reason:</p>
+                        <p className="font-semibold text-red-500 mb-1">{t('organization.rejectionReason')}</p>
                         <p style={{ color: "var(--text-secondary)" }}>{request.rejectionReason}</p>
                       </div>
                     </div>

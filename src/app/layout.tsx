@@ -7,6 +7,7 @@ import {
   Noto_Sans_Armenian,
 } from "next/font/google";
 import "./globals.css";
+import { validateEnvironment } from "@/lib/env-validation";
 import { ConvexClientProvider } from "@/lib/convex";
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { AuthSyncProvider } from '@/components/providers/AuthSyncProvider'
@@ -18,6 +19,9 @@ import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import { MaintenanceAutoLogout } from "@/components/MaintenanceAutoLogout";
 import { GlobalErrorBoundaryProvider } from "@/components/error/GlobalErrorBoundaryProvider";
+
+// Validate environment variables at startup
+validateEnvironment();
 
 // Corporate & Professional - IBM PLEX SANS (Primary font - preload)
 const ibmPlexSans = IBM_Plex_Sans({

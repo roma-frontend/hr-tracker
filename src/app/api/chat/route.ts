@@ -304,16 +304,25 @@ ${availableDriversInfo || ''}
       position: userPosition,
     });
 
-    // Detect intent from last user message (for navigation actions)
+    // Detect intent from last user message - ONLY for explicit navigation requests
     // lastUserMessage уже объявлена выше для Conflict Check
     const detectedIntent = detectIntent(lastUserMessage, userRole);
-    
+
     let navigationHint = '';
-    if (detectedIntent?.action) {
-      navigationHint = `\n\nDETECTED INTENT: User wants to navigate to "${detectedIntent.name}". 
+    // ONLY navigate if user explicitly asks to OPEN/SHOW/GO TO a page
+    // Keywords for explicit navigation: "открой", "покажи страницу", "перейди", "open", "show page", "go to"
+    const explicitNavigationKeywords = ['открой', 'откройте', 'покажи страницу', 'покажи мне страницу', 'перейди', 'перейдите', 'go to', 'open', 'show page', 'navigate to'];
+    const hasExplicitNavigation = explicitNavigationKeywords.some(keyword => lastUserMessage.toLowerCase().includes(keyword));
+    
+    if (detectedIntent?.action && hasExplicitNavigation) {
+      navigationHint = `\n\nDETECTED EXPLICIT NAVIGATION REQUEST: User wants to OPEN/SHOW page "${detectedIntent.name}".
 Route: ${detectedIntent.action}
 Include this in your response: <NAVIGATE>${detectedIntent.action}</NAVIGATE>
 Example: "Открываю календарь... 📅 <NAVIGATE>/calendar</NAVIGATE>"`;
+    } else if (detectedIntent?.action && !hasExplicitNavigation) {
+      // User wants to DO something, not navigate - just inform them
+      navigationHint = `\n\nDETECTED ACTION REQUEST: User wants to "${detectedIntent.name}" but did NOT ask to navigate.
+DO NOT navigate! Just help them with their request using <ACTION> tags if needed, or provide information.`;
     }
 
     const result = await streamText({
@@ -346,32 +355,41 @@ CRITICAL RULE FOR LEAVE BOOKING:
 - <ACTION> tag is used for CREATING/EDITING/DELETING leaves
 - <NAVIGATE> tag is used only for VIEWING pages
 - If user does not specify dates for leave booking → ASK for dates, do NOT navigate!
-- **NAVIGATION** - When user asks to open/show a page, navigate them using <NAVIGATE>route</NAVIGATE> tags
+- **NAVIGATION** - ONLY when user EXPLICITLY says "открой страницу...", "покажи страницу...", "перейди на...", "open page...", "show page...", "go to..."
+  Use <NAVIGATE>route</NAVIGATE> tags ONLY for explicit navigation requests.
+  
   Available routes:
-  * /calendar - календарь, calendar, показать календарь
-  * /leaves - ТОЛЬКО для просмотра списка отпусков (не для создания!)
-  * /employees - сотрудники, employees, команда, team
-  * /tasks - задачи, tasks, мои задачи
-  * /attendance - посещаемость, attendance
-  * /analytics - аналитика, analytics, статистика
-  * /reports - отчеты, reports
-  * /settings - настройки, settings
-  * /security - безопасность, security (for superadmin)
-  * /organizations - организации, organizations (for superadmin)
-  * /profile - профиль, profile, мой профиль
-  * /dashboard - дашборд, dashboard, главная, home
+  * /calendar - когда просят "открой календарь", "покажи страницу календаря"
+  * /leaves - когда просят "открой страницу отпусков", "покажи список отпусков" (НЕ для создания!)
+  * /employees - когда просят "открой страницу сотрудников", "покажи страницу команды"
+  * /tasks - когда просят "открой страницу задач", "покажи мои задачи"
+  * /attendance - когда просят "открой посещаемость", "покажи страницу посещаемости"
+  * /analytics - когда просят "открой аналитику", "покажи статистику"
+  * /reports - когда просят "открой отчеты", "покажи страницу отчетов"
+  * /settings - когда просят "открой настройки", "покажи страницу настроек"
+  * /security - когда просят "открой безопасность", "покажи security" (для superadmin)
+  * /organizations - когда просят "открой организации", "покажи список организаций"
+  * /profile - когда просят "открой профиль", "покажи мой профиль"
+  * /dashboard - когда просят "открой главную", "покажи dashboard"
 
-  IMPORTANT: 
-  - NEVER use <NAVIGATE>/leaves</NAVIGATE> when user wants to BOOK/REQUEST a leave!
-  - If user says "хочу отпуск", "book leave", "request vacation" → generate <ACTION> tag instead!
-  - Only use <NAVIGATE>/leaves</NAVIGATE> when user explicitly asks to "show leaves", "view my leaves", "покажи отпуска"
+  IMPORTANT NAVIGATION RULES:
+  - "покажи сотрудников" → НЕ навигация! Это запрос информации, покажи данные в чате!
+  - "хочу отпуск" → НЕ навигация! Это запрос на создание, используй <ACTION>!
+  - "забронировать отпуск" → НЕ навигация! Это запрос на создание, используй <ACTION>!
+  - "открой страницу сотрудников" → НАВИГАЦИЯ! <NAVIGATE>/employees</NAVIGATE>
+  - "покажи страницу отпусков" → НАВИГАЦИЯ! <NAVIGATE>/leaves</NAVIGATE>
+  - "перейди в календарь" → НАВИГАЦИЯ! <NAVIGATE>/calendar</NAVIGATE>
 
   Examples:
-  - "покажи безопасность" → "Открываю панель безопасности... 🔒 <NAVIGATE>/security</NAVIGATE>"
-  - "открой страницу сотрудников" → "Показываю список сотрудников... 👥 <NAVIGATE>/employees</NAVIGATE>"
-  - "покажи мои отпуска" → "Открываю список отпусков... 📅 <NAVIGATE>/leaves</NAVIGATE>"
-  - "хочу отпуск" → НЕ использовать <NAVIGATE>, использовать <ACTION> для создания!
-  - "забронировать отпуск" → НЕ использовать <NAVIGATE>, использовать <ACTION>!
+  - "покажи безопасность" → НЕ навигация! Просто покажи информацию о безопасности в чате!
+  - "открой страницу безопасности" → НАВИГАЦИЯ! "Открываю панель безопасности... 🔒 <NAVIGATE>/security</NAVIGATE>"
+  - "покажи сотрудников" → НЕ навигация! Покажи список сотрудников в чате!
+  - "открой страницу сотрудников" → НАВИГАЦИЯ! "Показываю список сотрудников... 👥 <NAVIGATE>/employees</NAVIGATE>"
+  - "покажи мои отпуска" → НЕ навигация! Покажи информацию об отпусках в чате!
+  - "открой страницу отпусков" → НАВИГАЦИЯ! "Открываю список отпусков... 📅 <NAVIGATE>/leaves</NAVIGATE>"
+  - "хочу отпуск" → НЕ навигация, НЕ показывай страницу! Используй <ACTION> для создания!
+  - "забронировать отпуск" → НЕ навигация, НЕ показывай страницу! Используй <ACTION> для создания!
+  - "перейди в календарь" → НАВИГАЦИЯ! "Открываю календарь... 📅 <NAVIGATE>/calendar</NAVIGATE>"
 
 BOOKING LEAVES:
 IMPORTANT: When user wants to book a leave:

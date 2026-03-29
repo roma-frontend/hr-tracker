@@ -30,22 +30,22 @@ function StatusBadge({ status, isTrialing }: { status: string | null | undefined
   if (!status) return <Badge variant="secondary">{t('billing.noSubscription')}</Badge>;
   if (isTrialing) return (
     <Badge variant="warning" className="flex items-center gap-1">
-      <Clock className="w-3 h-3" /> Trial
+      <Clock className="w-3 h-3" /> {t('subscription.trial')}
     </Badge>
   );
   if (status === 'active') return (
     <Badge variant="success" className="flex items-center gap-1">
-      <CheckCircle className="w-3 h-3" /> Active
+      <CheckCircle className="w-3 h-3" /> {t('subscription.active')}
     </Badge>
   );
   if (status === 'past_due') return (
     <Badge variant="destructive" className="flex items-center gap-1">
-      <AlertCircle className="w-3 h-3" /> Past Due
+      <AlertCircle className="w-3 h-3" /> {t('subscription.pastDue')}
     </Badge>
   );
   if (status === 'canceled') return (
     <Badge variant="secondary" className="flex items-center gap-1">
-      <XCircle className="w-3 h-3" /> Canceled
+      <XCircle className="w-3 h-3" /> {t('subscription.canceled')}
     </Badge>
   );
   return <Badge variant="secondary">{status}</Badge>;

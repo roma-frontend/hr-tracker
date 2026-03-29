@@ -99,6 +99,7 @@ import { DriverShiftControls } from "@/components/drivers/DriverShiftControls";
 import { ShiftHistory } from "@/components/drivers/ShiftHistory";
 import { CallModal } from "@/components/chat/CallModal";
 import type { ActiveCall } from "@/components/chat/ChatClient";
+import { RequestDriverWizard } from "@/components/drivers/RequestDriverWizard";
 
 interface TripInfo {
   from: string;
@@ -154,7 +155,7 @@ function DriverDashboard({ userId, organizationId }: { userId: Id<"users">; orga
   const [notesText, setNotesText] = useState("");
   const [etaScheduleId, setEtaScheduleId] = useState<string | null>(null);
   const [etaValue, setEtaValue] = useState("");
-  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   // Update current time every minute for waiting calculation
   useEffect(() => {
@@ -983,13 +984,16 @@ function ReassignDriverDialog({
   onOpenChange: (open: boolean) => void;
   requestId: Id<"driverRequests">;
   userId: Id<"users">;
-  organizationId: Id<"organizations">;
+  organizationId?: Id<"organizations">;
   currentDriverId: Id<"drivers">;
 }) {
   const { t } = useTranslation();
   const [selectedNewDriver, setSelectedNewDriver] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
-  const availableDrivers = useQuery(api.drivers.getAvailableDrivers, { organizationId });
+  const availableDrivers = useQuery(
+    api.drivers.getAvailableDrivers,
+    organizationId ? { organizationId } : "skip"
+  );
   const reassign = useMutation(api.drivers.reassignDriverRequest);
 
   const otherDrivers = availableDrivers?.filter((d) => d && d._id !== currentDriverId) ?? [];
@@ -1059,7 +1063,7 @@ export default function DriversPage() {
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
   const [mounted, setMounted] = React.useState(false);
-  const [currentTime, setCurrentTime] = React.useState(Date.now());
+  const [currentTime, setCurrentTime] = React.useState(() => Date.now());
 
   React.useEffect(() => setMounted(true), []);
 
@@ -1087,7 +1091,7 @@ export default function DriversPage() {
     if (showRequestModal) {
       const now = new Date();
       const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-      
+
       // Format as datetime-local string (YYYY-MM-DDTHH:mm)
       const formatDateTimeLocal = (date: Date) => {
         const year = date.getFullYear();
@@ -1097,7 +1101,7 @@ export default function DriversPage() {
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       };
-      
+
       setStartTime(formatDateTimeLocal(now));
       setEndTime(formatDateTimeLocal(oneHourLater));
     }
@@ -1113,7 +1117,7 @@ export default function DriversPage() {
   const [editEndTime, setEditEndTime] = useState("");
   const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
 
-  // Form state
+  // Form state - declared before useEffect that uses them
   const [tripInfo, setTripInfo] = useState<TripInfo>({
     from: "",
     to: "",
@@ -1270,6 +1274,7 @@ export default function DriversPage() {
     open: boolean;
     requestId?: Id<"driverRequests">;
     currentDriverId?: Id<"drivers">;
+    organizationId?: Id<"organizations">;
   }>({ open: false });
 
   // Feature #4: Filter state
@@ -1434,7 +1439,7 @@ export default function DriversPage() {
   // Handle driver registration
   const handleRegisterDriver = async () => {
     if (!userId || !organizationId) {
-      toast.error(t("driver.pleaseLogin", "Please log in"));
+      toast.error(t("driver.pleaseLogin", t('drivers.pleaseLogin')));
       return;
     }
 
@@ -1807,11 +1812,11 @@ export default function DriversPage() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                               <Label className="text-xs">{t("driver.startTime", "Start")}</Label>
-                              <Input type="datetime-local" value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} className="h-8 text-sm" />
+                              <Input type={t('common.datetimeLocal')} value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} className="h-8 text-sm" />
                             </div>
                             <div>
                               <Label className="text-xs">{t("driver.endTime", "End")}</Label>
-                              <Input type="datetime-local" value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} className="h-8 text-sm" />
+                              <Input type={t('common.datetimeLocal')} value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} className="h-8 text-sm" />
                             </div>
                           </div>
                           <div>
@@ -1870,7 +1875,7 @@ export default function DriversPage() {
                                 request.status === "approved"
                                   ? "default"
                                   : request.status === "declined"
-                                    ? "destructive"
+                                    ? t('common.destructive')
                                     : "secondary"
                               }
                             >
@@ -1953,6 +1958,7 @@ export default function DriversPage() {
                               open: true,
                               requestId: request._id as Id<"driverRequests">,
                               currentDriverId: request.driverId as Id<"drivers">,
+                              organizationId: user.organizationId as Id<"organizations">,
                             })}
                           >
                             <ArrowRightLeft className="w-3 h-3" />
@@ -2020,13 +2026,13 @@ export default function DriversPage() {
                           {/* Navigator buttons for pickup/dropoff */}
                           {request.tripInfo.pickupCoords && (
                             <NavigatorDropdown
-                              label="Navigate to Pickup"
+                              label={t('drivers.navigateToPickup')}
                               coords={request.tripInfo.pickupCoords}
                             />
                           )}
                           {request.tripInfo.dropoffCoords && (
                             <NavigatorDropdown
-                              label="Navigate to Destination"
+                              label={t('drivers.navigateToDestination')}
                               coords={request.tripInfo.dropoffCoords}
                             />
                           )}
@@ -2233,13 +2239,13 @@ export default function DriversPage() {
       )}
 
       {/* Feature #3: Reassign Dialog */}
-      {reassignDialog.requestId && reassignDialog.currentDriverId && userId && organizationId && (
+      {reassignDialog.requestId && reassignDialog.currentDriverId && reassignDialog.organizationId && userId && (
         <ReassignDriverDialog
           open={reassignDialog.open}
           onOpenChange={(open) => setReassignDialog((prev) => ({ ...prev, open }))}
           requestId={reassignDialog.requestId}
           userId={userId}
-          organizationId={organizationId}
+          organizationId={reassignDialog.organizationId}
           currentDriverId={reassignDialog.currentDriverId}
         />
       )}
@@ -2258,7 +2264,7 @@ export default function DriversPage() {
               <Label>{t("driver.selectDriver", "Select Driver")}</Label>
               <Select value={selectedDriver || ""} onValueChange={(v) => setSelectedDriver(v as Id<"drivers">)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t("driver.chooseDriver", "Choose a driver")} />
+                  <SelectValue placeholder={t("driver.chooseDriver", t('drivers.chooseDriver'))} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableDrivers?.filter(Boolean).map((driver: any) => (
@@ -2375,206 +2381,20 @@ export default function DriversPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Request Modal */}
+      {/* Request Modal - Using Wizard */}
       <Dialog open={showRequestModal} onOpenChange={setShowRequestModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t("driver.requestDriver", "Request Driver")}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>{t("driver.selectDriver", "Select Driver")}</Label>
-              <Select value={selectedDriver || ""} onValueChange={(v) => setSelectedDriver(v as Id<"drivers">)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a driver" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableDrivers?.filter(Boolean).map((driver: any) => (
-                    <SelectItem key={driver!._id} value={driver!._id}>
-                      {driver!.userName} - {driver!.vehicleInfo.model}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Leave Warning Alert */}
-            {driverLeaveCheck?.onLeave && driverLeaveCheck.leave && (
-              <Alert variant="destructive" className="border-red-500 bg-red-50">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-                <AlertTitle className="text-red-800">
-                  ⛔ {t("driver.driverOnLeave", "Driver on leave")}
-                </AlertTitle>
-                <AlertDescription className="text-red-700">
-                  <p className="font-semibold">
-                    {t("driver.onLeaveFrom", "Driver on leave from")} {driverLeaveCheck.leave.startDate} {t("driver.to", "to")} {driverLeaveCheck.leave.endDate}
-                  </p>
-                  <p className="mt-2">
-                    <strong>{t("driver.leaveType", "Leave type")}:</strong> {
-                      driverLeaveCheck.leave.type === 'paid' ? t("leave.types.paid", "Paid") :
-                      driverLeaveCheck.leave.type === 'sick' ? t("leave.types.sick", "Sick") :
-                      driverLeaveCheck.leave.type === 'family' ? t("leave.types.family", "Family") :
-                      driverLeaveCheck.leave.type === 'unpaid' ? t("leave.types.unpaid", "Unpaid") :
-                      driverLeaveCheck.leave.type
-                    }
-                  </p>
-                  <p className="text-sm mt-2 text-red-600">
-                    💡 {t("driver.selectAnotherDriver", "Select another driver or change dates")}
-                  </p>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <Label>{t("driver.pickupLocation", "Pickup Location")}</Label>
-                <PlaceAutocomplete
-                  value={tripInfo.from}
-                  onChange={(val) => {
-                    setTripInfo({ ...tripInfo, from: val });
-                    setPickupCoords(undefined);
-                  }}
-                  onSelect={(place) => {
-                    setTripInfo((prev) => ({ ...prev, from: place.address }));
-                    setPickupCoords({ lat: place.lat, lng: place.lng, address: place.address });
-                  }}
-                  placeholder={t("driver.officePlaceholder", "e.g., Office")}
-                />
-              </div>
-              <div>
-                <Label>{t("driver.dropoffLocation", "Dropoff Location")}</Label>
-                <PlaceAutocomplete
-                  value={tripInfo.to}
-                  onChange={(val) => {
-                    setTripInfo({ ...tripInfo, to: val });
-                    setDropoffCoords(undefined);
-                  }}
-                  onSelect={(place) => {
-                    setTripInfo((prev) => ({ ...prev, to: place.address }));
-                    setDropoffCoords({ lat: place.lat, lng: place.lng, address: place.address });
-                  }}
-                  placeholder={t("driver.airportPlaceholder", "e.g., Zvartnots Airport")}
-                />
-              </div>
-            </div>
-
-            {/* Map for location selection */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                {t("driver.selectOnMap", "Select on Map")}
-              </Label>
-              <div className="h-[200px] sm:h-[300px] rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <DriverMap
-                  pickupLocation={tripInfo.from}
-                  dropoffLocation={tripInfo.to}
-                  pickupCoords={pickupCoords}
-                  dropoffCoords={dropoffCoords}
-                  height="100%"
-                  zoom={13}
-                  interactive={true}
-                  onLocationSelect={handleLocationSelect}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label>{t("driver.tripPurpose", "Trip Purpose")}</Label>
-              <Input
-                value={tripInfo.purpose}
-                onChange={(e) => setTripInfo({ ...tripInfo, purpose: e.target.value })}
-                placeholder={t("driver.purposePlaceholder", "e.g., Airport transfer, Client meeting")}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <Label>{t("driver.startTime", "Start Time")}</Label>
-                <Input
-                  type="datetime-local"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label>{t("driver.endTime", "End Time")}</Label>
-                <Input
-                  type="datetime-local"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Time validation alert */}
-            <Alert variant="warning" className="border-amber-500/50 bg-amber-50 text-amber-900">
-              <AlertCircle className="w-4 h-4 text-amber-600" />
-              <AlertDescription className="text-sm">
-                <div className="space-y-1">
-                  <p className="font-medium">
-                    🇬🇧 Start time must be earlier than end time
-                  </p>
-                  <p className="font-medium">
-                    🇷🇺 Время начала должно быть раньше времени окончания
-                  </p>
-                  <p className="font-medium">
-                    🇦🇲 Սկսման ժամանակը պետք է ավելի վաղ լինի, քան ավարտը
-                  </p>
-                </div>
-              </AlertDescription>
-            </Alert>
-
-            <div>
-              <Label>{t("driver.passengerCount", "Passengers")}</Label>
-              <Input
-                type="number"
-                min={1}
-                max={10}
-                value={tripInfo.passengerCount}
-                onChange={(e) => setTripInfo({ ...tripInfo, passengerCount: parseInt(e.target.value) })}
-              />
-            </div>
-
-            <div>
-              <Label>{t("driver.notes", "Notes")} ({t("optional", "Optional")})</Label>
-              <Textarea
-                value={tripInfo.notes}
-                onChange={(e) => setTripInfo({ ...tripInfo, notes: e.target.value })}
-                placeholder="Additional information for the driver..."
-                rows={3}
-              />
-            </div>
-
-            {/* Corporate Trip Fields */}
-            <CorporateTripFields
-              priority={tripPriority}
-              tripCategory={tripCategory}
-              costCenter={costCenter}
-              businessJustification={businessJustification}
-              requiresApproval={requiresApproval}
-              onPriorityChange={setTripPriority}
-              onCategoryChange={setTripCategory}
-              onCostCenterChange={setCostCenter}
-              onBusinessJustificationChange={setBusinessJustification}
-              onRequiresApprovalChange={setRequiresApproval}
-            />
-
-            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end pt-4">
-              <Button variant="outline" onClick={() => setShowRequestModal(false)} type="button">
-                {t("cancel", "Cancel")}
-              </Button>
-              <Button
-                onClick={handleRequestDriver}
-                type="button"
-                className="relative z-10"
-                disabled={driverLeaveCheck?.onLeave}
-              >
-                {driverLeaveCheck?.onLeave
-                  ? t("driver.driverOnLeave", "Водитель в отпуске")
-                  : t("driver.submitRequest", "Submit Request")}
-              </Button>
-            </div>
-          </div>
+          <RequestDriverWizard
+            userId={user.id as Id<"users">}
+            onComplete={() => {
+              setShowRequestModal(false);
+              toast.success(t("driver.requestSubmitted", "Driver request submitted!"));
+            }}
+            onCancel={() => setShowRequestModal(false)}
+          />
         </DialogContent>
       </Dialog>
 
@@ -2884,7 +2704,7 @@ export default function DriversPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">
-                    {selectedScheduleDetail?.type === "trip" ? t("driver.tripDetailsTitle", "Trip Details") : t("driver.blockedTimeSlot", "Blocked Time Slot")}
+                    {selectedScheduleDetail?.type === "trip" ? t("driver.tripDetailsTitle", t('drivers.tripDetails')) : t("driver.blockedTimeSlot", "Blocked Time Slot")}
                   </h2>
                   <p className="text-primary-foreground/80 text-sm">
                     {format(new Date(selectedScheduleDetail?.startTime || currentTime), "EEEE, MMMM dd, yyyy")}

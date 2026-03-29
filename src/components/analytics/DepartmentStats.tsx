@@ -4,13 +4,23 @@ import { useTranslation } from "react-i18next";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+interface User {
+  department?: string;
+  paidLeaveBalance: number;
+  sickLeaveBalance: number;
+  familyLeaveBalance: number;
+}
+
 interface DepartmentStatsProps {
-  users: Array<{
-    department?: string;
-    paidLeaveBalance: number;
-    sickLeaveBalance: number;
-    familyLeaveBalance: number;
-  }>;
+  users: User[];
+}
+
+interface DepartmentStatsData {
+  department: string;
+  employees: number;
+  usedPaid: number;
+  usedSick: number;
+  usedFamily: number;
 }
 
 export function DepartmentStats({ users }: DepartmentStatsProps) {
@@ -38,9 +48,9 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
     acc[dept].usedSick += (DEFAULT_SICK - user.sickLeaveBalance);
     acc[dept].usedFamily += (DEFAULT_FAMILY - user.familyLeaveBalance);
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, DepartmentStatsData>);
 
-  const data = Object.values(departments).map((dept: any) => ({
+  const data = Object.values(departments).map((dept) => ({
     department: dept.department,
     avgPaid: Math.round((dept.usedPaid / dept.employees) * 10) / 10,
     avgSick: Math.round((dept.usedSick / dept.employees) * 10) / 10,

@@ -1563,4 +1563,54 @@ export default defineSchema({
     .index("by_org", ["organizationId"])
     .index("by_org_active", ["organizationId", "isActive"])
     .index("by_function", ["functionName"]),
+
+  // ── AUTOMATION WORKFLOWS ─────────────────────────────────────────────────
+  // Define automation workflows
+  automationWorkflows: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    config: v.any(),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_active", ["isActive"]),
+
+  // ── AUTOMATION TASKS ─────────────────────────────────────────────────────
+  // Track automation task execution
+  automationTasks: defineTable({
+    name: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+    ),
+    result: v.optional(v.any()),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_created", ["createdAt"]),
+
+  // ── AI CHAT CONVERSATIONS ─────────────────────────────────────────────────
+  // Store AI chat conversations
+  aiConversations: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"]),
+
+  // ── AI CHAT MESSAGES ─────────────────────────────────────────────────────
+  // Store individual messages in conversations
+  aiMessages: defineTable({
+    conversationId: v.id("aiConversations"),
+    role: v.union(v.literal("user"), v.literal("assistant")),
+    content: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"]),
 });

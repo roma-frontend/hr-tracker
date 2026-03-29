@@ -29,6 +29,7 @@ import {
   Ticket,
   AlertTriangle,
   HelpCircle,
+  Cpu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
@@ -54,6 +55,7 @@ const navItems = [
   { href: "/tasks", labelKey: "nav.tasks", icon: CheckSquare, roles: ["superadmin", "admin", "supervisor", "employee", "driver"] },
   { href: "/chat", labelKey: "nav.chat", icon: MessageCircle, roles: ["superadmin", "admin", "supervisor", "employee", "driver"], badge: "CHAT" },
   { href: "/approvals", labelKey: "nav.approvals", icon: UserCheck, roles: ["superadmin", "admin"] },
+  { href: "/superadmin/automation", labelKey: "nav.automation", icon: Cpu, roles: ["superadmin", "admin", "supervisor"] },
   { href: "/help", labelKey: "nav.help", icon: HelpCircle, roles: ["superadmin", "admin", "supervisor", "employee", "driver"], badge: "HELP" },
   { href: "/admin", labelKey: "nav.admin", icon: ShieldCheck, roles: ["superadmin"] },
   { href: "/superadmin/support", labelKey: "nav.support", icon: Ticket, roles: ["superadmin"], badge: "SUP" },

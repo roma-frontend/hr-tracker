@@ -19,10 +19,51 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+type User = {
+  _id: string;
+  name: string;
+  email: string;
+  organizationId?: string;
+};
+
+type Organization = {
+  _id: string;
+  name: string;
+  plan: string;
+  slug: string;
+};
+
+type LeaveRequest = {
+  _id: string;
+  userName: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+};
+
+type Task = {
+  _id: string;
+  title: string;
+  description?: string;
+  status: string;
+  priority?: string;
+};
+
+type DriverRequest = {
+  _id: string;
+  requesterName?: string;
+  status: string;
+  tripInfo?: {
+    from: string;
+    to: string;
+  };
+};
+
 interface GlobalSearchProps {
   placeholder?: string;
   autoFocus?: boolean;
-  onSelect?: (result: any) => void;
+  onSelect?: (result: SearchResult) => void;
 }
 
 type SearchResult = {
@@ -116,7 +157,7 @@ export function GlobalSearch({
 
     if (selectedType === null || selectedType === "user") {
       all.push(
-        ...(results.users || []).map((u: any) => ({
+        ...(results.users || []).map((u: User) => ({
           id: u._id,
           type: "user" as const,
           title: u.name,
@@ -129,7 +170,7 @@ export function GlobalSearch({
 
     if (selectedType === null || selectedType === "organization") {
       all.push(
-        ...(results.organizations || []).map((o: any) => ({
+        ...(results.organizations || []).map((o: Organization) => ({
           id: o._id,
           type: "organization" as const,
           title: o.name,
@@ -141,7 +182,7 @@ export function GlobalSearch({
 
     if (selectedType === null || selectedType === "leave") {
       all.push(
-        ...(results.leaveRequests || []).map((l: any) => ({
+        ...(results.leaveRequests || []).map((l: LeaveRequest) => ({
           id: l._id,
           type: "leave" as const,
           title: `${l.userName} - ${l.type}`,
@@ -154,7 +195,7 @@ export function GlobalSearch({
 
     if (selectedType === null || selectedType === "task") {
       all.push(
-        ...(results.tasks || []).map((t: any) => ({
+        ...(results.tasks || []).map((t: Task) => ({
           id: t._id,
           type: "task" as const,
           title: t.title,
@@ -168,7 +209,7 @@ export function GlobalSearch({
 
     if (selectedType === null || selectedType === "driver") {
       all.push(
-        ...(results.driverRequests || []).map((d: any) => ({
+        ...(results.driverRequests || []).map((d: DriverRequest) => ({
           id: d._id,
           type: "driver" as const,
           title: `${d.requesterName || "Unknown"}`,
@@ -249,7 +290,7 @@ export function GlobalSearch({
             {typeFilters.map((filter) => (
               <button
                 key={filter.id?.toString() || "all"}
-                onClick={() => setSelectedType(filter.id as any)}
+                onClick={() => setSelectedType(filter.id as string | null)}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors",
                   selectedType === filter.id

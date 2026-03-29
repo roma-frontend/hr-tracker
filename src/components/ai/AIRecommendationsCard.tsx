@@ -94,7 +94,7 @@ const user = useAuthStore((s) => s.user);
         </div>
       </CardHeader>
 
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {expanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}

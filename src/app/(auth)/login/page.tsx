@@ -455,7 +455,7 @@ export default function LoginPage() {
           {/* Onboarding Tour */}
           {!isOAuthSyncing && <OnboardingTour
             steps={loginTourSteps}
-            tourId="login-tour"
+            tourId={t('auth.loginTour')}
             onComplete={() => console.log("Tour completed!")}
             onSkip={() => console.log("Tour skipped")}
           />}
@@ -487,7 +487,7 @@ export default function LoginPage() {
       >
         {/* Card */}
         <div
-          id="login-card"
+          id={t('auth.loginCard')}
           className="rounded-2xl p-6 shadow-2xl border"
           style={{
             background: "var(--card)",
@@ -771,7 +771,7 @@ export default function LoginPage() {
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t('common.or')}</span>
               <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
             </div>
-            <Link href="/register-org" id="create-org-link">
+            <Link href="/register-org" id={t('auth.createOrgLink')}>
               <button
                 className="text-xs font-semibold hover:underline"
                 style={{ color: "#10b981" }}

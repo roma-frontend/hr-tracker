@@ -313,7 +313,7 @@ export default function ManageAdminsPage() {
                     onClick={() => handleAction(admin._id, "demote")}
                     disabled={isLoading}
                     className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors disabled:opacity-50"
-                    title="Remove admin role"
+                    title={t('superadmin.removeAdminRole')}
                   >
                     <UserX className="w-5 h-5" />
                   </button>

@@ -21,19 +21,24 @@ const eslintConfig = defineConfig([
       },
     },
     rules: {
-      // Downgrade to warnings for development productivity
-      "@typescript-eslint/no-explicit-any": "warn",
+      // Strict: don't allow explicit any
+      "@typescript-eslint/no-explicit-any": "error",
+      
+      // Warning for unsafe operations (can be fixed gradually)
       "@typescript-eslint/no-unsafe-assignment": "warn",
       "@typescript-eslint/no-unsafe-member-access": "warn",
       "@typescript-eslint/no-unsafe-call": "warn",
       "@typescript-eslint/no-unsafe-return": "warn",
       "@typescript-eslint/no-unsafe-argument": "warn",
       
-      // Allow unused vars for development (prefix with _ to ignore)
-      "@typescript-eslint/no-unused-vars": ["warn", { 
+      // Catch unused variables
+      "@typescript-eslint/no-unused-vars": ["error", { 
         "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_|^React$"
+        "varsIgnorePattern": "^_"
       }],
+      
+      // Disallow console in production
+      "no-console": ["error", { allow: ["warn", "error"] }],
       
       // Allow anonymous default exports for Next.js pages
       "import/no-anonymous-default-export": "warn",

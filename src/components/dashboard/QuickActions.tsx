@@ -147,16 +147,21 @@ export function QuickActions() {
   return (
     <Card
       data-tour="quick-actions"
-      className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900"
+      className="border-0 shadow-xl dark:to-gray-800 ring-1 ring-gray-900/5 dark:ring-white/10"
     >
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
-            <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg shadow-yellow-500/30">
+            <Zap className="w-5 h-5 text-white" />
           </div>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t("quickActions.title")}
-          </CardTitle>
+          <div>
+            <CardTitle className="text-lg font-bold">
+              {t("quickActions.title")}
+            </CardTitle>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              {t("quickActions.subtitle") || "Быстрый доступ к основным функциям"}
+            </p>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -164,26 +169,26 @@ export function QuickActions() {
           {actions.map((action, index) => (
             <motion.div
               key={action.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: index * 0.04, duration: 0.2 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
             >
               <Button
                 onClick={() => handleAction(action.href, action.label)}
-                className={`w-full h-24 flex flex-col items-center justify-center gap-2 rounded-xl transition-all ${action.color} text-white shadow-md hover:shadow-lg`}
+                className={`w-full h-28 flex flex-col items-center justify-center gap-2.5 rounded-2xl transition-all duration-200 ${action.color} text-white shadow-md hover:shadow-xl hover:shadow-gray-900/10 dark:hover:shadow-black/30 border border-white/20 dark:border-white/10`}
                 variant="ghost"
               >
-                <div className="p-2 rounded-full bg-white/20">
+                <div className="p-2.5 rounded-full bg-white/25 backdrop-blur-sm shadow-inner">
                   {action.icon}
                 </div>
-                <span className="text-xs font-medium text-center">
+                <span className="text-xs font-semibold text-center leading-tight">
                   {action.label}
                 </span>
               </Button>
               {action.description && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2 line-clamp-2">
                   {action.description}
                 </p>
               )}
@@ -192,15 +197,15 @@ export function QuickActions() {
         </div>
 
         {/* Keyboard shortcuts hint */}
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-5 pt-4 border-t border-gray-200/60 dark:border-gray-700/60">
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>{t("quickActions.shortcuts.hint")}</span>
-            <div className="flex gap-1">
-              <kbd className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-mono text-xs text-gray-700 dark:text-gray-300">
+            <span className="font-medium">{t("quickActions.shortcuts.hint")}</span>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-2.5 py-1.5 rounded-lg bg-gradient-to-b from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 border border-gray-300 dark:border-gray-600 font-mono text-xs font-semibold text-gray-700 dark:text-gray-200 shadow-sm">
                 Ctrl
               </kbd>
-              <span>+</span>
-              <kbd className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-mono text-xs text-gray-700 dark:text-gray-300">
+              <span className="text-gray-400">+</span>
+              <kbd className="px-2.5 py-1.5 rounded-lg bg-gradient-to-b from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 border border-gray-300 dark:border-gray-600 font-mono text-xs font-semibold text-gray-700 dark:text-gray-200 shadow-sm">
                 K
               </kbd>
             </div>

@@ -5,39 +5,53 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-interface MotionProps {
+interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
+  layout?: boolean;
   initial?: {
     opacity?: number;
     x?: number | string;
     y?: number | string;
     scale?: number;
+    width?: number | string;
+    height?: number | string;
+    rotate?: number;
   };
   animate?: {
     opacity?: number;
     x?: number | string;
     y?: number | string;
     scale?: number;
+    width?: number | string;
+    height?: number | string;
+    rotate?: number;
   };
   exit?: {
     opacity?: number;
     x?: number | string;
     y?: number | string;
     scale?: number;
+    width?: number | string;
+    height?: number | string;
+    rotate?: number;
   };
   transition?: {
     duration?: number;
     delay?: number;
-    ease?: 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear';
+    ease?: 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | string;
   };
   whileHover?: {
     scale?: number;
     x?: number;
     y?: number;
+    rotate?: number;
+    background?: string;
+    opacity?: number;
   };
   whileTap?: {
     scale?: number;
+    rotate?: number;
   };
   onAnimationComplete?: () => void;
 }
@@ -56,6 +70,9 @@ export function MotionDiv({
   whileHover,
   whileTap,
   onAnimationComplete,
+  layout,
+  onClick,
+  ...restProps
 }: MotionProps) {
   const [exiting, setExiting] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -75,6 +92,9 @@ export function MotionDiv({
       return () => clearTimeout(timer);
     }
   }, [exiting, exit, onAnimationComplete, transition.duration]);
+
+  // Handle layout animation (simplified - just applies transition)
+  const layoutClass = layout ? 'transition-all duration-300' : '';
 
   // Build animation classes
   const getAnimationClass = () => {
@@ -117,12 +137,34 @@ export function MotionDiv({
     return classes.join(' ');
   };
 
+  // Build inline styles for animate/exit states
+  const getAnimateStyle = () => {
+    const style: React.CSSProperties = {};
+
+    if (exiting && exit) {
+      if (exit.width !== undefined) {
+        style.width = typeof exit.width === 'number' ? `${exit.width}px` : exit.width;
+      }
+      if (exit.opacity !== undefined) style.opacity = exit.opacity;
+    } else if (mounted && animate) {
+      if (animate.width !== undefined) {
+        style.width = typeof animate.width === 'number' ? `${animate.width}px` : animate.width;
+      }
+      if (animate.opacity !== undefined) style.opacity = animate.opacity;
+    }
+
+    return style;
+  };
+
   // Build inline styles for initial state
   const getInitialStyle = () => {
     if (!initial || exiting) return {};
-    
+
     const style: React.CSSProperties = {};
     if (initial.opacity !== undefined) style.opacity = initial.opacity;
+    if (initial.width !== undefined) {
+      style.width = typeof initial.width === 'number' ? `${initial.width}px` : initial.width;
+    }
     if (initial.x !== undefined) {
       style.transform = `translateX(${typeof initial.x === 'number' ? `${initial.x}px` : initial.x})`;
     }
@@ -130,7 +172,7 @@ export function MotionDiv({
       style.transform = `${style.transform || ''} translateY(${typeof initial.y === 'number' ? `${initial.y}px` : initial.y})`.trim();
     }
     if (initial.scale !== undefined) style.transform = `${style.transform || ''} scale(${initial.scale})`.trim();
-    
+
     return style;
   };
 
@@ -141,11 +183,14 @@ export function MotionDiv({
     return (
       <div
         ref={elementRef}
-        className={`${className} ${animationClass}`}
+        className={`${className} ${animationClass} ${layoutClass}`}
         style={{
           ...getInitialStyle(),
+          ...getAnimateStyle(),
           transition: `all ${transition.duration || 0.3}s ${transition.ease || 'ease-in-out'}`,
         }}
+        onClick={onClick}
+        {...restProps}
       >
         {children}
       </div>
@@ -155,12 +200,15 @@ export function MotionDiv({
   return (
     <div
       ref={elementRef}
-      className={`${className} ${animationClass} ${interactiveClass} transition-all`}
+      className={`${className} ${animationClass} ${interactiveClass} ${layoutClass}`}
       style={{
         ...getInitialStyle(),
+        ...getAnimateStyle(),
         transitionDuration: `${(transition.duration || 0.3) * 1000}ms`,
         transitionDelay: `${(transition.delay || 0) * 1000}ms`,
       }}
+      onClick={onClick}
+      {...restProps}
     >
       {children}
     </div>
@@ -183,4 +231,41 @@ export function AnimatePresence({ children }: AnimatePresenceProps) {
 // Re-export common motion components as MotionDiv
 export const motion = {
   div: MotionDiv,
+  button: MotionDiv,
+  span: MotionDiv,
+  p: MotionDiv,
+  aside: MotionDiv,
+  header: MotionDiv,
+  main: MotionDiv,
+  section: MotionDiv,
+  article: MotionDiv,
+  nav: MotionDiv,
+  footer: MotionDiv,
+  form: MotionDiv,
+  input: MotionDiv,
+  li: MotionDiv,
+  ul: MotionDiv,
+  ol: MotionDiv,
+  h1: MotionDiv,
+  h2: MotionDiv,
+  h3: MotionDiv,
+  h4: MotionDiv,
+  h5: MotionDiv,
+  h6: MotionDiv,
+  a: MotionDiv,
+  img: MotionDiv,
+  svg: MotionDiv,
+  path: MotionDiv,
+  label: MotionDiv,
+  strong: MotionDiv,
+  em: MotionDiv,
+  small: MotionDiv,
+  b: MotionDiv,
+  i: MotionDiv,
+  u: MotionDiv,
+  hr: MotionDiv,
+  br: MotionDiv,
 };
+
+// Default export for compatibility
+export default motion;

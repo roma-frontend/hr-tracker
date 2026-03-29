@@ -26,6 +26,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useAuthStore } from "@/store/useAuthStore";
+import { CreateManualSubscriptionWizard } from "@/components/superadmin/CreateManualSubscriptionWizard";
 
 const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
@@ -45,11 +46,6 @@ export default function SubscriptionsManagementPage() {
   const cancelSub = useMutation(api.subscriptions_admin.cancelSubscription);
 
   const [showForm, setShowForm] = useState(false);
-  const [selectedOrganization, setSelectedOrganization] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState("enterprise");
-  const [customPrice, setCustomPrice] = useState("");
-  const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(false);
 
   // Wait for user to load - MUST check this first before checking role
   if (!user) {
@@ -86,33 +82,6 @@ export default function SubscriptionsManagementPage() {
       </div>
     );
   }
-
-  const handleCreateSubscription = async () => {
-    if (!selectedOrganization) {
-      toast.error(t('superadmin.subscriptions.selectOrganization'));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await createManual({
-        organizationId: selectedOrganization as Id<"organizations">,
-        plan: selectedPlan as "starter" | "professional" | "enterprise",
-        customPrice: customPrice ? parseFloat(customPrice) : undefined,
-        notes: notes || undefined,
-      });
-
-      toast.success(t('superadmin.subscriptions.createSuccess'));
-      setShowForm(false);
-      setSelectedOrganization("");
-      setCustomPrice("");
-      setNotes("");
-    } catch (error: any) {
-      toast.error(error.message || t('superadmin.subscriptions.failedToCreate'));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCancel = async (subId: Id<"subscriptions">) => {
     if (!confirm(t('superadmin.subscriptions.confirmCancelSub'))) return;
@@ -158,7 +127,7 @@ export default function SubscriptionsManagementPage() {
         </Button>
       </div>
 
-      {/* Create Manual Subscription Form */}
+      {/* Create Manual Subscription Form - Using Wizard */}
       {showForm && (
         <Card className="border-[var(--primary)]/20 bg-[var(--card)]">
           <CardHeader>
@@ -170,81 +139,14 @@ export default function SubscriptionsManagementPage() {
               {t('superadmin.subscriptions.createManualSubDesc')}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="organization">{t('superadmin.subscriptions.selectOrganization')}</Label>
-              <select
-                id="organization"
-                value={selectedOrganization}
-                onChange={(e) => setSelectedOrganization(e.target.value)}
-                className="w-full mt-1.5 px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--text-primary)]"
-              >
-                <option value="">
-                  {allOrganizations === undefined
-                    ? t('superadmin.subscriptions.loadingOrganizations')
-                    : allOrganizations.length === 0
-                      ? t('superadmin.subscriptions.noOrganizationsFound')
-                      : t('superadmin.subscriptions.selectOrganizationPlaceholder')}
-                </option>
-                {allOrganizations?.map((org: any) => (
-                  <option key={org._id} value={org._id}>
-                    {org.name} ({org.slug}) - {org.totalEmployees || 0} {t('superadmin.subscriptions.employees')}
-                  </option>
-                ))}
-              </select>
-              {allOrganizations !== undefined && (
-                <p className="text-xs text-[var(--text-muted)] mt-1">
-                  {t('superadmin.subscriptions.foundCount', { count: allOrganizations.length })}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="plan">{t('superadmin.subscriptions.selectPlanLabel')}</Label>
-              <select
-                id="plan"
-                value={selectedPlan}
-                onChange={(e) => setSelectedPlan(e.target.value)}
-                className="w-full mt-1.5 px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--text-primary)]"
-              >
-                <option value="enterprise">Enterprise</option>
-                <option value="professional">Professional</option>
-                <option value="starter">Starter</option>
-              </select>
-            </div>
-
-            <div>
-              <Label htmlFor="price">{t('superadmin.subscriptions.customPrice')}</Label>
-              <Input
-                id="price"
-                type="number"
-                placeholder={t('superadmin.subscriptions.customPricePlaceholder')}
-                value={customPrice}
-                onChange={(e) => setCustomPrice(e.target.value)}
-                className="mt-1.5"
-              />
-              <p className="text-xs text-[var(--text-muted)] mt-1">{t('superadmin.subscriptions.leaveEmptyForStandardPricing')}</p>
-            </div>
-
-            <div>
-              <Label htmlFor="notes">{t('superadmin.subscriptions.internalNotes')}</Label>
-              <Textarea
-                id="notes"
-                placeholder={t('superadmin.subscriptions.notesPlaceholder')}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="mt-1.5"
-                rows={3}
-              />
-            </div>
-
-            <Button
-              onClick={handleCreateSubscription}
-              disabled={loading || !selectedOrganization}
-              className="w-full"
-            >
-              {loading ? t('superadmin.subscriptions.creatingSubscription') : t('superadmin.subscriptions.createSubscriptionBtn')}
-            </Button>
+          <CardContent>
+            <CreateManualSubscriptionWizard
+              onComplete={() => {
+                setShowForm(false);
+                toast.success(t('superadmin.subscriptions.createSuccess'));
+              }}
+              onCancel={() => setShowForm(false)}
+            />
           </CardContent>
         </Card>
       )}

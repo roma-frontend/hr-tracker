@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Users,
@@ -40,6 +41,7 @@ interface QuickAction {
 }
 
 export function QuickActionsPalette() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +57,7 @@ export function QuickActionsPalette() {
   const allActions: QuickAction[] = [
     {
       id: "find-user",
-      label: "Найти пользователя",
+      label: t("superadmin.quickActions.findUser"),
       icon: <Search className="w-4 h-4" />,
       shortcut: "⌘U",
       category: "action",
@@ -67,7 +69,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "create-ticket",
-      label: "Создать тикет",
+      label: t("superadmin.quickActions.createTicket"),
       icon: <Ticket className="w-4 h-4" />,
       shortcut: "⌘T",
       category: "action",
@@ -79,7 +81,7 @@ export function QuickActionsPalette() {
     // Superadmin-only actions
     {
       id: "bulk-approve",
-      label: "Массовое утверждение",
+      label: t("superadmin.quickActions.bulkApprove"),
       icon: <CheckCircle className="w-4 h-4" />,
       shortcut: "⌘A",
       category: "action",
@@ -91,7 +93,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "emergency",
-      label: "Режим ЧП",
+      label: t("superadmin.quickActions.emergencyMode"),
       icon: <AlertTriangle className="w-4 h-4" />,
       shortcut: "⌘E",
       category: "action",
@@ -103,7 +105,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "broadcast",
-      label: "Отправить объявление",
+      label: t("superadmin.quickActions.broadcast"),
       icon: <MessageSquare className="w-4 h-4" />,
       shortcut: "⌘B",
       category: "action",
@@ -115,7 +117,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "maintenance",
-      label: "Режим обслуживания",
+      label: t("superadmin.quickActions.maintenanceMode"),
       icon: <Wrench className="w-4 h-4" />,
       shortcut: "⌘M",
       category: "action",
@@ -127,7 +129,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "impersonate",
-      label: "Войти как пользователь",
+      label: t("superadmin.quickActions.impersonate"),
       icon: <User className="w-4 h-4" />,
       shortcut: "⌘I",
       category: "action",
@@ -139,7 +141,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "automation",
-      label: "Автоматизация",
+      label: t("superadmin.quickActions.automation"),
       icon: <Zap className="w-4 h-4" />,
       shortcut: "⌘L",
       category: "action",
@@ -151,7 +153,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "reports",
-      label: "Отчеты",
+      label: t("superadmin.quickActions.reports"),
       icon: <FileText className="w-4 h-4" />,
       shortcut: "⌘R",
       category: "action",
@@ -162,7 +164,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "security",
-      label: "Безопасность",
+      label: t("superadmin.quickActions.security"),
       icon: <Shield className="w-4 h-4" />,
       shortcut: "⌘S",
       category: "action",
@@ -174,7 +176,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "dashboard",
-      label: "Дашборд",
+      label: t("superadmin.quickActions.dashboard"),
       icon: <Command className="w-4 h-4" />,
       shortcut: "⌘D",
       category: "navigation",
@@ -185,7 +187,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "organizations",
-      label: "Организации",
+      label: t("superadmin.quickActions.organizations"),
       icon: <Users className="w-4 h-4" />,
       shortcut: "⌘O",
       category: "navigation",
@@ -197,7 +199,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "support",
-      label: "Поддержка",
+      label: t("superadmin.quickActions.support"),
       icon: <Ticket className="w-4 h-4" />,
       shortcut: "⌘P",
       category: "navigation",
@@ -208,7 +210,7 @@ export function QuickActionsPalette() {
     },
     {
       id: "help",
-      label: "Помощь",
+      label: t("superadmin.quickActions.help"),
       icon: <HelpCircleIcon className="w-4 h-4" />,
       shortcut: "⌘H",
       category: "navigation",
@@ -301,11 +303,11 @@ export function QuickActionsPalette() {
       {/* Trigger button (optional, can also use keyboard shortcut) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
       >
         <Command className="w-4 h-4" />
-        <span className="hidden md:inline">Команды</span>
-        <kbd className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-[10px]">
+        <span className="hidden md:inline">{t("superadmin.quickActions.title") || "Команды"}</span>
+        <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-[var(--background-subtle)] border border-[var(--border)] rounded text-[10px] font-medium text-[var(--muted-foreground)]">
           <span>⌘K</span>
         </kbd>
       </button>
@@ -313,7 +315,7 @@ export function QuickActionsPalette() {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/10 dark:bg-black/50 z-50 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -321,28 +323,28 @@ export function QuickActionsPalette() {
       {/* Palette */}
       {isOpen && (
         <div className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 animate-in fade-in zoom-in duration-200">
-          <div className="bg-popover border rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden">
             {/* Header with search */}
-            <div className="border-b p-4">
+            <div className="border-b border-[var(--border)] p-4 bg-[var(--background-subtle)]/50">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)] opacity-60" />
                 <Input
                   ref={inputRef}
                   type="text"
-                  placeholder="Введите команду или найдите..."
+                  placeholder={t("superadmin.quickActions.placeholder") || "Type a command or search..."}
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setSelectedIndex(-1);
                   }}
-                  className="pl-9 pr-12 h-11"
+                  className="pl-9 pr-12 h-11 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted-foreground)]"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-[var(--background-subtle)] rounded-full transition-colors"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3 h-3 text-[var(--muted-foreground)]" />
                   </button>
                 )}
               </div>
@@ -371,42 +373,42 @@ export function QuickActionsPalette() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center py-8 text-muted-foreground">
-                    <p>Ничего не найдено</p>
+                    <p>{t("superadmin.quickActions.noResults") || "Ничего не найдено"}</p>
                   </div>
                 )
               ) : (
                 // Show grouped actions
                 <>
                   {groupedActions.action.length > 0 && (
-                    <ActionGroup title="Действия" actions={groupedActions.action} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
+                    <ActionGroup title={t("superadmin.quickActions.actions")} actions={groupedActions.action} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
                   )}
                   {groupedActions.navigation.length > 0 && (
-                    <ActionGroup title="Перейти" actions={groupedActions.navigation} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
+                    <ActionGroup title={t("superadmin.quickActions.navigation")} actions={groupedActions.navigation} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
                   )}
                 </>
               )}
             </div>
 
             {/* Footer */}
-            <div className="border-t p-3 text-xs text-muted-foreground flex items-center justify-between">
+            <div className="border-t border-[var(--border)] p-3 text-xs text-[var(--muted-foreground)] flex items-center justify-between bg-[var(--background-subtle)]/50">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">↑↓</kbd>
-                  Навигация
+                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">↑↓</kbd>
+                  {t("superadmin.quickActions.navigate")}
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">↵</kbd>
-                  Выбор
+                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">↵</kbd>
+                  {t("superadmin.quickActions.select")}
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">esc</kbd>
-                  Закрыть
+                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">esc</kbd>
+                  {t("superadmin.quickActions.close")}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-[10px]">
                 <Command className="w-3 h-3" />
-                <span>K</span>
-                <span className="mx-1">чтобы закрыть</span>
+                <span className="font-medium">K</span>
+                <span className="mx-1">{t("superadmin.quickActions.toClose")}</span>
               </div>
             </div>
           </div>
@@ -433,7 +435,7 @@ function ActionGroup({
 
   return (
     <div ref={groupRef} className="mb-4">
-      <h3 className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <h3 className="px-3 py-2 text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
         {title}
       </h3>
       <div className="space-y-1">
@@ -471,19 +473,23 @@ function ActionButton({
     <button
       onClick={onSelect}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left",
-        isSelected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left",
+        isSelected
+          ? "bg-[var(--primary)]/10 text-[var(--foreground)]"
+          : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground)]"
       )}
     >
-      <span className={cn("shrink-0", isSelected ? "text-primary-foreground" : "text-muted-foreground")}>
+      <span className={cn("shrink-0", isSelected ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]")}>
         {action.icon}
       </span>
       <span className="flex-1 font-medium">{action.label}</span>
       <div className="flex items-center gap-2 shrink-0">
         <kbd
           className={cn(
-            "px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono",
-            isSelected ? "bg-primary-foreground/20" : ""
+            "px-1.5 py-0.5 rounded text-[10px] font-mono border",
+            isSelected
+              ? "bg-[var(--primary)]/20 border-[var(--primary)]/30 text-[var(--primary)]"
+              : "bg-[var(--background-subtle)] border-[var(--border)] text-[var(--muted-foreground)]"
           )}
         >
           {action.shortcut}

@@ -9,8 +9,10 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { Shield, ArrowLeft, Ban, CheckCircle, AlertTriangle, Clock, MapPin, Monitor } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function SecurityAlertDetailPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
@@ -140,8 +142,8 @@ export default function SecurityAlertDetailPage() {
           
           <div className="flex  items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Security Alert Details</h1>
-              <p className="mt-1" style={{ color: "var(--text-muted)" }}>Review and manage suspicious activity</p>
+              <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{t('security.securityAlertDetails')}</h1>
+              <p className="mt-1" style={{ color: "var(--text-muted)" }}>{t('security.reviewAndManageSuspicious')}</p>
             </div>
             
             {suspiciousUser.isSuspended && (

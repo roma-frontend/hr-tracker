@@ -171,13 +171,13 @@ export default function UserProfile360Page() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-          <StatCard title="Отпуска" value={stats.totalLeaves} icon={Calendar} color="blue" />
+          <StatCard title={t('superadmin.leaves')} value={stats.totalLeaves} icon={Calendar} color="blue" />
           <StatCard title="Ожидают" value={stats.pendingLeaves} icon={Clock} color="orange" />
           <StatCard title="Одобрено" value={stats.approvedLeaves} icon={CheckCircle} color="green" />
-          <StatCard title="Задачи" value={stats.totalTasks} icon={Briefcase} color="purple" />
+          <StatCard title={t('superadmin.tasks')} value={stats.totalTasks} icon={Briefcase} color="purple" />
           <StatCard title="Выполнено" value={stats.completedTasks} icon={CheckCircle} color="green" />
-          <StatCard title="Поездки" value={stats.totalDriverRequests} icon={Car} color="blue" />
-          <StatCard title="Тикеты" value={stats.totalTickets} icon={Ticket} color="purple" />
+          <StatCard title={t('superadmin.rides')} value={stats.totalDriverRequests} icon={Car} color="blue" />
+          <StatCard title={t('superadmin.tickets')} value={stats.totalTickets} icon={Ticket} color="purple" />
           <StatCard title="Входы" value={stats.totalLoginAttempts} icon={LogIn} color="gray" />
         </div>
 

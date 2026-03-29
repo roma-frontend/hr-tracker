@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useAuthStore, type User } from "@/store/useAuthStore";
 import { useShallow } from 'zustand/shallow';
 import { useSidebarStore } from "@/store/useSidebarStore";
@@ -79,13 +80,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
   const needsOnboarding = useAuthStore(useShallow((state: { needsOnboarding: boolean }) => state.needsOnboarding));
   const { status } = useSession();
+  const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
-  const isChatPage = pathname?.startsWith("/chat");
+  const isAIChatPage = pathname?.startsWith("/ai-chat");
+  const isChatPage = pathname?.startsWith("/chat") && !isAIChatPage;
   const isOnboardingPage = pathname?.startsWith("/onboarding");
   const redirectedRef = React.useRef(false);
+  const hasHydratedRef = React.useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // Prevent double hydration
+    if (hasHydratedRef.current) return;
+    hasHydratedRef.current = true;
+    
     // Rehydrate persisted stores from localStorage on client only
     // This prevents SSR/client mismatch (hydration errors) from localStorage state
     useSidebarStore.persist.rehydrate();
@@ -97,17 +105,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // so rehydrating stale data first is harmless.
     useAuthStore.persist.rehydrate();
 
-    setHydrated(true);
+    // Mark as hydrated after rehydration
+    // This is a necessary use case for setState in effect - synchronizing with external system
+    // Using requestIdleCallback to avoid cascading renders
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => setHydrated(true));
+    } else {
+      setTimeout(() => setHydrated(true), 0);
+    }
   }, []);
 
   // Redirect to onboarding if user needs it (and not already on onboarding page)
   useEffect(() => {
     if (hydrated && user && !user.organizationId && !isOnboardingPage && !redirectedRef.current) {
-      console.log("[Providers] 🚨 User has no organizationId, redirecting to onboarding...");
       redirectedRef.current = true;
-      window.location.href = '/onboarding/select-organization';
+      router.push('/onboarding/select-organization');
     }
-  }, [hydrated, user, isOnboardingPage]);
+  }, [hydrated, user, isOnboardingPage, router]);
 
   // Don't redirect to login if user is on onboarding page
   if (isOnboardingPage) {
@@ -158,13 +172,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
               {/* Real-time notification banner — below status banner, full width, persistent */}
               {user && <NotificationBanner />}
               {/* Main content area — min-h-0 prevents CLS when content loads */}
-              <main className={isChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
+              <main className={isChatPage || isAIChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
                 {isChatPage ? (
                   <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">
                     {children}
                   </div>
+                ) : isAIChatPage ? (
+                  <div className="flex flex-col flex-1 min-h-0 h-full p-0">
+                    {children}
+                  </div>
                 ) : (
-                  <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto min-h-[calc(100vh-4rem)]">
+                  <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
                     {children}
                   </div>
                 )}

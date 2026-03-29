@@ -70,11 +70,11 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
 
   const getRecommendationBadge = () => {
     if (recommendation === "APPROVE") {
-      return <Badge variant="success" className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Approve</Badge>;
+      return <Badge variant="success" className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> {t('aiLeave.approve')}</Badge>;
     } else if (recommendation === "REVIEW") {
-      return <Badge variant="warning" className="flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Review</Badge>;
+      return <Badge variant="warning" className="flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {t('aiLeave.review')}</Badge>;
     } else {
-      return <Badge variant="destructive" className="flex items-center gap-1"><Minus className="w-3 h-3" /> Reject</Badge>;
+      return <Badge variant="destructive" className="flex items-center gap-1"><Minus className="w-3 h-3" /> {t('aiLeave.reject')}</Badge>;
     }
   };
 
@@ -89,7 +89,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
           {getRecommendationBadge()}
         </div>
         <div className="flex items-center gap-2 mt-2">
-          <span className="text-sm text-[var(--text-muted)]">Confidence:</span>
+          <span className="text-sm text-[var(--text-muted)]">{t('aiLeave.confidence')}:</span>
           <Badge variant={confidence === "HIGH" ? "success" : confidence === "MEDIUM" ? "warning" : "destructive"}>
             {confidence}
           </Badge>
@@ -107,7 +107,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-red-600" />
                   <span className="text-sm font-semibold text-red-700">
-                    🚨 Critical Conflicts ({criticalConflicts.length})
+                    {t('aiLeave.criticalConflicts', { count: criticalConflicts.length })}
                   </span>
                 </div>
                 {criticalConflicts.map((conflict: any, idx: number) => (
@@ -129,7 +129,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-yellow-600" />
                   <span className="text-sm font-semibold text-yellow-700">
-                    ⚠️ Warnings ({warningConflicts.length})
+                    {t('aiLeave.warnings', { count: warningConflicts.length })}
                   </span>
                 </div>
                 {warningConflicts.map((conflict: any, idx: number) => (
@@ -153,11 +153,11 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-green-600" />
               <span className="text-sm font-medium text-green-700">
-                ✅ No conflicts detected
+                {t('aiLeave.noConflicts')}
               </span>
             </div>
             <p className="text-xs text-green-600 mt-1">
-              This leave request does not conflict with events or department coverage.
+              {t('aiLeave.noConflictsDesc')}
             </p>
           </div>
         )}
@@ -165,7 +165,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
         {/* Overall Score */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Eligibility Score</span>
+            <span className="text-sm font-medium">{t('aiLeave.eligibilityScore')}</span>
             <span className={`text-2xl font-bold ${getScoreColor(leaveEligibilityScore)}`}>
               {leaveEligibilityScore}/100
             </span>

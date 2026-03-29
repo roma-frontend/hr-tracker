@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType, type LeaveStatus } from "@/lib/types";
+import { type LeaveEnriched, type Organization } from "@/lib/convex-types";
 import dynamic from "next/dynamic";
 import { PlanGate } from "@/components/subscription/PlanGate";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
@@ -94,11 +95,11 @@ export default function DashboardClient() {
   // ═══════════════════════════════════════════════════════════════
   const [mounted, setMounted] = React.useState(false);
 
-  // Convex useQuery arguments - using any to avoid infinite type recursion
+  // Convex useQuery arguments - properly typed
   const userId = user?.id as Id<"users"> | undefined;
-  const leaves: any[] = (useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : "skip") as any) ?? [];
-  const users: any[] = (useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : "skip") as any) ?? [];
-  const organization = useQuery(api.organizations.getMyOrganization, userId ? { userId } : "skip") as any;
+  const leaves = (useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : "skip") ?? []) as LeaveEnriched[];
+  const users = (useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : "skip") ?? []) as User[];
+  const organization = useQuery(api.organizations.getMyOrganization, userId ? { userId } : "skip") as Organization | null;
 
   // Security stats — only for superadmin (always call, condition is in arguments)
   const isSuperadmin = user?.role === "superadmin";

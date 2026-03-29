@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
+import { CreateSupportTicketWizard } from "@/components/superadmin/CreateSupportTicketWizard";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useTranslation } from "react-i18next";
 import {
@@ -47,6 +48,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { t } from "i18next";
 
 export default function SupportTicketsPage() {
   const router = useRouter();
@@ -264,13 +266,23 @@ export default function SupportTicketsPage() {
         </Card>
       </div>
 
-      {/* Create Ticket Dialog */}
-      <CreateTicketDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        userId={user.id as Id<"users">}
-        organizationId={user.organizationId as Id<"organizations">}
-      />
+      {/* Create Ticket Dialog - Using Wizard */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{t('superadmin.support.createTicket')}</DialogTitle>
+          </DialogHeader>
+          <CreateSupportTicketWizard
+            userId={user.id as Id<"users">}
+            organizationId={user.organizationId as Id<"organizations">}
+            onComplete={() => {
+              setCreateDialogOpen(false);
+              router.refresh();
+            }}
+            onCancel={() => setCreateDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Ticket Detail Dialog */}
       {selectedTicket && (
@@ -489,9 +501,9 @@ function CreateTicketDialog({
             </div>
 
             <div>
-              <Label htmlFor="description">{t('superadmin.support.create.descriptionLabel')}</Label>
+              <Label htmlFor={t('common.description')}>{t('superadmin.support.create.descriptionLabel')}</Label>
               <Textarea
-                id="description"
+                id={t('common.description')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={t('superadmin.support.create.descriptionPlaceholder')}
@@ -584,9 +596,6 @@ function TicketDetailDialog({
               <DialogTitle>{ticket.ticketNumber}</DialogTitle>
               <DialogDescription>{ticket.title}</DialogDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-              <X className="w-4 h-4" />
-            </Button>
           </div>
         </DialogHeader>
 
@@ -685,7 +694,7 @@ function TicketDetailDialog({
               }}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Статус" />
+                <SelectValue placeholder={t("superadmin.status")}/>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="open">Открытый</SelectItem>

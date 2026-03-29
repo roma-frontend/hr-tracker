@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -8,11 +8,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { useTranslation } from "react-i18next";
 import {
   AlertTriangle,
-  AlertCircle,
-  CheckCircle,
   Clock,
-  TrendingUp,
-  TrendingDown,
   Shield,
   Activity,
   Users,
@@ -25,35 +21,70 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
+import { CreateIncidentWizard } from "@/components/superadmin/CreateIncidentWizard";
+
+interface Ticket {
+  _id: string;
+  _creationTime: number;
+  ticketNumber: string;
+  title: string;
+  status: string;
+  creatorName: string;
+  organizationName: string | null;
+  minutesOpen: number;
+}
+
+interface Incident {
+  _id: Id<"emergencyIncidents">;
+  _creationTime: number;
+  organizationId?: Id<"organizations">;
+  title: string;
+  description: string;
+  severity: "critical" | "high" | "medium" | "low";
+  status: "investigating" | "identified" | "monitoring" | "resolved";
+  affectedUsers: number;
+  affectedOrgs: number;
+  rootCause?: string;
+  resolution?: string;
+  startedAt: number;
+  resolvedAt?: number;
+  createdBy: Id<"users">;
+  createdAt: number;
+  updatedAt: number;
+  // Enriched fields from map()
+  creatorName: string;
+  minutesActive: number;
+}
+
+interface SuspiciousIP {
+  ip: string;
+  attempts: number;
+  userIds: string[];
+}
 
 export default function EmergencyDashboardPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [createIncidentOpen, setCreateIncidentOpen] = useState(false);
-  const [selectedIncident, setSelectedIncident] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const data = useQuery(api.superadmin.getEmergencyDashboard);
-  const createIncident = useMutation(api.superadmin.createIncident);
   const updateIncidentStatus = useMutation(api.superadmin.updateIncidentStatus);
+
+  // Force refresh by toggling loading state
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Convex automatically refreshes, but we can show loading state
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setIsRefreshing(false);
+  };
 
   if (!data || !user) {
     return (
@@ -86,36 +117,6 @@ export default function EmergencyDashboardPage() {
         return "text-yellow-500 bg-yellow-500/10 border-yellow-500/30";
       default:
         return "text-green-500 bg-green-500/10 border-green-500/30";
-    }
-  };
-
-  const handleCreateIncident = async (formData: FormData) => {
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const severity = formData.get("severity") as any;
-    const affectedUsers = parseInt(formData.get("affectedUsers") as string);
-    const affectedOrgs = parseInt(formData.get("affectedOrgs") as string);
-
-    if (!title || !description) {
-      toast.error(t('superadmin.emergency.alerts.fillRequiredFields'));
-      return;
-    }
-
-    try {
-      await createIncident({
-        createdBy: user.id as Id<"users">,
-        title,
-        description,
-        severity,
-        affectedUsers,
-        affectedOrgs,
-      });
-
-      toast.success(t('superadmin.emergency.alerts.incidentCreated'));
-      setCreateIncidentOpen(false);
-    } catch (error) {
-      toast.error(t('superadmin.emergency.alerts.errorCreatingIncident'));
-      console.error(error);
     }
   };
 
@@ -166,10 +167,16 @@ export default function EmergencyDashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon">
-                <RefreshCw className="w-4 h-4" />
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)]"
+              >
+                <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
               </Button>
-              <Button onClick={() => setCreateIncidentOpen(true)} className="gap-2">
+              <Button onClick={() => setCreateIncidentOpen(true)} className="gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white">
                 <Plus className="w-4 h-4" />
                 {t('superadmin.emergency.createIncident')}
               </Button>
@@ -260,7 +267,7 @@ export default function EmergencyDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {criticalTickets.map((ticket: any) => (
+                {criticalTickets.map((ticket: Ticket) => (
                   <div
                     key={ticket._id}
                     className="p-4 rounded-lg border border-red-500/30 bg-red-500/5"
@@ -269,8 +276,8 @@ export default function EmergencyDashboardPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-mono text-sm">{ticket.ticketNumber}</span>
-                          <Badge variant="destructive">CRITICAL</Badge>
-                          <Badge variant="outline">{ticket.status}</Badge>
+                          <Badge variant="default" className="bg-red-600 hover:bg-red-700 text-white shadow-sm">CRITICAL</Badge>
+                          <Badge variant="outline" className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">{ticket.status}</Badge>
                         </div>
                         <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
                           {ticket.title}
@@ -287,6 +294,7 @@ export default function EmergencyDashboardPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => window.location.href = `/superadmin/support?ticket=${ticket._id}`}
+                        className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)]"
                       >
                         {t('superadmin.emergency.actions.open')}
                       </Button>
@@ -312,7 +320,7 @@ export default function EmergencyDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {activeIncidents.map((incident: any) => (
+                {activeIncidents.map((incident: Incident) => (
                   <div
                     key={incident._id}
                     className="p-4 rounded-lg border border-orange-500/30 bg-orange-500/5"
@@ -328,10 +336,22 @@ export default function EmergencyDashboardPage() {
                                 ? "default"
                                 : "secondary"
                             }
+                            className={
+                              incident.severity === "critical"
+                                ? "bg-red-600 hover:bg-red-700 text-white shadow-sm"
+                                : incident.severity === "high"
+                                ? "bg-orange-600 hover:bg-orange-700 text-white shadow-sm"
+                                : "bg-gray-200 hover:bg-gray-300 text-gray-800 shadow-sm"
+                            }
                           >
                             {incident.severity}
                           </Badge>
-                          <Badge variant="outline">{incident.status}</Badge>
+                          <Badge 
+                            variant="outline" 
+                            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]"
+                          >
+                            {incident.status}
+                          </Badge>
                         </div>
                         <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
                           {incident.title}
@@ -350,10 +370,15 @@ export default function EmergencyDashboardPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleResolveIncident(incident._id)}
+                          className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)]"
                         >
                           {t('superadmin.emergency.actions.resolve')}
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="hover:bg-[var(--background-subtle)] text-[var(--muted-foreground)]"
+                        >
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
@@ -379,7 +404,7 @@ export default function EmergencyDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {suspiciousIPs.map((ipData: any) => (
+                {suspiciousIPs.map((ipData: SuspiciousIP) => (
                   <div
                     key={ipData.ip}
                     className="p-4 rounded-lg border border-purple-500/30 bg-purple-500/5"
@@ -393,7 +418,10 @@ export default function EmergencyDashboardPage() {
                           {ipData.attempts} {t('superadmin.emergency.failedAttempts')} • {ipData.userIds.length} {t('superadmin.emergency.users')}
                         </p>
                       </div>
-                      <Badge variant="destructive">
+                      <Badge
+                        variant="default"
+                        className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
+                      >
                         <AlertTriangle className="w-3 h-3 mr-1" />
                         {t('superadmin.emergency.actions.block')}
                       </Badge>
@@ -460,94 +488,17 @@ export default function EmergencyDashboardPage() {
         </Card>
       </div>
 
-      {/* Create Incident Dialog */}
+      {/* Create Incident Wizard Dialog */}
       <Dialog open={createIncidentOpen} onOpenChange={setCreateIncidentOpen}>
-        <DialogContent className="max-w-2xl">
-          <form action={handleCreateIncident}>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-orange-500" />
-                {t('superadmin.emergency.createIncident')}
-              </DialogTitle>
-              <DialogDescription>
-                {t('superadmin.emergency.create.description')}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="title">{t('superadmin.emergency.create.titleLabel')}</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder={t('superadmin.emergency.create.titlePlaceholder')}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="severity">{t('superadmin.emergency.create.severityLabel')}</Label>
-                  <Select name="severity" defaultValue="high">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">{t('priority.low')}</SelectItem>
-                      <SelectItem value="medium">{t('priority.medium')}</SelectItem>
-                      <SelectItem value="high">{t('priority.high')}</SelectItem>
-                      <SelectItem value="critical">{t('priority.critical')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="affectedUsers">{t('superadmin.emergency.create.affectedUsersLabel')}</Label>
-                  <Input
-                    id="affectedUsers"
-                    name="affectedUsers"
-                    type="number"
-                    defaultValue={0}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="affectedOrgs">{t('superadmin.emergency.create.affectedOrgsLabel')}</Label>
-                <Input
-                  id="affectedOrgs"
-                  name="affectedOrgs"
-                  type="number"
-                  defaultValue={0}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">{t('superadmin.emergency.create.descriptionLabel')}</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder={t('superadmin.emergency.create.descriptionPlaceholder')}
-                  rows={6}
-                  required
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCreateIncidentOpen(false)}
-              >
-                {t('actions.cancel')}
-              </Button>
-              <Button type="submit" variant="destructive">
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                {t('superadmin.emergency.createIncident')}
-              </Button>
-            </DialogFooter>
-          </form>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+          <DialogTitle className="sr-only">
+            {t('superadmin.emergency.createIncident')}
+          </DialogTitle>
+          <CreateIncidentWizard
+            userId={user.id as Id<"users">}
+            onComplete={() => setCreateIncidentOpen(false)}
+            onCancel={() => setCreateIncidentOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>
@@ -558,13 +509,13 @@ export default function EmergencyDashboardPage() {
 function StatCard({
   title,
   value,
-  icon: Icon,
+  icon,
   color,
   subtitle,
 }: {
   title: string;
   value: number;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   subtitle: string;
 }) {
@@ -582,7 +533,7 @@ function StatCard({
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs text-muted-foreground">{title}</p>
-          <Icon className={`w-4 h-4 ${colorClasses[color]}`} />
+          {React.createElement(icon, { className: `w-4 h-4 ${colorClasses[color]}` })}
         </div>
         <p className="text-2xl font-bold">{value}</p>
         <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>

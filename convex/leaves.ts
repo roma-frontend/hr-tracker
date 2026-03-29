@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { paginationArgs, normalizePageSize, decodeCursor, encodeCursor } from "./pagination";
 
 /**
  * Helper function to batch load users and enrich leave data
@@ -860,5 +861,62 @@ export const bulkRejectLeaves = mutation({
     }
 
     return { rejected, errors };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET LEAVES PAGINATED — with cursor-based pagination for large datasets
+// ─────────────────────────────────────────────────────────────────────────────
+export const getLeavesPagederated = query({
+  args: {
+    requesterId: v.id("users"),
+    ...paginationArgs,
+  },
+  handler: async (ctx, { requesterId, pageSize, cursor }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error("Requester not found");
+
+    const normalizedPageSize = normalizePageSize(pageSize);
+
+    // Get user's leaves based on role
+    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+    let query = ctx.db.query("leaveRequests");
+
+    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+      // Superadmin sees all
+      query = query;
+    } else {
+      // Regular user - org scoped
+      if (!requester.organizationId) return { items: [], hasMore: false };
+      query = query.withIndex("by_org", (q) =>
+        q.eq("organizationId", requester.organizationId)
+      );
+    }
+
+    query = query.order("desc");
+
+    // Apply cursor if provided
+    let items: any[] = [];
+    if (cursor) {
+      const cursorData = decodeCursor(cursor);
+      items = await query.filter((q) => q.lt(q.field("_creationTime"), cursorData._creationTime)).take(normalizedPageSize + 1);
+    } else {
+      items = await query.take(normalizedPageSize + 1);
+    }
+
+    const hasMore = items.length > normalizedPageSize;
+    if (hasMore) {
+      items.pop();
+    }
+
+    const enriched = await enrichLeavesWithUserData(ctx, items);
+
+    return {
+      items: enriched,
+      hasMore,
+      nextCursor: hasMore && items.length > 0
+        ? encodeCursor({ _creationTime: items[items.length - 1]._creationTime })
+        : undefined,
+    };
   },
 });

@@ -42,6 +42,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { CreateTicketWizard } from "@/components/help/CreateTicketWizard";
+import { t } from "i18next";
 
 export default function HelpSupportPage() {
   const { t } = useTranslation();
@@ -49,6 +51,7 @@ export default function HelpSupportPage() {
   const { user } = useAuthStore();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [showPlanLimit, setShowPlanLimit] = useState(false);
+  const [useWizard, setUseWizard] = useState(true); // Переключатель Wizard vs обычная форма
 
   const myTickets = useQuery(
     api.tickets.getMyTickets,
@@ -77,7 +80,7 @@ export default function HelpSupportPage() {
     return ticketDate.getMonth() === now.getMonth() && ticketDate.getFullYear() === now.getFullYear();
   }).length || 0;
 
-  const isLimitReached = ticketLimit && currentMonthTickets >= ticketLimit;
+  const isLimitReached = ticketLimit ? currentMonthTickets >= ticketLimit : false;
 
   if (!user) {
     return (
@@ -145,8 +148,8 @@ export default function HelpSupportPage() {
             <div className="flex items-center gap-2">
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
-                    className="gap-2" 
+                  <Button
+                    className="gap-2"
                     onClick={handleCreateTicket}
                     disabled={!canCreateTickets || isLimitReached}
                   >
@@ -154,14 +157,43 @@ export default function HelpSupportPage() {
                     {t('help.createTicket')}
                   </Button>
                 </DialogTrigger>
-                <CreateTicketDialog
-                  open={createDialogOpen}
-                  onOpenChange={setCreateDialogOpen}
-                  userId={user.id as Id<"users">}
-                  organizationId={user.organizationId as Id<"organizations">}
-                  canUseCriticalPriority={canUseCriticalPriority}
-                  hasSLA={hasSLA}
-                />
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      <div className="flex items-center justify-between">
+                        <span>{t('help.createTicket')}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setUseWizard(!useWizard)}
+                          className="text-xs"
+                        >
+                          {useWizard ? "📝 Обычная форма" : "✨ Wizard"}
+                        </Button>
+                      </div>
+                    </DialogTitle>
+                    <DialogDescription>
+                      {t('help.subtitle')}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  {useWizard ? (
+                    <CreateTicketWizard
+                      userId={user.id as Id<"users">}
+                      onComplete={() => setCreateDialogOpen(false)}
+                      onCancel={() => setCreateDialogOpen(false)}
+                    />
+                  ) : (
+                    <CreateTicketDialog
+                      open={createDialogOpen}
+                      onOpenChange={setCreateDialogOpen}
+                      userId={user.id as Id<"users">}
+                      organizationId={user.organizationId as Id<"organizations">}
+                      canUseCriticalPriority={canUseCriticalPriority}
+                      hasSLA={hasSLA}
+                    />
+                  )}
+                </DialogContent>
               </Dialog>
               <Button
                 variant="outline"
@@ -521,9 +553,9 @@ function CreateTicketDialog({
           </div>
 
           <div>
-            <Label htmlFor="description">{t('help.create.descriptionLabel')}</Label>
+            <Label htmlFor={t('common.description')}>{t('help.create.descriptionLabel')}</Label>
             <Textarea
-              id="description"
+              id={t('common.description')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('help.create.descriptionPlaceholder')}
@@ -581,7 +613,7 @@ function PlanLimitDialog({
               current={userOrg?.plan === "starter"}
             />
             <PlanCard
-              name="Professional"
+              name={t('superadmin.professional')}
               price="$29"
               features={[
                 { text: t('help.plans.professional.tickets'), included: true },
@@ -593,7 +625,7 @@ function PlanLimitDialog({
               recommended
             />
             <PlanCard
-              name="Enterprise"
+              name={t('superadmin.enterprise')}
               price="$99"
               features={[
                 { text: t('help.plans.enterprise.unlimited'), included: true },

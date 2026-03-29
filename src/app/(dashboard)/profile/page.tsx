@@ -450,7 +450,7 @@ export default function ProfilePage() {
               {user?.avatar ? (
                 <img
                   src={user.avatar}
-                  alt="Current avatar"
+                  alt={t('profile.currentAvatar')}
                   className="w-16 h-16 rounded-full object-cover"
                 />
               ) : (

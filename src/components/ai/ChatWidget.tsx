@@ -996,7 +996,7 @@ export function ChatWidget() {
                                 {state.status === 'loading' && (
                                   <div className="flex items-center justify-center gap-2 py-2">
                                     <ShieldLoader size="xs" variant="inline" />
-                                    <span className="text-xs text-[var(--text-muted)]">Submitting...</span>
+                                    <span className="text-xs text-[var(--text-muted)]">{t('chatWidget.submitting')}</span>
                                   </div>
                                 )}
                                 {state.status === 'booked' && (

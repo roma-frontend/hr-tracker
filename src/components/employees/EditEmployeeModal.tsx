@@ -273,7 +273,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
               {/* Employee Type */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
-                  <Briefcase className="w-3.5 h-3.5" /> Employee Type
+                  <Briefcase className="w-3.5 h-3.5" /> {t('common.employeeType')}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {["staff", "contractor"].map((type) => (

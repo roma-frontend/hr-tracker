@@ -1,0 +1,87 @@
+{
+  "taskWizard": {
+    "submit": "Ստեղծել խնդիր",
+    "steps": {
+      "details": {
+        "title": "Խնդրի մանրամասներ",
+        "description": "Ի՞նչ պետք է անել",
+        "titleLabel": "Վերնագիր *",
+        "titlePlaceholder": "Խնդրի համառոտ նկարագրություն",
+        "descriptionLabel": "Նկարագրություն",
+        "descriptionPlaceholder": "Խնդրի մանրամասն նկարագրություն..."
+      },
+      "priority": {
+        "title": "Նախապատվություն և ժամկետ",
+        "description": "Որքա՞ն կարևոր է",
+        "priorityLabel": "Նախապատվություն",
+        "priorityPlaceholder": "Ընտրել նախապատվությունը",
+        "deadlineLabel": "Ժամկետ",
+        "deadlineDescription": "Ե՞րբ պետք է ավարտվի"
+      },
+      "assignee": {
+        "title": "Նշանակել",
+        "description": "Ո՞վ պետք է կատարի այս խնդիրը",
+        "assigneeLabel": "Կատարող *",
+        "assigneePlaceholder": "Ընտրել աշխատակցին"
+      }
+    },
+    "toast": {
+      "success": "Խնդիրը հաջողությամբ ստեղծվեց!",
+      "error": "Սխալ խնդիր ստեղծելիս"
+    }
+  },
+  "eventWizard": {
+    "submit": "Ստեղծել միջոցառում",
+    "steps": {
+      "type": {
+        "title": "Միջոցառման տեսակ",
+        "description": "Ի՞նչ տեսակի միջոցառում է",
+        "typeLabel": "Միջոցառման տեսակ"
+      },
+      "details": {
+        "title": "Միջոցառման մանրամասներ",
+        "description": "Նկարագրեք ձեր միջոցառումը",
+        "titleLabel": "Անվանում *",
+        "titlePlaceholder": "օրինակ՝ Թիմբիլդինգ",
+        "descriptionLabel": "Նկարագրություն",
+        "descriptionPlaceholder": "Ի՞նչի մասին է այս միջոցառումը"
+      },
+      "datetime": {
+        "title": "Ամսաթիվ և ժամանակ",
+        "description": "Ե՞րբ է այն տեղի ունենալու",
+        "dateLabel": "Ամսաթիվ *",
+        "timeLabel": "Ժամանակ *",
+        "locationLabel": "Վայր",
+        "locationPlaceholder": "Որտե՞ղ է այն լինելու"
+      }
+    },
+    "toast": {
+      "success": "Միջոցառումը հաջողությամբ ստեղծվեց!",
+      "error": "Սխալ միջոցառում ստեղծելիս"
+    }
+  },
+  "leave": {
+    "types": {
+      "paid": "Վճարովի արձակուրդ",
+      "paidDesc": "Տարեկան արձակուրդ",
+      "sick": "Հիվանդության արձակուրդ",
+      "sickDesc": "Հիվանդություն կամ բժշկական այց",
+      "family": "Ընտանեկան արձակուրդ",
+      "familyDesc": "Ընտանեկան հանգամանքներ",
+      "unpaid": "Անվճար արձակուրդ",
+      "unpaidDesc": "Արձակուրդ առանց վճարման"
+    }
+  },
+  "event": {
+    "types": {
+      "meeting": "Հանդիպում",
+      "meetingDesc": "Թիմային կամ ընդհանուր հանդիպում",
+      "training": "Ուսուցում",
+      "trainingDesc": "Կրթական միջոցառում",
+      "celebration": "Տոնակատարություն",
+      "celebrationDesc": "Երեկույթ կամ տոնակատարություն",
+      "other": "Այլ",
+      "otherDesc": "Ինչ-որ այլ բան"
+    }
+  }
+}

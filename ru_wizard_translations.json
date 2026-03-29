@@ -1,0 +1,155 @@
+{
+  "driverWizard": {
+    "submit": "Заказать водителя",
+    "steps": {
+      "type": {
+        "title": "Тип поездки",
+        "description": "Какой тип поездки вам нужен?",
+        "typeLabel": "Тип поездки"
+      },
+      "route": {
+        "title": "Маршрут",
+        "description": "Куда вам нужно ехать?",
+        "fromLabel": "Откуда *",
+        "fromPlaceholder": "Место подачи",
+        "toLabel": "Куда *",
+        "toPlaceholder": "Место назначения"
+      },
+      "datetime": {
+        "title": "Дата и время",
+        "description": "Когда вам нужен водитель?",
+        "dateLabel": "Дата *",
+        "timeLabel": "Время *",
+        "notesLabel": "Дополнительные заметки",
+        "notesPlaceholder": "Любые особые инструкции..."
+      }
+    },
+    "types": {
+      "oneWay": "В одну сторону",
+      "oneWayDesc": "Одиночная поездка",
+      "roundTrip": "Туда и обратно",
+      "roundTripDesc": "Поездка с возвращением",
+      "corporate": "Корпоративное мероприятие",
+      "corporateDesc": "Транспорт для компании"
+    },
+    "toast": {
+      "success": "Заявка на водителя отправлена!",
+      "error": "Ошибка при заказе водителя"
+    }
+  },
+  "supportWizard": {
+    "submit": "Создать тикет",
+    "steps": {
+      "type": {
+        "title": "Тип тикета",
+        "description": "Какой тип тикета?",
+        "typeLabel": "Тип тикета"
+      },
+      "details": {
+        "title": "Детали тикета",
+        "description": "Опишите проблему",
+        "titleLabel": "Заголовок *",
+        "titlePlaceholder": "Краткое описание",
+        "descriptionLabel": "Описание *",
+        "descriptionPlaceholder": "Подробное описание..."
+      },
+      "priority": {
+        "title": "Приоритет и категория",
+        "description": "Насколько это срочно?",
+        "priorityLabel": "Приоритет",
+        "priorityPlaceholder": "Выберите приоритет",
+        "categoryLabel": "Категория",
+        "categoryPlaceholder": "Выберите категорию"
+      }
+    },
+    "types": {
+      "question": "Вопрос",
+      "questionDesc": "Общий запрос",
+      "issue": "Проблема",
+      "issueDesc": "Что-то не работает",
+      "bug": "Ошибка",
+      "bugDesc": "Сообщить об ошибке",
+      "feature": "Предложение",
+      "featureDesc": "Предложить функцию"
+    },
+    "toast": {
+      "success": "Тикет успешно создан!",
+      "error": "Ошибка при создании тикета"
+    }
+  },
+  "incidentWizard": {
+    "submit": "Создать инцидент",
+    "steps": {
+      "severity": {
+        "title": "Уровень серьезности",
+        "description": "Насколько серьезен инцидент?",
+        "severityLabel": "Серьезность"
+      },
+      "details": {
+        "title": "Детали инцидента",
+        "description": "Опишите инцидент",
+        "titleLabel": "Заголовок *",
+        "titlePlaceholder": "Краткое описание",
+        "descriptionLabel": "Описание *",
+        "descriptionPlaceholder": "Подробное описание..."
+      },
+      "impact": {
+        "title": "Влияние",
+        "description": "Кто затронут?",
+        "affectedUsersLabel": "Затронутые пользователи",
+        "affectedOrgsLabel": "Затронутые организации",
+        "notice": "Эта информация помогает определить приоритетность реагирования"
+      }
+    },
+    "severity": {
+      "low": "Низкий",
+      "lowDesc": "Незначительная проблема",
+      "medium": "Средний",
+      "mediumDesc": "Умеренное влияние",
+      "high": "Высокий",
+      "highDesc": "Значительное влияние",
+      "critical": "Критический",
+      "criticalDesc": "Серьезное влияние"
+    },
+    "toast": {
+      "success": "Инцидент успешно создан!",
+      "error": "Ошибка при создании инцидента"
+    }
+  },
+  "subscriptionWizard": {
+    "submit": "Создать подписку",
+    "steps": {
+      "organization": {
+        "title": "Организация",
+        "description": "Какая организация?",
+        "organizationLabel": "Организация *",
+        "organizationPlaceholder": "Выберите организацию"
+      },
+      "plan": {
+        "title": "План подписки",
+        "description": "Выберите план",
+        "planLabel": "План"
+      },
+      "pricing": {
+        "title": "Ценообразование",
+        "description": "Индивидуальная цена (опционально)",
+        "priceLabel": "Индивидуальная цена (USD)",
+        "priceDescription": "Оставьте пустым для стандартной цены",
+        "notesLabel": "Внутренние заметки",
+        "notesPlaceholder": "Добавьте внутренние заметки..."
+      }
+    },
+    "plans": {
+      "starter": "Стартовый",
+      "starterDesc": "Бесплатный план",
+      "professional": "Профессиональный",
+      "professionalDesc": "$29/месяц",
+      "enterprise": "Корпоративный",
+      "enterpriseDesc": "Индивидуальная цена"
+    },
+    "toast": {
+      "success": "Подписка успешно создана!",
+      "error": "Ошибка при создании подписки"
+    }
+  }
+}

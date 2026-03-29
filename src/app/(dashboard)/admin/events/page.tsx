@@ -309,7 +309,7 @@ export default function CompanyEventsPage() {
                 <Label>{t('events.description', 'Description')}</Label>
                 <Textarea
                   defaultValue={selectedEvent.description || ''}
-                  id="edit-description"
+                  id={t('admin.editDescription')}
                   rows={3}
                 />
               </div>
@@ -319,7 +319,7 @@ export default function CompanyEventsPage() {
                   <Input
                     type="date"
                     defaultValue={new Date(selectedEvent.startDate).toISOString().split('T')[0]}
-                    id="edit-start"
+                    id={t('admin.editStart')}
                   />
                 </div>
                 <div>
@@ -340,7 +340,7 @@ export default function CompanyEventsPage() {
                     setSelectedEvent({ ...selectedEvent, priority: value });
                   }}
                 >
-                  <SelectTrigger id="edit-priority">
+                  <SelectTrigger id={t('admin.editPriority')}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

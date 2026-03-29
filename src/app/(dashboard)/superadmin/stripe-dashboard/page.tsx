@@ -6,10 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { 
-  DollarSign, 
-  Users, 
-  TrendingUp, 
+import {
+  DollarSign,
+  Users,
+  TrendingUp,
   AlertCircle,
   RefreshCw,
   Calendar,
@@ -26,6 +26,7 @@ import {
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useTranslation } from "react-i18next";
 
 const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
@@ -48,6 +49,7 @@ interface Subscription {
 
 export default function StripeDashboardPage() {
   // All hooks MUST be at the top, before any conditional returns
+  const { t } = useTranslation();
   const subscriptions = useQuery(api.subscriptions.listAll) as Subscription[] | undefined;
   const { user: currentUser } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -285,7 +287,7 @@ export default function StripeDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Trial Ending Soon</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('stripe.trialEndingSoon')}</CardTitle>
               <AlertCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -333,9 +335,9 @@ export default function StripeDashboardPage() {
             >
               <div className="flex items-center gap-2 w-full">
                 <FileSpreadsheet className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="font-semibold">Export to Excel</span>
+                <span className="font-semibold">{t('stripe.exportToExcel')}</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">Export data to XLSX format</p>
+              <p className="text-xs text-muted-foreground text-left">{t('stripe.exportDataXlsx')}</p>
               {runningScript === 'stripe:export' && (
                 <RefreshCw className="w-4 h-4 animate-spin text-green-600" />
               )}
@@ -349,9 +351,9 @@ export default function StripeDashboardPage() {
             >
               <div className="flex items-center gap-2 w-full">
                 <FileText className="w-4 h-4 text-red-600 dark:text-red-400" />
-                <span className="font-semibold">Export to PDF</span>
+                <span className="font-semibold">{t('stripe.exportToPdf')}</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">Generate PDF report</p>
+              <p className="text-xs text-muted-foreground text-left">{t('stripe.exportDataPdf')}</p>
               {runningScript === 'stripe:export-pdf' && (
                 <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
               )}

@@ -288,7 +288,7 @@ export default function SettingsPage() {
             }}
             className="absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-transparent rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ display: canScrollLeft ? undefined : "none" }}
-            aria-label="Scroll left"
+            aria-label={t('settings.scrollLeft')}
           >
             <ChevronLeft className="w-4 h-4 text-[var(--text-muted)]" />
           </button>
@@ -330,7 +330,7 @@ export default function SettingsPage() {
             }}
             className="absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-l from-[var(--surface)] via-[var(--surface)] to-transparent rounded-r-xl opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ display: canScrollRight ? undefined : "none" }}
-            aria-label="Scroll right"
+            aria-label={t('settings.scrollRight')}
           >
             <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
           </button>

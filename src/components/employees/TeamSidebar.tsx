@@ -51,7 +51,7 @@ function CollapsibleSection({ title, isCollapsed, onToggle, children, defaultIco
           </motion.div>
         </CardTitle>
       </CardHeader>
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {!isCollapsed && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}

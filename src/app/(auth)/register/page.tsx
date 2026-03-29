@@ -156,7 +156,7 @@ function OrgSearch({
             ) : results.length === 0 ? (
               <div className="p-3 text-sm text-[var(--text-muted)] text-center">
                 No organization found for &ldquo;{debouncedQuery}&rdquo;
-                <p className="text-xs mt-1">Ask your administrator to set up the organization first.</p>
+                <p className="text-xs mt-1">{t('auth.askAdmin')}</p>
               </div>
             ) : (
               results.map((org) => (
@@ -365,8 +365,8 @@ function RegisterPageContent() {
                     style={{ background: "rgba(37,99,235,0.08)", borderColor: "rgba(37,99,235,0.3)" }}>
                     <Sparkles className="w-4 h-4 text-blue-500 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-semibold text-[var(--text-primary)]">Invite link detected</p>
-                      <p className="text-xs text-[var(--text-muted)]">You were invited to join an organization directly.</p>
+                      <p className="text-sm font-semibold text-[var(--text-primary)]">{t('auth.inviteLinkDetected')}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{t('auth.invitedToJoin')}</p>
                     </div>
                   </div>
                 ) : (
@@ -426,7 +426,7 @@ function RegisterPageContent() {
 
                 {/* Name */}
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Full Name</label>
+                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.fullName')}</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                     <input
@@ -447,7 +447,7 @@ function RegisterPageContent() {
                   <SmartEmailInput
                     value={formData.email}
                     onChange={(val) => setFormData((p) => ({ ...p, email: val }))}
-                    label="Email address"
+                    label={t('auth.emailAddress')}
                     placeholder="you@company.com"
                   />
                   {isSuperadmin && (
@@ -459,7 +459,7 @@ function RegisterPageContent() {
 
                 {/* Phone */}
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Phone (optional)</label>
+                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.phoneOptional')}</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                     <input

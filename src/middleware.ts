@@ -94,7 +94,6 @@ export async function middleware(request: NextRequest) {
   // 1. Check blocked IPs (persistent via Redis)
   const isIpBlocked = await isBlocked(`ip:${ip}`);
   if (isIpBlocked && !pathname.startsWith('/api/')) {
-    console.warn(`🚨 Blocked suspicious IP: ${ip}`);
     return new NextResponse('Access Denied', { status: 403 });
   }
 
@@ -103,9 +102,8 @@ export async function middleware(request: NextRequest) {
     try {
       await blockKey(`ip:${ip}`, 24 * 60 * 60 * 1000, 'Suspicious path access attempt');
     } catch (error) {
-      console.error('Redis error (suspicious path):', error);
+      // Redis error - continue without blocking
     }
-    console.warn(`🚨 Suspicious path: ${pathname} from ${ip} - blocked for 24h`);
     return new NextResponse('Not Found', { status: 404 });
   }
 
@@ -114,12 +112,10 @@ export async function middleware(request: NextRequest) {
   try {
     rateLimitResult = await checkRateLimit(ip, SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS, SECURITY_CONFIG.RATE_LIMIT_WINDOW);
   } catch (error) {
-    console.error('Redis rate limit error:', error);
     // Fallback: allow request if Redis is unavailable
     rateLimitResult = { allowed: true, remaining: 100, resetAt: Date.now() };
   }
   if (!rateLimitResult.allowed) {
-    console.warn(`⚠️ Rate limit exceeded: ${ip}`);
     return new NextResponse('Too Many Requests', {
       status: 429,
       headers: {
@@ -135,9 +131,8 @@ export async function middleware(request: NextRequest) {
     try {
       await blockKey(`ip:${ip}`, 60 * 60 * 1000, 'Potential DDoS attack');
     } catch (error) {
-      console.error('Redis DDoS block error:', error);
+      // Redis error - continue without blocking
     }
-    console.error(`🚨 Potential DDoS attack from IP: ${ip} - blocked for 1h`);
     return new NextResponse('Too Many Requests', { status: 429 });
   }
 
@@ -155,7 +150,6 @@ export async function middleware(request: NextRequest) {
         );
       }
     } catch (error) {
-      console.error('Redis login block error:', error);
       // Continue without blocking if Redis is unavailable
     }
   }
@@ -173,9 +167,8 @@ export async function middleware(request: NextRequest) {
         try {
           await blockKey(`ip:${ip}`, 24 * 60 * 60 * 1000, 'SQL/XSS injection attempt');
         } catch (error) {
-          console.error('Redis SQL injection block error:', error);
+          // Redis error - continue without blocking
         }
-        console.error(`🚨 SQL Injection attempt from ${ip} - blocked for 24h`);
         return new NextResponse('Bad Request', { status: 400 });
       }
     }
@@ -190,8 +183,6 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
 
-  console.log(`[Middleware] Path: ${pathname}, isAuth: ${isAuthRoute}, isProtected: ${isProtectedRoute}, isPublic: ${isPublicRoute}, hasToken: ${!!token || !!nextAuthToken}`);
-
   // Если пользователь уже авторизован и заходит на auth routes (/login, /register)
   if (isAuthRoute && (token || nextAuthToken)) {
     // Получаем URL откуда пришли
@@ -200,19 +191,16 @@ export async function middleware(request: NextRequest) {
 
     // Если есть параметр from и это защищенный маршрут, редиректим туда
     if (from && from.startsWith('/') && !from.startsWith('/login') && !from.startsWith('/register')) {
-      console.log(`[Middleware] Redirecting to 'from' param: ${from}`);
       return NextResponse.redirect(new URL(from, request.url));
     }
 
     // Для всех остальных случаев — просто пропускаем на запрашиваемую страницу
     // Это позволяет обновлять страницу без редиректа на /dashboard
-    console.log(`[Middleware] Auth user on auth route, allowing: ${pathname}`);
     return NextResponse.next();
   }
 
   // Если пользователь авторизован и заходит на публичную страницу — пропускаем (без редиректа)
   if (isPublicRoute && (token || nextAuthToken)) {
-    console.log(`[Middleware] Allowing public route: ${pathname}`);
     return NextResponse.next();
   }
 
@@ -237,6 +225,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|favicon.svg|icon.svg|robots.txt|sitemap.xml|api/auth/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|txt|xml|json)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|favicon.svg|icon.svg|robots.txt|sitemap.xml|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|txt|xml|json)$).*)',
   ],
 }

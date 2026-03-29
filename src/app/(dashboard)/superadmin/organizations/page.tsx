@@ -379,7 +379,7 @@ export default function OrganizationsPage() {
                         className="p-2 rounded transition-colors"
                         style={{ color: "var(--text-primary)" }}
                         onMouseEnter={(e) => (e.currentTarget.style.background = "var(--background-subtle)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = t('common.transparent'))}
                         title={t('superadmin.organizations.card.edit')}
                       >
                         <Edit className="w-4 h-4" />

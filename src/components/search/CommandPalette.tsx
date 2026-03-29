@@ -210,8 +210,8 @@ export function CommandPalette() {
       {/* Кнопка открытия (можно добавить в хедер) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-40 p-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors"
-        aria-label="Open command palette"
+        className="fixed bottom-6 right-6 z-40 p-3.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 shadow-lg hover:shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105"
+        aria-label={t("commandPalette.open") || "Open command palette"}
       >
         <Search className="w-5 h-5" />
       </button>
@@ -224,7 +224,7 @@ export function CommandPalette() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-50"
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
               onClick={() => setIsOpen(false)}
             />
 
@@ -233,12 +233,13 @@ export function CommandPalette() {
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               className="fixed top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4"
             >
-              <div className="bg-[var(--card)] rounded-2xl shadow-2xl border border-[var(--border)] overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 {/* Поисковая строка */}
-                <div className="flex items-center gap-3 p-4 border-b border-[var(--border)]">
-                  <Search className="w-5 h-5 text-[var(--text-muted)]" />
+                <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                  <Search className="w-5 h-5 text-gray-400" />
                   <input
                     type="text"
                     value={query}
@@ -247,26 +248,31 @@ export function CommandPalette() {
                       setSelectedIndex(0);
                     }}
                     placeholder={t("commandPalette.placeholder")}
-                    className="flex-1 bg-transparent outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+                    className="flex-1 bg-transparent outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 text-base"
                     autoFocus
                   />
-                  <kbd className="hidden sm:inline-flex px-2 py-1 text-xs font-mono rounded bg-[var(--background-subtle)] border border-[var(--border)] text-[var(--text-muted)]">
-                    ESC
-                  </kbd>
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <kbd className="hidden sm:inline-flex px-2 py-1 text-xs font-medium font-mono rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500">
+                      ESC
+                    </kbd>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Результаты поиска */}
                 <div className="max-h-96 overflow-y-auto p-2">
                   {filteredCommands.length === 0 ? (
-                    <div className="text-center py-8 text-[var(--text-muted)]">
-                      <Search className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                      <p>{t("commandPalette.noResults")}</p>
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                        <Search className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">{t("commandPalette.noResults")}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t("commandPalette.tryDifferent") || "Попробуйте другой запрос"}</p>
                     </div>
                   ) : (
                     <div className="space-y-1">
@@ -275,35 +281,35 @@ export function CommandPalette() {
                           key={item.id}
                           onClick={() => handleSelect(item)}
                           className={cn(
-                            "w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left",
+                            "w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-150 text-left group",
                             index === selectedIndex
-                              ? "bg-[var(--primary)]/10"
-                              : "hover:bg-[var(--background-subtle)]"
+                              ? "bg-blue-50 dark:bg-blue-900/20"
+                              : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
                           )}
                         >
                           <div className={cn(
-                            "p-2 rounded-lg",
+                            "p-2 rounded-lg transition-colors",
                             index === selectedIndex
-                              ? "bg-[var(--primary)]/20 text-[var(--primary)]"
-                              : "bg-[var(--background-subtle)] text-[var(--text-muted)]"
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400"
                           )}>
                             {item.icon}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-[var(--text-primary)] truncate">
+                            <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
                               {item.label}
                             </div>
                             {item.description && (
-                              <div className="text-sm text-[var(--text-muted)] truncate">
+                              <div className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
                                 {item.description}
                               </div>
                             )}
                           </div>
                           <ArrowRight className={cn(
-                            "w-4 h-4",
+                            "w-4 h-4 transition-colors",
                             index === selectedIndex
-                              ? "text-[var(--primary)]"
-                              : "text-[var(--text-muted)]"
+                              ? "text-blue-500"
+                              : "text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400"
                           )} />
                         </button>
                       ))}
@@ -312,19 +318,23 @@ export function CommandPalette() {
                 </div>
 
                 {/* Подсказки */}
-                <div className="flex items-center justify-between px-4 py-3 bg-[var(--background-subtle)] border-t border-[var(--border)] text-xs text-[var(--text-muted)]">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">↑</kbd>
-                      <kbd className="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">↓</kbd>
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1.5">
+                      <kbd className="px-2 py-1 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono font-medium shadow-sm">↑</kbd>
+                      <kbd className="px-2 py-1 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono font-medium shadow-sm">↓</kbd>
                       <span>{t("commandPalette.navigate")}</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">↵</kbd>
+                    <span className="flex items-center gap-1.5">
+                      <kbd className="px-2 py-1 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono font-medium shadow-sm">↵</kbd>
                       <span>{t("commandPalette.select")}</span>
                     </span>
                   </div>
-                  <span>{t("commandPalette.shortcut")}</span>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="px-2 py-1 rounded bg-blue-500 text-white font-mono font-medium shadow-sm">Ctrl</kbd>
+                    <kbd className="px-2 py-1 rounded bg-blue-500 text-white font-mono font-medium shadow-sm">K</kbd>
+                    <span>{t("commandPalette.shortcut")}</span>
+                  </span>
                 </div>
               </div>
             </motion.div>

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { useShallow } from 'zustand/shallow'
 import React from 'react'
+import { validateToken, isTokenExpired } from '@/lib/jwt-utils'
 
 export interface User {
   id: string
@@ -28,6 +29,7 @@ interface AuthState {
   login: (user: User) => void
   logout: () => void
   checkOnboarding: () => void
+  validateAndCleanup: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -57,6 +59,18 @@ export const useAuthStore = create<AuthState>()(
         set({ needsOnboarding })
       },
 
+      validateAndCleanup: () => {
+        const { token, isAuthenticated } = get();
+        
+        // If not authenticated, nothing to validate
+        if (!isAuthenticated) return;
+        
+        // If token is expired or invalid, logout
+        if (!validateToken(token)) {
+          get().logout();
+        }
+      },
+
       logout: () => {
         // Clear Zustand state
         set({ user: null, token: null, isAuthenticated: false, needsOnboarding: false });
@@ -64,7 +78,6 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('hr-auth-storage');
         }
-        console.log("[Auth] Logout: Cleared Zustand state and localStorage");
       },
     }),
     {
@@ -109,3 +122,4 @@ export const useAuthUser = (): User | null => useAuthStore(useShallow((state) =>
 export const useAuthIsAuthenticated = () => useAuthStore(useShallow((state) => state.isAuthenticated))
 export const useAuthNeedsOnboarding = () => useAuthStore(useShallow((state) => state.needsOnboarding))
 export const useAuthLogout = () => useAuthStore((state) => state.logout)
+export const useAuthValidate = () => useAuthStore((state) => state.validateAndCleanup)

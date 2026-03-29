@@ -156,7 +156,7 @@ export default function JoinRequestsPage() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         {request.requesterName}
-                        <Badge variant={request.status === "pending" ? "secondary" : request.status === "approved" ? "default" : "destructive"}>
+                        <Badge variant={request.status === "pending" ? "secondary" : request.status === "approved" ? "default" : t('common.destructive')}>
                           {request.status}
                         </Badge>
                       </CardTitle>

@@ -9,10 +9,16 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as aiChat from "../aiChat.js";
+import type * as aiChatMutations from "../aiChatMutations.js";
 import type * as aiEvaluator from "../aiEvaluator.js";
 import type * as aiSiteEditor from "../aiSiteEditor.js";
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
+import type * as automation from "../automation.js";
+import type * as automationActions from "../automationActions.js";
+import type * as automationMutations from "../automationMutations.js";
+import type * as automationTest from "../automationTest.js";
 import type * as birthdays from "../birthdays.js";
 import type * as chat from "../chat.js";
 import type * as chatAction from "../chatAction.js";
@@ -32,7 +38,10 @@ import type * as notifications from "../notifications.js";
 import type * as organizationJoinRequests from "../organizationJoinRequests.js";
 import type * as organizationRequests from "../organizationRequests.js";
 import type * as organizations from "../organizations.js";
+import type * as pagination from "../pagination.js";
 import type * as productivity from "../productivity.js";
+import type * as scripts_createTestAutomationData from "../scripts/createTestAutomationData.js";
+import type * as scripts_createTestTicket from "../scripts/createTestTicket.js";
 import type * as security from "../security.js";
 import type * as settings from "../settings.js";
 import type * as sharepointSync from "../sharepointSync.js";
@@ -60,10 +69,16 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  aiChat: typeof aiChat;
+  aiChatMutations: typeof aiChatMutations;
   aiEvaluator: typeof aiEvaluator;
   aiSiteEditor: typeof aiSiteEditor;
   analytics: typeof analytics;
   auth: typeof auth;
+  automation: typeof automation;
+  automationActions: typeof automationActions;
+  automationMutations: typeof automationMutations;
+  automationTest: typeof automationTest;
   birthdays: typeof birthdays;
   chat: typeof chat;
   chatAction: typeof chatAction;
@@ -83,7 +98,10 @@ declare const fullApi: ApiFromModules<{
   organizationJoinRequests: typeof organizationJoinRequests;
   organizationRequests: typeof organizationRequests;
   organizations: typeof organizations;
+  pagination: typeof pagination;
   productivity: typeof productivity;
+  "scripts/createTestAutomationData": typeof scripts_createTestAutomationData;
+  "scripts/createTestTicket": typeof scripts_createTestTicket;
   security: typeof security;
   settings: typeof settings;
   sharepointSync: typeof sharepointSync;
