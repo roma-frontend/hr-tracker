@@ -244,18 +244,17 @@ export default function RootLayout({
         {/* Safari pinned tab */}
         <link rel="mask-icon" href="/favicon.svg?v=3" color="#2563eb" />
 
-        {/* ── Resource hints: max 4 preconnect (Lighthouse), rest dns-prefetch ── */}
-        <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
+        {/* ── Resource hints: only 3 most critical preconnects ── */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://steady-jaguar-712.convex.cloud" />
+        <link rel="preconnect" href="https://steady-jaguar-712.convex.cloud" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
         
-        {/* ── Preload critical fonts ── */}
+        {/* ── Preload only critical fonts (IBM Plex Sans + Inter) ── */}
         <link
           rel="preload"
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
           as="style"
         />
 

@@ -56,7 +56,6 @@ const nextConfig = {
     // Aggressive package imports optimization
     optimizePackageImports: [
       'lucide-react',
-      'framer-motion',
       '@radix-ui/react-avatar',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
