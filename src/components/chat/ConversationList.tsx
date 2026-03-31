@@ -1,4 +1,5 @@
 "use client";
+import Image from 'next/image';
 
 import React, { useState, useRef } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";

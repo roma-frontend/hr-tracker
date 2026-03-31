@@ -7,7 +7,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   Building2,
   Clock,

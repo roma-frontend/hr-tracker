@@ -2,7 +2,7 @@
 
 import React, { Suspense, useMemo, memo } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { useTranslation } from "react-i18next";
 import { Clock, CheckCircle, XCircle, Plus, Calendar as CalendarIcon, TrendingUp, Star } from "lucide-react";
 import { format } from "date-fns";

@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import React, { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, AreaChart, Area,

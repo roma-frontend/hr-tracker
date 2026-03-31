@@ -1,6 +1,14 @@
-import * as faceapi from 'face-api.js';
-
+// Lazy load face-api.js to reduce initial bundle size
+let faceapi: typeof import('face-api.js') | null = null;
 let modelsLoaded = false;
+
+// Dynamically import face-api.js only when needed
+async function loadFaceApiLibrary() {
+  if (!faceapi) {
+    faceapi = await import('face-api.js');
+  }
+  return faceapi;
+}
 
 // Load face-api.js models
 export async function loadFaceApiModels() {
@@ -9,6 +17,9 @@ export async function loadFaceApiModels() {
     return;
   }
 
+  // Lazy load the library first
+  const api = await loadFaceApiLibrary();
+
   // Use local models from public/models folder
   const MODEL_URL = '/models';
 
@@ -16,15 +27,15 @@ export async function loadFaceApiModels() {
 
   try {
     console.log('⏳ Loading SSD MobileNet v1...');
-    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+    await api.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
     console.log('✅ SSD MobileNet v1 loaded');
 
     console.log('⏳ Loading Face Landmark 68...');
-    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await api.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
     console.log('✅ Face Landmark 68 loaded');
 
     console.log('⏳ Loading Face Recognition...');
-    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+    await api.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
     console.log('✅ Face Recognition loaded');
 
     modelsLoaded = true;
@@ -42,6 +53,8 @@ export async function detectFace(videoElement: HTMLVideoElement) {
     await loadFaceApiModels();
   }
 
+  const api = await loadFaceApiLibrary();
+
   // Verify video element is ready
   if (!videoElement || videoElement.readyState < 2) {
     console.warn("⚠️ Video element not ready for detection");
@@ -50,7 +63,7 @@ export async function detectFace(videoElement: HTMLVideoElement) {
 
   try {
     const detection = await faceapi
-      .detectSingleFace(videoElement, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+      .detectSingleFace(videoElement, new api.SsdMobilenetv1Options({ minConfidence: 0.5 }))
       .withFaceLandmarks()
       .withFaceDescriptor();
 
@@ -71,7 +84,7 @@ export async function detectFace(videoElement: HTMLVideoElement) {
 
 // Compare two face descriptors
 export function compareFaces(descriptor1: Float32Array, descriptor2: number[]): number {
-  const distance = faceapi.euclideanDistance(descriptor1, descriptor2);
+  const distance = api.euclideanDistance(descriptor1, descriptor2);
   return distance;
 }
 

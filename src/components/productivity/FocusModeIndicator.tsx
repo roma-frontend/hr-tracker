@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Zap } from "lucide-react";
 
 interface FocusModeIndicatorProps {

@@ -1,8 +1,9 @@
 ﻿"use client";
+import Image from 'next/image';
 
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { X, Clock, LogIn, LogOut, AlertTriangle, CheckCircle, Calendar, Timer, TrendingUp, User, Building2 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";

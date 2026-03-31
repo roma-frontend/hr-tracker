@@ -1,4 +1,5 @@
 /**
+import Image from 'next/image';
  * Team Sidebar — Боковая панель с информацией о команде
  * Компактная сворачиваемая панель с accordion для виджетов
  */
@@ -9,7 +10,7 @@ import { useQuery } from "convex/react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   Users, UserCheck, UserX, Briefcase, Calendar, Award,
   TrendingUp, Clock, Star, Zap, ChevronDown, ChevronUp, X, PanelRightClose, PanelRightOpen

@@ -11,7 +11,7 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Calendar, CheckCircle, ChevronRight, ChevronLeft, X, Info, AlertTriangle } from "lucide-react";
 import { format, differenceInDays, addDays } from "date-fns";
 import { ru } from "date-fns/locale";

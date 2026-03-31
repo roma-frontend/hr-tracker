@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { AlertCircle, Info, CheckCircle, XCircle, Lightbulb, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

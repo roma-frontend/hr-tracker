@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { useTranslation } from "react-i18next";
 import { Plus, Search, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";

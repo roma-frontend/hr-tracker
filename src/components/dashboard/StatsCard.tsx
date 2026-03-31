@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useEffect, useRef, useState, memo } from "react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 

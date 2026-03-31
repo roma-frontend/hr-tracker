@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Sparkles, Calendar, AlertTriangle, TrendingUp, Users, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Search, X, ArrowRight, FileText, Users, Calendar, Settings, BarChart3, MessageCircle, ClipboardList, Clock, CheckSquare, User, ShieldCheck, CreditCard, Sparkles, Car } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";

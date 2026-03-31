@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Mail, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { validateEmail, type EmailValidationResult } from '@/lib/passwordValidation';
 import { Input } from '@/components/ui/input';

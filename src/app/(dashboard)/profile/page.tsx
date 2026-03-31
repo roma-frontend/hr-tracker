@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import {
   Save, User as UserIcon, Mail, Briefcase, Calendar,
   Shield, MapPin, Phone, Trash2, Upload, Clock, Award

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { useTranslation } from "react-i18next";
 import {
   Users, Clock, CheckCircle, UserCheck,

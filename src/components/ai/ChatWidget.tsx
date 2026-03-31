@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { X, Send, Sparkles, CheckCircle, AlertCircle, Calendar, Pencil, Trash2, Mic, MicOff, Car, Maximize2 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';

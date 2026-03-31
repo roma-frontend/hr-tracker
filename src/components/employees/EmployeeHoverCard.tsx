@@ -1,11 +1,12 @@
 ﻿"use client";
+import Image from 'next/image';
 
 import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import React from "react";
 
 type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";

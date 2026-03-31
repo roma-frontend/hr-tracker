@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { LucideIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/cssMotion';
 
 interface StatsCardProps {
   title: string;

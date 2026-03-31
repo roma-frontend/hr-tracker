@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Check, X, AlertCircle, Info, Sparkles } from 'lucide-react';
 import { validatePassword, getStrengthColor, type PasswordValidationResult } from '@/lib/passwordValidation';
 import { useTranslation } from 'react-i18next';

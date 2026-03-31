@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Settings, Save, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { useAuthStore } from "@/store/useAuthStore";
 
 function SLASettings() {

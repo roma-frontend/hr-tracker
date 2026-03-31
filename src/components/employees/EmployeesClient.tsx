@@ -1,4 +1,5 @@
 ﻿"use client";
+import Image from 'next/image';
 
 import React, { useState, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,7 +8,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   Plus,
   Search,

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { CalendarDays, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { Fingerprint } from "lucide-react";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { toast } from "sonner";

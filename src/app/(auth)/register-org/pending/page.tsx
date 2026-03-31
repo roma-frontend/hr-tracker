@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "@/lib/lazy-imports";
+import { motion } from '@/lib/cssMotion';
 import { Clock, Mail, CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from 'react-i18next';

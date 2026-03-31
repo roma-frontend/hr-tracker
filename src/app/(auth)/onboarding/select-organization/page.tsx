@@ -1,4 +1,5 @@
 /**
+import Image from 'next/image';
  * Organization Selection Page
  * 
  * For new Google OAuth users to select which organization they want to join.

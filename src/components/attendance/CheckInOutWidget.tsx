@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, LogIn, LogOut, Calendar, TrendingUp, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import { format } from "date-fns";

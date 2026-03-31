@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,

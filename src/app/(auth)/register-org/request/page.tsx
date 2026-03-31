@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from "react"
 import { useTranslation } from 'react-i18next';;
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "@/lib/lazy-imports";
+import { motion } from '@/lib/cssMotion';
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import {
   Building2,

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import {
   Mail,
   Phone,
@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from '@/lib/cssMotion';
 
 interface Employee {
   _id: string;

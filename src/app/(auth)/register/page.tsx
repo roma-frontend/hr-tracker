@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import React, { useState, useTransition, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "@/lib/lazy-imports";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import {
   Eye, EyeOff, Mail, Lock, User, Phone, AlertCircle,

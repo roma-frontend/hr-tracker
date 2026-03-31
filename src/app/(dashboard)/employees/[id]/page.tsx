@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from '@/lib/cssMotion';
 import { useTranslation } from "react-i18next";
 
 export default function EmployeeProfilePage() {

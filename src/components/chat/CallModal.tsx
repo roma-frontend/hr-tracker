@@ -1,4 +1,5 @@
 "use client";
+import Image from 'next/image';
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useMutation, useQuery } from "convex/react";

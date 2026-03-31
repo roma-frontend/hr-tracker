@@ -1,8 +1,9 @@
 ﻿"use client";
+import Image from 'next/image';
 
 import React from "react"
 import { useTranslation } from 'react-i18next';;
-import { motion } from "@/lib/lazy-imports";
+import { motion } from '@/lib/cssMotion';
 import { UserCheck, UserX, Clock, Mail, Calendar, CheckCircle } from "lucide-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";

@@ -1,4 +1,5 @@
 ﻿"use client";
+import Image from 'next/image';
 
 import React, { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
@@ -13,7 +14,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { SupervisorRatingForm } from "@/components/attendance/SupervisorRatingForm";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   Dialog,
   DialogContent,

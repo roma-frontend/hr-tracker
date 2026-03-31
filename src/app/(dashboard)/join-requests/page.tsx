@@ -6,7 +6,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   Users, CheckCircle2, XCircle, Clock, Search,
   Mail, Calendar, AlertCircle, Link2,

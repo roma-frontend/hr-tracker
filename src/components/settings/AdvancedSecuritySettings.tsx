@@ -1,4 +1,5 @@
 "use client";
+import Image from 'next/image';
 
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useRef } from "react";

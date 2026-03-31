@@ -1,4 +1,5 @@
 ﻿"use client";
+import Image from 'next/image';
 
 import { useTranslation } from "react-i18next";
 import { useState, useRef } from "react";
@@ -7,7 +8,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { toast } from "sonner";
 import { uploadTaskAttachment } from "@/actions/cloudinary";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 
 interface Attachment {

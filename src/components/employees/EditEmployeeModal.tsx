@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { X, Save, User, Mail, Phone, Briefcase, Building2, Shield, AlertTriangle } from "lucide-react";
 import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { toast } from "sonner";
