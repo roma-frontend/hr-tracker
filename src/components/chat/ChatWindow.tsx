@@ -23,6 +23,7 @@ import { uploadChatAttachment } from "@/actions/cloudinary";
 import { playChatMessageSound } from "@/lib/notificationSound";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { getInitials, formatFileSize } from "@/lib/stringUtils";
 
 interface Props {
   conversationId: Id<"chatConversations">;
@@ -42,17 +43,7 @@ interface PendingFile {
   error?: string;
 }
 
-function getInitials(name: string) {
-  return name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2);
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / 1048576).toFixed(1) + " MB";
-}
-
-export function ChatWindow({ conversationId, currentUserId, organizationId, currentUserName, currentUserAvatar, onBack, onStartCall }: Props) {
+export const ChatWindow = React.memo(function ChatWindow({ conversationId, currentUserId, organizationId, currentUserName, currentUserAvatar, onBack, onStartCall }: Props) {
   const { t, i18n } = useTranslation();
   console.log(`[ChatWindow] Loaded with organizationId: ${organizationId}, userId: ${currentUserId}`);
   const [input, setInput] = useState("");
@@ -472,7 +463,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
     // If chat is active (tab focused) — mark as read immediately, play sound
     if (document.hasFocus()) {
       // Ensure this call completes by using Promise handling
-      const readPromise = markAsRead({ conversationId, userId: currentUserId });
+      void markAsRead({ conversationId, userId: currentUserId });
       playChatMessageSound();
       return;
     }
@@ -490,7 +481,7 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
     } else if (Notification.permission === "default") {
       Notification.requestPermission();
     }
-  }, [messages?.length, conv?.membership?.isMuted, currentUserId]);
+  }, [messages, conv?.membership?.isMuted, currentUserId, conversationId, markAsRead]);
 
   const canSend = (input.trim().length > 0 || pendingFiles.length > 0) && !sending;
 
@@ -1063,4 +1054,4 @@ export function ChatWindow({ conversationId, currentUserId, organizationId, curr
       )}
     </div>
   );
-}
+});

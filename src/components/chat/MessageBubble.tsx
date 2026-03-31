@@ -208,7 +208,7 @@ function ReadReceipt({ readBy, isOwn, lang = "en" }: { readBy?: ReadEntry[]; isO
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export function MessageBubble({ message, isOwn, showAvatar, showName, currentUserId, currentUserAvatar, currentUserName, onReply, onOpenThread, onSendMessage, lang = "en" }: Props) {
+export const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showAvatar, showName, currentUserId, currentUserAvatar, currentUserName, onReply, onOpenThread, onSendMessage, lang = "en" }: Props) {
   const L = UI_LABELS[getLabelLang(lang)];
   const [showActions, setShowActions] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -869,7 +869,7 @@ export function MessageBubble({ message, isOwn, showAvatar, showName, currentUse
       `}</style>
     </>
   );
-}
+});
 
 // Portal-mounted menu so it isn't clipped by scroll containers / input area
 function MessageMenuPortal({

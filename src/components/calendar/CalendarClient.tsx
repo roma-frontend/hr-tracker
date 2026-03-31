@@ -40,6 +40,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { LeaveRequestModal } from "@/components/leaves/LeaveRequestModal";
 import { useSelectedOrganization } from "@/hooks/useSelectedOrganization";
 import { DriverRequestModal } from "./DriverRequestModal";
+import { getInitials } from "@/lib/stringUtils";
 
 type LeaveRequest = {
   _id: string;
@@ -83,10 +84,6 @@ type GoogleCalendarEvent = {
 };
 
 // --- Helpers ------------------------------------------------------------------
-function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-}
-
 function safeDate(dateStr: string | undefined | null): Date | null {
   if (!dateStr) return null;
   const d = new Date(dateStr);
@@ -265,11 +262,10 @@ function DayCell({
 }
 
 // --- Main Component ------------------------------------------------------------
-export function CalendarClient() {
+export const CalendarClient = React.memo(function CalendarClient() {
   const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [mounted, setMounted] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showDriverModal, setShowDriverModal] = useState(false);
@@ -1018,6 +1014,6 @@ export function CalendarClient() {
       </AnimatePresence>
     </div>
   );
-}
+});
 
 export default CalendarClient;
