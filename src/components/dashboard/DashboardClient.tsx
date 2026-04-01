@@ -97,8 +97,10 @@ export default function DashboardClient() {
 
   // Convex useQuery arguments - properly typed
   const userId = user?.id as Id<"users"> | undefined;
-  const leaves = (useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : "skip") ?? []) as LeaveEnriched[];
-  const users = (useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : "skip") ?? []) as User[];
+  const leaves = useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : "skip") ?? [];
+  const usersFromConvex = useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : "skip") ?? [];
+  // Convert Convex _id to id for User type compatibility
+  const users = usersFromConvex.map(u => ({ ...u, id: u._id })) as unknown as User[];
   const organization = useQuery(api.organizations.getMyOrganization, userId ? { userId } : "skip") as Organization | null;
 
   // Security stats — only for superadmin (always call, condition is in arguments)
@@ -184,10 +186,8 @@ export default function DashboardClient() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4 sm:space-y-6">
       {/* Page title for accessibility — proper heading order h1 → h2 → h3 */}
       <h1 className="sr-only">{t('nav.dashboard', { defaultValue: 'Dashboard' })}</h1>
-      {/* Smart Banners */}
-      <motion.div variants={itemVariants}>
-        <DashboardBanners />
-      </motion.div>
+      {/* Smart Banners - only render if there are active banners */}
+      <DashboardBanners />
 
       {/* Welcome header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -228,16 +228,14 @@ export default function DashboardClient() {
       </motion.div>
 
       {/* Stats */}
-      <div style={{ marginBottom: '2rem' }}>
-        <motion.div variants={itemVariants}>
-          <div data-tour="quick-stats" className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
+      <motion.div variants={itemVariants}>
+        <div data-tour="quick-stats" className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
             <StatsCard title={t('titles.totalEmployees')} value={isLoading ? "—" : stats.totalEmployees} icon={<Users className="w-4 h-4 sm:w-5 sm:h-5" />} color="blue" index={0} />
             <StatsCard title={t('titles.pendingRequests')} value={isLoading ? "—" : stats.pendingRequests} icon={<Clock className="w-4 h-4 sm:w-5 sm:h-5" />} color="yellow" index={1} />
             <StatsCard title={t('titles.approvedThisMonth')} value={isLoading ? "—" : stats.approvedThisMonth} icon={<CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />} color="green" index={2} />
             <StatsCard title={t('titles.onLeaveNow')} value={isLoading ? "—" : stats.onLeaveNow} icon={<UserCheck className="w-4 h-4 sm:w-5 sm:h-5" />} color="purple" index={3} />
           </div>
-        </motion.div>
-      </div>
+      </motion.div>
 
       {/* Security Widget — superadmin only */}
       {user?.role === "superadmin" && (

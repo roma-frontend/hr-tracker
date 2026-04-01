@@ -5,7 +5,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Wizard, WizardStep } from "@/components/ui/wizard";
 import {
@@ -13,11 +13,13 @@ import {
   TextareaStep,
   CardSelectionStep,
 } from "@/components/ui/wizard-step-components";
-import { Car, MapPin, Clock, Calendar } from "lucide-react";
+import { Car, MapPin, Clock, Calendar, Users } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface RequestDriverWizardProps {
   userId: Id<"users">;
@@ -32,7 +34,17 @@ export function RequestDriverWizard({
 }: RequestDriverWizardProps) {
   const { t } = useTranslation();
   const requestDriver = useMutation(api.drivers.requestDriver);
-  const user = useQuery(api.users.getCurrentUser);
+  const user = useQuery(api["users/queries"].getCurrentUser, {});
+  const drivers = useQuery(
+    api.drivers.getAvailableDrivers,
+    user?.organizationId ? { organizationId: user.organizationId } : "skip"
+  );
+
+  const [wizardData, setWizardData] = useState<Record<string, string | number | boolean | null>>({});
+
+  const updateStepData = (key: string, value: string | number | boolean | null) => {
+    setWizardData(prev => ({ ...prev, [key]: value }));
+  };
 
   const steps: WizardStep[] = [
     {
@@ -42,30 +54,30 @@ export function RequestDriverWizard({
       icon: <Car className="w-5 h-5" />,
       content: (
         <CardSelectionStep
-          stepData={{}}
-          updateStepData={() => {}}
-          field="tripType"
+          stepData={wizardData}
+          updateStepData={updateStepData}
+          field="tripCategory"
           label={t("driverWizard.steps.type.typeLabel")}
           options={[
             {
-              value: "one-way",
-              title: t("driverWizard.types.oneWay"),
-              description: t("driverWizard.types.oneWayDesc"),
-              icon: <MapPin className="w-6 h-6" />,
+              value: "airport",
+              title: t("driverWizard.types.airport"),
+              description: t("driverWizard.types.airportDesc"),
+              icon: <Calendar className="w-6 h-6" />,
               color: "bg-blue-500/10 text-blue-600",
             },
             {
-              value: "round-trip",
-              title: t("driverWizard.types.roundTrip"),
-              description: t("driverWizard.types.roundTripDesc"),
-              icon: <Calendar className="w-6 h-6" />,
+              value: "office_transfer",
+              title: t("driverWizard.types.officeTransfer"),
+              description: t("driverWizard.types.officeTransferDesc"),
+              icon: <MapPin className="w-6 h-6" />,
               color: "bg-green-500/10 text-green-600",
             },
             {
-              value: "corporate",
-              title: t("driverWizard.types.corporate"),
-              description: t("driverWizard.types.corporateDesc"),
-              icon: <Car className="w-6 h-6" />,
+              value: "client_meeting",
+              title: t("driverWizard.types.clientMeeting"),
+              description: t("driverWizard.types.clientMeetingDesc"),
+              icon: <Users className="w-6 h-6" />,
               color: "bg-purple-500/10 text-purple-600",
             },
           ]}
@@ -82,21 +94,73 @@ export function RequestDriverWizard({
       content: (
         <div className="space-y-4">
           <TextInputStep
-            stepData={{}}
-            updateStepData={() => {}}
+            stepData={wizardData}
+            updateStepData={updateStepData}
             field="from"
             label={t("driverWizard.steps.route.fromLabel")}
             placeholder={t("driverWizard.steps.route.fromPlaceholder")}
             required
           />
           <TextInputStep
-            stepData={{}}
-            updateStepData={() => {}}
+            stepData={wizardData}
+            updateStepData={updateStepData}
             field="to"
             label={t("driverWizard.steps.route.toLabel")}
             placeholder={t("driverWizard.steps.route.toPlaceholder")}
             required
           />
+          <div className="space-y-2">
+            <Label htmlFor="purpose">{t("driverWizard.steps.route.purposeLabel")}</Label>
+            <TextInputStep
+              stepData={wizardData}
+              updateStepData={updateStepData}
+              field="purpose"
+              label={t("driverWizard.steps.route.purposeLabel")}
+              placeholder={t("driverWizard.steps.route.purposePlaceholder")}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="passengerCount">{t("driverWizard.steps.route.passengerCountLabel")}</Label>
+            <Input
+              id="passengerCount"
+              type="number"
+              min="1"
+              max="10"
+              value={String(wizardData.passengerCount || "1")}
+              onChange={(e) => updateStepData("passengerCount", parseInt(e.target.value) || 1)}
+              className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)]"
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "driver",
+      title: t("driverWizard.steps.driver.title"),
+      description: t("driverWizard.steps.driver.description"),
+      icon: <Car className="w-5 h-5" />,
+      content: drivers && drivers.length > 0 ? (
+        <CardSelectionStep
+          stepData={wizardData}
+          updateStepData={updateStepData}
+          field="driverId"
+          label={t("driverWizard.steps.driver.selectLabel")}
+          options={drivers
+            .filter(driver => driver !== null)
+            .map(driver => ({
+              value: driver._id,
+              title: driver.userName,
+              description: driver.userPosition || "",
+              icon: <Car className="w-6 h-6" />,
+              color: "bg-blue-500/10 text-blue-600",
+            }))}
+          columns={2}
+          required
+        />
+      ) : (
+        <div className="text-center py-8 text-[var(--text-muted)]">
+          {t("driverWizard.steps.driver.noDrivers")}
         </div>
       ),
     },
@@ -109,25 +173,27 @@ export function RequestDriverWizard({
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <TextInputStep
-              stepData={{}}
-              updateStepData={() => {}}
+              stepData={wizardData}
+              updateStepData={updateStepData}
               field="date"
               label={t("driverWizard.steps.datetime.dateLabel")}
-              type="date"
+              type="text"
+              placeholder="YYYY-MM-DD"
               required
             />
             <TextInputStep
-              stepData={{}}
-              updateStepData={() => {}}
+              stepData={wizardData}
+              updateStepData={updateStepData}
               field="time"
               label={t("driverWizard.steps.datetime.timeLabel")}
-              type="time"
+              type="text"
+              placeholder="HH:MM"
               required
             />
           </div>
           <TextareaStep
-            stepData={{}}
-            updateStepData={() => {}}
+            stepData={wizardData}
+            updateStepData={updateStepData}
             field="notes"
             label={t("driverWizard.steps.datetime.notesLabel")}
             placeholder={t("driverWizard.steps.datetime.notesPlaceholder")}
@@ -140,20 +206,36 @@ export function RequestDriverWizard({
 
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
-      const startTime = new Date(`${String(data.date)}T${String(data.time)}`).getTime();
+      if (!user?.organizationId) {
+        toast.error(t("driverWizard.toast.noOrg"));
+        return;
+      }
+
+      const dateStr = String(data.date);
+      const timeStr = String(data.time);
+      const startTime = new Date(`${dateStr}T${timeStr}`).getTime();
       const endTime = startTime + 3600000; // +1 hour default
 
-      await requestDriver({
+      const result = await requestDriver({
+        organizationId: user.organizationId,
         requesterId: userId,
-        tripType: String(data.tripType) as "airport" | "regular" | "corporate",
+        driverId: data.driverId as Id<"drivers">,
+        startTime,
+        endTime,
         tripInfo: {
           from: String(data.from),
           to: String(data.to),
+          purpose: String(data.purpose),
+          passengerCount: Number(data.passengerCount) || 1,
+          notes: data.notes ? String(data.notes) : undefined,
         },
-        startTime,
-        endTime,
-        notes: data.notes ? String(data.notes) : undefined,
+        tripCategory: data.tripCategory as "client_meeting" | "airport" | "office_transfer" | "emergency" | "team_event" | "personal",
       });
+
+      if (result.error) {
+        toast.error(result.error.message);
+        return;
+      }
 
       toast.success(t("driverWizard.toast.success"));
       onComplete?.();

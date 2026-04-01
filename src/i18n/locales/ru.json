@@ -538,7 +538,7 @@
       }
     },
     "emergency": {
-      "title": "Emergency Dashboard",
+      "title": "Панель чрезвычайных ситуаций",
       "subtitle": "Критические проблемы требующие немедленного внимания",
       "createIncident": "Создать инцидент",
       "attentionRequired": "ТРЕБУЕТСЯ ВНИМАНИЕ!",
@@ -557,6 +557,19 @@
       "pendingOrgsSubtitle": "организаций",
       "systemStatus": "Статус системы",
       "systemStatusSubtitle": "Текущее состояние всех компонентов",
+      "systemComponents": {
+        "operational": "Работает",
+        "degraded": "Работает с перебоями",
+        "down": "Не работает",
+        "api": "API",
+        "database": "База данных",
+        "emailService": "Email сервис",
+        "stripe": "Stripe",
+        "convex": "Convex",
+        "redis": "Redis",
+        "cloudinary": "Cloudinary",
+        "sentry": "Sentry"
+      },
       "create": {
         "title": "Создать инцидент",
         "description": "Заполните информацию о системном инциденте",
@@ -582,6 +595,7 @@
       "exitMode": "Выйти из режима",
       "searchUser": "Поиск пользователя",
       "searchPlaceholder": "user@example.com или имя...",
+      "searchDesc": "Введите email или имя для поиска",
       "noUsersFound": "Пользователи не найдены",
       "history": "История имперсонаций",
       "historySubtitle": "Последние 20 сессий",
@@ -630,7 +644,8 @@
         "reasonPlaceholder": "Укажите причину отклонения...",
         "cancel": "Отмена",
         "submit": "Отклонить {count} заявок"
-      }
+      },
+      "close": "Закрыть"
     },
     "user360": {
       "back": "Назад",
@@ -1239,6 +1254,7 @@
     "allStatusesFilter": "Все статусы"
   },
   "leaveStats": {
+    "burnoutPrevention": "Профилактика выгорания",
     "burnoutRisk": "Риск выгорания",
     "notOnLeave": "Вы не были в отпуске уже {{days}} дней",
     "lastLeave": "Последний отпуск",
@@ -1739,6 +1755,7 @@
     "role": "Роль",
     "department": "Отдел",
     "employee": "Сотрудник",
+    "userId": "ID пользователя",
     "leaveType": "Тип отпуска",
     "startDate": "Дата начала",
     "endDate": "Дата окончания",
@@ -1769,7 +1786,9 @@
     "attachments": "Вложения",
     "registered": "Зарегистрирован",
     "leaveBalances": "Остатки отпусков",
-    "phone": "Телефон"
+    "phone": "Телефон",
+    "userId": "ID пользователя",
+    "email": "Email"
   },
   "forms": {
     "required": "Обязательно",
@@ -1845,10 +1864,11 @@
     "deleteAvatarTitle": "Удалить аватар",
     "deleteAvatarWarning": "Вы уверены, что хотите удалить фотографию профиля?",
     "memberSince": "Дата регистрации",
-    "userId": "Օգտատիրոջ ID",
+    "userId": "ID пользователя",
     "activityStats": "Статистика активности",
     "currentAvatar": "Текущий аватар",
-    "phonePlaceholder": "+1 (555) 123-4567"
+    "phonePlaceholder": "+1 (555) 123-4567",
+    "roleManagedByAdmin": "Ваша роль и отдел управляются вашим администратором. Обратитесь к ним для внесения изменений."
   },
   "modals": {
     "assignSupervisor": {
@@ -1923,7 +1943,9 @@
     "inactive": "Неактивен",
     "approved": "Одобрено",
     "pending": "В ожидании",
-    "rejected": "Отклонено"
+    "rejected": "Отклонено",
+    "completed": "Завершено",
+    "late": "Опоздание"
   },
   "timePeriods": {
     "today": "Сегодня",
@@ -1991,7 +2013,26 @@
     "starter": "Начальный",
     "critical": "КРИТИЧЕСКИЙ",
     "affectedUsers": "Затронутые пользователи",
-    "affectedOrgs": "Затронутые организации"
+    "affectedOrgs": "Затронутые организации",
+    "profilePictureUpload": "Загрузите фото профиля",
+    "clickCameraToUpload": "Нажмите на значок камеры для загрузки фото",
+    "recommendedImageSize": "Рекомендуемый размер: 400x400px (макс. 2MB)",
+    "deletePicture": "Удалить фото",
+    "personalInformation": "Личная информация",
+    "updateYourPersonalDetails": "Обновите свои личные данные",
+    "accountInformation": "Информация об аккаунте",
+    "yourAccountDetails": "Детали вашего аккаунта",
+    "yourActivity": "Ваша активность",
+    "saveChanges": "Сохранить изменения",
+    "saving": "Сохранение...",
+    "discardChanges": "Отменить изменения",
+    "notCheckedInWarning": "Вы не отметились сегодня",
+    "comprehensiveAnalysis": "Полный анализ",
+    "memberSince": "Участник с",
+    "userId": "ID пользователя",
+    "activityStats": "Статистика активности",
+    "emergencyDashboard": "Панель чрезвычайных ситуаций",
+    "roleManagedByAdmin": "Ваша роль и отдел управляются администратором. Обратитесь к ним для внесения изменений."
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Отчеты и аналитика",
@@ -2550,9 +2591,11 @@
     "allStatuses": "Все статусы"
   },
   "attendanceExtra": {
-    "daysWorked": "Days Worked",
-    "totalHours": "Total Hours",
-    "punctuality": "Punctuality"
+    "daysWorked": "Отработано дней",
+    "totalHours": "Всего часов",
+    "punctuality": "Пунктуальность",
+    "lateDays": "Дней опозданий",
+    "overtime": "сверхурочно"
   },
   "editEmployee": {
     "fullAccess": "Полный доступ",
@@ -4547,16 +4590,16 @@
       "route": {
         "title": "Маршрут",
         "description": "Куда вам нужно ехать?",
-        "fromLabel": "Откуда *",
+        "fromLabel": "Откуда",
         "fromPlaceholder": "Место подачи",
-        "toLabel": "Куда *",
+        "toLabel": "Куда",
         "toPlaceholder": "Место назначения"
       },
       "datetime": {
         "title": "Дата и время",
         "description": "Когда вам нужен водитель?",
-        "dateLabel": "Дата *",
-        "timeLabel": "Время *",
+        "dateLabel": "Дата",
+        "timeLabel": "Время",
         "notesLabel": "Дополнительные заметки",
         "notesPlaceholder": "Любые особые инструкции..."
       }
@@ -4733,6 +4776,7 @@
     "runError": "Не удалось запустить автоматизацию",
     "running": "Запуск...",
     "runNow": "Запустить сейчас",
+    "manualRun": "Ручной запуск автоматизации",
     "stats": {
       "totalTasks": "Всего задач",
       "completed": "Завершено",

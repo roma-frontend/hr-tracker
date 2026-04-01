@@ -312,7 +312,7 @@ export default function ProfilePage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-[var(--primary)]" />
-            <CardTitle className="text-base">Account Information</CardTitle>
+            <CardTitle className="text-base">{t('ui.accountInformation')}</CardTitle>
           </div>
           <CardDescription>{t('ui.yourAccountDetails')}</CardDescription>
         </CardHeader>
@@ -340,7 +340,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Member Since</Label>
+              <Label>{t('ui.memberSince')}</Label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
@@ -352,7 +352,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label>User ID</Label>
+              <Label>{t('labels.userId')}</Label>
               <div className="relative">
                 <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
@@ -368,8 +368,7 @@ export default function ProfilePage() {
           <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-sm">
             <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <p>
-              Your role and department are managed by your administrator.
-              Contact them to request changes.
+              {t('profile.roleManagedByAdmin')}
             </p>
           </div>
         </CardContent>
@@ -380,7 +379,7 @@ export default function ProfilePage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4 text-[var(--primary)]" />
-            <CardTitle className="text-base">Activity Stats</CardTitle>
+            <CardTitle className="text-base">{t('ui.activityStats')}</CardTitle>
           </div>
           <CardDescription>{t('ui.yourActivity')}</CardDescription>
         </CardHeader>

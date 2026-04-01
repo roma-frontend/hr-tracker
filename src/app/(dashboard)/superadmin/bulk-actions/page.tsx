@@ -77,12 +77,12 @@ export default function BulkActionsPage() {
 
     try {
       const result = await bulkApprove({
-        leaveIds: Array.from(selectedLeaves),
+        leaveIds: Array.from(selectedLeaves) as Id<"leaveRequests">[],
         reviewerId: user!.id as Id<"users">,
         comment: comment || undefined,
       });
 
-      toast.success(t('superadmin.bulkActions.alerts.approved', { count: result.approved }));
+      toast.success(t('superadmin.bulkActions.alerts.approved', { count: result.approved.length }));
       if (result.errors.length > 0) {
         toast.warning(t('superadmin.bulkActions.alerts.errors', { errors: result.errors.join(", ") }));
       }
@@ -104,12 +104,12 @@ export default function BulkActionsPage() {
 
     try {
       const result = await bulkReject({
-        leaveIds: Array.from(selectedLeaves),
+        leaveIds: Array.from(selectedLeaves) as Id<"leaveRequests">[],
         reviewerId: user!.id as Id<"users">,
         comment: comment || t('superadmin.bulkActions.rejectedInBulk'),
       });
 
-      toast.success(t('superadmin.bulkActions.alerts.rejected', { count: result.rejected }));
+      toast.success(t('superadmin.bulkActions.alerts.rejected', { count: result.rejected.length }));
       if (result.errors.length > 0) {
         toast.warning(t('superadmin.bulkActions.alerts.errors', { errors: result.errors.join(", ") }));
       }
@@ -139,7 +139,7 @@ export default function BulkActionsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
-                ✅ {t('superadmin.bulkActions.title')}
+                {t('superadmin.bulkActions.title')}
               </h1>
               <p className="text-muted-foreground">
                 {t('superadmin.bulkActions.subtitle')}

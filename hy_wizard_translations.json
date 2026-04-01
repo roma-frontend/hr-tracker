@@ -1,4 +1,52 @@
 {
+  "driverWizard": {
+    "submit": "Պատվիրել վարորդ",
+    "steps": {
+      "type": {
+        "title": "Ուղևորության տեսակ",
+        "description": "Ի՞նչ տեսակի ուղևորություն է անհրաժեշտ",
+        "typeLabel": "Ուղևորության տեսակ"
+      },
+      "route": {
+        "title": "Մարշրուտ",
+        "description": "Ո՞ւր պետք է գնաք",
+        "fromLabel": "Որտեղից *",
+        "fromPlaceholder": "Մեկնման վայր",
+        "toLabel": "Ո՞ւր *",
+        "toPlaceholder": "Ժամանման վայր",
+        "purposeLabel": "Ուղևորության նպատակ *",
+        "purposePlaceholder": "Օրինակ՝ հանդիպում հաճախորդի հետ",
+        "passengerCountLabel": "Ուղևորների քանակ *"
+      },
+      "driver": {
+        "title": "Վարորդի ընտրություն",
+        "description": "Ընտրեք հասանելի վարորդ",
+        "selectLabel": "Վարորդ",
+        "noDrivers": "Հասանելի վարորդներ չկան"
+      },
+      "datetime": {
+        "title": "Ամսաթիվ և ժամանակ",
+        "description": "Ե՞րբ է ձեզ անհրաժեշտ վարորդ",
+        "dateLabel": "Ամսաթիվ *",
+        "timeLabel": "Ժամանակ *",
+        "notesLabel": "Լրացուցիչ նշումներ",
+        "notesPlaceholder": "Ցանկացած հատուկ հրահանգներ..."
+      }
+    },
+    "types": {
+      "airport": "Օդանավակայան",
+      "airportDesc": "Տրանսֆեր օդանավակայան",
+      "officeTransfer": "Գրասենյակի տրանսֆեր",
+      "officeTransferDesc": "Ուղևորություն գրասենյակների միջև",
+      "clientMeeting": "Հանդիպում հաճախորդի հետ",
+      "clientMeetingDesc": "Տրանսպորտ հանդիպման համար"
+    },
+    "toast": {
+      "success": "Վարորդի հայտը ուղարկված է!",
+      "error": "Սխալ վարորդ պատվիրելիս",
+      "noOrg": "Կազմակերպություն չի գտնվել"
+    }
+  },
   "taskWizard": {
     "submit": "Ստեղծել խնդիր",
     "steps": {

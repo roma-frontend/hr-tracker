@@ -152,7 +152,7 @@ export default function EmergencyDashboardPage() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-3xl md:text-4xl font-bold" style={{ color: "var(--text-primary)" }}>
-                  🚨 {t('superadmin.emergency.title')}
+                  {t('superadmin.emergency.title')}
                 </h1>
                 <Badge className={`${getPriorityColor(priorityLevel)} text-lg px-4 py-1`}>
                   {priorityLevel === "critical" && "🔴"}

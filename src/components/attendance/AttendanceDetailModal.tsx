@@ -212,7 +212,7 @@ record, open, onClose }: AttendanceDetailModalProps) {
                     </div>
                     {record.overtimeMinutes && record.overtimeMinutes > 0 && (
                       <p className="text-xs text-sky-400 mt-1">
-                        +{formatDuration(record.overtimeMinutes)} overtime
+                        +{formatDuration(record.overtimeMinutes)} {t('attendanceExtra.overtime') || 'overtime'}
                       </p>
                     )}
                   </div>
@@ -245,15 +245,15 @@ record, open, onClose }: AttendanceDetailModalProps) {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="text-center">
                       <p className="text-xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Days worked</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('attendanceExtra.daysWorked')}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-xl font-bold text-green-500">{monthlyStats.punctualityRate}%</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Punctuality</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('attendanceExtra.punctuality')}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-xl font-bold text-orange-500">{monthlyStats.lateDays}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Late days</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('attendanceExtra.lateDays') || 'Late days'}</p>
                     </div>
                   </div>
                 </div>

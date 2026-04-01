@@ -617,6 +617,7 @@
       "exitMode": "Ելք ռեժիմից",
       "searchUser": "Փնտրել օգտատեր",
       "searchPlaceholder": "user@example.com կամ անուն...",
+      "searchDesc": "Մուտքագրեք էլ. փոստ կամ անուն փնտրելու համար",
       "noUsersFound": "Օգտատերեր չեն գտնվել",
       "history": "Իմպերսոնացիայի պատմություն",
       "historySubtitle": "Վերջին 20 սեսիաներ",
@@ -1298,6 +1299,7 @@
     "allStatusesFilter": "Բոլոր կարգավիճակները"
   },
   "leaveStats": {
+    "burnoutPrevention": "Հոգնածության կանխարգելում",
     "burnoutRisk": "Հոգնածության ռիսկ",
     "notOnLeave": "Դուք արձակուրդում չեք եղել {{days}} օր",
     "lastLeave": "Վերջին արձակուրդ",
@@ -1824,7 +1826,9 @@
     "attachments": "Կցորդներ",
     "registered": "Գրանցված",
     "leaveBalances": "Остатки отпусков",
-    "phone": "Հեռախոսահամար"
+    "phone": "Հեռախոսահամար",
+    "userId": "Օգտատիրոջ ID",
+    "email": "Էլ. փոստ"
   },
   "forms": {
     "required": "Պարտադիր",
@@ -1897,7 +1901,8 @@
     "userId": "Օգտատիրոջ ID",
     "activityStats": "Ակտիվության վիճակագրություն",
     "currentAvatar": "Ընթացիկ ավատար",
-    "phonePlaceholder": "+1 (555) 123-4567"
+    "phonePlaceholder": "+1 (555) 123-4567",
+    "roleManagedByAdmin": "Ձեր դերը և բաժինը կառավարվում են ձեր ադմինիստրատորի կողմից: Դիմեք նրան փոփոխություններ կատարելու համար:"
   },
   "modals": {
     "assignSupervisor": {
@@ -2026,7 +2031,12 @@
     "onlyAdminsCanAccess": "Միայն ադմինները կարող են մուտք գործել այս էջ",
     "backToHome": "Վերադառնալ գլխավոր էջ",
     "yourEmail": "Ձեր էլ. հասցեն",
-    "role": "Դեր"
+    "role": "Դեր",
+    "notCheckedInWarning": "Դուք չեք նշել ներկայությունը այսօր",
+    "comprehensiveAnalysis": "Համապարփակ վերլուծություն",
+    "memberSince": "Անդամ է սկսած",
+    "activityStats": "Ակտիվության վիճակագրություն",
+    "emergencyDashboard": "Արտակարգ իրավիճակների վահանակ"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Հաշվետվություններ և վերլուծություն",
@@ -4554,6 +4564,7 @@
     "runError": "Չհաջողվեց մեկնարկել ավտոմատացումը",
     "running": "Կատարվում է...",
     "runNow": "Մեկնարկել հիմա",
+    "manualRun": "Ձեռքով ավտոմատացման մեկնարկ",
     "stats": {
       "totalTasks": "Ընդհանուր խնդիրներ",
       "completed": "Ավարտված",

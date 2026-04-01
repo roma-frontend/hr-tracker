@@ -117,7 +117,7 @@ export default React.memo(function LeaveStats({ userId }: LeaveStatsProps) {
             ) : (
               <CheckCircle className="w-5 h-5 text-green-500" />
             )}
-            🏖️ Burnout Prevention
+            🏖️ {t('leaveStats.burnoutPrevention')}
           </CardTitle>
         </CardHeader>
         <CardContent>

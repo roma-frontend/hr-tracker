@@ -114,7 +114,7 @@ export default function HelpSupportPage() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold" style={{ color: "var(--text-primary)" }}>
-                  🆘 {t('help.title')}
+                  {t('help.title')}
                 </h1>
                 {userOrg && (
                   <Badge

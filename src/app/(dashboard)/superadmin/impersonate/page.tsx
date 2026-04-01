@@ -122,7 +122,7 @@ export default function ImpersonationPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
-                👤 {t('superadmin.impersonate.title')}
+                {t('superadmin.impersonate.title')}
               </h1>
               <p className="text-muted-foreground">
                 {t('superadmin.impersonate.subtitle')}

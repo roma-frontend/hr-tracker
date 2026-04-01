@@ -135,6 +135,11 @@ export function DashboardBanners({
   }
   const showLeaveWarning = lowBalances.length > 0;
 
+  // Don't render anything if no banners are active
+  if (!showLoginSuccess && !showSuspiciousLogin && !showSessionExpiry && !showWelcome && !showLeaveWarning) {
+    return null;
+  }
+
   return (
     <div className="space-y-3">
       {/* 1. Login success — green */}

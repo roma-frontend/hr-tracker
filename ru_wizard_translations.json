@@ -13,7 +13,16 @@
         "fromLabel": "Откуда *",
         "fromPlaceholder": "Место подачи",
         "toLabel": "Куда *",
-        "toPlaceholder": "Место назначения"
+        "toPlaceholder": "Место назначения",
+        "purposeLabel": "Цель поездки *",
+        "purposePlaceholder": "Например: встреча с клиентом",
+        "passengerCountLabel": "Количество пассажиров *"
+      },
+      "driver": {
+        "title": "Выбор водителя",
+        "description": "Выберите доступного водителя",
+        "selectLabel": "Водитель",
+        "noDrivers": "Нет доступных водителей"
       },
       "datetime": {
         "title": "Дата и время",
@@ -25,16 +34,17 @@
       }
     },
     "types": {
-      "oneWay": "В одну сторону",
-      "oneWayDesc": "Одиночная поездка",
-      "roundTrip": "Туда и обратно",
-      "roundTripDesc": "Поездка с возвращением",
-      "corporate": "Корпоративное мероприятие",
-      "corporateDesc": "Транспорт для компании"
+      "airport": "В аэропорт",
+      "airportDesc": "Трансфер в аэропорт",
+      "officeTransfer": "Офисный трансфер",
+      "officeTransferDesc": "Поездка между офисами",
+      "clientMeeting": "Встреча с клиентом",
+      "clientMeetingDesc": "Транспорт для встречи"
     },
     "toast": {
       "success": "Заявка на водителя отправлена!",
-      "error": "Ошибка при заказе водителя"
+      "error": "Ошибка при заказе водителя",
+      "noOrg": "Организация не найдена"
     }
   },
   "supportWizard": {

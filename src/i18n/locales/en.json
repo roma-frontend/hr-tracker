@@ -617,6 +617,7 @@
       "exitMode": "Exit Mode",
       "searchUser": "Search User",
       "searchPlaceholder": "user@example.com or name...",
+      "searchDesc": "Enter email or name to search",
       "noUsersFound": "No users found",
       "history": "Impersonation History",
       "historySubtitle": "Last 20 sessions",
@@ -1294,6 +1295,7 @@
     "allStatusesFilter": "All Statuses"
   },
   "leaveStats": {
+    "burnoutPrevention": "Burnout Prevention",
     "burnoutRisk": "Burnout Risk",
     "notOnLeave": "You haven't been on leave for {{days}} days",
     "lastLeave": "Last leave",
@@ -1824,7 +1826,9 @@
     "attachments": "Attachments",
     "registered": "Registered",
     "leaveBalances": "Leave Balances",
-    "phone": "Phone"
+    "phone": "Phone",
+    "userId": "User ID",
+    "email": "Email"
   },
   "forms": {
     "required": "*",
@@ -1897,7 +1901,8 @@
     "userId": "User ID",
     "activityStats": "Activity Stats",
     "currentAvatar": "Current avatar",
-    "phonePlaceholder": "+1 (555) 123-4567"
+    "phonePlaceholder": "+1 (555) 123-4567",
+    "roleManagedByAdmin": "Your role and department are managed by your administrator. Contact them to request changes."
   },
   "modals": {
     "assignSupervisor": {
@@ -2026,7 +2031,12 @@
     "onlyAdminsCanAccess": "Only admins can access this page",
     "backToHome": "Back to Home",
     "yourEmail": "Your email",
-    "role": "Role"
+    "role": "Role",
+    "notCheckedInWarning": "You haven't checked in today",
+    "comprehensiveAnalysis": "Comprehensive Analysis",
+    "memberSince": "Member Since",
+    "activityStats": "Activity Stats",
+    "emergencyDashboard": "Emergency Dashboard"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Reports & Analytics",
@@ -4811,6 +4821,7 @@
     "runError": "Failed to run automation",
     "running": "Running...",
     "runNow": "Run Now",
+    "manualRun": "Manual automation run",
     "stats": {
       "totalTasks": "Total Tasks",
       "completed": "Completed",
