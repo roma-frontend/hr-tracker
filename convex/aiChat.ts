@@ -4,6 +4,7 @@
 
 import { query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 
 export const getConversations = query({
   args: { userId: v.id("users") },
@@ -13,7 +14,7 @@ export const getConversations = query({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .order("desc")
       .collect();
-    
+
     return conversations.map(conv => ({
       ...conv,
       messages: [] as Array<{ _id: Id<"aiMessages">; content: string; role: string }>, // Don't load all messages here
