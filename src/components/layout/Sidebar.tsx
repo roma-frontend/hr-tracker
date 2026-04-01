@@ -168,11 +168,10 @@ export function Sidebar() {
               </div>
               <div
                 style={{
-                  opacity: collapsed ? 0 : 1,
-                  transition: collapsed
-                    ? "opacity 150ms"
-                    : "opacity 150ms 600ms",
-                }}
+              opacity: collapsed ? 0 : 1,
+              transition: `opacity 150ms ${collapsed ? "" : "600ms"
+                }, all 600ms cubic-bezier(0.34, 1.56, 0.64, 1)`
+            }}
               >
                 <h1 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
                   {t('sidebar.appName')}
@@ -350,12 +349,6 @@ export function Sidebar() {
                 {/* Label */}
                 <span
                   className="flex-1 text-sm font-medium truncate"
-                  style={{
-                    opacity: collapsed ? 0 : 1,
-                    transition: collapsed
-                      ? "opacity 150ms"
-                      : "opacity 150ms 600ms",
-                  }}
                 >
                   {t(item.labelKey)}
                 </span>

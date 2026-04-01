@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Proceed with login ───────────────────────────────────────────────────
-    const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const sessionToken = crypto.randomUUID();
     const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
     const res = await fetch(`${CONVEX_URL}/api/mutation`, {

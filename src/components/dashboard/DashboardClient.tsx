@@ -202,7 +202,7 @@ export default function DashboardClient() {
           </motion.p>
         </div>
         <div className="flex gap-1.5 sm:gap-2 flex-wrap">
-          {user?.email?.toLowerCase() === "romangulanyan@gmail.com" && (
+          {user?.role === 'superadmin' && (
             <>
               <Button asChild size="sm" variant="outline">
                 <Link href="/superadmin/organizations"><Building2 className="w-4 h-4" />{t('dashboard.manageOrgs')}</Link>

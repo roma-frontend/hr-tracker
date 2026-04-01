@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, DEPARTMENTS, type LeaveType } from "@/lib/types";
+import { LEAVE_TYPE_COLORS, DEPARTMENTS, getLeaveTypeLabel, type LeaveType } from "@/lib/types";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -61,11 +61,11 @@ export default function ReportsPage() {
   // Pie data
   const pieData = useMemo(() => {
     return (Object.keys(LEAVE_TYPE_COLORS) as LeaveType[]).map((key) => ({
-      name: LEAVE_TYPE_LABELS[key as LeaveType],
+      name: getLeaveTypeLabel(key as LeaveType, t),
       value: leaves?.filter((r) => r.type === key).length ?? 0,
       color: LEAVE_TYPE_COLORS[key as LeaveType],
     })).filter((d) => d.value > 0);
-  }, [leaves]);
+  }, [leaves, t]);
 
   // Department breakdown
   const deptData = useMemo(() => {

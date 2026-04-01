@@ -14,7 +14,9 @@ const nextConfig = {
   productionBrowserSourceMaps: false, // Disable for production (use hidden-source-map instead)
 
   // Ignore TS errors during build (for deployment)
-  typescript: { ignoreBuildErrors: true },
+  // NOTE: This should be false to catch type errors early.
+  // Temporarily enabled only when TS migration is in progress.
+  typescript: { ignoreBuildErrors: false },
 
   // Transpile Radix UI icons
   transpilePackages: ['@radix-ui/react-icons', 'face-api.js'],

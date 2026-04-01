@@ -12,6 +12,8 @@ import { ShieldLoader } from "@/components/ui/ShieldLoader";
 import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
 import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 import { ReactQueryProvider } from "@/components/providers/ReactQueryProvider";
+// StatusUpdateProvider is already in root layout (src/app/layout.tsx)
+// import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
 
 function SidebarSkeleton() {
   return (
@@ -153,8 +155,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <ReactQueryProvider>
-        <StatusUpdateProvider>
-          <div className="flex h-screen bg-[var(--background)] overflow-hidden">
+        <div className="flex h-screen bg-[var(--background)] overflow-hidden">
             {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
             <Sidebar />
 
@@ -211,8 +212,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 />
               </>
             )}
-          </div>
-        </StatusUpdateProvider>
+        </div>
       </ReactQueryProvider>
     </ErrorBoundary>
   );

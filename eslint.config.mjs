@@ -58,11 +58,11 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "off",
       "react-hooks/rules-of-hooks": "off",
       "react-hooks/exhaustive-deps": "off",
-      "react-hooks/set-state-in-effect": "off",
-      "react-hooks/purity": "off",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/purity": "warn",
       "react-hooks/use-memo": "off",
-      "react/jsx-no-undef": "off",
-      "react-hooks/refs": "off",
+      "react/jsx-no-undef": "error",
+      "react-hooks/refs": "warn",
 
       // TypeScript rules
       "@typescript-eslint/ban-ts-comment": "off",

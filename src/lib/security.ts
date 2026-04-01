@@ -3,7 +3,7 @@
  * Комплексная система безопасности для защиты от всех типов атак
  */
 
-import { randomBytes, createHash, createHmac } from 'crypto';
+import { randomBytes, createHash, createHmac, timingSafeEqual } from 'crypto';
 
 // ═══════════════════════════════════════════════════════════════
 // CSRF PROTECTION
@@ -35,15 +35,17 @@ export function generateCSRFToken(): string {
  */
 export function verifyCSRFToken(token: string): boolean {
   if (!token || typeof token !== 'string') return false;
-  
+
   const [tokenPart, signature] = token.split('.');
   if (!tokenPart || !signature) return false;
-  
+
   const expectedSignature = createHmac('sha256', CSRF_SECRET)
     .update(tokenPart)
     .digest('hex');
-  
-  return signature === expectedSignature;
+
+  // Use timing-safe comparison to prevent timing attacks
+  if (signature.length !== expectedSignature.length) return false;
+  return timingSafeEqual(Buffer.from(signature, 'utf8'), Buffer.from(expectedSignature, 'utf8'));
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -248,20 +250,25 @@ export function generateSecurePassword(length: number = 16): string {
   
   let password = '';
   
-  // Гарантируем наличие каждого типа символов
-  password += lowercase[Math.floor(Math.random() * lowercase.length)];
-  password += uppercase[Math.floor(Math.random() * uppercase.length)];
-  password += numbers[Math.floor(Math.random() * numbers.length)];
-  password += special[Math.floor(Math.random() * special.length)];
-  
+  // Гарантируем наличие каждого типа символов (crypto-safe)
+  password += lowercase[crypto.getRandomValues(new Uint8Array(1))[0] % lowercase.length];
+  password += uppercase[crypto.getRandomValues(new Uint8Array(1))[0] % uppercase.length];
+  password += numbers[crypto.getRandomValues(new Uint8Array(1))[0] % numbers.length];
+  password += special[crypto.getRandomValues(new Uint8Array(1))[0] % special.length];
+
   // Заполняем остальное
   for (let i = password.length; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * allChars.length);
+    const randomIndex = crypto.getRandomValues(new Uint8Array(1))[0] % allChars.length;
     password += allChars[randomIndex];
   }
-  
-  // Перемешиваем
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+
+  // Перемешиваем с Fisher-Yates (crypto-safe)
+  const arr = password.split('');
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = crypto.getRandomValues(new Uint8Array(1))[0] % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
