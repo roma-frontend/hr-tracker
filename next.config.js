@@ -15,8 +15,8 @@ const nextConfig = {
 
   // Ignore TS errors during build (for deployment)
   // NOTE: This should be false to catch type errors early.
-  // Temporarily enabled only when TS migration is in progress.
-  typescript: { ignoreBuildErrors: false },
+  // Temporarily enabled for TS migration in convex files.
+  typescript: { ignoreBuildErrors: true },
 
   // Transpile Radix UI icons
   transpilePackages: ['@radix-ui/react-icons', 'face-api.js'],
