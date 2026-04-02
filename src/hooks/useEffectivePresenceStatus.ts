@@ -26,6 +26,8 @@ export function useEffectivePresenceStatus(
 
     // Check if user has an approved leave today
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    if (!today) return presenceStatus;
+
     const hasActiveLeave = leaves.some((leave) => {
       return leave.status === 'approved' && leave.startDate <= today && today <= leave.endDate;
     });

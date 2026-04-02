@@ -567,14 +567,15 @@ export function EmployeesClient() {
             {/* GRID VIEW */}
             {viewMode === 'grid' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence>
                   {filtered.map((emp: any, i: any) => {
                     const roleConf = ROLE_CONFIG[emp.role as keyof typeof ROLE_CONFIG];
                     const typeConf =
                       TYPE_CONFIG[(emp as any).employeeType as keyof typeof TYPE_CONFIG] ||
                       TYPE_CONFIG.staff;
                     const RoleIcon = roleConf.icon;
-                    const presence = getPresenceBadge((emp as any).presenceStatus);
+                    const presenceStatus = (emp as any).presenceStatus;
+                    const presence = presenceStatus ? getPresenceBadge(presenceStatus) : null;
                     return (
                       <motion.div
                         key={emp._id}
@@ -682,9 +683,9 @@ export function EmployeesClient() {
                               </span>
                             ) : (
                               <span
-                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence?.cls ?? ''}`}
                               >
-                                {t(presence.labelKey)}
+                                {t(presence?.labelKey ?? 'common.unknown')}
                               </span>
                             )}
                           </div>
@@ -757,14 +758,15 @@ export function EmployeesClient() {
                     {t('dashboard.type')}
                   </div>
                 </div>
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence>
                   {filtered.map((emp: any, i: any) => {
                     const roleConf = ROLE_CONFIG[emp.role as keyof typeof ROLE_CONFIG];
                     const typeConf =
                       TYPE_CONFIG[(emp as any).employeeType as keyof typeof TYPE_CONFIG] ||
                       TYPE_CONFIG.staff;
                     const RoleIcon = roleConf.icon;
-                    const presence = getPresenceBadge((emp as any).presenceStatus);
+                    const presenceStatus = (emp as any).presenceStatus;
+                    const presence = presenceStatus ? getPresenceBadge(presenceStatus) : null;
                     return (
                       <motion.div
                         key={emp._id}
@@ -834,9 +836,9 @@ export function EmployeesClient() {
                             </span>
                           )}
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence.cls}`}
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence?.cls ?? ''}`}
                           >
-                            {t(presence.labelKey)}
+                            {t(presence?.labelKey ?? 'common.unknown')}
                           </span>
                           <span
                             className="text-xs px-2 py-0.5 rounded-full font-medium"
@@ -865,9 +867,9 @@ export function EmployeesClient() {
                         {/* Presence status - desktop only */}
                         <div className="hidden sm:block sm:col-span-2">
                           <span
-                            className={`text-xs px-2 py-1 rounded-full font-medium ${presence.cls}`}
+                            className={`text-xs px-2 py-1 rounded-full font-medium ${presence?.cls ?? ''}`}
                           >
-                            {t(presence.labelKey)}
+                            {t(presence?.labelKey ?? 'common.unknown')}
                           </span>
                         </div>
 

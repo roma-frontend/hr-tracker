@@ -16,7 +16,7 @@ interface JwtPayload {
 export function decodeJwt(token: string): JwtPayload | null {
   try {
     const parts = token.split('.');
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3 || !parts[1]) return null;
 
     const decoded = JSON.parse(atob(parts[1]));
     return decoded as JwtPayload;

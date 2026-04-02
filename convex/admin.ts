@@ -1,26 +1,24 @@
-import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import { v } from 'convex/values';
+import { query, mutation } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 /**
  * Get cost analysis data for admin dashboard
  */
 export const getCostAnalysis = query({
   args: {
-    period: v.optional(
-      v.union(v.literal("month"), v.literal("quarter"), v.literal("year")),
-    ),
+    period: v.optional(v.union(v.literal('month'), v.literal('quarter'), v.literal('year'))),
   },
   handler: async (ctx, args) => {
-    const period = args.period || "month";
+    const period = args.period || 'month';
 
     // Calculate date range
     const now = new Date();
     let startDate: Date;
 
-    if (period === "month") {
+    if (period === 'month') {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else if (period === "quarter") {
+    } else if (period === 'quarter') {
       const quarter = Math.floor(now.getMonth() / 3);
       startDate = new Date(now.getFullYear(), quarter * 3, 1);
     } else {
@@ -31,17 +29,14 @@ export const getCostAnalysis = query({
 
     // Get all approved leave requests in the period
     const leaves = await ctx.db
-      .query("leaveRequests")
+      .query('leaveRequests')
       .filter((q) =>
-        q.and(
-          q.eq(q.field("status"), "approved"),
-          q.gte(q.field("createdAt"), startTimestamp),
-        ),
+        q.and(q.eq(q.field('status'), 'approved'), q.gte(q.field('createdAt'), startTimestamp)),
       )
       .collect();
 
     // Get all users
-    const users = await ctx.db.query("users").collect();
+    const users = await ctx.db.query('users').collect();
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Calculate costs by department
@@ -55,13 +50,13 @@ export const getCostAnalysis = query({
 
       // Simplified cost calculation: assume average daily cost
       // In reality, you'd want to store salary information
-      const dailyCost = user.employeeType === "contractor" ? 150 : 200; // USD per day
+      const dailyCost = user.employeeType === 'contractor' ? 150 : 200; // USD per day
       const cost = leave.days * dailyCost;
 
       totalCost += cost;
 
       // By department
-      const dept = user.department || "Unknown";
+      const dept = user.department || 'Unknown';
       departmentCosts.set(dept, (departmentCosts.get(dept) || 0) + cost);
 
       // By type
@@ -70,13 +65,11 @@ export const getCostAnalysis = query({
 
     return {
       totalCost,
-      byDepartment: Array.from(departmentCosts.entries()).map(
-        ([name, cost]) => ({
-          name,
-          cost,
-          percentage: totalCost > 0 ? (cost / totalCost) * 100 : 0,
-        }),
-      ),
+      byDepartment: Array.from(departmentCosts.entries()).map(([name, cost]) => ({
+        name,
+        cost,
+        percentage: totalCost > 0 ? (cost / totalCost) * 100 : 0,
+      })),
       byType: Array.from(typeCosts.entries()).map(([type, cost]) => ({
         type,
         cost,
@@ -96,17 +89,12 @@ export const detectConflicts = query({
   handler: async (ctx) => {
     // Get all approved and pending leaves
     const leaves = await ctx.db
-      .query("leaveRequests")
-      .filter((q) =>
-        q.or(
-          q.eq(q.field("status"), "approved"),
-          q.eq(q.field("status"), "pending"),
-        ),
-      )
+      .query('leaveRequests')
+      .filter((q) => q.or(q.eq(q.field('status'), 'approved'), q.eq(q.field('status'), 'pending')))
       .collect();
 
     // Get all users
-    const users = await ctx.db.query("users").collect();
+    const users = await ctx.db.query('users').collect();
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Group by department and date
@@ -115,7 +103,7 @@ export const detectConflicts = query({
       department: string;
       date: string;
       employeesOut: string[];
-      severity: "critical" | "warning" | "info";
+      severity: 'critical' | 'warning' | 'info';
       recommendation: string;
     }> = [];
 
@@ -125,7 +113,7 @@ export const detectConflicts = query({
       const user = userMap.get(leave.userId);
       if (!user) continue;
 
-      const dept = user.department || "Unknown";
+      const dept = user.department || 'Unknown';
       if (!deptLeaves.has(dept)) {
         deptLeaves.set(dept, []);
       }
@@ -135,9 +123,7 @@ export const detectConflicts = query({
     // Check each department for conflicts
     for (const [dept, deptLeaveList] of deptLeaves.entries()) {
       // Get department size
-      const deptUsers = users.filter(
-        (u) => (u.department || "Unknown") === dept,
-      );
+      const deptUsers = users.filter((u) => (u.department || 'Unknown') === dept);
       const deptSize = deptUsers.length;
 
       // Check each day for overlaps
@@ -148,13 +134,13 @@ export const detectConflicts = query({
         const end = new Date(leave.endDate);
 
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          const dateStr = d.toISOString().split('T')[0] ?? '';
-          if (!dateOverlaps.has(dateStr)) {
+          const dateStr = d.toISOString().split('T')[0];
+          if (dateStr && !dateOverlaps.has(dateStr)) {
             dateOverlaps.set(dateStr, new Set());
           }
           const user = userMap.get(leave.userId);
-          if (user) {
-            dateOverlaps.get(dateStr)!.add(user.name);
+          if (user && dateStr) {
+            dateOverlaps.get(dateStr)?.add(user.name);
           }
         }
       }
@@ -170,7 +156,7 @@ export const detectConflicts = query({
             department: dept,
             date,
             employeesOut: Array.from(employeesOut),
-            severity: "critical",
+            severity: 'critical',
             recommendation: `Critical: ${outCount}/${deptSize} employees out (${percentage.toFixed(0)}%). Consider rescheduling some leaves.`,
           });
         } else if (percentage >= 30) {
@@ -179,7 +165,7 @@ export const detectConflicts = query({
             department: dept,
             date,
             employeesOut: Array.from(employeesOut),
-            severity: "warning",
+            severity: 'warning',
             recommendation: `Warning: ${outCount}/${deptSize} employees out (${percentage.toFixed(0)}%). Monitor workload.`,
           });
         }
@@ -188,7 +174,7 @@ export const detectConflicts = query({
 
     return conflicts.sort((a, b) => {
       if (a.severity === b.severity) return a.date.localeCompare(b.date);
-      return a.severity === "critical" ? -1 : 1;
+      return a.severity === 'critical' ? -1 : 1;
     });
   },
 });
@@ -203,48 +189,46 @@ export const getSmartSuggestions = query({
       id: string;
       title: string;
       description: string;
-      impact: "high" | "medium" | "low";
-      category: "optimization" | "cost" | "conflict" | "policy";
+      impact: 'high' | 'medium' | 'low';
+      category: 'optimization' | 'cost' | 'conflict' | 'policy';
     }> = [];
 
     // Get all users and leaves
-    const users = await ctx.db.query("users").collect();
+    const users = await ctx.db.query('users').collect();
     const leaves = await ctx.db
-      .query("leaveRequests")
-      .filter((q) => q.eq(q.field("status"), "approved"))
+      .query('leaveRequests')
+      .filter((q) => q.eq(q.field('status'), 'approved'))
       .collect();
 
     // Suggestion 1: Users with high leave balances
     const highBalanceUsers = users.filter((u) => {
-      const totalBalance =
-        u.paidLeaveBalance + u.sickLeaveBalance + u.familyLeaveBalance;
+      const totalBalance = u.paidLeaveBalance + u.sickLeaveBalance + u.familyLeaveBalance;
       return totalBalance > 30; // More than 30 days total
     });
 
     if (highBalanceUsers.length > 0) {
       suggestions.push({
-        id: "high-balance",
-        title: "Encourage Leave Usage",
+        id: 'high-balance',
+        title: 'Encourage Leave Usage',
         description: `${highBalanceUsers.length} employees have high leave balances (>30 days). Encourage them to use their leave to avoid year-end issues.`,
-        impact: "medium",
-        category: "policy",
+        impact: 'medium',
+        category: 'policy',
       });
     }
 
     // Suggestion 2: Users with low balances
     const lowBalanceUsers = users.filter((u) => {
-      const totalBalance =
-        u.paidLeaveBalance + u.sickLeaveBalance + u.familyLeaveBalance;
+      const totalBalance = u.paidLeaveBalance + u.sickLeaveBalance + u.familyLeaveBalance;
       return totalBalance < 5; // Less than 5 days total
     });
 
     if (lowBalanceUsers.length > 0) {
       suggestions.push({
-        id: "low-balance",
-        title: "Review Leave Policies",
+        id: 'low-balance',
+        title: 'Review Leave Policies',
         description: `${lowBalanceUsers.length} employees have very low leave balances (<5 days). Consider reviewing workload distribution.`,
-        impact: "high",
-        category: "policy",
+        impact: 'high',
+        category: 'policy',
       });
     }
 
@@ -253,30 +237,28 @@ export const getSmartSuggestions = query({
     for (const leave of leaves) {
       const user = users.find((u) => u._id === leave.userId);
       if (user) {
-        const dept = user.department || "Unknown";
+        const dept = user.department || 'Unknown';
         deptLeaves.set(dept, (deptLeaves.get(dept) || 0) + 1);
       }
     }
 
-    const allDepts = new Set(users.map((u) => u.department || "Unknown"));
-    const deptsWithoutLeaves = Array.from(allDepts).filter(
-      (d) => !deptLeaves.has(d),
-    );
+    const allDepts = new Set(users.map((u) => u.department || 'Unknown'));
+    const deptsWithoutLeaves = Array.from(allDepts).filter((d) => !deptLeaves.has(d));
 
     if (deptsWithoutLeaves.length > 0) {
       suggestions.push({
-        id: "no-planned-leaves",
-        title: "Departments Without Planned Leaves",
-        description: `${deptsWithoutLeaves.join(", ")} have no upcoming leaves. This might indicate burnout risk.`,
-        impact: "medium",
-        category: "optimization",
+        id: 'no-planned-leaves',
+        title: 'Departments Without Planned Leaves',
+        description: `${deptsWithoutLeaves.join(', ')} have no upcoming leaves. This might indicate burnout risk.`,
+        impact: 'medium',
+        category: 'optimization',
       });
     }
 
     // Suggestion 4: Cost optimization
     const contractorLeaves = leaves.filter((l) => {
       const user = users.find((u) => u._id === l.userId);
-      return user?.employeeType === "contractor";
+      return user?.employeeType === 'contractor';
     });
 
     if (contractorLeaves.length > 0) {
@@ -284,11 +266,11 @@ export const getSmartSuggestions = query({
       const estimatedCost = totalDays * 150; // $150/day for contractors
 
       suggestions.push({
-        id: "contractor-costs",
-        title: "Contractor Leave Costs",
+        id: 'contractor-costs',
+        title: 'Contractor Leave Costs',
         description: `${contractorLeaves.length} contractor leaves totaling ${totalDays} days. Estimated cost: $${estimatedCost.toLocaleString()}.`,
-        impact: "high",
-        category: "cost",
+        impact: 'high',
+        category: 'cost',
       });
     }
 
@@ -307,12 +289,12 @@ export const getCalendarExportData = query({
   handler: async (ctx, args) => {
     // Get all approved leaves
     const leaves = await ctx.db
-      .query("leaveRequests")
-      .filter((q) => q.eq(q.field("status"), "approved"))
+      .query('leaveRequests')
+      .filter((q) => q.eq(q.field('status'), 'approved'))
       .collect();
 
     // Get all users
-    const users = await ctx.db.query("users").collect();
+    const users = await ctx.db.query('users').collect();
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Filter by date range if provided
@@ -330,12 +312,12 @@ export const getCalendarExportData = query({
       const user = userMap.get(leave.userId);
       return {
         id: leave._id,
-        title: `${user?.name || "Unknown"} - ${leave.type} leave`,
+        title: `${user?.name || 'Unknown'} - ${leave.type} leave`,
         startDate: leave.startDate,
         endDate: leave.endDate,
         description: leave.reason,
-        userName: user?.name || "Unknown",
-        department: user?.department || "Unknown",
+        userName: user?.name || 'Unknown',
+        department: user?.department || 'Unknown',
         type: leave.type,
       };
     });
@@ -350,8 +332,8 @@ export const getCalendarExportData = query({
  */
 export const sendServiceBroadcast = mutation({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"), // the superadmin making the request
+    organizationId: v.id('organizations'),
+    userId: v.id('users'), // the superadmin making the request
     title: v.string(), // e.g. "System Maintenance"
     content: v.string(), // the announcement message
     icon: v.optional(v.string()), // emoji e.g. "⚠️", "ℹ️", "🔧", "🎉"
@@ -364,23 +346,21 @@ export const sendServiceBroadcast = mutation({
 
     // Verify user is superadmin
     const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== "superadmin") {
-      throw new Error("Only superadmin can send service broadcasts");
+    if (!user || user.role !== 'superadmin') {
+      throw new Error('Only superadmin can send service broadcasts');
     }
 
-    console.warn(
-      `[sendServiceBroadcast] Superadmin: ${user.name} (${user.email})`,
-    );
+    console.warn(`[sendServiceBroadcast] Superadmin: ${user.name} (${user.email})`);
 
     // Get or create the "System Announcements" group chat for this organization
     let announcementConv = await ctx.db
-      .query("chatConversations")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('chatConversations')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .filter((q) =>
         q.and(
-          q.eq(q.field("type"), "group"),
-          q.eq(q.field("name"), "System Announcements"),
-          q.eq(q.field("isDeleted"), false),
+          q.eq(q.field('type'), 'group'),
+          q.eq(q.field('name'), 'System Announcements'),
+          q.eq(q.field('isDeleted'), false),
         ),
       )
       .first();
@@ -388,11 +368,11 @@ export const sendServiceBroadcast = mutation({
     // If system announcements channel doesn't exist, create it
     if (!announcementConv) {
       const now = Date.now();
-      const convId = await ctx.db.insert("chatConversations", {
+      const convId = await ctx.db.insert('chatConversations', {
         organizationId: args.organizationId,
-        type: "group",
-        name: "System Announcements",
-        description: "Official company-wide announcements and service messages",
+        type: 'group',
+        name: 'System Announcements',
+        description: 'Official company-wide announcements and service messages',
         createdBy: args.userId,
         createdAt: now,
         updatedAt: now,
@@ -406,13 +386,11 @@ export const sendServiceBroadcast = mutation({
 
       // Add all active, approved users to this channel
       const users = await ctx.db
-        .query("users")
-        .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
         .collect();
 
-      console.warn(
-        `[sendServiceBroadcast] Initial creation: Found ${users.length} total users`,
-      );
+      console.warn(`[sendServiceBroadcast] Initial creation: Found ${users.length} total users`);
 
       let addedCount = 0;
       for (const u of users) {
@@ -420,11 +398,11 @@ export const sendServiceBroadcast = mutation({
           console.warn(
             `[sendServiceBroadcast] Adding initial member: ${u.name} (active:${u.isActive}, approved:${u.isApproved})`,
           );
-          await ctx.db.insert("chatMembers", {
+          await ctx.db.insert('chatMembers', {
             conversationId: convId,
             userId: u._id,
             organizationId: args.organizationId,
-            role: u._id === args.userId ? "owner" : "member",
+            role: u._id === args.userId ? 'owner' : 'member',
             unreadCount: 1, // Mark as unread for new members
             isMuted: false,
             joinedAt: now,
@@ -447,11 +425,11 @@ export const sendServiceBroadcast = mutation({
           console.warn(
             `[sendServiceBroadcast] Adding superadmin to channel as owner: ${superadminUser.name}`,
           );
-          await ctx.db.insert("chatMembers", {
+          await ctx.db.insert('chatMembers', {
             conversationId: convId,
             userId: args.userId,
             organizationId: args.organizationId,
-            role: "owner",
+            role: 'owner',
             unreadCount: 0, // Superadmin already saw it
             isMuted: false,
             joinedAt: now,
@@ -469,9 +447,9 @@ export const sendServiceBroadcast = mutation({
         _id: convId,
         _creationTime: now,
         organizationId: args.organizationId,
-        type: "group" as const,
-        name: "System Announcements",
-        description: "Official company-wide announcements and service messages",
+        type: 'group' as const,
+        name: 'System Announcements',
+        description: 'Official company-wide announcements and service messages',
         createdBy: args.userId,
         createdAt: now,
         updatedAt: now,
@@ -482,7 +460,7 @@ export const sendServiceBroadcast = mutation({
 
     // Verify we have the conversation
     if (!announcementConv) {
-      throw new Error("Failed to create or find system announcements channel");
+      throw new Error('Failed to create or find system announcements channel');
     }
 
     console.warn(
@@ -492,36 +470,24 @@ export const sendServiceBroadcast = mutation({
     // Ensure all active, approved users are members of System Announcements channel
     // (needed for new users who joined after the channel was created)
     const allUsers = await ctx.db
-      .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .collect();
 
-    console.warn(
-      `[sendServiceBroadcast] Total users in org: ${allUsers.length}`,
-    );
-    const activeApprovedUsers = allUsers.filter(
-      (u) => u.isActive && u.isApproved,
-    );
-    console.warn(
-      `[sendServiceBroadcast] Active & approved users: ${activeApprovedUsers.length}`,
-    );
+    console.warn(`[sendServiceBroadcast] Total users in org: ${allUsers.length}`);
+    const activeApprovedUsers = allUsers.filter((u) => u.isActive && u.isApproved);
+    console.warn(`[sendServiceBroadcast] Active & approved users: ${activeApprovedUsers.length}`);
     activeApprovedUsers.forEach((u) =>
-      console.warn(
-        `  - ${u.name} (${u.email}) - active:${u.isActive}, approved:${u.isApproved}`,
-      ),
+      console.warn(`  - ${u.name} (${u.email}) - active:${u.isActive}, approved:${u.isApproved}`),
     );
 
     const existingMembers = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation", (q) =>
-        q.eq("conversationId", announcementConv._id),
-      )
+      .query('chatMembers')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', announcementConv._id))
       .collect();
 
-    const existingMemberIds = new Set(
-      existingMembers.map((m) => m.userId.toString()),
-    );
-    const newMemberIds: Id<"users">[] = [];
+    const existingMemberIds = new Set(existingMembers.map((m) => m.userId.toString()));
+    const newMemberIds: Id<'users'>[] = [];
 
     console.warn(
       `[sendServiceBroadcast] Existing members: ${existingMembers.length}, Active users: ${allUsers.filter((u) => u.isActive && u.isApproved).length}`,
@@ -533,23 +499,19 @@ export const sendServiceBroadcast = mutation({
         const userIdStr = u._id.toString();
 
         if (!existingMemberIds.has(userIdStr)) {
-          console.warn(
-            `[sendServiceBroadcast] Adding new member: ${u.name} (${u._id})`,
-          );
-          await ctx.db.insert("chatMembers", {
+          console.warn(`[sendServiceBroadcast] Adding new member: ${u.name} (${u._id})`);
+          await ctx.db.insert('chatMembers', {
             conversationId: announcementConv._id,
             userId: u._id,
             organizationId: args.organizationId,
-            role: u._id === args.userId ? "owner" : "member",
+            role: u._id === args.userId ? 'owner' : 'member',
             unreadCount: 1,
             isMuted: false,
             joinedAt: Date.now(),
           });
           newMemberIds.push(u._id);
         } else {
-          console.warn(
-            `[sendServiceBroadcast] User ${u.name} already a member`,
-          );
+          console.warn(`[sendServiceBroadcast] User ${u.name} already a member`);
         }
       }
     }
@@ -562,11 +524,11 @@ export const sendServiceBroadcast = mutation({
         console.warn(
           `[sendServiceBroadcast] Ensuring superadmin is member: ${superadminUser.name}`,
         );
-        await ctx.db.insert("chatMembers", {
+        await ctx.db.insert('chatMembers', {
           conversationId: announcementConv._id,
           userId: args.userId,
           organizationId: args.organizationId,
-          role: "owner",
+          role: 'owner',
           unreadCount: 0, // Superadmin already saw it
           isMuted: false,
           joinedAt: Date.now(),
@@ -585,14 +547,14 @@ export const sendServiceBroadcast = mutation({
       conversationId: announcementConv._id,
       organizationId: args.organizationId,
       senderId: args.userId,
-      type: "system" as const,
+      type: 'system' as const,
       content: args.content,
       isServiceBroadcast: true,
       broadcastTitle: args.title,
-      broadcastIcon: args.icon || "ℹ️",
+      broadcastIcon: args.icon || 'ℹ️',
       createdAt: now,
       // Include optional fields to ensure message is complete
-      readBy: [] as Array<{ userId: Id<"users">; readAt: number }>,
+      readBy: [] as Array<{ userId: Id<'users'>; readAt: number }>,
       reactions: undefined,
       mentionedUserIds: undefined,
       threadCount: 0,
@@ -601,17 +563,14 @@ export const sendServiceBroadcast = mutation({
       isPinned: false,
     };
 
-    const msgId = await ctx.db.insert("chatMessages", broadcastMessage);
+    const msgId = await ctx.db.insert('chatMessages', broadcastMessage);
 
     console.warn(
       `[sendServiceBroadcast] Message created: ${msgId} in conversation ${announcementConv._id}`,
     );
 
     // Update conversation last message
-    const preview =
-      args.content.length > 100
-        ? args.content.slice(0, 100) + "…"
-        : args.content;
+    const preview = args.content.length > 100 ? args.content.slice(0, 100) + '…' : args.content;
     await ctx.db.patch(announcementConv._id, {
       lastMessageAt: now,
       lastMessageText: `[${args.title}] ${preview}`,
@@ -656,8 +615,8 @@ export const sendServiceBroadcast = mutation({
  */
 export const enableMaintenanceMode = mutation({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"),
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
     title: v.string(),
     message: v.string(),
     startTime: v.number(),
@@ -668,16 +627,16 @@ export const enableMaintenanceMode = mutation({
   handler: async (ctx, args) => {
     // Verify user is superadmin
     const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== "superadmin") {
-      throw new Error("Only superadmin can enable maintenance mode");
+    if (!user || user.role !== 'superadmin') {
+      throw new Error('Only superadmin can enable maintenance mode');
     }
 
     const now = Date.now();
 
     // Check if maintenance mode already exists
     const existing = await ctx.db
-      .query("maintenanceMode")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('maintenanceMode')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .first();
 
     if (existing) {
@@ -689,7 +648,7 @@ export const enableMaintenanceMode = mutation({
         startTime: args.startTime,
         endTime: args.endTime,
         estimatedDuration: args.estimatedDuration,
-        icon: args.icon || "🔧",
+        icon: args.icon || '🔧',
         enabledBy: args.userId,
         updatedAt: now,
       });
@@ -697,7 +656,7 @@ export const enableMaintenanceMode = mutation({
     }
 
     // Create new maintenance mode
-    const maintenanceId = await ctx.db.insert("maintenanceMode", {
+    const maintenanceId = await ctx.db.insert('maintenanceMode', {
       organizationId: args.organizationId,
       isActive: true,
       title: args.title,
@@ -705,7 +664,7 @@ export const enableMaintenanceMode = mutation({
       startTime: args.startTime,
       endTime: args.endTime,
       estimatedDuration: args.estimatedDuration,
-      icon: args.icon || "🔧",
+      icon: args.icon || '🔧',
       enabledBy: args.userId,
       createdAt: now,
       updatedAt: now,
@@ -720,23 +679,23 @@ export const enableMaintenanceMode = mutation({
  */
 export const disableMaintenanceMode = mutation({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"),
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     // Verify user is superadmin
     const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== "superadmin") {
-      throw new Error("Only superadmin can disable maintenance mode");
+    if (!user || user.role !== 'superadmin') {
+      throw new Error('Only superadmin can disable maintenance mode');
     }
 
     const maintenance = await ctx.db
-      .query("maintenanceMode")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('maintenanceMode')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .first();
 
     if (!maintenance) {
-      throw new Error("Maintenance mode not found");
+      throw new Error('Maintenance mode not found');
     }
 
     await ctx.db.patch(maintenance._id, {
@@ -753,12 +712,12 @@ export const disableMaintenanceMode = mutation({
  */
 export const getMaintenanceMode = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query("maintenanceMode")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('maintenanceMode')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .first();
   },
 });
@@ -769,24 +728,21 @@ export const getMaintenanceMode = query({
  */
 export const assignUserAsOrgAdmin = mutation({
   args: {
-    superadminUserId: v.id("users"),
+    superadminUserId: v.id('users'),
     userEmail: v.string(),
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
     // Verify caller is superadmin
     const superadmin = await ctx.db.get(args.superadminUserId);
-    if (
-      !superadmin ||
-      superadmin.email.toLowerCase() !== "romangulanyan@gmail.com"
-    ) {
-      throw new Error("Only superadmin can assign organization admins");
+    if (!superadmin || superadmin.email.toLowerCase() !== 'romangulanyan@gmail.com') {
+      throw new Error('Only superadmin can assign organization admins');
     }
 
     // Find user by email
     const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.userEmail.toLowerCase()))
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', args.userEmail.toLowerCase()))
       .unique();
 
     if (!user) {
@@ -796,20 +752,20 @@ export const assignUserAsOrgAdmin = mutation({
     // Verify org exists
     const org = await ctx.db.get(args.organizationId);
     if (!org) {
-      throw new Error("Organization not found");
+      throw new Error('Organization not found');
     }
 
     // Update user
     await ctx.db.patch(user._id, {
       organizationId: args.organizationId,
-      role: "admin",
+      role: 'admin',
       updatedAt: Date.now(),
     });
 
     return {
       userId: user._id,
       email: args.userEmail,
-      role: "admin",
+      role: 'admin',
       organizationId: args.organizationId,
     };
   },
@@ -822,19 +778,19 @@ export const assignUserAsOrgAdmin = mutation({
 export const getSuperadminDashboard = query({
   handler: async (ctx) => {
     // Get all organizations
-    const orgs = await ctx.db.query("organizations").collect();
+    const orgs = await ctx.db.query('organizations').collect();
 
     // Batch load all data
-    const allUsers = await ctx.db.query("users").collect();
-    const allLeaves = await ctx.db.query("leaveRequests").collect();
-    const allSubscriptions = await ctx.db.query("subscriptions").collect();
+    const allUsers = await ctx.db.query('users').collect();
+    const allLeaves = await ctx.db.query('leaveRequests').collect();
+    const allSubscriptions = await ctx.db.query('subscriptions').collect();
 
     // Create lookup maps
     const usersByOrg = new Map<
       string,
       Array<{
-        _id: Id<"users">;
-        organizationId?: Id<"organizations">;
+        _id: Id<'users'>;
+        organizationId?: Id<'organizations'>;
         isActive: boolean;
         isApproved: boolean;
       }>
@@ -842,8 +798,8 @@ export const getSuperadminDashboard = query({
     const leavesByOrg = new Map<
       string,
       Array<{
-        _id: Id<"leaveRequests">;
-        organizationId?: Id<"organizations">;
+        _id: Id<'leaveRequests'>;
+        organizationId?: Id<'organizations'>;
         status: string;
       }>
     >();
@@ -853,18 +809,18 @@ export const getSuperadminDashboard = query({
         plan: string;
         status: string;
         currentPeriodEnd?: number;
-        organizationId: Id<"organizations">;
+        organizationId: Id<'organizations'>;
       }
     >();
 
     allUsers.forEach((user) => {
-      const orgId = user.organizationId?.toString() || "no-org";
+      const orgId = user.organizationId?.toString() || 'no-org';
       if (!usersByOrg.has(orgId)) usersByOrg.set(orgId, []);
       usersByOrg.get(orgId)!.push(user);
     });
 
     allLeaves.forEach((leave) => {
-      const orgId = leave.organizationId?.toString() || "no-org";
+      const orgId = leave.organizationId?.toString() || 'no-org';
       if (!leavesByOrg.has(orgId)) leavesByOrg.set(orgId, []);
       leavesByOrg.get(orgId)!.push(leave);
     });
@@ -888,22 +844,16 @@ export const getSuperadminDashboard = query({
 
       const activeUsers = orgUsers.filter((u) => u.isActive && u.isApproved);
       const pendingUsers = orgUsers.filter((u) => !u.isApproved);
-      const pendingLeaves = orgLeaves.filter((l) => l.status === "pending");
-      const approvedLeaves = orgLeaves.filter((l) => l.status === "approved");
+      const pendingLeaves = orgLeaves.filter((l) => l.status === 'pending');
+      const approvedLeaves = orgLeaves.filter((l) => l.status === 'approved');
 
       // Calculate revenue based on plan
       const monthlyRevenue =
-        subscription?.plan === "professional"
-          ? 99
-          : subscription?.plan === "enterprise"
-            ? 299
-            : 0;
+        subscription?.plan === 'professional' ? 99 : subscription?.plan === 'enterprise' ? 299 : 0;
 
       // Calculate utilization
       const utilization =
-        org.employeeLimit > 0
-          ? Math.round((activeUsers.length / org.employeeLimit) * 100)
-          : 0;
+        org.employeeLimit > 0 ? Math.round((activeUsers.length / org.employeeLimit) * 100) : 0;
 
       return {
         organization: {
@@ -925,7 +875,7 @@ export const getSuperadminDashboard = query({
           total: orgLeaves.length,
           pending: pendingLeaves.length,
           approved: approvedLeaves.length,
-          rejected: orgLeaves.filter((l) => l.status === "rejected").length,
+          rejected: orgLeaves.filter((l) => l.status === 'rejected').length,
         },
         subscription: subscription
           ? {
@@ -950,10 +900,7 @@ export const getSuperadminDashboard = query({
       organizations: orgs.length,
       activeOrganizations: orgs.filter((o) => o.isActive).length,
       totalUsers: allUsers.filter((u) => u.organizationId).length,
-      totalRevenue: dashboard.reduce(
-        (sum, d) => sum + (d.subscription?.monthlyRevenue || 0),
-        0,
-      ),
+      totalRevenue: dashboard.reduce((sum, d) => sum + (d.subscription?.monthlyRevenue || 0), 0),
       pendingLeaves: dashboard.reduce((sum, d) => sum + d.leaves.pending, 0),
     };
 

@@ -2,8 +2,8 @@
  * Birthday Reminders — Напоминания о днях рождения сотрудников
  */
 
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
 
 // ... остальной код
 
@@ -12,7 +12,7 @@ import { mutation, query } from "./_generated/server";
  */
 export const checkBirthdaysToday = mutation({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, { organizationId }) => {
     const today = new Date();
@@ -23,18 +23,15 @@ export const checkBirthdaysToday = mutation({
 
     // Получить всех сотрудников организации
     const users = await ctx.db
-      .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .collect();
 
     // Найти тех, у кого день рождения сегодня
-    const birthdayUsers = users.filter(user => {
+    const birthdayUsers = users.filter((user) => {
       if (!user.dateOfBirth) return false;
       const birthDate = new Date(user.dateOfBirth);
-      return (
-        birthDate.getMonth() + 1 === currentMonth &&
-        birthDate.getDate() === currentDay
-      );
+      return birthDate.getMonth() + 1 === currentMonth && birthDate.getDate() === currentDay;
     });
 
     console.warn(`[Birthday Check] Found ${birthdayUsers.length} birthdays today`);
@@ -47,10 +44,10 @@ export const checkBirthdaysToday = mutation({
       for (const user of users) {
         if (user._id === birthdayUser._id) continue;
 
-        await ctx.db.insert("notifications", {
+        await ctx.db.insert('notifications', {
           organizationId,
           userId: user._id,
-          type: "system",
+          type: 'system',
           title: `🎉 День рождения!`,
           message: `Сегодня день рождения у ${birthdayUser.name}! ${getAgeEmoji(age)}\n\n🎁 Поздравьте коллегу и подарите хорошее настроение!`,
           isRead: false,
@@ -64,10 +61,10 @@ export const checkBirthdaysToday = mutation({
       }
 
       // Персональное поздравление имениннику
-      await ctx.db.insert("notifications", {
+      await ctx.db.insert('notifications', {
         organizationId,
         userId: birthdayUser._id,
-        type: "system",
+        type: 'system',
         title: `🎂 С Днём Рождения!`,
         message: `${birthdayUser.name}, поздравляем Вас с Днём Рождения! 🎉\n\nЖелаем успехов, здоровья и отличного настроения! 🎁\n\nВаш возраст: ${age} ${getAgeWord(age)}`,
         isRead: false,
@@ -82,7 +79,7 @@ export const checkBirthdaysToday = mutation({
     return {
       birthdaysFound: birthdayUsers.length,
       notificationsSent: birthdayUsers.length * users.length,
-      birthdayUsers: birthdayUsers.map(u => ({
+      birthdayUsers: birthdayUsers.map((u) => ({
         id: u._id,
         name: u.name,
         email: u.email,
@@ -97,7 +94,7 @@ export const checkBirthdaysToday = mutation({
  */
 export const checkUpcomingBirthdays = mutation({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
     daysAhead: v.optional(v.number()), // По умолчанию 7 дней
   },
   handler: async (ctx, { organizationId, daysAhead = 7 }) => {
@@ -117,8 +114,8 @@ export const checkUpcomingBirthdays = mutation({
 
     // Получить всех сотрудников
     const users = await ctx.db
-      .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .collect();
 
     // Проверить следующие N дней
@@ -129,22 +126,22 @@ export const checkUpcomingBirthdays = mutation({
       const checkMonth = checkDate.getMonth() + 1;
       const checkDay = checkDate.getDate();
 
-      const birthdayUsers = users.filter(user => {
+      const birthdayUsers = users.filter((user) => {
         if (!user.dateOfBirth) return false;
         const birthDate = new Date(user.dateOfBirth);
-        return (
-          birthDate.getMonth() + 1 === checkMonth &&
-          birthDate.getDate() === checkDay
-        );
+        return birthDate.getMonth() + 1 === checkMonth && birthDate.getDate() === checkDay;
       });
 
       for (const birthdayUser of birthdayUsers) {
         const age = checkDate.getFullYear() - new Date(birthdayUser.dateOfBirth!).getFullYear();
         const daysUntil = i;
+        const dateStr = checkDate.toISOString().split('T')[0];
+
+        if (!dateStr) continue;
 
         upcomingBirthdays.push({
           user: birthdayUser,
-          date: checkDate.toISOString().split('T')[0],
+          date: dateStr,
           age,
           daysUntil,
         });
@@ -152,10 +149,10 @@ export const checkUpcomingBirthdays = mutation({
         // Напоминание за 3 дня
         if (i === 3) {
           for (const user of users) {
-            await ctx.db.insert("notifications", {
+            await ctx.db.insert('notifications', {
               organizationId,
               userId: user._id,
-              type: "system",
+              type: 'system',
               title: `🎁 Скоро день рождения!`,
               message: `Через 3 дня день рождения у ${birthdayUser.name}! Подумайте о поздравлении. 🎂`,
               isRead: false,
@@ -171,7 +168,7 @@ export const checkUpcomingBirthdays = mutation({
     }
 
     return {
-      upcomingBirthdays: upcomingBirthdays.map(b => ({
+      upcomingBirthdays: upcomingBirthdays.map((b) => ({
         name: b.user.name,
         email: b.user.email,
         department: b.user.department,
@@ -188,18 +185,18 @@ export const checkUpcomingBirthdays = mutation({
  */
 export const getBirthdaysForMonth = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
     month: v.optional(v.number()), // 1-12, по умолчанию текущий
   },
   handler: async (ctx, args) => {
-    const targetMonth = args.month || (new Date().getMonth() + 1);
+    const targetMonth = args.month || new Date().getMonth() + 1;
 
     const users = await ctx.db
-      .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .collect();
 
-    const birthdayUsers = users.filter(user => {
+    const birthdayUsers = users.filter((user) => {
       if (!user.dateOfBirth) return false;
       const birthDate = new Date(user.dateOfBirth);
       return birthDate.getMonth() + 1 === targetMonth;
@@ -215,12 +212,12 @@ export const getBirthdaysForMonth = query({
     const today = new Date();
     const currentYear = today.getFullYear();
 
-    return birthdayUsers.map(user => {
+    return birthdayUsers.map((user) => {
       const birthDate = new Date(user.dateOfBirth!);
       const age = currentYear - birthDate.getFullYear();
       const day = birthDate.getDate();
-      const isToday = day === today.getDate() && targetMonth === (today.getMonth() + 1);
-      const isPast = day < today.getDate() && targetMonth === (today.getMonth() + 1);
+      const isToday = day === today.getDate() && targetMonth === today.getMonth() + 1;
+      const isPast = day < today.getDate() && targetMonth === today.getMonth() + 1;
 
       return {
         id: user._id,
@@ -273,10 +270,20 @@ function getAgeWord(age: number): string {
 
 function getMonthName(month: number): string {
   const months = [
-    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+    'января',
+    'февраля',
+    'марта',
+    'апреля',
+    'мая',
+    'июня',
+    'июля',
+    'августа',
+    'сентября',
+    'октября',
+    'ноября',
+    'декабря',
   ];
-  return months[month - 1];
+  return months[month - 1] ?? 'января';
 }
 
 /**
@@ -286,16 +293,16 @@ function getMonthName(month: number): string {
  */
 export const scheduledBirthdayCheck = mutation({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, { organizationId }) => {
     // Проверить сегодня
-    const today = await ctx.runMutation("birthdays:checkBirthdaysToday" as any, {
+    const today = await ctx.runMutation('birthdays:checkBirthdaysToday' as any, {
       organizationId,
     });
 
     // Проверить предстоящие (через 3 дня для напоминания)
-    const upcoming = await ctx.runMutation("birthdays:checkUpcomingBirthdays" as any, {
+    const upcoming = await ctx.runMutation('birthdays:checkUpcomingBirthdays' as any, {
       organizationId,
       daysAhead: 7,
     });
@@ -313,14 +320,14 @@ export const scheduledBirthdayCheck = mutation({
  */
 export const setupBirthdayScheduler = mutation({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, { organizationId }) => {
     // Создать запись о scheduled job
-    const jobId = await ctx.db.insert("scheduledJobs", {
+    const jobId = await ctx.db.insert('scheduledJobs', {
       organizationId,
-      functionName: "birthdays:scheduledBirthdayCheck",
-      schedule: "0 9 * * *", // Каждое утро в 9:00
+      functionName: 'birthdays:scheduledBirthdayCheck',
+      schedule: '0 9 * * *', // Каждое утро в 9:00
       isActive: true,
       lastRun: undefined,
       nextRun: new Date().setHours(9, 0, 0, 0), // Сегодня в 9:00
@@ -329,8 +336,8 @@ export const setupBirthdayScheduler = mutation({
 
     return {
       jobId,
-      message: "Birthday scheduler setup successfully!",
-      schedule: "0 9 * * * (daily at 9:00 AM)",
+      message: 'Birthday scheduler setup successfully!',
+      schedule: '0 9 * * * (daily at 9:00 AM)',
     };
   },
 });

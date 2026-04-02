@@ -1,58 +1,70 @@
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 /**
  * Helper to batch-load users and their leave status
  * Eliminates N+1 queries for presence status calculation
  */
-async function getUsersWithLeaveStatus(ctx: {
-  db: {
-    get: (id: Id<"users">) => Promise<{
-      _id: Id<"users">;
-      presenceStatus?: string;
-    } | null>;
-    query: (table: string) => {
-      collect: () => Promise<Array<{
-        userId: Id<"users">;
-        status: string;
-        startDate: string;
-        endDate: string;
-      }>>;
+async function getUsersWithLeaveStatus(
+  ctx: {
+    db: {
+      get: (id: Id<'users'>) => Promise<{
+        _id: Id<'users'>;
+        presenceStatus?: string;
+      } | null>;
+      query: (table: string) => {
+        collect: () => Promise<
+          Array<{
+            userId: Id<'users'>;
+            status: string;
+            startDate: string;
+            endDate: string;
+          }>
+        >;
+      };
     };
-  };
-}, userIds: Id<"users">[]) {
+  },
+  userIds: Id<'users'>[],
+) {
   if (userIds.length === 0) return { userMap: new Map(), result: new Map() };
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split('T')[0];
+  if (!today) return { userMap: new Map(), result: new Map() };
 
   // Batch load all users
   const users = await Promise.all(userIds.map((id) => ctx.db.get(id)));
   const userMap = new Map(users.map((u) => [u?._id, u]));
 
   // Batch load all approved leaves for these users
-  const allLeaves = await ctx.db.query("leaveRequests").collect();
-  const userLeavesMap = new Map<Id<"users">, Array<{
-    userId: Id<"users">;
-    status: string;
-    startDate: string;
-    endDate: string;
-  }>>();
+  const allLeaves = await ctx.db.query('leaveRequests').collect();
+  const userLeavesMap = new Map<
+    Id<'users'>,
+    Array<{
+      userId: Id<'users'>;
+      status: string;
+      startDate: string;
+      endDate: string;
+    }>
+  >();
 
   userIds.forEach((id) => {
     const leaves = allLeaves.filter(
-      (l) => l.userId === id && l.status === "approved" && l.startDate <= today && today <= l.endDate
+      (l) =>
+        l.userId === id && l.status === 'approved' && l.startDate <= today && today <= l.endDate,
     );
     userLeavesMap.set(id, leaves);
   });
 
   // Calculate effective presence status
-  const result = new Map<Id<"users">, { presenceStatus: string; hasActiveLeave: boolean }>();
+  const result = new Map<Id<'users'>, { presenceStatus: string; hasActiveLeave: boolean }>();
   userIds.forEach((id) => {
     const user = userMap.get(id);
     const leaves = userLeavesMap.get(id) || [];
     const hasActiveLeave = leaves.length > 0;
-    const effectivePresenceStatus = hasActiveLeave ? "out_of_office" : (user?.presenceStatus ?? "available");
+    const effectivePresenceStatus = hasActiveLeave
+      ? 'out_of_office'
+      : (user?.presenceStatus ?? 'available');
 
     result.set(id, { presenceStatus: effectivePresenceStatus, hasActiveLeave });
   });
@@ -65,25 +77,25 @@ async function getUsersWithLeaveStatus(ctx: {
 /** Get or create a direct message conversation between two users */
 export const getOrCreateDM = mutation({
   args: {
-    organizationId: v.id("organizations"),
-    currentUserId: v.id("users"),
-    targetUserId: v.id("users"),
+    organizationId: v.id('organizations'),
+    currentUserId: v.id('users'),
+    targetUserId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const ids = [args.currentUserId, args.targetUserId].sort();
-    const dmKey = ids.join("_");
+    const dmKey = ids.join('_');
 
     const existing = await ctx.db
-      .query("chatConversations")
-      .withIndex("by_dm_key", (q) => q.eq("dmKey", dmKey))
+      .query('chatConversations')
+      .withIndex('by_dm_key', (q) => q.eq('dmKey', dmKey))
       .first();
 
     if (existing) return existing._id;
 
     const now = Date.now();
-    const convId = await ctx.db.insert("chatConversations", {
+    const convId = await ctx.db.insert('chatConversations', {
       organizationId: args.organizationId,
-      type: "direct",
+      type: 'direct',
       createdBy: args.currentUserId,
       dmKey,
       createdAt: now,
@@ -91,20 +103,20 @@ export const getOrCreateDM = mutation({
     });
 
     // Add both members
-    await ctx.db.insert("chatMembers", {
+    await ctx.db.insert('chatMembers', {
       conversationId: convId,
       userId: args.currentUserId,
       organizationId: args.organizationId,
-      role: "member",
+      role: 'member',
       unreadCount: 0,
       isMuted: false,
       joinedAt: now,
     });
-    await ctx.db.insert("chatMembers", {
+    await ctx.db.insert('chatMembers', {
       conversationId: convId,
       userId: args.targetUserId,
       organizationId: args.organizationId,
-      role: "member",
+      role: 'member',
       unreadCount: 0,
       isMuted: false,
       joinedAt: now,
@@ -117,17 +129,17 @@ export const getOrCreateDM = mutation({
 /** Create a group conversation */
 export const createGroup = mutation({
   args: {
-    organizationId: v.id("organizations"),
-    createdBy: v.id("users"),
+    organizationId: v.id('organizations'),
+    createdBy: v.id('users'),
     name: v.string(),
     description: v.optional(v.string()),
-    memberIds: v.array(v.id("users")),
+    memberIds: v.array(v.id('users')),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const convId = await ctx.db.insert("chatConversations", {
+    const convId = await ctx.db.insert('chatConversations', {
       organizationId: args.organizationId,
-      type: "group",
+      type: 'group',
       name: args.name,
       description: args.description,
       createdBy: args.createdBy,
@@ -136,11 +148,11 @@ export const createGroup = mutation({
     });
 
     // Add creator as owner
-    await ctx.db.insert("chatMembers", {
+    await ctx.db.insert('chatMembers', {
       conversationId: convId,
       userId: args.createdBy,
       organizationId: args.organizationId,
-      role: "owner",
+      role: 'owner',
       unreadCount: 0,
       isMuted: false,
       joinedAt: now,
@@ -149,11 +161,11 @@ export const createGroup = mutation({
     // Add other members
     for (const uid of args.memberIds) {
       if (uid === args.createdBy) continue;
-      await ctx.db.insert("chatMembers", {
+      await ctx.db.insert('chatMembers', {
         conversationId: convId,
         userId: uid,
         organizationId: args.organizationId,
-        role: "member",
+        role: 'member',
         unreadCount: 0,
         isMuted: false,
         joinedAt: now,
@@ -161,11 +173,11 @@ export const createGroup = mutation({
     }
 
     // System message
-    await ctx.db.insert("chatMessages", {
+    await ctx.db.insert('chatMessages', {
       conversationId: convId,
       organizationId: args.organizationId,
       senderId: args.createdBy,
-      type: "system",
+      type: 'system',
       content: `Group "${args.name}" was created`,
       createdAt: now,
     });
@@ -184,14 +196,14 @@ export const createGroup = mutation({
  */
 export const getMyConversations = query({
   args: {
-    userId: v.id("users"),
-    organizationId: v.id("organizations"),
+    userId: v.id('users'),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
     // Step 1: Get all memberships for this user
     const memberships = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .query('chatMembers')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
       .collect();
 
     // Step 2: Batch load all conversations
@@ -209,22 +221,22 @@ export const getMyConversations = query({
 
     const validMemberships = memberships.filter((m, idx) => validConvs[idx] !== null);
     const filteredConvs = validConvs.filter(Boolean) as Array<{
-      _id: Id<"chatConversations">;
-      type: "direct" | "group";
-      createdBy: Id<"users">;
-      organizationId: Id<"organizations">;
+      _id: Id<'chatConversations'>;
+      type: 'direct' | 'group';
+      createdBy: Id<'users'>;
+      organizationId: Id<'organizations'>;
       lastMessageAt?: number;
       createdAt: number;
       isPinned?: boolean;
     }>;
 
     // Step 4: Collect all user IDs that we need to load
-    const allUserIds = new Set<Id<"users">>();
+    const allUserIds = new Set<Id<'users'>>();
 
     filteredConvs.forEach((conv) => {
-      if (conv.type === "direct") {
+      if (conv.type === 'direct') {
         allUserIds.add(conv.createdBy);
-      } else if (conv.type === "group") {
+      } else if (conv.type === 'group') {
         allUserIds.add(conv.createdBy);
       }
     });
@@ -235,22 +247,27 @@ export const getMyConversations = query({
     const userStatusMap = usersWithLeaveStatus.result;
 
     // Step 6: Batch load group members for groups
-    const groupConvs = filteredConvs.filter((c) => c.type === "group");
+    const groupConvs = filteredConvs.filter((c) => c.type === 'group');
 
-    const allGroupMembers = await ctx.db.query("chatMembers").collect();
-    const groupMembersMap = new Map<Id<"chatConversations">, Array<{
-      _id: Id<"chatMembers">;
-      userId: Id<"users">;
-      conversationId: Id<"chatConversations">;
-    }>>();
+    const allGroupMembers = await ctx.db.query('chatMembers').collect();
+    const groupMembersMap = new Map<
+      Id<'chatConversations'>,
+      Array<{
+        _id: Id<'chatMembers'>;
+        userId: Id<'users'>;
+        conversationId: Id<'chatConversations'>;
+      }>
+    >();
     groupConvs.forEach((conv) => {
       const members = allGroupMembers.filter((m) => m.conversationId === conv._id);
       groupMembersMap.set(conv._id, members);
     });
 
     // Collect all group member user IDs
-    const groupMemberUserIds = new Set<Id<"users">>();
-    Array.from(groupMembersMap.values()).flat().forEach((m) => groupMemberUserIds.add(m.userId));
+    const groupMemberUserIds = new Set<Id<'users'>>();
+    Array.from(groupMembersMap.values())
+      .flat()
+      .forEach((m) => groupMemberUserIds.add(m.userId));
 
     // Load group member users
     const groupMemberUsers = await getUsersWithLeaveStatus(ctx, Array.from(groupMemberUserIds));
@@ -262,26 +279,26 @@ export const getMyConversations = query({
 
       // For DMs: get other user
       let otherUser = null;
-      if (conv.type === "direct") {
+      if (conv.type === 'direct') {
         const allMembers = allGroupMembers.filter((m) => m.conversationId === conv._id);
         const otherMember = allMembers.find((m) => m.userId !== args.userId);
         if (otherMember) {
           const status = userStatusMap.get(otherMember.userId);
           otherUser = {
             _id: otherMember.userId,
-            name: userMap.get(otherMember.userId)?.name || "Unknown",
+            name: userMap.get(otherMember.userId)?.name || 'Unknown',
             avatarUrl: userMap.get(otherMember.userId)?.avatarUrl,
-            presenceStatus: status?.presenceStatus || "available",
+            presenceStatus: status?.presenceStatus || 'available',
           };
         }
       }
 
       // For groups: build members list
       let members: Array<{
-        userId: Id<"users">;
+        userId: Id<'users'>;
         user: { name: string; avatarUrl?: string } | null;
       }> = [];
-      if (conv.type === "group") {
+      if (conv.type === 'group') {
         const groupMembers = groupMembersMap.get(conv._id) || [];
         members = groupMembers.map((m) => ({
           userId: m.userId,
@@ -294,7 +311,7 @@ export const getMyConversations = query({
         }));
       }
 
-      const memberCount = conv.type === "group" ? (groupMembersMap.get(conv._id)?.length || 0) : 2;
+      const memberCount = conv.type === 'group' ? groupMembersMap.get(conv._id)?.length || 0 : 2;
 
       return {
         ...conv,
@@ -316,11 +333,11 @@ export const getMyConversations = query({
 
 /** Get all members of a conversation */
 export const getConversationMembers = query({
-  args: { conversationId: v.id("chatConversations") },
+  args: { conversationId: v.id('chatConversations') },
   handler: async (ctx, args) => {
     const members = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .query('chatMembers')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
       .collect();
 
     // Get today's date in YYYY-MM-DD format
@@ -329,14 +346,14 @@ export const getConversationMembers = query({
     return Promise.all(
       members.map(async (m) => {
         const user = await ctx.db.get(m.userId);
-        let effectivePresenceStatus = user?.presenceStatus ?? "available";
+        let effectivePresenceStatus = user?.presenceStatus ?? 'available';
 
         // Check if user has an approved leave today
         if (user) {
           const approvedLeaves = await ctx.db
-            .query("leaveRequests")
-            .withIndex("by_user", (q) => q.eq("userId", user._id))
-            .filter((q) => q.eq(q.field("status"), "approved"))
+            .query('leaveRequests')
+            .withIndex('by_user', (q) => q.eq('userId', user._id))
+            .filter((q) => q.eq(q.field('status'), 'approved'))
             .collect();
 
           const hasActiveLeave = approvedLeaves.some((leave) => {
@@ -344,22 +361,24 @@ export const getConversationMembers = query({
           });
 
           if (hasActiveLeave) {
-            effectivePresenceStatus = "out_of_office";
+            effectivePresenceStatus = 'out_of_office';
           }
         }
 
         return {
           ...m,
-          user: user ? {
-            _id: user._id,
-            name: user.name,
-            avatarUrl: user.avatarUrl,
-            presenceStatus: effectivePresenceStatus,
-            department: user.department,
-            position: user.position,
-          } : null,
+          user: user
+            ? {
+                _id: user._id,
+                name: user.name,
+                avatarUrl: user.avatarUrl,
+                presenceStatus: effectivePresenceStatus,
+                department: user.department,
+                position: user.position,
+              }
+            : null,
         };
-      })
+      }),
     );
   },
 });
@@ -367,20 +386,20 @@ export const getConversationMembers = query({
 /** Update group info */
 export const updateGroup = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const membership = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
-    if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-      throw new Error("Not authorized");
+    if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+      throw new Error('Not authorized');
     }
     const updates: Record<string, unknown> = { updatedAt: Date.now() };
     if (args.name !== undefined) updates.name = args.name;
@@ -392,38 +411,38 @@ export const updateGroup = mutation({
 /** Add member to group */
 export const addMember = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    requesterId: v.id("users"),
-    userId: v.id("users"),
-    organizationId: v.id("organizations"),
+    conversationId: v.id('chatConversations'),
+    requesterId: v.id('users'),
+    userId: v.id('users'),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
     if (existing) return;
 
     const now = Date.now();
-    await ctx.db.insert("chatMembers", {
+    await ctx.db.insert('chatMembers', {
       conversationId: args.conversationId,
       userId: args.userId,
       organizationId: args.organizationId,
-      role: "member",
+      role: 'member',
       unreadCount: 0,
       isMuted: false,
       joinedAt: now,
     });
 
     const user = await ctx.db.get(args.userId);
-    await ctx.db.insert("chatMessages", {
+    await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       senderId: args.requesterId,
-      type: "system",
-      content: `${user?.name ?? "Someone"} was added to the group`,
+      type: 'system',
+      content: `${user?.name ?? 'Someone'} was added to the group`,
       createdAt: now,
     });
   },
@@ -432,14 +451,14 @@ export const addMember = mutation({
 /** Leave / remove from group */
 export const leaveConversation = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const membership = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
     if (!membership) return;
@@ -448,12 +467,12 @@ export const leaveConversation = mutation({
     const user = await ctx.db.get(args.userId);
     const conv = await ctx.db.get(args.conversationId);
     if (conv) {
-      await ctx.db.insert("chatMessages", {
+      await ctx.db.insert('chatMessages', {
         conversationId: args.conversationId,
         organizationId: conv.organizationId,
         senderId: args.userId,
-        type: "system",
-        content: `${user?.name ?? "Someone"} left the group`,
+        type: 'system',
+        content: `${user?.name ?? 'Someone'} left the group`,
         createdAt: Date.now(),
       });
     }
@@ -465,46 +484,54 @@ export const leaveConversation = mutation({
 /** Send a message */
 export const sendMessage = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    senderId: v.id("users"),
-    organizationId: v.id("organizations"),
+    conversationId: v.id('chatConversations'),
+    senderId: v.id('users'),
+    organizationId: v.id('organizations'),
     type: v.union(
-      v.literal("text"),
-      v.literal("image"),
-      v.literal("file"),
-      v.literal("audio"),
-      v.literal("system"),
-      v.literal("call"),
+      v.literal('text'),
+      v.literal('image'),
+      v.literal('file'),
+      v.literal('audio'),
+      v.literal('system'),
+      v.literal('call'),
     ),
     content: v.string(),
-    attachments: v.optional(v.array(v.object({
-      url: v.string(),
-      name: v.string(),
-      type: v.string(),
-      size: v.number(),
-    }))),
-    replyToId: v.optional(v.id("chatMessages")),
-    mentionedUserIds: v.optional(v.array(v.id("users"))),
-    poll: v.optional(v.object({
-      question: v.string(),
-      options: v.array(v.object({
-        id: v.string(),
-        text: v.string(),
-        votes: v.array(v.id("users")),
-      })),
-      closedAt: v.optional(v.number()),
-    })),
-    audioDuration: v.optional(v.number()),  // Duration in seconds for voice messages
+    attachments: v.optional(
+      v.array(
+        v.object({
+          url: v.string(),
+          name: v.string(),
+          type: v.string(),
+          size: v.number(),
+        }),
+      ),
+    ),
+    replyToId: v.optional(v.id('chatMessages')),
+    mentionedUserIds: v.optional(v.array(v.id('users'))),
+    poll: v.optional(
+      v.object({
+        question: v.string(),
+        options: v.array(
+          v.object({
+            id: v.string(),
+            text: v.string(),
+            votes: v.array(v.id('users')),
+          }),
+        ),
+        closedAt: v.optional(v.number()),
+      }),
+    ),
+    audioDuration: v.optional(v.number()), // Duration in seconds for voice messages
   },
   handler: async (ctx, args) => {
     const now = Date.now();
 
     // Check if trying to send to System Announcements channel
     const conversation = await ctx.db.get(args.conversationId);
-    if (conversation?.name === "System Announcements") {
+    if (conversation?.name === 'System Announcements') {
       const sender = await ctx.db.get(args.senderId);
-      if (!sender || sender.role !== "superadmin") {
-        throw new Error("Only superadmin can send messages to System Announcements channel");
+      if (!sender || sender.role !== 'superadmin') {
+        throw new Error('Only superadmin can send messages to System Announcements channel');
       }
     }
 
@@ -520,7 +547,7 @@ export const sendMessage = mutation({
       }
     }
 
-    const msgId = await ctx.db.insert("chatMessages", {
+    const msgId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       senderId: args.senderId,
@@ -532,12 +559,12 @@ export const sendMessage = mutation({
       replyToSenderName,
       mentionedUserIds: args.mentionedUserIds,
       poll: args.poll,
-      callDuration: args.audioDuration,  // Reuse for voice message duration
+      callDuration: args.audioDuration, // Reuse for voice message duration
       createdAt: now,
     });
 
     // Update conversation last message
-    const preview = args.content.length > 60 ? args.content.slice(0, 60) + "…" : args.content;
+    const preview = args.content.length > 60 ? args.content.slice(0, 60) + '…' : args.content;
     await ctx.db.patch(args.conversationId, {
       lastMessageAt: now,
       lastMessageText: preview,
@@ -548,11 +575,11 @@ export const sendMessage = mutation({
     // Increment unread counts for all members except sender
     // Also stamp readBy with readAt:-1 (delivered) for each online recipient
     const members = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .query('chatMembers')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
       .collect();
 
-    const recipientIds: Array<{ userId: Id<"users">; readAt: number }> = members
+    const recipientIds: Array<{ userId: Id<'users'>; readAt: number }> = members
       .filter((m) => m.userId !== args.senderId)
       .map((m) => ({ userId: m.userId, readAt: -1 }));
 
@@ -566,18 +593,20 @@ export const sendMessage = mutation({
         .filter((m) => m.userId !== args.senderId && !m.isMuted)
         .map((m) => {
           // Don't increment unreadCount if user just marked conversation as read in the last 500ms
-          const recentlyRead = m.lastReadAt && (now - m.lastReadAt) < 500;
+          const recentlyRead = m.lastReadAt && now - m.lastReadAt < 500;
           if (recentlyRead) {
             return Promise.resolve();
           }
           // If the member had soft-deleted this conversation, restore it so they see the new message
-          const patch: Record<string, number | boolean | undefined> = { unreadCount: m.unreadCount + 1 };
+          const patch: Record<string, number | boolean | undefined> = {
+            unreadCount: m.unreadCount + 1,
+          };
           if (m.isDeleted) {
             patch.isDeleted = false;
             patch.deletedAt = undefined;
           }
           return ctx.db.patch(m._id, patch);
-        })
+        }),
     );
 
     // Send notification for mentions
@@ -585,11 +614,11 @@ export const sendMessage = mutation({
       const sender = await ctx.db.get(args.senderId);
       for (const mentionedId of args.mentionedUserIds) {
         if (mentionedId === args.senderId) continue;
-        await ctx.db.insert("notifications", {
+        await ctx.db.insert('notifications', {
           organizationId: args.organizationId,
           userId: mentionedId,
-          type: "system",
-          title: `${sender?.name ?? "Someone"} mentioned you`,
+          type: 'system',
+          title: `${sender?.name ?? 'Someone'} mentioned you`,
           message: args.content.slice(0, 100),
           isRead: false,
           relatedId: args.conversationId,
@@ -605,8 +634,8 @@ export const sendMessage = mutation({
 /** Get messages for a conversation (paginated, newest last) */
 export const getMessages = query({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -614,9 +643,9 @@ export const getMessages = query({
 
     // Verify membership
     const membership = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
     if (!membership) {
@@ -624,31 +653,32 @@ export const getMessages = query({
     }
 
     const messages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation_created", (q) =>
-        q.eq("conversationId", args.conversationId)
-      )
-      .order("desc")
+      .query('chatMessages')
+      .withIndex('by_conversation_created', (q) => q.eq('conversationId', args.conversationId))
+      .order('desc')
       .take(limit);
 
     // Enrich with sender info, filter out messages deleted for this user
     const enriched = await Promise.all(
       messages.map(async (msg) => {
         // If this user deleted the message for themselves, skip it
-        const deletedForUsers: Id<"users">[] = (msg.deletedForUsers as Id<"users">[] | undefined) ?? [];
+        const deletedForUsers: Id<'users'>[] =
+          (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];
         if (deletedForUsers.includes(args.userId)) return null;
 
         const sender = await ctx.db.get(msg.senderId);
         return {
           ...msg,
-          readBy: (msg.readBy as Array<{ userId: Id<"users">; readAt: number }> | undefined) ?? [],
-          sender: sender ? {
-            _id: sender._id,
-            name: sender.name,
-            avatarUrl: sender.avatarUrl,
-          } : null,
+          readBy: (msg.readBy as Array<{ userId: Id<'users'>; readAt: number }> | undefined) ?? [],
+          sender: sender
+            ? {
+                _id: sender._id,
+                name: sender.name,
+                avatarUrl: sender.avatarUrl,
+              }
+            : null,
         };
-      })
+      }),
     );
 
     return enriched.filter(Boolean).reverse() as typeof enriched;
@@ -658,13 +688,13 @@ export const getMessages = query({
 /** Edit a message */
 export const editMessage = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
     content: v.string(),
   },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
-    if (!msg || msg.senderId !== args.userId) throw new Error("Not authorized");
+    if (!msg || msg.senderId !== args.userId) throw new Error('Not authorized');
     await ctx.db.patch(args.messageId, {
       content: args.content,
       isEdited: true,
@@ -676,22 +706,22 @@ export const editMessage = mutation({
 /** Delete a message only for the requesting user (hide from their view). For senders, can also delete for everyone within 5 minutes */
 export const deleteMessage = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
     deleteForEveryone: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
     if (!msg) {
-      throw new Error("Message not found");
+      throw new Error('Message not found');
     }
 
     const user = await ctx.db.get(args.userId);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error('User not found');
     }
 
-    const isSuperadmin = user.role === "superadmin";
+    const isSuperadmin = user.role === 'superadmin';
 
     // If deleteForEveryone flag is set, sender can delete for everyone within 5 minutes (or superadmin anytime)
     if (args.deleteForEveryone) {
@@ -700,31 +730,31 @@ export const deleteMessage = mutation({
         await ctx.db.patch(args.messageId, {
           isDeleted: true,
           deletedAt: Date.now(),
-          content: "This message was deleted",
+          content: 'This message was deleted',
         });
         return;
       }
 
       // Regular messages: only sender (within 5 minutes)
       if (msg.senderId !== args.userId) {
-        throw new Error("Not authorized");
+        throw new Error('Not authorized');
       }
 
       const fiveMin = 5 * 60 * 1000;
       const timeSinceCreation = Date.now() - msg.createdAt;
       if (timeSinceCreation > fiveMin) {
-        throw new Error("Cannot delete after 5 minutes");
+        throw new Error('Cannot delete after 5 minutes');
       }
 
       // Fully delete for everyone
       await ctx.db.patch(args.messageId, {
         isDeleted: true,
         deletedAt: Date.now(),
-        content: "This message was deleted",
+        content: 'This message was deleted',
       });
     } else {
       // Delete only for current user
-      const existing: Id<"users">[] = (msg.deletedForUsers as Id<"users">[] | undefined) ?? [];
+      const existing: Id<'users'>[] = (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];
       if (!existing.includes(args.userId)) {
         await ctx.db.patch(args.messageId, {
           deletedForUsers: [...existing, args.userId],
@@ -737,13 +767,13 @@ export const deleteMessage = mutation({
 /** Delete a message only for the requesting user (hide from their view) */
 export const deleteMessageForMe = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
-    if (!msg) throw new Error("Message not found");
-    const existing: Id<"users">[] = (msg.deletedForUsers as Id<"users">[] | undefined) ?? [];
+    if (!msg) throw new Error('Message not found');
+    const existing: Id<'users'>[] = (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];
     if (!existing.includes(args.userId)) {
       await ctx.db.patch(args.messageId, {
         deletedForUsers: [...existing, args.userId],
@@ -770,19 +800,19 @@ function emojiToKey(emoji: string): string {
 /** Toggle reaction on a message */
 export const toggleReaction = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
     emoji: v.string(),
   },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
-    if (!msg) throw new Error("Message not found");
+    if (!msg) throw new Error('Message not found');
 
     // Sanitize emoji: trim whitespace
     const sanitizedEmoji = args.emoji.trim();
-    
+
     if (!sanitizedEmoji) {
-      throw new Error("Invalid emoji: must contain at least one character");
+      throw new Error('Invalid emoji: must contain at least one character');
     }
 
     // Convert emoji to ASCII-safe key since Convex doesn't allow non-ASCII field names
@@ -790,8 +820,8 @@ export const toggleReaction = mutation({
 
     // Get existing reactions - safely handle potentially malformed data
     const rawReactions = msg.reactions;
-    const reactions: Record<string, Id<"users">[]> = {};
-    
+    const reactions: Record<string, Id<'users'>[]> = {};
+
     // Clean up existing reactions - migrate old emoji keys to new format if needed
     if (rawReactions && typeof rawReactions === 'object') {
       for (const [key, value] of Object.entries(rawReactions)) {
@@ -808,7 +838,7 @@ export const toggleReaction = mutation({
         }
 
         if (safeKey && Array.isArray(value) && value.length > 0) {
-          reactions[safeKey] = value as Id<"users">[];
+          reactions[safeKey] = value as Id<'users'>[];
         }
       }
     }
@@ -836,8 +866,8 @@ export const toggleReaction = mutation({
 /** Pin / unpin a message */
 export const pinMessage = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
     pin: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -852,14 +882,14 @@ export const pinMessage = mutation({
 /** Mark conversation as read for a user + stamp readBy on recent messages */
 export const markAsRead = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const membership = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
     if (!membership) return;
@@ -871,15 +901,15 @@ export const markAsRead = mutation({
 
     // Stamp readBy on the last 20 messages not sent by this user
     const recent = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation_created", (q) => q.eq("conversationId", args.conversationId))
-      .order("desc")
+      .query('chatMessages')
+      .withIndex('by_conversation_created', (q) => q.eq('conversationId', args.conversationId))
+      .order('desc')
       .take(20);
 
     for (const msg of recent) {
       if (msg.senderId === args.userId) continue;
-      const readBy: Array<{ userId: Id<"users">; readAt: number }> =
-        (msg.readBy as Array<{ userId: Id<"users">; readAt: number }> | undefined) ?? [];
+      const readBy: Array<{ userId: Id<'users'>; readAt: number }> =
+        (msg.readBy as Array<{ userId: Id<'users'>; readAt: number }> | undefined) ?? [];
       if (readBy.some((r) => r.userId === args.userId)) continue;
       await ctx.db.patch(msg._id, {
         readBy: [...readBy, { userId: args.userId, readAt: now }],
@@ -891,14 +921,14 @@ export const markAsRead = mutation({
 /** Mark a single sent message as delivered (called after sendMessage on the recipient side) */
 export const markMessageDelivered = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
     if (!msg || msg.senderId === args.userId) return;
-    const readBy: Array<{ userId: Id<"users">; readAt: number }> =
-      (msg.readBy as Array<{ userId: Id<"users">; readAt: number }> | undefined) ?? [];
+    const readBy: Array<{ userId: Id<'users'>; readAt: number }> =
+      (msg.readBy as Array<{ userId: Id<'users'>; readAt: number }> | undefined) ?? [];
     if (readBy.some((r) => r.userId === args.userId)) return;
     // We reuse readBy array but with readAt = 0 to mean "delivered not yet read"
     // Actually let's use a separate delivered approach: just stamp with readAt = -1
@@ -910,14 +940,14 @@ export const markMessageDelivered = mutation({
 
 /** Get total unread count across all conversations (excludes deleted/archived per-user) */
 export const getTotalUnread = query({
-  args: { 
-    userId: v.id("users"),
-    organizationId: v.optional(v.id("organizations"))
+  args: {
+    userId: v.id('users'),
+    organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, args) => {
     const memberships = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .query('chatMembers')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
       .collect();
     // Only count memberships that are not deleted/archived
     // If organizationId provided, filter by org
@@ -935,16 +965,16 @@ export const getTotalUnread = query({
 
 export const setTyping = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
-    organizationId: v.id("organizations"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
+    organizationId: v.id('organizations'),
     isTyping: v.boolean(),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
-      .query("chatTyping")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatTyping')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
 
@@ -952,7 +982,7 @@ export const setTyping = mutation({
       if (existing) {
         await ctx.db.patch(existing._id, { updatedAt: Date.now() });
       } else {
-        await ctx.db.insert("chatTyping", {
+        await ctx.db.insert('chatTyping', {
           conversationId: args.conversationId,
           userId: args.userId,
           organizationId: args.organizationId,
@@ -967,25 +997,23 @@ export const setTyping = mutation({
 
 export const getTypingUsers = query({
   args: {
-    conversationId: v.id("chatConversations"),
-    currentUserId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    currentUserId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const cutoff = Date.now() - 5000; // 5 seconds TTL
     const typing = await ctx.db
-      .query("chatTyping")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .query('chatTyping')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
       .collect();
 
-    const active = typing.filter(
-      (t) => t.userId !== args.currentUserId && t.updatedAt > cutoff
-    );
+    const active = typing.filter((t) => t.userId !== args.currentUserId && t.updatedAt > cutoff);
 
     return Promise.all(
       active.map(async (t) => {
         const user = await ctx.db.get(t.userId);
-        return { userId: t.userId, name: user?.name ?? "Someone" };
-      })
+        return { userId: t.userId, name: user?.name ?? 'Someone' };
+      }),
     );
   },
 });
@@ -994,11 +1022,11 @@ export const getTypingUsers = query({
 
 export const initiateCall = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    organizationId: v.id("organizations"),
-    initiatorId: v.id("users"),
-    type: v.union(v.literal("audio"), v.literal("video")),
-    participantIds: v.array(v.id("users")),
+    conversationId: v.id('chatConversations'),
+    organizationId: v.id('organizations'),
+    initiatorId: v.id('users'),
+    type: v.union(v.literal('audio'), v.literal('video')),
+    participantIds: v.array(v.id('users')),
     offer: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -1009,31 +1037,29 @@ export const initiateCall = mutation({
         joinedAt: now,
         offer: args.offer,
       },
-      ...args.participantIds
-        .filter((id) => id !== args.initiatorId)
-        .map((id) => ({ userId: id })),
+      ...args.participantIds.filter((id) => id !== args.initiatorId).map((id) => ({ userId: id })),
     ];
 
-    const callId = await ctx.db.insert("chatCalls", {
+    const callId = await ctx.db.insert('chatCalls', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       initiatorId: args.initiatorId,
       type: args.type,
-      status: "ringing",
+      status: 'ringing',
       participants: participantList,
       createdAt: now,
     });
 
     // Post system message about call
     const initiator = await ctx.db.get(args.initiatorId);
-    await ctx.db.insert("chatMessages", {
+    await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       senderId: args.initiatorId,
-      type: "call",
-      content: `${initiator?.name ?? "Someone"} started a ${args.type} call`,
+      type: 'call',
+      content: `${initiator?.name ?? 'Someone'} started a ${args.type} call`,
       callType: args.type,
-      callStatus: "missed",
+      callStatus: 'missed',
       createdAt: now,
     });
 
@@ -1043,13 +1069,13 @@ export const initiateCall = mutation({
 
 export const answerCall = mutation({
   args: {
-    callId: v.id("chatCalls"),
-    userId: v.id("users"),
+    callId: v.id('chatCalls'),
+    userId: v.id('users'),
     answer: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const call = await ctx.db.get(args.callId);
-    if (!call) throw new Error("Call not found");
+    if (!call) throw new Error('Call not found');
 
     const participants = call.participants.map((p) => {
       if (p.userId === args.userId) {
@@ -1059,32 +1085,32 @@ export const answerCall = mutation({
     });
 
     await ctx.db.patch(args.callId, {
-      status: "active",
+      status: 'active',
       startedAt: Date.now(),
       participants,
     });
 
     // Update call message status
     const callMessages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", call.conversationId))
-      .order("desc")
+      .query('chatMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', call.conversationId))
+      .order('desc')
       .take(5);
-    const callMsg = callMessages.find((m) => m.type === "call" && m.callStatus === "missed");
+    const callMsg = callMessages.find((m) => m.type === 'call' && m.callStatus === 'missed');
     if (callMsg) {
-      await ctx.db.patch(callMsg._id, { callStatus: "answered" });
+      await ctx.db.patch(callMsg._id, { callStatus: 'answered' });
     }
   },
 });
 
 export const endCall = mutation({
   args: {
-    callId: v.id("chatCalls"),
-    userId: v.id("users"),
+    callId: v.id('chatCalls'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const call = await ctx.db.get(args.callId);
-    if (!call) throw new Error("Call not found");
+    if (!call) throw new Error('Call not found');
 
     const now = Date.now();
     const duration = call.startedAt ? Math.floor((now - call.startedAt) / 1000) : 0;
@@ -1095,7 +1121,7 @@ export const endCall = mutation({
     });
 
     await ctx.db.patch(args.callId, {
-      status: "ended",
+      status: 'ended',
       endedAt: now,
       duration,
       participants,
@@ -1105,22 +1131,22 @@ export const endCall = mutation({
 
 export const declineCall = mutation({
   args: {
-    callId: v.id("chatCalls"),
-    userId: v.id("users"),
+    callId: v.id('chatCalls'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const call = await ctx.db.get(args.callId);
-    if (!call) throw new Error("Call not found");
-    await ctx.db.patch(args.callId, { status: "declined" });
+    if (!call) throw new Error('Call not found');
+    await ctx.db.patch(args.callId, { status: 'declined' });
 
     const callMessages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", call.conversationId))
-      .order("desc")
+      .query('chatMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', call.conversationId))
+      .order('desc')
       .take(5);
-    const callMsg = callMessages.find((m) => m.type === "call");
+    const callMsg = callMessages.find((m) => m.type === 'call');
     if (callMsg) {
-      await ctx.db.patch(callMsg._id, { callStatus: "declined" });
+      await ctx.db.patch(callMsg._id, { callStatus: 'declined' });
     }
   },
 });
@@ -1128,13 +1154,13 @@ export const declineCall = mutation({
 /** Store SDP offer for the initiator (does NOT change call status) */
 export const updateOffer = mutation({
   args: {
-    callId: v.id("chatCalls"),
-    userId: v.id("users"),
+    callId: v.id('chatCalls'),
+    userId: v.id('users'),
     offer: v.string(),
   },
   handler: async (ctx, args) => {
     const call = await ctx.db.get(args.callId);
-    if (!call) throw new Error("Call not found");
+    if (!call) throw new Error('Call not found');
 
     const participants = call.participants.map((p) => {
       if (p.userId === args.userId) {
@@ -1149,13 +1175,13 @@ export const updateOffer = mutation({
 
 export const updateIceCandidates = mutation({
   args: {
-    callId: v.id("chatCalls"),
-    userId: v.id("users"),
+    callId: v.id('chatCalls'),
+    userId: v.id('users'),
     candidates: v.array(v.string()),
   },
   handler: async (ctx, args) => {
     const call = await ctx.db.get(args.callId);
-    if (!call) throw new Error("Call not found");
+    if (!call) throw new Error('Call not found');
 
     const participants = call.participants.map((p) => {
       if (p.userId === args.userId) {
@@ -1172,14 +1198,14 @@ export const updateIceCandidates = mutation({
 });
 
 export const getActiveCall = query({
-  args: { conversationId: v.id("chatConversations") },
+  args: { conversationId: v.id('chatConversations') },
   handler: async (ctx, args) => {
     // Get the most recent call that is still ringing or active
     return ctx.db
-      .query("chatCalls")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
-      .order("desc")
-      .filter((q) => q.or(q.eq(q.field("status"), "ringing"), q.eq(q.field("status"), "active")))
+      .query('chatCalls')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
+      .order('desc')
+      .filter((q) => q.or(q.eq(q.field('status'), 'ringing'), q.eq(q.field('status'), 'active')))
       .first();
   },
 });
@@ -1187,26 +1213,28 @@ export const getActiveCall = query({
 /** Get all incoming calls for a user (ringing calls where user is not initiator) */
 export const getIncomingCalls = query({
   args: {
-    userId: v.id("users"),
-    organizationId: v.id("organizations"),
+    userId: v.id('users'),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
     // Find all active/ringing calls in this organization where user is a participant but not initiator
     const calls = await ctx.db
-      .query("chatCalls")
-      .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+      .query('chatCalls')
+      .withIndex('by_organization', (q) => q.eq('organizationId', args.organizationId))
       .filter((q) =>
         q.and(
-          q.or(q.eq(q.field("status"), "ringing"), q.eq(q.field("status"), "active")),
-          q.neq(q.field("initiatorId"), args.userId)
-        )
+          q.or(q.eq(q.field('status'), 'ringing'), q.eq(q.field('status'), 'active')),
+          q.neq(q.field('initiatorId'), args.userId),
+        ),
       )
-      .order("desc")
+      .order('desc')
       .collect();
 
     // Filter to only calls where user is a participant
     const incomingCalls = calls.filter((call) =>
-      call.participants?.some((p: { userId: Id<"users">; joinedAt?: number }) => p.userId === args.userId)
+      call.participants?.some(
+        (p: { userId: Id<'users'>; joinedAt?: number }) => p.userId === args.userId,
+      ),
     );
 
     // Get the most recent one (or return null if none)
@@ -1221,47 +1249,48 @@ export const getIncomingCalls = query({
 /** Search messages in a conversation */
 export const searchMessages = query({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
     query: v.string(),
   },
   handler: async (ctx, args) => {
     const membership = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
     if (!membership) return [];
 
     const messages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .query('chatMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
       .collect();
 
     const q = args.query.toLowerCase();
-    return messages
-      .filter((m) => !m.isDeleted && m.content.toLowerCase().includes(q))
-      .slice(-20);
+    return messages.filter((m) => !m.isDeleted && m.content.toLowerCase().includes(q)).slice(-20);
   },
 });
 
 /** Get pinned messages in a conversation */
 export const getPinnedMessages = query({
-  args: { conversationId: v.id("chatConversations") },
+  args: { conversationId: v.id('chatConversations') },
   handler: async (ctx, args) => {
     const messages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_pinned", (q) =>
-        q.eq("conversationId", args.conversationId).eq("isPinned", true)
+      .query('chatMessages')
+      .withIndex('by_pinned', (q) =>
+        q.eq('conversationId', args.conversationId).eq('isPinned', true),
       )
       .collect();
 
     return Promise.all(
       messages.map(async (msg) => {
         const sender = await ctx.db.get(msg.senderId);
-        return { ...msg, sender: sender ? { name: sender.name, avatarUrl: sender.avatarUrl } : null };
-      })
+        return {
+          ...msg,
+          sender: sender ? { name: sender.name, avatarUrl: sender.avatarUrl } : null,
+        };
+      }),
     );
   },
 });
@@ -1269,19 +1298,19 @@ export const getPinnedMessages = query({
 /** Vote on a poll */
 export const votePoll = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
     optionId: v.string(),
   },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
-    if (!msg?.poll) throw new Error("No poll found");
+    if (!msg?.poll) throw new Error('No poll found');
     const poll = msg.poll as {
       question: string;
-      options: Array<{ id: string; text: string; votes: Id<"users">[] }>;
+      options: Array<{ id: string; text: string; votes: Id<'users'>[] }>;
       closedAt?: number;
     };
-    if (poll.closedAt && Date.now() > poll.closedAt) throw new Error("Poll closed");
+    if (poll.closedAt && Date.now() > poll.closedAt) throw new Error('Poll closed');
     const options = poll.options.map((opt) => {
       // Remove user's vote from all options first (toggle)
       const votes = opt.votes.filter((v) => v !== args.userId);
@@ -1295,14 +1324,14 @@ export const votePoll = mutation({
 
 /** Close a poll */
 export const closePoll = mutation({
-  args: { messageId: v.id("chatMessages"), userId: v.id("users") },
+  args: { messageId: v.id('chatMessages'), userId: v.id('users') },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
-    if (!msg?.poll) throw new Error("No poll");
-    if (msg.senderId !== args.userId) throw new Error("Not authorized");
+    if (!msg?.poll) throw new Error('No poll');
+    if (msg.senderId !== args.userId) throw new Error('Not authorized');
     const poll = msg.poll as {
       question: string;
-      options: Array<{ id: string; text: string; votes: Id<"users">[] }>;
+      options: Array<{ id: string; text: string; votes: Id<'users'>[] }>;
       closedAt?: number;
     };
     await ctx.db.patch(args.messageId, { poll: { ...poll, closedAt: Date.now() } });
@@ -1312,19 +1341,19 @@ export const closePoll = mutation({
 /** Send a thread reply */
 export const sendThreadReply = mutation({
   args: {
-    parentMessageId: v.id("chatMessages"),
-    conversationId: v.id("chatConversations"),
-    senderId: v.id("users"),
-    organizationId: v.id("organizations"),
+    parentMessageId: v.id('chatMessages'),
+    conversationId: v.id('chatConversations'),
+    senderId: v.id('users'),
+    organizationId: v.id('organizations'),
     content: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const replyId = await ctx.db.insert("chatMessages", {
+    const replyId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       senderId: args.senderId,
-      type: "text",
+      type: 'text',
       content: args.content,
       parentMessageId: args.parentMessageId,
       createdAt: now,
@@ -1343,18 +1372,23 @@ export const sendThreadReply = mutation({
 
 /** Get thread replies for a message */
 export const getThreadReplies = query({
-  args: { parentMessageId: v.id("chatMessages") },
+  args: { parentMessageId: v.id('chatMessages') },
   handler: async (ctx, args) => {
     const replies = await ctx.db
-      .query("chatMessages")
-      .filter((q) => q.eq(q.field("parentMessageId"), args.parentMessageId))
-      .order("asc")
+      .query('chatMessages')
+      .filter((q) => q.eq(q.field('parentMessageId'), args.parentMessageId))
+      .order('asc')
       .collect();
     return Promise.all(
       replies.map(async (r) => {
         const sender = await ctx.db.get(r.senderId);
-        return { ...r, sender: sender ? { _id: sender._id, name: sender.name, avatarUrl: sender.avatarUrl } : null };
-      })
+        return {
+          ...r,
+          sender: sender
+            ? { _id: sender._id, name: sender.name, avatarUrl: sender.avatarUrl }
+            : null,
+        };
+      }),
     );
   },
 });
@@ -1362,18 +1396,18 @@ export const getThreadReplies = query({
 /** Schedule a message to be sent later */
 export const scheduleMessage = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    senderId: v.id("users"),
-    organizationId: v.id("organizations"),
+    conversationId: v.id('chatConversations'),
+    senderId: v.id('users'),
+    organizationId: v.id('organizations'),
     content: v.string(),
     scheduledFor: v.number(),
   },
   handler: async (ctx, args) => {
-    return ctx.db.insert("chatMessages", {
+    return ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       senderId: args.senderId,
-      type: "text",
+      type: 'text',
       content: args.content,
       scheduledFor: args.scheduledFor,
       isSent: false,
@@ -1384,11 +1418,11 @@ export const scheduleMessage = mutation({
 
 /** Get scheduled messages for a user */
 export const getScheduledMessages = query({
-  args: { conversationId: v.id("chatConversations"), senderId: v.id("users") },
+  args: { conversationId: v.id('chatConversations'), senderId: v.id('users') },
   handler: async (ctx, args) => {
     const msgs = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .query('chatMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
       .collect();
     return msgs.filter((m) => m.senderId === args.senderId && m.scheduledFor && !m.isSent);
   },
@@ -1396,10 +1430,10 @@ export const getScheduledMessages = query({
 
 /** Cancel a scheduled message */
 export const cancelScheduledMessage = mutation({
-  args: { messageId: v.id("chatMessages"), userId: v.id("users") },
+  args: { messageId: v.id('chatMessages'), userId: v.id('users') },
   handler: async (ctx, args) => {
     const msg = await ctx.db.get(args.messageId);
-    if (!msg || msg.senderId !== args.userId) throw new Error("Not authorized");
+    if (!msg || msg.senderId !== args.userId) throw new Error('Not authorized');
     await ctx.db.delete(args.messageId);
   },
 });
@@ -1407,7 +1441,7 @@ export const cancelScheduledMessage = mutation({
 /** Update link preview on a message */
 export const setLinkPreview = mutation({
   args: {
-    messageId: v.id("chatMessages"),
+    messageId: v.id('chatMessages'),
     preview: v.object({
       url: v.string(),
       title: v.optional(v.string()),
@@ -1426,20 +1460,20 @@ export const setLinkPreview = mutation({
 /** Toggle pin status for a conversation */
 export const togglePin = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const conv = await ctx.db.get(args.conversationId);
-    if (!conv) throw new Error("Conversation not found");
+    if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .query('chatMembers')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
+      .filter((q) => q.eq(q.field('userId'), args.userId))
       .first();
 
-    if (!member) throw new Error("Not a member of this conversation");
+    if (!member) throw new Error('Not a member of this conversation');
 
     await ctx.db.patch(args.conversationId, {
       isPinned: !conv.isPinned,
@@ -1452,21 +1486,21 @@ export const togglePin = mutation({
 /** Soft delete a conversation (per-user — only hides it for the requesting user) */
 export const deleteConversation = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const conv = await ctx.db.get(args.conversationId);
-    if (!conv) throw new Error("Conversation not found");
+    if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
 
-    if (!member) throw new Error("Not a member of this conversation");
+    if (!member) throw new Error('Not a member of this conversation');
 
     // Mark as deleted for THIS user only & reset unread count
     await ctx.db.patch(member._id, {
@@ -1480,21 +1514,21 @@ export const deleteConversation = mutation({
 /** Restore a deleted conversation (per-user) */
 export const restoreConversation = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const conv = await ctx.db.get(args.conversationId);
-    if (!conv) throw new Error("Conversation not found");
+    if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
 
-    if (!member) throw new Error("Not a member of this conversation");
+    if (!member) throw new Error('Not a member of this conversation');
 
     // Reset per-user flags on chatMembers
     await ctx.db.patch(member._id, {
@@ -1508,21 +1542,21 @@ export const restoreConversation = mutation({
 /** Archive or unarchive a conversation (per-user) */
 export const toggleArchive = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const conv = await ctx.db.get(args.conversationId);
-    if (!conv) throw new Error("Conversation not found");
+    if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
 
-    if (!member) throw new Error("Not a member of this conversation");
+    if (!member) throw new Error('Not a member of this conversation');
 
     const newArchived = !member.isArchived;
     await ctx.db.patch(member._id, {
@@ -1535,17 +1569,17 @@ export const toggleArchive = mutation({
 /** Toggle mute status for current user */
 export const toggleMute = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const member = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .query('chatMembers')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
+      .filter((q) => q.eq(q.field('userId'), args.userId))
       .first();
 
-    if (!member) throw new Error("Not a member of this conversation");
+    if (!member) throw new Error('Not a member of this conversation');
 
     await ctx.db.patch(member._id, {
       isMuted: !member.isMuted,
@@ -1559,28 +1593,28 @@ export const toggleMute = mutation({
 /** Get only unread conversations */
 export const getUnreadConversations = query({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"),
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const members = await ctx.db
-      .query("chatMembers")
-      .filter((q) => q.and(
-        q.eq(q.field("userId"), args.userId),
-        q.eq(q.field("organizationId"), args.organizationId),
-        q.gt(q.field("unreadCount"), 0)
-      ))
+      .query('chatMembers')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('organizationId'), args.organizationId),
+          q.gt(q.field('unreadCount'), 0),
+        ),
+      )
       .collect();
 
     // Filter out per-user deleted/archived memberships
     const activeMembers = members.filter((m) => !m.isDeleted && !m.isArchived);
     const convIds = activeMembers.map((m) => m.conversationId);
-    const convs = await Promise.all(
-      convIds.map((id) => ctx.db.get(id))
-    );
+    const convs = await Promise.all(convIds.map((id) => ctx.db.get(id)));
 
     return convs
-      .filter((c): c is typeof c & { _id: Id<"chatConversations"> } => c !== null)
+      .filter((c): c is typeof c & { _id: Id<'chatConversations'> } => c !== null)
       .sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0));
   },
 });
@@ -1588,28 +1622,28 @@ export const getUnreadConversations = query({
 /** Get only group conversations */
 export const getGroupConversations = query({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"),
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const members = await ctx.db
-      .query("chatMembers")
-      .filter((q) => q.and(
-        q.eq(q.field("userId"), args.userId),
-        q.eq(q.field("organizationId"), args.organizationId)
-      ))
+      .query('chatMembers')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('organizationId'), args.organizationId),
+        ),
+      )
       .collect();
 
     // Filter out per-user deleted/archived memberships
     const activeMembers = members.filter((m) => !m.isDeleted && !m.isArchived);
 
-    const convs = await Promise.all(
-      activeMembers.map((m) => ctx.db.get(m.conversationId))
-    );
+    const convs = await Promise.all(activeMembers.map((m) => ctx.db.get(m.conversationId)));
 
     return convs
-      .filter((c): c is typeof c & { _id: Id<"chatConversations"> } =>
-        c !== null && c.type === "group"
+      .filter(
+        (c): c is typeof c & { _id: Id<'chatConversations'> } => c !== null && c.type === 'group',
       )
       .sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0));
   },
@@ -1618,29 +1652,27 @@ export const getGroupConversations = query({
 /** Get pinned conversations */
 export const getPinnedConversations = query({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"),
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const members = await ctx.db
-      .query("chatMembers")
-      .filter((q) => q.and(
-        q.eq(q.field("userId"), args.userId),
-        q.eq(q.field("organizationId"), args.organizationId)
-      ))
+      .query('chatMembers')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('organizationId'), args.organizationId),
+        ),
+      )
       .collect();
 
     // Filter out members who have per-user deleted this conversation
     const activeMembers = members.filter((m) => !m.isDeleted);
 
-    const convs = await Promise.all(
-      activeMembers.map((m) => ctx.db.get(m.conversationId))
-    );
+    const convs = await Promise.all(activeMembers.map((m) => ctx.db.get(m.conversationId)));
 
     return convs
-      .filter((c): c is typeof c & { _id: Id<"chatConversations"> } =>
-        c !== null && !!c.isPinned
-      )
+      .filter((c): c is typeof c & { _id: Id<'chatConversations'> } => c !== null && !!c.isPinned)
       .sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0));
   },
 });
@@ -1648,29 +1680,27 @@ export const getPinnedConversations = query({
 /** Get archived conversations */
 export const getArchivedConversations = query({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"),
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const members = await ctx.db
-      .query("chatMembers")
-      .filter((q) => q.and(
-        q.eq(q.field("userId"), args.userId),
-        q.eq(q.field("organizationId"), args.organizationId)
-      ))
+      .query('chatMembers')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('organizationId'), args.organizationId),
+        ),
+      )
       .collect();
 
     // Only show conversations archived by this user (per-user) and not deleted
     const archivedMembers = members.filter((m) => m.isArchived && !m.isDeleted);
 
-    const convs = await Promise.all(
-      archivedMembers.map((m) => ctx.db.get(m.conversationId))
-    );
+    const convs = await Promise.all(archivedMembers.map((m) => ctx.db.get(m.conversationId)));
 
     return convs
-      .filter((c): c is typeof c & { _id: Id<"chatConversations"> } =>
-        c !== null
-      )
+      .filter((c): c is typeof c & { _id: Id<'chatConversations'> } => c !== null)
       .sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0));
   },
 });
@@ -1678,13 +1708,13 @@ export const getArchivedConversations = query({
 /** Get all org users for new conversation / mention picker */
 export const getOrgUsers = query({
   args: {
-    organizationId: v.id("organizations"),
-    currentUserId: v.id("users"),
+    organizationId: v.id('organizations'),
+    currentUserId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const users = await ctx.db
-      .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .collect();
 
     // Get today's date in YYYY-MM-DD format
@@ -1695,12 +1725,12 @@ export const getOrgUsers = query({
         .filter((u) => u._id !== args.currentUserId && u.isActive && u.isApproved)
         .map(async (u) => {
           // Check if user has an approved leave today
-          let effectivePresenceStatus = u.presenceStatus ?? "available";
+          let effectivePresenceStatus = u.presenceStatus ?? 'available';
 
           const approvedLeaves = await ctx.db
-            .query("leaveRequests")
-            .withIndex("by_user", (q) => q.eq("userId", u._id))
-            .filter((q) => q.eq(q.field("status"), "approved"))
+            .query('leaveRequests')
+            .withIndex('by_user', (q) => q.eq('userId', u._id))
+            .filter((q) => q.eq(q.field('status'), 'approved'))
             .collect();
 
           const hasActiveLeave = approvedLeaves.some((leave) => {
@@ -1708,7 +1738,7 @@ export const getOrgUsers = query({
           });
 
           if (hasActiveLeave) {
-            effectivePresenceStatus = "out_of_office";
+            effectivePresenceStatus = 'out_of_office';
           }
 
           return {
@@ -1720,7 +1750,7 @@ export const getOrgUsers = query({
             presenceStatus: effectivePresenceStatus,
             organizationId: u.organizationId,
           };
-        })
+        }),
     );
   },
 });
@@ -1730,31 +1760,31 @@ export const getOrgUsers = query({
 /** Send a service broadcast message from superadmin to all users in organization */
 export const sendServiceBroadcast = mutation({
   args: {
-    organizationId: v.id("organizations"),
-    conversationId: v.id("chatConversations"),
-    senderId: v.id("users"),  // the superadmin user
-    title: v.string(),        // e.g. "System Maintenance"
-    content: v.string(),      // the announcement message
-    icon: v.optional(v.string()),  // emoji or icon, e.g. "⚠️", "ℹ️", "🔧"
+    organizationId: v.id('organizations'),
+    conversationId: v.id('chatConversations'),
+    senderId: v.id('users'), // the superadmin user
+    title: v.string(), // e.g. "System Maintenance"
+    content: v.string(), // the announcement message
+    icon: v.optional(v.string()), // emoji or icon, e.g. "⚠️", "ℹ️", "🔧"
   },
   handler: async (ctx, args) => {
     const now = Date.now();
 
     // Create the service broadcast message
-    const msgId = await ctx.db.insert("chatMessages", {
+    const msgId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       senderId: args.senderId,
-      type: "system",
+      type: 'system',
       content: args.content,
       isServiceBroadcast: true,
       broadcastTitle: args.title,
-      broadcastIcon: args.icon || "ℹ️",
+      broadcastIcon: args.icon || 'ℹ️',
       createdAt: now,
     });
 
     // Update conversation last message
-    const preview = args.content.length > 60 ? args.content.slice(0, 60) + "…" : args.content;
+    const preview = args.content.length > 60 ? args.content.slice(0, 60) + '…' : args.content;
     await ctx.db.patch(args.conversationId, {
       lastMessageAt: now,
       lastMessageText: `[${args.title}] ${preview}`,
@@ -1764,8 +1794,8 @@ export const sendServiceBroadcast = mutation({
 
     // Add unread count for all members except sender
     const members = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .query('chatMembers')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
       .collect();
 
     for (const member of members) {
@@ -1782,19 +1812,19 @@ export const sendServiceBroadcast = mutation({
 /** Get all service broadcasts for an organization */
 export const getServiceBroadcasts = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
     // Get System Announcements conversation
     const systemAnnouncements = await ctx.db
-      .query("chatConversations")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .query('chatConversations')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .filter((q) =>
         q.and(
-          q.eq(q.field("type"), "group"),
-          q.eq(q.field("name"), "System Announcements"),
-          q.eq(q.field("isDeleted"), false)
-        )
+          q.eq(q.field('type'), 'group'),
+          q.eq(q.field('name'), 'System Announcements'),
+          q.eq(q.field('isDeleted'), false),
+        ),
       )
       .first();
 
@@ -1804,9 +1834,9 @@ export const getServiceBroadcasts = query({
 
     // Get all service broadcast messages
     const broadcasts = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", systemAnnouncements._id))
-      .filter((q) => q.eq(q.field("isServiceBroadcast"), true))
+      .query('chatMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', systemAnnouncements._id))
+      .filter((q) => q.eq(q.field('isServiceBroadcast'), true))
       .collect();
 
     // Get sender info for each broadcast
@@ -1815,14 +1845,14 @@ export const getServiceBroadcasts = query({
         const sender = await ctx.db.get(b.senderId);
         return {
           _id: b._id,
-          title: b.broadcastTitle || "Announcement",
-          icon: b.broadcastIcon || "ℹ️",
+          title: b.broadcastTitle || 'Announcement',
+          icon: b.broadcastIcon || 'ℹ️',
           content: b.content,
           createdAt: b.createdAt,
-          senderName: sender?.name || "Unknown",
-          senderEmail: sender?.email || "unknown",
+          senderName: sender?.name || 'Unknown',
+          senderEmail: sender?.email || 'unknown',
         };
-      })
+      }),
     );
 
     // Sort by creation date descending (newest first)
@@ -1834,11 +1864,11 @@ export const getServiceBroadcasts = query({
 // GET UNREAD MESSAGE COUNT — for badge display
 // ─────────────────────────────────────────────────────────────────────────────
 export const getUnreadMessageCount = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     const memberships = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .query('chatMembers')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
       .collect();
 
     let total = 0;

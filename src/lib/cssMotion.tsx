@@ -10,7 +10,7 @@ export type HTMLMotionProps<T extends HTMLElement = HTMLDivElement> = MotionProp
   React.HTMLAttributes<T>;
 
 interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   layout?: boolean;
   initial?:
@@ -293,10 +293,10 @@ export function MotionDiv({
  */
 interface AnimatePresenceProps {
   children: React.ReactNode;
-  mode?: 'sync' | 'wait';
+  mode?: 'sync' | 'wait' | 'popLayout';
 }
 
-export function AnimatePresence({ children }: AnimatePresenceProps) {
+export function AnimatePresence({ children, mode }: AnimatePresenceProps) {
   return <>{children}</>;
 }
 
