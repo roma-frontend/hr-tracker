@@ -1,26 +1,43 @@
-"use client";
+'use client';
 
 import { useTranslation } from 'react-i18next';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { motion } from '@/lib/cssMotion';
 import {
-  Save, User as UserIcon, Mail, Briefcase, Calendar,
-  Shield, MapPin, Phone, Trash2, Upload, Clock, Award
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { useAuthStore } from "@/store/useAuthStore";
-import { toast } from "sonner";
-import { AvatarUpload } from "@/components/ui/avatar-upload";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
-import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
+  Save,
+  User as UserIcon,
+  Mail,
+  Briefcase,
+  Calendar,
+  Shield,
+  MapPin,
+  Phone,
+  Trash2,
+  Upload,
+  Clock,
+  Award,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useAuthStore } from '@/store/useAuthStore';
+import { toast } from 'sonner';
+import { AvatarUpload } from '@/components/ui/avatar-upload';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
+import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -29,18 +46,20 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [name, setName] = useState(user?.name ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
-  const [phone, setPhone] = useState("");
-  const [location, setLocation] = useState("");
+  const [name, setName] = useState(user?.name ?? '');
+  const [email, setEmail] = useState(user?.email ?? '');
+  const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
 
   const updateOwnProfile = useMutation(api.users.updateOwnProfile);
   const deleteAvatar = useMutation(api.users.deleteAvatar);
-  const userData = useQuery(api.users.getUserById,
-    user?.id ? { userId: user.id as any, requesterId: user.id as any } : "skip"
+  const userData = useQuery(
+    api.users.getUserById,
+    user?.id ? { userId: user.id as any, requesterId: user.id as any } : 'skip',
   );
-  const userStats = useQuery(api.userStats.getUserStats,
-    user?.id ? { userId: user.id as any } : "skip"
+  const userStats = useQuery(
+    api.userStats.getUserStats,
+    user?.id ? { userId: user.id as any } : 'skip',
   );
 
   // Sync when user loads from store or DB
@@ -51,19 +70,19 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (userData) {
-      setPhone(userData.phone ?? "");
-      setLocation(userData.location ?? "");
+      setPhone(userData.phone ?? '');
+      setLocation(userData.location ?? '');
     }
   }, [userData]);
 
   const handleSave = async () => {
     if (!user?.id) {
-      console.error("[Profile] No user ID");
+      console.error('[Profile] No user ID');
       return;
     }
-    
-    console.log("[Profile] Saving...", { user, name, email, phone, location });
-    
+
+    console.log('[Profile] Saving...', { user, name, email, phone, location });
+
     setSaving(true);
     try {
       const newName = name.trim() || user.name;
@@ -71,7 +90,7 @@ export default function ProfilePage() {
       const newPhone = phone.trim();
       const newLocation = location.trim();
 
-      console.log("[Profile] Calling updateOwnProfile...", {
+      console.log('[Profile] Calling updateOwnProfile...', {
         userId: user.id,
         name: newName,
         email: newEmail,
@@ -88,46 +107,46 @@ export default function ProfilePage() {
         location: newLocation || undefined,
       });
 
-      console.log("[Profile] Convex update successful");
+      console.log('[Profile] Convex update successful');
 
       // 2. Update JWT cookie via API route
-      console.log("[Profile] Calling /api/profile/update...");
-      
-      const res = await fetch("/api/profile/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      console.log('[Profile] Calling /api/profile/update...');
+
+      const res = await fetch('/api/profile/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           name: newName,
           email: newEmail,
         }),
-        credentials: "include",
+        credentials: 'include',
       });
 
-      console.log("[Profile] API response status:", res.status);
+      console.log('[Profile] API response status:', res.status);
 
       if (!res.ok) {
         const error = await res.json();
-        console.error("[Profile] API error:", error);
-        throw new Error(error.error || "Failed to update session");
+        console.error('[Profile] API error:', error);
+        throw new Error(error.error || 'Failed to update session');
       }
 
-      console.log("[Profile] JWT cookie updated");
+      console.log('[Profile] JWT cookie updated');
 
       // 3. Update Zustand store (localStorage)
       login({ ...user, name: newName, email: newEmail });
-      console.log("[Profile] Zustand store updated");
+      console.log('[Profile] Zustand store updated');
 
       // 4. Update local state to reflect changes immediately
       setName(newName);
       setEmail(newEmail);
 
-      toast.success(t("toasts.profileUpdated"));
+      toast.success(t('toasts.profileUpdated'));
 
       // Don't reload - let Convex revalidate automatically
     } catch (err) {
-      console.error("[Profile] Save error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to save profile");
+      console.error('[Profile] Save error:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -139,7 +158,7 @@ export default function ProfilePage() {
     setDeleting(true);
     try {
       // 1. Delete from Cloudinary
-      const { deleteAvatarFromCloudinary } = await import("@/actions/cloudinary");
+      const { deleteAvatarFromCloudinary } = await import('@/actions/cloudinary');
       await deleteAvatarFromCloudinary(user.id);
 
       // 2. Delete from database
@@ -148,11 +167,11 @@ export default function ProfilePage() {
       // 3. Update local state
       login({ ...user, avatar: undefined });
 
-      toast.success(t("toasts.profilePictureDeleted"));
+      toast.success(t('toasts.profilePictureDeleted'));
       setShowDeleteDialog(false);
     } catch (err) {
-      console.error("Delete avatar error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to delete avatar");
+      console.error('Delete avatar error:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to delete avatar');
     } finally {
       setDeleting(false);
     }
@@ -161,11 +180,11 @@ export default function ProfilePage() {
   // Format date
   const joinDate = userData?._creationTime
     ? new Date(userData._creationTime).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-    : "N/A";
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : 'N/A';
 
   return (
     <motion.div
@@ -175,7 +194,9 @@ export default function ProfilePage() {
     >
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t('profileSettings.myProfile')}</h2>
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+          {t('profileSettings.myProfile')}
+        </h2>
         <p className="text-[var(--text-muted)] text-sm mt-1">
           {t('profileSettings.managePersonalInfo')}
         </p>
@@ -188,21 +209,19 @@ export default function ProfilePage() {
             <Upload className="w-4 h-4 text-[var(--primary)]" />
             <CardTitle className="text-base">{t('profileSettings.profilePicture')}</CardTitle>
           </div>
-          <CardDescription>
-            {t('ui.profilePictureUpload')}
-          </CardDescription>
+          <CardDescription>{t('ui.profilePictureUpload')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row items-center gap-6">
             {/* Avatar */}
             <div className="relative">
               <AvatarUpload
-                userId={user?.id ?? ""}
+                userId={user?.id ?? ''}
                 currentUrl={user?.avatar}
-                name={user?.name ?? "User"}
+                name={user?.name ?? 'User'}
                 size="lg"
                 onSuccess={(url) => {
-                  toast.success(t("toasts.profilePictureUpdated"));
+                  toast.success(t('toasts.profilePictureUpdated'));
                   login({ ...user!, avatar: url });
                 }}
               />
@@ -247,7 +266,9 @@ export default function ProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">{t('labels.fullName')} {t('forms.required')}</Label>
+              <Label htmlFor="name">
+                {t('labels.fullName')} {t('forms.required')}
+              </Label>
               <div className="relative">
                 <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
@@ -261,7 +282,9 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="email">{t('labels.emailAddress')} {t('forms.required')}</Label>
+              <Label htmlFor="email">
+                {t('labels.emailAddress')} {t('forms.required')}
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
@@ -321,7 +344,7 @@ export default function ProfilePage() {
             <div className="space-y-1.5">
               <Label>{t('labels.role')}</Label>
               <div className="flex items-center gap-2">
-                <Badge variant={user?.role === "admin" ? "default" : "secondary"}>
+                <Badge variant={user?.role === 'admin' ? 'default' : 'secondary'}>
                   {user?.role?.toUpperCase()}
                 </Badge>
               </div>
@@ -332,7 +355,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
-                  value={user?.department ?? "Not assigned"}
+                  value={user?.department ?? 'Not assigned'}
                   disabled
                   className="pl-10 opacity-60"
                 />
@@ -343,11 +366,7 @@ export default function ProfilePage() {
               <Label>{t('ui.memberSince')}</Label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                <Input
-                  value={joinDate}
-                  disabled
-                  className="pl-10 opacity-60"
-                />
+                <Input value={joinDate} disabled className="pl-10 opacity-60" />
               </div>
             </div>
 
@@ -356,7 +375,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
-                  value={user?.id ? user.id.slice(0, 16) + "..." : "N/A"}
+                  value={user?.id ? user.id.slice(0, 16) + '...' : 'N/A'}
                   disabled
                   className="pl-10 opacity-60 font-mono text-xs"
                 />
@@ -367,9 +386,7 @@ export default function ProfilePage() {
           {/* Info note */}
           <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-sm">
             <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <p>
-              {t('profile.roleManagedByAdmin')}
-            </p>
+            <p>{t('profile.roleManagedByAdmin')}</p>
           </div>
         </CardContent>
       </Card>
@@ -387,10 +404,26 @@ export default function ProfilePage() {
           {userStats ? (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { label: t('profile.daysActive'), value: userStats.daysActive.toString(), icon: Clock },
-                { label: t('profile.tasksCompleted'), value: userStats.tasksCompleted.toString(), icon: Award },
-                { label: t('profile.leavesTaken'), value: userStats.leavesTaken.toString(), icon: Calendar },
-                { label: t('profile.projects'), value: userStats.projects.toString(), icon: Briefcase },
+                {
+                  label: t('profile.daysActive'),
+                  value: userStats.daysActive.toString(),
+                  icon: Clock,
+                },
+                {
+                  label: t('profile.tasksCompleted'),
+                  value: userStats.tasksCompleted.toString(),
+                  icon: Award,
+                },
+                {
+                  label: t('profile.leavesTaken'),
+                  value: userStats.leavesTaken.toString(),
+                  icon: Calendar,
+                },
+                {
+                  label: t('profile.projects'),
+                  value: userStats.projects.toString(),
+                  icon: Briefcase,
+                },
               ].map((stat) => (
                 <div
                   key={stat.label}
@@ -412,11 +445,14 @@ export default function ProfilePage() {
 
       {/* Save Button */}
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={() => {
-          setName(user?.name ?? "");
-          setEmail(user?.email ?? "");
-          toast.info(t("toasts.changesDiscarded"));
-        }}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setName(user?.name ?? '');
+            setEmail(user?.email ?? '');
+            toast.info(t('toasts.changesDiscarded'));
+          }}
+        >
           Discard Changes
         </Button>
         <Button onClick={handleSave} disabled={saving}>
@@ -427,22 +463,29 @@ export default function ProfilePage() {
 
       {/* Delete Avatar Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="sm:max-w-md" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <DialogContent
+          className="sm:max-w-md"
+          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+        >
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2" style={{ color: "var(--destructive)" }}>
+            <DialogTitle
+              className="flex items-center gap-2"
+              style={{ color: 'var(--destructive)' }}
+            >
               <Trash2 className="w-5 h-5" />
               {t('profile.deleteAvatarTitle') || 'Delete Profile Picture?'}
             </DialogTitle>
-            <DialogDescription className="pt-3" style={{ color: "var(--text-muted)" }}>
-              {t('profile.deleteAvatarWarning') || 'Are you sure you want to delete your profile picture? This action cannot be undone.'}
+            <DialogDescription className="pt-3" style={{ color: 'var(--text-muted)' }}>
+              {t('profile.deleteAvatarWarning') ||
+                'Are you sure you want to delete your profile picture? This action cannot be undone.'}
             </DialogDescription>
           </DialogHeader>
 
           <div
             className="flex items-center gap-3 p-4 rounded-lg border"
             style={{
-              background: "var(--destructive-bg, rgba(239, 68, 68, 0.1))",
-              borderColor: "var(--destructive-border, rgba(239, 68, 68, 0.3))"
+              background: 'var(--destructive-bg, rgba(239, 68, 68, 0.1))',
+              borderColor: 'var(--destructive-border, rgba(239, 68, 68, 0.3))',
             }}
           >
             <div className="flex-shrink-0">
@@ -459,10 +502,10 @@ export default function ProfilePage() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 {user?.name}
               </p>
-              <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+              <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
                 {user?.email}
               </p>
             </div>
@@ -475,8 +518,8 @@ export default function ProfilePage() {
               onClick={() => setShowDeleteDialog(false)}
               disabled={deleting}
               style={{
-                borderColor: "var(--border)",
-                color: "var(--text-primary)"
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)',
               }}
             >
               {t('ui.cancel') || 'Cancel'}

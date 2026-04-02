@@ -1,4 +1,4 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT, jwtVerify } from 'jose';
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -7,25 +7,27 @@ if (process.env.NODE_ENV === 'production' && (!jwtSecret || jwtSecret.length < 3
   throw new Error('JWT_SECRET must be at least 32 characters in production');
 }
 
-const secret = new TextEncoder().encode(jwtSecret || 'dev-secret-change-me-in-production-min-32-chars');
+const secret = new TextEncoder().encode(
+  jwtSecret || 'dev-secret-change-me-in-production-min-32-chars',
+);
 
 export interface JWTPayload {
   userId: string;
   name: string;
   email: string;
-  role: "admin" | "supervisor" | "employee" | "superadmin";
+  role: 'admin' | 'supervisor' | 'employee' | 'superadmin';
   organizationId?: string;
   isApproved?: boolean;
   department?: string;
   position?: string;
-  employeeType?: "staff" | "contractor";
+  employeeType?: 'staff' | 'contractor';
   avatar?: string;
-  type?: "2fa-pending";
+  type?: '2fa-pending';
 }
 
-export async function signJWT(payload: JWTPayload, expiresIn: string = "7d"): Promise<string> {
+export async function signJWT(payload: JWTPayload, expiresIn: string = '7d'): Promise<string> {
   return await new SignJWT({ ...payload })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
     .sign(secret);

@@ -32,28 +32,52 @@ import MobileMenu from './MobileMenu';
 import CookieBanner from '@/components/CookieBanner';
 import { Button } from '@/components/ui/button';
 
-const FloatingParticles = dynamic(() => import('./FloatingParticles'), { ssr: false, loading: () => null });
-
+const FloatingParticles = dynamic(() => import('./FloatingParticles'), {
+  ssr: false,
+  loading: () => null,
+});
 
 // Lazy load sections that appear below the fold
 const TestimonialsSection = dynamic(() => import('./TestimonialsSection'), {
-  loading: () => <div className="h-96 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
+  loading: () => (
+    <div
+      className="h-96 animate-pulse rounded-3xl"
+      style={{ backgroundColor: 'var(--landing-card-bg)' }}
+    />
+  ),
 });
 
 const FAQSection = dynamic(() => import('./FAQSection'), {
-  loading: () => <div className="h-96 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
+  loading: () => (
+    <div
+      className="h-96 animate-pulse rounded-3xl"
+      style={{ backgroundColor: 'var(--landing-card-bg)' }}
+    />
+  ),
 });
 
 const NewsletterSection = dynamic(() => import('./NewsletterSection'), {
-  loading: () => <div className="h-64 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
+  loading: () => (
+    <div
+      className="h-64 animate-pulse rounded-3xl"
+      style={{ backgroundColor: 'var(--landing-card-bg)' }}
+    />
+  ),
 });
 
 const PricingPreview = dynamic(() => import('./PricingPreview'), {
-  loading: () => <div className="h-96 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
+  loading: () => (
+    <div
+      className="h-96 animate-pulse rounded-3xl"
+      style={{ backgroundColor: 'var(--landing-card-bg)' }}
+    />
+  ),
 });
 
 const SocialProof = dynamic(() => import('./SocialProof'), {
-  loading: () => <div className="h-32 animate-pulse" style={{ backgroundColor: 'var(--landing-card-bg)' }} />,
+  loading: () => (
+    <div className="h-32 animate-pulse" style={{ backgroundColor: 'var(--landing-card-bg)' }} />
+  ),
 });
 import { useAuthStore } from '@/store/useAuthStore';
 import { logoutAction } from '@/actions/auth';
@@ -204,7 +228,12 @@ function Navbar() {
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const toggleTheme = () => {
@@ -216,8 +245,9 @@ function Navbar() {
       {/* nav-animate class uses CSS animation — zero JS cost vs framer-motion */}
       {/* sticky position - works exactly like dashboard navbar */}
       <nav
-        className={`nav-animate sticky top-0 z-[100] flex items-center justify-between px-4 md:px-8 lg:px-12 transition-all duration-300 border-b ${scrolled ? 'py-2 md:py-3 shadow-lg' : 'py-3 md:py-4'
-          }`}
+        className={`nav-animate sticky top-0 z-[100] flex items-center justify-between px-4 md:px-8 lg:px-12 transition-all duration-300 border-b ${
+          scrolled ? 'py-2 md:py-3 shadow-lg' : 'py-3 md:py-4'
+        }`}
         role="navigation"
         aria-label="Main navigation"
         style={{
@@ -232,7 +262,9 @@ function Navbar() {
               ? 'rgba(var(--landing-navbar-bg-rgb, 15, 23, 42), 0.98)'
               : 'rgba(var(--landing-navbar-bg-rgb, 15, 23, 42), 0.7)',
             borderColor: 'var(--landing-card-border)',
-            boxShadow: scrolled ? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)' : 'none'
+            boxShadow: scrolled
+              ? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+              : 'none',
           }}
         />
 
@@ -269,8 +301,10 @@ function Navbar() {
               style={{
                 color: 'var(--landing-navbar-text)',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--landing-navbar-text-hover)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-navbar-text)'}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = 'var(--landing-navbar-text-hover)')
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--landing-navbar-text)')}
               aria-label={`Navigate to ${item.name}`}
             >
               {item.name}
@@ -292,7 +326,9 @@ function Navbar() {
                 background: 'var(--landing-card-bg)',
                 border: '1px solid var(--landing-card-border)',
               }}
-              aria-label={theme === 'dark' ? t('landingExtra.switchToLight') : t('landingExtra.switchToDark')}
+              aria-label={
+                theme === 'dark' ? t('landingExtra.switchToLight') : t('landingExtra.switchToDark')
+              }
             >
               {theme === 'dark' ? (
                 <Sun size={18} style={{ color: 'var(--landing-text-muted)' }} />
@@ -314,7 +350,9 @@ function Navbar() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden sm:block text-left">
-                    <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">{user.name}</p>
+                    <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">
+                      {user.name}
+                    </p>
                     <p className="text-[10px] text-[var(--text-muted)] capitalize">{user.role}</p>
                   </div>
                   <ChevronDown className="w-3 h-3 text-[var(--text-muted)] hidden sm:block" />
@@ -329,7 +367,7 @@ function Navbar() {
                   {t('landingExtra.myAccount')}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-[var(--border)]" />
-                
+
                 <DropdownMenuItem
                   className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
                   onClick={() => router.push('/dashboard')}
@@ -347,7 +385,7 @@ function Navbar() {
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator className="bg-[var(--border)]" />
-                
+
                 <DropdownMenuItem
                   className="text-red-400 cursor-pointer hover:bg-red-500/10 focus:bg-red-500/10 hover:text-red-300 gap-2"
                   onClick={handleLogout}
@@ -365,7 +403,7 @@ function Navbar() {
                 className="hidden lg:inline-flex text-sm transition-colors font-medium px-3 lg:px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 style={{
                   color: 'var(--landing-navbar-text)',
-                  backgroundColor: 'transparent'
+                  backgroundColor: 'transparent',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = 'var(--landing-navbar-text-hover)';
@@ -381,7 +419,10 @@ function Navbar() {
               <Link
                 href="/register"
                 className="hidden lg:inline-flex items-center gap-2 text-sm font-semibold px-4 lg:px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #93c5fd)', color: '#ffffff' }}
+                style={{
+                  background: 'linear-gradient(135deg, #2563eb, #93c5fd)',
+                  color: '#ffffff',
+                }}
               >
                 {t('landingExtra.getStarted')}
                 <ArrowRight size={14} />
@@ -393,7 +434,7 @@ function Navbar() {
                 className="lg:hidden w-10 h-10 rounded-xl transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 style={{
                   backgroundColor: 'var(--landing-card-bg)',
-                  border: '1px solid var(--landing-card-border)'
+                  border: '1px solid var(--landing-card-border)',
                 }}
                 aria-label="Open mobile menu"
                 aria-expanded={isMobileMenuOpen}
@@ -423,7 +464,6 @@ function Navbar() {
   );
 }
 
-
 // ─── Hero Section ─────────────────────────────────────────────────────────────
 // Replaced framer-motion scroll parallax + per-element JS animations with
 // pure CSS keyframe animations — same visual result, zero runtime JS cost.
@@ -444,7 +484,7 @@ function HeroSection() {
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg"
         style={{
           backgroundColor: 'var(--primary)',
-          color: '#ffffff'
+          color: '#ffffff',
         }}
       >
         {t('ui.skipToContent')}
@@ -461,35 +501,61 @@ function HeroSection() {
         aria-label="Premium HR platform"
       >
         <div className="badge-shimmer absolute inset-0" aria-hidden="true" />
-        <div className="w-2 h-2 rounded-full pulse-dot" style={{ backgroundColor: 'var(--primary)' }} aria-hidden="true" />
-        <span className="relative text-xs font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--landing-text-muted)' }}>
+        <div
+          className="w-2 h-2 rounded-full pulse-dot"
+          style={{ backgroundColor: 'var(--primary)' }}
+          aria-hidden="true"
+        />
+        <span
+          className="relative text-xs font-bold tracking-[0.2em] uppercase"
+          style={{ color: 'var(--landing-text-muted)' }}
+        >
           {t('landing.exclusiveHR')}
         </span>
-        <Sparkles size={16} className="spin-slow" style={{ color: 'var(--primary)' }} aria-hidden="true" />
+        <Sparkles
+          size={16}
+          className="spin-slow"
+          style={{ color: 'var(--primary)' }}
+          aria-hidden="true"
+        />
       </div>
 
       {/* Title — CSS fade-up stagger */}
       <h1 className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6 relative">
-        <span className="hero-word-1 relative text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none" style={{ color: 'var(--landing-text-primary)' }}>
+        <span
+          className="hero-word-1 relative text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none"
+          style={{ color: 'var(--landing-text-primary)' }}
+        >
           {t('landing.heroTitle')}
         </span>
         <div
           className="hero-line absolute -bottom-4 left-1/2 -translate-x-1/2 h-[2px] w-32"
           style={{
-            background: 'linear-gradient(to right, transparent, var(--primary), transparent)'
+            background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
           }}
         />
       </h1>
 
-
       {/* Subtitle */}
       <div className="hero-fade-3 max-w-3xl mx-auto mb-12">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="w-16 h-[1px]" style={{ background: 'linear-gradient(to right, transparent, var(--primary))' }} />
-          <div className="w-2 h-2 rounded-full pulse-dot" style={{ backgroundColor: 'var(--primary)' }} />
-          <div className="w-16 h-[1px]" style={{ background: 'linear-gradient(to left, transparent, var(--primary))' }} />
+          <div
+            className="w-16 h-[1px]"
+            style={{ background: 'linear-gradient(to right, transparent, var(--primary))' }}
+          />
+          <div
+            className="w-2 h-2 rounded-full pulse-dot"
+            style={{ backgroundColor: 'var(--primary)' }}
+          />
+          <div
+            className="w-16 h-[1px]"
+            style={{ background: 'linear-gradient(to left, transparent, var(--primary))' }}
+          />
         </div>
-        <p className="text-lg md:text-xl leading-relaxed font-light text-center" style={{ color: 'var(--landing-text-secondary)' }}>
+        <p
+          className="text-lg md:text-xl leading-relaxed font-light text-center"
+          style={{ color: 'var(--landing-text-secondary)' }}
+        >
           {t('landing.heroSubtitle')}
         </p>
         <div className="flex items-center justify-center gap-2 mt-6">
@@ -538,12 +604,7 @@ function HeroSection() {
         ) : (
           <>
             <Link href="/register">
-              <Button
-                variant="cta"
-                size="2xl"
-                className="gap-3"
-                aria-label="Get started for free"
-              >
+              <Button variant="cta" size="2xl" className="gap-3" aria-label="Get started for free">
                 <Zap size={20} aria-hidden="true" />
                 {t('landing.getStartedFree')}
                 <ArrowRight size={18} aria-hidden="true" />
@@ -567,11 +628,26 @@ function HeroSection() {
       {/* Trusted companies */}
       <div className="hero-fade-4 flex flex-col items-center gap-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-[1px]" style={{ background: 'linear-gradient(to right, transparent, var(--primary))', opacity: 0.7 }} />
-          <p className="text-xs uppercase tracking-[0.3em] font-semibold" style={{ color: 'var(--landing-text-muted)' }}>
+          <div
+            className="w-8 h-[1px]"
+            style={{
+              background: 'linear-gradient(to right, transparent, var(--primary))',
+              opacity: 0.7,
+            }}
+          />
+          <p
+            className="text-xs uppercase tracking-[0.3em] font-semibold"
+            style={{ color: 'var(--landing-text-muted)' }}
+          >
             {t('landing.trustedByElite')}
           </p>
-          <div className="w-8 h-[1px]" style={{ background: 'linear-gradient(to left, transparent, var(--primary))', opacity: 0.7 }} />
+          <div
+            className="w-8 h-[1px]"
+            style={{
+              background: 'linear-gradient(to left, transparent, var(--primary))',
+              opacity: 0.7,
+            }}
+          />
         </div>
         <div className="flex flex-wrap justify-center gap-10">
           {TRUSTED.map((name) => (
@@ -584,7 +660,12 @@ function HeroSection() {
               }}
             >
               {name}
-              <span className="absolute -bottom-1 left-0 right-0 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to right, transparent, var(--primary), transparent)' }} />
+              <span
+                className="absolute -bottom-1 left-0 right-0 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{
+                  background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
+                }}
+              />
             </span>
           ))}
         </div>
@@ -598,8 +679,19 @@ function HeroSection() {
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center gap-2 hidden md:flex"
         aria-hidden="true"
       >
-        <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--primary)', opacity: 0.6 }}>{t('landing.scroll')}</span>
-        <div className="scroll-line w-px h-12" style={{ background: 'linear-gradient(to bottom, var(--primary), transparent)', opacity: 0.7 }} />
+        <span
+          className="text-xs uppercase tracking-widest"
+          style={{ color: 'var(--primary)', opacity: 0.6 }}
+        >
+          {t('landing.scroll')}
+        </span>
+        <div
+          className="scroll-line w-px h-12"
+          style={{
+            background: 'linear-gradient(to bottom, var(--primary), transparent)',
+            opacity: 0.7,
+          }}
+        />
       </div>
     </div>
   );
@@ -612,10 +704,16 @@ function StatsSection() {
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
   React.useEffect(() => {
-    const el = ref.current; if (!el) return;
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 }
+      ([e]) => {
+        if (e.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.1 },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -629,11 +727,15 @@ function StatsSection() {
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
+          transition:
+            'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
         <span className="section-eyebrow">{t('landing.byTheNumbers')}</span>
-        <h2 className="mt-3 text-3xl md:text-4xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>
+        <h2
+          className="mt-3 text-3xl md:text-4xl font-bold"
+          style={{ color: 'var(--landing-text-primary)' }}
+        >
           {t('landing.trustedAt')} <span className="heading-gradient">{t('landing.scale')}</span>
         </h2>
       </div>
@@ -653,10 +755,16 @@ function FeaturesSection() {
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
   React.useEffect(() => {
-    const el = ref.current; if (!el) return;
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.08 }
+      ([e]) => {
+        if (e.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.08 },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -671,15 +779,22 @@ function FeaturesSection() {
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.75s cubic-bezier(0.22,1,0.36,1), transform 0.75s cubic-bezier(0.22,1,0.36,1)',
+          transition:
+            'opacity 0.75s cubic-bezier(0.22,1,0.36,1), transform 0.75s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
         <span className="section-eyebrow">{t('landing.leaveTypes')}</span>
-        <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
+        <h2
+          className="mt-3 text-3xl md:text-5xl font-black leading-tight"
+          style={{ color: 'var(--landing-text-primary)' }}
+        >
           {t('landingExtra.everyLeaveType')}{' '}
           <span className="heading-gradient">{t('landing.perfectlyManaged')}</span>
         </h2>
-        <p className="mt-4 max-w-xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)' }}>
+        <p
+          className="mt-4 max-w-xl mx-auto text-lg"
+          style={{ color: 'var(--landing-text-secondary)' }}
+        >
           {t('landingExtra.featuresSubtitle')}
         </p>
       </div>
@@ -703,12 +818,27 @@ function CTABanner() {
   return (
     <section className="relative py-28" aria-label="Call to action">
       {/* Static CSS glows — no JS animation needed */}
-      <div className="absolute -top-24 right-0 w-[600px] h-[600px] rounded-full pointer-events-none orb-pulse-1"
-        style={{ background: 'radial-gradient(circle, rgba(14,165,233,0.3) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-      <div className="absolute bottom-0 -left-20 w-[500px] h-[500px] rounded-full pointer-events-none orb-pulse-2"
-        style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none orb-pulse-3"
-        style={{ background: 'radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%)', filter: 'blur(50px)' }} />
+      <div
+        className="absolute -top-24 right-0 w-[600px] h-[600px] rounded-full pointer-events-none orb-pulse-1"
+        style={{
+          background: 'radial-gradient(circle, rgba(14,165,233,0.3) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }}
+      />
+      <div
+        className="absolute bottom-0 -left-20 w-[500px] h-[500px] rounded-full pointer-events-none orb-pulse-2"
+        style={{
+          background: 'radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }}
+      />
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none orb-pulse-3"
+        style={{
+          background: 'radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%)',
+          filter: 'blur(50px)',
+        }}
+      />
 
       <div className="section-fade relative max-w-5xl mx-auto px-6 md:px-12">
         <div className="relative px-10 py-20 text-center flex flex-col items-center">
@@ -717,14 +847,18 @@ function CTABanner() {
             <Sparkles size={48} style={{ color: 'var(--primary)' }} />
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
+          <h2
+            className="text-4xl md:text-6xl font-black mb-4 leading-tight"
+            style={{ color: 'var(--landing-text-primary)' }}
+          >
             {t('landingExtra.ctaTitle')}{' '}
-            <span style={{ color: 'var(--primary)' }}>
-              {t('landingExtra.ctaTitleHighlight')}
-            </span>
+            <span style={{ color: 'var(--primary)' }}>{t('landingExtra.ctaTitleHighlight')}</span>
           </h2>
 
-          <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
+          <p
+            className="text-lg mb-12 max-w-xl mx-auto leading-relaxed"
+            style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+          >
             {t('landingExtra.ctaSubtitle')}
           </p>
 
@@ -753,21 +887,13 @@ function CTABanner() {
             ) : (
               <>
                 <Link href="/register">
-                  <Button
-                    variant="cta"
-                    size="2xl"
-                    className="gap-3"
-                  >
+                  <Button variant="cta" size="2xl" className="gap-3">
                     <Zap size={20} />
                     {t('landing.getStartedFree')}
                   </Button>
                 </Link>
                 <Link href="/login">
-                  <Button
-                    variant="ctaSecondary"
-                    size="2xl"
-                    className="gap-3"
-                  >
+                  <Button variant="ctaSecondary" size="2xl" className="gap-3">
                     {t('landing.signIn')}
                   </Button>
                 </Link>
@@ -813,7 +939,11 @@ function Footer() {
   };
 
   return (
-    <footer className="relative border-t" style={{ borderColor: 'var(--landing-card-border)' }} role="contentinfo">
+    <footer
+      className="relative border-t"
+      style={{ borderColor: 'var(--landing-card-border)' }}
+      role="contentinfo"
+    >
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         {/* Main footer content */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
@@ -826,22 +956,39 @@ function Footer() {
               >
                 <Shield size={18} style={{ color: '#ffffff' }} />
               </div>
-              <span className="font-bold text-lg transition-colors" style={{ color: 'var(--landing-text-primary)' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-primary)'}
+              <span
+                className="font-bold text-lg transition-colors"
+                style={{ color: 'var(--landing-text-primary)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--landing-text-primary)')}
               >
                 HR<span style={{ color: 'var(--primary)' }}>Office</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
+            <p
+              className="text-sm leading-relaxed mb-4"
+              style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}
+            >
               {t('landingExtra.footerBrand')}
             </p>
             {/* Social links */}
             <div className="flex gap-3">
               {[
-                { name: 'Twitter', icon: 'M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z', href: 'https://twitter.com' },
-                { name: 'LinkedIn', icon: 'M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z', href: 'https://linkedin.com' },
-                { name: 'GitHub', icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22', href: 'https://github.com' },
+                {
+                  name: 'Twitter',
+                  icon: 'M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z',
+                  href: 'https://twitter.com',
+                },
+                {
+                  name: 'LinkedIn',
+                  icon: 'M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z',
+                  href: 'https://linkedin.com',
+                },
+                {
+                  name: 'GitHub',
+                  icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22',
+                  href: 'https://github.com',
+                },
               ].map((social) => (
                 <a
                   key={social.name}
@@ -850,8 +997,12 @@ function Footer() {
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors group"
                   style={{ backgroundColor: 'var(--landing-card-bg)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-hover)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)'}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = 'var(--card-hover)')
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = 'var(--landing-card-bg)')
+                  }
                   aria-label={social.name}
                 >
                   <svg
@@ -862,7 +1013,12 @@ function Footer() {
                     viewBox="0 0 24 24"
                     aria-hidden="true"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={social.icon} />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={social.icon}
+                    />
                   </svg>
                 </a>
               ))}
@@ -872,8 +1028,17 @@ function Footer() {
           {/* Links columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4" style={{ color: 'var(--landing-text-primary)' }}>
-                {category === 'product' ? t('landingExtra.footerProduct') : category === 'platform' ? t('landingExtra.footerPlatform') : category === 'account' ? t('landingExtra.footerAccount') : t('landingExtra.footerLegal')}
+              <h3
+                className="font-semibold text-sm uppercase tracking-wider mb-4"
+                style={{ color: 'var(--landing-text-primary)' }}
+              >
+                {category === 'product'
+                  ? t('landingExtra.footerProduct')
+                  : category === 'platform'
+                    ? t('landingExtra.footerPlatform')
+                    : category === 'account'
+                      ? t('landingExtra.footerAccount')
+                      : t('landingExtra.footerLegal')}
               </h3>
               <ul className="space-y-3">
                 {links.map((link: any) => (
@@ -883,8 +1048,10 @@ function Footer() {
                         href={link.href}
                         className="text-sm transition-colors focus:outline-none focus:underline underline-offset-4"
                         style={{ color: 'var(--landing-text-secondary)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary)')}
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.color = 'var(--landing-text-secondary)')
+                        }
                       >
                         {t(link.nameKey)}
                       </a>
@@ -893,8 +1060,10 @@ function Footer() {
                         href={link.href}
                         className="text-sm transition-colors focus:outline-none focus:underline underline-offset-4"
                         style={{ color: 'var(--landing-text-secondary)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-secondary)'}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary)')}
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.color = 'var(--landing-text-secondary)')
+                        }
                       >
                         {t(link.nameKey)}
                       </Link>
@@ -907,11 +1076,17 @@ function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--landing-card-border)' }}>
+        <div
+          className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4"
+          style={{ borderColor: 'var(--landing-card-border)' }}
+        >
           <p className="text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
             {t('landingExtra.footerCopyright', { year: new Date().getFullYear() })}
           </p>
-          <div className="flex items-center gap-6 text-xs" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
+          <div
+            className="flex items-center gap-6 text-xs"
+            style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+          >
             <span>{t('landingExtra.footerSsl')}</span>
             <span>{t('landingExtra.footerGdprCompliant')}</span>
             <span>{t('landingExtra.footerSoc2')}</span>

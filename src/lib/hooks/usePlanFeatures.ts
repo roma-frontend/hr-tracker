@@ -5,13 +5,13 @@ import { useSubscription, type Plan } from './useSubscription';
 // ── Feature matrix per plan ────────────────────────────────────────────────────
 // Add new features here as the product grows
 export interface PlanFeatures {
-  analytics: boolean;       // Advanced Analytics page
-  reports: boolean;         // Reports & CSV export
-  aiChat: boolean;          // AI Leave Assistant / Chat
-  sla: boolean;             // SLA settings & monitoring
-  apiAccess: boolean;       // API access
-  customPolicies: boolean;  // Custom leave policies
-  calendarSync: boolean;    // Google/Outlook calendar sync
+  analytics: boolean; // Advanced Analytics page
+  reports: boolean; // Reports & CSV export
+  aiChat: boolean; // AI Leave Assistant / Chat
+  sla: boolean; // SLA settings & monitoring
+  apiAccess: boolean; // API access
+  customPolicies: boolean; // Custom leave policies
+  calendarSync: boolean; // Google/Outlook calendar sync
   maxEmployees: number | null; // null = unlimited
 }
 

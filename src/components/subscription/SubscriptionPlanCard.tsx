@@ -1,11 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 import {
-  CreditCard, Zap, Building2, Rocket,
-  CheckCircle, XCircle, AlertCircle, Clock,
-  ArrowRight, RefreshCw,
+  CreditCard,
+  Zap,
+  Building2,
+  Rocket,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Clock,
+  ArrowRight,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,44 +32,46 @@ const PLAN_COLORS: Record<string, string> = {
   enterprise: 'text-cyan-500',
 };
 
-function StatusBadge({ status, isTrialing }: { status: string | null | undefined; isTrialing: boolean }) {
+function StatusBadge({
+  status,
+  isTrialing,
+}: {
+  status: string | null | undefined;
+  isTrialing: boolean;
+}) {
   const { t } = useTranslation();
   if (!status) return <Badge variant="secondary">{t('billing.noSubscription')}</Badge>;
-  if (isTrialing) return (
-    <Badge variant="warning" className="flex items-center gap-1">
-      <Clock className="w-3 h-3" /> {t('subscription.trial')}
-    </Badge>
-  );
-  if (status === 'active') return (
-    <Badge variant="success" className="flex items-center gap-1">
-      <CheckCircle className="w-3 h-3" /> {t('subscription.active')}
-    </Badge>
-  );
-  if (status === 'past_due') return (
-    <Badge variant="destructive" className="flex items-center gap-1">
-      <AlertCircle className="w-3 h-3" /> {t('subscription.pastDue')}
-    </Badge>
-  );
-  if (status === 'canceled') return (
-    <Badge variant="secondary" className="flex items-center gap-1">
-      <XCircle className="w-3 h-3" /> {t('subscription.canceled')}
-    </Badge>
-  );
+  if (isTrialing)
+    return (
+      <Badge variant="warning" className="flex items-center gap-1">
+        <Clock className="w-3 h-3" /> {t('subscription.trial')}
+      </Badge>
+    );
+  if (status === 'active')
+    return (
+      <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" /> {t('subscription.active')}
+      </Badge>
+    );
+  if (status === 'past_due')
+    return (
+      <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" /> {t('subscription.pastDue')}
+      </Badge>
+    );
+  if (status === 'canceled')
+    return (
+      <Badge variant="secondary" className="flex items-center gap-1">
+        <XCircle className="w-3 h-3" /> {t('subscription.canceled')}
+      </Badge>
+    );
   return <Badge variant="secondary">{status}</Badge>;
 }
 
 export function SubscriptionPlanCard() {
-
   const { t } = useTranslation();
-  const {
-    subscription,
-    isLoading,
-    plan,
-    isTrialing,
-    isPastDue,
-    trialDaysLeft,
-    periodDaysLeft,
-  } = useSubscription();
+  const { subscription, isLoading, plan, isTrialing, isPastDue, trialDaysLeft, periodDaysLeft } =
+    useSubscription();
 
   const { features } = usePlanFeatures();
   const [modalOpen, setModalOpen] = useState(false);
@@ -82,8 +91,10 @@ export function SubscriptionPlanCard() {
 
   const periodEndStr = subscription?.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric',
-    })
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
     : null;
 
   return (
@@ -107,7 +118,9 @@ export function SubscriptionPlanCard() {
               {/* Plan header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl bg-[var(--background-subtle)] ${PLAN_COLORS[plan] ?? 'text-indigo-500'}`}>
+                  <div
+                    className={`p-2 rounded-xl bg-[var(--background-subtle)] ${PLAN_COLORS[plan] ?? 'text-indigo-500'}`}
+                  >
                     {PLAN_ICONS[plan] ?? <Zap className="w-5 h-5" />}
                   </div>
                   <div>
@@ -125,7 +138,10 @@ export function SubscriptionPlanCard() {
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm">
                   <Clock className="w-4 h-4 flex-shrink-0" />
                   <span>
-                    <strong>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''}</strong> remaining in your free trial
+                    <strong>
+                      {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''}
+                    </strong>{' '}
+                    remaining in your free trial
                   </span>
                 </div>
               )}
@@ -134,7 +150,9 @@ export function SubscriptionPlanCard() {
               {isPastDue && (
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>Payment failed. Please update your billing info to keep your plan active.</span>
+                  <span>
+                    Payment failed. Please update your billing info to keep your plan active.
+                  </span>
                 </div>
               )}
 
@@ -142,7 +160,9 @@ export function SubscriptionPlanCard() {
               {subscription?.cancelAtPeriodEnd && periodEndStr && (
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-sm">
                   <RefreshCw className="w-4 h-4 flex-shrink-0" />
-                  <span>Cancels on <strong>{periodEndStr}</strong>. You&apos;ll keep access until then.</span>
+                  <span>
+                    Cancels on <strong>{periodEndStr}</strong>. You&apos;ll keep access until then.
+                  </span>
                 </div>
               )}
 
@@ -157,7 +177,13 @@ export function SubscriptionPlanCard() {
                       <CheckCircle
                         className={`w-4 h-4 flex-shrink-0 ${enabled ? 'text-[var(--success)]' : 'text-[var(--border)] opacity-40'}`}
                       />
-                      <span className={enabled ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)] line-through opacity-50'}>
+                      <span
+                        className={
+                          enabled
+                            ? 'text-[var(--text-secondary)]'
+                            : 'text-[var(--text-muted)] line-through opacity-50'
+                        }
+                      >
                         {label}
                       </span>
                     </li>

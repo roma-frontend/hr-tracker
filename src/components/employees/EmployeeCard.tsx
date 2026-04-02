@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 import { motion } from '@/lib/cssMotion';
 import {
   Mail,
@@ -13,9 +13,9 @@ import {
   Trash2,
   ChevronRight,
   type LucideIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { AvatarUpload } from "@/components/ui/avatar-upload";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { AvatarUpload } from '@/components/ui/avatar-upload';
 import { AnimatePresence } from '@/lib/cssMotion';
 
 interface Employee {
@@ -25,7 +25,7 @@ interface Employee {
   position?: string;
   department?: string;
   role: string;
-  employeeType: "staff" | "contractor";
+  employeeType: 'staff' | 'contractor';
   avatarUrl?: string;
   phone?: string;
   supervisorId?: string;
@@ -60,7 +60,7 @@ interface EmployeeCardProps {
   setEditEmployee: (emp: Employee) => void;
   setDeleteConfirm: (id: string) => void;
   t: (key: string) => string;
-  viewMode: "grid" | "list";
+  viewMode: 'grid' | 'list';
   index: number;
 }
 
@@ -91,7 +91,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
     const supervisor = supervisors?.find((s) => s._id === emp.supervisorId);
 
     // Grid view
-    if (viewMode === "grid") {
+    if (viewMode === 'grid') {
       return (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -101,8 +101,8 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           onClick={() => router.push(`/employees/${emp._id}`)}
           className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
           style={{
-            background: "var(--card)",
-            borderColor: emp.isActive ? "var(--border)" : "rgba(239,68,68,0.2)",
+            background: 'var(--card)',
+            borderColor: emp.isActive ? 'var(--border)' : 'rgba(239,68,68,0.2)',
             opacity: emp.isActive ? 1 : 0.6,
           }}
         >
@@ -115,10 +115,13 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
               readonly={!canManage && emp._id !== (window as any).__CURRENT_USER_ID__}
             />
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold truncate cursor-pointer hover:text-blue-500 transition-colors" style={{ color: "var(--text-primary)" }}>
+              <h3
+                className="font-semibold truncate cursor-pointer hover:text-blue-500 transition-colors"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {emp.name}
               </h3>
-              <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+              <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
                 {emp.position ?? t('employees.noPosition')}
               </p>
               <span
@@ -132,18 +135,18 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           </div>
 
           <div className="space-y-1.5 text-xs">
-            <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+            <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
               <Mail className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{emp.email}</span>
             </div>
             {emp.phone && (
-              <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
                 <Phone className="w-3 h-3" />
                 {emp.phone}
               </div>
             )}
             {emp.department && (
-              <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
                 <Building2 className="w-3 h-3" />
                 {emp.department}
               </div>
@@ -158,7 +161,10 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+          <div
+            className="flex items-center justify-between mt-4 pt-3 border-t"
+            style={{ borderColor: 'var(--border)' }}
+          >
             <div className="flex gap-2">
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-medium"
@@ -174,7 +180,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
             </div>
             <div className="flex items-center gap-1">
               {isAdmin ? (
-                <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+                <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
                   {emp.travelAllowance?.toLocaleString() ?? '0'} {t('currency.amd')}
                 </span>
               ) : (
@@ -188,13 +194,13 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           {!emp.isActive && (
             <div
               className="absolute inset-0 rounded-2xl flex items-center justify-center"
-              style={{ background: "rgba(0,0,0,0.05)" }}
+              style={{ background: 'rgba(0,0,0,0.05)' }}
             >
               <span
                 className="text-xs font-bold px-3 py-1 rounded-full"
-                style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
               >
-                {t("employees.deactivatedBadge")}
+                {t('employees.deactivatedBadge')}
               </span>
             </div>
           )}
@@ -211,7 +217,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
         transition={{ delay: index * 0.02 }}
         onClick={() => router.push(`/employees/${emp._id}`)}
         className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-[var(--background-subtle)] relative"
-        style={{ borderColor: "var(--border)", opacity: emp.isActive ? 1 : 0.5 }}
+        style={{ borderColor: 'var(--border)', opacity: emp.isActive ? 1 : 0.5 }}
       >
         {/* Employee name + avatar */}
         <div className="sm:col-span-4 flex items-center gap-3 min-w-0">
@@ -225,15 +231,15 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
               />
             ) : (
               emp.name
-                .split(" ")
+                .split(' ')
                 .map((n: string) => n[0])
-                .join("")
+                .join('')
                 .toUpperCase()
                 .slice(0, 2)
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+            <p className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
               {emp.name}
             </p>
             <div className="flex items-center gap-1.5">
@@ -249,7 +255,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           {/* Mobile-only action chevron */}
           <ChevronRight
             className="w-4 h-4 sm:hidden flex-shrink-0"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: 'var(--text-muted)' }}
           />
         </div>
 
@@ -258,7 +264,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           {emp.department && (
             <span
               className="text-xs px-2 py-0.5 rounded-full"
-              style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}
+              style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
             >
               <Building2 className="w-3 h-3 inline mr-1" />
               {emp.department}
@@ -276,13 +282,16 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
         </div>
 
         {/* Department - desktop only */}
-        <div className="hidden sm:block sm:col-span-2 text-sm truncate" style={{ color: "var(--text-muted)" }}>
+        <div
+          className="hidden sm:block sm:col-span-2 text-sm truncate"
+          style={{ color: 'var(--text-muted)' }}
+        >
           {emp.department ?? t('common.none')}
         </div>
 
         {/* Supervisor - desktop only */}
         <div className="hidden sm:block sm:col-span-2 text-sm truncate text-blue-500 font-medium">
-          {emp.supervisorId ? supervisor?.name ?? t('common.none') : t('common.none')}
+          {emp.supervisorId ? (supervisor?.name ?? t('common.none')) : t('common.none')}
         </div>
 
         {/* Presence status - desktop only */}
@@ -293,7 +302,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
         </div>
 
         {/* Type - desktop only */}
-        <div className="hidden sm:block sm:col-span-2" style={{ textAlign: "center" }}>
+        <div className="hidden sm:block sm:col-span-2" style={{ textAlign: 'center' }}>
           <span
             className="text-xs px-2 py-0.5 rounded-full font-medium"
             style={{ background: typeConf.bg, color: typeConf.color }}
@@ -305,7 +314,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
         {/* Actions — view only on hover */}
         <div
           className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md border"
-          style={{ background: "var(--card)", borderColor: "var(--border)" }}
+          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         >
           <button
             onClick={(e) => {
@@ -313,17 +322,17 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
               router.push(`/employees/${emp._id}`);
             }}
             className="p-1.5 rounded-md text-blue-500 hover:bg-blue-500/20 transition-colors"
-            title={t("common.view")}
+            title={t('common.view')}
           >
             <Eye className="w-3.5 h-3.5" />
           </button>
         </div>
       </motion.div>
     );
-  }
+  },
 );
 
-EmployeeCard.displayName = "EmployeeCard";
+EmployeeCard.displayName = 'EmployeeCard';
 
 /**
  * Оптимизированный компонент меню действий
@@ -348,7 +357,7 @@ export const EmployeeMenu = React.memo<{
             e.stopPropagation();
           }}
           className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-          style={{ color: "var(--text-muted)", background: "var(--background-subtle)" }}
+          style={{ color: 'var(--text-muted)', background: 'var(--background-subtle)' }}
         >
           <MoreVertical className="w-4 h-4" />
         </button>
@@ -359,7 +368,7 @@ export const EmployeeMenu = React.memo<{
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className="absolute right-0 top-8 w-40 rounded-xl border shadow-xl z-20 overflow-hidden"
-              style={{ background: "var(--card)", borderColor: "var(--border)" }}
+              style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
             >
               <button
                 onClick={(e) => {
@@ -368,9 +377,9 @@ export const EmployeeMenu = React.memo<{
                   onClose();
                 }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80"
-                style={{ color: "var(--text-primary)" }}
+                style={{ color: 'var(--text-primary)' }}
               >
-                <Eye className="w-3.5 h-3.5" /> {t("common.viewProfile")}
+                <Eye className="w-3.5 h-3.5" /> {t('common.viewProfile')}
               </button>
               <button
                 onClick={(e) => {
@@ -379,9 +388,9 @@ export const EmployeeMenu = React.memo<{
                   onClose();
                 }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80"
-                style={{ color: "var(--text-primary)" }}
+                style={{ color: 'var(--text-primary)' }}
               >
-                <Edit2 className="w-3.5 h-3.5" /> {t("common.edit")}
+                <Edit2 className="w-3.5 h-3.5" /> {t('common.edit')}
               </button>
               <button
                 onClick={(e) => {
@@ -390,9 +399,9 @@ export const EmployeeMenu = React.memo<{
                   onClose();
                 }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80"
-                style={{ color: "#ef4444" }}
+                style={{ color: '#ef4444' }}
               >
-                <Trash2 className="w-3.5 h-3.5" /> {t("employees.deactivate")}
+                <Trash2 className="w-3.5 h-3.5" /> {t('employees.deactivate')}
               </button>
             </motion.div>
           )}

@@ -1,18 +1,15 @@
-import { useState, useCallback } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
-import { toast } from "sonner";
+import { useState, useCallback } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+import { toast } from 'sonner';
 
-type PresenceStatus = "available" | "in_meeting" | "in_call" | "out_of_office" | "busy";
+type PresenceStatus = 'available' | 'in_meeting' | 'in_call' | 'out_of_office' | 'busy';
 
-export function usePresenceStatus(userId?: Id<"users">) {
+export function usePresenceStatus(userId?: Id<'users'>) {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  
-  const currentUser = useQuery(
-    api.users.getCurrentUser,
-    userId ? {} : "skip"
-  );
+
+  const currentUser = useQuery(api.users.getCurrentUser, userId ? {} : 'skip');
 
   const updateStatusMutation = useMutation(api.users.updatePresenceStatus);
 
@@ -27,21 +24,21 @@ export function usePresenceStatus(userId?: Id<"users">) {
   const updateStatus = useCallback(
     async (status: string, message?: string) => {
       if (!userId) {
-        toast.error("User ID not found");
+        toast.error('User ID not found');
         return;
       }
 
       // Validate status is one of the allowed types
       const validStatuses: PresenceStatus[] = [
-        "available",
-        "in_meeting",
-        "in_call",
-        "out_of_office",
-        "busy",
+        'available',
+        'in_meeting',
+        'in_call',
+        'out_of_office',
+        'busy',
       ];
-      
+
       if (!validStatuses.includes(status as PresenceStatus)) {
-        toast.error("Invalid status");
+        toast.error('Invalid status');
         return;
       }
 
@@ -53,12 +50,12 @@ export function usePresenceStatus(userId?: Id<"users">) {
         });
         return true;
       } catch (error) {
-        console.error("Failed to update status:", error);
-        toast.error("Failed to update status");
+        console.error('Failed to update status:', error);
+        toast.error('Failed to update status');
         return false;
       }
     },
-    [userId, updateStatusMutation]
+    [userId, updateStatusMutation],
   );
 
   return {

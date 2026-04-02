@@ -63,9 +63,24 @@ const EVENT_TYPES = [
 ];
 
 const PRIORITY_LEVELS = [
-  { value: 'high', label: 'High', description: 'Critical attendance required', color: 'bg-red-100 text-red-800' },
-  { value: 'medium', label: 'Medium', description: 'Recommended attendance', color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'low', label: 'Low', description: 'Optional attendance', color: 'bg-blue-100 text-blue-800' },
+  {
+    value: 'high',
+    label: 'High',
+    description: 'Critical attendance required',
+    color: 'bg-red-100 text-red-800',
+  },
+  {
+    value: 'medium',
+    label: 'Medium',
+    description: 'Recommended attendance',
+    color: 'bg-yellow-100 text-yellow-800',
+  },
+  {
+    value: 'low',
+    label: 'Low',
+    description: 'Optional attendance',
+    color: 'bg-blue-100 text-blue-800',
+  },
 ];
 
 export function CreateEventModal({
@@ -84,7 +99,9 @@ export function CreateEventModal({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isAllDay, setIsAllDay] = useState(false);
-  const [eventType, setEventType] = useState<'meeting' | 'conference' | 'training' | 'team_building' | 'holiday' | 'deadline' | 'other'>('meeting');
+  const [eventType, setEventType] = useState<
+    'meeting' | 'conference' | 'training' | 'team_building' | 'holiday' | 'deadline' | 'other'
+  >('meeting');
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [requiredDepartments, setRequiredDepartments] = useState<string[]>([]);
   const [notifyDaysBefore, setNotifyDaysBefore] = useState<number>(3);
@@ -92,7 +109,7 @@ export function CreateEventModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name || !startDate || !endDate || requiredDepartments.length === 0) {
       alert('Please fill all required fields');
       return;
@@ -136,10 +153,8 @@ export function CreateEventModal({
   };
 
   const toggleDepartment = (dept: string) => {
-    setRequiredDepartments(prev =>
-      prev.includes(dept)
-        ? prev.filter(d => d !== dept)
-        : [...prev, dept]
+    setRequiredDepartments((prev) =>
+      prev.includes(dept) ? prev.filter((d) => d !== dept) : [...prev, dept],
     );
   };
 
@@ -157,7 +172,9 @@ export function CreateEventModal({
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <Label>Event Name <span className="text-red-500">*</span></Label>
+              <Label>
+                Event Name <span className="text-red-500">*</span>
+              </Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -180,7 +197,9 @@ export function CreateEventModal({
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Start Date <span className="text-red-500">*</span></Label>
+              <Label>
+                Start Date <span className="text-red-500">*</span>
+              </Label>
               <Input
                 type="date"
                 value={startDate}
@@ -189,7 +208,9 @@ export function CreateEventModal({
               />
             </div>
             <div>
-              <Label>End Date <span className="text-red-500">*</span></Label>
+              <Label>
+                End Date <span className="text-red-500">*</span>
+              </Label>
               <Input
                 type="date"
                 value={endDate}
@@ -242,7 +263,9 @@ export function CreateEventModal({
 
           {/* Required Departments */}
           <div>
-            <Label>Required Departments <span className="text-red-500">*</span></Label>
+            <Label>
+              Required Departments <span className="text-red-500">*</span>
+            </Label>
             <p className="text-sm text-muted-foreground mb-2">
               Employees from these departments should attend
             </p>
@@ -255,16 +278,12 @@ export function CreateEventModal({
                   onClick={() => toggleDepartment(dept)}
                 >
                   {dept}
-                  {requiredDepartments.includes(dept) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
+                  {requiredDepartments.includes(dept) && <X className="w-3 h-3 ml-1" />}
                 </Badge>
               ))}
             </div>
             {requiredDepartments.length === 0 && (
-              <p className="text-sm text-red-500 mt-1">
-                ⚠️ At least one department is required
-              </p>
+              <p className="text-sm text-red-500 mt-1">⚠️ At least one department is required</p>
             )}
           </div>
 

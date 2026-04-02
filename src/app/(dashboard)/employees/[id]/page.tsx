@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
-import { Id } from "../../../../../convex/_generated/dataModel";
-import EmployeeProfileDetail from "@/components/employees/EmployeeProfileDetail";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import React from 'react';
+import { useParams } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../../convex/_generated/api';
+import { Id } from '../../../../../convex/_generated/dataModel';
+import EmployeeProfileDetail from '@/components/employees/EmployeeProfileDetail';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { motion } from '@/lib/cssMotion';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 export default function EmployeeProfilePage() {
   const { t } = useTranslation();
@@ -20,7 +20,7 @@ export default function EmployeeProfilePage() {
 
   const employee = useQuery(
     api.users.getUserById,
-    employeeId ? { userId: employeeId as Id<"users"> } : "skip"
+    employeeId ? { userId: employeeId as Id<'users'> } : 'skip',
   );
 
   if (employee === undefined) {
@@ -71,7 +71,7 @@ export default function EmployeeProfilePage() {
           {t('employees.backToEmployees')}
         </Button>
       </Link>
-      <EmployeeProfileDetail employeeId={employeeId as Id<"users">} />
+      <EmployeeProfileDetail employeeId={employeeId as Id<'users'>} />
     </motion.div>
   );
 }

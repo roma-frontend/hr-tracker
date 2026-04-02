@@ -33,11 +33,21 @@ export default function TestI18nPage() {
     <div className="container mx-auto p-8">
       <Card className="p-6 max-w-2xl mx-auto">
         <div className="mb-4 p-3 bg-blue-100 dark:bg-blue-900 rounded text-sm space-y-2">
-          <p>Current Language: <strong>{i18n.language}</strong></p>
-          <p>Initialized: <strong>{i18n.isInitialized ? 'Yes' : 'No'}</strong></p>
-          <p>Available languages: <strong>{i18n.languages.join(', ')}</strong></p>
-          <p>Translation test: <strong>{t('common.welcome')}</strong></p>
-          <p>Direct key: <strong>common.welcome</strong></p>
+          <p>
+            Current Language: <strong>{i18n.language}</strong>
+          </p>
+          <p>
+            Initialized: <strong>{i18n.isInitialized ? 'Yes' : 'No'}</strong>
+          </p>
+          <p>
+            Available languages: <strong>{i18n.languages.join(', ')}</strong>
+          </p>
+          <p>
+            Translation test: <strong>{t('common.welcome')}</strong>
+          </p>
+          <p>
+            Direct key: <strong>common.welcome</strong>
+          </p>
           <hr className="my-2" />
           <details>
             <summary className="cursor-pointer font-bold">Click to see loaded translations</summary>
@@ -46,19 +56,15 @@ export default function TestI18nPage() {
             </pre>
           </details>
         </div>
-        
-        <h1 className="text-3xl font-bold mb-4">
-          RAW: {t('common.welcome')}
-        </h1>
-        
+
+        <h1 className="text-3xl font-bold mb-4">RAW: {t('common.welcome')}</h1>
+
         <div className="space-y-4">
-          <p className="text-lg">
-            Dashboard welcome: {t('dashboard.welcome')}
-          </p>
+          <p className="text-lg">Dashboard welcome: {t('dashboard.welcome')}</p>
           <p className="text-lg bg-yellow-100 dark:bg-yellow-900 p-2 rounded">
             Testing direct: {JSON.stringify(t('common.save'))}
           </p>
-          
+
           <div className="flex gap-2">
             <Button>{t('common.save')}</Button>
             <Button variant="outline">{t('common.cancel')}</Button>

@@ -1,6 +1,6 @@
 /**
  * 📊 SLA Dashboard Component
- * 
+ *
  * Displays SLA metrics for leave request response times
  * - Average response time
  * - On-time vs breached percentage
@@ -15,15 +15,15 @@ import { api } from '@/../convex/_generated/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle, 
-  AlertCircle, 
-  TrendingUp, 
+import {
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  TrendingUp,
   TrendingDown,
   Calendar,
-  Timer
+  Timer,
 } from 'lucide-react';
 
 interface SLAMetric {
@@ -52,34 +52,46 @@ export function SLADashboard() {
 
   // Calculate average response time (only for responded requests)
   const respondedMetrics = slaMetrics.filter((m: SLAMetric) => m.responseTimeHours !== undefined);
-  const avgResponseTime = respondedMetrics.length > 0
-    ? respondedMetrics.reduce((sum: number, m: SLAMetric) => sum + (m.responseTimeHours || 0), 0) / respondedMetrics.length
-    : 0;
+  const avgResponseTime =
+    respondedMetrics.length > 0
+      ? respondedMetrics.reduce(
+          (sum: number, m: SLAMetric) => sum + (m.responseTimeHours || 0),
+          0,
+        ) / respondedMetrics.length
+      : 0;
 
   // Calculate SLA compliance percentage
-  const complianceRate = totalMetrics > 0
-    ? (onTimeMetrics / totalMetrics) * 100
-    : 100;
+  const complianceRate = totalMetrics > 0 ? (onTimeMetrics / totalMetrics) * 100 : 100;
 
   // Calculate warning and critical counts
-  const warningCount = slaMetrics.filter((m: SLAMetric) => m.warningTriggered && !m.criticalTriggered).length;
+  const warningCount = slaMetrics.filter(
+    (m: SLAMetric) => m.warningTriggered && !m.criticalTriggered,
+  ).length;
   const criticalCount = slaMetrics.filter((m: SLAMetric) => m.criticalTriggered).length;
 
   // Trend calculation (compare last 7 days vs previous 7 days)
   const now = Date.now();
-  const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
-  const fourteenDaysAgo = now - (14 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const fourteenDaysAgo = now - 14 * 24 * 60 * 60 * 1000;
 
   const recentMetrics = slaMetrics.filter((m: SLAMetric) => m.createdAt >= sevenDaysAgo);
-  const previousMetrics = slaMetrics.filter((m: SLAMetric) => m.createdAt >= fourteenDaysAgo && m.createdAt < sevenDaysAgo);
+  const previousMetrics = slaMetrics.filter(
+    (m: SLAMetric) => m.createdAt >= fourteenDaysAgo && m.createdAt < sevenDaysAgo,
+  );
 
-  const recentCompliance = recentMetrics.length > 0
-    ? (recentMetrics.filter((m: SLAMetric) => m.status === 'on_time').length / recentMetrics.length) * 100
-    : 100;
+  const recentCompliance =
+    recentMetrics.length > 0
+      ? (recentMetrics.filter((m: SLAMetric) => m.status === 'on_time').length /
+          recentMetrics.length) *
+        100
+      : 100;
 
-  const previousCompliance = previousMetrics.length > 0
-    ? (previousMetrics.filter((m: SLAMetric) => m.status === 'on_time').length / previousMetrics.length) * 100
-    : 100;
+  const previousCompliance =
+    previousMetrics.length > 0
+      ? (previousMetrics.filter((m: SLAMetric) => m.status === 'on_time').length /
+          previousMetrics.length) *
+        100
+      : 100;
 
   const trend = recentCompliance - previousCompliance;
   const isImproving = trend > 0;
@@ -92,18 +104,12 @@ export function SLADashboard() {
       {/* Average Response Time */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Avg Response Time
-          </CardTitle>
+          <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
           <Timer className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {avgResponseTime.toFixed(1)}h
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Target: {targetHours}h
-          </p>
+          <div className="text-2xl font-bold">{avgResponseTime.toFixed(1)}h</div>
+          <p className="text-xs text-muted-foreground">Target: {targetHours}h</p>
           {avgResponseTime <= targetHours ? (
             <div className="flex items-center text-green-600 text-xs mt-1">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -121,17 +127,15 @@ export function SLADashboard() {
       {/* SLA Compliance Rate */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            SLA Compliance
-          </CardTitle>
+          <CardTitle className="text-sm font-medium">SLA Compliance</CardTitle>
           <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {complianceRate.toFixed(1)}%
-          </div>
+          <div className="text-2xl font-bold">{complianceRate.toFixed(1)}%</div>
           <Progress value={complianceRate} className="mt-2" />
-          <div className={`flex items-center text-xs mt-1 ${isImproving ? 'text-green-600' : 'text-red-600'}`}>
+          <div
+            className={`flex items-center text-xs mt-1 ${isImproving ? 'text-green-600' : 'text-red-600'}`}
+          >
             {isImproving ? (
               <TrendingUp className="h-3 w-3 mr-1" />
             ) : (
@@ -145,15 +149,11 @@ export function SLADashboard() {
       {/* Pending Requests */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Pending Requests
-          </CardTitle>
+          <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {pendingMetrics}
-          </div>
+          <div className="text-2xl font-bold">{pendingMetrics}</div>
           <p className="text-xs text-muted-foreground">
             {onTimeMetrics} on-time, {breachedMetrics} breached
           </p>
@@ -168,23 +168,17 @@ export function SLADashboard() {
       {/* Alerts */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Alerts
-          </CardTitle>
+          <CardTitle className="text-sm font-medium">Alerts</CardTitle>
           <AlertTriangle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {warningCount}
-              </div>
+              <div className="text-2xl font-bold text-yellow-600">{warningCount}</div>
               <p className="text-xs text-muted-foreground">Warnings</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-red-600">
-                {criticalCount}
-              </div>
+              <div className="text-2xl font-bold text-red-600">{criticalCount}</div>
               <p className="text-xs text-muted-foreground">Critical</p>
             </div>
           </div>
@@ -200,9 +194,7 @@ export function SLADashboard() {
       <Card className="md:col-span-2 lg:col-span-4">
         <CardHeader>
           <CardTitle>SLA Performance Breakdown</CardTitle>
-          <CardDescription>
-            Response time distribution for the last 30 days
-          </CardDescription>
+          <CardDescription>Response time distribution for the last 30 days</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -234,10 +226,14 @@ export function SLADashboard() {
             <div className="flex items-center gap-4">
               <div className="w-32 text-sm font-medium">Pending</div>
               <div className="flex-1">
-                <Progress value={(pendingMetrics / totalMetrics) * 100} className="h-2 [&>div]:bg-muted-foreground" />
+                <Progress
+                  value={(pendingMetrics / totalMetrics) * 100}
+                  className="h-2 [&>div]:bg-muted-foreground"
+                />
               </div>
               <div className="w-20 text-right text-sm">
-                {pendingMetrics} ({totalMetrics > 0 ? ((pendingMetrics / totalMetrics) * 100).toFixed(0) : 0}%)
+                {pendingMetrics} (
+                {totalMetrics > 0 ? ((pendingMetrics / totalMetrics) * 100).toFixed(0) : 0}%)
               </div>
               <Clock className="h-5 w-5 text-muted-foreground" />
             </div>
@@ -253,9 +249,7 @@ export function SLADashboard() {
                     Target response time: {slaConfig.targetResponseTimeHours}h
                   </p>
                 </div>
-                <Badge variant="outline">
-                  24/7
-                </Badge>
+                <Badge variant="outline">24/7</Badge>
               </div>
             </div>
           )}

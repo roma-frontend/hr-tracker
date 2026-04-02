@@ -34,9 +34,9 @@ export function isTokenExpired(token: string, bufferSeconds = 60): boolean {
 
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = payload.exp;
-  
+
   // Add buffer (default 60s) to refresh token before actual expiry
-  return now >= (expiresAt - bufferSeconds);
+  return now >= expiresAt - bufferSeconds;
 }
 
 /**
@@ -45,7 +45,7 @@ export function isTokenExpired(token: string, bufferSeconds = 60): boolean {
 export function getTokenExpiryTime(token: string): number | null {
   const payload = decodeJwt(token);
   if (!payload || !payload.exp) return null;
-  
+
   const expiresAt = payload.exp * 1000; // Convert to ms
   return expiresAt - Date.now();
 }
@@ -55,9 +55,9 @@ export function getTokenExpiryTime(token: string): number | null {
  */
 export function validateToken(token: string | null | undefined): boolean {
   if (!token) return false;
-  
+
   const payload = decodeJwt(token);
   if (!payload) return false;
-  
+
   return !isTokenExpired(token);
 }

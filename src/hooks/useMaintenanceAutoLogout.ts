@@ -1,7 +1,7 @@
-import { useEffect, useRef, useCallback } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useEffect, useRef, useCallback } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function useMaintenanceAutoLogout() {
   const { user, logout } = useAuthStore();
@@ -11,21 +11,21 @@ export function useMaintenanceAutoLogout() {
 
   const maintenance = useQuery(
     api.admin.getMaintenanceMode,
-    organizationId ? { organizationId } : "skip"
+    organizationId ? { organizationId } : 'skip',
   );
 
   const performLogout = useCallback(async () => {
     if (logoutAttemptedRef.current) return;
     logoutAttemptedRef.current = true;
 
-    document.documentElement.style.transition = "opacity 0.5s ease-out";
-    document.documentElement.style.opacity = "0";
+    document.documentElement.style.transition = 'opacity 0.5s ease-out';
+    document.documentElement.style.opacity = '0';
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     try {
-      const maintenanceUrl = `/login?maintenance=true${organizationId ? `&org=${organizationId}` : ""}`;
-      
+      const maintenanceUrl = `/login?maintenance=true${organizationId ? `&org=${organizationId}` : ''}`;
+
       const signal = abortControllerRef.current?.signal;
       await fetch(`/api/auth/logout?redirect=${encodeURIComponent(maintenanceUrl)}`, {
         method: 'POST',
@@ -40,27 +40,32 @@ export function useMaintenanceAutoLogout() {
       logout();
       localStorage.removeItem('hr-auth-storage');
 
-      const cookies = document.cookie.split(";");
+      const cookies = document.cookie.split(';');
       for (const cookie of cookies) {
-        const eqPos = cookie.indexOf("=");
+        const eqPos = cookie.indexOf('=');
         const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
-        if (name.includes("auth") || name.includes("session")) {
+        if (name.includes('auth') || name.includes('session')) {
           document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/;`;
           document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/;domain=${document.location.hostname};`;
         }
       }
 
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
       window.location.href = maintenanceUrl;
     } catch (error) {
       logout();
       localStorage.removeItem('hr-auth-storage');
-      window.location.href = `/login?maintenance=true${organizationId ? `&org=${organizationId}` : ""}`;
+      window.location.href = `/login?maintenance=true${organizationId ? `&org=${organizationId}` : ''}`;
     }
   }, [organizationId, logout]);
 
   useEffect(() => {
-    if (!maintenance?.isActive || !user || user.role === "superadmin" || logoutAttemptedRef.current) {
+    if (
+      !maintenance?.isActive ||
+      !user ||
+      user.role === 'superadmin' ||
+      logoutAttemptedRef.current
+    ) {
       return;
     }
 
@@ -82,6 +87,12 @@ export function useMaintenanceAutoLogout() {
       clearTimeout(timeoutId);
       abortControllerRef.current?.abort();
     };
-  }, [maintenance?.isActive, maintenance?.startTime, user?.id, user?.role, organizationId, performLogout]);
+  }, [
+    maintenance?.isActive,
+    maintenance?.startTime,
+    user?.id,
+    user?.role,
+    organizationId,
+    performLogout,
+  ]);
 }
-

@@ -1,9 +1,9 @@
 /**
  * 🛡️ REDIS RATE LIMITING
- * 
+ *
  * Persistent rate limiting using Upstash Redis
  * Survives server restarts and works across multiple instances
- * 
+ *
  * Setup:
  * 1. Create account at https://upstash.com
  * 2. Create Redis database
@@ -49,7 +49,7 @@ function getRedis(): Redis | null {
 export async function checkRateLimit(
   key: string,
   maxRequests: number,
-  windowMs: number
+  windowMs: number,
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   const redis = getRedis();
 
@@ -101,11 +101,7 @@ export async function isBlocked(key: string): Promise<boolean> {
 /**
  * Block an IP/key for specified duration
  */
-export async function blockKey(
-  key: string,
-  durationMs: number,
-  reason?: string
-): Promise<void> {
+export async function blockKey(key: string, durationMs: number, reason?: string): Promise<void> {
   const redis = getRedis();
 
   if (!redis) return;
@@ -151,7 +147,7 @@ export async function getBlockReason(key: string): Promise<string | null> {
   if (!redis) return null;
 
   try {
-    return await redis.get(`block:${key}:reason`) || null;
+    return (await redis.get(`block:${key}:reason`)) || null;
   } catch {
     return null;
   }
@@ -168,7 +164,7 @@ export async function logLoginAttempt(
   email: string,
   ip: string,
   success: boolean,
-  riskScore?: number
+  riskScore?: number,
 ): Promise<void> {
   const redis = getRedis();
 
@@ -184,12 +180,15 @@ export async function logLoginAttempt(
       await redis.expire(`${key}:failed`, 15 * 60); // 15 minutes
 
       // Log attempt details
-      await redis.lpush(`${key}:attempts`, JSON.stringify({
-        timestamp: now,
-        success: false,
-        ip,
-        riskScore,
-      }));
+      await redis.lpush(
+        `${key}:attempts`,
+        JSON.stringify({
+          timestamp: now,
+          success: false,
+          ip,
+          riskScore,
+        }),
+      );
       await redis.ltrim(`${key}:attempts`, 0, 9); // Keep last 10
       await redis.expire(`${key}:attempts`, 15 * 60);
 
@@ -234,7 +233,7 @@ export async function logSecurityEvent(
   type: string,
   userId: string,
   ip: string,
-  details?: Record<string, any>
+  details?: Record<string, any>,
 ): Promise<void> {
   const redis = getRedis();
 
@@ -267,7 +266,7 @@ export async function getSecurityEvents(userId: string): Promise<any[]> {
 
   try {
     const events = await redis.lrange(`security:${userId}`, 0, 99);
-    return events.map(e => JSON.parse(e as string));
+    return events.map((e) => JSON.parse(e as string));
   } catch {
     return [];
   }
@@ -346,7 +345,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
 export async function setCache<T>(
   key: string,
   data: T,
-  ttlSeconds: number = 300 // 5 minutes default
+  ttlSeconds: number = 300, // 5 minutes default
 ): Promise<void> {
   const redis = getRedis();
 

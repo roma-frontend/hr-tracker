@@ -1,29 +1,46 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "@/lib/cssMotion";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from '@/lib/cssMotion';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import {
-  Sparkles, Send, Plus, MessageSquare, Bot, User, Copy,
-  MoreHorizontal, Trash2, Edit2, PanelLeftClose, Calendar,
-  ClipboardList, Users, TrendingUp, Zap, ArrowDown, ChevronRight, Check, X,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
+  Sparkles,
+  Send,
+  Plus,
+  MessageSquare,
+  Bot,
+  User,
+  Copy,
+  MoreHorizontal,
+  Trash2,
+  Edit2,
+  PanelLeftClose,
+  Calendar,
+  ClipboardList,
+  Users,
+  TrendingUp,
+  Zap,
+  ArrowDown,
+  ChevronRight,
+  Check,
+  X,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 type Message = {
   _id?: string;
   id: string;
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
   actions?: AnyAction[];
@@ -59,24 +76,36 @@ function parseActions(content: string): { cleanContent: string; actions: AnyActi
     }
   }
 
-  const cleanContent = content.replace(/<ACTION>[\s\S]*?<\/ACTION>/g, '').replace(/\s{2,}/g, ' ').trim();
+  const cleanContent = content
+    .replace(/<ACTION>[\s\S]*?<\/ACTION>/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   return { cleanContent, actions };
 }
 
 // ═══════════════════════════════════════════════════════════════
 // Follow-up suggestions
 // ═══════════════════════════════════════════════════════════════
-function getFollowUpSuggestions(content: string, userRole: string, t: (key: string) => string): string[] {
+function getFollowUpSuggestions(
+  content: string,
+  userRole: string,
+  t: (key: string) => string,
+): string[] {
   const lower = content.toLowerCase();
 
-  if (lower.includes('book') || lower.includes('leave') || lower.includes('submitted') || lower.includes('approved')) {
-    return [t("chatWidget.showBalance"), t("chatWidget.viewUpcoming"), t("chatWidget.whoOnLeave")];
+  if (
+    lower.includes('book') ||
+    lower.includes('leave') ||
+    lower.includes('submitted') ||
+    lower.includes('approved')
+  ) {
+    return [t('chatWidget.showBalance'), t('chatWidget.viewUpcoming'), t('chatWidget.whoOnLeave')];
   }
   if (lower.includes('balance') || lower.includes('days left') || lower.includes('remaining')) {
     return ['📆 Book a vacation', '🤒 Request sick leave', '📊 Show my leave history'];
   }
   if (lower.includes('sick') || lower.includes('doctor') || lower.includes('medical')) {
-    return ['🤒 Book sick leave for today', '👨‍⚕️ Book a doctor visit', t("chatWidget.showBalance")];
+    return ['🤒 Book sick leave for today', '👨‍⚕️ Book a doctor visit', t('chatWidget.showBalance')];
   }
   if (lower.includes('team') || lower.includes('colleague') || lower.includes('who is')) {
     return ['📅 Show team calendar', '📋 My leave balance', '📆 Book time off'];
@@ -85,9 +114,13 @@ function getFollowUpSuggestions(content: string, userRole: string, t: (key: stri
     return ['📋 Show my pending leaves', '📆 Book new leave', '📊 My leave balance'];
   }
   if (userRole === 'admin' || userRole === 'supervisor') {
-    return [t("chatWidget.whoOnLeaveToday"), t("chatWidget.teamStats"), t("chatWidget.pendingApprovals")];
+    return [
+      t('chatWidget.whoOnLeaveToday'),
+      t('chatWidget.teamStats'),
+      t('chatWidget.pendingApprovals'),
+    ];
   }
-  return ['📆 Book a vacation', t("chatWidget.showBalance"), '👥 Who is on leave this week?'];
+  return ['📆 Book a vacation', t('chatWidget.showBalance'), '👥 Who is on leave this week?'];
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -106,18 +139,18 @@ export default function AIChatPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
-  const userId = user?.id as Id<"users"> | undefined;
+  const userId = user?.id as Id<'users'> | undefined;
 
   // State
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
+  const [editingTitle, setEditingTitle] = useState('');
   const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
 
@@ -137,18 +170,20 @@ export default function AIChatPage() {
   // Convex queries
   const savedConversations = useQuery(
     userId ? api.aiChat.getConversations : api.aiChat.getConversations,
-    userId ? { userId } : "skip"
+    userId ? { userId } : 'skip',
   );
 
   const fullContext = useQuery(
     userId ? api.aiChat.getFullContext : api.aiChat.getFullContext,
-    userId ? { userId } : "skip"
+    userId ? { userId } : 'skip',
   );
 
   // Load messages for active conversation
   const savedMessages = useQuery(
     activeConversationId ? api.aiChat.getMessages : api.aiChat.getMessages,
-    activeConversationId ? { conversationId: activeConversationId as Id<"aiConversations"> } : "skip"
+    activeConversationId
+      ? { conversationId: activeConversationId as Id<'aiConversations'> }
+      : 'skip',
   );
 
   // Convex mutations
@@ -168,7 +203,7 @@ export default function AIChatPage() {
 
   // Scroll to bottom
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
@@ -187,8 +222,8 @@ export default function AIChatPage() {
       setShowScrollButton(scrollHeight - scrollTop - clientHeight > 200);
     };
 
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Load conversations from Convex
@@ -196,7 +231,7 @@ export default function AIChatPage() {
 
   useEffect(() => {
     if (savedConversations) {
-      const convs = savedConversations.map(c => ({
+      const convs = savedConversations.map((c) => ({
         _id: c._id,
         title: c.title,
         date: new Date(c.createdAt),
@@ -213,7 +248,7 @@ export default function AIChatPage() {
   // Load messages when conversation selected
   useEffect(() => {
     if (savedMessages && activeConversationId) {
-      const loadedMessages: Message[] = savedMessages.map(m => ({
+      const loadedMessages: Message[] = savedMessages.map((m) => ({
         _id: m._id,
         id: m._id,
         role: m.role,
@@ -244,22 +279,25 @@ export default function AIChatPage() {
     try {
       const { conversationId } = await createConversation({
         userId,
-        title: t("aiChat.newChat") || "New Chat",
+        title: t('aiChat.newChat') || 'New Chat',
       });
 
       setActiveConversationId(conversationId);
       setMessages([]);
-      setConversations(prev => [{
-        _id: conversationId,
-        title: t("aiChat.newChat") || "New Chat",
-        date: new Date(),
-      }, ...prev]);
+      setConversations((prev) => [
+        {
+          _id: conversationId,
+          title: t('aiChat.newChat') || 'New Chat',
+          date: new Date(),
+        },
+        ...prev,
+      ]);
 
-      toast.success(t("aiChat.newChatCreated") || "New chat created");
+      toast.success(t('aiChat.newChatCreated') || 'New chat created');
       setTimeout(() => textareaRef.current?.focus(), 100);
     } catch (error) {
       console.error('[Create conversation error]:', error);
-      toast.error(t("aiChat.createError") || "Failed to create chat");
+      toast.error(t('aiChat.createError') || 'Failed to create chat');
     }
   };
 
@@ -274,13 +312,13 @@ export default function AIChatPage() {
       setDeletingConversationId(conversationId);
 
       // Wait for animation
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Delete from Convex (also deletes all messages)
-      await deleteConversation({ conversationId: conversationId as Id<"aiConversations"> });
+      await deleteConversation({ conversationId: conversationId as Id<'aiConversations'> });
 
       // Update local state
-      setConversations(prev => prev.filter(c => c._id !== conversationId));
+      setConversations((prev) => prev.filter((c) => c._id !== conversationId));
 
       if (activeConversationId === conversationId) {
         setMessages([]);
@@ -288,11 +326,11 @@ export default function AIChatPage() {
       }
 
       setDeletingConversationId(null);
-      toast.success(t("aiChat.chatDeleted") || "Chat deleted");
+      toast.success(t('aiChat.chatDeleted') || 'Chat deleted');
     } catch (error) {
       console.error('[Delete conversation error]:', error);
       setDeletingConversationId(null);
-      toast.error(t("aiChat.deleteError") || "Failed to delete chat");
+      toast.error(t('aiChat.deleteError') || 'Failed to delete chat');
     }
   };
 
@@ -311,24 +349,24 @@ export default function AIChatPage() {
   const saveEditedTitle = async (conversationId: string) => {
     try {
       await updateConversationTitle({
-        conversationId: conversationId as Id<"aiConversations">,
+        conversationId: conversationId as Id<'aiConversations'>,
         title: editingTitle,
       });
 
-      setConversations(prev => prev.map(c =>
-        c._id === conversationId ? { ...c, title: editingTitle } : c
-      ));
+      setConversations((prev) =>
+        prev.map((c) => (c._id === conversationId ? { ...c, title: editingTitle } : c)),
+      );
       setEditingTitleId(null);
-      toast.success(t("aiChat.titleUpdated") || "Title updated");
+      toast.success(t('aiChat.titleUpdated') || 'Title updated');
     } catch (error) {
       console.error('[Update title error]:', error);
-      toast.error(t("aiChat.updateError") || "Failed to update title");
+      toast.error(t('aiChat.updateError') || 'Failed to update title');
     }
   };
 
   const cancelEditingTitle = () => {
     setEditingTitleId(null);
-    setEditingTitle("");
+    setEditingTitle('');
   };
 
   // ═══════════════════════════════════════════════════════════════
@@ -350,14 +388,17 @@ export default function AIChatPage() {
         });
         currentConvId = conversationId;
         setActiveConversationId(conversationId);
-        setConversations(prev => [{
-          _id: conversationId,
-          title: userMessageContent.slice(0, 50),
-          date: new Date(),
-        }, ...prev]);
+        setConversations((prev) => [
+          {
+            _id: conversationId,
+            title: userMessageContent.slice(0, 50),
+            date: new Date(),
+          },
+          ...prev,
+        ]);
       } catch (error) {
         console.error('[Create conversation error]:', error);
-        toast.error(t("toasts.conversationCreateFailed"));
+        toast.error(t('toasts.conversationCreateFailed'));
         return;
       }
     }
@@ -365,22 +406,22 @@ export default function AIChatPage() {
     // Create optimistic user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
-      role: "user",
+      role: 'user',
       content: userMessageContent,
       timestamp: new Date(),
       isNew: true,
     };
 
     // Add to UI immediately (optimistic update)
-    setMessages(prev => [...prev, userMessage]);
-    setInput("");
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
     setIsLoading(true);
 
     // Save user message to Convex
     try {
       await addMessage({
-        conversationId: currentConvId as Id<"aiConversations">,
-        role: "user",
+        conversationId: currentConvId as Id<'aiConversations'>,
+        role: 'user',
         content: userMessage.content,
       });
     } catch (error) {
@@ -390,14 +431,14 @@ export default function AIChatPage() {
     try {
       console.log('🤖 [AI Chat Page] Sending message to AI:', {
         userId,
-        message: input
+        message: input,
       });
 
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content })),
+          messages: [...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
           userId,
           lang,
         }),
@@ -413,15 +454,18 @@ export default function AIChatPage() {
       let fullContent = '';
 
       const assistantId = `ai-${Date.now()}`;
-      setMessages(prev => [...prev, {
-        id: assistantId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-        actions: [],
-        suggestions: [],
-        isNew: true,
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: assistantId,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          actions: [],
+          suggestions: [],
+          isNew: true,
+        },
+      ]);
 
       if (reader) {
         while (true) {
@@ -429,9 +473,9 @@ export default function AIChatPage() {
           if (done) break;
           fullContent += decoder.decode(value, { stream: true });
           const { cleanContent } = parseActions(fullContent);
-          setMessages(prev => prev.map(m =>
-            m.id === assistantId ? { ...m, content: cleanContent } : m
-          ));
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantId ? { ...m, content: cleanContent } : m)),
+          );
         }
       }
 
@@ -451,8 +495,8 @@ export default function AIChatPage() {
       // Save AI message to Convex
       try {
         await addMessage({
-          conversationId: currentConvId as Id<"aiConversations">,
-          role: "assistant",
+          conversationId: currentConvId as Id<'aiConversations'>,
+          role: 'assistant',
           content: cleanContent.replace(/<NAVIGATE>.*?<\/NAVIGATE>/g, '').trim(),
         });
       } catch (error) {
@@ -463,39 +507,46 @@ export default function AIChatPage() {
       if (savedMessages && savedMessages.length === 0 && currentConvId) {
         try {
           await autoRenameConversation({
-            conversationId: currentConvId as Id<"aiConversations">,
+            conversationId: currentConvId as Id<'aiConversations'>,
             firstMessage: userMessage.content,
           });
-          setConversations(prev => prev.map(c =>
-            c._id === currentConvId ? { ...c, title: userMessage.content.slice(0, 50) } : c
-          ));
+          setConversations((prev) =>
+            prev.map((c) =>
+              c._id === currentConvId ? { ...c, title: userMessage.content.slice(0, 50) } : c,
+            ),
+          );
         } catch (error) {
           console.error('[Auto-rename error]:', error);
         }
       }
 
-      setMessages(prev => prev.map(m =>
-        m.id === assistantId
-          ? {
-            ...m,
-            content: cleanContent.replace(/<NAVIGATE>.*?<\/NAVIGATE>/g, '').trim(),
-            actions,
-            suggestions,
-          }
-          : m
-      ));
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content: cleanContent.replace(/<NAVIGATE>.*?<\/NAVIGATE>/g, '').trim(),
+                actions,
+                suggestions,
+              }
+            : m,
+        ),
+      );
     } catch (error) {
       console.error('[AI Chat Page] Error:', error);
-      toast.error(t("aiChat.error") || "Failed to get response");
+      toast.error(t('aiChat.error') || 'Failed to get response');
 
       // Add error message
-      setMessages(prev => [...prev, {
-        id: `error-${Date.now()}`,
-        role: "assistant",
-        content: "❌ " + (error instanceof Error ? error.message : "Unknown error"),
-        timestamp: new Date(),
-        isNew: true,
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: '❌ ' + (error instanceof Error ? error.message : 'Unknown error'),
+          timestamp: new Date(),
+          isNew: true,
+        },
+      ]);
     } finally {
       setIsLoading(false);
       setTimeout(() => textareaRef.current?.focus(), 100);
@@ -510,22 +561,41 @@ export default function AIChatPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(t("aiChat.copied") || "Copied!");
+    toast.success(t('aiChat.copied') || 'Copied!');
   };
 
   const initialSuggestions = [
-    { icon: <Calendar className="w-4 h-4" />, label: t("aiChat.quickLeave") || "Отпуск", query: "Создать заявку на отпуск с 1 по 10 января" },
-    { icon: <ClipboardList className="w-4 h-4" />, label: t("aiChat.quickTasks") || "Задачи", query: "Показать мои задачи" },
-    { icon: <Users className="w-4 h-4" />, label: t("aiChat.quickTeam") || "Команда", query: "Показать сотрудников" },
-    { icon: <TrendingUp className="w-4 h-4" />, label: t("aiChat.quickAttendance") || "Посещаемость", query: "Моя посещаемость" },
+    {
+      icon: <Calendar className="w-4 h-4" />,
+      label: t('aiChat.quickLeave') || 'Отпуск',
+      query: 'Создать заявку на отпуск с 1 по 10 января',
+    },
+    {
+      icon: <ClipboardList className="w-4 h-4" />,
+      label: t('aiChat.quickTasks') || 'Задачи',
+      query: 'Показать мои задачи',
+    },
+    {
+      icon: <Users className="w-4 h-4" />,
+      label: t('aiChat.quickTeam') || 'Команда',
+      query: 'Показать сотрудников',
+    },
+    {
+      icon: <TrendingUp className="w-4 h-4" />,
+      label: t('aiChat.quickAttendance') || 'Посещаемость',
+      query: 'Моя посещаемость',
+    },
   ];
 
   return (
-    <div className="flex h-full bg-gradient-to-br from-[var(--background)] via-[var(--background)] to-[var(--primary)]/[0.02]" style={{ contain: "layout" }}>
+    <div
+      className="flex h-full bg-gradient-to-br from-[var(--background)] via-[var(--background)] to-[var(--primary)]/[0.02]"
+      style={{ contain: 'layout' }}
+    >
       {/* Sidebar */}
       <aside
         className={`fixed md:relative z-50 h-full bg-[var(--card)] border-r border-[var(--border)] flex-shrink-0 overflow-hidden ${
-          isMobile ? "w-full" : ""
+          isMobile ? 'w-full' : ''
         }`}
         style={{
           position: isMobile ? 'fixed' : 'relative',
@@ -548,7 +618,7 @@ export default function AIChatPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-[var(--text-primary)] flex items-center gap-2 truncate">
                 <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate">{t("aiChat.conversations") || "Conversations"}</span>
+                <span className="truncate">{t('aiChat.conversations') || 'Conversations'}</span>
               </h2>
               <Button
                 variant="ghost"
@@ -569,7 +639,7 @@ export default function AIChatPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-semibold text-[var(--text-primary)] flex items-center gap-2 truncate">
                 <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate">{t("aiChat.conversations") || "Conversations"}</span>
+                <span className="truncate">{t('aiChat.conversations') || 'Conversations'}</span>
               </h2>
               <Button
                 variant="ghost"
@@ -584,13 +654,9 @@ export default function AIChatPage() {
 
           {/* Mobile new chat button */}
           {isMobile && (
-            <Button
-              variant="secondary"
-              onClick={handleNewConversation}
-              className="w-full mb-4"
-            >
+            <Button variant="secondary" onClick={handleNewConversation} className="w-full mb-4">
               <Plus className="w-4 h-4 mr-2" />
-              {t("aiChat.newChat") || "New Chat"}
+              {t('aiChat.newChat') || 'New Chat'}
             </Button>
           )}
 
@@ -602,22 +668,26 @@ export default function AIChatPage() {
                   animate={{ opacity: 1 }}
                   className="text-center py-8 text-[var(--text-muted)] text-sm"
                 >
-                  {t("aiChat.noConversations") || "No conversations yet"}
+                  {t('aiChat.noConversations') || 'No conversations yet'}
                 </motion.div>
               ) : (
-                conversations.map(conv => (
+                conversations.map((conv) => (
                   <div
                     key={conv._id}
-                    className={`group relative flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${activeConversationId === conv._id
-                        ? "bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20"
-                        : "hover:bg-[var(--background-subtle)] border border-transparent"
-                      }`}
+                    className={`group relative flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
+                      activeConversationId === conv._id
+                        ? 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20'
+                        : 'hover:bg-[var(--background-subtle)] border border-transparent'
+                    }`}
                     onClick={() => handleSelectConversation(conv._id)}
                   >
                     <MessageSquare className="w-4 h-4 flex-shrink-0" />
 
                     {editingTitleId === conv._id ? (
-                      <div className="flex-1 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="flex-1 flex items-center gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <input
                           type="text"
                           value={editingTitle}
@@ -648,7 +718,9 @@ export default function AIChatPage() {
                       </div>
                     ) : (
                       <>
-                        <span className="flex-1 text-sm truncate block" title={conv.title}>{conv.title}</span>
+                        <span className="flex-1 text-sm truncate block" title={conv.title}>
+                          {conv.title}
+                        </span>
 
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                           <Button
@@ -679,7 +751,9 @@ export default function AIChatPage() {
       </aside>
 
       {/* Main Chat */}
-      <main className={`flex-1 flex flex-col min-w-0 h-full overflow-hidden ${!isMobile && !sidebarOpen ? 'md:ml-0' : ''}`}>
+      <main
+        className={`flex-1 flex flex-col min-w-0 h-full overflow-hidden ${!isMobile && !sidebarOpen ? 'md:ml-0' : ''}`}
+      >
         {/* Header */}
         <header className="flex items-center justify-between p-4 border-b border-[var(--border)] bg-[var(--card)]/50 backdrop-blur flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -689,7 +763,11 @@ export default function AIChatPage() {
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="h-9 w-9 p-0 flex-shrink-0"
             >
-              {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              {sidebarOpen ? (
+                <PanelLeftClose className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
             </Button>
             <div className="flex items-center gap-2 min-w-0">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 flex items-center justify-center flex-shrink-0">
@@ -697,10 +775,14 @@ export default function AIChatPage() {
               </div>
               <div className="min-w-0">
                 <h1 className="font-semibold text-[var(--text-primary)] truncate">
-                  {t("aiChat.title") || "Shield HR AI"}
+                  {t('aiChat.title') || 'Shield HR AI'}
                 </h1>
                 <p className="text-xs text-[var(--text-muted)] truncate">
-                  {user?.role === "superadmin" ? "👑 Superadmin" : user?.role === "admin" ? "🛡️ Admin" : "👤 Employee"}
+                  {user?.role === 'superadmin'
+                    ? '👑 Superadmin'
+                    : user?.role === 'admin'
+                      ? '🛡️ Admin'
+                      : '👤 Employee'}
                 </p>
               </div>
             </div>
@@ -713,10 +795,7 @@ export default function AIChatPage() {
         </header>
 
         {/* Messages */}
-        <div
-          ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-0"
-        >
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-0">
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center">
               <motion.div
@@ -728,10 +807,10 @@ export default function AIChatPage() {
                   <Sparkles className="w-12 h-12 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
-                  {t("aiChat.welcomeTitle") || "Welcome!"} {user?.name}
+                  {t('aiChat.welcomeTitle') || 'Welcome!'} {user?.name}
                 </h2>
                 <p className="text-[var(--text-muted)] mb-8">
-                  {t("aiChat.welcomeSubtitle") || "I'm your AI assistant. How can I help?"}
+                  {t('aiChat.welcomeSubtitle') || "I'm your AI assistant. How can I help?"}
                 </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -758,48 +837,75 @@ export default function AIChatPage() {
                   initial={{ opacity: 0, y: message.isNew ? 20 : 0 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: message.isNew ? index * 0.05 : 0 }}
-                  className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : ""}`}
+                  className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
                 >
                   <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarFallback className={message.role === "user" ? "bg-[var(--primary)] text-white" : "bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 text-white"}>
-                      {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                    <AvatarFallback
+                      className={
+                        message.role === 'user'
+                          ? 'bg-[var(--primary)] text-white'
+                          : 'bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 text-white'
+                      }
+                    >
+                      {message.role === 'user' ? (
+                        <User className="w-4 h-4" />
+                      ) : (
+                        <Bot className="w-4 h-4" />
+                      )}
                     </AvatarFallback>
                   </Avatar>
 
-                  <div className={`flex-1 max-w-[80%] ${message.role === "user" ? "text-right" : ""}`}>
-                    <Card className={`p-4 border-0 shadow-sm ${message.role === "user"
-                        ? "bg-[var(--primary)] text-white"
-                        : "bg-[var(--card)] border-[var(--border)]"
-                      }`}>
+                  <div
+                    className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : ''}`}
+                  >
+                    <Card
+                      className={`p-4 border-0 shadow-sm ${
+                        message.role === 'user'
+                          ? 'bg-[var(--primary)] text-white'
+                          : 'bg-[var(--card)] border-[var(--border)]'
+                      }`}
+                    >
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </Card>
 
-                    <div className={`flex items-center gap-2 mt-1 ${message.role === "user" ? "justify-end" : ""}`}>
+                    <div
+                      className={`flex items-center gap-2 mt-1 ${message.role === 'user' ? 'justify-end' : ''}`}
+                    >
                       <span className="text-xs text-[var(--text-muted)]">
-                        {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </span>
 
-                      {message.role === "assistant" && (
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(message.content)}>
+                      {message.role === 'assistant' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => copyToClipboard(message.content)}
+                        >
                           <Copy className="w-3 h-3" />
                         </Button>
                       )}
                     </div>
 
                     {/* Follow-up suggestions */}
-                    {message.role === "assistant" && message.suggestions && message.suggestions.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {message.suggestions.map((suggestion, i) => (
-                          <button
-                            key={i}
-                            onClick={() => handleSuggestion(suggestion)}
-                            className="text-xs px-3 py-1.5 rounded-full bg-[var(--background-subtle)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)] transition-colors border border-[var(--border)] hover:border-[var(--primary)]/30"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {message.role === 'assistant' &&
+                      message.suggestions &&
+                      message.suggestions.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {message.suggestions.map((suggestion, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handleSuggestion(suggestion)}
+                              className="text-xs px-3 py-1.5 rounded-full bg-[var(--background-subtle)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)] transition-colors border border-[var(--border)] hover:border-[var(--primary)]/30"
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 </motion.div>
               ))}
@@ -817,9 +923,18 @@ export default function AIChatPage() {
                   </Avatar>
                   <Card className="p-4 bg-[var(--card)] border-[var(--border)]">
                     <div className="flex gap-1">
-                      <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <span
+                        className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce"
+                        style={{ animationDelay: '0ms' }}
+                      />
+                      <span
+                        className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce"
+                        style={{ animationDelay: '150ms' }}
+                      />
+                      <span
+                        className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce"
+                        style={{ animationDelay: '300ms' }}
+                      />
                     </div>
                   </Card>
                 </motion.div>
@@ -838,12 +953,16 @@ export default function AIChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSend();
                 }
               }}
-              placeholder={isListening ? t("chatWidget.listening") : (t("aiChat.inputPlaceholder") || "Ask anything...")}
+              placeholder={
+                isListening
+                  ? t('chatWidget.listening')
+                  : t('aiChat.inputPlaceholder') || 'Ask anything...'
+              }
               className="flex-1 resize-none bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 min-h-[56px] max-h-[200px]"
               rows={1}
             />
@@ -858,7 +977,7 @@ export default function AIChatPage() {
           </div>
 
           <p className="text-xs text-center text-[var(--text-muted)] mt-3">
-            {t("aiChat.disclaimer") || "AI may make mistakes. Please verify important information."}
+            {t('aiChat.disclaimer') || 'AI may make mistakes. Please verify important information.'}
           </p>
         </div>
       </main>

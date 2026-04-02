@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   CheckCircle,
@@ -11,9 +11,9 @@ import {
   ArrowRight,
   X,
   Sparkles,
-} from "lucide-react";
+} from 'lucide-react';
 
-export type BannerType = "success" | "warning" | "info" | "error" | "purple";
+export type BannerType = 'success' | 'warning' | 'info' | 'error' | 'purple';
 
 export interface SmartBannerProps {
   type: BannerType;
@@ -31,22 +31,19 @@ export interface SmartBannerProps {
 }
 
 const colorClasses: Record<BannerType, string> = {
-  success:
-    "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400",
-  warning:
-    "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400",
-  info: "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400",
-  error: "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400",
-  purple:
-    "bg-violet-500/10 border-violet-500/20 text-violet-600 dark:text-violet-400",
+  success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+  warning: 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400',
+  info: 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400',
+  error: 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400',
+  purple: 'bg-violet-500/10 border-violet-500/20 text-violet-600 dark:text-violet-400',
 };
 
 const iconColors: Record<BannerType, string> = {
-  success: "text-emerald-500",
-  warning: "text-amber-500",
-  info: "text-blue-500",
-  error: "text-red-500",
-  purple: "text-violet-500",
+  success: 'text-emerald-500',
+  warning: 'text-amber-500',
+  info: 'text-blue-500',
+  error: 'text-red-500',
+  purple: 'text-violet-500',
 };
 
 const defaultIcons: Record<BannerType, React.ComponentType<{ className?: string }>> = {
@@ -65,7 +62,7 @@ export function SmartBanner({
   dismissable = true,
   autoDismiss,
   onDismiss,
-  className = "",
+  className = '',
   icon,
 }: SmartBannerProps) {
   const [visible, setVisible] = useState(true);
@@ -94,7 +91,7 @@ export function SmartBanner({
           initial={{ opacity: 0, y: -10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           className={`relative overflow-hidden border p-4 ${colorClasses[type]} ${className}`}
         >
           {/* Animated background gradient */}
@@ -102,12 +99,12 @@ export function SmartBanner({
             className="absolute inset-0 opacity-30"
             animate={{
               background: [
-                "radial-gradient(circle at 0% 0%, currentColor 0%, transparent 50%)",
-                "radial-gradient(circle at 100% 100%, currentColor 0%, transparent 50%)",
-                "radial-gradient(circle at 0% 0%, currentColor 0%, transparent 50%)",
+                'radial-gradient(circle at 0% 0%, currentColor 0%, transparent 50%)',
+                'radial-gradient(circle at 100% 100%, currentColor 0%, transparent 50%)',
+                'radial-gradient(circle at 0% 0%, currentColor 0%, transparent 50%)',
               ],
             }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
           />
 
           {/* Dismiss button */}
@@ -128,7 +125,7 @@ export function SmartBanner({
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
               className="flex-shrink-0"
             >
               {icon || <Icon className={`w-5 h-5 ${iconColors[type]}`} />}
@@ -178,9 +175,9 @@ export function SmartBanner({
           {autoDismiss && autoDismiss > 0 && (
             <motion.div
               className="absolute bottom-0 left-0 h-0.5 bg-current opacity-30"
-              initial={{ width: "100%" }}
-              animate={{ width: "0%" }}
-              transition={{ duration: autoDismiss / 1000, ease: "linear" }}
+              initial={{ width: '100%' }}
+              animate={{ width: '0%' }}
+              transition={{ duration: autoDismiss / 1000, ease: 'linear' }}
             />
           )}
         </motion.div>

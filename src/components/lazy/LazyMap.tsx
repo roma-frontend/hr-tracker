@@ -19,7 +19,7 @@ const LazyMap = dynamic(
         </div>
       </div>
     ),
-  }
+  },
 );
 
 export default LazyMap;

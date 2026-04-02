@@ -1,73 +1,82 @@
-﻿"use client";
+﻿'use client';
 
-import { useState, useRef } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { useTranslation } from "react-i18next";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { uploadTaskAttachment } from "@/actions/cloudinary";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { useState, useRef } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { uploadTaskAttachment } from '@/actions/cloudinary';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 interface Props {
-  currentUserId: Id<"users">;
-  userRole: "admin" | "supervisor" | "employee";
+  currentUserId: Id<'users'>;
+  userRole: 'admin' | 'supervisor' | 'employee';
   onClose: () => void;
 }
 
 export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
   const { t } = useTranslation();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [assignedTo, setAssignedTo] = useState<string>("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
-  const [deadline, setDeadline] = useState("");
-  const [tagsInput, setTagsInput] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [assignedTo, setAssignedTo] = useState<string>('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
+  const [deadline, setDeadline] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const employees = useQuery(api.tasks.getUsersForAssignment, { requesterId: currentUserId });
   const myEmployees = useQuery(
     api.tasks.getMyEmployees,
-    userRole === "supervisor" ? { supervisorId: currentUserId } : "skip"
+    userRole === 'supervisor' ? { supervisorId: currentUserId } : 'skip',
   );
 
   const createTask = useMutation(api.tasks.createTask);
   const addAttachment = useMutation(api.tasks.addAttachment);
 
   const handleFileAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newFiles = Array.from(e.target.files ?? []).filter(f => {
+    const newFiles = Array.from(e.target.files ?? []).filter((f) => {
       if (f.size > 10 * 1024 * 1024) {
         toast.error(`${f.name} too large (max 10MB)`);
         return false;
       }
       return true;
     });
-    setFiles(prev => [...prev, ...newFiles].slice(0, 10));
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setFiles((prev) => [...prev, ...newFiles].slice(0, 10));
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const availableEmployees = userRole === "admin" ? employees : myEmployees;
+  const availableEmployees = userRole === 'admin' ? employees : myEmployees;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) { setError(t('task.titleRequired')); return; }
-    if (!assignedTo) { setError(t('task.selectAssignee')); return; }
+    if (!title.trim()) {
+      setError(t('task.titleRequired'));
+      return;
+    }
+    if (!assignedTo) {
+      setError(t('task.selectAssignee'));
+      return;
+    }
 
     setLoading(true);
-    setError("");
+    setError('');
     try {
-      const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
+      const tags = tagsInput
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
       const taskId = await createTask({
         title: title.trim(),
         description: description.trim() || undefined,
-        assignedTo: assignedTo as Id<"users">,
+        assignedTo: assignedTo as Id<'users'>,
         assignedBy: currentUserId,
         priority,
         deadline: deadline ? new Date(deadline).getTime() : undefined,
@@ -76,27 +85,29 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
 
       // Upload attachments if any
       if (files.length > 0 && taskId) {
-        await Promise.all(files.map(async (file) => {
-          try {
-            const base64 = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(file);
-            });
-            const url = await uploadTaskAttachment(base64, file.name);
-            await addAttachment({
-              taskId: taskId as Id<"tasks">,
-              url,
-              name: file.name,
-              type: file.type,
-              size: file.size,
-              uploadedBy: currentUserId,
-            });
-          } catch {
-            toast.error(`Failed to upload ${file.name}`);
-          }
-        }));
+        await Promise.all(
+          files.map(async (file) => {
+            try {
+              const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+              const url = await uploadTaskAttachment(base64, file.name);
+              await addAttachment({
+                taskId: taskId as Id<'tasks'>,
+                url,
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                uploadedBy: currentUserId,
+              });
+            } catch {
+              toast.error(`Failed to upload ${file.name}`);
+            }
+          }),
+        );
       }
 
       onClose();
@@ -118,22 +129,33 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               <h2 className="text-xl font-bold ">{t('task.createTask')}</h2>
               <p className="text-black-200 text-sm mt-0.5">{t('task.assignTask')}</p>
             </div>
-            <Button onClick={onClose} variant="ghost" size="icon" className="w-8 h-8 rounded-full hover:bg-white/30">✕</Button>
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 rounded-full hover:bg-white/30"
+            >
+              ✕
+            </Button>
           </div>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm rounded-xl px-4 py-3">{error}</div>
+            <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm rounded-xl px-4 py-3">
+              {error}
+            </div>
           )}
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('task.taskTitleRequired')}</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+              {t('task.taskTitleRequired')}
+            </label>
             <input
               value={title}
-              onChange={e => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder={t('task.titlePlaceholder')}
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
             />
@@ -141,10 +163,12 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('task.description')}</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+              {t('task.description')}
+            </label>
             <textarea
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder={t('task.descriptionPlaceholder')}
               rows={3}
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none placeholder:text-[var(--text-muted)]"
@@ -153,25 +177,29 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
 
           {/* Assignee */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('task.assignToRequired')}</label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+              {t('task.assignToRequired')}
+            </label>
             <select
               value={assignedTo}
-              onChange={e => setAssignedTo(e.target.value)}
+              onChange={(e) => setAssignedTo(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
             >
               <option value="">{t('task.selectEmployee')}</option>
-              {availableEmployees?.map(emp => (
+              {availableEmployees?.map((emp) => (
                 <option key={emp._id} value={emp._id}>
                   {emp.name}
                   {emp.role ? ` [${t(`roles.${emp.role}`)}]` : ''}
-                  {emp.position ? ` — ${emp.position}` : ""}
-                  {emp.department ? ` (${emp.department})` : ""}
+                  {emp.position ? ` — ${emp.position}` : ''}
+                  {emp.department ? ` (${emp.department})` : ''}
                 </option>
               ))}
             </select>
             {availableEmployees?.length === 0 && (
               <p className="text-xs text-amber-400 mt-1">
-                {userRole === "supervisor" ? t('task.noEmployeesAssigned') : t('task.noEmployeesFound')}
+                {userRole === 'supervisor'
+                  ? t('task.noEmployeesAssigned')
+                  : t('task.noEmployeesFound')}
               </p>
             )}
           </div>
@@ -179,10 +207,12 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
           {/* Priority + Deadline row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('task.priority')}</label>
+              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+                {t('task.priority')}
+              </label>
               <select
                 value={priority}
-                onChange={e => setPriority(e.target.value as any)}
+                onChange={(e) => setPriority(e.target.value as any)}
                 className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               >
                 <option value="low">{t('task.low')}</option>
@@ -192,12 +222,14 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('task.deadline')}</label>
+              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+                {t('task.deadline')}
+              </label>
               <input
                 type="date"
                 value={deadline}
-                onChange={e => setDeadline(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => setDeadline(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
                 className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               />
             </div>
@@ -205,10 +237,13 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{t('task.tags')} <span className="font-normal text-[var(--text-muted)]">{t('task.tagsHint')}</span></label>
+            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+              {t('task.tags')}{' '}
+              <span className="font-normal text-[var(--text-muted)]">{t('task.tagsHint')}</span>
+            </label>
             <input
               value={tagsInput}
-              onChange={e => setTagsInput(e.target.value)}
+              onChange={(e) => setTagsInput(e.target.value)}
               placeholder={t('task.tagsPlaceholder')}
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
             />

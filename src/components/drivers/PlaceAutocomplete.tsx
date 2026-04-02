@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { MapPin, Loader2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { MapPin, Loader2, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PlaceSuggestion {
   display_name: string;
@@ -25,7 +25,7 @@ export function PlaceAutocomplete({
   value,
   onChange,
   onSelect,
-  placeholder = "Search for a place...",
+  placeholder = 'Search for a place...',
   className,
 }: PlaceAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
@@ -57,15 +57,15 @@ export function PlaceAutocomplete({
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&accept-language=en,ru`,
         {
           signal: abortRef.current.signal,
-          headers: { "User-Agent": "OfficeApp/1.0" },
-        }
+          headers: { 'User-Agent': 'OfficeApp/1.0' },
+        },
       );
       const data: PlaceSuggestion[] = await res.json();
       setSuggestions(data);
       setIsOpen(data.length > 0);
       setHighlightedIndex(-1);
     } catch (e: any) {
-      if (e.name !== "AbortError") {
+      if (e.name !== 'AbortError') {
         setSuggestions([]);
         setIsOpen(false);
       }
@@ -105,11 +105,11 @@ export function PlaceAutocomplete({
     const parts: string[] = [];
     // Try to build a concise address
     if (addr.road || addr.pedestrian || addr.street) {
-      parts.push(addr.road || addr.pedestrian || addr.street || "");
+      parts.push(addr.road || addr.pedestrian || addr.street || '');
       if (addr.house_number) parts[0] = `${parts[0]} ${addr.house_number}`;
     }
     if (addr.city || addr.town || addr.village) {
-      parts.push(addr.city || addr.town || addr.village || "");
+      parts.push(addr.city || addr.town || addr.village || '');
     }
     if (addr.country) {
       parts.push(addr.country);
@@ -119,29 +119,25 @@ export function PlaceAutocomplete({
     // If the place has a specific name (like a business/airport), prepend it
     const name = addr.aeroway || addr.amenity || addr.tourism || addr.building || addr.shop;
     if (name) {
-      return `${name}, ${parts.join(", ")}`;
+      return `${name}, ${parts.join(', ')}`;
     }
-    return parts.join(", ");
+    return parts.join(', ');
   };
 
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen || suggestions.length === 0) return;
 
-    if (e.key === "ArrowDown") {
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < suggestions.length - 1 ? prev + 1 : 0
-      );
-    } else if (e.key === "ArrowUp") {
+      setHighlightedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : suggestions.length - 1
-      );
-    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+    } else if (e.key === 'Enter' && highlightedIndex >= 0) {
       e.preventDefault();
       handleSelect(suggestions[highlightedIndex]);
-    } else if (e.key === "Escape") {
+    } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
   };
@@ -153,8 +149,8 @@ export function PlaceAutocomplete({
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   // Cleanup
@@ -166,14 +162,14 @@ export function PlaceAutocomplete({
   }, []);
 
   const clearInput = () => {
-    onChange("");
+    onChange('');
     setSuggestions([]);
     setIsOpen(false);
     inputRef.current?.focus();
   };
 
   return (
-    <div ref={containerRef} className={cn("relative", className)}>
+    <div ref={containerRef} className={cn('relative', className)}>
       <div className="relative flex items-center">
         <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
         <input
@@ -182,13 +178,15 @@ export function PlaceAutocomplete({
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => { if (suggestions.length > 0) setIsOpen(true); }}
+          onFocus={() => {
+            if (suggestions.length > 0) setIsOpen(true);
+          }}
           placeholder={placeholder}
           className={cn(
-            "flex h-9 w-full rounded-lg border border-[var(--input-border)] bg-[var(--input)] pl-8 py-1 text-sm text-[var(--text-primary)] shadow-sm transition-colors",
-            value || isLoading ? "pr-9" : "pr-3",
-            "placeholder:text-[var(--text-muted)]",
-            "focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-[var(--primary)]",
+            'flex h-9 w-full rounded-lg border border-[var(--input-border)] bg-[var(--input)] pl-8 py-1 text-sm text-[var(--text-primary)] shadow-sm transition-colors',
+            value || isLoading ? 'pr-9' : 'pr-3',
+            'placeholder:text-[var(--text-muted)]',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-[var(--primary)]',
           )}
         />
         {isLoading ? (
@@ -217,10 +215,10 @@ export function PlaceAutocomplete({
               type="button"
               onClick={() => handleSelect(s)}
               className={cn(
-                "w-full text-left px-3 py-2.5 text-sm flex items-start gap-2.5 transition-colors border-b border-[var(--input-border)] last:border-b-0",
+                'w-full text-left px-3 py-2.5 text-sm flex items-start gap-2.5 transition-colors border-b border-[var(--input-border)] last:border-b-0',
                 i === highlightedIndex
-                  ? "bg-[var(--primary)]/10 text-[var(--primary)]"
-                  : "text-[var(--text-primary)] hover:bg-[var(--muted)]"
+                  ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                  : 'text-[var(--text-primary)] hover:bg-[var(--muted)]',
               )}
             >
               <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-[var(--text-muted)]" />

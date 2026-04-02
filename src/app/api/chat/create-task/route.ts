@@ -1,11 +1,11 @@
 /**
  * AI Task Creation API with Conflict Detection
- * 
+ *
  * Проверяет конфликты при создании задачи:
  * - Дедлайн во время отпуска исполнителя
  * - Задача назначена человеку в отпуске
  * - Пересечение с другими задачами
- * 
+ *
  * Возвращает human-readable сообщения для AI
  */
 
@@ -18,48 +18,55 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(req: NextRequest) {
   try {
-    const { 
-      userId, 
+    const {
+      userId,
       organizationId,
-      title, 
-      description, 
-      assignedTo, 
-      assignedBy, 
-      priority, 
+      title,
+      description,
+      assignedTo,
+      assignedBy,
+      priority,
       deadline,
-      tags 
+      tags,
     } = await req.json();
 
-    console.log('[create-task] Request:', { 
-      userId, 
-      organizationId, 
-      title, 
-      assignedTo, 
-      deadline 
+    console.log('[create-task] Request:', {
+      userId,
+      organizationId,
+      title,
+      assignedTo,
+      deadline,
     });
 
     if (!userId || !organizationId || !title || !assignedTo || !assignedBy || !priority) {
       return NextResponse.json(
-        { error: 'Missing required fields: userId, organizationId, title, assignedTo, assignedBy, priority' },
-        { status: 400 }
+        {
+          error:
+            'Missing required fields: userId, organizationId, title, assignedTo, assignedBy, priority',
+        },
+        { status: 400 },
       );
     }
 
     // ═══════════════════════════════════════════════════════════════
     // CONFLICT DETECTION — Check task conflicts
     // ═══════════════════════════════════════════════════════════════
-    let conflictResult: { hasCritical: boolean; hasWarnings: boolean; conflicts: any[] } = { hasCritical: false, hasWarnings: false, conflicts: [] };
+    let conflictResult: { hasCritical: boolean; hasWarnings: boolean; conflicts: any[] } = {
+      hasCritical: false,
+      hasWarnings: false,
+      conflicts: [],
+    };
 
     if (deadline) {
       // Проверяем конфликты задачи с отпусками
       const conflictData: any = await convex.query(api.conflicts.checkConflictsForRequest, {
-        organizationId: organizationId as Id<"organizations">,
-        requestType: "task" as const,
-        userId: assignedTo as Id<"users">,
+        organizationId: organizationId as Id<'organizations'>,
+        requestType: 'task' as const,
+        userId: assignedTo as Id<'users'>,
         startDate: Date.now(),
         endDate: new Date(deadline).getTime(),
         metadata: {
-          assigneeId: assignedTo as Id<"users">,
+          assigneeId: assignedTo as Id<'users'>,
           taskId: undefined,
         },
       });
@@ -85,9 +92,9 @@ export async function POST(req: NextRequest) {
     const taskId = await convex.mutation(api.tasks.createTask, {
       title,
       description: description || '',
-      assignedTo: assignedTo as Id<"users">,
-      assignedBy: assignedBy as Id<"users">,
-      priority: priority as "low" | "medium" | "high" | "urgent",
+      assignedTo: assignedTo as Id<'users'>,
+      assignedBy: assignedBy as Id<'users'>,
+      priority: priority as 'low' | 'medium' | 'high' | 'urgent',
       deadline: deadline ? new Date(deadline).getTime() : undefined,
       tags: tags || [],
     });
@@ -96,10 +103,10 @@ export async function POST(req: NextRequest) {
 
     // Формируем ответ с учётом предупреждений
     let message = `✅ Task "${title}" has been created and assigned.`;
-    
+
     if (warnings.length > 0) {
       message += `\n\n⚠️ **Potential conflicts detected**:\n`;
-      warnings.forEach(w => {
+      warnings.forEach((w) => {
         message += `\n• ${w}`;
       });
       message += `\n\n💡 Consider adjusting the deadline or reassigning the task.`;
@@ -115,10 +122,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('[create-task] Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create task' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to create task' }, { status: 500 });
   }
 }
 
@@ -134,20 +138,17 @@ export async function GET(req: NextRequest) {
     const deadline = searchParams.get('deadline');
 
     if (!userId || !organizationId || !assigneeId || !deadline) {
-      return NextResponse.json(
-        { error: 'Missing required query params' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required query params' }, { status: 400 });
     }
 
     const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<"organizations">,
-      requestType: "task" as const,
-      userId: userId as Id<"users">,
+      organizationId: organizationId as Id<'organizations'>,
+      requestType: 'task' as const,
+      userId: userId as Id<'users'>,
       startDate: Date.now(),
       endDate: parseInt(deadline),
-      metadata: { 
-        assigneeId: assigneeId as Id<"users">,
+      metadata: {
+        assigneeId: assigneeId as Id<'users'>,
       },
     });
 
@@ -161,12 +162,11 @@ export async function GET(req: NextRequest) {
       aiMessage: aiFriendlyMessage,
       conflicts: conflictResult.conflicts,
     });
-
   } catch (error: any) {
     console.error('[task-conflict-check] Error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to check conflicts' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -176,10 +176,10 @@ export async function GET(req: NextRequest) {
  */
 function formatTaskConflictsForAI(conflicts: any[]): string {
   if (conflicts.length === 0) {
-    return "✅ Конфликтов не обнаружено. Задачу можно создавать.";
+    return '✅ Конфликтов не обнаружено. Задачу можно создавать.';
   }
 
-  let message = "⚠️ **Обнаружены потенциальные конфликты**:\n\n";
+  let message = '⚠️ **Обнаружены потенциальные конфликты**:\n\n';
 
   conflicts.forEach((c, i) => {
     message += `${i + 1}. **${c.title}**\n`;
@@ -187,8 +187,8 @@ function formatTaskConflictsForAI(conflicts: any[]): string {
     message += `   💡 ${c.suggestion}\n\n`;
   });
 
-  message += "\n📋 **Рекомендация AI**: ";
-  message += "Рассмотрите возможность переноса дедлайна или назначения другого исполнителя.";
+  message += '\n📋 **Рекомендация AI**: ';
+  message += 'Рассмотрите возможность переноса дедлайна или назначения другого исполнителя.';
 
   return message;
 }

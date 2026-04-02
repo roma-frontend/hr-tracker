@@ -59,12 +59,7 @@ export function CheckConflictsButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={isChecking}
-          className="gap-2"
-        >
+        <Button variant="outline" size="sm" disabled={isChecking} className="gap-2">
           {isChecking ? (
             <RefreshCw className="w-4 h-4 animate-spin" />
           ) : (
@@ -79,9 +74,7 @@ export function CheckConflictsButton({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={handleCheck}>
-          Check for this leave request
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleCheck}>Check for this leave request</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

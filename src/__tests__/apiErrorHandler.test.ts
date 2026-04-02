@@ -17,12 +17,7 @@ jest.mock('next/server', () => ({
   },
 }));
 
-import {
-  createErrorResponse,
-  withApiHandler,
-  ApiErrors,
-  ErrorCode,
-} from '../apiErrorHandler';
+import { createErrorResponse, withApiHandler, ApiErrors, ErrorCode } from '../apiErrorHandler';
 
 describe('API Error Handler', () => {
   describe('createErrorResponse', () => {
@@ -40,12 +35,10 @@ describe('API Error Handler', () => {
     });
 
     it('should include details when provided', async () => {
-      const response = createErrorResponse(
-        'Validation failed',
-        ErrorCode.VALIDATION_ERROR,
-        400,
-        { field: 'email', reason: 'invalid format' }
-      );
+      const response = createErrorResponse('Validation failed', ErrorCode.VALIDATION_ERROR, 400, {
+        field: 'email',
+        reason: 'invalid format',
+      });
       const data = await response.json();
 
       expect(data.details).toEqual({
@@ -65,9 +58,7 @@ describe('API Error Handler', () => {
 
   describe('withApiHandler', () => {
     it('should return handler result on success', async () => {
-      const mockHandler = jest.fn().mockResolvedValue(
-        NextResponse.json({ success: true })
-      );
+      const mockHandler = jest.fn().mockResolvedValue(NextResponse.json({ success: true }));
 
       const result = await withApiHandler(mockHandler);
       const data = await (result as any).json();
@@ -77,9 +68,7 @@ describe('API Error Handler', () => {
     });
 
     it('should catch and format validation errors', async () => {
-      const mockHandler = jest.fn().mockRejectedValue(
-        new Error('Required field is missing')
-      );
+      const mockHandler = jest.fn().mockRejectedValue(new Error('Required field is missing'));
 
       const result = await withApiHandler(mockHandler, { operation: 'test' });
       const data = await (result as any).json();
@@ -89,9 +78,7 @@ describe('API Error Handler', () => {
     });
 
     it('should catch and format authentication errors', async () => {
-      const mockHandler = jest.fn().mockRejectedValue(
-        new Error('Unauthorized access')
-      );
+      const mockHandler = jest.fn().mockRejectedValue(new Error('Unauthorized access'));
 
       const result = await withApiHandler(mockHandler);
       const data = await (result as any).json();
@@ -100,9 +87,7 @@ describe('API Error Handler', () => {
     });
 
     it('should catch and format not found errors', async () => {
-      const mockHandler = jest.fn().mockRejectedValue(
-        new Error('Resource not found')
-      );
+      const mockHandler = jest.fn().mockRejectedValue(new Error('Resource not found'));
 
       const result = await withApiHandler(mockHandler);
       const data = await (result as any).json();
@@ -111,9 +96,7 @@ describe('API Error Handler', () => {
     });
 
     it('should catch and format conflict errors', async () => {
-      const mockHandler = jest.fn().mockRejectedValue(
-        new Error('Email already exists')
-      );
+      const mockHandler = jest.fn().mockRejectedValue(new Error('Email already exists'));
 
       const result = await withApiHandler(mockHandler);
       const data = await (result as any).json();
@@ -122,9 +105,7 @@ describe('API Error Handler', () => {
     });
 
     it('should default to internal error for unknown errors', async () => {
-      const mockHandler = jest.fn().mockRejectedValue(
-        new Error('Random error')
-      );
+      const mockHandler = jest.fn().mockRejectedValue(new Error('Random error'));
 
       const result = await withApiHandler(mockHandler, { operation: 'test' });
       const data = await (result as any).json();

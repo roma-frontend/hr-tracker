@@ -1,14 +1,26 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
-import { useCookieConsent, type CookiePreferences as CookiePrefs } from "@/store/cookieConsentStore";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { Cookie, Shield, BarChart3, Target, Palette, Info, CheckCircle2, RotateCcw } from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
+import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
+import {
+  useCookieConsent,
+  type CookiePreferences as CookiePrefs,
+} from '@/store/cookieConsentStore';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import {
+  Cookie,
+  Shield,
+  BarChart3,
+  Target,
+  Palette,
+  Info,
+  CheckCircle2,
+  RotateCcw,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface CookieCategory {
   id: keyof CookiePrefs;
@@ -21,40 +33,42 @@ interface CookieCategory {
 
 const cookieCategories: CookieCategory[] = [
   {
-    id: "necessary",
-    name: "Essential Cookies",
-    description: "Required for core functionality like authentication, security, and session management. These cannot be disabled.",
+    id: 'necessary',
+    name: 'Essential Cookies',
+    description:
+      'Required for core functionality like authentication, security, and session management. These cannot be disabled.',
     icon: Shield,
     required: true,
-    color: "text-green-500",
+    color: 'text-green-500',
   },
   {
-    id: "analytics",
-    name: "Analytics Cookies",
-    description: "Help us understand how you use our platform to improve performance and user experience.",
+    id: 'analytics',
+    name: 'Analytics Cookies',
+    description:
+      'Help us understand how you use our platform to improve performance and user experience.',
     icon: BarChart3,
-    color: "text-blue-500",
+    color: 'text-blue-500',
   },
   {
-    id: "marketing",
-    name: "Marketing Cookies",
-    description: "Used to deliver relevant advertisements and measure campaign effectiveness.",
+    id: 'marketing',
+    name: 'Marketing Cookies',
+    description: 'Used to deliver relevant advertisements and measure campaign effectiveness.',
     icon: Target,
-    color: "text-orange-500",
+    color: 'text-orange-500',
   },
   {
-    id: "preferences",
-    name: "Preference Cookies",
-    description: "Remember your settings like theme, language, and layout preferences for a personalized experience.",
+    id: 'preferences',
+    name: 'Preference Cookies',
+    description:
+      'Remember your settings like theme, language, and layout preferences for a personalized experience.',
     icon: Palette,
-    color: "text-orange-500",
+    color: 'text-orange-500',
   },
 ];
 
 export function CookiePreferences() {
-  
   const { t } = useTranslation();
-const { hasConsent, preferences, savePreferences, resetConsent } = useCookieConsent();
+  const { hasConsent, preferences, savePreferences, resetConsent } = useCookieConsent();
   const [localPreferences, setLocalPreferences] = useState<CookiePrefs>(preferences);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -68,7 +82,7 @@ const { hasConsent, preferences, savePreferences, resetConsent } = useCookieCons
   }, [localPreferences, preferences]);
 
   const handleToggle = (category: keyof CookiePrefs) => {
-    if (category === "necessary") return;
+    if (category === 'necessary') return;
     setLocalPreferences((prev) => ({
       ...prev,
       [category]: !prev[category],
@@ -77,7 +91,7 @@ const { hasConsent, preferences, savePreferences, resetConsent } = useCookieCons
 
   const handleSave = () => {
     savePreferences(localPreferences);
-    toast.success(t("toasts.cookiePreferencesSaved"));
+    toast.success(t('toasts.cookiePreferencesSaved'));
     setHasChanges(false);
   };
 
@@ -102,9 +116,9 @@ const { hasConsent, preferences, savePreferences, resetConsent } = useCookieCons
   };
 
   const handleReset = () => {
-    if (confirm("This will reset your cookie consent and show the banner again. Continue?")) {
+    if (confirm('This will reset your cookie consent and show the banner again. Continue?')) {
       resetConsent();
-      toast.info(t("toasts.cookieConsentReset"));
+      toast.info(t('toasts.cookieConsentReset'));
     }
   };
 
@@ -123,31 +137,30 @@ const { hasConsent, preferences, savePreferences, resetConsent } = useCookieCons
             </div>
           )}
         </div>
-        <CardDescription>
-          {t('cookies.manageExperience')}
-        </CardDescription>
+        <CardDescription>{t('cookies.manageExperience')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Info Banner */}
         <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/50 dark:bg-blue-950/30">
           <Info className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div className="text-xs text-blue-900 dark:text-blue-100">
-            {t('cookies.respectPrivacy')}{" "}
-            <Link 
-              href="/privacy" 
+            {t('cookies.respectPrivacy')}{' '}
+            <Link
+              href="/privacy"
               target="_blank"
               className="font-semibold underline hover:text-blue-700 dark:hover:text-blue-300"
             >
               {t('cookies.privacyPolicy')}
             </Link>
-            {" and "}
-            <Link 
-              href="/terms" 
+            {' and '}
+            <Link
+              href="/terms"
               target="_blank"
               className="font-semibold underline hover:text-blue-700 dark:hover:text-blue-300"
             >
               {t('cookies.termsOfService')}
-            </Link>.
+            </Link>
+            .
           </div>
         </div>
 
@@ -161,19 +174,23 @@ const { hasConsent, preferences, savePreferences, resetConsent } = useCookieCons
               <div
                 key={category.id}
                 className={`rounded-lg border transition-all ${
-                  isEnabled 
-                    ? 'border-[var(--primary)]/30 bg-[var(--primary)]/5' 
+                  isEnabled
+                    ? 'border-[var(--primary)]/30 bg-[var(--primary)]/5'
                     : 'border-[var(--border)] bg-[var(--background-subtle)]'
                 }`}
               >
                 <div className="flex items-start justify-between gap-4 p-4">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-                      isEnabled
-                        ? "bg-gradient-to-br from-blue-500 to-cyan-500"
-                        : "bg-[var(--background-subtle)] border border-[var(--border)]"
-                    }`}>
-                      <Icon className={`h-4 w-4 ${isEnabled ? "text-white" : "text-[var(--text-muted)]"}`} />
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${
+                        isEnabled
+                          ? 'bg-gradient-to-br from-blue-500 to-cyan-500'
+                          : 'bg-[var(--background-subtle)] border border-[var(--border)]'
+                      }`}
+                    >
+                      <Icon
+                        className={`h-4 w-4 ${isEnabled ? 'text-white' : 'text-[var(--text-muted)]'}`}
+                      />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -206,20 +223,10 @@ const { hasConsent, preferences, savePreferences, resetConsent } = useCookieCons
 
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAcceptAll}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onClick={handleAcceptAll} className="text-xs">
             Accept All
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRejectAll}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onClick={handleRejectAll} className="text-xs">
             Reject Optional
           </Button>
           <Button

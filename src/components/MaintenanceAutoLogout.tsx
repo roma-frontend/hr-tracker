@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useMaintenanceAutoLogout } from "@/hooks/useMaintenanceAutoLogout";
+import { useMaintenanceAutoLogout } from '@/hooks/useMaintenanceAutoLogout';
 
 /**
  * Component that handles auto-logout when maintenance mode is detected

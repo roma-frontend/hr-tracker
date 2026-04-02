@@ -1,9 +1,9 @@
-"use client";
+'use client';
 import Image from 'next/image';
 
-import React, { useState, useRef } from "react";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, { useState, useRef } from 'react';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -11,65 +11,98 @@ import {
   ContextMenuSeparator,
   ContextMenuLabel,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { cn } from "@/lib/utils";
-import { Search, Plus, Users, MessageCircle, Pin, Archive, Trash2, RotateCcw, Volume2, VolumeX, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { useTranslation } from "react-i18next";
+} from '@/components/ui/context-menu';
+import { cn } from '@/lib/utils';
+import {
+  Search,
+  Plus,
+  Users,
+  MessageCircle,
+  Pin,
+  Archive,
+  Trash2,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 interface Conversation {
-  _id: Id<"chatConversations">;
-  type: "direct" | "group";
+  _id: Id<'chatConversations'>;
+  type: 'direct' | 'group';
   name?: string;
   avatarUrl?: string;
   lastMessageAt?: number;
   lastMessageText?: string;
-  lastMessageSenderId?: Id<"users">;
+  lastMessageSenderId?: Id<'users'>;
   isPinned?: boolean;
   isArchived?: boolean;
   isDeleted?: boolean;
   membership: { unreadCount: number; isMuted: boolean; isDeleted?: boolean; isArchived?: boolean };
-  otherUser?: { _id: Id<"users">; name: string; avatarUrl?: string; presenceStatus?: string } | null;
+  otherUser?: {
+    _id: Id<'users'>;
+    name: string;
+    avatarUrl?: string;
+    presenceStatus?: string;
+  } | null;
   memberCount?: number;
-  members?: Array<{ userId: Id<"users">; user?: { name: string; avatarUrl?: string } | null }>;
+  members?: Array<{ userId: Id<'users'>; user?: { name: string; avatarUrl?: string } | null }>;
 }
 
 interface Props {
   conversations: Conversation[];
-  selectedId: Id<"chatConversations"> | null;
-  currentUserId: Id<"users">;
-  onSelect: (id: Id<"chatConversations">) => void;
+  selectedId: Id<'chatConversations'> | null;
+  currentUserId: Id<'users'>;
+  onSelect: (id: Id<'chatConversations'>) => void;
   onNewConversation: () => void;
-  onTogglePin?: (convId: Id<"chatConversations">) => Promise<void>;
-  onDelete?: (convId: Id<"chatConversations">) => Promise<void>;
-  onRestore?: (convId: Id<"chatConversations">) => Promise<void>;
-  onToggleArchive?: (convId: Id<"chatConversations">) => Promise<void>;
-  onToggleMute?: (convId: Id<"chatConversations">) => Promise<void>;
+  onTogglePin?: (convId: Id<'chatConversations'>) => Promise<void>;
+  onDelete?: (convId: Id<'chatConversations'>) => Promise<void>;
+  onRestore?: (convId: Id<'chatConversations'>) => Promise<void>;
+  onToggleArchive?: (convId: Id<'chatConversations'>) => Promise<void>;
+  onToggleMute?: (convId: Id<'chatConversations'>) => Promise<void>;
 }
 
-type FilterType = "all" | "chat" | "unread" | "groups" | "pinned" | "archived";
+type FilterType = 'all' | 'chat' | 'unread' | 'groups' | 'pinned' | 'archived';
 
 function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function PresenceDot({ status }: { status?: string }) {
   const color =
-    status === "available" ? "bg-green-500" :
-    status === "busy" ? "bg-yellow-500" :
-    status === "in_call" || status === "in_meeting" ? "bg-red-500" :
-    status === "out_of_office" ? "bg-gray-400" :
-    "bg-gray-400";
+    status === 'available'
+      ? 'bg-green-500'
+      : status === 'busy'
+        ? 'bg-yellow-500'
+        : status === 'in_call' || status === 'in_meeting'
+          ? 'bg-red-500'
+          : status === 'out_of_office'
+            ? 'bg-gray-400'
+            : 'bg-gray-400';
   return (
-    <span className={cn("absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white", color)} />
+    <span
+      className={cn(
+        'absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white',
+        color,
+      )}
+    />
   );
 }
 
-export function ConversationList({ 
-  conversations, 
-  selectedId, 
-  currentUserId, 
-  onSelect, 
+export function ConversationList({
+  conversations,
+  selectedId,
+  currentUserId,
+  onSelect,
   onNewConversation,
   onTogglePin,
   onDelete,
@@ -78,8 +111,8 @@ export function ConversationList({
   onToggleMute,
 }: Props) {
   const { t } = useTranslation();
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<FilterType>("chat");
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<FilterType>('chat');
   const [loadingOpId, setLoadingOpId] = useState<string | null>(null);
   const filtersRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -123,7 +156,7 @@ export function ConversationList({
 
   // Apply filters
   const filtered = conversations.filter((c) => {
-    const name = c.type === "direct" ? (c.otherUser?.name ?? "") : (c.name ?? "");
+    const name = c.type === 'direct' ? (c.otherUser?.name ?? '') : (c.name ?? '');
     const matchesSearch = name.toLowerCase().includes(search.toLowerCase());
 
     if (!matchesSearch) return false;
@@ -131,15 +164,15 @@ export function ConversationList({
     const isHidden = c.membership.isArchived || c.isArchived || c.membership.isDeleted;
 
     switch (filter) {
-      case "chat":
-        return c.type === "direct" && !isHidden;
-      case "unread":
+      case 'chat':
+        return c.type === 'direct' && !isHidden;
+      case 'unread':
         return c.membership.unreadCount > 0 && !isHidden;
-      case "groups":
-        return c.type === "group" && !isHidden;
-      case "pinned":
+      case 'groups':
+        return c.type === 'group' && !isHidden;
+      case 'pinned':
         return c.isPinned && !isHidden;
-      case "archived":
+      case 'archived':
         return isHidden;
       default:
         return !isHidden; // "all" shows non-archived/deleted only
@@ -148,12 +181,15 @@ export function ConversationList({
 
   const totalUnread = conversations.reduce((s, c) => s + (c.membership.unreadCount ?? 0), 0);
 
-  const handleOperation = async (operation: () => Promise<void>, convId: Id<"chatConversations">) => {
+  const handleOperation = async (
+    operation: () => Promise<void>,
+    convId: Id<'chatConversations'>,
+  ) => {
     try {
       setLoadingOpId(convId);
       await operation();
     } catch (error) {
-      console.error("Operation failed:", error);
+      console.error('Operation failed:', error);
     } finally {
       setLoadingOpId(null);
     }
@@ -164,13 +200,13 @@ export function ConversationList({
       {/* Header */}
       <div className="px-4 pt-4 pb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <MessageCircle className="w-5 h-5" style={{ color: "var(--primary)" }} />
-          <h2 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+          <MessageCircle className="w-5 h-5" style={{ color: 'var(--primary)' }} />
+          <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
             {t('chat.messages')}
           </h2>
           {totalUnread > 0 && (
             <span className="min-w-4.5 h-4.5 px-1 rounded-full bg-linear-to-r from-red-500 to-red-600 text-white text-[10px] font-bold flex items-center justify-center">
-              {totalUnread > 99 ? "99+" : totalUnread}
+              {totalUnread > 99 ? '99+' : totalUnread}
             </span>
           )}
         </div>
@@ -179,11 +215,12 @@ export function ConversationList({
             onNewConversation();
           }}
           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-          style={{ 
-            background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)",
-            cursor: "pointer",
+          style={{
+            background:
+              'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
+            cursor: 'pointer',
             zIndex: 10,
-            position: "relative",
+            position: 'relative',
           }}
           title={t('chat.newConversation')}
         >
@@ -194,19 +231,22 @@ export function ConversationList({
       {/* Search */}
       <div className="px-3 pb-2">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: "var(--text-disabled)" }} />
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
+            style={{ color: 'var(--text-disabled)' }}
+          />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('chat.searchConversations')}
             className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border outline-none transition-all"
             style={{
-              background: "var(--background-subtle)",
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
+              background: 'var(--background-subtle)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-primary)',
             }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
-            onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+            onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
+            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
           />
         </div>
       </div>
@@ -217,47 +257,55 @@ export function ConversationList({
         <button
           onClick={() => scrollFilters('left')}
           className={cn(
-            "flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all",
-            canScrollLeft ? "opacity-100 hover:opacity-70" : "opacity-30 cursor-not-allowed"
+            'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all',
+            canScrollLeft ? 'opacity-100 hover:opacity-70' : 'opacity-30 cursor-not-allowed',
           )}
-          style={{ background: "var(--background-subtle)" }}
+          style={{ background: 'var(--background-subtle)' }}
           disabled={!canScrollLeft}
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
 
         {/* Filters container */}
-        <div 
+        <div
           ref={filtersRef}
           onWheel={handleFilterWheel}
           onScroll={updateScrollButtons}
           className="flex-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth"
           style={{ scrollBehavior: 'smooth' }}
         >
-          {(["all", "chat", "unread", "groups", "pinned", "archived"] as const).map((f) => {
-            const unreadCount = conversations.filter(c => c.membership.unreadCount > 0 && !(c.membership.isArchived || c.isArchived || c.membership.isDeleted)).length;
+          {(['all', 'chat', 'unread', 'groups', 'pinned', 'archived'] as const).map((f) => {
+            const unreadCount = conversations.filter(
+              (c) =>
+                c.membership.unreadCount > 0 &&
+                !(c.membership.isArchived || c.isArchived || c.membership.isDeleted),
+            ).length;
             return (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "px-3 py-1 text-xs rounded-full whitespace-nowrap transition-all shrink-0 active:scale-95",
+                  'px-3 py-1 text-xs rounded-full whitespace-nowrap transition-all shrink-0 active:scale-95',
                   filter === f
-                    ? "text-white shadow-md"
-                    : "text-gray-500 opacity-60 hover:opacity-100"
+                    ? 'text-white shadow-md'
+                    : 'text-gray-500 opacity-60 hover:opacity-100',
                 )}
                 style={{
-                  background: filter === f ? "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)" : "transparent",
-                  cursor: "pointer",
+                  background:
+                    filter === f
+                      ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)'
+                      : 'transparent',
+                  cursor: 'pointer',
                 }}
-                title={f === "archived" ? "Archived conversations - tap to restore" : undefined}
+                title={f === 'archived' ? 'Archived conversations - tap to restore' : undefined}
               >
-                {f === "all" && t('chat.filterAll', 'All')}
-                {f === "chat" && t('chat.filterChat', 'Chat')}
-                {f === "unread" && `${t('chat.filterUnread', 'Unread')} ${unreadCount > 0 ? `(${unreadCount})` : ""}`}
-                {f === "groups" && t('chat.filterGroups', 'Groups')}
-                {f === "pinned" && t('chat.filterPinned', 'Pinned')}
-                {f === "archived" && t('chat.filterArchived', 'Archived')}
+                {f === 'all' && t('chat.filterAll', 'All')}
+                {f === 'chat' && t('chat.filterChat', 'Chat')}
+                {f === 'unread' &&
+                  `${t('chat.filterUnread', 'Unread')} ${unreadCount > 0 ? `(${unreadCount})` : ''}`}
+                {f === 'groups' && t('chat.filterGroups', 'Groups')}
+                {f === 'pinned' && t('chat.filterPinned', 'Pinned')}
+                {f === 'archived' && t('chat.filterArchived', 'Archived')}
               </button>
             );
           })}
@@ -267,10 +315,10 @@ export function ConversationList({
         <button
           onClick={() => scrollFilters('right')}
           className={cn(
-            "flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all",
-            canScrollRight ? "opacity-100 hover:opacity-70" : "opacity-30 cursor-not-allowed"
+            'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all',
+            canScrollRight ? 'opacity-100 hover:opacity-70' : 'opacity-30 cursor-not-allowed',
           )}
-          style={{ background: "var(--background-subtle)" }}
+          style={{ background: 'var(--background-subtle)' }}
           disabled={!canScrollRight}
         >
           <ChevronRight className="w-4 h-4" />
@@ -281,8 +329,11 @@ export function ConversationList({
       <div className="flex-1 overflow-y-auto px-2 space-y-0.5 custom-scrollbar">
         {filtered.length === 0 && (
           <div className="text-center py-12">
-            <Users className="w-8 h-8 mx-auto mb-2 opacity-30" style={{ color: "var(--text-muted)" }} />
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <Users
+              className="w-8 h-8 mx-auto mb-2 opacity-30"
+              style={{ color: 'var(--text-muted)' }}
+            />
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
               {search ? t('chat.noResults') : t('chat.noConversations')}
             </p>
           </div>
@@ -290,30 +341,35 @@ export function ConversationList({
 
         {filtered.map((conv, idx) => {
           const isSelected = conv._id === selectedId;
-          const isGroup = conv.type === "group";
-          const displayName = isGroup ? (conv.name ?? "Group") : (conv.otherUser?.name ?? "Unknown");
+          const isGroup = conv.type === 'group';
+          const displayName = isGroup
+            ? (conv.name ?? 'Group')
+            : (conv.otherUser?.name ?? 'Unknown');
           const avatarUrl = isGroup ? conv.avatarUrl : conv.otherUser?.avatarUrl;
           // If conversation is selected, hide the unread count (client-side optimization)
           const unread = isSelected ? 0 : (conv.membership.unreadCount ?? 0);
           const lastTime = conv.lastMessageAt
             ? formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: false })
-            : "";
+            : '';
 
           // Sender prefix for last message
           const isOwnLast = conv.lastMessageSenderId === currentUserId;
-          const isSystemAnnouncements = conv.name === "System Announcements";
+          const isSystemAnnouncements = conv.name === 'System Announcements';
           // Don't show sender name for System Announcements
           const senderName = isSystemAnnouncements
-            ? ""
+            ? ''
             : isOwnLast
               ? t('chat.youPrefix')
-              : conv.type === "direct"
-                ? ""
+              : conv.type === 'direct'
+                ? ''
                 : conv.lastMessageSenderId
-                  ? (conv.members?.find((m) => m.userId === conv.lastMessageSenderId)?.user?.name?.split(" ")[0] ?? "")
-                  : "";
-          const rawLastText = conv.lastMessageText === "This message was deleted" ? "" : conv.lastMessageText;
-          
+                  ? (conv.members
+                      ?.find((m) => m.userId === conv.lastMessageSenderId)
+                      ?.user?.name?.split(' ')[0] ?? '')
+                  : '';
+          const rawLastText =
+            conv.lastMessageText === 'This message was deleted' ? '' : conv.lastMessageText;
+
           // Remove sender prefix for System Announcements (in case it's still there)
           let displayLastText = rawLastText;
           if (isSystemAnnouncements && displayLastText) {
@@ -323,21 +379,34 @@ export function ConversationList({
               displayLastText = displayLastText.substring(match[0].length);
             }
             // Also strip common time patterns that appear in maintenance messages
-            displayLastText = displayLastText.replace(/^\d{1,2}\s*[AP]M\s*🔔?\s*/, "");
+            displayLastText = displayLastText.replace(/^\d{1,2}\s*[AP]M\s*🔔?\s*/, '');
           }
-          
+
           const lastMsgPreview = isSystemAnnouncements
             ? t('maintenance.notificationLabel') // Show translated label for System Announcements instead of message text
             : displayLastText
-              ? (senderName && !isSystemAnnouncements ? `${senderName}: ${displayLastText}` : displayLastText)
-              : (isGroup ? `${conv.memberCount ?? 2} ${t('chat.members')}` : t('chat.startConversationHint'));
+              ? senderName && !isSystemAnnouncements
+                ? `${senderName}: ${displayLastText}`
+                : displayLastText
+              : isGroup
+                ? `${conv.memberCount ?? 2} ${t('chat.members')}`
+                : t('chat.startConversationHint');
 
           // Last message sender avatar (for groups, but NOT for System Announcements)
-          const lastSenderMember = isGroup && !isSystemAnnouncements && conv.lastMessageSenderId
-            ? conv.members?.find((m) => m.userId === conv.lastMessageSenderId)
-            : null;
-          const lastSenderAvatar = isSystemAnnouncements ? null : (isOwnLast ? null : lastSenderMember?.user?.avatarUrl);
-          const lastSenderInitial = isSystemAnnouncements ? null : (isOwnLast ? null : (lastSenderMember?.user?.name?.[0]?.toUpperCase() ?? null));
+          const lastSenderMember =
+            isGroup && !isSystemAnnouncements && conv.lastMessageSenderId
+              ? conv.members?.find((m) => m.userId === conv.lastMessageSenderId)
+              : null;
+          const lastSenderAvatar = isSystemAnnouncements
+            ? null
+            : isOwnLast
+              ? null
+              : lastSenderMember?.user?.avatarUrl;
+          const lastSenderInitial = isSystemAnnouncements
+            ? null
+            : isOwnLast
+              ? null
+              : (lastSenderMember?.user?.name?.[0]?.toUpperCase() ?? null);
 
           const isLoading = loadingOpId === conv._id;
 
@@ -347,118 +416,186 @@ export function ConversationList({
                 <div
                   onClick={() => onSelect(conv._id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left relative cursor-pointer",
-                    isSelected ? "shadow-sm scale-[1.01]" : "hover:opacity-90",
+                    'w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left relative cursor-pointer',
+                    isSelected ? 'shadow-sm scale-[1.01]' : 'hover:opacity-90',
                   )}
                   style={{
-                    background: isSelected ? "var(--sidebar-item-active)" : "transparent",
-                    color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-primary)",
+                    background: isSelected ? 'var(--sidebar-item-active)' : 'transparent',
+                    color: isSelected ? 'var(--sidebar-item-active-text)' : 'var(--text-primary)',
                     animation: `conv-in 0.25s ease-out ${idx * 0.04}s both`,
                     opacity: conv.membership.isDeleted ? 0.5 : 1,
-                    userSelect: "none",
+                    userSelect: 'none',
                   }}
-                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "var(--sidebar-item-hover)"; }}
-                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = 'var(--sidebar-item-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = 'transparent';
+                  }}
                 >
-                {isLoading && <Loader2 className="absolute top-3 left-3 w-5 h-5 animate-spin" style={{ color: "var(--primary)" }} />}
-                
-                {/* Conversation avatar */}
-                <div className="relative shrink-0">
-                  <Avatar className="w-10 h-10">
-                    {avatarUrl && <AvatarImage src={avatarUrl} />}
-                    <AvatarFallback
-                      className="text-xs font-bold text-white"
-                      style={{ background: isGroup ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
-                    >
-                      {isGroup ? <Users className="w-4 h-4" /> : getInitials(displayName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  {!isGroup && conv.otherUser?.presenceStatus && (
-                    <PresenceDot status={conv.otherUser.presenceStatus} />
+                  {isLoading && (
+                    <Loader2
+                      className="absolute top-3 left-3 w-5 h-5 animate-spin"
+                      style={{ color: 'var(--primary)' }}
+                    />
+                  )}
+
+                  {/* Conversation avatar */}
+                  <div className="relative shrink-0">
+                    <Avatar className="w-10 h-10">
+                      {avatarUrl && <AvatarImage src={avatarUrl} />}
+                      <AvatarFallback
+                        className="text-xs font-bold text-white"
+                        style={{
+                          background: isGroup
+                            ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                            : 'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
+                        }}
+                      >
+                        {isGroup ? <Users className="w-4 h-4" /> : getInitials(displayName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {!isGroup && conv.otherUser?.presenceStatus && (
+                      <PresenceDot status={conv.otherUser.presenceStatus} />
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span
+                          className={cn(
+                            'sm:text-sm text-base truncate',
+                            unread > 0 ? 'font-semibold' : 'font-medium',
+                          )}
+                        >
+                          {displayName}
+                        </span>
+                        {conv.isPinned && (
+                          <Pin
+                            className="sm:w-3 sm:h-3 w-4 h-4 shrink-0"
+                            style={{ color: 'var(--primary)' }}
+                          />
+                        )}
+                      </div>
+                      {lastTime && (
+                        <span
+                          className="sm:text-[10px] text-xs shrink-0"
+                          style={{ color: 'var(--text-disabled)' }}
+                        >
+                          {lastTime}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-1 mt-1 sm:mt-0.5">
+                      <div className="flex items-center gap-1 min-w-0">
+                        {/* Last message sender mini-avatar (groups only, not own, not System Announcements) */}
+                        {isGroup &&
+                          conv.lastMessageText &&
+                          !isOwnLast &&
+                          !isSystemAnnouncements && (
+                            <div
+                              className="sm:w-3.5 sm:h-3.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center sm:text-[7px] text-[8px] font-bold text-white overflow-hidden"
+                              style={{
+                                background:
+                                  'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
+                              }}
+                            >
+                              {lastSenderAvatar ? (
+                                <img
+                                  src={lastSenderAvatar}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                lastSenderInitial
+                              )}
+                            </div>
+                          )}
+                        <p
+                          className={cn(
+                            'sm:text-xs text-sm truncate',
+                            unread > 0 ? 'font-medium' : 'opacity-70',
+                          )}
+                          style={{
+                            color: isSelected
+                              ? 'var(--sidebar-item-active-text)'
+                              : 'var(--text-muted)',
+                          }}
+                        >
+                          {conv.membership.isDeleted
+                            ? t('chat.deleted') || '[Удалено]'
+                            : lastMsgPreview}
+                        </p>
+                      </div>
+                      {unread > 0 && !conv.membership.isMuted && (
+                        <span className="min-w-5 sm:min-w-4.5 h-5 sm:h-4.5 px-1 rounded-full bg-linear-to-r from-red-500 to-red-600 text-white sm:text-[9px] text-[10px] font-bold flex items-center justify-center shadow-lg">
+                          {unread > 99 ? '99+' : unread}
+                        </span>
+                      )}
+                      {conv.membership.isMuted && (
+                        <VolumeX className="w-3 h-3 shrink-0 opacity-50" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action buttons for archived/deleted items (visible without right-click) */}
+                  {filter === 'archived' && (
+                    <div className="flex items-center gap-1 shrink-0 ml-1">
+                      {conv.membership.isDeleted ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOperation(async () => {
+                              await onRestore?.(conv._id);
+                              setFilter('chat');
+                            }, conv._id);
+                          }}
+                          className="p-1.5 rounded-lg transition-colors hover:bg-(--sidebar-item-hover)"
+                          title={t('chat.restore') || 'Восстановить'}
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" style={{ color: 'var(--primary)' }} />
+                        </button>
+                      ) : conv.membership.isArchived || conv.isArchived ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOperation(
+                              () => onToggleArchive?.(conv._id) || Promise.resolve(),
+                              conv._id,
+                            );
+                          }}
+                          className="p-1.5 rounded-lg transition-colors hover:bg-(--sidebar-item-hover)"
+                          title={t('chat.unarchive') || 'Разархивировать'}
+                        >
+                          <Archive className="w-3.5 h-3.5" style={{ color: 'var(--primary)' }} />
+                        </button>
+                      ) : null}
+                    </div>
                   )}
                 </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-1">
-                    <div className="flex items-center gap-1 min-w-0">
-                      <span className={cn("sm:text-sm text-base truncate", unread > 0 ? "font-semibold" : "font-medium")}>
-                        {displayName}
-                      </span>
-                      {conv.isPinned && <Pin className="sm:w-3 sm:h-3 w-4 h-4 shrink-0" style={{ color: "var(--primary)" }} />}
-                    </div>
-                    {lastTime && (
-                      <span className="sm:text-[10px] text-xs shrink-0" style={{ color: "var(--text-disabled)" }}>
-                        {lastTime}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between gap-1 mt-1 sm:mt-0.5">
-                    <div className="flex items-center gap-1 min-w-0">
-                      {/* Last message sender mini-avatar (groups only, not own, not System Announcements) */}
-                      {isGroup && conv.lastMessageText && !isOwnLast && !isSystemAnnouncements && (
-                        <div className="sm:w-3.5 sm:h-3.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center sm:text-[7px] text-[8px] font-bold text-white overflow-hidden"
-                          style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}
-                        >
-                          {lastSenderAvatar
-                            ? <img src={lastSenderAvatar} alt="" className="w-full h-full object-cover" />
-                            : lastSenderInitial
-                          }
-                        </div>
-                      )}
-                      <p className={cn("sm:text-xs text-sm truncate", unread > 0 ? "font-medium" : "opacity-70")}
-                        style={{ color: isSelected ? "var(--sidebar-item-active-text)" : "var(--text-muted)" }}>
-                        {conv.membership.isDeleted ? t('chat.deleted') || '[Удалено]' : lastMsgPreview}
-                      </p>
-                    </div>
-                    {unread > 0 && !conv.membership.isMuted && (
-                      <span className="min-w-5 sm:min-w-4.5 h-5 sm:h-4.5 px-1 rounded-full bg-linear-to-r from-red-500 to-red-600 text-white sm:text-[9px] text-[10px] font-bold flex items-center justify-center shadow-lg">
-                        {unread > 99 ? "99+" : unread}
-                      </span>
-                    )}
-                    {conv.membership.isMuted && (
-                      <VolumeX className="w-3 h-3 shrink-0 opacity-50" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Action buttons for archived/deleted items (visible without right-click) */}
-                {filter === "archived" && (
-                  <div className="flex items-center gap-1 shrink-0 ml-1">
-                    {conv.membership.isDeleted ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleOperation(async () => { await onRestore?.(conv._id); setFilter("chat"); }, conv._id); }}
-                        className="p-1.5 rounded-lg transition-colors hover:bg-(--sidebar-item-hover)"
-                        title={t('chat.restore') || 'Восстановить'}
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" style={{ color: "var(--primary)" }} />
-                      </button>
-                    ) : (conv.membership.isArchived || conv.isArchived) ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleOperation(() => onToggleArchive?.(conv._id) || Promise.resolve(), conv._id); }}
-                        className="p-1.5 rounded-lg transition-colors hover:bg-(--sidebar-item-hover)"
-                        title={t('chat.unarchive') || 'Разархивировать'}
-                      >
-                        <Archive className="w-3.5 h-3.5" style={{ color: "var(--primary)" }} />
-                      </button>
-                    ) : null}
-                  </div>
-                )}
-              </div>
               </ContextMenuTrigger>
 
               {/* Context Menu */}
               <ContextMenuContent className="w-48">
                 {!conv.membership.isDeleted && (
                   <>
-                    <ContextMenuLabel className="text-xs" style={{ color: "var(--text-muted)" }}>{displayName}</ContextMenuLabel>
+                    <ContextMenuLabel className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {displayName}
+                    </ContextMenuLabel>
                     <ContextMenuSeparator />
                   </>
                 )}
-                
+
                 {conv.membership.isDeleted ? (
                   <ContextMenuItem
-                    onClick={() => handleOperation(async () => { await onRestore?.(conv._id); setFilter("chat"); }, conv._id)}
+                    onClick={() =>
+                      handleOperation(async () => {
+                        await onRestore?.(conv._id);
+                        setFilter('chat');
+                      }, conv._id)
+                    }
                     disabled={isLoading}
                     className="flex items-center gap-2"
                   >
@@ -468,16 +605,26 @@ export function ConversationList({
                 ) : (
                   <>
                     <ContextMenuItem
-                      onClick={() => handleOperation(() => onTogglePin?.(conv._id) || Promise.resolve(), conv._id)}
+                      onClick={() =>
+                        handleOperation(
+                          () => onTogglePin?.(conv._id) || Promise.resolve(),
+                          conv._id,
+                        )
+                      }
                       disabled={isLoading}
                       className="flex items-center gap-2"
                     >
                       <Pin className="w-4 h-4" />
-                      {conv.isPinned ? "Открепить" : "Закрепить"}
+                      {conv.isPinned ? 'Открепить' : 'Закрепить'}
                     </ContextMenuItem>
-                    
+
                     <ContextMenuItem
-                      onClick={() => handleOperation(() => onToggleMute?.(conv._id) || Promise.resolve(), conv._id)}
+                      onClick={() =>
+                        handleOperation(
+                          () => onToggleMute?.(conv._id) || Promise.resolve(),
+                          conv._id,
+                        )
+                      }
                       disabled={isLoading}
                       className="flex items-center gap-2"
                     >
@@ -493,20 +640,29 @@ export function ConversationList({
                         </>
                       )}
                     </ContextMenuItem>
-                    
+
                     <ContextMenuItem
-                      onClick={() => handleOperation(() => onToggleArchive?.(conv._id) || Promise.resolve(), conv._id)}
+                      onClick={() =>
+                        handleOperation(
+                          () => onToggleArchive?.(conv._id) || Promise.resolve(),
+                          conv._id,
+                        )
+                      }
                       disabled={isLoading}
                       className="flex items-center gap-2"
                     >
                       <Archive className="w-4 h-4" />
-                      {(conv.membership.isArchived || conv.isArchived) ? t('chat.unarchive') || 'Разархивировать' : t('chat.archive') || 'Архивировать'}
+                      {conv.membership.isArchived || conv.isArchived
+                        ? t('chat.unarchive') || 'Разархивировать'
+                        : t('chat.archive') || 'Архивировать'}
                     </ContextMenuItem>
-                    
+
                     <ContextMenuSeparator />
-                    
+
                     <ContextMenuItem
-                      onClick={() => handleOperation(() => onDelete?.(conv._id) || Promise.resolve(), conv._id)}
+                      onClick={() =>
+                        handleOperation(() => onDelete?.(conv._id) || Promise.resolve(), conv._id)
+                      }
                       disabled={isLoading}
                       className="flex items-center gap-2 text-red-500 focus:text-red-500"
                     >
@@ -522,19 +678,39 @@ export function ConversationList({
       </div>
 
       <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-        
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: var(--border);
+          border-radius: 2px;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
         /* Smooth scrolling for filter tabs */
-        .scroll-smooth { scroll-behavior: smooth; }
-        
+        .scroll-smooth {
+          scroll-behavior: smooth;
+        }
+
         @keyframes conv-in {
-          from { opacity: 0; transform: translateX(-8px); }
-          to   { opacity: 1; transform: translateX(0); }
+          from {
+            opacity: 0;
+            transform: translateX(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
       `}</style>
     </div>

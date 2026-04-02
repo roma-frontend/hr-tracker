@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
-import { useAuthStore } from "@/store/useAuthStore";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import dynamic from 'next/dynamic';
+import { useAuthStore } from '@/store/useAuthStore';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 // Dynamically import heavy dashboard components — they are large bundles
 // with recharts, framer-motion etc. Loading them on demand saves ~120KB on
 // the initial JS payload for pages that don't need them yet.
-const DashboardClient = dynamic(
-  () => import("@/components/dashboard/DashboardClient"),
-  { ssr: false, loading: () => <DashboardSkeleton /> }
-);
+const DashboardClient = dynamic(() => import('@/components/dashboard/DashboardClient'), {
+  ssr: false,
+  loading: () => <DashboardSkeleton />,
+});
 
-const EmployeeDashboard = dynamic(
-  () => import("@/components/dashboard/EmployeeDashboard"),
-  { ssr: false, loading: () => <DashboardSkeleton /> }
-);
+const EmployeeDashboard = dynamic(() => import('@/components/dashboard/EmployeeDashboard'), {
+  ssr: false,
+  loading: () => <DashboardSkeleton />,
+});
 
 function DashboardSkeleton() {
   return (
@@ -46,7 +46,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (user?.role === "employee") {
+  if (user?.role === 'employee') {
     return <EmployeeDashboard />;
   }
 

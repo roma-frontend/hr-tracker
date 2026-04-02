@@ -1,42 +1,42 @@
-"use client";
+'use client';
 
-import { useSubscription, type PlanType } from "./useSubscription";
+import { useSubscription, type PlanType } from './useSubscription';
 export type { PlanType };
 
 // ── Определение функций по плану ─────────────────────────────────────────────
 export interface PlanFeatures {
   // Аналитика
   analytics: boolean;
-  advancedAnalytics: boolean;   // professional+
+  advancedAnalytics: boolean; // professional+
 
   // Отчёты
   reports: boolean;
-  exportReports: boolean;       // professional+
+  exportReports: boolean; // professional+
 
   // AI функции
-  aiChat: boolean;              // professional+
-  aiInsights: boolean;          // professional+
-  aiLeaveAssistant: boolean;    // professional+
+  aiChat: boolean; // professional+
+  aiInsights: boolean; // professional+
+  aiLeaveAssistant: boolean; // professional+
 
   // AI Site Editor - NEW
-  aiSiteEditor: boolean;        // all plans
-  aiSiteEditorDesignChanges: number;    // starter: 5/month, pro: unlimited
-  aiSiteEditorContentChanges: number;   // starter: 10/month, pro: unlimited
-  aiSiteEditorLayoutChanges: number;    // starter: 2/month, pro: unlimited
-  aiSiteEditorLogicChanges: boolean;    // professional+ only
-  aiSiteEditorFullControl: boolean;     // professional+ only
+  aiSiteEditor: boolean; // all plans
+  aiSiteEditorDesignChanges: number; // starter: 5/month, pro: unlimited
+  aiSiteEditorContentChanges: number; // starter: 10/month, pro: unlimited
+  aiSiteEditorLayoutChanges: number; // starter: 2/month, pro: unlimited
+  aiSiteEditorLogicChanges: boolean; // professional+ only
+  aiSiteEditorFullControl: boolean; // professional+ only
 
   // SLA
-  slaSettings: boolean;         // professional+
+  slaSettings: boolean; // professional+
 
   // Сотрудники
-  maxEmployees: number;         // starter: 50, professional: 200, enterprise: unlimited
+  maxEmployees: number; // starter: 50, professional: 200, enterprise: unlimited
 
   // Calendar sync
-  calendarSync: boolean;        // professional+
+  calendarSync: boolean; // professional+
 
   // Telegram/интеграции
-  integrations: boolean;        // enterprise only
+  integrations: boolean; // enterprise only
 }
 
 const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
@@ -50,11 +50,11 @@ const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
     aiLeaveAssistant: true,
     // AI Site Editor - Limited for Starter
     aiSiteEditor: true,
-    aiSiteEditorDesignChanges: 5,        // 5 design changes per month
-    aiSiteEditorContentChanges: 10,      // 10 content changes per month
-    aiSiteEditorLayoutChanges: 2,        // 2 layout changes per month
-    aiSiteEditorLogicChanges: false,     // No logic changes
-    aiSiteEditorFullControl: false,      // No full control
+    aiSiteEditorDesignChanges: 5, // 5 design changes per month
+    aiSiteEditorContentChanges: 10, // 10 content changes per month
+    aiSiteEditorLayoutChanges: 2, // 2 layout changes per month
+    aiSiteEditorLogicChanges: false, // No logic changes
+    aiSiteEditorFullControl: false, // No full control
     slaSettings: true,
     maxEmployees: 50,
     calendarSync: true,
@@ -70,11 +70,11 @@ const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
     aiLeaveAssistant: true,
     // AI Site Editor - Unlimited for Professional
     aiSiteEditor: true,
-    aiSiteEditorDesignChanges: Infinity,  // Unlimited design changes
+    aiSiteEditorDesignChanges: Infinity, // Unlimited design changes
     aiSiteEditorContentChanges: Infinity, // Unlimited content changes
-    aiSiteEditorLayoutChanges: Infinity,  // Unlimited layout changes
-    aiSiteEditorLogicChanges: true,       // Logic changes allowed
-    aiSiteEditorFullControl: true,        // Full control allowed
+    aiSiteEditorLayoutChanges: Infinity, // Unlimited layout changes
+    aiSiteEditorLogicChanges: true, // Logic changes allowed
+    aiSiteEditorFullControl: true, // Full control allowed
     slaSettings: true,
     maxEmployees: 200,
     calendarSync: true,
@@ -90,11 +90,11 @@ const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
     aiLeaveAssistant: true,
     // AI Site Editor - Unlimited for Enterprise
     aiSiteEditor: true,
-    aiSiteEditorDesignChanges: Infinity,  // Unlimited design changes
+    aiSiteEditorDesignChanges: Infinity, // Unlimited design changes
     aiSiteEditorContentChanges: Infinity, // Unlimited content changes
-    aiSiteEditorLayoutChanges: Infinity,  // Unlimited layout changes
-    aiSiteEditorLogicChanges: true,       // Logic changes allowed
-    aiSiteEditorFullControl: true,        // Full control allowed
+    aiSiteEditorLayoutChanges: Infinity, // Unlimited layout changes
+    aiSiteEditorLogicChanges: true, // Logic changes allowed
+    aiSiteEditorFullControl: true, // Full control allowed
     slaSettings: true,
     maxEmployees: Infinity,
     calendarSync: true,
@@ -103,26 +103,26 @@ const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
 };
 
 export const PLAN_LABELS: Record<PlanType, string> = {
-  starter: "Starter",
-  professional: "Professional",
-  enterprise: "Enterprise",
+  starter: 'Starter',
+  professional: 'Professional',
+  enterprise: 'Enterprise',
 };
 
 export const PLAN_PRICES: Record<PlanType, string> = {
-  starter: "Free",
-  professional: "$79/mo",
-  enterprise: "Custom",
+  starter: 'Free',
+  professional: '$79/mo',
+  enterprise: 'Custom',
 };
 
 export const PLAN_UPGRADE_URL: Record<PlanType, string> = {
-  starter: process.env.NEXT_PUBLIC_STRIPE_CHECKOUT_PROFESSIONAL ?? "/contact",
-  professional: "/contact",
-  enterprise: "/contact",
+  starter: process.env.NEXT_PUBLIC_STRIPE_CHECKOUT_PROFESSIONAL ?? '/contact',
+  professional: '/contact',
+  enterprise: '/contact',
 };
 
 // Возвращает true, если requiredPlan <= currentPlan
 export function planIncludes(currentPlan: PlanType, requiredPlan: PlanType): boolean {
-  const order: PlanType[] = ["starter", "professional", "enterprise"];
+  const order: PlanType[] = ['starter', 'professional', 'enterprise'];
   return order.indexOf(currentPlan) >= order.indexOf(requiredPlan);
 }
 
@@ -134,13 +134,16 @@ export function usePlanFeatures() {
   function canAccess(feature: keyof PlanFeatures): boolean {
     if (isLoading) return false;
     const val = features[feature];
-    if (typeof val === "boolean") return val;
+    if (typeof val === 'boolean') return val;
     return true; // числовые значения — всегда доступны, но ограничены
   }
 
   function requiresPlan(feature: keyof PlanFeatures): PlanType | null {
-    for (const p of ["starter", "professional", "enterprise"] as PlanType[]) {
-      if (PLAN_FEATURES[p][feature] === true || (typeof PLAN_FEATURES[p][feature] === "number" && (PLAN_FEATURES[p][feature] as number) > 0)) {
+    for (const p of ['starter', 'professional', 'enterprise'] as PlanType[]) {
+      if (
+        PLAN_FEATURES[p][feature] === true ||
+        (typeof PLAN_FEATURES[p][feature] === 'number' && (PLAN_FEATURES[p][feature] as number) > 0)
+      ) {
         return p;
       }
     }

@@ -1,21 +1,31 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Clock, TrendingUp, AlertTriangle, CheckCircle2, XCircle, Activity } from "lucide-react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useTranslation } from 'react-i18next';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Clock, TrendingUp, AlertTriangle, CheckCircle2, XCircle, Activity } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 
 interface SLAStatsProps {
   startDate?: number;
   endDate?: number;
 }
 
-export function ResponseTimeSLA({ 
-startDate, endDate }: SLAStatsProps) {
+export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
   const { t } = useTranslation();
   const stats = useQuery(api.sla.getSLAStats, { startDate, endDate });
   const trend = useQuery(api.sla.getSLATrend, { days: 30 });
@@ -40,9 +50,12 @@ startDate, endDate }: SLAStatsProps) {
     );
   }
 
-  const complianceColor = stats.complianceRate >= 95 ? "text-green-600" : 
-                          stats.complianceRate >= 80 ? "text-yellow-600" : 
-                          "text-red-600";
+  const complianceColor =
+    stats.complianceRate >= 95
+      ? 'text-green-600'
+      : stats.complianceRate >= 80
+        ? 'text-yellow-600'
+        : 'text-red-600';
 
   return (
     <div className="space-y-6">
@@ -51,38 +64,29 @@ startDate, endDate }: SLAStatsProps) {
         {/* Compliance Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("responseSLA.compliance")}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('responseSLA.compliance')}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${complianceColor}`}>
-              {stats.complianceRate}%
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Target: 95%
-            </p>
-            <Progress 
-              value={stats.complianceRate} 
-              className="mt-2"
-            />
+            <div className={`text-2xl font-bold ${complianceColor}`}>{stats.complianceRate}%</div>
+            <p className="text-xs text-muted-foreground">Target: 95%</p>
+            <Progress value={stats.complianceRate} className="mt-2" />
           </CardContent>
         </Card>
 
         {/* Average Response Time */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("responseSLA.avgResponseTime")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t('responseSLA.avgResponseTime')}
+            </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.avgResponseTime}h
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Target: {stats.targetResponseTime}h
-            </p>
-            <Progress 
-              value={(stats.avgResponseTime / stats.targetResponseTime) * 100} 
+            <div className="text-2xl font-bold">{stats.avgResponseTime}h</div>
+            <p className="text-xs text-muted-foreground">Target: {stats.targetResponseTime}h</p>
+            <Progress
+              value={(stats.avgResponseTime / stats.targetResponseTime) * 100}
               className="mt-2"
             />
           </CardContent>
@@ -91,37 +95,32 @@ startDate, endDate }: SLAStatsProps) {
         {/* SLA Score */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("responseSLA.avgScore")}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('responseSLA.avgScore')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.avgSLAScore}/100
-            </div>
+            <div className="text-2xl font-bold">{stats.avgSLAScore}/100</div>
             <p className="text-xs text-muted-foreground">
               {stats.onTime} on-time, {stats.breached} breached
             </p>
-            <Progress 
-              value={stats.avgSLAScore} 
-              className="mt-2"
-            />
+            <Progress value={stats.avgSLAScore} className="mt-2" />
           </CardContent>
         </Card>
 
         {/* Alerts */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("responseSLA.activeAlerts")}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('responseSLA.activeAlerts')}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{t("responseSLA.critical")}</span>
+                <span className="text-sm text-muted-foreground">{t('responseSLA.critical')}</span>
                 <Badge variant="destructive">{stats.criticalCount}</Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{t("responseSLA.warning")}</span>
+                <span className="text-sm text-muted-foreground">{t('responseSLA.warning')}</span>
                 <Badge variant="secondary">{stats.warningCount}</Badge>
               </div>
             </div>
@@ -140,38 +139,40 @@ startDate, endDate }: SLAStatsProps) {
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={trend}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   tick={{ fontSize: 12 }}
-                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  tickFormatter={(value) =>
+                    new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  }
                 />
                 <YAxis yAxisId="left" />
                 <YAxis yAxisId="right" orientation="right" />
-                <Tooltip 
+                <Tooltip
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
                   contentStyle={{
                     background: 'var(--card)',
                     border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: 'var(--text-primary)'
+                    color: 'var(--text-primary)',
                   }}
                   itemStyle={{ color: 'var(--text-primary)' }}
                   labelStyle={{ color: 'var(--text-primary)' }}
                 />
                 <Legend />
-                <Line 
+                <Line
                   yAxisId="left"
-                  type="monotone" 
-                  dataKey="avgResponseTime" 
-                  stroke="#8884d8" 
-                  name={t("responseSLA.avgResponseTime")}
+                  type="monotone"
+                  dataKey="avgResponseTime"
+                  stroke="#8884d8"
+                  name={t('responseSLA.avgResponseTime')}
                   strokeWidth={2}
                 />
-                <Line 
+                <Line
                   yAxisId="right"
-                  type="monotone" 
-                  dataKey="complianceRate" 
-                  stroke="#82ca9d" 
+                  type="monotone"
+                  dataKey="complianceRate"
+                  stroke="#82ca9d"
                   name="Compliance Rate (%)"
                   strokeWidth={2}
                 />
@@ -185,26 +186,28 @@ startDate, endDate }: SLAStatsProps) {
       {trend && trend.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>{t("responseSLA.slaStatusDistribution")}</CardTitle>
+            <CardTitle>{t('responseSLA.slaStatusDistribution')}</CardTitle>
             <CardDescription>On-time vs breached requests by day</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={trend}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   tick={{ fontSize: 12 }}
-                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  tickFormatter={(value) =>
+                    new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  }
                 />
                 <YAxis />
-                <Tooltip 
+                <Tooltip
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
                   contentStyle={{
                     background: 'var(--card)',
                     border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: 'var(--text-primary)'
+                    color: 'var(--text-primary)',
                   }}
                   itemStyle={{ color: 'var(--text-primary)' }}
                   labelStyle={{ color: 'var(--text-primary)' }}
@@ -222,25 +225,33 @@ startDate, endDate }: SLAStatsProps) {
       {pendingWithSLA && pendingWithSLA.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>{t("responseSLA.pendingRequests")}</CardTitle>
+            <CardTitle>{t('responseSLA.pendingRequests')}</CardTitle>
             <CardDescription>{pendingWithSLA.length} requests awaiting response</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {pendingWithSLA.map((request: any) => {
                 const statusConfig = {
-                  normal: { color: "bg-green-100 text-green-800", icon: Activity, label: "Normal" },
-                  warning: { color: "bg-yellow-100 text-yellow-800", icon: Clock, label: "Warning" },
-                  critical: { color: "bg-orange-100 text-orange-800", icon: AlertTriangle, label: "Critical" },
-                  breached: { color: "bg-red-100 text-red-800", icon: XCircle, label: "Breached" },
+                  normal: { color: 'bg-green-100 text-green-800', icon: Activity, label: 'Normal' },
+                  warning: {
+                    color: 'bg-yellow-100 text-yellow-800',
+                    icon: Clock,
+                    label: 'Warning',
+                  },
+                  critical: {
+                    color: 'bg-orange-100 text-orange-800',
+                    icon: AlertTriangle,
+                    label: 'Critical',
+                  },
+                  breached: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Breached' },
                 } as const;
 
                 const config = statusConfig[request.sla.status as keyof typeof statusConfig];
                 const StatusIcon = config.icon;
 
                 return (
-                  <div 
-                    key={request._id} 
+                  <div
+                    key={request._id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="flex items-center gap-4 flex-1">
@@ -257,25 +268,22 @@ startDate, endDate }: SLAStatsProps) {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <p className="text-sm font-medium">
                           {request.sla.elapsedHours}h / {request.sla.targetHours}h
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {request.sla.remainingHours > 0 
-                            ? `${request.sla.remainingHours}h remaining` 
-                            : `${Math.abs(request.sla.remainingHours)}h overdue`
-                          }
+                          {request.sla.remainingHours > 0
+                            ? `${request.sla.remainingHours}h remaining`
+                            : `${Math.abs(request.sla.remainingHours)}h overdue`}
                         </p>
                       </div>
                       <div className="w-24">
                         <Progress value={request.sla.progressPercent} />
                       </div>
-                      <Badge className={config.color}>
-                        {config.label}
-                      </Badge>
+                      <Badge className={config.color}>{config.label}</Badge>
                     </div>
                   </div>
                 );
@@ -294,7 +302,8 @@ startDate, endDate }: SLAStatsProps) {
           <CardContent>
             <div className="text-3xl font-bold">{stats.onTime}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.total > 0 ? Math.round((stats.onTime / stats.total) * 100) : 0}% {t("responseSLA.ofTotal")}
+              {stats.total > 0 ? Math.round((stats.onTime / stats.total) * 100) : 0}%{' '}
+              {t('responseSLA.ofTotal')}
             </p>
           </CardContent>
         </Card>
@@ -306,7 +315,8 @@ startDate, endDate }: SLAStatsProps) {
           <CardContent>
             <div className="text-3xl font-bold">{stats.pending}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}% {t("responseSLA.ofTotal")}
+              {stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}%{' '}
+              {t('responseSLA.ofTotal')}
             </p>
           </CardContent>
         </Card>
@@ -318,7 +328,8 @@ startDate, endDate }: SLAStatsProps) {
           <CardContent>
             <div className="text-3xl font-bold">{stats.breached}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.total > 0 ? Math.round((stats.breached / stats.total) * 100) : 0}% {t("responseSLA.ofTotal")}
+              {stats.total > 0 ? Math.round((stats.breached / stats.total) * 100) : 0}%{' '}
+              {t('responseSLA.ofTotal')}
             </p>
           </CardContent>
         </Card>
@@ -328,4 +339,3 @@ startDate, endDate }: SLAStatsProps) {
 }
 
 export default ResponseTimeSLA;
-

@@ -23,7 +23,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   font-family: var(--font-inter), system-ui, sans-serif;
@@ -34,12 +35,21 @@ html, body {
 
 /* Skeleton для мгновенного рендеринга */
 .loading-skeleton {
-  background: linear-gradient(90deg, hsl(var(--background)) 25%, hsl(var(--border)) 50%, hsl(var(--background)) 75%);
+  background: linear-gradient(
+    90deg,
+    hsl(var(--background)) 25%,
+    hsl(var(--border)) 50%,
+    hsl(var(--background)) 75%
+  );
   background-size: 200% 100%;
   animation: loading 1.5s ease-in-out infinite;
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

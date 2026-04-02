@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { cookies } from "next/headers";
-import { signJWT, verifyJWT } from "@/lib/jwt";
-import { log } from "@/lib/logger";
+import { cookies } from 'next/headers';
+import { signJWT, verifyJWT } from '@/lib/jwt';
+import { log } from '@/lib/logger';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -13,13 +13,16 @@ async function convexMutation(name: string, args: Record<string, unknown>) {
 
     if (!CONVEX_URL) {
       console.error('❌ CONVEX_URL is undefined!');
-      console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('CONVEX')));
+      console.error(
+        'Available env vars:',
+        Object.keys(process.env).filter((k) => k.includes('CONVEX')),
+      );
       throw new Error('NEXT_PUBLIC_CONVEX_URL environment variable is not set');
     }
 
     const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: name, args }),
       cache: 'no-store',
     });
@@ -30,12 +33,12 @@ async function convexMutation(name: string, args: Record<string, unknown>) {
 
     const data = await res.json();
 
-    if (data.status === "error") {
-      throw new Error(data.errorMessage ?? "Convex error");
+    if (data.status === 'error') {
+      throw new Error(data.errorMessage ?? 'Convex error');
     }
 
     log.debug('convexMutation returning value', {
-      resultKeys: data.value ? Object.keys(data.value) : null
+      resultKeys: data.value ? Object.keys(data.value) : null,
     });
 
     return data.value;
@@ -44,7 +47,7 @@ async function convexMutation(name: string, args: Record<string, unknown>) {
       name,
       errorMessage: error?.message,
       errorType: error?.name,
-      errorStack: error?.stack
+      errorStack: error?.stack,
     });
 
     // Provide better error messages
@@ -67,8 +70,8 @@ async function convexQuery(name: string, args: Record<string, unknown>) {
     }
 
     const res = await fetch(`${CONVEX_URL}/api/query`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: name, args }),
       cache: 'no-store',
     });
@@ -79,8 +82,8 @@ async function convexQuery(name: string, args: Record<string, unknown>) {
 
     const data = await res.json();
 
-    if (data.status === "error") {
-      throw new Error(data.errorMessage ?? "Convex error");
+    if (data.status === 'error') {
+      throw new Error(data.errorMessage ?? 'Convex error');
     }
 
     log.debug('convexQuery data parsed', { result: data.value });
@@ -91,7 +94,7 @@ async function convexQuery(name: string, args: Record<string, unknown>) {
       name,
       errorMessage: error?.message,
       errorType: error?.name,
-      errorStack: error?.stack
+      errorStack: error?.stack,
     });
 
     // Provide better error messages
@@ -106,17 +109,17 @@ async function convexQuery(name: string, args: Record<string, unknown>) {
 }
 
 export async function registerAction(formData: FormData) {
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const phone = formData.get("phone") as string | undefined;
-  const organizationId = formData.get("organizationId") as string | undefined;
-  const inviteToken = formData.get("inviteToken") as string | undefined;
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const phone = formData.get('phone') as string | undefined;
+  const organizationId = formData.get('organizationId') as string | undefined;
+  const inviteToken = formData.get('inviteToken') as string | undefined;
 
-  if (!name || !email || !password) throw new Error("All fields required");
-  if (password.length < 8) throw new Error("Password must be at least 8 characters");
+  if (!name || !email || !password) throw new Error('All fields required');
+  if (password.length < 8) throw new Error('Password must be at least 8 characters');
 
-  const result = await convexMutation("auth:register", {
+  const result = await convexMutation('auth:register', {
     name,
     email,
     password,
@@ -130,7 +133,7 @@ export async function registerAction(formData: FormData) {
     // Still try to link subscription even if pending approval
     if (result.userId) {
       try {
-        await convexMutation("subscriptions:linkSubscriptionToUser", {
+        await convexMutation('subscriptions:linkSubscriptionToUser', {
           email,
           userId: result.userId,
         });
@@ -142,7 +145,8 @@ export async function registerAction(formData: FormData) {
       success: true,
       role: result.role,
       needsApproval: true,
-      message: "Your account has been created and is pending admin approval. You will be notified once approved."
+      message:
+        'Your account has been created and is pending admin approval. You will be notified once approved.',
     };
   }
 
@@ -150,7 +154,7 @@ export async function registerAction(formData: FormData) {
   const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
-  const loginResult = await convexMutation("auth:login", {
+  const loginResult = await convexMutation('auth:login', {
     email,
     password,
     sessionToken,
@@ -159,7 +163,7 @@ export async function registerAction(formData: FormData) {
 
   // Link subscription to user (non-critical, fails silently)
   try {
-    await convexMutation("subscriptions:linkSubscriptionToUser", {
+    await convexMutation('subscriptions:linkSubscriptionToUser', {
       email,
       userId: loginResult.userId,
     });
@@ -179,19 +183,19 @@ export async function registerAction(formData: FormData) {
   });
 
   const cookieStore = await cookies();
-  cookieStore.set("hr-auth-token", jwt, {
+  cookieStore.set('hr-auth-token', jwt, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60,
-    path: "/",
+    path: '/',
   });
-  cookieStore.set("hr-session-token", sessionToken, {
+  cookieStore.set('hr-session-token', sessionToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60,
-    path: "/",
+    path: '/',
   });
 
   return {
@@ -208,8 +212,10 @@ export async function registerAction(formData: FormData) {
   };
 }
 
-export async function loginAction(formData: FormData | { email: string; password: string; isFaceLogin?: boolean }) {
-  let email: string = "";
+export async function loginAction(
+  formData: FormData | { email: string; password: string; isFaceLogin?: boolean },
+) {
+  let email: string = '';
   let password: string;
   let isFaceLogin = false;
 
@@ -218,12 +224,12 @@ export async function loginAction(formData: FormData | { email: string; password
 
     log.info('Login action initiated', {
       action: 'login',
-      inputType: formData instanceof FormData ? 'FormData' : 'Object'
+      inputType: formData instanceof FormData ? 'FormData' : 'Object',
     });
 
     if (formData instanceof FormData) {
-      email = formData.get("email") as string;
-      password = formData.get("password") as string;
+      email = formData.get('email') as string;
+      password = formData.get('password') as string;
     } else {
       email = formData.email;
       password = formData.password;
@@ -233,12 +239,12 @@ export async function loginAction(formData: FormData | { email: string; password
     log.debug('Login credentials parsed', {
       email,
       hasPassword: !!password,
-      isFaceLogin
+      isFaceLogin,
     });
 
     // For Face ID login, we don't need password validation
     if (!isFaceLogin && (!email || !password)) {
-      throw new Error("Email and password required");
+      throw new Error('Email and password required');
     }
 
     const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -248,9 +254,9 @@ export async function loginAction(formData: FormData | { email: string; password
 
     let result;
     try {
-      result = await convexMutation("auth:login", {
+      result = await convexMutation('auth:login', {
         email,
-        password: password || "", // Empty password for Face ID login
+        password: password || '', // Empty password for Face ID login
         sessionToken,
         sessionExpiry,
         isFaceLogin, // Pass Face ID login flag
@@ -259,19 +265,19 @@ export async function loginAction(formData: FormData | { email: string; password
       log.debug('Raw Convex login result', {
         result,
         keys: Object.keys(result),
-        types: Object.fromEntries(Object.entries(result).map(([k, v]) => [k, typeof v]))
+        types: Object.fromEntries(Object.entries(result).map(([k, v]) => [k, typeof v])),
       });
 
       log.api.response('POST', 'auth:login', 200, {
         userId: result.userId,
-        role: result.role
+        role: result.role,
       });
     } catch (convexError: any) {
       log.error('Convex auth:login mutation failed', convexError, {
         email,
         isFaceLogin,
         errorMessage: convexError?.message,
-        errorName: convexError?.name
+        errorName: convexError?.name,
       });
       // Re-throw with a cleaner message
       throw new Error(convexError?.message || 'Authentication failed');
@@ -306,40 +312,44 @@ export async function loginAction(formData: FormData | { email: string; password
     log.debug('Setting authentication cookies');
 
     const cookieStore = await cookies();
-    cookieStore.set("hr-auth-token", jwt, {
+    cookieStore.set('hr-auth-token', jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
-    cookieStore.set("hr-session-token", sessionToken, {
+    cookieStore.set('hr-session-token', sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
 
     log.user('User logged in successfully', {
       userId: result.userId,
       email: result.email,
       role: result.role,
-      isFaceLogin
+      isFaceLogin,
     });
 
     // Auto-unlock Face ID after successful email/password login
     if (!isFaceLogin) {
       try {
         log.debug('Auto-unlocking Face ID after password login', { userId: result.userId });
-        await convexMutation("users:autoUnblockFaceId", {
+        await convexMutation('users:autoUnblockFaceId', {
           userId: result.userId,
         });
         log.info('Face ID auto-unlocked successfully', { userId: result.userId });
       } catch (error) {
-        log.error('Failed to auto-unlock Face ID', error instanceof Error ? error : new Error(String(error)), {
-          userId: result.userId,
-        });
+        log.error(
+          'Failed to auto-unlock Face ID',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            userId: result.userId,
+          },
+        );
         // Don't fail login if Face ID unlock fails
       }
     }
@@ -355,7 +365,7 @@ export async function loginAction(formData: FormData | { email: string; password
     log.error('Login action failed', error, {
       action: 'login',
       email,
-      isFaceLogin
+      isFaceLogin,
     });
     throw error;
   }
@@ -363,51 +373,54 @@ export async function loginAction(formData: FormData | { email: string; password
 
 export async function logoutAction() {
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("hr-session-token")?.value;
-  const jwt = cookieStore.get("hr-auth-token")?.value;
+  const sessionToken = cookieStore.get('hr-session-token')?.value;
+  const jwt = cookieStore.get('hr-auth-token')?.value;
 
   if (jwt) {
     try {
       const payload = await verifyJWT(jwt);
       if (payload && sessionToken) {
-        await convexMutation("auth:logout", { userId: payload.userId });
+        await convexMutation('auth:logout', { userId: payload.userId });
       }
-    } catch { }
+    } catch {}
   }
 
-  cookieStore.delete("hr-auth-token");
-  cookieStore.delete("hr-session-token");
+  cookieStore.delete('hr-auth-token');
+  cookieStore.delete('hr-session-token');
 }
 
 export async function getSessionAction() {
   const cookieStore = await cookies();
-  const jwt = cookieStore.get("hr-auth-token")?.value;
+  const jwt = cookieStore.get('hr-auth-token')?.value;
   if (!jwt) return null;
   return await verifyJWT(jwt);
 }
 
 export async function updateSessionProfileAction(userId: string, name: string, email: string) {
-  "use server";
-  
+  'use server';
+
   try {
     const cookieStore = await cookies();
-    const jwt = cookieStore.get("hr-auth-token")?.value;
-    
+    const jwt = cookieStore.get('hr-auth-token')?.value;
+
     if (!jwt) {
       console.error('[updateSessionProfileAction] No JWT token found');
-      throw new Error("Not authenticated");
+      throw new Error('Not authenticated');
     }
 
     const payload = await verifyJWT(jwt);
-    
+
     if (!payload) {
       console.error('[updateSessionProfileAction] Invalid JWT payload');
-      throw new Error("Invalid token");
+      throw new Error('Invalid token');
     }
-    
+
     if (payload.userId !== userId) {
-      console.error('[updateSessionProfileAction] User ID mismatch', { payloadUserId: payload.userId, requestUserId: userId });
-      throw new Error("Unauthorized");
+      console.error('[updateSessionProfileAction] User ID mismatch', {
+        payloadUserId: payload.userId,
+        requestUserId: userId,
+      });
+      throw new Error('Unauthorized');
     }
 
     const newJwt = await signJWT({
@@ -421,12 +434,12 @@ export async function updateSessionProfileAction(userId: string, name: string, e
       avatar: payload.avatar,
     });
 
-    cookieStore.set("hr-auth-token", newJwt, {
+    cookieStore.set('hr-auth-token', newJwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
 
     console.log('[updateSessionProfileAction] Success', { userId, name, email });
@@ -439,11 +452,11 @@ export async function updateSessionProfileAction(userId: string, name: string, e
 
 export async function updateSessionAvatarAction(userId: string, avatarUrl: string) {
   const cookieStore = await cookies();
-  const jwt = cookieStore.get("hr-auth-token")?.value;
-  if (!jwt) throw new Error("Not authenticated");
+  const jwt = cookieStore.get('hr-auth-token')?.value;
+  if (!jwt) throw new Error('Not authenticated');
 
   const payload = await verifyJWT(jwt);
-  if (!payload || payload.userId !== userId) throw new Error("Unauthorized");
+  if (!payload || payload.userId !== userId) throw new Error('Unauthorized');
 
   // Update JWT with new avatar
   const newJwt = await signJWT({
@@ -457,12 +470,12 @@ export async function updateSessionAvatarAction(userId: string, avatarUrl: strin
     avatar: avatarUrl,
   });
 
-  cookieStore.set("hr-auth-token", newJwt, {
+  cookieStore.set('hr-auth-token', newJwt, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60,
-    path: "/",
+    path: '/',
   });
 
   return { success: true, avatar: avatarUrl };

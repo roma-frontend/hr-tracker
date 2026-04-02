@@ -1,28 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { signJWT } from "@/lib/jwt";
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { signJWT } from '@/lib/jwt';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
 async function convexMutation(path: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path, args }),
   });
   const data = await res.json();
-  if (data.status === "error") throw new Error(data.errorMessage ?? "Convex error");
+  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
   return data.value;
 }
 
 async function convexQuery(path: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path, args }),
   });
   const data = await res.json();
-  if (data.status === "error") return null;
+  if (data.status === 'error') return null;
   return data.value;
 }
 
@@ -36,28 +36,33 @@ export async function POST(req: NextRequest) {
     const { email, name, avatarUrl } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+      return NextResponse.json({ error: 'Email required' }, { status: 400 });
     }
 
     const emailLower = email.toLowerCase().trim();
-    console.log("[oauth-session] Starting OAuth session creation for:", emailLower);
+    console.log('[oauth-session] Starting OAuth session creation for:', emailLower);
 
     // 1. Find user by email directly via query
-    console.log("[oauth-session] Querying Convex for user...");
-    const userResult = await convexQuery("users:getUserByEmail", { email: emailLower });
+    console.log('[oauth-session] Querying Convex for user...');
+    const userResult = await convexQuery('users:getUserByEmail', { email: emailLower });
 
-    console.log("[oauth-session] Convex query result:", userResult ? {
-      id: userResult._id,
-      name: userResult.name,
-      email: userResult.email,
-      role: userResult.role,
-      department: userResult.department,
-      position: userResult.position,
-    } : "NOT_FOUND");
+    console.log(
+      '[oauth-session] Convex query result:',
+      userResult
+        ? {
+            id: userResult._id,
+            name: userResult.name,
+            email: userResult.email,
+            role: userResult.role,
+            department: userResult.department,
+            position: userResult.position,
+          }
+        : 'NOT_FOUND',
+    );
 
     if (!userResult) {
-      console.error("[oauth-session] ❌ User not found in database:", emailLower);
-      return NextResponse.json({ error: "User not found in database" }, { status: 404 });
+      console.error('[oauth-session] ❌ User not found in database:', emailLower);
+      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
     }
 
     // Check maintenance mode — block non-superadmin login
@@ -68,7 +73,7 @@ export async function POST(req: NextRequest) {
       if (maintenanceData?.isActive && maintenanceData.startTime <= Date.now()) {
         return NextResponse.json(
           { error: 'maintenance', organizationId: userResult.organizationId },
-          { status: 503 }
+          { status: 503 },
         );
       }
     }
@@ -77,10 +82,10 @@ export async function POST(req: NextRequest) {
     const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
-    console.log("[oauth-session] Creating login session...");
-    await convexMutation("auth:login", {
+    console.log('[oauth-session] Creating login session...');
+    await convexMutation('auth:login', {
       email: emailLower,
-      password: "",
+      password: '',
       sessionToken,
       sessionExpiry,
       isFaceLogin: true, // skip password check
@@ -101,7 +106,7 @@ export async function POST(req: NextRequest) {
       avatar: result.avatarUrl ?? avatarUrl,
     });
 
-    console.log("[oauth-session] ✅ JWT created for user:", {
+    console.log('[oauth-session] ✅ JWT created for user:', {
       userId: result._id,
       name: result.name,
       role: result.role,
@@ -109,34 +114,34 @@ export async function POST(req: NextRequest) {
 
     // Set cookies
     const cookieStore = await cookies();
-    cookieStore.set("hr-auth-token", jwt, {
+    cookieStore.set('hr-auth-token', jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
-    cookieStore.set("hr-session-token", sessionToken, {
+    cookieStore.set('hr-session-token', sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
 
     // Log the OAuth login
     try {
-      const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-      const auditEnabled = await convexQuery("security:getSetting", { key: "audit_logging" });
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+      const auditEnabled = await convexQuery('security:getSetting', { key: 'audit_logging' });
       if (auditEnabled) {
-        await convexMutation("security:logLoginAttempt", {
+        await convexMutation('security:logLoginAttempt', {
           email: emailLower,
           userId: result._id,
           organizationId: result.organizationId,
           success: true,
-          method: "google",
+          method: 'google',
           ip,
-          userAgent: req.headers.get("user-agent") ?? undefined,
+          userAgent: req.headers.get('user-agent') ?? undefined,
           riskScore: 5, // Google OAuth is trusted
           riskFactors: [],
         });
@@ -158,7 +163,7 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    console.log("[oauth-session] ✅ Returning success response:", {
+    console.log('[oauth-session] ✅ Returning success response:', {
       userId: responseData.session.userId,
       name: responseData.session.name,
       email: responseData.session.email,
@@ -167,10 +172,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(responseData);
   } catch (error: any) {
-    console.error("[oauth-session] ❌ OAuth session error:", error.message || error);
+    console.error('[oauth-session] ❌ OAuth session error:', error.message || error);
     return NextResponse.json(
-      { error: error.message || "Failed to create OAuth session" },
-      { status: 500 }
+      { error: error.message || 'Failed to create OAuth session' },
+      { status: 500 },
     );
   }
 }

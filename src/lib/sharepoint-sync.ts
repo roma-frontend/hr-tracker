@@ -5,14 +5,14 @@
 
 // ── Column mapping (configurable — update when exact column names are known) ──
 export const COLUMN_MAP = {
-  name: "Title",           // or "FullName"
-  email: "Email",          // or "WorkEmail"
-  department: "Department",
-  position: "JobTitle",
-  phone: "WorkPhone",
-  location: "Office",
-  employeeType: "Category", // maps to "staff" / "contractor"
-  status: "Status",         // for filtering inactive entries
+  name: 'Title', // or "FullName"
+  email: 'Email', // or "WorkEmail"
+  department: 'Department',
+  position: 'JobTitle',
+  phone: 'WorkPhone',
+  location: 'Office',
+  employeeType: 'Category', // maps to "staff" / "contractor"
+  status: 'Status', // for filtering inactive entries
 };
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ export interface SharePointEmployee {
   position?: string;
   phone?: string;
   location?: string;
-  employeeType: "staff" | "contractor";
+  employeeType: 'staff' | 'contractor';
 }
 
 export interface SharePointSyncResult {
@@ -43,15 +43,15 @@ export function getSharePointAuthUrl(redirectUri: string): string {
   const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID;
   const tenantId = process.env.MICROSOFT_TENANT_ID;
 
-  if (!clientId) throw new Error("Microsoft Client ID not configured");
-  if (!tenantId) throw new Error("Microsoft Tenant ID not configured");
+  if (!clientId) throw new Error('Microsoft Client ID not configured');
+  if (!tenantId) throw new Error('Microsoft Tenant ID not configured');
 
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
-    response_type: "code",
-    scope: "Sites.Read.All offline_access User.Read",
-    response_mode: "query",
+    response_type: 'code',
+    scope: 'Sites.Read.All offline_access User.Read',
+    response_mode: 'query',
   });
 
   return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params.toString()}`;
@@ -71,24 +71,21 @@ export async function exchangeSharePointCode(code: string): Promise<{
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/sharepoint/callback`;
 
   if (!tenantId || !clientId || !clientSecret) {
-    throw new Error("Microsoft SharePoint OAuth credentials not configured");
+    throw new Error('Microsoft SharePoint OAuth credentials not configured');
   }
 
-  const response = await fetch(
-    `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: "authorization_code",
-        scope: "Sites.Read.All offline_access User.Read",
-      }),
-    }
-  );
+  const response = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
+      scope: 'Sites.Read.All offline_access User.Read',
+    }),
+  });
 
   if (!response.ok) {
     const error = await response.text();
@@ -111,23 +108,20 @@ export async function refreshSharePointToken(refreshToken: string): Promise<{
   const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
 
   if (!tenantId || !clientId || !clientSecret) {
-    throw new Error("Microsoft SharePoint OAuth credentials not configured");
+    throw new Error('Microsoft SharePoint OAuth credentials not configured');
   }
 
-  const response = await fetch(
-    `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refreshToken,
-        grant_type: "refresh_token",
-        scope: "Sites.Read.All offline_access User.Read",
-      }),
-    }
-  );
+  const response = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+      scope: 'Sites.Read.All offline_access User.Read',
+    }),
+  });
 
   if (!response.ok) {
     const error = await response.text();
@@ -142,14 +136,12 @@ export async function refreshSharePointToken(refreshToken: string): Promise<{
 /**
  * Fetch all items from the SharePoint List (with pagination)
  */
-export async function fetchSharePointListItems(
-  accessToken: string
-): Promise<SharePointEmployee[]> {
+export async function fetchSharePointListItems(accessToken: string): Promise<SharePointEmployee[]> {
   const siteId = process.env.SHAREPOINT_SITE_ID;
   const listId = process.env.SHAREPOINT_LIST_ID;
 
   if (!siteId || !listId) {
-    throw new Error("SharePoint site/list IDs not configured");
+    throw new Error('SharePoint site/list IDs not configured');
   }
 
   const employees: SharePointEmployee[] = [];
@@ -166,7 +158,10 @@ export async function fetchSharePointListItems(
       throw new Error(`Failed to fetch SharePoint list items: ${error}`);
     }
 
-    const data: { value?: Array<{ fields?: Record<string, unknown> }>; "@odata.nextLink"?: string } = await response.json();
+    const data: {
+      value?: Array<{ fields?: Record<string, unknown> }>;
+      '@odata.nextLink'?: string;
+    } = await response.json();
 
     for (const item of data.value || []) {
       const fields = item.fields || {};
@@ -177,7 +172,7 @@ export async function fetchSharePointListItems(
     }
 
     // Follow @odata.nextLink for pagination
-    url = data["@odata.nextLink"] || null;
+    url = data['@odata.nextLink'] || null;
   }
 
   return employees;
@@ -188,23 +183,22 @@ export async function fetchSharePointListItems(
  * Returns null if the row should be skipped (no email, inactive status)
  */
 export function mapSharePointToEmployee(
-  fields: Record<string, unknown>
+  fields: Record<string, unknown>,
 ): SharePointEmployee | null {
   const email = (fields[COLUMN_MAP.email] as string)?.trim()?.toLowerCase();
   if (!email) return null;
 
   // Skip rows where status indicates inactive
   const status = (fields[COLUMN_MAP.status] as string)?.toLowerCase();
-  if (status === "inactive" || status === "terminated" || status === "disabled") {
+  if (status === 'inactive' || status === 'terminated' || status === 'disabled') {
     return null;
   }
 
   const rawType = (fields[COLUMN_MAP.employeeType] as string)?.toLowerCase();
-  const employeeType: "staff" | "contractor" =
-    rawType === "contractor" ? "contractor" : "staff";
+  const employeeType: 'staff' | 'contractor' = rawType === 'contractor' ? 'contractor' : 'staff';
 
   return {
-    name: (fields[COLUMN_MAP.name] as string) || email.split("@")[0],
+    name: (fields[COLUMN_MAP.name] as string) || email.split('@')[0],
     email,
     department: fields[COLUMN_MAP.department] as string | undefined,
     position: fields[COLUMN_MAP.position] as string | undefined,

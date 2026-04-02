@@ -1,32 +1,55 @@
-"use client";
+'use client';
 import Image from 'next/image';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff, Monitor, Volume2, VolumeX } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { ActiveCall } from "./ChatClient";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Phone,
+  PhoneOff,
+  Video,
+  VideoOff,
+  Mic,
+  MicOff,
+  Monitor,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { ActiveCall } from './ChatClient';
 
 interface Props {
   call: ActiveCall;
-  currentUserId: Id<"users">;
+  currentUserId: Id<'users'>;
   currentUserName: string;
   currentUserAvatar?: string;
   onEnd: () => void;
 }
 
 function getInitials(name: string) {
-  return name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n: any) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
-export function CallModal({ call, currentUserId, currentUserName, currentUserAvatar, onEnd }: Props) {
+export function CallModal({
+  call,
+  currentUserId,
+  currentUserName,
+  currentUserAvatar,
+  onEnd,
+}: Props) {
   const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(call.type === "video");
+  const [camOn, setCamOn] = useState(call.type === 'video');
   const [speakerOn, setSpeakerOn] = useState(true);
-  const [callStatus, setCallStatus] = useState<"ringing" | "connecting" | "active" | "ended">("ringing");
+  const [callStatus, setCallStatus] = useState<'ringing' | 'connecting' | 'active' | 'ended'>(
+    'ringing',
+  );
   const [duration, setDuration] = useState(0);
   const [peerConnected, setPeerConnected] = useState(false);
   const [mediaError, setMediaError] = useState<string | null>(null);
@@ -50,28 +73,28 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
   const addedIceCandidatesRef = useRef<Set<string>>(new Set());
 
   const FALLBACK_ICE_SERVERS: RTCIceServer[] = [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-    { urls: "stun:stun.relay.metered.ca:80" },
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun.relay.metered.ca:80' },
     {
-      urls: "turn:global.relay.metered.ca:80",
-      username: "ac986faa3d8fec75bb7c4aff",
-      credential: "WOCnG2giai1RFd3N",
+      urls: 'turn:global.relay.metered.ca:80',
+      username: 'ac986faa3d8fec75bb7c4aff',
+      credential: 'WOCnG2giai1RFd3N',
     },
     {
-      urls: "turn:global.relay.metered.ca:80?transport=tcp",
-      username: "ac986faa3d8fec75bb7c4aff",
-      credential: "WOCnG2giai1RFd3N",
+      urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+      username: 'ac986faa3d8fec75bb7c4aff',
+      credential: 'WOCnG2giai1RFd3N',
     },
     {
-      urls: "turn:global.relay.metered.ca:443",
-      username: "ac986faa3d8fec75bb7c4aff",
-      credential: "WOCnG2giai1RFd3N",
+      urls: 'turn:global.relay.metered.ca:443',
+      username: 'ac986faa3d8fec75bb7c4aff',
+      credential: 'WOCnG2giai1RFd3N',
     },
     {
-      urls: "turns:global.relay.metered.ca:443?transport=tcp",
-      username: "ac986faa3d8fec75bb7c4aff",
-      credential: "WOCnG2giai1RFd3N",
+      urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+      username: 'ac986faa3d8fec75bb7c4aff',
+      credential: 'WOCnG2giai1RFd3N',
     },
   ];
 
@@ -82,7 +105,7 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
     const fetchIceServers = async () => {
       try {
         const response = await fetch(
-          "https://hr-project.metered.live/api/v1/turn/credentials?apiKey=7191ce6de881f9924fda86a5d47a8ee5adc1"
+          'https://hr-project.metered.live/api/v1/turn/credentials?apiKey=7191ce6de881f9924fda86a5d47a8ee5adc1',
         );
         const servers = await response.json();
         if (Array.isArray(servers) && servers.length > 0) {
@@ -97,25 +120,27 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
 
   // Format duration
   const formatDuration = (secs: number) => {
-    const m = Math.floor(secs / 60).toString().padStart(2, "0");
-    const s = (secs % 60).toString().padStart(2, "0");
+    const m = Math.floor(secs / 60)
+      .toString()
+      .padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
 
   const cleanup = useCallback(() => {
     console.log('[CallModal] Cleaning up media resources...');
-    
+
     // Stop ALL tracks — browser immediately releases camera/mic indicator
     if (localStreamRef.current) {
       const tracks = localStreamRef.current.getTracks();
       console.log('[CallModal] Stopping', tracks.length, 'local tracks');
-      
+
       tracks.forEach((t) => {
         try {
           t.stop();
           console.log('[CallModal] Stopped track:', t.kind);
         } catch (e) {
-          console.warn("Error stopping track:", e);
+          console.warn('Error stopping track:', e);
         }
       });
       // Clear all references to ensure garbage collection
@@ -140,7 +165,7 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         // Remove all transceiver tracks
         const senders = peerConnectionRef.current.getSenders();
         console.log('[CallModal] Stopping', senders.length, 'peer connection senders');
-        
+
         senders.forEach((sender) => {
           try {
             if (sender.track) {
@@ -148,13 +173,13 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
               console.log('[CallModal] Stopped sender track:', sender.track.kind);
             }
           } catch (e) {
-            console.warn("Error stopping sender track:", e);
+            console.warn('Error stopping sender track:', e);
           }
         });
         peerConnectionRef.current.close();
         console.log('[CallModal] Closed peer connection');
       } catch (e) {
-        console.warn("Error closing peer connection:", e);
+        console.warn('Error closing peer connection:', e);
       }
       peerConnectionRef.current = null;
     }
@@ -166,7 +191,7 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
       clearTimeout(retryTimerRef.current);
       retryTimerRef.current = null;
     }
-    
+
     console.log('[CallModal] Cleanup complete');
   }, []);
 
@@ -176,19 +201,19 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
       setMediaError(null);
       console.log('[CallModal] Requesting media with constraints:', {
         audio: true,
-        video: call.type === "video",
+        video: call.type === 'video',
       });
-      
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: call.type === "video",
+        video: call.type === 'video',
       });
-      
+
       console.log('[CallModal] Got media stream:', {
         videoTracks: stream.getVideoTracks().length,
         audioTracks: stream.getAudioTracks().length,
       });
-      
+
       localStreamRef.current = stream;
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
@@ -218,10 +243,10 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
           remoteVideoDisplayRef.current.srcObject = stream;
         }
         setPeerConnected(true);
-        setCallStatus("active");
+        setCallStatus('active');
         // Set user status to "in_call"
-        setInCallStatusMutation({ userId: currentUserId }).catch(e => 
-          console.error('[CallModal] Failed to set in_call status:', e)
+        setInCallStatusMutation({ userId: currentUserId }).catch((e) =>
+          console.error('[CallModal] Failed to set in_call status:', e),
         );
         // Start duration timer
         if (!durationTimerRef.current) {
@@ -230,13 +255,13 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
       };
 
       pc.onconnectionstatechange = () => {
-        if (pc.connectionState === "connected") {
-          setCallStatus("active");
+        if (pc.connectionState === 'connected') {
+          setCallStatus('active');
           // Set user status to "in_call"
-          setInCallStatusMutation({ userId: currentUserId }).catch(e => 
-            console.error('[CallModal] Failed to set in_call status:', e)
+          setInCallStatusMutation({ userId: currentUserId }).catch((e) =>
+            console.error('[CallModal] Failed to set in_call status:', e),
           );
-        } else if (pc.connectionState === "disconnected" || pc.connectionState === "failed") {
+        } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
           handleEnd();
         }
       };
@@ -245,47 +270,53 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         // Create offer and store it via dedicated mutation (does NOT change call status)
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
-        await updateOfferMutation({ callId: call.callId, userId: currentUserId, offer: JSON.stringify(offer) });
-        setCallStatus("connecting");
+        await updateOfferMutation({
+          callId: call.callId,
+          userId: currentUserId,
+          offer: JSON.stringify(offer),
+        });
+        setCallStatus('connecting');
       }
     } catch (err: any) {
-      console.error("[CallModal] Media error:", {
+      console.error('[CallModal] Media error:', {
         name: err.name,
         message: err.message,
         code: err.code,
       });
-      
-      if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+
+      if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
         // Device in use - show message and auto-retry
-        const message = 
+        const message =
           retryCount >= 3
-            ? "Не удалось получить доступ к камере/микрофону после нескольких попыток. Закройте все другие браузеры/приложения и попробуйте снова."
+            ? 'Не удалось получить доступ к камере/микрофону после нескольких попыток. Закройте все другие браузеры/приложения и попробуйте снова.'
             : `Камера или микрофон уже используются. Закройте другие вкладки браузера (особенно с этим же аккаунтом). Попытка ${retryCount + 1}...`;
-        
+
         setMediaError(message);
-        
+
         // Clean up any partial state before retrying
         cleanup();
-        
+
         // Auto-retry after delay (exponential backoff with longer delays for device conflicts)
         if (retryCount < 3) {
           // Longer delays to ensure device is fully released
           const delays = [2000, 4000, 8000]; // 2s, 4s, 8s
           const delay = retryCount < delays.length ? delays[retryCount] : 10000;
           console.log(`[CallModal] Scheduling retry in ${delay}ms (attempt ${retryCount + 2})...`);
-          
+
           retryTimerRef.current = setTimeout(() => {
             console.log(`[CallModal] Retrying media initialization (attempt ${retryCount + 2})`);
             setRetryCount((c) => c + 1);
             initMedia();
           }, delay);
         }
-      } else if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setMediaError("Доступ к камере/микрофону запрещён. Разрешите доступ в настройках браузера и перезагрузите страницу.");
-      } else if (err.name === "NotFoundError") {
-        setMediaError("Камера или микрофон не найдены. Проверьте подключение устройств.");
+      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMediaError(
+          'Доступ к камере/микрофону запрещён. Разрешите доступ в настройках браузера и перезагрузите страницу.',
+        );
+      } else if (err.name === 'NotFoundError') {
+        setMediaError('Камера или микрофон не найдены. Проверьте подключение устройств.');
       } else {
-        setMediaError("Не удалось получить доступ к камере/микрофону. Попробуйте снова.");
+        setMediaError('Не удалось получить доступ к камере/микрофону. Попробуйте снова.');
       }
     }
   }, [call, currentUserId, iceServers, retryCount]);
@@ -307,12 +338,12 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
     if (callData) {
       callEndedByRemoteRef.current = true; // We've seen the call exist
     }
-    if (callData === null && callEndedByRemoteRef.current && callStatus !== "ended") {
+    if (callData === null && callEndedByRemoteRef.current && callStatus !== 'ended') {
       console.log('[CallModal] Remote side ended the call (callData became null), cleaning up...');
       cleanup();
       setMicOn(false);
       setCamOn(false);
-      setCallStatus("ended");
+      setCallStatus('ended');
       setTimeout(() => onEnd(), 100);
     }
   }, [callData, callStatus]);
@@ -332,7 +363,11 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
           // Store SDP answer on receiver's participant record (answerCall already called from ChatClient accept button)
-          await answerCallMutation({ callId: call.callId, userId: currentUserId, answer: JSON.stringify(answer) });
+          await answerCallMutation({
+            callId: call.callId,
+            userId: currentUserId,
+            answer: JSON.stringify(answer),
+          });
         } catch (e) {
           console.error('[CallModal] Error processing offer:', e);
         }
@@ -369,23 +404,23 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
 
   const handleEnd = async () => {
     console.log('[CallModal] Ending call and turning off media devices...');
-    
+
     // Stop all media tracks and cleanup peer connection
     cleanup();
-    
+
     // Clear media states
     setMicOn(false);
     setCamOn(false);
-    
-    setCallStatus("ended");
-    try { 
-      await endCallMutation({ callId: call.callId, userId: currentUserId }); 
+
+    setCallStatus('ended');
+    try {
+      await endCallMutation({ callId: call.callId, userId: currentUserId });
       // Reset status from "in_call" back to "available"
       await resetCallStatusMutation({ userId: currentUserId });
     } catch (e) {
       console.error('[CallModal] Error ending call:', e);
     }
-    
+
     // Give a moment for cleanup to complete before closing
     setTimeout(() => {
       console.log('[CallModal] Call ended, closing modal');
@@ -395,12 +430,18 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
 
   const toggleMic = () => {
     const track = localStreamRef.current?.getAudioTracks()[0];
-    if (track) { track.enabled = !track.enabled; setMicOn(track.enabled); }
+    if (track) {
+      track.enabled = !track.enabled;
+      setMicOn(track.enabled);
+    }
   };
 
   const toggleCam = () => {
     const track = localStreamRef.current?.getVideoTracks()[0];
-    if (track) { track.enabled = !track.enabled; setCamOn(track.enabled); }
+    if (track) {
+      track.enabled = !track.enabled;
+      setCamOn(track.enabled);
+    }
   };
 
   // Apply speaker mute/unmute to remote audio/video elements
@@ -414,26 +455,26 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
   }, [speakerOn]);
 
   const statusText = {
-    ringing: "Ringing…",
-    connecting: "Connecting…",
+    ringing: 'Ringing…',
+    connecting: 'Connecting…',
     active: formatDuration(duration),
-    ended: "Call ended",
+    ended: 'Call ended',
   }[callStatus];
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
       {/* Hidden audio element for remote stream — ensures audio works for both call types */}
-      <audio ref={remoteVideoRef} autoPlay playsInline style={{ display: "none" }} />
+      <audio ref={remoteVideoRef} autoPlay playsInline style={{ display: 'none' }} />
 
       <div
         className="relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl"
         style={{
-          background: "linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-          minHeight: call.type === "video" ? "500px" : "320px",
+          background: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+          minHeight: call.type === 'video' ? '500px' : '320px',
         }}
       >
         {/* Video area */}
-        {call.type === "video" && (
+        {call.type === 'video' && (
           <div className="relative w-full h-72 bg-black rounded-t-3xl overflow-hidden">
             {/* Remote video */}
             <video
@@ -441,23 +482,29 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
               autoPlay
               playsInline
               className="w-full h-full object-cover"
-              style={{ display: peerConnected ? "block" : "none" }}
+              style={{ display: peerConnected ? 'block' : 'none' }}
             />
             {!peerConnected && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <Avatar className="w-20 h-20 mx-auto mb-3 ring-4 ring-white/20">
                     <AvatarFallback className="text-2xl font-bold text-white bg-gradient-to-br from-purple-600 to-blue-600">
-                      {getInitials(call.remoteUserName ?? "?")}
+                      {getInitials(call.remoteUserName ?? '?')}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-white font-semibold">{call.remoteUserName ?? "Connecting…"}</p>
+                  <p className="text-white font-semibold">{call.remoteUserName ?? 'Connecting…'}</p>
                 </div>
               </div>
             )}
             {/* Local video (PiP) */}
             <div className="absolute bottom-3 right-3 w-24 h-16 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg">
-              <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
               {!camOn && (
                 <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
                   <VideoOff className="w-5 h-5 text-gray-400" />
@@ -468,22 +515,25 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         )}
 
         {/* Audio call UI */}
-        {call.type === "audio" && (
+        {call.type === 'audio' && (
           <div className="flex flex-col items-center py-10 gap-4">
-            <div className={cn("relative", callStatus === "active" && "animate-pulse")}>
+            <div className={cn('relative', callStatus === 'active' && 'animate-pulse')}>
               <Avatar className="w-24 h-24 ring-4 ring-white/20">
                 <AvatarFallback className="text-3xl font-bold text-white bg-gradient-to-br from-purple-600 to-blue-600">
-                  {getInitials(call.remoteUserName ?? "?")}
+                  {getInitials(call.remoteUserName ?? '?')}
                 </AvatarFallback>
               </Avatar>
-              {callStatus === "active" && (
+              {callStatus === 'active' && (
                 <>
                   <span className="absolute inset-0 rounded-full ring-4 ring-green-500/30 animate-ping" />
-                  <span className="absolute inset-0 rounded-full ring-4 ring-green-500/20 animate-ping" style={{ animationDelay: "0.5s" }} />
+                  <span
+                    className="absolute inset-0 rounded-full ring-4 ring-green-500/20 animate-ping"
+                    style={{ animationDelay: '0.5s' }}
+                  />
                 </>
               )}
             </div>
-            <p className="text-white text-xl font-semibold">{call.remoteUserName ?? "Unknown"}</p>
+            <p className="text-white text-xl font-semibold">{call.remoteUserName ?? 'Unknown'}</p>
           </div>
         )}
 
@@ -527,21 +577,21 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         <div className="flex items-center justify-center gap-4 pb-8 px-6">
           <ControlBtn
             icon={micOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-            label={micOn ? "Mute" : "Unmute"}
+            label={micOn ? 'Mute' : 'Unmute'}
             onClick={toggleMic}
             active={!micOn}
           />
-          {call.type === "video" && (
+          {call.type === 'video' && (
             <ControlBtn
               icon={camOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-              label={camOn ? "Camera off" : "Camera on"}
+              label={camOn ? 'Camera off' : 'Camera on'}
               onClick={toggleCam}
               active={!camOn}
             />
           )}
           <ControlBtn
             icon={speakerOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-            label={speakerOn ? "Mute speaker" : "Unmute"}
+            label={speakerOn ? 'Mute speaker' : 'Unmute'}
             onClick={() => setSpeakerOn(!speakerOn)}
             active={!speakerOn}
           />
@@ -559,7 +609,9 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         <div className="absolute top-4 left-4">
           <div className="flex items-center gap-2">
             <Avatar className="w-7 h-7">
-              {currentUserAvatar && <img src={currentUserAvatar} className="w-full h-full object-cover rounded-full" />}
+              {currentUserAvatar && (
+                <img src={currentUserAvatar} className="w-full h-full object-cover rounded-full" />
+              )}
               <AvatarFallback className="text-xs text-white bg-gray-700">
                 {getInitials(currentUserName)}
               </AvatarFallback>
@@ -571,8 +623,8 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
         {/* Call type badge */}
         <div className="absolute top-4 right-4">
           <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 text-white/70 text-xs">
-            {call.type === "video" ? <Video className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
-            {call.type === "video" ? "Video" : "Audio"} call
+            {call.type === 'video' ? <Video className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
+            {call.type === 'video' ? 'Video' : 'Audio'} call
           </span>
         </div>
       </div>
@@ -580,17 +632,23 @@ export function CallModal({ call, currentUserId, currentUserName, currentUserAva
   );
 }
 
-function ControlBtn({ icon, label, onClick, active }: { icon: React.ReactNode; label: string; onClick: () => void; active?: boolean }) {
+function ControlBtn({
+  icon,
+  label,
+  onClick,
+  active,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center gap-1 group"
-      title={label}
-    >
+    <button onClick={onClick} className="flex flex-col items-center gap-1 group" title={label}>
       <div
         className={cn(
-          "w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110",
-          active ? "bg-white/30" : "bg-white/10 hover:bg-white/20"
+          'w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110',
+          active ? 'bg-white/30' : 'bg-white/10 hover:bg-white/20',
         )}
       >
         <span className="text-white">{icon}</span>

@@ -3,7 +3,7 @@
  * Добавьте его в корневой layout или dashboard page для отладки
  */
 
-"use client";
+'use client';
 
 import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';

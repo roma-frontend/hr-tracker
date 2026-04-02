@@ -1,2 +1,2 @@
-export { GlobalSearch } from "./GlobalSearch";
-export { QuickActionsPalette } from "./QuickActionsPalette";
+export { GlobalSearch } from './GlobalSearch';
+export { QuickActionsPalette } from './QuickActionsPalette';

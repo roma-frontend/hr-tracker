@@ -128,8 +128,8 @@ describe('Security Utilities', () => {
 
   describe('SQL Injection Detection', () => {
     it('should detect SQL keywords', () => {
-      expect(containsSQLInjection("SELECT * FROM users")).toBe(true);
-      expect(containsSQLInjection("DROP TABLE users")).toBe(true);
+      expect(containsSQLInjection('SELECT * FROM users')).toBe(true);
+      expect(containsSQLInjection('DROP TABLE users')).toBe(true);
       expect(containsSQLInjection("1' OR '1'='1")).toBe(true);
     });
 

@@ -1,12 +1,21 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { Sparkles, Calendar, AlertTriangle, TrendingUp, Users, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuthStore } from "@/store/useAuthStore";
+import {
+  Sparkles,
+  Calendar,
+  AlertTriangle,
+  TrendingUp,
+  Users,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface Insights {
   balanceWarning: string | null;
@@ -16,9 +25,8 @@ interface Insights {
 }
 
 export default function AIRecommendationsCard() {
-  
   const { t } = useTranslation();
-const user = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
@@ -69,7 +77,7 @@ const user = useAuthStore((s) => s.user);
             {t('aiFeatures.aiRecommendations')}
             {lastFetched && (
               <span className="text-xs text-[var(--text-muted)] font-normal">
-                · {lastFetched.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                · {lastFetched.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
           </CardTitle>
@@ -80,15 +88,19 @@ const user = useAuthStore((s) => s.user);
               className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors disabled:opacity-50"
               title={t('titles.refresh')}
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-[var(--text-muted)] ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-3.5 h-3.5 text-[var(--text-muted)] ${loading ? 'animate-spin' : ''}`}
+              />
             </button>
             <button
               onClick={() => setExpanded(!expanded)}
               className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
             >
-              {expanded
-                ? <ChevronUp className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                : <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
+              {expanded ? (
+                <ChevronUp className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              )}
             </button>
           </div>
         </div>
@@ -98,7 +110,7 @@ const user = useAuthStore((s) => s.user);
         {expanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
@@ -136,7 +148,10 @@ const user = useAuthStore((s) => s.user);
                       </div>
                       <ul className="space-y-1">
                         {insights.patterns.map((p, i) => (
-                          <li key={i} className="text-sm text-[var(--text-primary)] flex items-start gap-2">
+                          <li
+                            key={i}
+                            className="text-sm text-[var(--text-primary)] flex items-start gap-2"
+                          >
                             <span className="text-sky-400 mt-0.5">•</span>
                             {p}
                           </li>
@@ -155,11 +170,16 @@ const user = useAuthStore((s) => s.user);
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <Calendar className="w-4 h-4 text-green-500" />
-                        <p className="text-xs font-semibold text-green-500">Best Dates for Vacation</p>
+                        <p className="text-xs font-semibold text-green-500">
+                          Best Dates for Vacation
+                        </p>
                       </div>
                       <ul className="space-y-1">
                         {insights.bestDates.map((d, i) => (
-                          <li key={i} className="text-sm text-[var(--text-primary)] flex items-start gap-2">
+                          <li
+                            key={i}
+                            className="text-sm text-[var(--text-primary)] flex items-start gap-2"
+                          >
                             <span className="text-green-500 mt-0.5">✓</span>
                             {d}
                           </li>
@@ -181,11 +201,16 @@ const user = useAuthStore((s) => s.user);
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <Users className="w-4 h-4 text-blue-500" />
-                        <p className="text-xs font-semibold text-blue-500">Team on Leave (next 60 days)</p>
+                        <p className="text-xs font-semibold text-blue-500">
+                          Team on Leave (next 60 days)
+                        </p>
                       </div>
                       <ul className="space-y-1">
                         {insights.teamConflicts.map((c, i) => (
-                          <li key={i} className="text-sm text-[var(--text-primary)] flex items-start gap-2">
+                          <li
+                            key={i}
+                            className="text-sm text-[var(--text-primary)] flex items-start gap-2"
+                          >
                             <span className="text-blue-500 mt-0.5">•</span>
                             {c}
                           </li>

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Bell } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import React from 'react';
+import { Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 
 interface NotificationSettingsProps {
   emailNotifs: boolean;
@@ -27,25 +27,25 @@ export function NotificationSettings({
 
   const notifications = [
     {
-      label: t("settingsNotifications.emailNotifications"),
-      desc: t("settingsNotifications.emailNotificationsDesc"),
+      label: t('settingsNotifications.emailNotifications'),
+      desc: t('settingsNotifications.emailNotificationsDesc'),
       value: emailNotifs,
       onChange: onEmailNotifsChange,
-      icon: "📧",
+      icon: '📧',
     },
     {
-      label: t("settingsNotifications.pushNotifications"),
-      desc: t("settingsNotifications.pushNotificationsDesc"),
+      label: t('settingsNotifications.pushNotifications'),
+      desc: t('settingsNotifications.pushNotificationsDesc'),
       value: pushNotifs,
       onChange: onPushNotifsChange,
-      icon: "🔔",
+      icon: '🔔',
     },
     {
-      label: t("settingsNotifications.weeklyReport"),
-      desc: t("settingsNotifications.weeklyReportDesc"),
+      label: t('settingsNotifications.weeklyReport'),
+      desc: t('settingsNotifications.weeklyReportDesc'),
       value: weeklyReport,
       onChange: onWeeklyReportChange,
-      icon: "📊",
+      icon: '📊',
     },
   ];
 
@@ -54,9 +54,9 @@ export function NotificationSettings({
       <CardHeader>
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-[var(--warning)]" />
-          <CardTitle>{t("settingsNotifications.title")}</CardTitle>
+          <CardTitle>{t('settingsNotifications.title')}</CardTitle>
         </div>
-        <CardDescription>{t("settingsNotifications.description")}</CardDescription>
+        <CardDescription>{t('settingsNotifications.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {notifications.map((item, idx) => (

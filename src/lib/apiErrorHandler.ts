@@ -24,7 +24,7 @@ export enum ErrorCode {
   CONFLICT = 'CONFLICT',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-  
+
   // Server errors (5xx)
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
@@ -39,7 +39,7 @@ export function createErrorResponse(
   message: string,
   code: ErrorCode = ErrorCode.INTERNAL_ERROR,
   status: number = 500,
-  details?: Record<string, any>
+  details?: Record<string, any>,
 ): NextResponse<ApiError> {
   const error: ApiError = {
     error: code,
@@ -59,7 +59,7 @@ export function createErrorResponse(
 
 /**
  * Handle errors in API routes with consistent formatting
- * 
+ *
  * @example
  * export async function GET(request: Request) {
  *   return withApiHandler(async () => {
@@ -73,7 +73,7 @@ export async function withApiHandler<T extends NextResponse>(
   options?: {
     operation?: string;
     logError?: boolean;
-  }
+  },
 ): Promise<T | NextResponse<ApiError>> {
   try {
     return await handler();
@@ -90,7 +90,11 @@ export async function withApiHandler<T extends NextResponse>(
       const message = error.message.toLowerCase();
 
       // Validation errors
-      if (message.includes('required') || message.includes('invalid') || message.includes('validation')) {
+      if (
+        message.includes('required') ||
+        message.includes('invalid') ||
+        message.includes('validation')
+      ) {
         return createErrorResponse(error.message, ErrorCode.VALIDATION_ERROR, 400);
       }
 
@@ -100,7 +104,11 @@ export async function withApiHandler<T extends NextResponse>(
       }
 
       // Authorization errors
-      if (message.includes('forbidden') || message.includes('permission') || message.includes('not allowed')) {
+      if (
+        message.includes('forbidden') ||
+        message.includes('permission') ||
+        message.includes('not allowed')
+      ) {
         return createErrorResponse('Access forbidden', ErrorCode.FORBIDDEN, 403);
       }
 
@@ -110,7 +118,11 @@ export async function withApiHandler<T extends NextResponse>(
       }
 
       // Conflict errors
-      if (message.includes('already exists') || message.includes('duplicate') || message.includes('conflict')) {
+      if (
+        message.includes('already exists') ||
+        message.includes('duplicate') ||
+        message.includes('conflict')
+      ) {
         return createErrorResponse('Resource conflict', ErrorCode.CONFLICT, 409);
       }
 
@@ -121,11 +133,7 @@ export async function withApiHandler<T extends NextResponse>(
     }
 
     // Default to internal server error
-    return createErrorResponse(
-      `Operation failed: ${operation}`,
-      ErrorCode.INTERNAL_ERROR,
-      500
-    );
+    return createErrorResponse(`Operation failed: ${operation}`, ErrorCode.INTERNAL_ERROR, 500);
   }
 }
 

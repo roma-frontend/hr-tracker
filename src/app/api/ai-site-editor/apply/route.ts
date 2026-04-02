@@ -4,11 +4,7 @@ import path from 'path';
 
 // ─── Whitelist / Blacklist (дублируем для изоляции endpoint) ──────────────────
 
-const ALLOWED_DIRECTORIES = [
-  'src/app',
-  'src/components',
-  'src/i18n/locales',
-];
+const ALLOWED_DIRECTORIES = ['src/app', 'src/components', 'src/i18n/locales'];
 
 const FORBIDDEN_PATHS = [
   'src/components/ui',
@@ -30,10 +26,7 @@ function isPathAllowed(filePath: string): boolean {
   }
 
   for (const allowed of ALLOWED_DIRECTORIES) {
-    if (
-      normalizedPath.startsWith(allowed) ||
-      normalizedPath.includes(`/${allowed}/`)
-    ) {
+    if (normalizedPath.startsWith(allowed) || normalizedPath.includes(`/${allowed}/`)) {
       return true;
     }
   }
@@ -96,7 +89,7 @@ export async function POST(req: NextRequest) {
     if (!isPathAllowed(filePath)) {
       return NextResponse.json(
         { error: 'Access denied: File is not allowed for editing' },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -108,16 +101,10 @@ export async function POST(req: NextRequest) {
     if (fs.existsSync(fullPath)) {
       if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
 
-      const backupPath = path.join(
-        backupDir,
-        `${path.basename(filePath)}.${timestamp}.backup`
-      );
+      const backupPath = path.join(backupDir, `${path.basename(filePath)}.${timestamp}.backup`);
       fs.copyFileSync(fullPath, backupPath);
 
-      const metaPath = path.join(
-        backupDir,
-        `${path.basename(filePath)}.${timestamp}.meta.json`
-      );
+      const metaPath = path.join(backupDir, `${path.basename(filePath)}.${timestamp}.meta.json`);
       fs.writeFileSync(
         metaPath,
         JSON.stringify(
@@ -127,8 +114,8 @@ export async function POST(req: NextRequest) {
             description: description || 'Manual apply via API',
           },
           null,
-          2
-        )
+          2,
+        ),
       );
     }
 
@@ -159,26 +146,23 @@ export async function DELETE(req: NextRequest) {
     const { filePath, timestamp } = body as { filePath: string; timestamp: number };
 
     if (!filePath || !timestamp) {
-      return NextResponse.json({ error: 'Missing required fields: filePath, timestamp' }, { status: 400 });
-    }
-
-    if (!isPathAllowed(filePath)) {
       return NextResponse.json(
-        { error: 'Access denied: File is not allowed' },
-        { status: 403 }
+        { error: 'Missing required fields: filePath, timestamp' },
+        { status: 400 },
       );
     }
 
+    if (!isPathAllowed(filePath)) {
+      return NextResponse.json({ error: 'Access denied: File is not allowed' }, { status: 403 });
+    }
+
     const backupDir = BACKUP_DIR();
-    const backupPath = path.join(
-      backupDir,
-      `${path.basename(filePath)}.${timestamp}.backup`
-    );
+    const backupPath = path.join(backupDir, `${path.basename(filePath)}.${timestamp}.backup`);
 
     if (!fs.existsSync(backupPath)) {
       return NextResponse.json(
         { error: `Backup not found for ${filePath} at timestamp ${timestamp}` },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -189,13 +173,13 @@ export async function DELETE(req: NextRequest) {
       const rollbackTs = Date.now();
       const rollbackBackupPath = path.join(
         backupDir,
-        `${path.basename(filePath)}.${rollbackTs}.backup`
+        `${path.basename(filePath)}.${rollbackTs}.backup`,
       );
       fs.copyFileSync(fullPath, rollbackBackupPath);
 
       const rollbackMetaPath = path.join(
         backupDir,
-        `${path.basename(filePath)}.${rollbackTs}.meta.json`
+        `${path.basename(filePath)}.${rollbackTs}.meta.json`,
       );
       fs.writeFileSync(
         rollbackMetaPath,
@@ -206,8 +190,8 @@ export async function DELETE(req: NextRequest) {
             description: `Pre-rollback snapshot (rolled back to ts=${timestamp})`,
           },
           null,
-          2
-        )
+          2,
+        ),
       );
     }
 

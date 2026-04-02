@@ -103,7 +103,11 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
   };
 
   if (!alerts || !reviewedAlerts) {
-    return <div className="flex items-center justify-center p-8"><Clock className="w-6 h-6 animate-spin" /></div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Clock className="w-6 h-6 animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -145,7 +149,8 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {t('events.requestingLeave', 'Requesting leave')}: {alert.leaveStartDate} → {alert.leaveEndDate}
+                          {t('events.requestingLeave', 'Requesting leave')}: {alert.leaveStartDate}{' '}
+                          → {alert.leaveEndDate}
                         </p>
                         <p className="text-sm text-red-600 font-medium mt-2">
                           {t('events.conflictsWith', 'Conflicts with')}: {alert.eventName}
@@ -174,7 +179,9 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
         </CardHeader>
         <CardContent>
           {reviewedAlerts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t('events.noReviewedAlerts', 'No reviewed alerts yet')}</p>
+            <p className="text-sm text-muted-foreground">
+              {t('events.noReviewedAlerts', 'No reviewed alerts yet')}
+            </p>
           ) : (
             <div className="space-y-2">
               {reviewedAlerts.slice(0, 5).map((alert: any) => (
@@ -184,9 +191,13 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
                   ) : (
                     <XCircle className="w-4 h-4 text-red-600" />
                   )}
-                  <span className="flex-1">{alert.employeeName} - {alert.eventName}</span>
+                  <span className="flex-1">
+                    {alert.employeeName} - {alert.eventName}
+                  </span>
                   <Badge variant="outline" className="text-xs">
-                    {alert.reviewNotes?.includes('Approved') ? t('common.approved', 'Approved') : t('events.noted', 'Noted')}
+                    {alert.reviewNotes?.includes('Approved')
+                      ? t('common.approved', 'Approved')
+                      : t('events.noted', 'Noted')}
                   </Badge>
                 </div>
               ))}
@@ -209,7 +220,9 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
             <div className="space-y-4">
               {/* Employee Info */}
               <div className="p-4 rounded-lg bg-muted/50 border">
-                <h4 className="font-semibold text-foreground">{t('events.leaveRequest', 'Leave Request')}</h4>
+                <h4 className="font-semibold text-foreground">
+                  {t('events.leaveRequest', 'Leave Request')}
+                </h4>
                 <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
                   <div>
                     <p className="text-muted-foreground">{t('events.employee', 'Employee')}</p>
@@ -223,18 +236,24 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
                   <div>
                     <p className="text-muted-foreground">{t('events.leaveDates', 'Leave Dates')}</p>
                     <p className="font-medium text-foreground">{selectedAlert.leaveStartDate}</p>
-                    <p className="text-muted-foreground text-xs">{t('common.to', 'to')} {selectedAlert.leaveEndDate}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {t('common.to', 'to')} {selectedAlert.leaveEndDate}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">{t('events.leaveType', 'Leave Type')}</p>
-                    <p className="font-medium text-foreground capitalize">{selectedAlert.leaveType}</p>
+                    <p className="font-medium text-foreground capitalize">
+                      {selectedAlert.leaveType}
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Event Info */}
               <div className="p-4 rounded-lg bg-muted/50 border">
-                <h4 className="font-semibold text-foreground">{t('events.conflictingEvent', 'Conflicting Event')}</h4>
+                <h4 className="font-semibold text-foreground">
+                  {t('events.conflictingEvent', 'Conflicting Event')}
+                </h4>
                 <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
                   <div>
                     <p className="text-muted-foreground">{t('events.event', 'Event')}</p>
@@ -243,15 +262,21 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
                   <div>
                     <p className="text-muted-foreground">{t('events.dates', 'Dates')}</p>
                     <p className="font-medium text-foreground">{selectedAlert.eventStartDate}</p>
-                    <p className="text-muted-foreground text-xs">{t('common.to', 'to')} {selectedAlert.eventEndDate}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {t('common.to', 'to')} {selectedAlert.eventEndDate}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">{t('events.conflictType', 'Conflict Type')}</p>
+                    <p className="text-muted-foreground">
+                      {t('events.conflictType', 'Conflict Type')}
+                    </p>
                     <p className="font-medium text-foreground capitalize">
                       {(() => {
                         const conflictType = selectedAlert.conflictType || 'required_department';
                         const typeText = t(`events.conflictType.${conflictType}` as any);
-                        return typeof typeText === 'string' ? typeText : conflictType.replace('_', ' ');
+                        return typeof typeText === 'string'
+                          ? typeText
+                          : conflictType.replace('_', ' ');
                       })()}
                     </p>
                   </div>
@@ -274,7 +299,10 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
                 <Textarea
                   value={reviewNotes}
                   onChange={(e) => setReviewNotes(e.target.value)}
-                  placeholder={t('events.reviewNotesPlaceholder', 'Add notes about your decision...')}
+                  placeholder={t(
+                    'events.reviewNotesPlaceholder',
+                    'Add notes about your decision...',
+                  )}
                   rows={3}
                   className="mt-2"
                 />

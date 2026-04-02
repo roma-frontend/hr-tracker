@@ -4,16 +4,26 @@ import { useState, useRef, useEffect } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-interface FAQ { id: number; questionKey: string; answerKey: string; }
+interface FAQ {
+  id: number;
+  questionKey: string;
+  answerKey: string;
+}
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const el = ref.current; if (!el) return;
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.08, rootMargin: '-30px' }
+      ([e]) => {
+        if (e.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.08, rootMargin: '-30px' },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -30,7 +40,7 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
     <div
       ref={ref}
       className="border-b last:border-0"
-      style={{ 
+      style={{
         borderColor: 'var(--landing-card-border)',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(20px)',
@@ -43,21 +53,28 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
         aria-expanded={isOpen}
         aria-controls={`faq-answer-${faq.id}`}
       >
-        <span className="font-semibold text-lg pr-4 transition-colors" style={{ color: 'var(--landing-text-primary)' }}
-          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--landing-text-primary)'}>
+        <span
+          className="font-semibold text-lg pr-4 transition-colors"
+          style={{ color: 'var(--landing-text-primary)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--landing-text-primary)')}
+        >
           {t(faq.questionKey)}
         </span>
         {/* CSS rotate instead of motion.div */}
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg transition-colors flex items-center justify-center mt-1"
-          style={{ 
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+        <div
+          className="flex-shrink-0 w-8 h-8 rounded-lg transition-colors flex items-center justify-center mt-1"
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), background-color 0.3s',
-            backgroundColor: 'var(--landing-card-bg)'
-          }}>
-          {isOpen
-            ? <Minus size={16} style={{ color: 'var(--primary)' }} />
-            : <Plus size={16} style={{ color: 'var(--primary)' }} />}
+            backgroundColor: 'var(--landing-card-bg)',
+          }}
+        >
+          {isOpen ? (
+            <Minus size={16} style={{ color: 'var(--primary)' }} />
+          ) : (
+            <Plus size={16} style={{ color: 'var(--primary)' }} />
+          )}
         </div>
       </button>
 
@@ -71,7 +88,12 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
           transition: 'max-height 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease',
         }}
       >
-        <p className="leading-relaxed pb-5 pr-12" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>{t(faq.answerKey)}</p>
+        <p
+          className="leading-relaxed pb-5 pr-12"
+          style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+        >
+          {t(faq.answerKey)}
+        </p>
       </div>
     </div>
   );
@@ -94,25 +116,40 @@ export default function FAQSection() {
     <section id="faq" className="relative z-10 px-6 md:px-12 py-20">
       <div className="max-w-4xl mx-auto">
         {/* Section header — reveal on scroll */}
-        <div ref={ref} className="text-center mb-12"
+        <div
+          ref={ref}
+          className="text-center mb-12"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? 'translateY(0)' : 'translateY(30px)',
-            transition: 'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
+            transition:
+              'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
           }}
         >
           <span className="section-eyebrow">{t('faq.title')}</span>
-          <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
+          <h2
+            className="mt-3 text-3xl md:text-5xl font-black leading-tight"
+            style={{ color: 'var(--landing-text-primary)' }}
+          >
             {t('faq.subtitle')}{' '}
             <span className="heading-gradient">{t('faq.subtitleHighlight')}</span>
           </h2>
-          <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
+          <p
+            className="mt-4 max-w-2xl mx-auto text-lg"
+            style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}
+          >
             {t('faq.description')}
           </p>
         </div>
 
         {/* FAQ list */}
-        <div className="relative rounded-2xl border backdrop-blur-xl p-6 md:p-8" style={{ borderColor: 'var(--landing-card-border)', backgroundColor: 'var(--landing-card-bg)' }}>
+        <div
+          className="relative rounded-2xl border backdrop-blur-xl p-6 md:p-8"
+          style={{
+            borderColor: 'var(--landing-card-border)',
+            backgroundColor: 'var(--landing-card-bg)',
+          }}
+        >
           {faqs.map((faq, i) => (
             <FAQItem key={faq.id} faq={faq} delay={i * 0.08} />
           ))}
@@ -120,14 +157,16 @@ export default function FAQSection() {
 
         {/* Still have questions */}
         <div className="text-center mt-10">
-          <p className="mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{t('faq.stillHaveQuestions')}</p>
+          <p className="mb-4" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
+            {t('faq.stillHaveQuestions')}
+          </p>
           <a
             href="mailto:support@hroffice.io"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border transition-all font-medium"
-            style={{ 
-              backgroundColor: 'var(--landing-card-bg)', 
+            style={{
+              backgroundColor: 'var(--landing-card-bg)',
               borderColor: 'var(--landing-card-border)',
-              color: 'var(--landing-text-primary)'
+              color: 'var(--landing-text-primary)',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'var(--card-hover)';

@@ -1,20 +1,20 @@
 /**
  * Pending Approval Page
- * 
+ *
  * Shown to users who are waiting for admin approval to join an organization.
  */
 
-"use client";
+'use client';
 
-import React from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Clock, Mail, Building2, CheckCircle, XCircle } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { signOut } from "next-auth/react";
+import React from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Clock, Mail, Building2, CheckCircle, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { signOut } from 'next-auth/react';
 
 export default function PendingApprovalPage() {
   const { t } = useTranslation();
@@ -23,21 +23,21 @@ export default function PendingApprovalPage() {
   // Get fresh user data from Convex to check if approved
   const freshUserData = useQuery(
     api.users.getCurrentUser,
-    user?.email ? { email: user.email } : "skip"
+    user?.email ? { email: user.email } : 'skip',
   );
 
   const myRequests = useQuery(
     api.organizationJoinRequests.getMyJoinRequests,
-    user?.id ? { userId: user.id as any } : "skip"
+    user?.id ? { userId: user.id as any } : 'skip',
   );
 
-  const pendingRequest = myRequests?.find((req: any) => req.status === "pending");
-  const rejectedRequest = myRequests?.find((req: any) => req.status === "rejected");
+  const pendingRequest = myRequests?.find((req: any) => req.status === 'pending');
+  const rejectedRequest = myRequests?.find((req: any) => req.status === 'rejected');
 
   // Check if user was approved while on this page
   React.useEffect(() => {
     if (freshUserData?.organizationId && freshUserData?.isApproved) {
-      console.log("[PendingPage] ✅ User was approved! Redirecting to dashboard...");
+      console.log('[PendingPage] ✅ User was approved! Redirecting to dashboard...');
       // Update auth store with fresh data
       setUser({
         id: freshUserData._id,
@@ -52,7 +52,7 @@ export default function PendingApprovalPage() {
   }, [freshUserData, setUser]);
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/login" });
+    signOut({ callbackUrl: '/login' });
   };
 
   return (
@@ -64,10 +64,10 @@ export default function PendingApprovalPage() {
             <Clock className="w-10 h-10 text-amber-600" />
           </div>
           <h1 className="text-3xl font-bold mb-2">
-            {t("onboarding.pendingApproval", "Pending Approval")}
+            {t('onboarding.pendingApproval', 'Pending Approval')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {t("onboarding.pendingDesc", "Your request is being reviewed by administrators")}
+            {t('onboarding.pendingDesc', 'Your request is being reviewed by administrators')}
           </p>
         </div>
 
@@ -78,17 +78,17 @@ export default function PendingApprovalPage() {
               <div className="flex items-center gap-2">
                 <XCircle className="w-5 h-5 text-red-600" />
                 <CardTitle className="text-red-800 dark:text-red-200">
-                  {t("onboarding.requestRejected", "Request Rejected")}
+                  {t('onboarding.requestRejected', 'Request Rejected')}
                 </CardTitle>
               </div>
               <CardDescription className="text-red-600 dark:text-red-300">
-                {rejectedRequest.rejectionReason || t("onboarding.noReason", "No reason provided")}
+                {rejectedRequest.rejectionReason || t('onboarding.noReason', 'No reason provided')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleSignOut} className="flex-1">
-                  {t("onboarding.tryAnotherEmail", "Try Another Email")}
+                  {t('onboarding.tryAnotherEmail', 'Try Another Email')}
                 </Button>
               </div>
             </CardContent>
@@ -101,10 +101,10 @@ export default function PendingApprovalPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-blue-600" />
-                <CardTitle>{t("onboarding.requestSent", "Request Sent")}</CardTitle>
+                <CardTitle>{t('onboarding.requestSent', 'Request Sent')}</CardTitle>
               </div>
               <CardDescription>
-                {t("onboarding.waitingForApproval", "Waiting for administrator approval")}
+                {t('onboarding.waitingForApproval', 'Waiting for administrator approval')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -113,29 +113,33 @@ export default function PendingApprovalPage() {
                 <div>
                   <p className="text-sm font-medium">{user?.email}</p>
                   <p className="text-xs text-blue-600">
-                    {t("onboarding.requestSentTo", "Request sent to administrators")}
+                    {t('onboarding.requestSentTo', 'Request sent to administrators')}
                   </p>
                 </div>
               </div>
 
               <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg">
                 <p className="text-sm text-amber-800 dark:text-amber-200">
-                  💡 {t("onboarding.approvalTime", "Administrators typically respond within 24-48 hours")}
+                  💡{' '}
+                  {t(
+                    'onboarding.approvalTime',
+                    'Administrators typically respond within 24-48 hours',
+                  )}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <h4 className="font-medium text-sm">{t("onboarding.nextSteps", "Next Steps")}:</h4>
+                <h4 className="font-medium text-sm">{t('onboarding.nextSteps', 'Next Steps')}:</h4>
                 <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>1. ✅ {t("onboarding.step1", "Request submitted")}</li>
-                  <li>2. ⏳ {t("onboarding.step2", "Wait for admin approval")}</li>
-                  <li>3. 📧 {t("onboarding.step3", "You'll receive an email notification")}</li>
-                  <li>4. 🎉 {t("onboarding.step4", "Access the dashboard")}</li>
+                  <li>1. ✅ {t('onboarding.step1', 'Request submitted')}</li>
+                  <li>2. ⏳ {t('onboarding.step2', 'Wait for admin approval')}</li>
+                  <li>3. 📧 {t('onboarding.step3', "You'll receive an email notification")}</li>
+                  <li>4. 🎉 {t('onboarding.step4', 'Access the dashboard')}</li>
                 </ul>
               </div>
 
               <Button variant="outline" onClick={handleSignOut} className="w-full">
-                {t("onboarding.checkLater", "I'll Check Later")}
+                {t('onboarding.checkLater', "I'll Check Later")}
               </Button>
             </CardContent>
           </Card>
@@ -146,10 +150,10 @@ export default function PendingApprovalPage() {
           <Card>
             <CardContent className="py-8 text-center">
               <p className="text-gray-500">
-                {t("onboarding.noRequest", "No pending requests found")}
+                {t('onboarding.noRequest', 'No pending requests found')}
               </p>
               <Button onClick={handleSignOut} className="mt-4">
-                {t("onboarding.backToLogin", "Back to Login")}
+                {t('onboarding.backToLogin', 'Back to Login')}
               </Button>
             </CardContent>
           </Card>

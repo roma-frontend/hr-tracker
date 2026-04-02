@@ -11,23 +11,23 @@ if (!CONVEX_URL) {
 
 async function convexMutation(name: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: name, args }),
   });
   const data = await res.json();
-  if (data.status === "error") throw new Error(data.errorMessage ?? "Convex error");
+  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
   return data.value;
 }
 
 async function convexQuery(name: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: name, args }),
   });
   const data = await res.json();
-  if (data.status === "error") return null;
+  if (data.status === 'error') return null;
   return data.value;
 }
 
@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
     const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
     // Call Convex login mutation
-    const result = await convexMutation("auth:login", {
+    const result = await convexMutation('auth:login', {
       email,
-      password: "", // Empty password for Face ID login
+      password: '', // Empty password for Face ID login
       sessionToken,
       sessionExpiry,
       isFaceLogin: true,
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       if (maintenanceData?.isActive && maintenanceData.startTime <= Date.now()) {
         return NextResponse.json(
           { error: 'maintenance', organizationId: result.organizationId },
-          { status: 503 }
+          { status: 503 },
         );
       }
     }
@@ -84,19 +84,19 @@ export async function POST(request: NextRequest) {
 
     // Set cookies
     const cookieStore = await cookies();
-    cookieStore.set("hr-auth-token", jwt, {
+    cookieStore.set('hr-auth-token', jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
-    cookieStore.set("hr-session-token", sessionToken, {
+    cookieStore.set('hr-session-token', sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
 
     log.user('Face Login successful', { userId: result.userId, email });
@@ -118,9 +118,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     log.error('Face Login API error', error);
-    return NextResponse.json(
-      { error: error.message || 'Login failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Login failed' }, { status: 500 });
   }
 }

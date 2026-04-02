@@ -1,41 +1,56 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import React from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Minus, Calendar, Users, Briefcase } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import type { Id } from "../../../convex/_generated/dataModel";
+import { useTranslation } from 'react-i18next';
+import React from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Brain,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  CheckCircle,
+  Minus,
+  Calendar,
+  Users,
+  Briefcase,
+} from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 interface AILeaveAssistantProps {
-  leaveRequestId: Id<"leaveRequests">;
-  userId: Id<"users">;
+  leaveRequestId: Id<'leaveRequests'>;
+  userId: Id<'users'>;
   onApprove?: (comment?: string) => void;
   onReject?: (comment?: string) => void;
 }
 
 export default function AILeaveAssistant({
-leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
+  leaveRequestId,
+  userId,
+  onApprove,
+  onReject,
+}: AILeaveAssistantProps) {
   const { t } = useTranslation();
   const evaluation = useQuery(api.aiEvaluator.evaluateLeaveRequest, { leaveRequestId });
-  
+
   // Загружаем информацию о заявке на отпуск для проверки конфликтов
   const leaveRequest = useQuery(api.leaves.getAllLeaves, { requesterId: userId });
   const currentLeave = leaveRequest?.find((l: any) => l._id === leaveRequestId);
-  
+
   // Проверяем конфликты через Conflict Service
-  const conflicts = useQuery(api.conflicts.detectAllConflicts, 
-    currentLeave 
+  const conflicts = useQuery(
+    api.conflicts.detectAllConflicts,
+    currentLeave
       ? {
           organizationId: currentLeave.organizationId,
           startDate: new Date(currentLeave.startDate).getTime(),
           endDate: new Date(currentLeave.endDate).getTime(),
           userId: currentLeave.userId,
         }
-      : 'skip'
+      : 'skip',
   );
 
   if (!evaluation) {
@@ -52,29 +67,43 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
   }
 
   const { leaveEligibilityScore, breakdown, recommendation, confidence, reasoning } = evaluation;
-  
+
   // Фильтруем конфликты, относящиеся к этой заявке
-  const leaveConflicts = conflicts?.filter((c: any) => 
-    c.affectedUsers?.includes(currentLeave?.userId) ||
-    c.affectedDepartments?.includes(currentLeave?.userDepartment)
-  ) || [];
-  
+  const leaveConflicts =
+    conflicts?.filter(
+      (c: any) =>
+        c.affectedUsers?.includes(currentLeave?.userId) ||
+        c.affectedDepartments?.includes(currentLeave?.userDepartment),
+    ) || [];
+
   const criticalConflicts = leaveConflicts.filter((c: any) => c.severity === 'critical');
   const warningConflicts = leaveConflicts.filter((c: any) => c.severity === 'warning');
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
   const getRecommendationBadge = () => {
-    if (recommendation === "APPROVE") {
-      return <Badge variant="success" className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> {t('aiLeave.approve')}</Badge>;
-    } else if (recommendation === "REVIEW") {
-      return <Badge variant="warning" className="flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {t('aiLeave.review')}</Badge>;
+    if (recommendation === 'APPROVE') {
+      return (
+        <Badge variant="success" className="flex items-center gap-1">
+          <CheckCircle className="w-3 h-3" /> {t('aiLeave.approve')}
+        </Badge>
+      );
+    } else if (recommendation === 'REVIEW') {
+      return (
+        <Badge variant="warning" className="flex items-center gap-1">
+          <AlertCircle className="w-3 h-3" /> {t('aiLeave.review')}
+        </Badge>
+      );
     } else {
-      return <Badge variant="destructive" className="flex items-center gap-1"><Minus className="w-3 h-3" /> {t('aiLeave.reject')}</Badge>;
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <Minus className="w-3 h-3" /> {t('aiLeave.reject')}
+        </Badge>
+      );
     }
   };
 
@@ -90,7 +119,15 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
         </div>
         <div className="flex items-center gap-2 mt-2">
           <span className="text-sm text-[var(--text-muted)]">{t('aiLeave.confidence')}:</span>
-          <Badge variant={confidence === "HIGH" ? "success" : confidence === "MEDIUM" ? "warning" : "destructive"}>
+          <Badge
+            variant={
+              confidence === 'HIGH'
+                ? 'success'
+                : confidence === 'MEDIUM'
+                  ? 'warning'
+                  : 'destructive'
+            }
+          >
             {confidence}
           </Badge>
         </div>
@@ -152,13 +189,9 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
           <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium text-green-700">
-                {t('aiLeave.noConflicts')}
-              </span>
+              <span className="text-sm font-medium text-green-700">{t('aiLeave.noConflicts')}</span>
             </div>
-            <p className="text-xs text-green-600 mt-1">
-              {t('aiLeave.noConflictsDesc')}
-            </p>
+            <p className="text-xs text-green-600 mt-1">{t('aiLeave.noConflictsDesc')}</p>
           </div>
         )}
 
@@ -186,7 +219,9 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[var(--text-muted)]">{t('employeeInfo.attendance')}Attendance</span>
+              <span className="text-[var(--text-muted)]">
+                {t('employeeInfo.attendance')}Attendance
+              </span>
               <span className={`font-medium ${getScoreColor(breakdown.attendance.score)}`}>
                 {breakdown.attendance.score}%
               </span>
@@ -219,9 +254,7 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
             <Brain className="w-4 h-4" />
             {t('aiFeatures.aiAnalysis')}
           </h4>
-          <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-            {reasoning}
-          </p>
+          <p className="text-sm text-[var(--text-muted)] leading-relaxed">{reasoning}</p>
         </div>
 
         {/* Key Factors */}
@@ -230,9 +263,9 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
           <div className="space-y-1.5">
             {breakdown.performance.factors.slice(0, 2).map((factor: any, i: any) => (
               <div key={i} className="flex items-start gap-2 text-xs">
-                {factor.startsWith("✅") ? (
+                {factor.startsWith('✅') ? (
                   <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
-                ) : factor.startsWith("⚠️") ? (
+                ) : factor.startsWith('⚠️') ? (
                   <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
                 ) : (
                   <Minus className="w-3 h-3 text-red-600 mt-0.5 flex-shrink-0" />
@@ -242,9 +275,9 @@ leaveRequestId, userId, onApprove, onReject }: AILeaveAssistantProps) {
             ))}
             {breakdown.workload.factors.slice(0, 1).map((factor: any, i: any) => (
               <div key={i} className="flex items-start gap-2 text-xs">
-                {factor.startsWith("✅") ? (
+                {factor.startsWith('✅') ? (
                   <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
-                ) : factor.startsWith("⚠️") ? (
+                ) : factor.startsWith('⚠️') ? (
                   <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
                 ) : (
                   <Minus className="w-3 h-3 text-red-600 mt-0.5 flex-shrink-0" />

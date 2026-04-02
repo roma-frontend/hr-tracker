@@ -14,22 +14,16 @@ const LoadingSpinner = () => (
 );
 
 // ===== 3D КОМПОНЕНТЫ (Three.js - очень тяжелый) =====
-export const Lazy3DScene = dynamic(
-  () => Promise.resolve({ default: () => null }),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const Lazy3DScene = dynamic(() => Promise.resolve({ default: () => null }), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 // ===== AI CHAT WIDGET (большие AI библиотеки) =====
-export const LazyChatWidget = dynamic(
-  () => import('@/components/ai/ChatWidget'),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const LazyChatWidget = dynamic(() => import('@/components/ai/ChatWidget'), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 // ===== CHARTS (Recharts - тяжелая библиотека) =====
 export const LazyChart = dynamic(
@@ -37,79 +31,67 @@ export const LazyChart = dynamic(
   {
     loading: () => <LoadingSpinner />,
     ssr: false,
-  }
+  },
 );
 
-export const LazyRevenueChart = dynamic(
-  () => Promise.resolve({ default: () => null }),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const LazyRevenueChart = dynamic(() => Promise.resolve({ default: () => null }), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 // ===== FACE RECOGNITION (face-api.js - очень тяжелый) =====
-export const LazyFaceRecognition = dynamic(
-  () => Promise.resolve({ default: () => null }),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const LazyFaceRecognition = dynamic(() => Promise.resolve({ default: () => null }), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 // ===== CALENDAR (react-day-picker) =====
 export const LazyCalendar = dynamic(
-  () => import('@/components/ui/calendar').then(mod => ({ default: mod.Calendar })).catch(() => ({ default: () => null })),
+  () =>
+    import('@/components/ui/calendar')
+      .then((mod) => ({ default: mod.Calendar }))
+      .catch(() => ({ default: () => null })),
   {
     loading: () => <LoadingSpinner />,
     ssr: true,
-  }
+  },
 );
 
 // ===== RICH TEXT EDITOR =====
-export const LazyRichEditor = dynamic(
-  () => Promise.resolve({ default: () => null }),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const LazyRichEditor = dynamic(() => Promise.resolve({ default: () => null }), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 // ===== PDF VIEWER/GENERATOR =====
-export const LazyPDFViewer = dynamic(
-  () => Promise.resolve({ default: () => null }),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const LazyPDFViewer = dynamic(() => Promise.resolve({ default: () => null }), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 // ===== EXCEL EXPORT =====
-export const LazyExcelExport = dynamic(
-  () => Promise.resolve({ default: () => null }),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const LazyExcelExport = dynamic(() => Promise.resolve({ default: () => null }), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 // ===== МОДАЛЫ =====
 export const LazyModal = dynamic(
-  () => import('@/components/ui/dialog').then(mod => ({ default: mod.Dialog })).catch(() => ({ default: () => null })),
+  () =>
+    import('@/components/ui/dialog')
+      .then((mod) => ({ default: mod.Dialog }))
+      .catch(() => ({ default: () => null })),
   {
     loading: () => null,
     ssr: false,
-  }
+  },
 );
 
 // ===== ПРОФИЛЬ С АВАТАРОМ =====
-export const LazyAvatarUpload = dynamic(
-  () => Promise.resolve({ default: () => null }),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false,
-  }
-);
+export const LazyAvatarUpload = dynamic(() => Promise.resolve({ default: () => null }), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 export default {
   Lazy3DScene,

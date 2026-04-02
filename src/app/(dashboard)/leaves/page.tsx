@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 function LeavesSkeleton() {
   return (
@@ -14,13 +14,10 @@ function LeavesSkeleton() {
   );
 }
 
-const LeavesClient = dynamic(
-  () => import("@/components/leaves/LeavesClient"),
-  {
-    ssr: false,
-    loading: () => <LeavesSkeleton />,
-  }
-);
+const LeavesClient = dynamic(() => import('@/components/leaves/LeavesClient'), {
+  ssr: false,
+  loading: () => <LeavesSkeleton />,
+});
 
 export default function LeavesPage() {
   return <LeavesClient />;

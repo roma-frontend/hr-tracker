@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
@@ -39,7 +39,7 @@ export function SmartPasswordInput({
     const newPassword = generateSecurePassword();
     onChange(newPassword);
     setShowPassword(true);
-    
+
     // Auto-copy to clipboard
     navigator.clipboard.writeText(newPassword);
     setCopied(true);
@@ -57,16 +57,15 @@ export function SmartPasswordInput({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label htmlFor="password" className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]">
+        <Label
+          htmlFor="password"
+          className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]"
+        >
           {label}
           {required && <span className="text-red-500">*</span>}
         </Label>
 
-        {forgotPasswordLink && (
-          <div className="ml-2">
-            {forgotPasswordLink}
-          </div>
-        )}
+        {forgotPasswordLink && <div className="ml-2">{forgotPasswordLink}</div>}
 
         {showGenerator && !forgotPasswordLink && (
           <motion.button
@@ -120,8 +119,18 @@ export function SmartPasswordInput({
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
                   >
-                    <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-4 h-4 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   </motion.div>
                 ) : (
@@ -175,7 +184,12 @@ export function SmartPasswordInput({
             className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             Пароль скопирован в буфер обмена!
           </motion.div>
@@ -183,9 +197,7 @@ export function SmartPasswordInput({
       </AnimatePresence>
 
       {/* Password strength indicator */}
-      {showStrength && value && (
-        <PasswordStrengthIndicator password={value} />
-      )}
+      {showStrength && value && <PasswordStrengthIndicator password={value} />}
     </div>
   );
 }

@@ -1,24 +1,24 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import React, { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Settings, Save, AlertCircle } from "lucide-react";
+import React, { useState } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Settings, Save, AlertCircle } from 'lucide-react';
 import { motion } from '@/lib/cssMotion';
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from '@/store/useAuthStore';
 
 function SLASettings() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const config = useQuery(api.sla.getSLAConfig);
   const updateConfig = useMutation(api.sla.updateSLAConfig);
-  
+
   const [targetHours, setTargetHours] = useState(24);
   const [warningThreshold, setWarningThreshold] = useState(75);
   const [criticalThreshold, setCriticalThreshold] = useState(90);
@@ -34,7 +34,7 @@ function SLASettings() {
 
   const handleSave = async () => {
     if (!user?.id) return;
-    
+
     setIsSaving(true);
     try {
       await updateConfig({
@@ -88,7 +88,7 @@ function SLASettings() {
             className="max-w-xs"
           />
           <p className="text-xs text-[var(--text-muted)]">
-            {t("sla.targetHint", { hours: targetHours })}
+            {t('sla.targetHint', { hours: targetHours })}
           </p>
         </div>
 
@@ -112,7 +112,7 @@ function SLASettings() {
             </span>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
-            {t("sla.warningHint", { percent: warningThreshold })}
+            {t('sla.warningHint', { percent: warningThreshold })}
           </p>
         </div>
 
@@ -136,7 +136,7 @@ function SLASettings() {
             </span>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
-            {t("sla.criticalHint", { percent: criticalThreshold })}
+            {t('sla.criticalHint', { percent: criticalThreshold })}
           </p>
         </div>
 
@@ -149,7 +149,7 @@ function SLASettings() {
           >
             <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-600 dark:text-amber-400">
-              {t("sla.thresholdError")}
+              {t('sla.thresholdError')}
             </div>
           </motion.div>
         )}
@@ -162,7 +162,7 @@ function SLASettings() {
             className="bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? t("common.loading") : t("sla.saveConfig")}
+            {isSaving ? t('common.loading') : t('sla.saveConfig')}
           </Button>
         </div>
       </CardContent>
@@ -171,4 +171,3 @@ function SLASettings() {
 }
 
 export default SLASettings;
-

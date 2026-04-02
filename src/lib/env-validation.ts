@@ -9,12 +9,7 @@ interface EnvConfig {
 }
 
 const ENV_CONFIG: EnvConfig = {
-  required: [
-    'CONVEX_DEPLOYMENT',
-    'NEXT_PUBLIC_CONVEX_URL',
-    'NEXTAUTH_SECRET',
-    'NEXTAUTH_URL',
-  ],
+  required: ['CONVEX_DEPLOYMENT', 'NEXT_PUBLIC_CONVEX_URL', 'NEXTAUTH_SECRET', 'NEXTAUTH_URL'],
   optional: [
     'GROQ_API_KEY',
     'STRIPE_SECRET_KEY',
@@ -30,9 +25,7 @@ const ENV_CONFIG: EnvConfig = {
  * Throws error if any are missing
  */
 export function validateEnvironment(): void {
-  const missing = ENV_CONFIG.required.filter(
-    (key) => !process.env[key]
-  );
+  const missing = ENV_CONFIG.required.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {
     const message = `Missing required environment variables: ${missing.join(', ')}`;

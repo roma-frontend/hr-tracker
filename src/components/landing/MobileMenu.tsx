@@ -2,8 +2,17 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useTranslation } from "react-i18next";
-import { X, Home, Sparkles, BarChart3, DollarSign, MessageCircle, LogIn, Rocket } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  X,
+  Home,
+  Sparkles,
+  BarChart3,
+  DollarSign,
+  MessageCircle,
+  LogIn,
+  Rocket,
+} from 'lucide-react';
 import Link from 'next/link';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
@@ -35,10 +44,10 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       // Just prevent body scrolling without changing position
       const originalOverflow = document.body.style.overflow;
       const originalTouchAction = document.body.style.touchAction;
-      
+
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
-      
+
       return () => {
         document.body.style.overflow = originalOverflow;
         document.body.style.touchAction = originalTouchAction;
@@ -48,8 +57,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { 
-      if (e.key === 'Escape' && isOpen) onClose(); 
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) onClose();
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -59,7 +68,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     onClose();
-    
+
     setTimeout(() => {
       const element = document.querySelector(href);
       if (element) {
@@ -99,31 +108,36 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         aria-label="Mobile navigation menu"
       >
         {/* Gradient Header */}
-        <div 
+        <div
           className="relative flex items-center justify-between p-5 border-b overflow-hidden"
-          style={{ 
+          style={{
             borderColor: 'var(--landing-card-border)',
-            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(59, 130, 246, 0.05))'
+            background:
+              'linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(59, 130, 246, 0.05))',
           }}
         >
           {/* Decorative gradient orb */}
-          <div 
+          <div
             className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-20"
             style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }}
           />
-          
+
           <div className="relative z-10">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 cursor-pointer">
-              <div 
+              <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg"
                 style={{
-                  background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)",
+                  background:
+                    'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
                 }}
               >
                 <span className="text-white font-bold text-sm">HR</span>
               </div>
               <div>
-                <h2 className="font-bold text-base" style={{ color: 'var(--landing-text-primary)' }}>
+                <h2
+                  className="font-bold text-base"
+                  style={{ color: 'var(--landing-text-primary)' }}
+                >
                   {t('sidebar.appName')}
                 </h2>
                 <p className="text-[10px]" style={{ color: 'var(--landing-text-muted)' }}>
@@ -137,9 +151,9 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <button
             onClick={onClose}
             className="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 hover:rotate-90 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-            style={{ 
+            style={{
               backgroundColor: 'var(--landing-card-bg)',
-              color: 'var(--landing-text-primary)'
+              color: 'var(--landing-text-primary)',
             }}
             aria-label="Close menu"
           >
@@ -148,8 +162,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         </div>
 
         {/* Navigation Links */}
-        <nav 
-          className="flex-1 overflow-y-auto px-4 py-6 custom-scrollbar" 
+        <nav
+          className="flex-1 overflow-y-auto px-4 py-6 custom-scrollbar"
           aria-label="Mobile navigation"
           style={{ minHeight: 0 }}
         >
@@ -164,18 +178,20 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   className="group flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 relative"
                 >
                   {/* Hover background effect */}
-                  <div 
+                  <div
                     className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ 
-                      background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05))'
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05))',
                     }}
                   />
 
                   {/* Icon Container */}
-                  <div 
+                  <div
                     className="relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-sm"
-                    style={{ 
-                      background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(59, 130, 246, 0.1))',
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(59, 130, 246, 0.1))',
                       border: '1px solid var(--landing-card-border)',
                       backdropFilter: 'blur(8px)',
                     }}
@@ -184,7 +200,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   </div>
 
                   {/* Label */}
-                  <span 
+                  <span
                     className="relative flex-1 font-semibold text-sm group-hover:translate-x-1 transition-all duration-300"
                     style={{ color: 'var(--landing-text-primary)' }}
                   >
@@ -192,7 +208,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   </span>
 
                   {/* Arrow indicator */}
-                  <div 
+                  <div
                     className="relative opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1"
                     style={{ color: 'var(--primary)' }}
                   >
@@ -204,7 +220,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </div>
 
           {/* Language Switcher inside scrollable area */}
-          <div 
+          <div
             className="pt-6 pb-2 border-t mt-6"
             style={{
               borderColor: 'var(--landing-card-border)',
@@ -217,7 +233,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         </nav>
 
         {/* Footer with CTAs - OUTSIDE scrollable area, always visible */}
-        <div 
+        <div
           className="px-4 pb-6 pt-4 space-y-3 border-t"
           style={{
             borderColor: 'rgba(209, 213, 219, 0.3)',
@@ -229,7 +245,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         >
           {/* Sign In Button */}
           <Link href="/login" onClick={onClose} className="block">
-            <button 
+            <button
               className="w-full px-5 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group border"
               style={{
                 color: 'var(--landing-text-primary)',
@@ -244,7 +260,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
           {/* Get Started Button */}
           <Link href="/register" onClick={onClose} className="block">
-            <button 
+            <button
               className="w-full px-5 py-3.5 rounded-xl font-bold transition-all duration-200 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
@@ -254,10 +270,11 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               }}
             >
               {/* Shine effect */}
-              <div 
+              <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                  background:
+                    'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
                   transform: 'translateX(-100%)',
                 }}
               />
@@ -287,5 +304,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     </>
   );
 
-  return mounted && typeof document !== 'undefined' ? createPortal(menuContent, document.body) : null;
+  return mounted && typeof document !== 'undefined'
+    ? createPortal(menuContent, document.body)
+    : null;
 }

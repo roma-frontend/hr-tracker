@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import React from "react";
+import { useTranslation } from 'react-i18next';
+import React from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { Zap } from "lucide-react";
+import { Zap } from 'lucide-react';
 
 interface FocusModeIndicatorProps {
   enabled: boolean;
@@ -11,10 +11,10 @@ interface FocusModeIndicatorProps {
   workHoursEnd?: string;
 }
 
-export default function FocusModeIndicator({ 
-enabled,
-  workHoursStart = "09:00",
-  workHoursEnd = "18:00",
+export default function FocusModeIndicator({
+  enabled,
+  workHoursStart = '09:00',
+  workHoursEnd = '18:00',
 }: FocusModeIndicatorProps) {
   const { t } = useTranslation();
   const [isWithinWorkHours, setIsWithinWorkHours] = React.useState(false);
@@ -22,7 +22,7 @@ enabled,
   React.useEffect(() => {
     const checkWorkHours = () => {
       const now = new Date();
-      const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       setIsWithinWorkHours(currentTime >= workHoursStart && currentTime <= workHoursEnd);
     };
 

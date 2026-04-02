@@ -1,66 +1,66 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from '@/lib/cssMotion';
-import { Building2, Check, Zap, Crown, ArrowRight } from "lucide-react";
+import { Building2, Check, Zap, Crown, ArrowRight } from 'lucide-react';
 
-type Plan = "starter" | "professional" | "enterprise";
+type Plan = 'starter' | 'professional' | 'enterprise';
 
 const plans = [
   {
-    id: "starter" as Plan,
-    name: "Starter",
-    price: "Free",
-    description: "Perfect for small teams getting started",
+    id: 'starter' as Plan,
+    name: 'Starter',
+    price: 'Free',
+    description: 'Perfect for small teams getting started',
     icon: Zap,
-    color: "from-green-500 to-emerald-500",
+    color: 'from-green-500 to-emerald-500',
     features: [
-      "Up to 10 employees",
-      "Basic leave management",
-      "Time tracking",
-      "Employee profiles",
-      "Email notifications",
-      "Community support",
+      'Up to 10 employees',
+      'Basic leave management',
+      'Time tracking',
+      'Employee profiles',
+      'Email notifications',
+      'Community support',
     ],
     instant: true,
   },
   {
-    id: "professional" as Plan,
-    name: "Professional",
-    price: "$29/mo",
-    description: "For growing teams with advanced needs",
+    id: 'professional' as Plan,
+    name: 'Professional',
+    price: '$29/mo',
+    description: 'For growing teams with advanced needs',
     icon: Building2,
-    color: "from-blue-500 to-cyan-500",
+    color: 'from-blue-500 to-cyan-500',
     features: [
-      "Up to 50 employees",
-      "Everything in Starter",
-      "Advanced analytics",
-      "Custom workflows",
-      "Priority support",
-      "API access",
-      "Integrations",
+      'Up to 50 employees',
+      'Everything in Starter',
+      'Advanced analytics',
+      'Custom workflows',
+      'Priority support',
+      'API access',
+      'Integrations',
     ],
     instant: false,
     popular: true,
   },
   {
-    id: "enterprise" as Plan,
-    name: "Enterprise",
-    price: "Custom",
-    description: "Unlimited scale for large organizations",
+    id: 'enterprise' as Plan,
+    name: 'Enterprise',
+    price: 'Custom',
+    description: 'Unlimited scale for large organizations',
     icon: Crown,
-    color: "from-purple-500 to-pink-500",
+    color: 'from-purple-500 to-pink-500',
     features: [
-      "100+ employees",
-      "Everything in Professional",
-      "Dedicated support",
-      "Custom integrations",
-      "SLA guarantee",
-      "Advanced security",
-      "Training & onboarding",
+      '100+ employees',
+      'Everything in Professional',
+      'Dedicated support',
+      'Custom integrations',
+      'SLA guarantee',
+      'Advanced security',
+      'Training & onboarding',
     ],
     instant: false,
   },
@@ -74,7 +74,7 @@ export default function RegisterOrgPage() {
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan);
     // Navigate to registration form with plan
-    if (plan === "starter") {
+    if (plan === 'starter') {
       router.push(`/register-org/create?plan=${plan}`);
     } else {
       router.push(`/register-org/request?plan=${plan}`);
@@ -84,17 +84,17 @@ export default function RegisterOrgPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "var(--background)" }}
+      style={{ background: 'var(--background)' }}
     >
       {/* Background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #2563eb, transparent)" }}
+          style={{ background: 'radial-gradient(circle, #2563eb, transparent)' }}
         />
         <div
           className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #0ea5e9, transparent)" }}
+          style={{ background: 'radial-gradient(circle, #0ea5e9, transparent)' }}
         />
       </div>
 
@@ -106,10 +106,10 @@ export default function RegisterOrgPage() {
       >
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+          <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Choose Your Plan
           </h1>
-          <p className="text-lg" style={{ color: "var(--text-muted)" }}>
+          <p className="text-lg" style={{ color: 'var(--text-muted)' }}>
             Start managing your team today
           </p>
         </div>
@@ -125,12 +125,12 @@ export default function RegisterOrgPage() {
                 whileTap={{ scale: 0.98 }}
                 className={`relative rounded-2xl p-6 cursor-pointer border-2 transition-all ${
                   selectedPlan === plan.id
-                    ? "border-blue-500 shadow-xl"
-                    : "border-transparent hover:border-blue-300"
+                    ? 'border-blue-500 shadow-xl'
+                    : 'border-transparent hover:border-blue-300'
                 }`}
                 style={{
-                  background: "var(--card)",
-                  boxShadow: plan.popular ? "0 0 30px rgba(37,99,235,0.2)" : undefined,
+                  background: 'var(--card)',
+                  boxShadow: plan.popular ? '0 0 30px rgba(37,99,235,0.2)' : undefined,
                 }}
                 onClick={() => handleSelectPlan(plan.id)}
               >
@@ -150,14 +150,16 @@ export default function RegisterOrgPage() {
                 </div>
 
                 {/* Plan details */}
-                <h3 className="text-2xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
+                <h3 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                   {plan.name}
                 </h3>
-                <p className="text-3xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent"
-                   style={{ backgroundImage: `linear-gradient(135deg, ${plan.color})` }}>
+                <p
+                  className="text-3xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent"
+                  style={{ backgroundImage: `linear-gradient(135deg, ${plan.color})` }}
+                >
                   {plan.price}
                 </p>
-                <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
                   {plan.description}
                 </p>
 
@@ -166,7 +168,7 @@ export default function RegisterOrgPage() {
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
                       <Check className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
-                      <span style={{ color: "var(--text-secondary)" }}>{feature}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -181,7 +183,7 @@ export default function RegisterOrgPage() {
                 </button>
 
                 {!plan.instant && (
-                  <p className="text-xs text-center mt-3" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-xs text-center mt-3" style={{ color: 'var(--text-muted)' }}>
                     Approval within 24 hours
                   </p>
                 )}
@@ -192,13 +194,17 @@ export default function RegisterOrgPage() {
 
         {/* Footer */}
         <div className="text-center">
-          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
-            {t('auth.alreadyHaveOrg')}{" "}
+          <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+            {t('auth.alreadyHaveOrg')}{' '}
             <Link href="/register" className="font-semibold hover:underline text-blue-500">
               {t('auth.joinExistingTeam')}
             </Link>
           </p>
-          <Link href="/login" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
+          <Link
+            href="/login"
+            className="text-sm hover:underline"
+            style={{ color: 'var(--text-muted)' }}
+          >
             ← {t('ui.backToLogin')}
           </Link>
         </div>

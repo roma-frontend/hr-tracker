@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface OrgSelectorState {
   selectedOrgId: string | null;
@@ -16,12 +16,11 @@ export const useOrgSelectorStore = create<OrgSelectorState>()(
         return set({ selectedOrgId: orgId });
       },
 
-      clearSelection: () =>
-        set({ selectedOrgId: null }),
+      clearSelection: () => set({ selectedOrgId: null }),
     }),
     {
-      name: "org-selector-store",
+      name: 'org-selector-store',
       version: 1,
-    }
-  )
+    },
+  ),
 );

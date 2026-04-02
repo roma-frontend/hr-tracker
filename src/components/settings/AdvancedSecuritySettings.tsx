@@ -1,17 +1,28 @@
-"use client";
+'use client';
 import Image from 'next/image';
 
-import { useTranslation } from "react-i18next";
-import React, { useState, useEffect, useRef } from "react";
-import { Shield, Smartphone, History, Key, AlertTriangle, ShieldCheck, Copy, Check, Loader2, X } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Shield,
+  Smartphone,
+  History,
+  Key,
+  AlertTriangle,
+  ShieldCheck,
+  Copy,
+  Check,
+  Loader2,
+  X,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
 
-type SetupStep = "idle" | "loading" | "qr" | "verify" | "backup" | "done";
+type SetupStep = 'idle' | 'loading' | 'qr' | 'verify' | 'backup' | 'done';
 
 export function AdvancedSecuritySettings() {
   const { t } = useTranslation();
@@ -21,11 +32,11 @@ export function AdvancedSecuritySettings() {
   const [loading, setLoading] = useState(true);
 
   // 2FA setup state
-  const [setupStep, setSetupStep] = useState<SetupStep>("idle");
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
-  const [totpSecret, setTotpSecret] = useState("");
+  const [setupStep, setSetupStep] = useState<SetupStep>('idle');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [totpSecret, setTotpSecret] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [verifyCode, setVerifyCode] = useState("");
+  const [verifyCode, setVerifyCode] = useState('');
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [copiedSecret, setCopiedSecret] = useState(false);
   const [copiedCodes, setCopiedCodes] = useState(false);
@@ -33,7 +44,7 @@ export function AdvancedSecuritySettings() {
 
   // Disable 2FA state
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
-  const [disablePassword, setDisablePassword] = useState("");
+  const [disablePassword, setDisablePassword] = useState('');
   const [disableError, setDisableError] = useState<string | null>(null);
   const [disableLoading, setDisableLoading] = useState(false);
 
@@ -58,7 +69,8 @@ export function AdvancedSecuritySettings() {
           const data = await res.json();
           setTwoFactorEnabled(data.totpEnabled);
         }
-      } catch {} finally {
+      } catch {
+      } finally {
         setLoading(false);
       }
     }
@@ -67,7 +79,7 @@ export function AdvancedSecuritySettings() {
 
   // Start 2FA setup
   const handleStartSetup = async () => {
-    setSetupStep("loading");
+    setSetupStep('loading');
     try {
       const res = await fetch('/api/auth/totp/setup', {
         method: 'POST',
@@ -82,10 +94,10 @@ export function AdvancedSecuritySettings() {
       setQrCodeUrl(data.qrCodeUrl);
       setTotpSecret(data.secret);
       setBackupCodes(data.backupCodes);
-      setSetupStep("qr");
+      setSetupStep('qr');
     } catch (err: any) {
       toast.error(err.message || 'Failed to start 2FA setup');
-      setSetupStep("idle");
+      setSetupStep('idle');
     }
   };
 
@@ -102,21 +114,21 @@ export function AdvancedSecuritySettings() {
       if (!res.ok) {
         const err = await res.json();
         setVerifyError(err.error || 'Invalid code');
-        setVerifyCode("");
+        setVerifyCode('');
         return;
       }
-      setSetupStep("backup");
+      setSetupStep('backup');
       setTwoFactorEnabled(true);
       toast.success(t('toasts.twoFactorEnabled'));
     } catch (err: any) {
       setVerifyError(err.message || 'Verification failed');
-      setVerifyCode("");
+      setVerifyCode('');
     }
   };
 
   // Auto-submit on 6 digits
   useEffect(() => {
-    if (verifyCode.length === 6 && setupStep === "verify") {
+    if (verifyCode.length === 6 && setupStep === 'verify') {
       handleVerifySetup();
     }
   }, [verifyCode, setupStep]);
@@ -139,7 +151,7 @@ export function AdvancedSecuritySettings() {
       }
       setTwoFactorEnabled(false);
       setShowDisableConfirm(false);
-      setDisablePassword("");
+      setDisablePassword('');
       toast.success(t('toasts.twoFactorDisabled'));
     } catch (err: any) {
       setDisableError(err.message || 'Failed to disable 2FA');
@@ -148,9 +160,9 @@ export function AdvancedSecuritySettings() {
     }
   };
 
-  const copyToClipboard = (text: string, type: "secret" | "codes") => {
+  const copyToClipboard = (text: string, type: 'secret' | 'codes') => {
     navigator.clipboard.writeText(text);
-    if (type === "secret") {
+    if (type === 'secret') {
       setCopiedSecret(true);
       setTimeout(() => setCopiedSecret(false), 2000);
     } else {
@@ -161,15 +173,57 @@ export function AdvancedSecuritySettings() {
 
   // Mock data for sessions and login history
   const activeSessions = [
-    { id: 1, device: "Chrome on Windows", location: "Moscow, Russia", ip: "192.168.1.1", lastActive: "Just now", current: true },
-    { id: 2, device: "Safari on iPhone", location: "Moscow, Russia", ip: "192.168.1.25", lastActive: "2 hours ago", current: false },
+    {
+      id: 1,
+      device: 'Chrome on Windows',
+      location: 'Moscow, Russia',
+      ip: '192.168.1.1',
+      lastActive: 'Just now',
+      current: true,
+    },
+    {
+      id: 2,
+      device: 'Safari on iPhone',
+      location: 'Moscow, Russia',
+      ip: '192.168.1.25',
+      lastActive: '2 hours ago',
+      current: false,
+    },
   ];
 
   const loginHistory = [
-    { id: 1, date: "2024-02-28 09:15", device: "Chrome on Windows", location: "Moscow, Russia", ip: "192.168.1.1", status: "success" },
-    { id: 2, date: "2024-02-27 18:30", device: "Safari on iPhone", location: "Moscow, Russia", ip: "192.168.1.25", status: "success" },
-    { id: 3, date: "2024-02-27 09:00", device: "Chrome on Windows", location: "Moscow, Russia", ip: "192.168.1.1", status: "success" },
-    { id: 4, date: "2024-02-26 17:45", device: "Firefox on MacOS", location: "Unknown", ip: "203.0.113.0", status: "failed" },
+    {
+      id: 1,
+      date: '2024-02-28 09:15',
+      device: 'Chrome on Windows',
+      location: 'Moscow, Russia',
+      ip: '192.168.1.1',
+      status: 'success',
+    },
+    {
+      id: 2,
+      date: '2024-02-27 18:30',
+      device: 'Safari on iPhone',
+      location: 'Moscow, Russia',
+      ip: '192.168.1.25',
+      status: 'success',
+    },
+    {
+      id: 3,
+      date: '2024-02-27 09:00',
+      device: 'Chrome on Windows',
+      location: 'Moscow, Russia',
+      ip: '192.168.1.1',
+      status: 'success',
+    },
+    {
+      id: 4,
+      date: '2024-02-26 17:45',
+      device: 'Firefox on MacOS',
+      location: 'Unknown',
+      ip: '203.0.113.0',
+      status: 'failed',
+    },
   ];
 
   return (
@@ -183,7 +237,10 @@ export function AdvancedSecuritySettings() {
               <CardTitle>{t('settingsAdvancedSecurity.twoFactor')}</CardTitle>
             </div>
             {twoFactorEnabled && (
-              <Badge variant="default" className="bg-green-500/10 text-green-600 border-green-500/20">
+              <Badge
+                variant="default"
+                className="bg-green-500/10 text-green-600 border-green-500/20"
+              >
                 <ShieldCheck className="w-3 h-3 mr-1" />
                 Enabled
               </Badge>
@@ -193,17 +250,19 @@ export function AdvancedSecuritySettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Status / Toggle */}
-          {setupStep === "idle" && !showDisableConfirm && (
+          {setupStep === 'idle' && !showDisableConfirm && (
             <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🔐</span>
                 <div>
                   <p className="text-sm font-medium text-[var(--text-primary)]">
-                    {twoFactorEnabled ? "Two-factor authentication is active" : t('settingsAdvancedSecurity.enable2fa')}
+                    {twoFactorEnabled
+                      ? 'Two-factor authentication is active'
+                      : t('settingsAdvancedSecurity.enable2fa')}
                   </p>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">
                     {twoFactorEnabled
-                      ? "Your account is protected with an authenticator app"
+                      ? 'Your account is protected with an authenticator app'
                       : t('settingsAdvancedSecurity.enable2faDesc')}
                   </p>
                 </div>
@@ -218,20 +277,15 @@ export function AdvancedSecuritySettings() {
                   Disable
                 </Button>
               ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleStartSetup}
-                  disabled={loading}
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enable"}
+                <Button variant="default" size="sm" onClick={handleStartSetup} disabled={loading}>
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enable'}
                 </Button>
               )}
             </div>
           )}
 
           {/* Loading */}
-          {setupStep === "loading" && (
+          {setupStep === 'loading' && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-[var(--primary)]" />
               <span className="ml-2 text-sm text-[var(--text-muted)]">Setting up 2FA...</span>
@@ -239,7 +293,7 @@ export function AdvancedSecuritySettings() {
           )}
 
           {/* QR Code Step */}
-          {setupStep === "qr" && (
+          {setupStep === 'qr' && (
             <div className="space-y-4">
               <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
                 <p className="text-sm font-medium text-[var(--text-primary)] mb-3">
@@ -254,7 +308,9 @@ export function AdvancedSecuritySettings() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-[var(--text-muted)] mb-1">Or enter this code manually:</p>
+                  <p className="text-xs text-[var(--text-muted)] mb-1">
+                    Or enter this code manually:
+                  </p>
                   <div className="flex items-center justify-center gap-2">
                     <code className="text-sm font-mono bg-[var(--surface-hover)] px-3 py-1.5 rounded border border-[var(--border)]">
                       {totpSecret}
@@ -262,9 +318,13 @@ export function AdvancedSecuritySettings() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => copyToClipboard(totpSecret, "secret")}
+                      onClick={() => copyToClipboard(totpSecret, 'secret')}
                     >
-                      {copiedSecret ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                      {copiedSecret ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -274,9 +334,9 @@ export function AdvancedSecuritySettings() {
                   variant="outline"
                   className="flex-1"
                   onClick={() => {
-                    setSetupStep("idle");
-                    setQrCodeUrl("");
-                    setTotpSecret("");
+                    setSetupStep('idle');
+                    setQrCodeUrl('');
+                    setTotpSecret('');
                   }}
                 >
                   Cancel
@@ -284,7 +344,7 @@ export function AdvancedSecuritySettings() {
                 <Button
                   className="flex-1"
                   onClick={() => {
-                    setSetupStep("verify");
+                    setSetupStep('verify');
                     setTimeout(() => verifyInputRef.current?.focus(), 100);
                   }}
                 >
@@ -295,7 +355,7 @@ export function AdvancedSecuritySettings() {
           )}
 
           {/* Verify Code Step */}
-          {setupStep === "verify" && (
+          {setupStep === 'verify' && (
             <div className="space-y-4">
               <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
                 <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
@@ -311,15 +371,15 @@ export function AdvancedSecuritySettings() {
                   maxLength={6}
                   value={verifyCode}
                   onChange={(e) => {
-                    setVerifyCode(e.target.value.replace(/\D/g, ""));
+                    setVerifyCode(e.target.value.replace(/\D/g, ''));
                     setVerifyError(null);
                   }}
                   placeholder="000000"
                   className="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 px-4 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{
-                    background: "var(--surface-hover)",
-                    borderColor: verifyError ? "#ef4444" : "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--surface-hover)',
+                    borderColor: verifyError ? '#ef4444' : 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
                   autoFocus
                 />
@@ -331,11 +391,7 @@ export function AdvancedSecuritySettings() {
                 )}
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setSetupStep("qr")}
-                >
+                <Button variant="outline" className="flex-1" onClick={() => setSetupStep('qr')}>
                   Back
                 </Button>
                 <Button
@@ -350,24 +406,23 @@ export function AdvancedSecuritySettings() {
           )}
 
           {/* Backup Codes Step */}
-          {setupStep === "backup" && (
+          {setupStep === 'backup' && (
             <div className="space-y-4">
               <div className="p-4 rounded-lg border border-green-500/20 bg-green-500/5">
                 <div className="flex items-center gap-2 mb-3">
                   <ShieldCheck className="w-5 h-5 text-green-600" />
-                  <p className="text-sm font-medium text-green-600">
-                    2FA Enabled Successfully!
-                  </p>
+                  <p className="text-sm font-medium text-green-600">2FA Enabled Successfully!</p>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mb-4">
-                  Save these backup codes in a safe place. Each code can only be used once. If you lose access to your authenticator app, you can use these codes to sign in.
+                  Save these backup codes in a safe place. Each code can only be used once. If you
+                  lose access to your authenticator app, you can use these codes to sign in.
                 </p>
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   {backupCodes.map((code, i) => (
                     <div
                       key={i}
                       className="font-mono text-sm text-center py-2 px-3 rounded bg-[var(--surface-hover)] border border-[var(--border)]"
-                      style={{ color: "var(--text-primary)" }}
+                      style={{ color: 'var(--text-primary)' }}
                     >
                       {code}
                     </div>
@@ -376,23 +431,27 @@ export function AdvancedSecuritySettings() {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => copyToClipboard(backupCodes.join("\n"), "codes")}
+                  onClick={() => copyToClipboard(backupCodes.join('\n'), 'codes')}
                 >
                   {copiedCodes ? (
-                    <><Check className="w-4 h-4 mr-2 text-green-500" /> Copied!</>
+                    <>
+                      <Check className="w-4 h-4 mr-2 text-green-500" /> Copied!
+                    </>
                   ) : (
-                    <><Copy className="w-4 h-4 mr-2" /> Copy All Codes</>
+                    <>
+                      <Copy className="w-4 h-4 mr-2" /> Copy All Codes
+                    </>
                   )}
                 </Button>
               </div>
               <Button
                 className="w-full"
                 onClick={() => {
-                  setSetupStep("idle");
-                  setQrCodeUrl("");
-                  setTotpSecret("");
+                  setSetupStep('idle');
+                  setQrCodeUrl('');
+                  setTotpSecret('');
                   setBackupCodes([]);
-                  setVerifyCode("");
+                  setVerifyCode('');
                 }}
               >
                 Done
@@ -420,14 +479,12 @@ export function AdvancedSecuritySettings() {
                   placeholder="Enter your password"
                   className="w-full py-2 px-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
                   style={{
-                    background: "var(--surface-hover)",
-                    borderColor: disableError ? "#ef4444" : "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--surface-hover)',
+                    borderColor: disableError ? '#ef4444' : 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
                 />
-                {disableError && (
-                  <p className="text-sm text-red-500 mt-2">{disableError}</p>
-                )}
+                {disableError && <p className="text-sm text-red-500 mt-2">{disableError}</p>}
               </div>
               <div className="flex gap-2">
                 <Button
@@ -435,7 +492,7 @@ export function AdvancedSecuritySettings() {
                   className="flex-1"
                   onClick={() => {
                     setShowDisableConfirm(false);
-                    setDisablePassword("");
+                    setDisablePassword('');
                     setDisableError(null);
                   }}
                 >
@@ -482,9 +539,13 @@ export function AdvancedSecuritySettings() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{session.device}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                      {session.device}
+                    </p>
                     {session.current && (
-                      <Badge variant="default" className="text-xs">{t('common.current') || 'Current'}</Badge>
+                      <Badge variant="default" className="text-xs">
+                        {t('common.current') || 'Current'}
+                      </Badge>
                     )}
                   </div>
                   <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -525,9 +586,11 @@ export function AdvancedSecuritySettings() {
               <div key={login.id}>
                 <div className="flex items-start justify-between py-3">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      login.status === "success" ? "bg-green-500" : "bg-red-500"
-                    }`} />
+                    <div
+                      className={`w-2 h-2 rounded-full mt-2 ${
+                        login.status === 'success' ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                    />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[var(--text-primary)]">
                         {login.device}
@@ -535,16 +598,14 @@ export function AdvancedSecuritySettings() {
                       <p className="text-xs text-[var(--text-muted)] mt-1">
                         {login.location} • {login.ip}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {login.date}
-                      </p>
+                      <p className="text-xs text-[var(--text-muted)]">{login.date}</p>
                     </div>
                   </div>
                   <Badge
-                    variant={login.status === "success" ? "default" : "destructive"}
+                    variant={login.status === 'success' ? 'default' : 'destructive'}
                     className="text-xs"
                   >
-                    {login.status === "success" ? "✓ Success" : "✗ Failed"}
+                    {login.status === 'success' ? '✓ Success' : '✗ Failed'}
                   </Badge>
                 </div>
                 {idx < loginHistory.length - 1 && (
@@ -585,8 +646,8 @@ export function AdvancedSecuritySettings() {
               <div>
                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Security Tip</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Use a strong, unique password and enable 2FA for maximum security.
-                  Regularly review your login history for any suspicious activity.
+                  Use a strong, unique password and enable 2FA for maximum security. Regularly
+                  review your login history for any suspicious activity.
                 </p>
               </div>
             </div>

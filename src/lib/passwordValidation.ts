@@ -66,15 +66,13 @@ export function validatePassword(password: string): PasswordValidationResult {
     },
   ];
 
-  const requiredMet = requirements
-    .filter(r => r.required)
-    .every(r => r.met);
+  const requiredMet = requirements.filter((r) => r.required).every((r) => r.met);
 
-  const allMet = requirements.every(r => r.met);
+  const allMet = requirements.every((r) => r.met);
 
   // Calculate strength score (0-100)
   let score = 0;
-  requirements.forEach(req => {
+  requirements.forEach((req) => {
     if (req.met) {
       score += req.required ? 20 : 10;
     }
@@ -83,7 +81,7 @@ export function validatePassword(password: string): PasswordValidationResult {
   // Additional scoring factors
   if (password.length >= 16) score += 10;
   if (/[А-Яа-я]/.test(password)) score += 5; // Cyrillic bonus
-  
+
   // Penalty for common patterns
   if (/^[0-9]+$/.test(password)) score -= 20; // All numbers
   if (/^[a-zA-Z]+$/.test(password)) score -= 10; // Only letters
@@ -150,10 +148,18 @@ export function validatePassword(password: string): PasswordValidationResult {
 
   // Common password detection
   const commonPasswords = [
-    'password', 'qwerty', '123456', '12345678', 'admin', 'letmein',
-    'welcome', 'monkey', '1234567890', 'password123'
+    'password',
+    'qwerty',
+    '123456',
+    '12345678',
+    'admin',
+    'letmein',
+    'welcome',
+    'monkey',
+    '1234567890',
+    'password123',
   ];
-  if (commonPasswords.some(common => password.toLowerCase().includes(common))) {
+  if (commonPasswords.some((common) => password.toLowerCase().includes(common))) {
     feedback.push({
       type: 'error',
       message: 'Этот пароль слишком распространен! Хакеры его знают.',
@@ -181,13 +187,13 @@ export function validatePassword(password: string): PasswordValidationResult {
   }
 
   // Add smart suggestions based on what's missing
-  if (!requirements.find(r => r.id === 'uppercase')?.met) {
+  if (!requirements.find((r) => r.id === 'uppercase')?.met) {
     suggestions.push('Добавьте заглавную букву');
   }
-  if (!requirements.find(r => r.id === 'number')?.met) {
+  if (!requirements.find((r) => r.id === 'number')?.met) {
     suggestions.push('Добавьте цифру');
   }
-  if (!requirements.find(r => r.id === 'special')?.met && score < 70) {
+  if (!requirements.find((r) => r.id === 'special')?.met && score < 70) {
     suggestions.push('Добавьте спецсимвол (!@#$%^&*)');
   }
 
@@ -226,7 +232,7 @@ export function validateEmail(email: string): EmailValidationResult {
 
   // Basic email regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   if (!emailRegex.test(email)) {
     return {
       isValid: false,
@@ -288,12 +294,18 @@ export function validateEmail(email: string): EmailValidationResult {
  */
 export function getStrengthColor(strength: PasswordValidationResult['strength']): string {
   switch (strength) {
-    case 'weak': return '#ef4444'; // red
-    case 'fair': return '#f59e0b'; // orange
-    case 'good': return '#eab308'; // yellow
-    case 'strong': return '#22c55e'; // green
-    case 'excellent': return '#10b981'; // emerald
-    default: return '#6b7280'; // gray
+    case 'weak':
+      return '#ef4444'; // red
+    case 'fair':
+      return '#f59e0b'; // orange
+    case 'good':
+      return '#eab308'; // yellow
+    case 'strong':
+      return '#22c55e'; // green
+    case 'excellent':
+      return '#10b981'; // emerald
+    default:
+      return '#6b7280'; // gray
   }
 }
 
@@ -305,21 +317,24 @@ export function generateSecurePassword(): string {
   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
   const special = '!@#$%^&*()_+-=[]{}';
-  
+
   const all = uppercase + lowercase + numbers + special;
-  
+
   let password = '';
   // Ensure at least one of each required type
   password += uppercase[Math.floor(Math.random() * uppercase.length)];
   password += lowercase[Math.floor(Math.random() * lowercase.length)];
   password += numbers[Math.floor(Math.random() * numbers.length)];
   password += special[Math.floor(Math.random() * special.length)];
-  
+
   // Fill the rest randomly (total 16 chars)
   for (let i = password.length; i < 16; i++) {
     password += all[Math.floor(Math.random() * all.length)];
   }
-  
+
   // Shuffle the password
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+  return password
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('');
 }

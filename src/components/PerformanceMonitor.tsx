@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect } from 'react';
 import { reportWebVitals, logBundleSize, calculatePerformanceScore } from '@/lib/performance';
@@ -31,7 +31,12 @@ export default function PerformanceMonitor() {
               reportWebVitals({
                 name: 'FCP',
                 value: entry.startTime,
-                rating: entry.startTime < 1800 ? 'good' : entry.startTime < 3000 ? 'needs-improvement' : 'poor',
+                rating:
+                  entry.startTime < 1800
+                    ? 'good'
+                    : entry.startTime < 3000
+                      ? 'needs-improvement'
+                      : 'poor',
                 delta: entry.startTime,
                 id: 'fcp',
               });
@@ -47,7 +52,12 @@ export default function PerformanceMonitor() {
           reportWebVitals({
             name: 'LCP',
             value: lastEntry.startTime,
-            rating: lastEntry.startTime < 2500 ? 'good' : lastEntry.startTime < 4000 ? 'needs-improvement' : 'poor',
+            rating:
+              lastEntry.startTime < 2500
+                ? 'good'
+                : lastEntry.startTime < 4000
+                  ? 'needs-improvement'
+                  : 'poor',
             delta: lastEntry.startTime,
             id: 'lcp',
           });
@@ -60,8 +70,12 @@ export default function PerformanceMonitor() {
             reportWebVitals({
               name: 'FID',
               value: (entry as any).processingStart - entry.startTime,
-              rating: (entry as any).processingStart - entry.startTime < 100 ? 'good' : 
-                      (entry as any).processingStart - entry.startTime < 300 ? 'needs-improvement' : 'poor',
+              rating:
+                (entry as any).processingStart - entry.startTime < 100
+                  ? 'good'
+                  : (entry as any).processingStart - entry.startTime < 300
+                    ? 'needs-improvement'
+                    : 'poor',
               delta: (entry as any).processingStart - entry.startTime,
               id: 'fid',
             });
@@ -86,7 +100,6 @@ export default function PerformanceMonitor() {
           }
         });
         clsObserver.observe({ entryTypes: ['layout-shift'] });
-
       } catch (e) {
         console.warn('Performance monitoring failed:', e);
       }

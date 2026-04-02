@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Users } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useTranslation } from 'react-i18next';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Users } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const PRESENCE_CONFIG = {
-  available: { dot: "bg-green-500", labelKey: "quickStats.available" },
-  in_meeting: { dot: "bg-yellow-500", labelKey: "quickStats.inMeeting" },
-  in_call: { dot: "bg-blue-500", labelKey: "quickStats.inCall" },
-  out_of_office: { dot: "bg-gray-500", labelKey: "quickStats.outOfOffice" },
-  busy: { dot: "bg-red-500", labelKey: "quickStats.busy" },
+  available: { dot: 'bg-green-500', labelKey: 'quickStats.available' },
+  in_meeting: { dot: 'bg-yellow-500', labelKey: 'quickStats.inMeeting' },
+  in_call: { dot: 'bg-blue-500', labelKey: 'quickStats.inCall' },
+  out_of_office: { dot: 'bg-gray-500', labelKey: 'quickStats.outOfOffice' },
+  busy: { dot: 'bg-red-500', labelKey: 'quickStats.busy' },
 } as const;
 
 export function TeamPresence() {
-
   const { t } = useTranslation();
   const { user } = useAuthStore();
   // Only pass requesterId if it looks like a valid Convex user ID (not organizationId or temp ID)
-  const hasValidUserId = user?.id && !user.id.startsWith("nextauth-") && user.id !== user.organizationId;
+  const hasValidUserId =
+    user?.id && !user.id.startsWith('nextauth-') && user.id !== user.organizationId;
   const teamMembers = useQuery(
     api.productivity.getTeamPresence,
-    hasValidUserId ? { requesterId: user!.id as any } : "skip"
+    hasValidUserId ? { requesterId: user!.id as any } : 'skip',
   );
 
   if (!teamMembers) {
@@ -41,9 +41,12 @@ export function TeamPresence() {
     <div className="px-2 py-3">
       <div className="mb-3 px-2 flex items-center justify-between">
         <div>
-          <h3 className="text-xs font-semibold text-[var(--text-muted)]">{t('quickStats.teamOnline')}</h3>
+          <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+            {t('quickStats.teamOnline')}
+          </h3>
           <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-            {onlineCount} {onlineCount === 1 ? t('quickStats.member') : t('quickStats.members')} active
+            {onlineCount} {onlineCount === 1 ? t('quickStats.member') : t('quickStats.members')}{' '}
+            active
           </p>
         </div>
         <Users className="w-4 h-4 text-[var(--text-muted)]" />
@@ -56,11 +59,13 @@ export function TeamPresence() {
       ) : (
         <div className="space-y-2">
           {teamMembers.map((member: any) => {
-            const presenceConfig = PRESENCE_CONFIG[member.presenceStatus as keyof typeof PRESENCE_CONFIG] || PRESENCE_CONFIG.available;
+            const presenceConfig =
+              PRESENCE_CONFIG[member.presenceStatus as keyof typeof PRESENCE_CONFIG] ||
+              PRESENCE_CONFIG.available;
             const initials = member.name
-              .split(" ")
+              .split(' ')
               .map((n: any) => n[0])
-              .join("")
+              .join('')
               .toUpperCase()
               .slice(0, 2);
 
@@ -91,7 +96,9 @@ export function TeamPresence() {
                   </p>
                 </div>
 
-                <span className={`text-[9px] font-medium px-2 py-0.5 rounded-full ${presenceConfig.dot} bg-opacity-20`}>
+                <span
+                  className={`text-[9px] font-medium px-2 py-0.5 rounded-full ${presenceConfig.dot} bg-opacity-20`}
+                >
                   {t(presenceConfig.labelKey)}
                 </span>
               </div>

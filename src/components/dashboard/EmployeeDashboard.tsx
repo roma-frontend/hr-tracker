@@ -1,40 +1,48 @@
-﻿"use client";
+﻿'use client';
 
-import React, { Suspense, useMemo, memo } from "react";
-import dynamic from "next/dynamic";
+import React, { Suspense, useMemo, memo } from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from '@/lib/cssMotion';
-import { useTranslation } from "react-i18next";
-import { Clock, CheckCircle, XCircle, Plus, Calendar as CalendarIcon, TrendingUp, Star } from "lucide-react";
-import { format } from "date-fns";
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Id } from "../../../convex/_generated/dataModel";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from "@/lib/types";
-import { CheckInOutWidget } from "@/components/attendance/CheckInOutWidget";
-import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useTranslation } from 'react-i18next';
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  Plus,
+  Calendar as CalendarIcon,
+  TrendingUp,
+  Star,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Id } from '../../../convex/_generated/dataModel';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from '@/lib/types';
+import { CheckInOutWidget } from '@/components/attendance/CheckInOutWidget';
+import { DashboardBanners } from '@/components/dashboard/DashboardBanners';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 // Lazy load heavy dashboard components to reduce initial JS bundle
 const AttendanceDashboard = dynamic(
-  () => import("@/components/attendance/AttendanceDashboard").then(mod => ({ default: mod.AttendanceDashboard })),
+  () =>
+    import('@/components/attendance/AttendanceDashboard').then((mod) => ({
+      default: mod.AttendanceDashboard,
+    })),
   {
     loading: () => <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />,
-    ssr: true
-  }
+    ssr: true,
+  },
 );
 
-const AIRecommendationsCard = dynamic(
-  () => import("@/components/ai/AIRecommendationsCard"),
-  {
-    loading: () => <div className="h-32 bg-gray-100 rounded-lg animate-pulse" />,
-    ssr: true
-  }
-);
+const AIRecommendationsCard = dynamic(() => import('@/components/ai/AIRecommendationsCard'), {
+  loading: () => <div className="h-32 bg-gray-100 rounded-lg animate-pulse" />,
+  ssr: true,
+});
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,24 +54,28 @@ const itemVariants = {
 };
 
 const StatusBadge = memo(({ status }: { status: LeaveStatus }) => {
-  const variants: Record<LeaveStatus, "warning" | "success" | "destructive"> = {
-    pending: "warning",
-    approved: "success",
-    rejected: "destructive",
+  const variants: Record<LeaveStatus, 'warning' | 'success' | 'destructive'> = {
+    pending: 'warning',
+    approved: 'success',
+    rejected: 'destructive',
   };
-  return <Badge variant={variants[status]} className="capitalize">{status}</Badge>;
+  return (
+    <Badge variant={variants[status]} className="capitalize">
+      {status}
+    </Badge>
+  );
 });
-StatusBadge.displayName = "StatusBadge";
+StatusBadge.displayName = 'StatusBadge';
 
 const StarRating = memo(({ rating }: { rating: number }) => {
   return [1, 2, 3, 4, 5].map((i: any) => (
     <Star
       key={i}
-      className={`w-4 h-4 ${i <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+      className={`w-4 h-4 ${i <= Math.round(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
     />
   ));
 });
-StarRating.displayName = "StarRating";
+StarRating.displayName = 'StarRating';
 
 export function EmployeeDashboard() {
   const { t } = useTranslation();
@@ -72,18 +84,18 @@ export function EmployeeDashboard() {
   // ═══════════════════════════════════════════════════════════════
   // HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   // ═══════════════════════════════════════════════════════════════
-  const leaves = useQuery(api.leaves.getAllLeaves, user?.id && user.organizationId ? { requesterId: user.id as Id<"users"> } : "skip");
-  const userData = useQuery(
-    api.users.getUserById,
-    user?.id ? { userId: user.id as any } : "skip"
+  const leaves = useQuery(
+    api.leaves.getAllLeaves,
+    user?.id && user.organizationId ? { requesterId: user.id as Id<'users'> } : 'skip',
   );
+  const userData = useQuery(api.users.getUserById, user?.id ? { userId: user.id as any } : 'skip');
   const latestRating = useQuery(
     api.supervisorRatings.getLatestRating,
-    user?.id ? { employeeId: user.id as any } : "skip"
+    user?.id ? { employeeId: user.id as any } : 'skip',
   );
   const monthlyStats = useQuery(
     api.timeTracking.getMonthlyStats,
-    user?.id ? { userId: user.id as any, month: new Date().toISOString().slice(0, 7) } : "skip"
+    user?.id ? { userId: user.id as any, month: new Date().toISOString().slice(0, 7) } : 'skip',
   );
 
   // ═══════════════════════════════════════════════════════════════
@@ -93,9 +105,9 @@ export function EmployeeDashboard() {
     const myLeaves = leaves?.filter((l) => l.userId === user?.id) ?? [];
     return {
       myLeaves,
-      pendingLeaves: myLeaves.filter((l) => l.status === "pending"),
-      approvedLeaves: myLeaves.filter((l) => l.status === "approved"),
-      rejectedLeaves: myLeaves.filter((l) => l.status === "rejected"),
+      pendingLeaves: myLeaves.filter((l) => l.status === 'pending'),
+      approvedLeaves: myLeaves.filter((l) => l.status === 'approved'),
+      rejectedLeaves: myLeaves.filter((l) => l.status === 'rejected'),
     };
   }, [leaves, user?.id]);
 
@@ -111,7 +123,12 @@ export function EmployeeDashboard() {
   const today = new Date();
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4 sm:space-y-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-4 sm:space-y-6"
+    >
       {/* Smart Banners */}
       <motion.div variants={itemVariants}>
         <DashboardBanners
@@ -126,10 +143,10 @@ export function EmployeeDashboard() {
       {/* Welcome header */}
       <motion.div variants={itemVariants}>
         <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-          {t('dashboard.welcome')}, {user?.name?.split(" ")[0]} 👋
+          {t('dashboard.welcome')}, {user?.name?.split(' ')[0]} 👋
         </h2>
         <p className="text-[var(--text-muted)] text-sm mt-1">
-          {format(today, "EEEE, MMMM d, yyyy")}
+          {format(today, 'EEEE, MMMM d, yyyy')}
         </p>
       </motion.div>
 
@@ -155,19 +172,25 @@ export function EmployeeDashboard() {
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-green-500">{monthlyStats.totalWorkedHours}h</p>
+                <p className="text-2xl font-bold text-green-500">
+                  {monthlyStats.totalWorkedHours}h
+                </p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.totalHours')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.punctuality')}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  {t('dashboard.punctuality')}
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <p className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? "text-red-500" : "text-green-500"}`}>
+                <p
+                  className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? 'text-red-500' : 'text-green-500'}`}
+                >
                   {monthlyStats.lateDays}
                 </p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.lateDays')}</p>
@@ -193,7 +216,7 @@ export function EmployeeDashboard() {
                     <span className="text-sm font-normal text-[var(--text-muted)]">/5</span>
                   </p>
                   <p className="text-xs text-[var(--text-muted)]">
-                    by {latestRating.supervisor?.name ?? "Supervisor"} · {latestRating.ratingPeriod}
+                    by {latestRating.supervisor?.name ?? 'Supervisor'} · {latestRating.ratingPeriod}
                   </p>
                 </div>
               </div>
@@ -210,8 +233,13 @@ export function EmployeeDashboard() {
                 <div key={label} className="flex items-center justify-between">
                   <span className="text-sm text-[var(--text-muted)] w-36">{label}</span>
                   <div className="flex items-center gap-2">
-                    <div className="flex"><StarRating rating={value} /></div>
-                    <span className="text-sm font-semibold w-6 text-right" style={{ color: "var(--text-primary)" }}>
+                    <div className="flex">
+                      <StarRating rating={value} />
+                    </div>
+                    <span
+                      className="text-sm font-semibold w-6 text-right"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {value}
                     </span>
                   </div>
@@ -220,20 +248,32 @@ export function EmployeeDashboard() {
 
               {latestRating.strengths && (
                 <div className="mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-950">
-                  <p className="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">💪 {t('dashboard.strengths')}</p>
-                  <p className="text-sm text-green-700 dark:text-green-300">{latestRating.strengths}</p>
+                  <p className="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">
+                    💪 {t('dashboard.strengths')}
+                  </p>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    {latestRating.strengths}
+                  </p>
                 </div>
               )}
               {latestRating.areasForImprovement && (
                 <div className="mt-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
-                  <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 mb-1">📈 {t('dashboard.areasForImprovement')}</p>
-                  <p className="text-sm text-orange-700 dark:text-orange-300">{latestRating.areasForImprovement}</p>
+                  <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 mb-1">
+                    📈 {t('dashboard.areasForImprovement')}
+                  </p>
+                  <p className="text-sm text-orange-700 dark:text-orange-300">
+                    {latestRating.areasForImprovement}
+                  </p>
                 </div>
               )}
               {latestRating.generalComments && (
                 <div className="mt-2 p-3 rounded-lg bg-[var(--background-subtle)]">
-                  <p className="text-xs font-semibold text-[var(--text-muted)] mb-1">💬 {t('dashboard.comments')}</p>
-                  <p className="text-sm text-[var(--text-primary)]">{latestRating.generalComments}</p>
+                  <p className="text-xs font-semibold text-[var(--text-muted)] mb-1">
+                    💬 {t('dashboard.comments')}
+                  </p>
+                  <p className="text-sm text-[var(--text-primary)]">
+                    {latestRating.generalComments}
+                  </p>
                 </div>
               )}
 
@@ -251,8 +291,12 @@ export function EmployeeDashboard() {
           <Card className="border-dashed">
             <CardContent className="p-6 text-center">
               <Star className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-              <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noPerformanceRating')}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.supervisorWillRate')}</p>
+              <p className="text-sm text-[var(--text-muted)]">
+                {t('dashboard.noPerformanceRating')}
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                {t('dashboard.supervisorWillRate')}
+              </p>
             </CardContent>
           </Card>
         </motion.div>
@@ -267,16 +311,24 @@ export function EmployeeDashboard() {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
-                <p className="text-2xl font-bold text-[#2563eb]">{userData?.paidLeaveBalance ?? 0}</p>
+                <p className="text-2xl font-bold text-[#2563eb]">
+                  {userData?.paidLeaveBalance ?? 0}
+                </p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.paidLeave')}</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
-                <p className="text-2xl font-bold text-[#ef4444]">{userData?.sickLeaveBalance ?? 0}</p>
+                <p className="text-2xl font-bold text-[#ef4444]">
+                  {userData?.sickLeaveBalance ?? 0}
+                </p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.sickLeave')}</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
-                <p className="text-2xl font-bold text-[#10b981]">{userData?.familyLeaveBalance ?? 0}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.familyLeave')}</p>
+                <p className="text-2xl font-bold text-[#10b981]">
+                  {userData?.familyLeaveBalance ?? 0}
+                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  {t('dashboard.familyLeave')}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -293,7 +345,9 @@ export function EmployeeDashboard() {
                   <Clock className="w-6 h-6 text-[#f59e0b]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">{leaveStats.pendingLeaves.length}</p>
+                  <p className="text-2xl font-bold text-[var(--text-primary)]">
+                    {leaveStats.pendingLeaves.length}
+                  </p>
                   <p className="text-sm text-[var(--text-muted)]">{t('dashboard.pending')}</p>
                 </div>
               </div>
@@ -309,7 +363,9 @@ export function EmployeeDashboard() {
                   <CheckCircle className="w-6 h-6 text-[#10b981]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">{leaveStats.approvedLeaves.length}</p>
+                  <p className="text-2xl font-bold text-[var(--text-primary)]">
+                    {leaveStats.approvedLeaves.length}
+                  </p>
                   <p className="text-sm text-[var(--text-muted)]">{t('dashboard.approved')}</p>
                 </div>
               </div>
@@ -325,7 +381,9 @@ export function EmployeeDashboard() {
                   <XCircle className="w-6 h-6 text-[#ef4444]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">{leaveStats.rejectedLeaves.length}</p>
+                  <p className="text-2xl font-bold text-[var(--text-primary)]">
+                    {leaveStats.rejectedLeaves.length}
+                  </p>
                   <p className="text-sm text-[var(--text-muted)]">{t('dashboard.rejected')}</p>
                 </div>
               </div>
@@ -372,7 +430,9 @@ export function EmployeeDashboard() {
                         {LEAVE_TYPE_LABELS[leave.type as LeaveType]}
                       </p>
                       <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                        {format(new Date(leave.startDate), "MMM d")} – {format(new Date(leave.endDate), "MMM d, yyyy")} ({leave.days} {t('ui.days').toLowerCase()})
+                        {format(new Date(leave.startDate), 'MMM d')} –{' '}
+                        {format(new Date(leave.endDate), 'MMM d, yyyy')} ({leave.days}{' '}
+                        {t('ui.days').toLowerCase()})
                       </p>
                     </div>
                     <StatusBadge status={leave.status as LeaveStatus} />
@@ -380,7 +440,9 @@ export function EmployeeDashboard() {
                 ))}
                 {leaveStats.myLeaves.length > 5 && (
                   <Button asChild variant="ghost" size="sm" className="w-full">
-                    <Link href="/leaves">{t('dashboard.viewAllRequests', { count: leaveStats.myLeaves.length })}</Link>
+                    <Link href="/leaves">
+                      {t('dashboard.viewAllRequests', { count: leaveStats.myLeaves.length })}
+                    </Link>
                   </Button>
                 )}
               </div>

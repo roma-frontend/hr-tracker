@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Check, Zap, Building2, Rocket, Sparkles, ArrowRight,
-  Shield, Star,
-} from 'lucide-react';
+import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PLAN_LABELS, type PlanType } from '@/hooks/usePlanFeatures';
 
@@ -176,7 +177,9 @@ function PlanCard({
             {tier.icon}
           </div>
           <div>
-            <p className="font-bold text-[var(--text-primary)] leading-tight text-sm">{tier.name}</p>
+            <p className="font-bold text-[var(--text-primary)] leading-tight text-sm">
+              {tier.name}
+            </p>
             <p className="text-[11px] text-[var(--text-muted)]">{tier.description}</p>
           </div>
         </div>
@@ -205,7 +208,10 @@ function PlanCard({
             <li key={feature} className="flex items-start gap-2 text-xs">
               <div
                 className="w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                style={{ background: `${tier.accentFrom}1a`, border: `1px solid ${tier.accentFrom}33` }}
+                style={{
+                  background: `${tier.accentFrom}1a`,
+                  border: `1px solid ${tier.accentFrom}33`,
+                }}
               >
                 <Check size={8} style={{ color: tier.accentFrom }} />
               </div>
@@ -227,18 +233,18 @@ function PlanCard({
                   color: 'var(--text-muted)',
                 }
               : tier.popular
-              ? {
-                  background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
-                  boxShadow: `0 4px 16px ${tier.glowColor}`,
-                  color: '#fff',
-                  opacity: loading ? 0.7 : 1,
-                }
-              : {
-                  background: `${tier.accentFrom}15`,
-                  border: `1px solid ${tier.accentFrom}33`,
-                  color: tier.accentFrom,
-                  opacity: loading ? 0.7 : 1,
-                }
+                ? {
+                    background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
+                    boxShadow: `0 4px 16px ${tier.glowColor}`,
+                    color: '#fff',
+                    opacity: loading ? 0.7 : 1,
+                  }
+                : {
+                    background: `${tier.accentFrom}15`,
+                    border: `1px solid ${tier.accentFrom}33`,
+                    color: tier.accentFrom,
+                    opacity: loading ? 0.7 : 1,
+                  }
           }
         >
           {loading ? (
@@ -252,7 +258,10 @@ function PlanCard({
             <>
               <Sparkles size={12} />
               {tier.buttonText}
-              <ArrowRight size={12} className="group-hover/btn:translate-x-0.5 transition-transform" />
+              <ArrowRight
+                size={12}
+                className="group-hover/btn:translate-x-0.5 transition-transform"
+              />
             </>
           )}
         </button>
@@ -284,7 +293,12 @@ export function UpgradeModal({
   const { plan: currentPlan } = useSubscription();
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
       <DialogContent className="max-w-3xl w-full p-0 overflow-hidden gap-0">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-[var(--border)]">

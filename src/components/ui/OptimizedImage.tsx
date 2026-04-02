@@ -1,6 +1,6 @@
 /**
  * Optimized Image Component with lazy loading and blur placeholder
- * 
+ *
  * Usage:
  * <OptimizedImage
  *   src="/path/to/image.jpg"
@@ -68,12 +68,7 @@ export function OptimizedImage({
           height: fill ? '100%' : height,
         }}
       >
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -103,17 +98,16 @@ export function OptimizedImage({
         priority={priority}
         loading={priority ? 'eager' : 'lazy'}
         placeholder={placeholder}
-        blurDataURL={blurDataURL || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='}
-        className={`transition-opacity duration-300 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        blurDataURL={
+          blurDataURL ||
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+        }
+        className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         onLoad={handleLoad}
         onError={handleError}
         sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw"
       />
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-gray-800 animate-pulse" />
-      )}
+      {!isLoaded && <div className="absolute inset-0 bg-gray-800 animate-pulse" />}
     </div>
   );
 }
@@ -135,12 +129,7 @@ const sizeMap = {
   xl: 56,
 };
 
-export function OptimizedAvatar({
-  src,
-  alt,
-  size = 'md',
-  className = '',
-}: AvatarProps) {
+export function OptimizedAvatar({ src, alt, size = 'md', className = '' }: AvatarProps) {
   const pixelSize = sizeMap[size];
 
   if (!src) {

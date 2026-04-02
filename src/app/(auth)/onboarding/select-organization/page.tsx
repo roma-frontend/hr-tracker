@@ -5,19 +5,19 @@ import Image from 'next/image';
  * For new Google OAuth users to select which organization they want to join.
  */
 
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2, Building2, Search, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
+import React, { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Loader2, Building2, Search, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export default function SelectOrganizationPage() {
   const { t } = useTranslation();
@@ -26,25 +26,27 @@ export default function SelectOrganizationPage() {
   // Get fresh user data from Convex (not just from auth store)
   const freshUserData = useQuery(
     api.users.getCurrentUser,
-    user?.email ? { email: user.email } : "skip"
+    user?.email ? { email: user.email } : 'skip',
   );
 
   // Debug logging
   React.useEffect(() => {
-    console.log("[SelectOrganization] user:", {
+    console.log('[SelectOrganization] user:', {
       id: user?.id,
       email: user?.email,
       organizationId: user?.organizationId,
-      isApproved: user?.isApproved
+      isApproved: user?.isApproved,
     });
-    console.log("[SelectOrganization] freshUserData from Convex:", freshUserData);
+    console.log('[SelectOrganization] freshUserData from Convex:', freshUserData);
   }, [user, freshUserData]);
 
   // Redirect if user already has organization and is approved (check BOTH store and fresh Convex data)
   React.useEffect(() => {
     // Check fresh data from Convex first (more reliable than store)
     if (freshUserData?.organizationId && freshUserData?.isApproved) {
-      console.log("[SelectOrganization] ✅ Fresh Convex data shows user is approved - redirecting to dashboard");
+      console.log(
+        '[SelectOrganization] ✅ Fresh Convex data shows user is approved - redirecting to dashboard',
+      );
       // Update auth store with fresh data
       setUser({
         id: freshUserData._id,
@@ -57,10 +59,12 @@ export default function SelectOrganizationPage() {
       window.location.href = '/dashboard';
       return;
     }
-    
+
     // Fallback to store data
     if (user?.organizationId && user?.isApproved) {
-      console.log("[SelectOrganization] ✅ Store data shows user is approved - redirecting to dashboard");
+      console.log(
+        '[SelectOrganization] ✅ Store data shows user is approved - redirecting to dashboard',
+      );
       window.location.href = '/dashboard';
     }
   }, [user, freshUserData, setUser]);
@@ -69,16 +73,17 @@ export default function SelectOrganizationPage() {
   const requestJoin = useMutation(api.organizationJoinRequests.requestJoinOrganization);
   // Skip getMyRequests query to avoid rendering issues - user can see pending status after redirect
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isRequesting, setIsRequesting] = useState<Id<"organizations"> | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isRequesting, setIsRequesting] = useState<Id<'organizations'> | null>(null);
 
-  const filteredOrgs = organizations?.filter((org: any) =>
-    org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.slug.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredOrgs = organizations?.filter(
+    (org: any) =>
+      org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      org.slug.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Debug logging
-  console.log("[SelectOrganizationPage] Render:", {
+  console.log('[SelectOrganizationPage] Render:', {
     user,
     organizations,
     filteredOrgs,
@@ -91,31 +96,36 @@ export default function SelectOrganizationPage() {
     buttonShouldBeDisabled: !user?.id,
   });
 
-  const handleRequestJoin = async (organizationId: Id<"organizations">) => {
-    console.log("[handleRequestJoin] Called with organizationId:", organizationId);
-    console.log("[handleRequestJoin] user:", { id: user?.id, email: user?.email });
-    
+  const handleRequestJoin = async (organizationId: Id<'organizations'>) => {
+    console.log('[handleRequestJoin] Called with organizationId:', organizationId);
+    console.log('[handleRequestJoin] user:', { id: user?.id, email: user?.email });
+
     if (!user?.id) {
-      console.error("[handleRequestJoin] No user ID!");
-      toast.error("User not loaded. Please try again.");
+      console.error('[handleRequestJoin] No user ID!');
+      toast.error('User not loaded. Please try again.');
       return;
     }
 
     setIsRequesting(organizationId);
     try {
-      console.log("[handleRequestJoin] Sending request with userId:", user.id, "organizationId:", organizationId);
-      
+      console.log(
+        '[handleRequestJoin] Sending request with userId:',
+        user.id,
+        'organizationId:',
+        organizationId,
+      );
+
       await requestJoin({
-        userId: user.id as Id<"users">,
+        userId: user.id as Id<'users'>,
         organizationId,
       });
 
-      console.log("[handleRequestJoin] Request successful!");
-      toast.success(t("onboarding.requestSent", "Request sent!"));
-      window.location.href = "/onboarding/pending";
+      console.log('[handleRequestJoin] Request successful!');
+      toast.success(t('onboarding.requestSent', 'Request sent!'));
+      window.location.href = '/onboarding/pending';
     } catch (error: any) {
-      console.error("[handleRequestJoin] Error:", error);
-      toast.error(error.message || t("onboarding.requestFailed", "Failed to send request"));
+      console.error('[handleRequestJoin] Error:', error);
+      toast.error(error.message || t('onboarding.requestFailed', 'Failed to send request'));
     } finally {
       setIsRequesting(null);
     }
@@ -130,10 +140,13 @@ export default function SelectOrganizationPage() {
             <Building2 className="w-8 h-8 text-blue-600" />
           </div>
           <h1 className="text-3xl font-bold mb-2">
-            {t("onboarding.selectOrganization", "Select Your Organization")}
+            {t('onboarding.selectOrganization', 'Select Your Organization')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {t("onboarding.selectOrgDesc", "Choose the organization you want to join. Your request will be sent to administrators for approval.")}
+            {t(
+              'onboarding.selectOrgDesc',
+              'Choose the organization you want to join. Your request will be sent to administrators for approval.',
+            )}
           </p>
         </div>
 
@@ -142,7 +155,7 @@ export default function SelectOrganizationPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input
             type="text"
-            placeholder={t("onboarding.searchOrg", "Search organizations...")}
+            placeholder={t('onboarding.searchOrg', 'Search organizations...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -159,8 +172,8 @@ export default function SelectOrganizationPage() {
             <Card>
               <CardContent className="py-8 text-center text-gray-500">
                 {searchQuery
-                  ? t("onboarding.noOrgFound", "No organizations found matching your search")
-                  : t("onboarding.noOrgs", "No organizations available")}
+                  ? t('onboarding.noOrgFound', 'No organizations found matching your search')
+                  : t('onboarding.noOrgs', 'No organizations available')}
               </CardContent>
             </Card>
           ) : (
@@ -175,7 +188,11 @@ export default function SelectOrganizationPage() {
                       {/* Logo */}
                       <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
                         {org.logoUrl ? (
-                          <img src={org.logoUrl} alt={org.name} className="w-full h-full object-cover rounded-lg" />
+                          <img
+                            src={org.logoUrl}
+                            alt={org.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
                         ) : (
                           org.name.charAt(0).toUpperCase()
                         )}
@@ -209,7 +226,7 @@ export default function SelectOrganizationPage() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log("[Button onClick] Clicked!", { orgId: org._id, user });
+                        console.log('[Button onClick] Clicked!', { orgId: org._id, user });
                         handleRequestJoin(org._id);
                       }}
                       disabled={isRequesting === org._id || !user?.id}
@@ -218,14 +235,14 @@ export default function SelectOrganizationPage() {
                       {isRequesting === org._id ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          {t("onboarding.sending", "Sending...")}
+                          {t('onboarding.sending', 'Sending...')}
                         </>
                       ) : !user?.id ? (
-                        "Loading..."
+                        'Loading...'
                       ) : (
                         <>
                           <CheckCircle2 className="w-4 h-4 mr-2" />
-                          {t("onboarding.join", "Join")}
+                          {t('onboarding.join', 'Join')}
                         </>
                       )}
                     </Button>
@@ -238,7 +255,12 @@ export default function SelectOrganizationPage() {
 
         {/* Help Text */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>{t("onboarding.afterJoin", "After joining, you'll need to wait for administrator approval before accessing the dashboard.")}</p>
+          <p>
+            {t(
+              'onboarding.afterJoin',
+              "After joining, you'll need to wait for administrator approval before accessing the dashboard.",
+            )}
+          </p>
         </div>
       </div>
     </div>

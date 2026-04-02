@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
-import { api } from "@/convex/_generated/api";
+import { useState, useEffect, useRef } from 'react';
+import { useQuery } from 'convex/react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/convex/_generated/api';
 import {
   Search,
   Users,
@@ -14,10 +14,10 @@ import {
   Car,
   X,
   ArrowRight,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 type User = {
   _id: string;
@@ -68,7 +68,7 @@ interface GlobalSearchProps {
 
 type SearchResult = {
   id: string;
-  type: "user" | "organization" | "leave" | "task" | "driver" | "ticket";
+  type: 'user' | 'organization' | 'leave' | 'task' | 'driver' | 'ticket';
   title: string;
   subtitle?: string;
   icon: string;
@@ -77,20 +77,20 @@ type SearchResult = {
   priority?: string;
 };
 
-export function GlobalSearch({ 
-  placeholder = "Поиск по всей системе...", 
+export function GlobalSearch({
+  placeholder = 'Поиск по всей системе...',
   autoFocus = false,
-  onSelect 
+  onSelect,
 }: GlobalSearchProps) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const results = useQuery(
     api.superadmin.globalSearch,
-    query.length >= 2 ? { query, limit: 20 } : "skip"
+    query.length >= 2 ? { query, limit: 20 } : 'skip',
   );
 
   // Close on outside click
@@ -101,50 +101,50 @@ export function GlobalSearch({
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd/Ctrl + K to focus
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        document.getElementById("global-search-input")?.focus();
+        document.getElementById('global-search-input')?.focus();
         setIsOpen(true);
       }
       // Escape to close
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setIsOpen(false);
-        (document.getElementById("global-search-input") as HTMLInputElement)?.blur();
+        (document.getElementById('global-search-input') as HTMLInputElement)?.blur();
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleSelect = (item: SearchResult) => {
     onSelect?.(item);
     setIsOpen(false);
-    setQuery("");
+    setQuery('');
 
     // Navigate based on type
     switch (item.type) {
-      case "user":
+      case 'user':
         router.push(`/superadmin/users/${item.id}`);
         break;
-      case "organization":
+      case 'organization':
         router.push(`/superadmin/organizations/${item.id}/edit`);
         break;
-      case "leave":
+      case 'leave':
         router.push(`/leaves`);
         break;
-      case "task":
+      case 'task':
         router.push(`/tasks`);
         break;
-      case "ticket":
+      case 'ticket':
         router.push(`/superadmin/support`);
         break;
     }
@@ -155,82 +155,82 @@ export function GlobalSearch({
 
     const all: SearchResult[] = [];
 
-    if (selectedType === null || selectedType === "user") {
+    if (selectedType === null || selectedType === 'user') {
       all.push(
         ...(results.users || []).map((u: User) => ({
           id: u._id,
-          type: "user" as const,
+          type: 'user' as const,
           title: u.name,
           subtitle: u.email,
-          icon: "👤",
+          icon: '👤',
           organizationId: u.organizationId,
-        }))
+        })),
       );
     }
 
-    if (selectedType === null || selectedType === "organization") {
+    if (selectedType === null || selectedType === 'organization') {
       all.push(
         ...(results.organizations || []).map((o: Organization) => ({
           id: o._id,
-          type: "organization" as const,
+          type: 'organization' as const,
           title: o.name,
           subtitle: `${o.plan} • ${o.slug}`,
-          icon: "🏢",
-        }))
+          icon: '🏢',
+        })),
       );
     }
 
-    if (selectedType === null || selectedType === "leave") {
+    if (selectedType === null || selectedType === 'leave') {
       all.push(
         ...(results.leaveRequests || []).map((l: LeaveRequest) => ({
           id: l._id,
-          type: "leave" as const,
+          type: 'leave' as const,
           title: `${l.userName} - ${l.type}`,
           subtitle: `${l.startDate} → ${l.endDate}`,
-          icon: "📅",
+          icon: '📅',
           status: l.status,
-        }))
+        })),
       );
     }
 
-    if (selectedType === null || selectedType === "task") {
+    if (selectedType === null || selectedType === 'task') {
       all.push(
         ...(results.tasks || []).map((t: Task) => ({
           id: t._id,
-          type: "task" as const,
+          type: 'task' as const,
           title: t.title,
           subtitle: t.description?.slice(0, 50) || t.status,
-          icon: "✅",
+          icon: '✅',
           status: t.status,
           priority: t.priority,
-        }))
+        })),
       );
     }
 
-    if (selectedType === null || selectedType === "driver") {
+    if (selectedType === null || selectedType === 'driver') {
       all.push(
         ...(results.driverRequests || []).map((d: DriverRequest) => ({
           id: d._id,
-          type: "driver" as const,
-          title: `${d.requesterName || "Unknown"}`,
+          type: 'driver' as const,
+          title: `${d.requesterName || 'Unknown'}`,
           subtitle: `${d.tripInfo?.from} → ${d.tripInfo?.to}`,
-          icon: "🚗",
+          icon: '🚗',
           status: d.status,
-        }))
+        })),
       );
     }
 
-    if (selectedType === null || selectedType === "ticket") {
+    if (selectedType === null || selectedType === 'ticket') {
       all.push(
         ...(results.supportTickets || []).map((t: any) => ({
           id: t._id,
-          type: "ticket" as const,
+          type: 'ticket' as const,
           title: t.ticketNumber,
           subtitle: t.title,
-          icon: "🎫",
+          icon: '🎫',
           status: t.status,
           priority: t.priority,
-        }))
+        })),
       );
     }
 
@@ -242,13 +242,18 @@ export function GlobalSearch({
   const hasQuery = query.length >= 2;
 
   const typeFilters = [
-    { id: null, label: "Все", icon: Search, count: results?.total || 0 },
-    { id: "user", label: "Пользователи", icon: Users, count: results?.users?.length || 0 },
-    { id: "organization", label: "Организации", icon: Building2, count: results?.organizations?.length || 0 },
-    { id: "leave", label: "Отпуска", icon: Calendar, count: results?.leaveRequests?.length || 0 },
-    { id: "task", label: "Задачи", icon: CheckSquare, count: results?.tasks?.length || 0 },
-    { id: "driver", label: "Водители", icon: Car, count: results?.driverRequests?.length || 0 },
-    { id: "ticket", label: "Тикеты", icon: Ticket, count: results?.supportTickets?.length || 0 },
+    { id: null, label: 'Все', icon: Search, count: results?.total || 0 },
+    { id: 'user', label: 'Пользователи', icon: Users, count: results?.users?.length || 0 },
+    {
+      id: 'organization',
+      label: 'Организации',
+      icon: Building2,
+      count: results?.organizations?.length || 0,
+    },
+    { id: 'leave', label: 'Отпуска', icon: Calendar, count: results?.leaveRequests?.length || 0 },
+    { id: 'task', label: 'Задачи', icon: CheckSquare, count: results?.tasks?.length || 0 },
+    { id: 'driver', label: 'Водители', icon: Car, count: results?.driverRequests?.length || 0 },
+    { id: 'ticket', label: 'Тикеты', icon: Ticket, count: results?.supportTickets?.length || 0 },
   ];
 
   return (
@@ -272,7 +277,7 @@ export function GlobalSearch({
         {query && (
           <button
             onClick={() => {
-              setQuery("");
+              setQuery('');
               setIsOpen(false);
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full"
@@ -289,13 +294,13 @@ export function GlobalSearch({
           <div className="flex gap-1 p-2 border-b overflow-x-auto">
             {typeFilters.map((filter) => (
               <button
-                key={filter.id?.toString() || "all"}
+                key={filter.id?.toString() || 'all'}
                 onClick={() => setSelectedType(filter.id as string | null)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors",
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors',
                   selectedType === filter.id
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted',
                 )}
               >
                 <filter.icon className="w-3 h-3" />
@@ -336,21 +341,18 @@ export function GlobalSearch({
                       <div className="flex items-center gap-2">
                         <span className="font-medium truncate">{item.title}</span>
                         {item.status && (
-                          <Badge
-                            variant="outline"
-                            className="h-4 text-[10px] shrink-0"
-                          >
+                          <Badge variant="outline" className="h-4 text-[10px] shrink-0">
                             {item.status}
                           </Badge>
                         )}
                         {item.priority && (
                           <Badge
                             variant={
-                              item.priority === "critical"
-                                ? "destructive"
-                                : item.priority === "high"
-                                ? "default"
-                                : "secondary"
+                              item.priority === 'critical'
+                                ? 'destructive'
+                                : item.priority === 'high'
+                                  ? 'default'
+                                  : 'secondary'
                             }
                             className="h-4 text-[10px] shrink-0"
                           >
@@ -359,9 +361,7 @@ export function GlobalSearch({
                         )}
                       </div>
                       {item.subtitle && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {item.subtitle}
-                        </p>
+                        <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
                       )}
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -373,8 +373,9 @@ export function GlobalSearch({
 
           {/* Footer */}
           <div className="p-2 border-t text-xs text-muted-foreground text-center">
-            Нажмите <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Enter</kbd> чтобы перейти,{" "}
-            <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> чтобы закрыть
+            Нажмите <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Enter</kbd> чтобы
+            перейти, <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> чтобы
+            закрыть
           </div>
         </div>
       )}

@@ -10,10 +10,16 @@ function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const el = ref.current; if (!el) return;
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 }
+      ([e]) => {
+        if (e.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.1 },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -30,7 +36,10 @@ export default function NewsletterSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) { toast.error(t('newsletter.invalidEmail')); return; }
+    if (!email || !email.includes('@')) {
+      toast.error(t('newsletter.invalidEmail'));
+      return;
+    }
     setIsLoading(true);
     setTimeout(() => {
       setIsSubmitted(true);
@@ -48,14 +57,23 @@ export default function NewsletterSection() {
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.96)',
-          transition: 'opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)',
+          transition:
+            'opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
         {/* Background glow */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-blue-600/15 to-slate-400/10 rounded-3xl blur-3xl" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-blue-600/15 to-slate-400/10 rounded-3xl blur-3xl"
+          aria-hidden="true"
+        />
 
-        <div className="relative rounded-3xl border backdrop-blur-xl p-8 md:p-12 text-center overflow-hidden"
-          style={{ borderColor: 'var(--landing-card-border)', backgroundColor: 'var(--landing-card-bg)' }}>
+        <div
+          className="relative rounded-3xl border backdrop-blur-xl p-8 md:p-12 text-center overflow-hidden"
+          style={{
+            borderColor: 'var(--landing-card-border)',
+            backgroundColor: 'var(--landing-card-bg)',
+          }}
+        >
           {/* Static orb — CSS pulse instead of JS animate */}
           <div
             className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br from-blue-500/25 to-blue-600/20 blur-3xl orb-pulse-1"
@@ -67,15 +85,24 @@ export default function NewsletterSection() {
             <Mail size={28} style={{ color: '#ffffff' }} />
           </div>
 
-          <h3 className="text-2xl md:text-4xl font-black mb-4" style={{ color: 'var(--landing-text-primary)' }}>
+          <h3
+            className="text-2xl md:text-4xl font-black mb-4"
+            style={{ color: 'var(--landing-text-primary)' }}
+          >
             {t('newsletter.title')}
           </h3>
-          <p className="text-lg mb-8 max-w-xl mx-auto" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
+          <p
+            className="text-lg mb-8 max-w-xl mx-auto"
+            style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+          >
             {t('newsletter.subtitle')}
           </p>
 
           {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="flex items-center flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <form
+              onSubmit={handleSubmit}
+              className="flex items-center flex-col sm:flex-row gap-3 max-w-md mx-auto"
+            >
               <input
                 type="email"
                 value={email}
@@ -85,7 +112,7 @@ export default function NewsletterSection() {
                 style={{
                   backgroundColor: 'var(--input)',
                   borderColor: 'var(--input-border)',
-                  color: 'var(--landing-text-primary)'
+                  color: 'var(--landing-text-primary)',
                 }}
                 disabled={isLoading}
                 aria-label={t('ariaLabels.emailAddress')}
@@ -98,21 +125,33 @@ export default function NewsletterSection() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }} />
+                  <div
+                    className="w-5 h-5 border-2 rounded-full animate-spin"
+                    style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }}
+                  />
                 ) : (
-                  <><span>{t('newsletter.subscribe')}</span><ArrowRight size={18} /></>
+                  <>
+                    <span>{t('newsletter.subscribe')}</span>
+                    <ArrowRight size={18} />
+                  </>
                 )}
               </Button>
             </form>
           ) : (
             /* CSS fade-in on success */
-            <div className="flex items-center justify-center gap-3 font-semibold success-reveal" style={{ color: 'var(--primary)' }}>
+            <div
+              className="flex items-center justify-center gap-3 font-semibold success-reveal"
+              style={{ color: 'var(--primary)' }}
+            >
               <CheckCircle2 size={24} />
               <span>{t('newsletter.subscribed')}</span>
             </div>
           )}
 
-          <p className="text-xs mt-6" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
+          <p
+            className="text-xs mt-6"
+            style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+          >
             {t('newsletter.privacyNote')}
           </p>
         </div>

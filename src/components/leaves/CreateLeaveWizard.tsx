@@ -3,81 +3,80 @@
  * Использует универсальный Wizard компонент
  */
 
-"use client";
+'use client';
 
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { Wizard, WizardStep } from "@/components/ui/wizard";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Wizard, WizardStep } from '@/components/ui/wizard';
 import {
   CardSelectionStep,
   TextInputStep,
   TextareaStep,
-} from "@/components/ui/wizard-step-components";
-import { Calendar, Sun, Heart, Users, Briefcase } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { toast } from "sonner";
-import type { LeaveType } from "@/lib/types";
+} from '@/components/ui/wizard-step-components';
+import { Calendar, Sun, Heart, Users, Briefcase } from 'lucide-react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { toast } from 'sonner';
+import type { LeaveType } from '@/lib/types';
 
 interface CreateLeaveWizardProps {
-  userId: Id<"users">;
+  userId: Id<'users'>;
   onComplete?: () => void;
   onCancel?: () => void;
 }
 
-export function CreateLeaveWizard({
-  userId,
-  onComplete,
-  onCancel,
-}: CreateLeaveWizardProps) {
+export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveWizardProps) {
   const { t } = useTranslation();
   const createLeave = useMutation(api.leaves.createLeave);
-  
+
   // Загрузка данных пользователя
   const user = useQuery(api.users.getUserById, { userId });
-  const userOrg = useQuery(api.organizations.getMyOrganization, user?.id ? { userId: user.id as Id<"users"> } : "skip");
+  const userOrg = useQuery(
+    api.organizations.getMyOrganization,
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
+  );
 
   const steps: WizardStep[] = [
     {
-      id: "type",
-      title: t("leaveWizard.steps.type.title"),
-      description: t("leaveWizard.steps.type.description"),
+      id: 'type',
+      title: t('leaveWizard.steps.type.title'),
+      description: t('leaveWizard.steps.type.description'),
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <CardSelectionStep
           stepData={{}}
           updateStepData={() => {}}
           field="type"
-          label={t("leaveWizard.steps.type.typeLabel")}
+          label={t('leaveWizard.steps.type.typeLabel')}
           options={[
             {
-              value: "paid",
-              title: t("leave.types.paid"),
-              description: t("leave.types.paidDesc"),
+              value: 'paid',
+              title: t('leave.types.paid'),
+              description: t('leave.types.paidDesc'),
               icon: <Sun className="w-6 h-6" />,
-              color: "bg-yellow-500/10 text-yellow-600",
+              color: 'bg-yellow-500/10 text-yellow-600',
             },
             {
-              value: "sick",
-              title: t("leave.types.sick"),
-              description: t("leave.types.sickDesc"),
+              value: 'sick',
+              title: t('leave.types.sick'),
+              description: t('leave.types.sickDesc'),
               icon: <Heart className="w-6 h-6" />,
-              color: "bg-red-500/10 text-red-600",
+              color: 'bg-red-500/10 text-red-600',
             },
             {
-              value: "family",
-              title: t("leave.types.family"),
-              description: t("leave.types.familyDesc"),
+              value: 'family',
+              title: t('leave.types.family'),
+              description: t('leave.types.familyDesc'),
               icon: <Users className="w-6 h-6" />,
-              color: "bg-purple-500/10 text-purple-600",
+              color: 'bg-purple-500/10 text-purple-600',
             },
             {
-              value: "unpaid",
-              title: t("leave.types.unpaid"),
-              description: t("leave.types.unpaidDesc"),
+              value: 'unpaid',
+              title: t('leave.types.unpaid'),
+              description: t('leave.types.unpaidDesc'),
               icon: <Briefcase className="w-6 h-6" />,
-              color: "bg-gray-500/10 text-gray-600",
+              color: 'bg-gray-500/10 text-gray-600',
             },
           ]}
           columns={2}
@@ -87,9 +86,9 @@ export function CreateLeaveWizard({
       validation: () => true,
     },
     {
-      id: "dates",
-      title: t("leaveWizard.steps.dates.title"),
-      description: t("leaveWizard.steps.dates.description"),
+      id: 'dates',
+      title: t('leaveWizard.steps.dates.title'),
+      description: t('leaveWizard.steps.dates.description'),
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
@@ -98,7 +97,7 @@ export function CreateLeaveWizard({
               stepData={{}}
               updateStepData={() => {}}
               field="startDate"
-              label={t("leaveWizard.steps.dates.startDateLabel")}
+              label={t('leaveWizard.steps.dates.startDateLabel')}
               type="date"
               required
             />
@@ -106,14 +105,17 @@ export function CreateLeaveWizard({
               stepData={{}}
               updateStepData={() => {}}
               field="endDate"
-              label={t("leaveWizard.steps.dates.endDateLabel")}
+              label={t('leaveWizard.steps.dates.endDateLabel')}
               type="date"
               required
             />
           </div>
           <div className="p-4 rounded-lg bg-[var(--background-subtle)] border border-[var(--border)]">
             <p className="text-sm text-[var(--text-muted)]">
-              {t("leaveWizard.steps.dates.totalDays")}: <span className="font-semibold text-[var(--text-primary)]">{t("leaveWizard.steps.dates.calculating")}</span>
+              {t('leaveWizard.steps.dates.totalDays')}:{' '}
+              <span className="font-semibold text-[var(--text-primary)]">
+                {t('leaveWizard.steps.dates.calculating')}
+              </span>
             </p>
           </div>
         </div>
@@ -124,9 +126,9 @@ export function CreateLeaveWizard({
       },
     },
     {
-      id: "details",
-      title: t("leaveWizard.steps.details.title"),
-      description: t("leaveWizard.steps.details.description"),
+      id: 'details',
+      title: t('leaveWizard.steps.details.title'),
+      description: t('leaveWizard.steps.details.description'),
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
@@ -134,22 +136,23 @@ export function CreateLeaveWizard({
             stepData={{}}
             updateStepData={() => {}}
             field="reason"
-            label={t("leaveWizard.steps.details.reasonLabel")}
-            placeholder={t("leaveWizard.steps.details.reasonPlaceholder")}
+            label={t('leaveWizard.steps.details.reasonLabel')}
+            placeholder={t('leaveWizard.steps.details.reasonPlaceholder')}
             required
           />
           <TextareaStep
             stepData={{}}
             updateStepData={() => {}}
             field="comment"
-            label={t("leaveWizard.steps.details.commentLabel")}
-            placeholder={t("leaveWizard.steps.details.commentPlaceholder")}
+            label={t('leaveWizard.steps.details.commentLabel')}
+            placeholder={t('leaveWizard.steps.details.commentPlaceholder')}
             rows={4}
           />
           {user && (
             <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                💡 {t("leaveWizard.steps.details.balanceInfo", {
+                💡{' '}
+                {t('leaveWizard.steps.details.balanceInfo', {
                   balance: user.paidLeaveBalance ?? 24,
                 })}
               </p>
@@ -159,28 +162,40 @@ export function CreateLeaveWizard({
       ),
     },
     {
-      id: "confirm",
-      title: t("leaveWizard.steps.confirm.title"),
-      description: t("leaveWizard.steps.confirm.description"),
+      id: 'confirm',
+      title: t('leaveWizard.steps.confirm.title'),
+      description: t('leaveWizard.steps.confirm.description'),
       icon: <CheckCircle className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
           <div className="p-4 rounded-lg bg-[var(--background-subtle)] border border-[var(--border)]">
             <h4 className="font-semibold text-[var(--text-primary)] mb-3">
-              {t("leaveWizard.steps.confirm.summary")}
+              {t('leaveWizard.steps.confirm.summary')}
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">{t("leaveWizard.steps.confirm.type")}:</span>
-                <span className="font-medium text-[var(--text-primary)]">{t("leaveWizard.steps.confirm.typeValue")}</span>
+                <span className="text-[var(--text-muted)]">
+                  {t('leaveWizard.steps.confirm.type')}:
+                </span>
+                <span className="font-medium text-[var(--text-primary)]">
+                  {t('leaveWizard.steps.confirm.typeValue')}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">{t("leaveWizard.steps.confirm.dates")}:</span>
-                <span className="font-medium text-[var(--text-primary)]">{t("leaveWizard.steps.confirm.datesValue")}</span>
+                <span className="text-[var(--text-muted)]">
+                  {t('leaveWizard.steps.confirm.dates')}:
+                </span>
+                <span className="font-medium text-[var(--text-primary)]">
+                  {t('leaveWizard.steps.confirm.datesValue')}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">{t("leaveWizard.steps.confirm.days")}:</span>
-                <span className="font-medium text-[var(--text-primary)]">{t("leaveWizard.steps.confirm.daysValue")}</span>
+                <span className="text-[var(--text-muted)]">
+                  {t('leaveWizard.steps.confirm.days')}:
+                </span>
+                <span className="font-medium text-[var(--text-primary)]">
+                  {t('leaveWizard.steps.confirm.daysValue')}
+                </span>
               </div>
             </div>
           </div>
@@ -192,7 +207,7 @@ export function CreateLeaveWizard({
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
       const days = calculateDays(String(data.startDate), String(data.endDate));
-      
+
       await createLeave({
         userId,
         type: String(data.type) as LeaveType,
@@ -203,12 +218,12 @@ export function CreateLeaveWizard({
         comment: data.comment ? String(data.comment) : undefined,
       });
 
-      toast.success(t("leaveWizard.toast.success"), {
-        description: t("leaveWizard.toast.description"),
+      toast.success(t('leaveWizard.toast.success'), {
+        description: t('leaveWizard.toast.description'),
       });
       onComplete?.();
     } catch (error) {
-      toast.error(t("leaveWizard.toast.error"));
+      toast.error(t('leaveWizard.toast.error'));
       console.error(error);
     }
   };
@@ -227,8 +242,8 @@ export function CreateLeaveWizard({
       steps={steps}
       onComplete={handleSubmit}
       onCancel={onCancel}
-      submitLabel={t("leaveWizard.submit")}
-      cancelLabel={t("actions.cancel")}
+      submitLabel={t('leaveWizard.submit')}
+      cancelLabel={t('actions.cancel')}
     />
   );
 }

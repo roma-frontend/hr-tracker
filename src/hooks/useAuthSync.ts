@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useSession } from 'next-auth/react';
+import { useEffect, useRef, useState } from 'react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 export function useAuthSync() {
   const { data: session, status } = useSession();
@@ -16,32 +16,31 @@ export function useAuthSync() {
   const prevUserState = useRef<{ organizationId?: string | null; isApproved?: boolean }>({});
 
   // Get current user by email
-  const currentUser = useQuery(
-    api.users.getCurrentUser,
-    userEmail ? { email: userEmail } : "skip"
-  );
+  const currentUser = useQuery(api.users.getCurrentUser, userEmail ? { email: userEmail } : 'skip');
 
   useEffect(() => {
     const syncAuth = async () => {
-      console.log("[useAuthSync] Status:", status, "Session:", session?.user?.email);
-      console.log("[useAuthSync] Session user name:", session?.user?.name);
-      console.log("[useAuthSync] userEmail state:", userEmail);
-      
-      if (status === "loading") {
-        console.log("[useAuthSync] Still loading...");
+      console.log('[useAuthSync] Status:', status, 'Session:', session?.user?.email);
+      console.log('[useAuthSync] Session user name:', session?.user?.name);
+      console.log('[useAuthSync] userEmail state:', userEmail);
+
+      if (status === 'loading') {
+        console.log('[useAuthSync] Still loading...');
         return;
       }
 
       // When NextAuth logs user out, clear everything
       // BUT only if we don't have a valid email/password session (JWT cookie)
-      if (status === "unauthenticated") {
+      if (status === 'unauthenticated') {
         const { isAuthenticated } = useAuthStore.getState();
         if (isAuthenticated) {
           // User logged in via email/password — JWT session is active, don't logout
-          console.log("[useAuthSync] NextAuth unauthenticated but email/password session active - skipping logout");
+          console.log(
+            '[useAuthSync] NextAuth unauthenticated but email/password session active - skipping logout',
+          );
           return;
         }
-        console.log("[useAuthSync] NextAuth unauthenticated and no active session - logging out");
+        console.log('[useAuthSync] NextAuth unauthenticated and no active session - logging out');
         logout();
         setUserEmail(null);
         sessionCreated.current = false;
@@ -49,25 +48,26 @@ export function useAuthSync() {
       }
 
       // If authenticated via NextAuth
-      if (status === "authenticated" && session?.user) {
-        console.log("[useAuthSync] Authenticated! User:", session.user.email);
-        console.log("[useAuthSync] Session user full details:", {
+      if (status === 'authenticated' && session?.user) {
+        console.log('[useAuthSync] Authenticated! User:', session.user.email);
+        console.log('[useAuthSync] Session user full details:', {
           email: session.user.email,
           name: session.user.name,
           image: session.user.image,
           id: session.user.id,
         });
-        
+
         // Only sync if user email changed (prevent excess mutations)
         if (userEmail !== session.user.email) {
-          console.log("[useAuthSync] Email changed, syncing to Convex...");
+          console.log('[useAuthSync] Email changed, syncing to Convex...');
           try {
             // Ensure name is never empty
-            const finalName = session.user.name?.trim() || session.user.email!.split("@")[0] || 'User';
-            console.log("[useAuthSync] Name extraction:", {
+            const finalName =
+              session.user.name?.trim() || session.user.email!.split('@')[0] || 'User';
+            console.log('[useAuthSync] Name extraction:', {
               sessionName: session.user.name,
               sessionNameTrimmed: session.user.name?.trim(),
-              emailPrefix: session.user.email!.split("@")[0],
+              emailPrefix: session.user.email!.split('@')[0],
               finalName,
             });
             const userData = {
@@ -75,12 +75,12 @@ export function useAuthSync() {
               name: finalName,
               avatarUrl: session.user.image || undefined,
             };
-            
+
             const result = await createOAuthUser(userData);
-            console.log("[useAuthSync] User synced to Convex with name:", finalName);
+            console.log('[useAuthSync] User synced to Convex with name:', finalName);
             setUserEmail(session.user.email!);
           } catch (error) {
-            console.error("[useAuthSync] Error syncing OAuth user:", error);
+            console.error('[useAuthSync] Error syncing OAuth user:', error);
           }
         }
       }
@@ -91,24 +91,43 @@ export function useAuthSync() {
 
   // Separate effect to handle user data once it's loaded
   useEffect(() => {
-    console.log("[useAuthSync] Effect 2 triggered");
-    console.log("[useAuthSync]   currentUser:", currentUser ? { id: currentUser._id, name: currentUser.name, email: currentUser.email, role: currentUser.role } : null);
-    console.log("[useAuthSync]   session.user:", session?.user ? { name: session.user.name, email: session.user.email, role: (session.user as any).role } : null);
-    
+    console.log('[useAuthSync] Effect 2 triggered');
+    console.log(
+      '[useAuthSync]   currentUser:',
+      currentUser
+        ? {
+            id: currentUser._id,
+            name: currentUser.name,
+            email: currentUser.email,
+            role: currentUser.role,
+          }
+        : null,
+    );
+    console.log(
+      '[useAuthSync]   session.user:',
+      session?.user
+        ? { name: session.user.name, email: session.user.email, role: (session.user as any).role }
+        : null,
+    );
+
     if (!session?.user?.email) {
-      console.log("[useAuthSync] ❌ No session.user - skipping sync");
+      console.log('[useAuthSync] ❌ No session.user - skipping sync');
       return;
     }
 
     // Prevent syncing the same user multiple times (race condition safeguard)
     if (lastSyncedUserRef.current === session.user.email) {
-      console.log("[useAuthSync] ℹ️  Already synced", session.user.email, "- skipping to prevent race condition");
+      console.log(
+        '[useAuthSync] ℹ️  Already synced',
+        session.user.email,
+        '- skipping to prevent race condition',
+      );
       return;
     }
 
     // If we have currentUser from Convex, use it (has full profile)
     if (currentUser) {
-      console.log("[useAuthSync] ✅ Current user from Convex:", {
+      console.log('[useAuthSync] ✅ Current user from Convex:', {
         id: currentUser._id,
         name: currentUser.name,
         email: currentUser.email,
@@ -119,15 +138,20 @@ export function useAuthSync() {
 
       // If user name is "User" but we have better name from session, use that
       let finalName = currentUser.name;
-      if (currentUser.name === "User" || !currentUser.name) {
+      if (currentUser.name === 'User' || !currentUser.name) {
         const sessionName = session.user.name?.trim();
-        if (sessionName && sessionName !== "User") {
-          console.log("[useAuthSync] 📝 Upgrading name from DB", currentUser.name, "to session name:", sessionName);
+        if (sessionName && sessionName !== 'User') {
+          console.log(
+            '[useAuthSync] 📝 Upgrading name from DB',
+            currentUser.name,
+            'to session name:',
+            sessionName,
+          );
           finalName = sessionName;
         }
       }
 
-      console.log("[useAuthSync] 📤 Syncing to useAuthStore from Convex...");
+      console.log('[useAuthSync] 📤 Syncing to useAuthStore from Convex...');
 
       // Sync to useAuthStore — only from Convex data (never from incomplete session data)
       const { login } = useAuthStore.getState();
@@ -144,7 +168,7 @@ export function useAuthSync() {
         isApproved: currentUser.isApproved,
       });
 
-      console.log("[useAuthSync] ✅ User logged into useAuthStore:", {
+      console.log('[useAuthSync] ✅ User logged into useAuthStore:', {
         id: currentUser._id,
         name: finalName,
         email: currentUser.email,
@@ -162,32 +186,33 @@ export function useAuthSync() {
       // Only redirect if user was NOT approved before but IS approved now
       // AND we're not already on a dashboard page
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-      const isDashboardPage = currentPath === '/dashboard' || 
-        currentPath.startsWith('/superadmin') || 
-        currentPath.startsWith('/admin') || 
-        currentPath.startsWith('/employees') || 
-        currentPath.startsWith('/tasks') || 
-        currentPath.startsWith('/calendar') || 
-        currentPath.startsWith('/leaves') || 
-        currentPath.startsWith('/attendance') || 
-        currentPath.startsWith('/settings') || 
-        currentPath.startsWith('/chat') || 
-        currentPath.startsWith('/analytics') || 
-        currentPath.startsWith('/reports') || 
-        currentPath.startsWith('/join-requests') || 
-        currentPath.startsWith('/org-requests') || 
-        currentPath.startsWith('/approvals') || 
-        currentPath.startsWith('/profile') || 
+      const isDashboardPage =
+        currentPath === '/dashboard' ||
+        currentPath.startsWith('/superadmin') ||
+        currentPath.startsWith('/admin') ||
+        currentPath.startsWith('/employees') ||
+        currentPath.startsWith('/tasks') ||
+        currentPath.startsWith('/calendar') ||
+        currentPath.startsWith('/leaves') ||
+        currentPath.startsWith('/attendance') ||
+        currentPath.startsWith('/settings') ||
+        currentPath.startsWith('/chat') ||
+        currentPath.startsWith('/analytics') ||
+        currentPath.startsWith('/reports') ||
+        currentPath.startsWith('/join-requests') ||
+        currentPath.startsWith('/org-requests') ||
+        currentPath.startsWith('/approvals') ||
+        currentPath.startsWith('/profile') ||
         currentPath.startsWith('/ai-site-editor');
 
       if (!prevApproved && currApproved && currOrg && !isDashboardPage) {
-        console.log("[useAuthSync] 🎉 User was just approved! WOULD redirect to dashboard...");
+        console.log('[useAuthSync] 🎉 User was just approved! WOULD redirect to dashboard...');
         // TEMP: Disabled for debugging
         // setTimeout(() => {
         //   window.location.href = "/dashboard";
         // }, 1000);
       } else if (prevApproved && currApproved) {
-        console.log("[useAuthSync] ℹ️  User already approved, skipping redirect");
+        console.log('[useAuthSync] ℹ️  User already approved, skipping redirect');
       }
 
       // Update previous state
@@ -203,13 +228,13 @@ export function useAuthSync() {
       // incomplete NextAuth session data (which may have name "User").
       // OAuthSyncLoader + Providers ShieldLoader will keep showing until
       // Convex returns the full profile and login() is called above.
-      console.log("[useAuthSync] ⏳ Waiting for Convex query to return full user profile...");
+      console.log('[useAuthSync] ⏳ Waiting for Convex query to return full user profile...');
     }
 
     // Create server-side session cookie for dashboard auth (only once per user)
     if (!sessionCreated.current) {
       sessionCreated.current = true;
-      
+
       const createSession = async () => {
         try {
           // Check if we're in maintenance mode
@@ -219,43 +244,50 @@ export function useAuthSync() {
 
           // Skip redirect if in maintenance mode or already on dashboard/login
           if (isMaintenance) {
-            console.log("[useAuthSync] Maintenance mode detected - not redirecting");
+            console.log('[useAuthSync] Maintenance mode detected - not redirecting');
             return;
           }
-          
+
           // Debug mode - log but don't redirect
           if (isDebug) {
-            console.log("[useAuthSync] Debug mode - logging but not redirecting");
+            console.log('[useAuthSync] Debug mode - logging but not redirecting');
           }
 
           // Public routes that should NOT redirect
           const publicRoutes = ['/', '/contact', '/privacy', '/terms', '/test-i18n', '/landing'];
           const path = window.location.pathname;
 
-          console.log("[useAuthSync] Checking route:", {
+          console.log('[useAuthSync] Checking route:', {
             path,
             publicRoutes,
-            isPublicRouteCheck: publicRoutes.some(route => path === route || path === route + '/' || path.startsWith(route + '/')),
-            isLandingPage: path === '/' || path.startsWith('/landing')
+            isPublicRouteCheck: publicRoutes.some(
+              (route) => path === route || path === route + '/' || path.startsWith(route + '/'),
+            ),
+            isLandingPage: path === '/' || path.startsWith('/landing'),
           });
 
           // Check for exact match or sub-route
-          const isPublicRoute = publicRoutes.some(route =>
-            path === route || path === route + '/' || path.startsWith(route + '/')
+          const isPublicRoute = publicRoutes.some(
+            (route) => path === route || path === route + '/' || path.startsWith(route + '/'),
           );
 
           // Landing page should never redirect
           const isLandingPage = path === '/' || path.startsWith('/landing');
 
           // Only redirect if we're on auth pages (login/register), not if already on a dashboard page or public page
-          const isAuthPage = path === '/login' || path === '/register' || path === '/forgot-password' || path.startsWith('/register-org');
+          const isAuthPage =
+            path === '/login' ||
+            path === '/register' ||
+            path === '/forgot-password' ||
+            path.startsWith('/register-org');
 
           if (isPublicRoute || isLandingPage) {
-            console.log("[useAuthSync] ✅ Public/landing route - not redirecting:", path);
+            console.log('[useAuthSync] ✅ Public/landing route - not redirecting:', path);
             return;
           }
-          
-          const isDashboardPage = path === '/dashboard' ||
+
+          const isDashboardPage =
+            path === '/dashboard' ||
             path.startsWith('/superadmin') ||
             path.startsWith('/admin') ||
             path.startsWith('/employees') ||
@@ -275,34 +307,38 @@ export function useAuthSync() {
             path.startsWith('/drivers') ||
             path.startsWith('/events') ||
             path.startsWith('/admin/events');
-          
-          console.log("[useAuthSync] Route check result:", {
+
+          console.log('[useAuthSync] Route check result:', {
             isPublicRoute,
             isLandingPage,
             isAuthPage,
             isDashboardPage,
-            path
+            path,
           });
 
           // Don't redirect to dashboard if user has no organization (needs onboarding)
           if (currentUser && !currentUser.organizationId) {
-            console.log("[useAuthSync] 🚨 User has no organization - not redirecting to dashboard");
+            console.log('[useAuthSync] 🚨 User has no organization - not redirecting to dashboard');
             return;
           }
 
           if (!isDashboardPage && !isAuthPage && !isPublicRoute) {
-            console.log("[useAuthSync] ⚠️ WOULD Redirect from", path, "to dashboard");
+            console.log('[useAuthSync] ⚠️ WOULD Redirect from', path, 'to dashboard');
             // TEMP: Disabled for debugging
             // window.location.href = '/dashboard';
           } else {
-            console.log("[useAuthSync] ✅ No redirect needed:", { isDashboardPage, isAuthPage, isPublicRoute });
+            console.log('[useAuthSync] ✅ No redirect needed:', {
+              isDashboardPage,
+              isAuthPage,
+              isPublicRoute,
+            });
           }
         } catch (error) {
-          console.error("[useAuthSync] Session creation error:", error);
+          console.error('[useAuthSync] Session creation error:', error);
           sessionCreated.current = false; // Allow retry on error
         }
       };
-      
+
       // Wait for state to update before redirecting
       setTimeout(createSession, 0);
     }

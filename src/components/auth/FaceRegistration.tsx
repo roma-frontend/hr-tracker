@@ -1,26 +1,25 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import { useRef, useState, useEffect } from "react";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Camera, CheckCircle, XCircle } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { toast } from "sonner";
-import { detectFace, loadFaceApiModels, createCanvasFromVideo, canvasToBlob } from "@/lib/faceApi";
-import { uploadAvatarToCloudinary } from "@/actions/cloudinary";
-import { Id } from "../../../convex/_generated/dataModel";
+import { useTranslation } from 'react-i18next';
+import { useRef, useState, useEffect } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Camera, CheckCircle, XCircle } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { toast } from 'sonner';
+import { detectFace, loadFaceApiModels, createCanvasFromVideo, canvasToBlob } from '@/lib/faceApi';
+import { uploadAvatarToCloudinary } from '@/actions/cloudinary';
+import { Id } from '../../../convex/_generated/dataModel';
 
 interface FaceRegistrationProps {
-  userId: Id<"users">;
+  userId: Id<'users'>;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function FaceRegistration({ 
-userId, onSuccess, onCancel }: FaceRegistrationProps) {
+export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrationProps) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isWebcamActive, setIsWebcamActive] = useState(false);
@@ -29,29 +28,29 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
-  const [selectedCamera, setSelectedCamera] = useState<string>("");
+  const [selectedCamera, setSelectedCamera] = useState<string>('');
 
   const registerFace = useMutation(api.faceRecognition.registerFace);
 
   useEffect(() => {
     // Load models on mount
     loadFaceApiModels().catch((err) => {
-      console.error("Failed to load face models:", err);
-      toast.error("Failed to load face recognition models");
+      console.error('Failed to load face models:', err);
+      toast.error('Failed to load face recognition models');
     });
 
     // Get available cameras
     async function getCameras() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(d => d.kind === 'videoinput');
-        console.log("Available cameras:", videoDevices);
+        const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+        console.log('Available cameras:', videoDevices);
         setCameras(videoDevices);
         if (videoDevices.length > 0) {
           setSelectedCamera(videoDevices[0].deviceId);
         }
       } catch (err) {
-        console.error("Failed to enumerate devices:", err);
+        console.error('Failed to enumerate devices:', err);
       }
     }
     getCameras();
@@ -68,95 +67,99 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
     try {
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast.error("Camera access is not supported in this browser. Please use Chrome, Edge, or Firefox.");
+        toast.error(
+          'Camera access is not supported in this browser. Please use Chrome, Edge, or Firefox.',
+        );
         return;
       }
 
-      console.log("🎥 Requesting camera access...");
-      console.log("Selected camera:", selectedCamera);
-      
+      console.log('🎥 Requesting camera access...');
+      console.log('Selected camera:', selectedCamera);
+
       const constraints: MediaStreamConstraints = {
-        video: selectedCamera ? {
-          deviceId: { exact: selectedCamera },
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-        } : {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: "user" 
-        },
+        video: selectedCamera
+          ? {
+              deviceId: { exact: selectedCamera },
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+            }
+          : {
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+              facingMode: 'user',
+            },
       };
-      
+
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      
-      console.log("✅ Camera access granted");
-      
+
+      console.log('✅ Camera access granted');
+
       // Set state to trigger video element rendering
       setStream(mediaStream);
       setIsWebcamActive(true);
-      
+
       // Wait for React to render the video element
-      await new Promise(resolve => setTimeout(resolve, 0));
-      
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       // Wait for video element to be available in DOM
       const waitForVideoElement = async (maxAttempts = 20) => {
         for (let i = 0; i < maxAttempts; i++) {
           if (videoRef.current) {
-            console.log("📹 Video element found on attempt", i + 1);
+            console.log('📹 Video element found on attempt', i + 1);
             return true;
           }
           console.log(`⏳ Waiting for video element... attempt ${i + 1}`);
-          await new Promise(resolve => setTimeout(resolve, 50));
+          await new Promise((resolve) => setTimeout(resolve, 50));
         }
         return false;
       };
-      
+
       const videoElementAvailable = await waitForVideoElement();
-      
+
       if (!videoElementAvailable || !videoRef.current) {
-        console.error("❌ Video element ref is null after waiting!");
-        toast.error("Video element not found. Please try again.");
+        console.error('❌ Video element ref is null after waiting!');
+        toast.error('Video element not found. Please try again.');
         // Stop the stream and reset state
-        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream.getTracks().forEach((track) => track.stop());
         setStream(null);
         setIsWebcamActive(false);
         return;
       }
-      
-      console.log("📹 Setting up video element...");
+
+      console.log('📹 Setting up video element...');
       videoRef.current.srcObject = mediaStream;
-        
-        console.log("⏳ Waiting for metadata to load...");
-        
-        // Ensure video plays
-        const playVideo = async () => {
-          if (!videoRef.current) {
-            console.error("❌ videoRef is null when trying to play");
-            return;
-          }
-          
-          try {
-            console.log("🎬 Attempting to play video...");
-            console.log("Video element state:", {
-              readyState: videoRef.current.readyState,
-              paused: videoRef.current.paused,
-              srcObject: !!videoRef.current.srcObject
-            });
-            await videoRef.current.play();
-            console.log("✅ Video playing successfully");
-            detectFaceLoop(true); // Force start with true flag
-          } catch (err) {
-            console.error("❌ Failed to play video:", err);
-            toast.error("Failed to start video playback");
-          }
-        };
-        
-        // Wait for metadata and play
-        videoRef.current.onloadedmetadata = () => {
-          console.log("✅ Video metadata loaded");
-          playVideo();
-        };
-        
+
+      console.log('⏳ Waiting for metadata to load...');
+
+      // Ensure video plays
+      const playVideo = async () => {
+        if (!videoRef.current) {
+          console.error('❌ videoRef is null when trying to play');
+          return;
+        }
+
+        try {
+          console.log('🎬 Attempting to play video...');
+          console.log('Video element state:', {
+            readyState: videoRef.current.readyState,
+            paused: videoRef.current.paused,
+            srcObject: !!videoRef.current.srcObject,
+          });
+          await videoRef.current.play();
+          console.log('✅ Video playing successfully');
+          detectFaceLoop(true); // Force start with true flag
+        } catch (err) {
+          console.error('❌ Failed to play video:', err);
+          toast.error('Failed to start video playback');
+        }
+      };
+
+      // Wait for metadata and play
+      videoRef.current.onloadedmetadata = () => {
+        console.log('✅ Video metadata loaded');
+        playVideo();
+      };
+
       // Fallback: try to play after a short delay if metadata event doesn't fire
       setTimeout(() => {
         if (videoRef.current && isWebcamActive) {
@@ -165,20 +168,22 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
         }
       }, 1000);
     } catch (error: any) {
-      console.error("❌ Error accessing webcam:", error);
-      
+      console.error('❌ Error accessing webcam:', error);
+
       // Reset state on error
       setIsWebcamActive(false);
       setStream(null);
-      
-      if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
-        toast.error("Camera permission denied. Please allow camera access in your browser settings.");
-      } else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
-        toast.error("No camera found. Please connect a camera and try again.");
-      } else if (error.name === "NotReadableError" || error.name === "TrackStartError") {
-        toast.error("Camera is already in use by another application.");
+
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        toast.error(
+          'Camera permission denied. Please allow camera access in your browser settings.',
+        );
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        toast.error('No camera found. Please connect a camera and try again.');
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        toast.error('Camera is already in use by another application.');
       } else {
-        toast.error(`Unable to access camera: ${error.message || "Unknown error"}`);
+        toast.error(`Unable to access camera: ${error.message || 'Unknown error'}`);
       }
     }
   };
@@ -193,22 +198,29 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
   };
 
   const detectFaceLoop = (forceStart = false) => {
-    console.log("🔄 Starting face detection loop...");
-    console.log("forceStart:", forceStart, "videoRef.current:", !!videoRef.current, "isWebcamActive:", isWebcamActive);
-    
+    console.log('🔄 Starting face detection loop...');
+    console.log(
+      'forceStart:',
+      forceStart,
+      'videoRef.current:',
+      !!videoRef.current,
+      'isWebcamActive:',
+      isWebcamActive,
+    );
+
     if (!videoRef.current) {
-      console.warn("⚠️ Cannot start detection loop - videoRef is null");
+      console.warn('⚠️ Cannot start detection loop - videoRef is null');
       return;
     }
-    
+
     if (!forceStart && !isWebcamActive) {
-      console.warn("⚠️ Cannot start detection loop - isWebcamActive is false");
+      console.warn('⚠️ Cannot start detection loop - isWebcamActive is false');
       return;
     }
 
     const interval = setInterval(async () => {
       if (!videoRef.current) {
-        console.log("🛑 Stopping face detection loop - videoRef is null");
+        console.log('🛑 Stopping face detection loop - videoRef is null');
         clearInterval(interval);
         return;
       }
@@ -216,21 +228,21 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
       try {
         // Check if video is actually playing and has valid dimensions
         if (videoRef.current.readyState < 2) {
-          console.log("⏳ Video not ready yet, readyState:", videoRef.current.readyState);
+          console.log('⏳ Video not ready yet, readyState:', videoRef.current.readyState);
           return;
         }
 
         const detection = await detectFace(videoRef.current);
         const faceFound = !!detection;
-        
+
         // Only log when face detection status changes
         if (faceFound !== faceDetected) {
-          console.log(faceFound ? "✅ Face detected!" : "❌ No face detected");
+          console.log(faceFound ? '✅ Face detected!' : '❌ No face detected');
         }
-        
+
         setFaceDetected(faceFound);
       } catch (error) {
-        console.error("Error in face detection loop:", error);
+        console.error('Error in face detection loop:', error);
       }
     }, 500);
 
@@ -247,7 +259,7 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
       const detection = await detectFace(videoRef.current);
 
       if (!detection) {
-        toast.error("No face detected. Please position your face in the frame.");
+        toast.error('No face detected. Please position your face in the frame.');
         setIsProcessing(false);
         return;
       }
@@ -257,7 +269,7 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
 
       // Create canvas and capture image
       const canvas = createCanvasFromVideo(videoRef.current);
-      const base64Image = canvas.toDataURL("image/jpeg", 0.95);
+      const base64Image = canvas.toDataURL('image/jpeg', 0.95);
 
       // Upload face image to Cloudinary
       const imageUrl = await uploadAvatarToCloudinary(base64Image, `face-${userId}`);
@@ -271,12 +283,12 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
 
       setCapturedImage(canvas.toDataURL());
       stopWebcam();
-      
-      toast.success("Face registered successfully! You can now use Face ID to login.");
+
+      toast.success('Face registered successfully! You can now use Face ID to login.');
       onSuccess?.();
     } catch (error) {
-      console.error("Error capturing face:", error);
-      toast.error("Failed to register face. Please try again.");
+      console.error('Error capturing face:', error);
+      toast.error('Failed to register face. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -286,9 +298,7 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
     <Card className="p-6 bg-[var(--surface-base)] border-[var(--border-primary)]">
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-            Register Face ID
-          </h3>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">Register Face ID</h3>
           <p className="text-sm text-[var(--text-tertiary)] mt-1">
             Position your face in the camera frame to register Face ID login
           </p>
@@ -312,7 +322,7 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
                 muted
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Face detection indicator */}
               <div className="absolute top-4 right-4">
                 {faceDetected ? (
@@ -336,11 +346,7 @@ userId, onSuccess, onCancel }: FaceRegistrationProps) {
           )}
 
           {capturedImage && (
-            <img
-              src={capturedImage}
-              alt="Captured face"
-              className="w-full h-full object-cover"
-            />
+            <img src={capturedImage} alt="Captured face" className="w-full h-full object-cover" />
           )}
         </div>
 

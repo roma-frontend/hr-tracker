@@ -1,28 +1,28 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { Play, Pause, RotateCcw, Coffee, Timer, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { Play, Pause, RotateCcw, Coffee, Timer, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const DURATIONS = {
-  pomodoro: 25 * 60,      // 25 minutes
-  shortBreak: 5 * 60,     // 5 minutes
-  longBreak: 15 * 60,     // 15 minutes
+  pomodoro: 25 * 60, // 25 minutes
+  shortBreak: 5 * 60, // 5 minutes
+  longBreak: 15 * 60, // 15 minutes
 };
 
 export function PomodoroTimer() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const [mode, setMode] = useState<"pomodoro" | "shortBreak" | "longBreak">("pomodoro");
+  const [mode, setMode] = useState<'pomodoro' | 'shortBreak' | 'longBreak'>('pomodoro');
   const [timeLeft, setTimeLeft] = useState(DURATIONS.pomodoro);
   const [isRunning, setIsRunning] = useState(false);
-  const [sessionId, setSessionId] = useState<Id<"pomodoroSessions"> | null>(null);
+  const [sessionId, setSessionId] = useState<Id<'pomodoroSessions'> | null>(null);
   const intervalRef = useRef<NodeJS.Timeout>(null);
 
   const startSession = useMutation(api.productivity.startPomodoroSession);
@@ -30,7 +30,7 @@ export function PomodoroTimer() {
   const interruptSession = useMutation(api.productivity.interruptPomodoroSession);
   const activeSession = useQuery(
     api.productivity.getActivePomodoroSession,
-    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
   // Sync with active session from DB
@@ -51,41 +51,41 @@ export function PomodoroTimer() {
     }
 
     // Browser Notification
-    if (mode === "pomodoro") {
+    if (mode === 'pomodoro') {
       toast.success(t('pomodoro.pomodoroCompleted'), {
         duration: 5000,
       });
 
       // Send browser notification
-      if ("Notification" in window && Notification.permission === "granted") {
+      if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(t('pomodoro.notificationTitle'), {
           body: t('pomodoro.breakReadyMsg'),
-          icon: "/icon.png",
-          badge: "/badge.png",
-          tag: "pomodoro-complete",
+          icon: '/icon.png',
+          badge: '/badge.png',
+          tag: 'pomodoro-complete',
         });
       }
 
       // Auto switch to break
-      setMode("shortBreak");
+      setMode('shortBreak');
       setTimeLeft(DURATIONS.shortBreak);
-    } else if (mode === "shortBreak") {
+    } else if (mode === 'shortBreak') {
       toast.success(t('pomodoro.breakOver'), {
         duration: 5000,
       });
 
       // Send browser notification
-      if ("Notification" in window && Notification.permission === "granted") {
+      if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(t('pomodoro.breakTitle'), {
           body: t('pomodoro.refreshedMsg'),
-          icon: "/icon.png",
-          badge: "/badge.png",
-          tag: "break-complete",
+          icon: '/icon.png',
+          badge: '/badge.png',
+          tag: 'break-complete',
         });
       }
 
       // Auto switch back to pomodoro
-      setMode("pomodoro");
+      setMode('pomodoro');
       setTimeLeft(DURATIONS.pomodoro);
     }
 
@@ -122,13 +122,13 @@ export function PomodoroTimer() {
 
     try {
       // Request notification permission on first use
-      if ("Notification" in window && Notification.permission === "default") {
+      if ('Notification' in window && Notification.permission === 'default') {
         await Notification.requestPermission();
       }
 
-      const duration = mode === "pomodoro" ? 25 : mode === "shortBreak" ? 5 : 15;
+      const duration = mode === 'pomodoro' ? 25 : mode === 'shortBreak' ? 5 : 15;
       const id = await startSession({
-        userId: user.id as Id<"users">,
+        userId: user.id as Id<'users'>,
         duration,
       });
       setSessionId(id);
@@ -158,7 +158,7 @@ export function PomodoroTimer() {
 
   const handleModeChange = (newMode: typeof mode) => {
     if (isRunning) {
-      toast.error("Stop the current session first");
+      toast.error('Stop the current session first');
       return;
     }
     setMode(newMode);
@@ -168,7 +168,7 @@ export function PomodoroTimer() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const progress = ((DURATIONS[mode] - timeLeft) / DURATIONS[mode]) * 100;
@@ -185,29 +185,32 @@ export function PomodoroTimer() {
       {/* Mode selector */}
       <div className="grid grid-cols-3 gap-1 mb-4 px-2">
         <button
-          onClick={() => handleModeChange("pomodoro")}
-          className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${mode === "pomodoro"
-              ? "bg-[var(--primary)] text-white shadow-sm"
-              : "bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80"
-            }`}
+          onClick={() => handleModeChange('pomodoro')}
+          className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            mode === 'pomodoro'
+              ? 'bg-[var(--primary)] text-white shadow-sm'
+              : 'bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80'
+          }`}
         >
           Focus
         </button>
         <button
-          onClick={() => handleModeChange("shortBreak")}
-          className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${mode === "shortBreak"
-              ? "bg-[var(--primary)] text-white shadow-sm"
-              : "bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80"
-            }`}
+          onClick={() => handleModeChange('shortBreak')}
+          className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            mode === 'shortBreak'
+              ? 'bg-[var(--primary)] text-white shadow-sm'
+              : 'bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80'
+          }`}
         >
           Short
         </button>
         <button
-          onClick={() => handleModeChange("longBreak")}
-          className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${mode === "longBreak"
-              ? "bg-[var(--primary)] text-white shadow-sm"
-              : "bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80"
-            }`}
+          onClick={() => handleModeChange('longBreak')}
+          className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            mode === 'longBreak'
+              ? 'bg-[var(--primary)] text-white shadow-sm'
+              : 'bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80'
+          }`}
         >
           Long
         </button>
@@ -217,14 +220,7 @@ export function PomodoroTimer() {
       <div className="relative mb-4">
         {/* Progress ring */}
         <svg className="w-full h-32" viewBox="0 0 120 120">
-          <circle
-            cx="60"
-            cy="60"
-            r="54"
-            fill="none"
-            stroke="var(--border)"
-            strokeWidth="6"
-          />
+          <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border)" strokeWidth="6" />
           <circle
             cx="60"
             cy="60"
@@ -246,7 +242,11 @@ export function PomodoroTimer() {
             {formatTime(timeLeft)}
           </div>
           <div className="text-xs text-[var(--text-muted)] mt-1 capitalize">
-            {mode === "pomodoro" ? t('pomodoro.focusTime') : mode === "shortBreak" ? t('pomodoro.shortBreak') : t('pomodoro.longBreak')}
+            {mode === 'pomodoro'
+              ? t('pomodoro.focusTime')
+              : mode === 'shortBreak'
+                ? t('pomodoro.shortBreak')
+                : t('pomodoro.longBreak')}
           </div>
         </div>
       </div>
@@ -278,11 +278,9 @@ export function PomodoroTimer() {
       </div>
 
       {/* Stats */}
-      {mode === "pomodoro" && (
+      {mode === 'pomodoro' && (
         <div className="mt-3 px-2 text-center">
-          <p className="text-[10px] text-[var(--text-muted)]">
-            {t('pomodoro.productivityTip')}
-          </p>
+          <p className="text-[10px] text-[var(--text-muted)]">{t('pomodoro.productivityTip')}</p>
         </div>
       )}
     </div>

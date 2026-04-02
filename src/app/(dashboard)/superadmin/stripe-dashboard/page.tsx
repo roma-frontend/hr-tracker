@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   DollarSign,
   Users,
@@ -21,14 +21,14 @@ import {
   BarChart3,
   RefreshCcw,
   Bell,
-  ShieldAlert
-} from "lucide-react";
-import { useState, useMemo } from "react";
-import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useTranslation } from "react-i18next";
+  ShieldAlert,
+} from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
 
-const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
 interface Subscription {
   _id: string;
@@ -54,7 +54,7 @@ export default function StripeDashboardPage() {
   const { user: currentUser } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
   const [runningScript, setRunningScript] = useState<string | null>(null);
-  const [scriptOutput, setScriptOutput] = useState<string>("");
+  const [scriptOutput, setScriptOutput] = useState<string>('');
 
   const stats = useMemo(() => {
     if (!subscriptions) return null;
@@ -70,7 +70,7 @@ export default function StripeDashboardPage() {
     let mrr = 0;
     let totalRevenue = 0;
 
-    subscriptions.forEach(sub => {
+    subscriptions.forEach((sub) => {
       byStatus[sub.status] = (byStatus[sub.status] || 0) + 1;
       byPlan[sub.plan] = (byPlan[sub.plan] || 0) + 1;
 
@@ -83,12 +83,13 @@ export default function StripeDashboardPage() {
 
     // Calculate growth
     const now = Date.now();
-    const lastMonth = now - (30 * 24 * 60 * 60 * 1000);
-    const lastMonthSubs = subscriptions.filter(s => s._creationTime < lastMonth);
-    const growth = ((subscriptions.length - lastMonthSubs.length) / Math.max(lastMonthSubs.length, 1)) * 100;
+    const lastMonth = now - 30 * 24 * 60 * 60 * 1000;
+    const lastMonthSubs = subscriptions.filter((s) => s._creationTime < lastMonth);
+    const growth =
+      ((subscriptions.length - lastMonthSubs.length) / Math.max(lastMonthSubs.length, 1)) * 100;
 
     // Trial reminders
-    const trialEnding = subscriptions.filter(sub => {
+    const trialEnding = subscriptions.filter((sub) => {
       if (sub.status !== 'trialing' || !sub.trialEnd) return false;
       const daysLeft = Math.ceil((sub.trialEnd - now) / (1000 * 60 * 60 * 24));
       return daysLeft >= 0 && daysLeft <= 7;
@@ -117,7 +118,8 @@ export default function StripeDashboardPage() {
     );
   }
 
-  const isSuperAdmin = currentUser.email?.toLowerCase() === SUPERADMIN_EMAIL || currentUser.role === "superadmin";
+  const isSuperAdmin =
+    currentUser.email?.toLowerCase() === SUPERADMIN_EMAIL || currentUser.role === 'superadmin';
 
   if (!isSuperAdmin) {
     return (
@@ -128,13 +130,12 @@ export default function StripeDashboardPage() {
               <ShieldAlert className="w-6 h-6" />
               <CardTitle>Access Denied</CardTitle>
             </div>
-            <CardDescription>
-              This page is only accessible to the superadmin.
-            </CardDescription>
+            <CardDescription>This page is only accessible to the superadmin.</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Payment and subscription management features are restricted to authorized personnel only.
+              Payment and subscription management features are restricted to authorized personnel
+              only.
             </p>
           </CardContent>
         </Card>
@@ -150,11 +151,11 @@ export default function StripeDashboardPage() {
 
   const handleRunScript = async (script: string) => {
     setRunningScript(script);
-    setScriptOutput("");
-    
+    setScriptOutput('');
+
     try {
       toast.loading(`Running ${script}...`, { id: script });
-      
+
       const response = await fetch('/api/stripe/run-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -162,7 +163,7 @@ export default function StripeDashboardPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setScriptOutput(data.output);
         toast.success(`✅ ${script} completed successfully`, { id: script });
@@ -279,9 +280,7 @@ export default function StripeDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.growth}%</div>
-              <p className="text-xs text-muted-foreground">
-                Last 30 days
-              </p>
+              <p className="text-xs text-muted-foreground">Last 30 days</p>
             </CardContent>
           </Card>
 
@@ -292,9 +291,7 @@ export default function StripeDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.trialEnding}</div>
-              <p className="text-xs text-muted-foreground">
-                Within 7 days
-              </p>
+              <p className="text-xs text-muted-foreground">Within 7 days</p>
             </CardContent>
           </Card>
         </div>
@@ -321,7 +318,9 @@ export default function StripeDashboardPage() {
                 <Terminal className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span className="font-semibold">View Transactions</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">Display all Stripe transactions</p>
+              <p className="text-xs text-muted-foreground text-left">
+                Display all Stripe transactions
+              </p>
               {runningScript === 'stripe:view' && (
                 <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
               )}
@@ -337,7 +336,9 @@ export default function StripeDashboardPage() {
                 <FileSpreadsheet className="w-4 h-4 text-green-600 dark:text-green-400" />
                 <span className="font-semibold">{t('stripe.exportToExcel')}</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">{t('stripe.exportDataXlsx')}</p>
+              <p className="text-xs text-muted-foreground text-left">
+                {t('stripe.exportDataXlsx')}
+              </p>
               {runningScript === 'stripe:export' && (
                 <RefreshCw className="w-4 h-4 animate-spin text-green-600" />
               )}
@@ -369,7 +370,9 @@ export default function StripeDashboardPage() {
                 <BarChart3 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 <span className="font-semibold">Growth Chart</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">Generate growth visualization</p>
+              <p className="text-xs text-muted-foreground text-left">
+                Generate growth visualization
+              </p>
               {runningScript === 'stripe:growth-chart' && (
                 <RefreshCw className="w-4 h-4 animate-spin text-purple-600" />
               )}
@@ -485,7 +488,7 @@ export default function StripeDashboardPage() {
                   enterprise: 199,
                 };
                 const price = prices[plan] || 0;
-                
+
                 return (
                   <div key={plan} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -546,16 +549,16 @@ export default function StripeDashboardPage() {
                         </div>
                       </td>
                       <td className="py-3">
-                        <span className="capitalize">{getPlanEmoji(sub.plan)} {sub.plan}</span>
+                        <span className="capitalize">
+                          {getPlanEmoji(sub.plan)} {sub.plan}
+                        </span>
                       </td>
                       <td className="py-3">
                         <Badge variant="outline" className="capitalize">
                           {getStatusEmoji(sub.status)} {sub.status}
                         </Badge>
                       </td>
-                      <td className="py-3 font-semibold">
-                        ${price}
-                      </td>
+                      <td className="py-3 font-semibold">${price}</td>
                       <td className="py-3 text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />

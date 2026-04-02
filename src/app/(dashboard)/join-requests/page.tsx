@@ -1,50 +1,59 @@
-"use client";
+'use client';
 
-import { useState } from "react"
-import { useTranslation } from 'react-i18next';;
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
-  Users, CheckCircle2, XCircle, Clock, Search,
-  Mail, Calendar, AlertCircle, Link2,
-  Copy, Check, RefreshCw,
-} from "lucide-react";
-import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import type { Id } from "@/convex/_generated/dataModel";
+  Users,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Search,
+  Mail,
+  Calendar,
+  AlertCircle,
+  Link2,
+  Copy,
+  Check,
+  RefreshCw,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import type { Id } from '@/convex/_generated/dataModel';
 
-type FilterStatus = "pending" | "approved" | "rejected" | "all";
+type FilterStatus = 'pending' | 'approved' | 'rejected' | 'all';
 
 // Status badges will be rendered with translation in component
 
 export default function JoinRequestsPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const [filter, setFilter] = useState<FilterStatus>("pending");
-  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<FilterStatus>('pending');
+  const [search, setSearch] = useState('');
   const [approving, setApproving] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReason, setRejectReason] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [generatingLink, setGeneratingLink] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
-  const userId = user?.id as Id<"users"> | undefined;
+  const userId = user?.id as Id<'users'> | undefined;
 
   const requests = useQuery(
     api.organizations.getJoinRequests,
-    userId ? { adminId: userId, status: filter === "all" ? undefined : filter } : "skip"
+    userId ? { adminId: userId, status: filter === 'all' ? undefined : filter } : 'skip',
   );
 
   const pendingCount = useQuery(
     api.organizations.getPendingJoinRequestCount,
-    userId ? { adminId: userId } : "skip"
+    userId ? { adminId: userId } : 'skip',
   );
 
   // Debug logging
@@ -53,7 +62,7 @@ export default function JoinRequestsPage() {
       userId,
       userRole: user?.role,
       userOrg: user?.organizationId,
-      requestsData: requests
+      requestsData: requests,
     });
   }
 
@@ -72,7 +81,7 @@ export default function JoinRequestsPage() {
     );
   }
 
-  if (user.role !== "admin" && user.role !== "superadmin") {
+  if (user.role !== 'admin' && user.role !== 'superadmin') {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
@@ -84,7 +93,7 @@ export default function JoinRequestsPage() {
   }
 
   // Admin without org — show message
-  if (user.role === "admin" && !user.organizationId) {
+  if (user.role === 'admin' && !user.organizationId) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
@@ -95,19 +104,20 @@ export default function JoinRequestsPage() {
     );
   }
 
-  const filtered = (requests ?? []).filter((r) =>
-    r.requestedByName.toLowerCase().includes(search.toLowerCase()) ||
-    r.requestedByEmail.toLowerCase().includes(search.toLowerCase())
+  const filtered = (requests ?? []).filter(
+    (r) =>
+      r.requestedByName.toLowerCase().includes(search.toLowerCase()) ||
+      r.requestedByEmail.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleApprove = async (inviteId: Id<"organizationInvites">) => {
+  const handleApprove = async (inviteId: Id<'organizationInvites'>) => {
     if (!userId) return;
     setApproving(inviteId);
     try {
       await approveRequest({
         adminId: userId,
         inviteId,
-        role: "employee",
+        role: 'employee',
         passwordHash: Math.random().toString(36).slice(2) + Date.now().toString(36),
       });
       toast.success(t('joinRequestsPage.requestApproved'));
@@ -118,14 +128,14 @@ export default function JoinRequestsPage() {
     }
   };
 
-  const handleReject = async (inviteId: Id<"organizationInvites">) => {
+  const handleReject = async (inviteId: Id<'organizationInvites'>) => {
     if (!userId) return;
     setRejecting(inviteId);
     try {
       await rejectRequest({ adminId: userId, inviteId, reason: rejectReason || undefined });
       toast.success(t('joinRequestsPage.requestRejected'));
       setRejectingId(null);
-      setRejectReason("");
+      setRejectReason('');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : t('joinRequestsPage.failedToReject'));
     } finally {
@@ -168,9 +178,7 @@ export default function JoinRequestsPage() {
               </span>
             )}
           </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            {t('joinRequestsPage.subtitle')}
-          </p>
+          <p className="text-sm text-[var(--text-muted)] mt-1">{t('joinRequestsPage.subtitle')}</p>
         </div>
 
         {/* Generate invite link */}
@@ -182,7 +190,11 @@ export default function JoinRequestsPage() {
             disabled={generatingLink}
             className="gap-1.5"
           >
-            {generatingLink ? <ShieldLoader size="xs" variant="inline" /> : <Link2 className="w-4 h-4" />}
+            {generatingLink ? (
+              <ShieldLoader size="xs" variant="inline" />
+            ) : (
+              <Link2 className="w-4 h-4" />
+            )}
             {t('joinRequestsPage.generateInviteLink')}
           </Button>
           {inviteLink && (
@@ -192,8 +204,15 @@ export default function JoinRequestsPage() {
                 value={inviteLink}
                 className="text-xs px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-muted)] w-48 truncate"
               />
-              <button onClick={handleCopyLink} className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors">
-                {inviteCopied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-[var(--text-muted)]" />}
+              <button
+                onClick={handleCopyLink}
+                className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+              >
+                {inviteCopied ? (
+                  <Check className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <Copy className="w-4 h-4 text-[var(--text-muted)]" />
+                )}
               </button>
             </div>
           )}
@@ -203,14 +222,14 @@ export default function JoinRequestsPage() {
       {/* Filters + Search */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex gap-2">
-          {(["pending", "approved", "rejected", "all"] as FilterStatus[]).map((f: any) => (
+          {(['pending', 'approved', 'rejected', 'all'] as FilterStatus[]).map((f: any) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all"
               style={{
-                background: filter === f ? "var(--primary)" : "var(--background-subtle)",
-                color: filter === f ? "#fff" : "var(--text-muted)",
+                background: filter === f ? 'var(--primary)' : 'var(--background-subtle)',
+                color: filter === f ? '#fff' : 'var(--text-muted)',
               }}
             >
               {t(`joinRequestsPage.filter${f.charAt(0).toUpperCase() + f.slice(1)}`)}
@@ -239,17 +258,23 @@ export default function JoinRequestsPage() {
             <Users className="w-10 h-10 text-[var(--text-muted)] opacity-40" />
             <div className="text-center space-y-2">
               <p className="text-[var(--text-muted)] font-medium">
-                {filter === "pending" ? t('joinRequestsPage.noPendingRequests') : t('joinRequestsPage.noFilteredRequests', { filter: t(`joinRequestsPage.filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`).toLowerCase() })}
+                {filter === 'pending'
+                  ? t('joinRequestsPage.noPendingRequests')
+                  : t('joinRequestsPage.noFilteredRequests', {
+                      filter: t(
+                        `joinRequestsPage.filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`,
+                      ).toLowerCase(),
+                    })}
               </p>
               <p className="text-xs text-[var(--text-muted)]">
                 {t('joinRequestsPage.shareInviteLink')}
               </p>
-              {filter === "pending" && (
+              {filter === 'pending' && (
                 <p className="text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
                   {t('joinRequestsPage.tipCheckFilters')}
                 </p>
               )}
-              {!user?.organizationId && user?.role === "admin" && (
+              {!user?.organizationId && user?.role === 'admin' && (
                 <p className="text-xs text-amber-600 bg-amber-50 rounded px-3 py-2 mt-2 border border-amber-200">
                   {t('joinRequestsPage.orgNotAssigned')}
                 </p>
@@ -276,14 +301,20 @@ export default function JoinRequestsPage() {
                           {req.requestedByName.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-semibold text-[var(--text-primary)]">{req.requestedByName}</p>
+                          <p className="font-semibold text-[var(--text-primary)]">
+                            {req.requestedByName}
+                          </p>
                           <p className="text-sm text-[var(--text-muted)] flex items-center gap-1">
                             <Mail className="w-3 h-3" /> {req.requestedByEmail}
                           </p>
                           <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
                             <Calendar className="w-3 h-3" />
-                            {new Date(req.requestedAt).toLocaleDateString("en-US", {
-                              year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+                            {new Date(req.requestedAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
                             })}
                           </p>
                         </div>
@@ -291,9 +322,19 @@ export default function JoinRequestsPage() {
 
                       {/* Status + Actions */}
                       <div className="flex flex-col items-end gap-3 sm:items-end">
-                        <Badge variant={req.status === "approved" ? "success" : req.status === "rejected" ? t('common.destructive') : "warning"}>{req.status}</Badge>
+                        <Badge
+                          variant={
+                            req.status === 'approved'
+                              ? 'success'
+                              : req.status === 'rejected'
+                                ? t('common.destructive')
+                                : 'warning'
+                          }
+                        >
+                          {req.status}
+                        </Badge>
 
-                        {req.status === "pending" && (
+                        {req.status === 'pending' && (
                           <div className="flex items-center gap-2">
                             {rejectingId === req._id ? (
                               <div className="flex items-center gap-2">
@@ -306,12 +347,22 @@ export default function JoinRequestsPage() {
                                 <Button
                                   size="sm"
                                   variant="destructive"
-                                  onClick={() => handleReject(req._id as Id<"organizationInvites">)}
+                                  onClick={() => handleReject(req._id as Id<'organizationInvites'>)}
                                   disabled={rejecting === req._id}
                                 >
-                                  {rejecting === req._id ? <ShieldLoader size="xs" variant="inline" /> : t('joinRequestsPage.confirm')}
+                                  {rejecting === req._id ? (
+                                    <ShieldLoader size="xs" variant="inline" />
+                                  ) : (
+                                    t('joinRequestsPage.confirm')
+                                  )}
                                 </Button>
-                                <Button size="sm" variant="ghost" onClick={() => setRejectingId(null)}>{t('common.cancel')}</Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setRejectingId(null)}
+                                >
+                                  {t('common.cancel')}
+                                </Button>
                               </div>
                             ) : (
                               <>
@@ -326,7 +377,9 @@ export default function JoinRequestsPage() {
                                 <Button
                                   size="sm"
                                   className="gap-1"
-                                  onClick={() => handleApprove(req._id as Id<"organizationInvites">)}
+                                  onClick={() =>
+                                    handleApprove(req._id as Id<'organizationInvites'>)
+                                  }
                                   disabled={approving === req._id}
                                 >
                                   {approving === req._id ? (
@@ -341,7 +394,7 @@ export default function JoinRequestsPage() {
                           </div>
                         )}
 
-                        {req.status === "rejected" && req.rejectionReason && (
+                        {req.status === 'rejected' && req.rejectionReason && (
                           <p className="text-xs text-[var(--text-muted)] italic">
                             {t('joinRequestsPage.reason')}: {req.rejectionReason}
                           </p>

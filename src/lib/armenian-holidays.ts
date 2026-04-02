@@ -156,10 +156,7 @@ export const armenianHolidays2027: Holiday[] = [
 ];
 
 // Combine all holidays
-export const allArmenianHolidays = [
-  ...armenianHolidays2026,
-  ...armenianHolidays2027,
-];
+export const allArmenianHolidays = [...armenianHolidays2026, ...armenianHolidays2027];
 
 /**
  * Check if a given date is an Armenian national holiday

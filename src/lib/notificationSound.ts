@@ -6,18 +6,20 @@
 // Shared AudioContext — avoids "suspended" state issues with per-call contexts
 let _sharedCtx: AudioContext | null = null;
 function getAudioContext(): AudioContext {
-  if (!_sharedCtx || _sharedCtx.state === "closed") {
+  if (!_sharedCtx || _sharedCtx.state === 'closed') {
     _sharedCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
-  if (_sharedCtx.state === "suspended") {
+  if (_sharedCtx.state === 'suspended') {
     _sharedCtx.resume().catch(() => {});
   }
   return _sharedCtx;
 }
 
 // Create a pleasant notification sound
-export const playNotificationSound = (type: "new_request" | "approved" | "rejected" = "new_request") => {
-  if (typeof window === "undefined") return;
+export const playNotificationSound = (
+  type: 'new_request' | 'approved' | 'rejected' = 'new_request',
+) => {
+  if (typeof window === 'undefined') return;
 
   try {
     // Use Web Audio API for better control
@@ -26,35 +28,31 @@ export const playNotificationSound = (type: "new_request" | "approved" | "reject
     const duration = 0.5;
 
     // Create oscillators for different notification types
-    if (type === "new_request") {
+    if (type === 'new_request') {
       // 🔔 Pleasant two-tone chime for new requests
       playChime(audioContext, now, duration);
-    } else if (type === "approved") {
+    } else if (type === 'approved') {
       // ✅ Happy uplifting sound for approvals
       playSuccess(audioContext, now, duration);
-    } else if (type === "rejected") {
+    } else if (type === 'rejected') {
       // ❌ Gentle notification for rejections
       playNotification(audioContext, now, duration);
     }
   } catch (error) {
     // Fallback to HTML5 audio or silent fail
-    console.warn("Could not play notification sound:", error);
+    console.warn('Could not play notification sound:', error);
   }
 };
 
 // Two-tone chime for new requests
-function playChime(
-  context: AudioContext | (any),
-  startTime: number,
-  duration: number
-) {
+function playChime(context: AudioContext | any, startTime: number, duration: number) {
   const frequencies = [523.25, 659.25]; // C5, E5
   frequencies.forEach((freq, idx) => {
     const osc = context.createOscillator();
     const gain = context.createGain();
 
     osc.frequency.value = freq;
-    osc.type = "sine";
+    osc.type = 'sine';
 
     gain.gain.setValueAtTime(0.3, startTime);
     gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration - 0.05);
@@ -70,18 +68,14 @@ function playChime(
 }
 
 // Happy uplifting sound for approvals
-function playSuccess(
-  context: AudioContext | (any),
-  startTime: number,
-  duration: number
-) {
+function playSuccess(context: AudioContext | any, startTime: number, duration: number) {
   const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
   frequencies.forEach((freq, idx) => {
     const osc = context.createOscillator();
     const gain = context.createGain();
 
     osc.frequency.value = freq;
-    osc.type = "sine";
+    osc.type = 'sine';
 
     gain.gain.setValueAtTime(0, startTime);
     gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
@@ -98,18 +92,14 @@ function playSuccess(
 }
 
 // Gentle notification sound
-function playNotification(
-  context: AudioContext | (any),
-  startTime: number,
-  duration: number
-) {
+function playNotification(context: AudioContext | any, startTime: number, duration: number) {
   const frequencies = [439.74, 523.25]; // A4, C5
   frequencies.forEach((freq, idx) => {
     const osc = context.createOscillator();
     const gain = context.createGain();
 
     osc.frequency.value = freq;
-    osc.type = "sine";
+    osc.type = 'sine';
 
     gain.gain.setValueAtTime(0.2, startTime);
     gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration - 0.05);
@@ -129,7 +119,7 @@ function playNotification(
  * A gentle water-drop + harmonic chime — easy on the ears
  */
 export const playChatMessageSound = () => {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     const ctx = getAudioContext();
     const now = ctx.currentTime;
@@ -137,7 +127,7 @@ export const playChatMessageSound = () => {
     // Layer 1: soft "ping" — sine wave at 880Hz (A5), short attack, long tail
     const ping = ctx.createOscillator();
     const pingGain = ctx.createGain();
-    ping.type = "sine";
+    ping.type = 'sine';
     ping.frequency.setValueAtTime(880, now);
     ping.frequency.exponentialRampToValueAtTime(660, now + 0.3); // slight fall = natural resonance
     pingGain.gain.setValueAtTime(0, now);
@@ -151,7 +141,7 @@ export const playChatMessageSound = () => {
     // Layer 2: harmonic undertone — sine at 440Hz (A4), softer, gives warmth
     const warm = ctx.createOscillator();
     const warmGain = ctx.createGain();
-    warm.type = "sine";
+    warm.type = 'sine';
     warm.frequency.value = 440;
     warmGain.gain.setValueAtTime(0, now);
     warmGain.gain.linearRampToValueAtTime(0.07, now + 0.02);
@@ -164,7 +154,7 @@ export const playChatMessageSound = () => {
     // Layer 3: second tiny chime — 1320Hz (E6), delayed, sparkle effect
     const sparkle = ctx.createOscillator();
     const sparkleGain = ctx.createGain();
-    sparkle.type = "sine";
+    sparkle.type = 'sine';
     sparkle.frequency.value = 1320;
     sparkleGain.gain.setValueAtTime(0, now + 0.07);
     sparkleGain.gain.linearRampToValueAtTime(0.06, now + 0.09);
@@ -173,20 +163,19 @@ export const playChatMessageSound = () => {
     sparkleGain.connect(ctx.destination);
     sparkle.start(now + 0.07);
     sparkle.stop(now + 0.45);
-
   } catch (error) {
-    console.warn("Failed to play notification sound:", error);
+    console.warn('Failed to play notification sound:', error);
   }
 };
 
 // Request permission and play sound
 export const requestNotificationPermission = () => {
-  if (typeof window !== "undefined" && "Notification" in window) {
-    if (Notification.permission === "granted") {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (Notification.permission === 'granted') {
       return true;
-    } else if (Notification.permission !== "denied") {
+    } else if (Notification.permission !== 'denied') {
       Notification.requestPermission().then((permission) => {
-        return permission === "granted";
+        return permission === 'granted';
       });
       return false;
     }
@@ -197,26 +186,26 @@ export const requestNotificationPermission = () => {
 // Send browser notification with sound
 export const sendBrowserNotification = (
   title: string,
-  options?: NotificationOptions & { soundType?: "new_request" | "approved" | "rejected" }
+  options?: NotificationOptions & { soundType?: 'new_request' | 'approved' | 'rejected' },
 ) => {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
 
-  const soundType = options?.soundType || "new_request";
+  const soundType = options?.soundType || 'new_request';
   delete (options as any)?.soundType;
 
   // Play sound
   playNotificationSound(soundType);
 
   // Send browser notification if permitted
-  if ("Notification" in window && Notification.permission === "granted") {
+  if ('Notification' in window && Notification.permission === 'granted') {
     try {
       new Notification(title, {
-        icon: "/favicon.ico",
-        badge: "/favicon.ico",
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
         ...options,
       });
     } catch (error) {
-      console.warn("Could not send browser notification:", error);
+      console.warn('Could not send browser notification:', error);
     }
   }
 };

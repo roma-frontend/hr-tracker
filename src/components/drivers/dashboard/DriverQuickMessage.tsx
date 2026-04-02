@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MessageSquare } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/dropdown-menu';
+import { MessageSquare } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DriverQuickMessageProps {
-  passengerUserId: Id<"users">;
+  passengerUserId: Id<'users'>;
   passengerName?: string;
-  driverUserId: Id<"users">;
-  organizationId: Id<"organizations">;
+  driverUserId: Id<'users'>;
+  organizationId: Id<'organizations'>;
   tripInfo: { from: string; to: string; purpose: string };
 }
 
@@ -35,17 +35,56 @@ export function DriverQuickMessage({
   const sendChatMessage = useMutation(api.chat.sendMessage);
 
   const DRIVER_TEMPLATES = [
-    { id: "arrived", label: t("driver.templates.arrived", "I've Arrived"), message: t("driver.templates.arrivedMsg", "Hi! I've arrived at the pickup location. Ready when you are! 🚗") },
-    { id: "delayed", label: t("driver.templates.delayed", "Running Late"), message: t("driver.templates.delayedMsg", "Hi! I'm running about 5 minutes late due to traffic. Apologies! ⏰") },
-    { id: "waiting", label: t("driver.templates.waiting", "Waiting"), message: t("driver.templates.waitingMsg", "Hi! I'm waiting at the pickup point. Please let me know when you're ready. 👋") },
-    { id: "confirming", label: t("driver.templates.confirming", "Confirming Trip"), message: t("driver.templates.confirmingMsg", "Hi! Confirming your trip. See you soon! ✅") },
-    { id: "cant_find", label: t("driver.templates.cantFind", "Can't Find Location"), message: t("driver.templates.cantFindMsg", "Hi! I'm having trouble finding the pickup location. Can you provide more details? 📍") },
-    { id: "completed", label: t("driver.templates.completed", "Trip Completed"), message: t("driver.templates.completedMsg", "Thank you for choosing our service! Hope you had a great trip. ⭐") },
+    {
+      id: 'arrived',
+      label: t('driver.templates.arrived', "I've Arrived"),
+      message: t(
+        'driver.templates.arrivedMsg',
+        "Hi! I've arrived at the pickup location. Ready when you are! 🚗",
+      ),
+    },
+    {
+      id: 'delayed',
+      label: t('driver.templates.delayed', 'Running Late'),
+      message: t(
+        'driver.templates.delayedMsg',
+        "Hi! I'm running about 5 minutes late due to traffic. Apologies! ⏰",
+      ),
+    },
+    {
+      id: 'waiting',
+      label: t('driver.templates.waiting', 'Waiting'),
+      message: t(
+        'driver.templates.waitingMsg',
+        "Hi! I'm waiting at the pickup point. Please let me know when you're ready. 👋",
+      ),
+    },
+    {
+      id: 'confirming',
+      label: t('driver.templates.confirming', 'Confirming Trip'),
+      message: t('driver.templates.confirmingMsg', 'Hi! Confirming your trip. See you soon! ✅'),
+    },
+    {
+      id: 'cant_find',
+      label: t('driver.templates.cantFind', "Can't Find Location"),
+      message: t(
+        'driver.templates.cantFindMsg',
+        "Hi! I'm having trouble finding the pickup location. Can you provide more details? 📍",
+      ),
+    },
+    {
+      id: 'completed',
+      label: t('driver.templates.completed', 'Trip Completed'),
+      message: t(
+        'driver.templates.completedMsg',
+        'Thank you for choosing our service! Hope you had a great trip. ⭐',
+      ),
+    },
   ];
 
   const handleSend = async (message: string) => {
     try {
-      const msg = passengerName ? message.replace("Hi!", `Hi ${passengerName}!`) : message;
+      const msg = passengerName ? message.replace('Hi!', `Hi ${passengerName}!`) : message;
       const conversationId = await getOrCreateDM({
         organizationId,
         currentUserId: driverUserId,
@@ -55,14 +94,14 @@ export function DriverQuickMessage({
         conversationId,
         senderId: driverUserId,
         organizationId,
-        type: "text",
+        type: 'text',
         content: msg,
       });
-      toast.success(t("toasts.messageSentToPassenger"));
+      toast.success(t('toasts.messageSentToPassenger'));
       setOpen(false);
     } catch (error) {
-      console.error("Failed to send message:", error);
-      toast.error(t("toasts.messageFailedToSend"));
+      console.error('Failed to send message:', error);
+      toast.error(t('toasts.messageFailedToSend'));
     }
   };
 
@@ -71,7 +110,7 @@ export function DriverQuickMessage({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1 h-7 px-2 text-xs">
           <MessageSquare className="w-3 h-3" />
-          {t("driver.message", "Message")}
+          {t('driver.message', 'Message')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">

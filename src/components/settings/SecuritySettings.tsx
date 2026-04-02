@@ -1,29 +1,28 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import React, { useState, useEffect } from "react";
-import { Shield, ScanFace } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { WebAuthnButton } from "@/components/auth/WebAuthnButton";
-import { FaceRegistration } from "@/components/auth/FaceRegistration";
-import { toast } from "sonner";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
+import { Shield, ScanFace } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { WebAuthnButton } from '@/components/auth/WebAuthnButton';
+import { FaceRegistration } from '@/components/auth/FaceRegistration';
+import { toast } from 'sonner';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 interface SecuritySettingsProps {
   userId: string;
 }
 
-export function SecuritySettings({ 
-userId }: SecuritySettingsProps) {
+export function SecuritySettings({ userId }: SecuritySettingsProps) {
   const { t } = useTranslation();
   const [showFaceRegistration, setShowFaceRegistration] = useState(false);
 
   // Get face descriptor status
   const faceData = useQuery(
     api.faceRecognition.getFaceDescriptor,
-    userId ? { userId: userId as any } : "skip"
+    userId ? { userId: userId as any } : 'skip',
   );
   const removeFaceRegistration = useMutation(api.faceRecognition.removeFaceRegistration);
 
@@ -91,7 +90,8 @@ userId }: SecuritySettingsProps) {
                       {t('settingsSecurity.faceIdRegistered')}
                     </p>
                     <p className="text-xs text-[var(--text-muted)] mt-1 truncate">
-                      {t('settingsSecurity.registeredOn')} {new Date(faceData.faceRegisteredAt || 0).toLocaleDateString()}
+                      {t('settingsSecurity.registeredOn')}{' '}
+                      {new Date(faceData.faceRegisteredAt || 0).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -120,10 +120,7 @@ userId }: SecuritySettingsProps) {
                         </p>
                       </div>
                     </div>
-                    <Button
-                      onClick={() => setShowFaceRegistration(true)}
-                      className="w-full"
-                    >
+                    <Button onClick={() => setShowFaceRegistration(true)} className="w-full">
                       <ScanFace className="w-4 h-4 mr-2" />
                       {t('settingsSecurity.registerFaceId')}
                     </Button>

@@ -1,34 +1,29 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { ArrowRightLeft } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { ArrowRightLeft } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ReassignDriverDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  requestId: Id<"driverRequests">;
-  userId: Id<"users">;
-  organizationId?: Id<"organizations">;
-  currentDriverId: Id<"drivers">;
+  requestId: Id<'driverRequests'>;
+  userId: Id<'users'>;
+  organizationId?: Id<'organizations'>;
+  currentDriverId: Id<'drivers'>;
 }
 
 export const ReassignDriverDialog = React.memo(function ReassignDriverDialog({
@@ -40,11 +35,11 @@ export const ReassignDriverDialog = React.memo(function ReassignDriverDialog({
   currentDriverId,
 }: ReassignDriverDialogProps) {
   const { t } = useTranslation();
-  const [selectedNewDriver, setSelectedNewDriver] = useState<string>("");
+  const [selectedNewDriver, setSelectedNewDriver] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const availableDrivers = useQuery(
     api.drivers.getAvailableDrivers,
-    organizationId ? { organizationId } : "skip"
+    organizationId ? { organizationId } : 'skip',
   );
   const reassign = useMutation(api.drivers.reassignDriverRequest);
 
@@ -57,12 +52,13 @@ export const ReassignDriverDialog = React.memo(function ReassignDriverDialog({
       await reassign({
         requestId,
         userId,
-        newDriverId: selectedNewDriver as Id<"drivers">,
+        newDriverId: selectedNewDriver as Id<'drivers'>,
       });
-      toast.success(t("driver.reassigned", "Request sent to new driver!"));
+      toast.success(t('driver.reassigned', 'Request sent to new driver!'));
       onOpenChange(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t("driver.failedToReassign", "Failed to reassign");
+      const errorMessage =
+        error instanceof Error ? error.message : t('driver.failedToReassign', 'Failed to reassign');
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
@@ -75,13 +71,13 @@ export const ReassignDriverDialog = React.memo(function ReassignDriverDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ArrowRightLeft className="w-5 h-5" />
-            {t("driver.requestAnotherDriver", "Request Another Driver")}
+            {t('driver.requestAnotherDriver', 'Request Another Driver')}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Select value={selectedNewDriver} onValueChange={setSelectedNewDriver}>
             <SelectTrigger>
-              <SelectValue placeholder={t("driver.selectNewDriver", "Choose another driver")} />
+              <SelectValue placeholder={t('driver.selectNewDriver', 'Choose another driver')} />
             </SelectTrigger>
             <SelectContent>
               {otherDrivers.filter(Boolean).map((driver) => {
@@ -101,10 +97,10 @@ export const ReassignDriverDialog = React.memo(function ReassignDriverDialog({
           </Select>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t("cancel", "Cancel")}
+              {t('cancel', 'Cancel')}
             </Button>
             <Button onClick={handleReassign} disabled={submitting || !selectedNewDriver}>
-              {submitting ? "..." : t("driver.reassign", "Send Request")}
+              {submitting ? '...' : t('driver.reassign', 'Send Request')}
             </Button>
           </div>
         </div>

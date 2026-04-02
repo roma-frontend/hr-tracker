@@ -1,8 +1,12 @@
-"use client";
+'use client';
 
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Check, X, AlertCircle, Info, Sparkles } from 'lucide-react';
-import { validatePassword, getStrengthColor, type PasswordValidationResult } from '@/lib/passwordValidation';
+import {
+  validatePassword,
+  getStrengthColor,
+  type PasswordValidationResult,
+} from '@/lib/passwordValidation';
 import { useTranslation } from 'react-i18next';
 
 interface PasswordStrengthIndicatorProps {
@@ -51,7 +55,7 @@ export function PasswordStrengthIndicator({
             {strengthLabels[validation.strength]}
           </motion.span>
         </div>
-        
+
         {/* Animated progress bar */}
         <div className="h-2 bg-[var(--background-subtle)] rounded-full overflow-hidden">
           <motion.div
@@ -76,10 +80,10 @@ export function PasswordStrengthIndicator({
               item.type === 'success'
                 ? 'bg-green-500/10 text-green-600 dark:text-green-400'
                 : item.type === 'error'
-                ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                : item.type === 'warning'
-                ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                  ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                  : item.type === 'warning'
+                    ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+                    : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
             }`}
           >
             <span className="text-base leading-none mt-0.5">{item.icon}</span>
@@ -102,8 +106,8 @@ export function PasswordStrengthIndicator({
                   req.met
                     ? 'text-green-600 dark:text-green-400'
                     : req.required
-                    ? 'text-[var(--text-muted)]'
-                    : 'text-[var(--text-muted)] opacity-60'
+                      ? 'text-[var(--text-muted)]'
+                      : 'text-[var(--text-muted)] opacity-60'
                 }`}
               >
                 <motion.div
@@ -117,7 +121,9 @@ export function PasswordStrengthIndicator({
                     <div className="w-4 h-4 rounded-full border-2 border-current opacity-30" />
                   )}
                 </motion.div>
-                <span className={`${req.required ? 'font-medium' : ''} flex items-center gap-1 whitespace-nowrap`}>
+                <span
+                  className={`${req.required ? 'font-medium' : ''} flex items-center gap-1 whitespace-nowrap`}
+                >
                   {req.label}
                   {req.required && <span className="text-red-500">*</span>}
                 </span>

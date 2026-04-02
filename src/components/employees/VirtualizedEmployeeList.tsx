@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { EmployeeCard } from "./EmployeeCard";
-import { Users } from "lucide-react";
+import React, { useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { EmployeeCard } from './EmployeeCard';
+import { Users } from 'lucide-react';
 
 interface Employee {
   _id: string;
@@ -12,7 +12,7 @@ interface Employee {
   position?: string;
   department?: string;
   role: string;
-  employeeType: "staff" | "contractor";
+  employeeType: 'staff' | 'contractor';
   avatarUrl?: string;
   phone?: string;
   supervisorId?: string;
@@ -36,7 +36,7 @@ interface TypeConfig {
 
 interface VirtualizedEmployeeListProps {
   employees: Employee[];
-  viewMode: "grid" | "list";
+  viewMode: 'grid' | 'list';
   roleConfig: Record<string, RoleConfig>;
   typeConfig: Record<string, TypeConfig>;
   getPresenceBadge: (status: string | undefined) => { labelKey: string; cls: string };
@@ -77,13 +77,13 @@ export function VirtualizedEmployeeList({
   // Размеры элементов
   const GRID_ITEM_HEIGHT = 280;
   const LIST_ITEM_HEIGHT = 80;
-  const GRID_COLUMNS = viewMode === "grid" ? 3 : 1;
+  const GRID_COLUMNS = viewMode === 'grid' ? 3 : 1;
   const GAP = 16;
 
   const virtualizer = useVirtualizer({
     count: employees.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => (viewMode === "grid" ? GRID_ITEM_HEIGHT : LIST_ITEM_HEIGHT),
+    estimateSize: () => (viewMode === 'grid' ? GRID_ITEM_HEIGHT : LIST_ITEM_HEIGHT),
     overscan: 5, // Рендерить 5 элементов запасом
   });
 
@@ -93,16 +93,16 @@ export function VirtualizedEmployeeList({
   if (employees.length === 0) {
     return (
       <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
-        <Users className="w-12 h-12 opacity-20" style={{ color: "var(--text-muted)" }} />
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          {t("employees.noFound")}
+        <Users className="w-12 h-12 opacity-20" style={{ color: 'var(--text-muted)' }} />
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          {t('employees.noFound')}
         </p>
       </div>
     );
   }
 
   // Grid view
-  if (viewMode === "grid") {
+  if (viewMode === 'grid') {
     return (
       <div
         ref={parentRef}
@@ -111,29 +111,28 @@ export function VirtualizedEmployeeList({
         <div
           style={{
             height: `${totalHeight}px`,
-            width: "100%",
-            position: "relative",
+            width: '100%',
+            position: 'relative',
           }}
         >
           {virtualItems.map((virtualRow) => {
             const emp = employees[virtualRow.index];
             const roleConf = roleConfig[emp.role];
             const typeConf =
-              typeConfig[(emp as any).employeeType as keyof typeof typeConfig] ||
-              typeConfig.staff;
+              typeConfig[(emp as any).employeeType as keyof typeof typeConfig] || typeConfig.staff;
             const presence = getPresenceBadge((emp as any).presenceStatus);
 
             return (
               <div
                 key={emp._id}
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                   top: 0,
                   left: `${(virtualRow.index % GRID_COLUMNS) * (100 / GRID_COLUMNS)}%`,
                   width: `${100 / GRID_COLUMNS}%`,
                   transform: `translateY(${virtualRow.start}px)`,
-                  padding: "0 8px",
-                  boxSizing: "border-box",
+                  padding: '0 8px',
+                  boxSizing: 'border-box',
                 }}
               >
                 <EmployeeCard
@@ -165,25 +164,24 @@ export function VirtualizedEmployeeList({
     <div
       ref={parentRef}
       className="rounded-2xl border overflow-hidden h-[600px] overflow-auto"
-      style={{ borderColor: "var(--border)" }}
+      style={{ borderColor: 'var(--border)' }}
     >
-      <div style={{ height: `${totalHeight}px`, position: "relative" }}>
+      <div style={{ height: `${totalHeight}px`, position: 'relative' }}>
         {virtualItems.map((virtualRow) => {
           const emp = employees[virtualRow.index];
           const roleConf = roleConfig[emp.role];
           const typeConf =
-            typeConfig[(emp as any).employeeType as keyof typeof typeConfig] ||
-            typeConfig.staff;
+            typeConfig[(emp as any).employeeType as keyof typeof typeConfig] || typeConfig.staff;
           const presence = getPresenceBadge((emp as any).presenceStatus);
 
           return (
             <div
               key={emp._id}
               style={{
-                position: "absolute",
+                position: 'absolute',
                 top: 0,
                 left: 0,
-                width: "100%",
+                width: '100%',
                 transform: `translateY(${virtualRow.start}px)`,
               }}
             >

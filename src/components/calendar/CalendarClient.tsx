@@ -1,8 +1,8 @@
-﻿"use client";
+﻿'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,7 +14,7 @@ import {
   Plus,
   ExternalLink,
   Car,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   format,
   isSameDay,
@@ -27,20 +27,26 @@ import {
   addMonths,
   subMonths,
   isToday,
-} from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Id } from "../../../convex/_generated/dataModel";
-import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, getLeaveTypeLabel, type LeaveType, type LeaveStatus } from "@/lib/types";
-import { useAuthStore } from "@/store/useAuthStore";
-import { LeaveRequestModal } from "@/components/leaves/LeaveRequestModal";
-import { useSelectedOrganization } from "@/hooks/useSelectedOrganization";
-import { DriverRequestModal } from "./DriverRequestModal";
-import { getInitials } from "@/lib/stringUtils";
+} from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Id } from '../../../convex/_generated/dataModel';
+import {
+  LEAVE_TYPE_LABELS,
+  LEAVE_TYPE_COLORS,
+  getLeaveTypeLabel,
+  type LeaveType,
+  type LeaveStatus,
+} from '@/lib/types';
+import { useAuthStore } from '@/store/useAuthStore';
+import { LeaveRequestModal } from '@/components/leaves/LeaveRequestModal';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import { DriverRequestModal } from './DriverRequestModal';
+import { getInitials } from '@/lib/stringUtils';
 
 type LeaveRequest = {
   _id: string;
@@ -60,11 +66,17 @@ type DriverScheduleEvent = {
   _id: string;
   driverId: string;
   driverName: string;
-  driverVehicle?: { model: string; plateNumber: string; capacity: number; color?: string; year?: number };
+  driverVehicle?: {
+    model: string;
+    plateNumber: string;
+    capacity: number;
+    color?: string;
+    year?: number;
+  };
   bookedByName?: string;
   startTime: number;
   endTime: number;
-  type: "trip" | "blocked" | "maintenance";
+  type: 'trip' | 'blocked' | 'maintenance';
   status: string;
   tripInfo?: { from: string; to: string; purpose: string; passengerCount: number; notes?: string };
   reason?: string;
@@ -92,8 +104,12 @@ function safeDate(dateStr: string | undefined | null): Date | null {
 
 function safeFormat(dateStr: string | undefined | null, fmt: string): string {
   const d = safeDate(dateStr);
-  if (!d) return "�";
-  try { return format(d, fmt); } catch { return "�"; }
+  if (!d) return '�';
+  try {
+    return format(d, fmt);
+  } catch {
+    return '�';
+  }
 }
 
 function getDateRange(start: string, end: string): Date[] {
@@ -110,24 +126,24 @@ function getDateRange(start: string, end: string): Date[] {
 }
 
 function StatusIcon({ status }: { status: LeaveStatus }) {
-  if (status === "approved") return <CheckCircle className="w-3 h-3 text-emerald-500" />;
-  if (status === "rejected") return <XCircle className="w-3 h-3 text-red-500" />;
+  if (status === 'approved') return <CheckCircle className="w-3 h-3 text-emerald-500" />;
+  if (status === 'rejected') return <XCircle className="w-3 h-3 text-red-500" />;
   return <Clock className="w-3 h-3 text-amber-500" />;
 }
 
 const LEAVE_TYPE_BG: Record<string, string> = {
-  paid: "#2563eb",
-  unpaid: "#f59e0b",
-  sick: "#ef4444",
-  family: "#10b981",
-  doctor: "#06b6d4",
+  paid: '#2563eb',
+  unpaid: '#f59e0b',
+  sick: '#ef4444',
+  family: '#10b981',
+  doctor: '#06b6d4',
 };
 
 // Days of week will be translated using i18n
 
 // --- Calendar Day Cell ---------------------------------------------------------
-const GOOGLE_EVENT_COLOR = "#8b5cf6";
-const DRIVER_EVENT_COLOR = "#f97316"; // orange for driver bookings
+const GOOGLE_EVENT_COLOR = '#8b5cf6';
+const DRIVER_EVENT_COLOR = '#f97316'; // orange for driver bookings
 
 function DayCell({
   date,
@@ -161,28 +177,28 @@ function DayCell({
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       className={[
-        "relative w-full min-h-[80px] sm:min-h-[90px] rounded-xl p-1.5 text-left transition-all duration-200 border",
+        'relative w-full min-h-[80px] sm:min-h-[90px] rounded-xl p-1.5 text-left transition-all duration-200 border',
         isSelected
-          ? "bg-[var(--primary)] border-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/20"
+          ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/20'
           : isTodayDate
-            ? "bg-[var(--primary)]/10 border-[var(--primary)]/40"
+            ? 'bg-[var(--primary)]/10 border-[var(--primary)]/40'
             : isCurrentMonth
-              ? "bg-[var(--card)] border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[var(--background-subtle)]"
-              : "bg-transparent border-transparent opacity-40",
-      ].join(" ")}
+              ? 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[var(--background-subtle)]'
+              : 'bg-transparent border-transparent opacity-40',
+      ].join(' ')}
     >
       {/* Day number */}
       <span
         className={[
-          "text-xs font-semibold leading-none block mb-1",
+          'text-xs font-semibold leading-none block mb-1',
           isSelected
-            ? "text-white"
+            ? 'text-white'
             : isTodayDate
-              ? "text-[var(--primary)] font-bold"
+              ? 'text-[var(--primary)] font-bold'
               : isCurrentMonth
-                ? "text-[var(--text-primary)]"
-                : "text-[var(--text-muted)]",
-        ].join(" ")}
+                ? 'text-[var(--text-primary)]'
+                : 'text-[var(--text-muted)]',
+        ].join(' ')}
       >
         {isTodayDate && !isSelected && (
           <span className="absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
@@ -194,7 +210,7 @@ function DayCell({
       {(hasLeaves || hasGoogle || hasDriver) && (
         <div className="flex flex-col gap-0.5 mt-0.5">
           {/* Leave pills */}
-          {leaves.slice(0, (hasGoogle || hasDriver) ? 1 : 2).map((l, i) => (
+          {leaves.slice(0, hasGoogle || hasDriver ? 1 : 2).map((l, i) => (
             <div
               key={`l-${i}`}
               className="flex items-center gap-1 rounded-full px-1.5 py-0.5"
@@ -208,7 +224,7 @@ function DayCell({
                 className="text-[9px] font-medium truncate hidden sm:block"
                 style={{ color: LEAVE_TYPE_BG[l.type] }}
               >
-                {(l.userName ?? t('calendar.unknown')).split(" ")[0]}
+                {(l.userName ?? t('calendar.unknown')).split(' ')[0]}
               </span>
             </div>
           ))}
@@ -227,12 +243,12 @@ function DayCell({
                 className="text-[9px] font-medium truncate hidden sm:block"
                 style={{ color: DRIVER_EVENT_COLOR }}
               >
-                {evt.driverName.split(" ")[0]}
+                {evt.driverName.split(' ')[0]}
               </span>
             </div>
           ))}
           {/* Google Calendar pills */}
-          {googleEvents.slice(0, (hasLeaves || hasDriver) ? 1 : 2).map((evt, i) => (
+          {googleEvents.slice(0, hasLeaves || hasDriver ? 1 : 2).map((evt, i) => (
             <div
               key={`g-${i}`}
               className="flex items-center gap-1 rounded-full px-1.5 py-0.5"
@@ -251,9 +267,7 @@ function DayCell({
             </div>
           ))}
           {totalItems > 2 && (
-            <span className="text-[9px] text-[var(--text-muted)] pl-1">
-              +{totalItems - 2} more
-            </span>
+            <span className="text-[9px] text-[var(--text-muted)] pl-1">+{totalItems - 2} more</span>
           )}
         </div>
       )}
@@ -273,8 +287,13 @@ export const CalendarClient = React.memo(function CalendarClient() {
   const selectedOrgId = useSelectedOrganization();
 
   const DAYS_OF_WEEK = [
-    t('weekdays.sun'), t('weekdays.mon'), t('weekdays.tue'), t('weekdays.wed'),
-    t('weekdays.thu'), t('weekdays.fri'), t('weekdays.sat')
+    t('weekdays.sun'),
+    t('weekdays.mon'),
+    t('weekdays.tue'),
+    t('weekdays.wed'),
+    t('weekdays.thu'),
+    t('weekdays.fri'),
+    t('weekdays.sat'),
   ];
 
   // Google Calendar events
@@ -315,26 +334,26 @@ export const CalendarClient = React.memo(function CalendarClient() {
   // Determine which query to use based on selectedOrgId
   const shouldUseOrgQuery = mounted && selectedOrgId && user?.id;
   const queryParams = shouldUseOrgQuery
-    ? { organizationId: selectedOrgId as Id<"organizations"> }
-    : (mounted && user?.id ? { requesterId: user.id as Id<"users"> } : "skip" as const);
+    ? { organizationId: selectedOrgId as Id<'organizations'> }
+    : mounted && user?.id
+      ? { requesterId: user.id as Id<'users'> }
+      : ('skip' as const);
 
   // Use organization-specific query if org selected, otherwise use default
   const leavesData = useQuery(
     shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    mounted && user?.id && queryParams !== "skip"
-      ? queryParams
-      : "skip"
+    mounted && user?.id && queryParams !== 'skip' ? queryParams : 'skip',
   );
   const leaves: LeaveRequest[] = leavesData ?? [];
-  
+
   // Debug: Log data load
   useEffect(() => {
     if (mounted) {
-      console.log('📅 Leaves loaded:', { 
-        selectedOrgId, 
-        count: leaves.length, 
+      console.log('📅 Leaves loaded:', {
+        selectedOrgId,
+        count: leaves.length,
         usingOrgQuery: shouldUseOrgQuery,
-        mounted 
+        mounted,
       });
     }
   }, [leaves.length, selectedOrgId, mounted, shouldUseOrgQuery]);
@@ -346,8 +365,12 @@ export const CalendarClient = React.memo(function CalendarClient() {
   const driverSchedules = useQuery(
     api.drivers.getOrgDriverSchedules,
     mounted && selectedOrgId
-      ? { organizationId: selectedOrgId as Id<"organizations">, startTime: monthStart, endTime: monthEnd }
-      : "skip"
+      ? {
+          organizationId: selectedOrgId as Id<'organizations'>,
+          startTime: monthStart,
+          endTime: monthEnd,
+        }
+      : 'skip',
   ) as DriverScheduleEvent[] | undefined;
 
   const [selectedDriverEvent, setSelectedDriverEvent] = useState<DriverScheduleEvent | null>(null);
@@ -362,7 +385,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
       const cur = new Date(startD);
       cur.setHours(0, 0, 0, 0);
       while (cur <= endD) {
-        const key = format(cur, "yyyy-MM-dd");
+        const key = format(cur, 'yyyy-MM-dd');
         if (!map.has(key)) map.set(key, []);
         map.get(key)!.push(evt);
         cur.setDate(cur.getDate() + 1);
@@ -374,13 +397,15 @@ export const CalendarClient = React.memo(function CalendarClient() {
   // Build leave map
   const leaveDateMap = useMemo(() => {
     const map = new Map<string, LeaveRequest[]>();
-    leaves.filter((r) => r.status !== "rejected").forEach((req) => {
-      getDateRange(req.startDate, req.endDate).forEach((d) => {
-        const key = format(d, "yyyy-MM-dd");
-        if (!map.has(key)) map.set(key, []);
-        map.get(key)!.push(req);
+    leaves
+      .filter((r) => r.status !== 'rejected')
+      .forEach((req) => {
+        getDateRange(req.startDate, req.endDate).forEach((d) => {
+          const key = format(d, 'yyyy-MM-dd');
+          if (!map.has(key)) map.set(key, []);
+          map.get(key)!.push(req);
+        });
       });
-    });
     return map;
   }, [leaves]);
 
@@ -389,13 +414,14 @@ export const CalendarClient = React.memo(function CalendarClient() {
     const map = new Map<string, GoogleCalendarEvent[]>();
     googleEvents.forEach((evt) => {
       // For all-day events, Google returns end as exclusive (next day)
-      const endDate = evt.allDay && evt.endDate
-        ? format(addDays(new Date(evt.endDate), -1), "yyyy-MM-dd")
-        : evt.endDate;
+      const endDate =
+        evt.allDay && evt.endDate
+          ? format(addDays(new Date(evt.endDate), -1), 'yyyy-MM-dd')
+          : evt.endDate;
       const start = evt.startDate;
       if (!start) return;
       getDateRange(start, endDate || start).forEach((d) => {
-        const key = format(d, "yyyy-MM-dd");
+        const key = format(d, 'yyyy-MM-dd');
         if (!map.has(key)) map.set(key, []);
         map.get(key)!.push(evt);
       });
@@ -418,17 +444,17 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
   const selectedDayLeaves = useMemo(() => {
     if (!selectedDay) return [];
-    return leaveDateMap.get(format(selectedDay, "yyyy-MM-dd")) ?? [];
+    return leaveDateMap.get(format(selectedDay, 'yyyy-MM-dd')) ?? [];
   }, [selectedDay, leaveDateMap]);
 
   const selectedDayGoogle = useMemo(() => {
     if (!selectedDay) return [];
-    return googleDateMap.get(format(selectedDay, "yyyy-MM-dd")) ?? [];
+    return googleDateMap.get(format(selectedDay, 'yyyy-MM-dd')) ?? [];
   }, [selectedDay, googleDateMap]);
 
   const selectedDayDriverEvents = useMemo(() => {
     if (!selectedDay) return [];
-    return driverDateMap.get(format(selectedDay, "yyyy-MM-dd")) ?? [];
+    return driverDateMap.get(format(selectedDay, 'yyyy-MM-dd')) ?? [];
   }, [selectedDay, driverDateMap]);
 
   const prevMonth = () => setCurrentMonth((m) => subMonths(m, 1));
@@ -441,24 +467,26 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
   // Monthly summary
   const monthlySummary = useMemo(() => {
-    return (Object.keys(LEAVE_TYPE_LABELS) as LeaveType[]).map((type) => {
-      const count = leaves.filter(
-        (r) =>
-          r.type === type &&
-          r.status !== "rejected" &&
-          (isSameMonth(new Date(r.startDate), currentMonth) ||
-            isSameMonth(new Date(r.endDate), currentMonth))
-      ).length;
-      return { type, count };
-    }).filter((s) => s.count > 0);
+    return (Object.keys(LEAVE_TYPE_LABELS) as LeaveType[])
+      .map((type) => {
+        const count = leaves.filter(
+          (r) =>
+            r.type === type &&
+            r.status !== 'rejected' &&
+            (isSameMonth(new Date(r.startDate), currentMonth) ||
+              isSameMonth(new Date(r.endDate), currentMonth)),
+        ).length;
+        return { type, count };
+      })
+      .filter((s) => s.count > 0);
   }, [leaves, currentMonth]);
 
   // On leave today
   const onLeaveToday = useMemo(() => {
     if (!mounted) return [];
-    const todayStr = format(new Date(), "yyyy-MM-dd");
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
     return leaves.filter(
-      (r) => r.status === "approved" && r.startDate <= todayStr && r.endDate >= todayStr
+      (r) => r.status === 'approved' && r.startDate <= todayStr && r.endDate >= todayStr,
     );
   }, [mounted, leaves]);
 
@@ -473,7 +501,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t('calendarExtended.leaveCalendar')}</h2>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+            {t('calendarExtended.leaveCalendar')}
+          </h2>
           <p className="text-[var(--text-muted)] text-sm mt-1">
             {t('calendarExtended.visualOverview')}
           </p>
@@ -507,12 +537,12 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
                   <motion.h3
-                    key={format(currentMonth, "yyyy-MM")}
+                    key={format(currentMonth, 'yyyy-MM')}
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-lg font-bold text-[var(--text-primary)] min-w-[160px] text-center"
                   >
-                    {format(currentMonth, "MMMM yyyy")}
+                    {format(currentMonth, 'MMMM yyyy')}
                   </motion.h3>
                   <Button size="icon-sm" variant="ghost" onClick={nextMonth}>
                     <ChevronRight className="w-4 h-4" />
@@ -524,17 +554,27 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                     <span className="text-[var(--text-muted)]">
-                      {leaves.filter(
-                        (r) => r.status === "approved" && isSameMonth(new Date(r.startDate), currentMonth)
-                      ).length} approved
+                      {
+                        leaves.filter(
+                          (r) =>
+                            r.status === 'approved' &&
+                            isSameMonth(new Date(r.startDate), currentMonth),
+                        ).length
+                      }{' '}
+                      approved
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                     <span className="text-[var(--text-muted)]">
-                      {leaves.filter(
-                        (r) => r.status === "pending" && isSameMonth(new Date(r.startDate), currentMonth)
-                      ).length} pending
+                      {
+                        leaves.filter(
+                          (r) =>
+                            r.status === 'pending' &&
+                            isSameMonth(new Date(r.startDate), currentMonth),
+                        ).length
+                      }{' '}
+                      pending
                     </span>
                   </div>
                 </div>
@@ -557,7 +597,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
               {/* Day grid */}
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={format(currentMonth, "yyyy-MM")}
+                  key={format(currentMonth, 'yyyy-MM')}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -565,7 +605,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   className="grid grid-cols-7 gap-1.5"
                 >
                   {calendarDays.map((date, i) => {
-                    const key = format(date, "yyyy-MM-dd");
+                    const key = format(date, 'yyyy-MM-dd');
                     const leaves = leaveDateMap.get(key) ?? [];
                     const gEvents = googleDateMap.get(key) ?? [];
                     const dEvents = driverDateMap.get(key) ?? [];
@@ -596,17 +636,30 @@ export const CalendarClient = React.memo(function CalendarClient() {
           >
             {(Object.entries(LEAVE_TYPE_COLORS) as [LeaveType, string][]).map(([type, color]) => (
               <div key={type} className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: color }} />
-                <span className="text-xs text-[var(--text-muted)]">{getLeaveTypeLabel(type, t)}</span>
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ background: color }}
+                />
+                <span className="text-xs text-[var(--text-muted)]">
+                  {getLeaveTypeLabel(type, t)}
+                </span>
               </div>
             ))}
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: DRIVER_EVENT_COLOR }} />
-              <span className="text-xs text-[var(--text-muted)]">{t('driver.driverBookings', 'Driver Bookings')}</span>
+              <span
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ background: DRIVER_EVENT_COLOR }}
+              />
+              <span className="text-xs text-[var(--text-muted)]">
+                {t('driver.driverBookings', 'Driver Bookings')}
+              </span>
             </div>
             {googleConnected && (
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: GOOGLE_EVENT_COLOR }} />
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ background: GOOGLE_EVENT_COLOR }}
+                />
                 <span className="text-xs text-[var(--text-muted)]">Google Calendar</span>
               </div>
             )}
@@ -628,12 +681,14 @@ export const CalendarClient = React.memo(function CalendarClient() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm uppercase tracking-wider text-[var(--text-muted)]">
-                {selectedDay ? format(selectedDay, "EEEE, MMM d") : t('calendar.selectADay')}
+                {selectedDay ? format(selectedDay, 'EEEE, MMM d') : t('calendar.selectADay')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
               <AnimatePresence mode="wait">
-                {selectedDayLeaves.length === 0 && selectedDayGoogle.length === 0 && selectedDayDriverEvents.length === 0 ? (
+                {selectedDayLeaves.length === 0 &&
+                selectedDayGoogle.length === 0 &&
+                selectedDayDriverEvents.length === 0 ? (
                   <motion.div
                     key="empty"
                     initial={{ opacity: 0 }}
@@ -642,7 +697,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     className="py-6 text-center"
                   >
                     <CalendarDays className="w-8 h-8 text-[var(--border)] mx-auto mb-2" />
-                    <p className="text-sm text-[var(--text-muted)]">{t('calendarExtended.noLeavesThisDay')}</p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      {t('calendarExtended.noLeavesThisDay')}
+                    </p>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -666,26 +723,31 @@ export const CalendarClient = React.memo(function CalendarClient() {
                             className="text-[10px] font-bold text-white"
                             style={{ background: LEAVE_TYPE_BG[leave.type] }}
                           >
-                            {getInitials(leave.userName ?? "?")}
+                            {getInitials(leave.userName ?? '?')}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">
                             <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                              {leave.userName ?? "Unknown"}
+                              {leave.userName ?? 'Unknown'}
                             </p>
                             <StatusIcon status={leave.status as LeaveStatus} />
                           </div>
-                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{leave.userDepartment ?? ""}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                            {leave.userDepartment ?? ''}
+                          </p>
                           <div className="flex items-center gap-1 mt-1">
-                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: LEAVE_TYPE_BG[leave.type] }} />
+                            <span
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ background: LEAVE_TYPE_BG[leave.type] }}
+                            />
                             <span className="text-[10px] text-[var(--text-secondary)]">
                               {getLeaveTypeLabel(leave.type as LeaveType, t)}
                             </span>
                           </div>
                           <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                            {safeFormat(leave.startDate, "MMM d")} &ndash;{" "}
-                            {safeFormat(leave.endDate, "MMM d")} &middot; {leave.days}d
+                            {safeFormat(leave.startDate, 'MMM d')} &ndash;{' '}
+                            {safeFormat(leave.endDate, 'MMM d')} &middot; {leave.days}d
                           </p>
                           {leave.comment && (
                             <p className="text-[10px] text-[var(--text-muted)] mt-1 italic line-clamp-2">
@@ -730,8 +792,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                           </div>
                           {evt.startTime && (
                             <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                              {format(new Date(evt.startTime), "h:mm a")}
-                              {evt.endTime && ` – ${format(new Date(evt.endTime), "h:mm a")}`}
+                              {format(new Date(evt.startTime), 'h:mm a')}
+                              {evt.endTime && ` – ${format(new Date(evt.endTime), 'h:mm a')}`}
                             </p>
                           )}
                           {!evt.startTime && (
@@ -743,8 +805,13 @@ export const CalendarClient = React.memo(function CalendarClient() {
                             </p>
                           )}
                           <div className="flex items-center gap-1 mt-1">
-                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: GOOGLE_EVENT_COLOR }} />
-                            <span className="text-[10px] text-[var(--text-secondary)]">Google Calendar</span>
+                            <span
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ background: GOOGLE_EVENT_COLOR }}
+                            />
+                            <span className="text-[10px] text-[var(--text-secondary)]">
+                              Google Calendar
+                            </span>
                           </div>
                         </div>
                       </motion.div>
@@ -756,7 +823,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         key={evt._id}
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: (selectedDayLeaves.length + selectedDayGoogle.length + i) * 0.04 }}
+                        transition={{
+                          delay: (selectedDayLeaves.length + selectedDayGoogle.length + i) * 0.04,
+                        }}
                         className="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] cursor-pointer hover:border-[var(--primary)]/50 transition-colors"
                         onClick={() => setSelectedDriverEvent(evt)}
                       >
@@ -771,12 +840,16 @@ export const CalendarClient = React.memo(function CalendarClient() {
                             <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
                               {evt.driverName}
                             </p>
-                            <Badge variant="secondary" className="text-[9px] h-4 px-1.5 flex-shrink-0">
+                            <Badge
+                              variant="secondary"
+                              className="text-[9px] h-4 px-1.5 flex-shrink-0"
+                            >
                               {evt.type}
                             </Badge>
                           </div>
                           <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                            {format(new Date(evt.startTime), "h:mm a")} – {format(new Date(evt.endTime), "h:mm a")}
+                            {format(new Date(evt.startTime), 'h:mm a')} –{' '}
+                            {format(new Date(evt.endTime), 'h:mm a')}
                           </p>
                           {evt.tripInfo && (
                             <p className="text-[10px] text-[var(--text-muted)] mt-0.5 truncate">
@@ -784,8 +857,13 @@ export const CalendarClient = React.memo(function CalendarClient() {
                             </p>
                           )}
                           <div className="flex items-center gap-1 mt-1">
-                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: DRIVER_EVENT_COLOR }} />
-                            <span className="text-[10px] text-[var(--text-secondary)]">{t('driver.driverBookings', 'Driver Booking')}</span>
+                            <span
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ background: DRIVER_EVENT_COLOR }}
+                            />
+                            <span className="text-[10px] text-[var(--text-secondary)]">
+                              {t('driver.driverBookings', 'Driver Booking')}
+                            </span>
                           </div>
                         </div>
                       </motion.div>
@@ -800,12 +878,14 @@ export const CalendarClient = React.memo(function CalendarClient() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm uppercase tracking-wider text-[var(--text-muted)]">
-                {format(currentMonth, "MMMM")} {t('calendar.summary')}
+                {format(currentMonth, 'MMMM')} {t('calendar.summary')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 space-y-2">
               {monthlySummary.length === 0 ? (
-                <p className="text-xs text-[var(--text-muted)]">{t('calendarExtended.noLeavesThisMonth')}</p>
+                <p className="text-xs text-[var(--text-muted)]">
+                  {t('calendarExtended.noLeavesThisMonth')}
+                </p>
               ) : (
                 monthlySummary.map(({ type, count }) => (
                   <div key={type} className="flex items-center justify-between">
@@ -818,7 +898,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         {getLeaveTypeLabel(type, t)}
                       </span>
                     </div>
-                    <Badge variant="secondary" className="text-xs h-5 px-2">{count}</Badge>
+                    <Badge variant="secondary" className="text-xs h-5 px-2">
+                      {count}
+                    </Badge>
                   </div>
                 ))
               )}
@@ -843,7 +925,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
               {onLeaveToday.length === 0 ? (
                 <div className="flex items-center gap-2 py-2">
                   <Users className="w-4 h-4 text-[var(--border)]" />
-                  <p className="text-xs text-[var(--text-muted)]">{t('calendarExtended.everyoneInToday')}</p>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {t('calendarExtended.everyoneInToday')}
+                  </p>
                 </div>
               ) : (
                 onLeaveToday.map((l) => (
@@ -853,18 +937,21 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         className="text-[9px] font-bold text-white"
                         style={{ background: LEAVE_TYPE_BG[l.type] }}
                       >
-                        {getInitials(l.userName ?? "?")}
+                        {getInitials(l.userName ?? '?')}
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-[var(--text-primary)] truncate">
-                        {l.userName ?? "Unknown"}
+                        {l.userName ?? 'Unknown'}
                       </p>
                       <p className="text-[10px] text-[var(--text-muted)]">
                         {getLeaveTypeLabel(l.type as LeaveType, t)}
                       </p>
                     </div>
-                    <Badge className="ml-auto text-[9px] h-4 px-1.5 flex-shrink-0" variant="success">
+                    <Badge
+                      className="ml-auto text-[9px] h-4 px-1.5 flex-shrink-0"
+                      variant="success"
+                    >
                       away
                     </Badge>
                   </div>
@@ -876,10 +963,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
       </div>
 
       {/* Leave Request Modal */}
-      <LeaveRequestModal
-        open={showLeaveModal}
-        onClose={() => setShowLeaveModal(false)}
-      />
+      <LeaveRequestModal open={showLeaveModal} onClose={() => setShowLeaveModal(false)} />
 
       {/* Driver Request Modal */}
       <DriverRequestModal
@@ -919,7 +1003,11 @@ export const CalendarClient = React.memo(function CalendarClient() {
                       {selectedDriverEvent.driverName}
                     </h3>
                     <p className="text-xs text-[var(--text-muted)]">
-                      {selectedDriverEvent.type === "trip" ? t('driver.trip', 'Trip') : selectedDriverEvent.type === "blocked" ? t('driver.blocked', 'Blocked') : t('driver.maintenance', 'Maintenance')}
+                      {selectedDriverEvent.type === 'trip'
+                        ? t('driver.trip', 'Trip')
+                        : selectedDriverEvent.type === 'blocked'
+                          ? t('driver.blocked', 'Blocked')
+                          : t('driver.maintenance', 'Maintenance')}
                     </p>
                   </div>
                 </div>
@@ -937,7 +1025,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4 text-[var(--text-muted)]" />
                   <span className="text-[var(--text-secondary)]">
-                    {format(new Date(selectedDriverEvent.startTime), "MMM d, h:mm a")} – {format(new Date(selectedDriverEvent.endTime), "h:mm a")}
+                    {format(new Date(selectedDriverEvent.startTime), 'MMM d, h:mm a')} –{' '}
+                    {format(new Date(selectedDriverEvent.endTime), 'h:mm a')}
                   </span>
                 </div>
 
@@ -946,8 +1035,10 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   <div className="flex items-center gap-2 text-sm">
                     <Car className="w-4 h-4 text-[var(--text-muted)]" />
                     <span className="text-[var(--text-secondary)]">
-                      {selectedDriverEvent.driverVehicle.model} · {selectedDriverEvent.driverVehicle.plateNumber}
-                      {selectedDriverEvent.driverVehicle.color && ` · ${selectedDriverEvent.driverVehicle.color}`}
+                      {selectedDriverEvent.driverVehicle.model} ·{' '}
+                      {selectedDriverEvent.driverVehicle.plateNumber}
+                      {selectedDriverEvent.driverVehicle.color &&
+                        ` · ${selectedDriverEvent.driverVehicle.color}`}
                     </span>
                   </div>
                 )}
@@ -956,27 +1047,44 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 {selectedDriverEvent.tripInfo && (
                   <div className="rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] p-3 space-y-2">
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">{t('driver.from', 'From')}</span>
-                      <span className="text-xs text-[var(--text-primary)]">{selectedDriverEvent.tripInfo.from}</span>
+                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                        {t('driver.from', 'From')}
+                      </span>
+                      <span className="text-xs text-[var(--text-primary)]">
+                        {selectedDriverEvent.tripInfo.from}
+                      </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">{t('driver.to', 'To')}</span>
-                      <span className="text-xs text-[var(--text-primary)]">{selectedDriverEvent.tripInfo.to}</span>
+                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                        {t('driver.to', 'To')}
+                      </span>
+                      <span className="text-xs text-[var(--text-primary)]">
+                        {selectedDriverEvent.tripInfo.to}
+                      </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">{t('driver.purpose', 'Purpose')}</span>
-                      <span className="text-xs text-[var(--text-primary)]">{selectedDriverEvent.tripInfo.purpose}</span>
+                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                        {t('driver.purpose', 'Purpose')}
+                      </span>
+                      <span className="text-xs text-[var(--text-primary)]">
+                        {selectedDriverEvent.tripInfo.purpose}
+                      </span>
                     </div>
                     <div className="flex items-start gap-2">
                       <Users className="w-3 h-3 text-[var(--text-muted)] mt-0.5 shrink-0" />
                       <span className="text-xs text-[var(--text-primary)]">
-                        {selectedDriverEvent.tripInfo.passengerCount} {t('driver.passengers', 'passengers')}
+                        {selectedDriverEvent.tripInfo.passengerCount}{' '}
+                        {t('driver.passengers', 'passengers')}
                       </span>
                     </div>
                     {selectedDriverEvent.tripInfo.notes && (
                       <div className="flex items-start gap-2">
-                        <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">{t('driver.notes', 'Notes')}</span>
-                        <span className="text-xs text-[var(--text-primary)]">{selectedDriverEvent.tripInfo.notes}</span>
+                        <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                          {t('driver.notes', 'Notes')}
+                        </span>
+                        <span className="text-xs text-[var(--text-primary)]">
+                          {selectedDriverEvent.tripInfo.notes}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -1003,7 +1111,15 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
                 {/* Status */}
                 <div className="flex items-center gap-2">
-                  <Badge variant={selectedDriverEvent.status === "scheduled" ? "default" : selectedDriverEvent.status === "completed" ? "success" : "secondary"}>
+                  <Badge
+                    variant={
+                      selectedDriverEvent.status === 'scheduled'
+                        ? 'default'
+                        : selectedDriverEvent.status === 'completed'
+                          ? 'success'
+                          : 'secondary'
+                    }
+                  >
                     {selectedDriverEvent.status}
                   </Badge>
                 </div>

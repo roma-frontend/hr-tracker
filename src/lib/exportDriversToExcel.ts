@@ -18,22 +18,22 @@ interface TripData {
 
 export function exportTripsToExcel(trips: TripData[], filename: string = 'driver-trips.xlsx') {
   // Prepare data for Excel
-  const data = trips.map(trip => ({
-    'Date': trip.date,
-    'Driver': trip.driver,
-    'Passenger': trip.passenger,
-    'From': trip.from,
-    'To': trip.to,
-    'Purpose': trip.purpose,
+  const data = trips.map((trip) => ({
+    Date: trip.date,
+    Driver: trip.driver,
+    Passenger: trip.passenger,
+    From: trip.from,
+    To: trip.to,
+    Purpose: trip.purpose,
     'Distance (km)': trip.distanceKm,
     'Duration (min)': trip.durationMin,
-    'Status': trip.status,
+    Status: trip.status,
   }));
 
   // Create workbook and worksheet
   const wb = {
     Sheets: {
-      'Trips': {
+      Trips: {
         data: [
           // Header row
           [
@@ -47,7 +47,7 @@ export function exportTripsToExcel(trips: TripData[], filename: string = 'driver
             { v: 'Duration (min)', s: { font: { bold: true } } },
             { v: 'Status', s: { font: { bold: true } } },
           ],
-          ...data.map(row => Object.values(row)),
+          ...data.map((row) => Object.values(row)),
         ],
       },
     },
@@ -56,9 +56,11 @@ export function exportTripsToExcel(trips: TripData[], filename: string = 'driver
 
   // Write to file (in browser, this will trigger download)
   const excelBuffer = writeXLSX(wb, { bookType: 'xlsx', type: 'buffer' });
-  
+
   // Create blob and download
-  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([excelBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -70,11 +72,21 @@ export function exportTripsToExcel(trips: TripData[], filename: string = 'driver
 }
 
 export function exportTripsToCSV(trips: TripData[], filename: string = 'driver-trips.csv') {
-  const headers = ['Date', 'Driver', 'Passenger', 'From', 'To', 'Purpose', 'Distance (km)', 'Duration (min)', 'Status'];
-  
+  const headers = [
+    'Date',
+    'Driver',
+    'Passenger',
+    'From',
+    'To',
+    'Purpose',
+    'Distance (km)',
+    'Duration (min)',
+    'Status',
+  ];
+
   const csv = [
     headers.join(','),
-    ...trips.map(trip => 
+    ...trips.map((trip) =>
       [
         trip.date,
         trip.driver,
@@ -85,7 +97,7 @@ export function exportTripsToCSV(trips: TripData[], filename: string = 'driver-t
         trip.distanceKm,
         trip.durationMin,
         trip.status,
-      ].join(',')
+      ].join(','),
     ),
   ].join('\n');
 

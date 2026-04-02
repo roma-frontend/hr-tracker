@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useAuthStore, type User } from "@/store/useAuthStore";
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore, type User } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
-import { useSidebarStore } from "@/store/useSidebarStore";
-import { usePathname } from "next/navigation";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
-import { ErrorBoundary } from "@/components/error/ErrorBoundary";
-import { ReactQueryProvider } from "@/components/providers/ReactQueryProvider";
+import { useSidebarStore } from '@/store/useSidebarStore';
+import { usePathname } from 'next/navigation';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { StatusUpdateProvider } from '@/context/StatusUpdateContext';
+import { ErrorBoundary } from '@/components/error/ErrorBoundary';
+import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 // StatusUpdateProvider is already in root layout (src/app/layout.tsx)
 // import { StatusUpdateProvider } from "@/context/StatusUpdateContext";
 
@@ -28,66 +28,70 @@ function SidebarSkeleton() {
   );
 }
 
-const Sidebar = dynamic(
-  () => import("@/components/layout/Sidebar").then((m) => m.Sidebar),
-  { ssr: false, loading: () => <SidebarSkeleton /> }
-);
+const Sidebar = dynamic(() => import('@/components/layout/Sidebar').then((m) => m.Sidebar), {
+  ssr: false,
+  loading: () => <SidebarSkeleton />,
+});
 
 const MobileSidebar = dynamic(
-  () => import("@/components/layout/Sidebar").then((m) => m.MobileSidebar),
-  { ssr: false, loading: () => null }
+  () => import('@/components/layout/Sidebar').then((m) => m.MobileSidebar),
+  { ssr: false, loading: () => null },
 );
 
-const Navbar = dynamic(
-  () => import("@/components/layout/Navbar").then((m) => m.Navbar),
-  { ssr: false, loading: () => <div className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] fixed top-0 left-0 right-0 z-[60]" /> }
-);
+const Navbar = dynamic(() => import('@/components/layout/Navbar').then((m) => m.Navbar), {
+  ssr: false,
+  loading: () => (
+    <div className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] fixed top-0 left-0 right-0 z-[60]" />
+  ),
+});
 
-const ChatWidget = dynamic(
-  () => import("@/components/ai/ChatWidget").then((m) => m.ChatWidget),
-  { ssr: false, loading: () => null }
-);
+const ChatWidget = dynamic(() => import('@/components/ai/ChatWidget').then((m) => m.ChatWidget), {
+  ssr: false,
+  loading: () => null,
+});
 
 const BreakReminderService = dynamic(
-  () => import("@/components/productivity/BreakReminderService"),
-  { ssr: false, loading: () => null }
+  () => import('@/components/productivity/BreakReminderService'),
+  { ssr: false, loading: () => null },
 );
 
-const FocusModeIndicator = dynamic(
-  () => import("@/components/productivity/FocusModeIndicator"),
-  { ssr: false, loading: () => null }
-);
+const FocusModeIndicator = dynamic(() => import('@/components/productivity/FocusModeIndicator'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const NotificationBanner = dynamic(
-  () => import("@/components/notifications/NotificationBanner").then((m) => m.NotificationBanner),
-  { ssr: false, loading: () => null }
+  () => import('@/components/notifications/NotificationBanner').then((m) => m.NotificationBanner),
+  { ssr: false, loading: () => null },
 );
 
 const MaintenanceBanner = dynamic(
-  () => import("@/components/MaintenanceBanner").then((m) => m.MaintenanceBanner),
-  { ssr: false, loading: () => null }
+  () => import('@/components/MaintenanceBanner').then((m) => m.MaintenanceBanner),
+  { ssr: false, loading: () => null },
 );
 
 const IncomingCallProvider = dynamic(
-  () => import("@/components/chat/IncomingCallProvider").then((m) => m.IncomingCallProvider),
-  { ssr: false, loading: () => null }
+  () => import('@/components/chat/IncomingCallProvider').then((m) => m.IncomingCallProvider),
+  { ssr: false, loading: () => null },
 );
 
 const StatusUpdateBanner = dynamic(
-  () => import("@/components/StatusUpdateBanner").then((m) => m.StatusUpdateBanner),
-  { ssr: false, loading: () => null }
+  () => import('@/components/StatusUpdateBanner').then((m) => m.StatusUpdateBanner),
+  { ssr: false, loading: () => null },
 );
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
-  const needsOnboarding = useAuthStore(useShallow((state: { needsOnboarding: boolean }) => state.needsOnboarding));
+  const needsOnboarding = useAuthStore(
+    useShallow((state: { needsOnboarding: boolean }) => state.needsOnboarding),
+  );
   const { status } = useSession();
   const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
-  const isAIChatPage = pathname?.startsWith("/ai-chat");
-  const isChatPage = pathname?.startsWith("/chat") && !isAIChatPage;
-  const isOnboardingPage = pathname?.startsWith("/onboarding");
+  const isAIChatPage = pathname?.startsWith('/ai-chat');
+  const isChatPage = pathname?.startsWith('/chat') && !isAIChatPage;
+  const isOnboardingPage = pathname?.startsWith('/onboarding');
   const redirectedRef = React.useRef(false);
   const hasHydratedRef = React.useRef(false);
 
@@ -95,7 +99,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // Prevent double hydration
     if (hasHydratedRef.current) return;
     hasHydratedRef.current = true;
-    
+
     // Rehydrate persisted stores from localStorage on client only
     // This prevents SSR/client mismatch (hydration errors) from localStorage state
     useSidebarStore.persist.rehydrate();
@@ -133,7 +137,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Show Shield HR loader while:
   // 1. Stores haven't hydrated from localStorage yet
   // 2. OAuth session is active (Google login) but user data hasn't been synced from Convex yet
-  const isOAuthSyncing = status === "authenticated" && !user;
+  const isOAuthSyncing = status === 'authenticated' && !user;
   if (!hydrated || isOAuthSyncing) {
     return (
       <div className="flex h-screen items-center justify-center bg-[var(--background)]">
@@ -156,62 +160,67 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ErrorBoundary>
       <ReactQueryProvider>
         <div className="flex h-screen bg-[var(--background)] overflow-hidden">
-            {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
-            <Sidebar />
+          {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
+          <Sidebar />
 
-            {/* Mobile Sidebar */}
-            <MobileSidebar />
+          {/* Mobile Sidebar */}
+          <MobileSidebar />
 
-            {/* Main content — contain:layout reduces CLS from child layout changes */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{ contain: "layout" }}>
-              {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
-              <Navbar />
-              {/* Maintenance warning banner — below navbar, above content */}
-              {user && <MaintenanceBanner />}
-              {/* Status update banner — below maintenance banner */}
-              <StatusUpdateBanner />
-              {/* Real-time notification banner — below status banner, full width, persistent */}
-              {user && <NotificationBanner />}
-              {/* Main content area — min-h-0 prevents CLS when content loads */}
-              <main className={isChatPage || isAIChatPage ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto overflow-x-hidden min-h-0"} style={{ contain: "layout" }}>
-                {isChatPage ? (
-                  <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">
-                    {children}
-                  </div>
-                ) : isAIChatPage ? (
-                  <div className="flex flex-col flex-1 min-h-0 h-full p-0">
-                    {children}
-                  </div>
-                ) : (
-                  <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
-                    {children}
-                  </div>
-                )}
-              </main>
-            </div>
-            {/* AI Chat Widget - hidden on /chat page so it doesn't cover the send button */}
-            {!isChatPage && <ChatWidget />}
+          {/* Main content — contain:layout reduces CLS from child layout changes */}
+          <div
+            className="flex-1 flex flex-col min-w-0 overflow-hidden"
+            style={{ contain: 'layout' }}
+          >
+            {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
+            <Navbar />
+            {/* Maintenance warning banner — below navbar, above content */}
+            {user && <MaintenanceBanner />}
+            {/* Status update banner — below maintenance banner */}
+            <StatusUpdateBanner />
+            {/* Real-time notification banner — below status banner, full width, persistent */}
+            {user && <NotificationBanner />}
+            {/* Main content area — min-h-0 prevents CLS when content loads */}
+            <main
+              className={
+                isChatPage || isAIChatPage
+                  ? 'flex-1 overflow-hidden flex flex-col min-h-0'
+                  : 'flex-1 overflow-y-auto overflow-x-hidden min-h-0'
+              }
+              style={{ contain: 'layout' }}
+            >
+              {isChatPage ? (
+                <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">
+                  {children}
+                </div>
+              ) : isAIChatPage ? (
+                <div className="flex flex-col flex-1 min-h-0 h-full p-0">{children}</div>
+              ) : (
+                <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto">{children}</div>
+              )}
+            </main>
+          </div>
+          {/* AI Chat Widget - hidden on /chat page so it doesn't cover the send button */}
+          {!isChatPage && <ChatWidget />}
 
-            {/* Global incoming call detection — works on ALL pages */}
-            {hydrated && user && <IncomingCallProvider />}
+          {/* Global incoming call detection — works on ALL pages */}
+          {hydrated && user && <IncomingCallProvider />}
 
-
-            {/* Productivity Services - only render when mounted to avoid SSR mismatch */}
-            {hydrated && user && (
-              <>
-                <BreakReminderService
-                  enabled={false}
-                  intervalMinutes={120}
-                  workHoursStart={undefined}
-                  workHoursEnd={undefined}
-                />
-                <FocusModeIndicator
-                  enabled={false}
-                  workHoursStart={undefined}
-                  workHoursEnd={undefined}
-                />
-              </>
-            )}
+          {/* Productivity Services - only render when mounted to avoid SSR mismatch */}
+          {hydrated && user && (
+            <>
+              <BreakReminderService
+                enabled={false}
+                intervalMinutes={120}
+                workHoursStart={undefined}
+                workHoursEnd={undefined}
+              />
+              <FocusModeIndicator
+                enabled={false}
+                workHoursStart={undefined}
+                workHoursEnd={undefined}
+              />
+            </>
+          )}
         </div>
       </ReactQueryProvider>
     </ErrorBoundary>

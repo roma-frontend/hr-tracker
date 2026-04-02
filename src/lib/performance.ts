@@ -41,17 +41,17 @@ export const perf = {
       try {
         performance.mark(`${name}-end`);
         performance.measure(name, `${name}-start`, `${name}-end`);
-        
+
         const measure = performance.getEntriesByName(name)[0];
         if (measure && process.env.NODE_ENV === 'development') {
           console.log(`⏱️ ${name}: ${measure.duration.toFixed(2)}ms`);
         }
-        
+
         // Очистка marks
         performance.clearMarks(`${name}-start`);
         performance.clearMarks(`${name}-end`);
         performance.clearMeasures(name);
-        
+
         return measure?.duration || 0;
       } catch (e) {
         console.warn(`Performance measurement failed for ${name}:`, e);
@@ -64,7 +64,7 @@ export const perf = {
   // Получить все метрики
   getAllMetrics() {
     if (typeof performance === 'undefined') return [];
-    
+
     return {
       navigation: performance.getEntriesByType('navigation'),
       resources: performance.getEntriesByType('resource'),
@@ -91,14 +91,14 @@ export function createLazyObserver(callback: (entry: IntersectionObserverEntry) 
     {
       rootMargin: '50px', // Загружать за 50px до появления в viewport
       threshold: 0.01,
-    }
+    },
   );
 }
 
 // ===== PREFETCH UTILITIES =====
 export function prefetchRoute(href: string) {
   if (typeof document === 'undefined') return;
-  
+
   const link = document.createElement('link');
   link.rel = 'prefetch';
   link.href = href;
@@ -107,7 +107,7 @@ export function prefetchRoute(href: string) {
 
 export function preconnect(url: string) {
   if (typeof document === 'undefined') return;
-  
+
   const link = document.createElement('link');
   link.rel = 'preconnect';
   link.href = url;
@@ -117,16 +117,16 @@ export function preconnect(url: string) {
 // ===== DEBOUNCE & THROTTLE =====
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);
     };
-    
+
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
@@ -134,10 +134,10 @@ export function debounce<T extends (...args: any[]) => any>(
 
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
-  limit: number
+  limit: number,
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
       func(...args);
@@ -153,13 +153,13 @@ const cache = new Map<string, { data: any; timestamp: number }>();
 export function getCached<T>(key: string, ttl: number = 60000): T | null {
   const cached = cache.get(key);
   if (!cached) return null;
-  
+
   const isExpired = Date.now() - cached.timestamp > ttl;
   if (isExpired) {
     cache.delete(key);
     return null;
   }
-  
+
   return cached.data as T;
 }
 
@@ -179,15 +179,15 @@ export function clearCache(key?: string): void {
 export function logBundleSize() {
   if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-    
+
     const jsSize = resources
-      .filter(r => r.name.endsWith('.js'))
+      .filter((r) => r.name.endsWith('.js'))
       .reduce((sum, r) => sum + (r.transferSize || 0), 0);
-    
+
     const cssSize = resources
-      .filter(r => r.name.endsWith('.css'))
+      .filter((r) => r.name.endsWith('.css'))
       .reduce((sum, r) => sum + (r.transferSize || 0), 0);
-    
+
     console.log('📦 Bundle Sizes:', {
       js: `${(jsSize / 1024).toFixed(2)} KB`,
       css: `${(cssSize / 1024).toFixed(2)} KB`,
@@ -199,27 +199,28 @@ export function logBundleSize() {
 // ===== PERFORMANCE SCORE =====
 export function calculatePerformanceScore(): number {
   if (typeof performance === 'undefined') return 0;
-  
+
   const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
   if (!navigation) return 0;
-  
+
   // Метрики
   const fcp = performance.getEntriesByName('first-contentful-paint')[0]?.startTime || 0;
-  const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart;
+  const domContentLoaded =
+    navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart;
   const loadComplete = navigation.loadEventEnd - navigation.loadEventStart;
-  
+
   // Простая оценка (0-100)
   let score = 100;
-  
+
   if (fcp > 1800) score -= 30;
   else if (fcp > 1000) score -= 15;
-  
+
   if (domContentLoaded > 1500) score -= 25;
   else if (domContentLoaded > 800) score -= 10;
-  
+
   if (loadComplete > 3000) score -= 25;
   else if (loadComplete > 1500) score -= 10;
-  
+
   return Math.max(0, score);
 }
 

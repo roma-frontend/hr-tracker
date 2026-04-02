@@ -1,32 +1,42 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import React, { useState, useEffect } from "react";
-import { Globe, Calendar, Clock, CheckCircle2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { toast } from "sonner";
-import type { Id } from "@/convex/_generated/dataModel";
+import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
+import { Globe, Calendar, Clock, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { toast } from 'sonner';
+import type { Id } from '@/convex/_generated/dataModel';
 
 interface LocalizationSettingsProps {
-  userId: Id<"users">;
+  userId: Id<'users'>;
   user: any;
   onSettingsChange: (settings: any) => void;
 }
 
-export function LocalizationSettings({ userId, user, onSettingsChange }: LocalizationSettingsProps) {
+export function LocalizationSettings({
+  userId,
+  user,
+  onSettingsChange,
+}: LocalizationSettingsProps) {
   const { t, i18n } = useTranslation();
   const [isSaving, setIsSaving] = useState(false);
-  
-  const [language, setLanguage] = useState(user?.language ?? "en");
-  const [timezone, setTimezone] = useState(user?.timezone ?? "UTC");
-  const [dateFormat, setDateFormat] = useState(user?.dateFormat ?? "DD/MM/YYYY");
-  const [firstDayOfWeek, setFirstDayOfWeek] = useState(user?.firstDayOfWeek ?? "monday");
-  const [timeFormat, setTimeFormat] = useState(user?.timeFormat ?? "24h");
+
+  const [language, setLanguage] = useState(user?.language ?? 'en');
+  const [timezone, setTimezone] = useState(user?.timezone ?? 'UTC');
+  const [dateFormat, setDateFormat] = useState(user?.dateFormat ?? 'DD/MM/YYYY');
+  const [firstDayOfWeek, setFirstDayOfWeek] = useState(user?.firstDayOfWeek ?? 'monday');
+  const [timeFormat, setTimeFormat] = useState(user?.timeFormat ?? '24h');
 
   const updateSettings = useMutation(api.settings.updateLocalizationSettings);
 
@@ -44,11 +54,11 @@ export function LocalizationSettings({ userId, user, onSettingsChange }: Localiz
   // Sync when user data changes
   useEffect(() => {
     if (user) {
-      setLanguage(user.language ?? "en");
-      setTimezone(user.timezone ?? "UTC");
-      setDateFormat(user.dateFormat ?? "DD/MM/YYYY");
-      setFirstDayOfWeek(user.firstDayOfWeek ?? "monday");
-      setTimeFormat(user.timeFormat ?? "24h");
+      setLanguage(user.language ?? 'en');
+      setTimezone(user.timezone ?? 'UTC');
+      setDateFormat(user.dateFormat ?? 'DD/MM/YYYY');
+      setFirstDayOfWeek(user.firstDayOfWeek ?? 'monday');
+      setTimeFormat(user.timeFormat ?? '24h');
     }
   }, [user?.language, user?.timezone, user?.dateFormat, user?.timeFormat, user?.firstDayOfWeek]);
 
@@ -67,33 +77,33 @@ export function LocalizationSettings({ userId, user, onSettingsChange }: Localiz
       // Change language if it was changed
       if (language !== i18n.language) {
         console.log('[LocalizationSettings] Changing language from', i18n.language, 'to', language);
-        
+
         // Save to localStorage (I18nProvider will detect and apply it)
         localStorage.setItem('i18nextLng', language);
-        
+
         // Change language immediately
         await i18n.changeLanguage(language);
-        
-        toast.success(t("settings.saved"), {
-          description: `${t("settings.localizationSaved")} ${t("settings.reloadingPage")}`,
+
+        toast.success(t('settings.saved'), {
+          description: `${t('settings.localizationSaved')} ${t('settings.reloadingPage')}`,
           duration: 2000,
         });
-        
+
         // Force page reload to apply language everywhere after short delay
         setTimeout(() => {
           window.location.reload();
         }, 1500);
-        
+
         return; // Exit early, reload will handle the rest
       }
 
-      toast.success(t("settings.saved"), {
-        description: t("settings.localizationSaved"),
+      toast.success(t('settings.saved'), {
+        description: t('settings.localizationSaved'),
       });
     } catch (error) {
-      console.error("Failed to save localization settings:", error);
-      toast.error(t("settings.saveFailed"), {
-        description: t("settings.tryAgain"),
+      console.error('Failed to save localization settings:', error);
+      toast.error(t('settings.saveFailed'), {
+        description: t('settings.tryAgain'),
       });
     } finally {
       setIsSaving(false);
@@ -234,7 +244,9 @@ export function LocalizationSettings({ userId, user, onSettingsChange }: Localiz
             <div className="flex items-center gap-3">
               <span className="text-2xl">📅</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Week starts on {firstDayOfWeek}</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">
+                  Week starts on {firstDayOfWeek}
+                </p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
                   {t('settingsLocalization.weekStartNote')}
                 </p>
@@ -250,12 +262,12 @@ export function LocalizationSettings({ userId, user, onSettingsChange }: Localiz
           {isSaving ? (
             <>
               <div className="w-4 h-4 border-2 rounded-full animate-spin border-white/30 border-t-white" />
-              {t("buttons.saving")}
+              {t('buttons.saving')}
             </>
           ) : (
             <>
               <CheckCircle2 className="w-4 h-4" />
-              {t("buttons.save")}
+              {t('buttons.save')}
             </>
           )}
         </Button>

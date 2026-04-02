@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { AlertCircle, Info, CheckCircle, XCircle, Lightbulb, ArrowRight } from 'lucide-react';
@@ -25,9 +25,8 @@ export function SmartErrorMessage({ error, className = '' }: SmartErrorMessagePr
   if (!error) return null;
 
   // Convert string to SmartError object
-  const errorObj: SmartError = typeof error === 'string' 
-    ? { type: 'error', message: error }
-    : error;
+  const errorObj: SmartError =
+    typeof error === 'string' ? { type: 'error', message: error } : error;
 
   const icons = {
     error: XCircle,
@@ -136,46 +135,62 @@ export function parseAuthError(error: string): SmartError {
   const errorLower = error.toLowerCase();
 
   // Wrong password
-  if (errorLower.includes('invalid credentials') || errorLower.includes('wrong password') || errorLower.includes('incorrect password')) {
+  if (
+    errorLower.includes('invalid credentials') ||
+    errorLower.includes('wrong password') ||
+    errorLower.includes('incorrect password')
+  ) {
     return {
       type: 'error',
       message: '🔐 Неверный email или пароль',
       suggestion: 'Проверьте правильность ввода. Caps Lock включен?',
       action: {
         label: 'Забыли пароль?',
-        onClick: () => window.location.href = '/forgot-password',
+        onClick: () => (window.location.href = '/forgot-password'),
       },
     };
   }
 
   // User not found
-  if (errorLower.includes('user not found') || errorLower.includes('no user') || errorLower.includes('does not exist')) {
+  if (
+    errorLower.includes('user not found') ||
+    errorLower.includes('no user') ||
+    errorLower.includes('does not exist')
+  ) {
     return {
       type: 'error',
       message: '👤 Пользователь не найден',
       suggestion: 'Возможно, вы еще не зарегистрированы в системе',
       action: {
         label: 'Создать аккаунт',
-        onClick: () => window.location.href = '/register',
+        onClick: () => (window.location.href = '/register'),
       },
     };
   }
 
   // Email already exists
-  if (errorLower.includes('already exists') || errorLower.includes('already registered') || errorLower.includes('email taken')) {
+  if (
+    errorLower.includes('already exists') ||
+    errorLower.includes('already registered') ||
+    errorLower.includes('email taken')
+  ) {
     return {
       type: 'error',
       message: '📧 Этот email уже зарегистрирован',
       suggestion: 'Попробуйте войти или восстановите пароль',
       action: {
         label: 'Перейти к входу',
-        onClick: () => window.location.href = '/login',
+        onClick: () => (window.location.href = '/login'),
       },
     };
   }
 
   // Weak password
-  if (errorLower.includes('weak password') || errorLower.includes('password too short') || errorLower.includes('password must be')) {
+  if (
+    errorLower.includes('weak password') ||
+    errorLower.includes('password too short') ||
+    errorLower.includes('password must be')
+  ) {
     return {
       type: 'warning',
       message: '🔒 Пароль недостаточно надежный',
@@ -184,7 +199,11 @@ export function parseAuthError(error: string): SmartError {
   }
 
   // Network error
-  if (errorLower.includes('network') || errorLower.includes('fetch') || errorLower.includes('connection')) {
+  if (
+    errorLower.includes('network') ||
+    errorLower.includes('fetch') ||
+    errorLower.includes('connection')
+  ) {
     return {
       type: 'warning',
       message: '🌐 Проблема с подключением',
@@ -193,7 +212,11 @@ export function parseAuthError(error: string): SmartError {
   }
 
   // Server error
-  if (errorLower.includes('500') || errorLower.includes('server error') || errorLower.includes('internal error')) {
+  if (
+    errorLower.includes('500') ||
+    errorLower.includes('server error') ||
+    errorLower.includes('internal error')
+  ) {
     return {
       type: 'error',
       message: '⚠️ Ошибка сервера',
@@ -202,7 +225,11 @@ export function parseAuthError(error: string): SmartError {
   }
 
   // Too many attempts
-  if (errorLower.includes('too many') || errorLower.includes('rate limit') || errorLower.includes('blocked')) {
+  if (
+    errorLower.includes('too many') ||
+    errorLower.includes('rate limit') ||
+    errorLower.includes('blocked')
+  ) {
     return {
       type: 'warning',
       message: '⏱️ Слишком много попыток',
@@ -211,7 +238,11 @@ export function parseAuthError(error: string): SmartError {
   }
 
   // Account blocked/suspended
-  if (errorLower.includes('blocked') || errorLower.includes('suspended') || errorLower.includes('disabled')) {
+  if (
+    errorLower.includes('blocked') ||
+    errorLower.includes('suspended') ||
+    errorLower.includes('disabled')
+  ) {
     return {
       type: 'error',
       message: '🚫 Аккаунт заблокирован',
@@ -220,7 +251,11 @@ export function parseAuthError(error: string): SmartError {
   }
 
   // Email not verified
-  if (errorLower.includes('verify') || errorLower.includes('not verified') || errorLower.includes('confirm email')) {
+  if (
+    errorLower.includes('verify') ||
+    errorLower.includes('not verified') ||
+    errorLower.includes('confirm email')
+  ) {
     return {
       type: 'warning',
       message: '📬 Email не подтвержден',
@@ -229,7 +264,11 @@ export function parseAuthError(error: string): SmartError {
   }
 
   // Session expired
-  if (errorLower.includes('session') || errorLower.includes('expired') || errorLower.includes('timeout')) {
+  if (
+    errorLower.includes('session') ||
+    errorLower.includes('expired') ||
+    errorLower.includes('timeout')
+  ) {
     return {
       type: 'info',
       message: '⏰ Сессия истекла',

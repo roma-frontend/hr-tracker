@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback } from 'react';
 
 interface UseChatShortcutsOptions {
   onSearch?: () => void;
@@ -35,71 +35,85 @@ export function useChatShortcuts({
   onEditLastMessage,
   disabled = false,
 }: UseChatShortcutsOptions) {
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (disabled) return;
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (disabled) return;
 
-    // Don't trigger shortcuts when typing in input fields (except specific combos)
-    const target = e.target as HTMLElement;
-    const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
+      // Don't trigger shortcuts when typing in input fields (except specific combos)
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 
-    // Global shortcuts (work even in inputs)
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-      e.preventDefault();
-      onSearch?.();
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && e.key === "n") {
-      e.preventDefault();
-      onNewConversation?.();
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-      e.preventDefault();
-      onSendMessage?.();
-      return;
-    }
-
-    // Shortcuts that don't work in inputs
-    if (!isInput) {
-      if (e.key === "Escape") {
+      // Global shortcuts (work even in inputs)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        onEscape?.();
+        onSearch?.();
         return;
       }
 
-      if (e.key === "ArrowUp" && (e.ctrlKey || e.metaKey)) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
-        onEditLastMessage?.();
+        onNewConversation?.();
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.key === "r") {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        onReply?.();
-        return;
-      }
-    }
-
-    // Navigation shortcuts (only when not in input)
-    if (!isInput) {
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        onNavigateUp?.();
+        onSendMessage?.();
         return;
       }
 
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        onNavigateDown?.();
-        return;
+      // Shortcuts that don't work in inputs
+      if (!isInput) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          onEscape?.();
+          return;
+        }
+
+        if (e.key === 'ArrowUp' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          onEditLastMessage?.();
+          return;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+          e.preventDefault();
+          onReply?.();
+          return;
+        }
       }
-    }
-  }, [onSearch, onNewConversation, onSendMessage, onEscape, onNavigateUp, onNavigateDown, onReply, onEditLastMessage, disabled]);
+
+      // Navigation shortcuts (only when not in input)
+      if (!isInput) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          onNavigateUp?.();
+          return;
+        }
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          onNavigateDown?.();
+          return;
+        }
+      }
+    },
+    [
+      onSearch,
+      onNewConversation,
+      onSendMessage,
+      onEscape,
+      onNavigateUp,
+      onNavigateDown,
+      onReply,
+      onEditLastMessage,
+      disabled,
+    ],
+  );
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 }

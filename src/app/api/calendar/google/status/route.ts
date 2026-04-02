@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const accessToken = request.cookies.get("google_access_token")?.value;
-  const refreshToken = request.cookies.get("google_refresh_token")?.value;
+  const accessToken = request.cookies.get('google_access_token')?.value;
+  const refreshToken = request.cookies.get('google_refresh_token')?.value;
 
   if (!accessToken && !refreshToken) {
     return NextResponse.json({ connected: false });
@@ -11,10 +11,9 @@ export async function GET(request: NextRequest) {
   // If we have an access token, verify it's still valid
   if (accessToken) {
     try {
-      const res = await fetch(
-        "https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
+      const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (res.ok) {
         const profile = await res.json();
         return NextResponse.json({
@@ -34,24 +33,24 @@ export async function GET(request: NextRequest) {
 
     if (clientId && clientSecret) {
       try {
-        const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
             client_id: clientId,
             client_secret: clientSecret,
             refresh_token: refreshToken,
-            grant_type: "refresh_token",
+            grant_type: 'refresh_token',
           }),
         });
 
         if (tokenRes.ok) {
           const tokens = await tokenRes.json();
           const response = NextResponse.json({ connected: true });
-          response.cookies.set("google_access_token", tokens.access_token, {
+          response.cookies.set('google_access_token', tokens.access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             maxAge: tokens.expires_in || 3600,
           });
           return response;

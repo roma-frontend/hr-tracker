@@ -43,25 +43,41 @@ export async function GET(req: NextRequest) {
         position: u.position,
         employeeType: u.employeeType,
         // Today's attendance
-        todayStatus: todayRecord ? {
-          status: todayRecord.status,
-          checkIn: todayRecord.checkInTime ? new Date(todayRecord.checkInTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : null,
-          checkOut: todayRecord.checkOutTime ? new Date(todayRecord.checkOutTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : null,
-          isLate: todayRecord.isLate,
-          lateMinutes: todayRecord.lateMinutes,
-          workedHours: todayRecord.totalWorkedMinutes ? (todayRecord.totalWorkedMinutes / 60).toFixed(1) : null,
-        } : null,
+        todayStatus: todayRecord
+          ? {
+              status: todayRecord.status,
+              checkIn: todayRecord.checkInTime
+                ? new Date(todayRecord.checkInTime).toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : null,
+              checkOut: todayRecord.checkOutTime
+                ? new Date(todayRecord.checkOutTime).toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : null,
+              isLate: todayRecord.isLate,
+              lateMinutes: todayRecord.lateMinutes,
+              workedHours: todayRecord.totalWorkedMinutes
+                ? (todayRecord.totalWorkedMinutes / 60).toFixed(1)
+                : null,
+            }
+          : null,
         // Leave balances
         leaveBalance: u.leaveBalance ?? { paid: 20, sick: 10, family: 5, unpaid: 30 },
         // Currently on leave — include real leaveId for edit/delete!
-        currentLeave: activeLeave ? {
-          leaveId: activeLeave._id,
-          type: activeLeave.type,
-          startDate: activeLeave.startDate,
-          endDate: activeLeave.endDate,
-          reason: activeLeave.reason,
-          status: activeLeave.status,
-        } : null,
+        currentLeave: activeLeave
+          ? {
+              leaveId: activeLeave._id,
+              type: activeLeave.type,
+              startDate: activeLeave.startDate,
+              endDate: activeLeave.endDate,
+              reason: activeLeave.reason,
+              status: activeLeave.status,
+            }
+          : null,
         // Upcoming leaves — include real leaveId!
         upcomingLeaves: upcomingLeaves.map((l: any) => ({
           leaveId: l._id,
@@ -93,7 +109,9 @@ export async function GET(req: NextRequest) {
         // Leave history summary
         totalLeavesTaken: approvedLeaves.reduce((sum: number, l: any) => sum + (l.days ?? 0), 0),
         // Supervisor
-        supervisorName: u.supervisorId ? (users as any[]).find((s: any) => s._id === u.supervisorId)?.name ?? null : null,
+        supervisorName: u.supervisorId
+          ? ((users as any[]).find((s: any) => s._id === u.supervisorId)?.name ?? null)
+          : null,
         // Presence status
         presenceStatus: u.presenceStatus ?? 'available',
         // Tasks
@@ -105,7 +123,8 @@ export async function GET(req: NextRequest) {
             status: t.status,
             priority: t.priority,
             deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null,
-            assignedBy: (users as any[]).find((s: any) => s._id === t.assignedBy)?.name ?? 'Unknown',
+            assignedBy:
+              (users as any[]).find((s: any) => s._id === t.assignedBy)?.name ?? 'Unknown',
           })),
       };
     });
@@ -135,8 +154,18 @@ export async function GET(req: NextRequest) {
         name: user?.name ?? 'Unknown',
         department: user?.department ?? '',
         status: t.status,
-        checkIn: t.checkInTime ? new Date(t.checkInTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : null,
-        checkOut: t.checkOutTime ? new Date(t.checkOutTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : null,
+        checkIn: t.checkInTime
+          ? new Date(t.checkInTime).toLocaleTimeString('en-GB', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : null,
+        checkOut: t.checkOutTime
+          ? new Date(t.checkOutTime).toLocaleTimeString('en-GB', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : null,
         isLate: t.isLate,
         lateMinutes: t.lateMinutes,
       };

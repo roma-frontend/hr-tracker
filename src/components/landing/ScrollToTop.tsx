@@ -77,14 +77,13 @@ export default function ScrollToTop() {
       >
         <ArrowUp
           size={24}
-          style={{ 
+          style={{
             color: '#ffffff',
             transition: 'transform 0.3s ease',
           }}
           className="group-hover:animate-bounce"
         />
       </button>
-
     </>
   );
 

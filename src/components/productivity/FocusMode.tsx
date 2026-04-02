@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { Focus, Bell, BellOff, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { Focus, Bell, BellOff, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface FocusModeProps {
   currentPresence: string;
@@ -18,7 +18,7 @@ interface FocusModeProps {
 export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const [isFocusMode, setIsFocusMode] = useState(currentPresence === "busy");
+  const [isFocusMode, setIsFocusMode] = useState(currentPresence === 'busy');
   const updatePresence = useMutation(api.users.updatePresenceStatus);
 
   const toggleFocusMode = async () => {
@@ -29,8 +29,8 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
 
       // Update presence status
       await updatePresence({
-        userId: user.id as Id<"users">,
-        presenceStatus: newFocusState ? "busy" : "available",
+        userId: user.id as Id<'users'>,
+        presenceStatus: newFocusState ? 'busy' : 'available',
       });
 
       setIsFocusMode(newFocusState);
@@ -57,25 +57,23 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
           <Focus className="w-3.5 h-3.5" />
           {t('focusMode.title')}
         </h3>
-        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-          {t('focusMode.description')}
-        </p>
+        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{t('focusMode.description')}</p>
       </div>
 
       {/* Focus Mode Toggle */}
       <div
         className={`rounded-xl border p-4 transition-all ${
           isFocusMode
-            ? "border-[var(--primary)]/50 bg-[var(--primary)]/5"
-            : "border-[var(--border)] bg-[var(--background-subtle)]"
+            ? 'border-[var(--primary)]/50 bg-[var(--primary)]/5'
+            : 'border-[var(--border)] bg-[var(--background-subtle)]'
         }`}
       >
         <div className="flex items-start gap-3 mb-3">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all ${
               isFocusMode
-                ? "bg-[var(--primary)] shadow-lg"
-                : "bg-[var(--background-subtle)] border border-[var(--border)]"
+                ? 'bg-[var(--primary)] shadow-lg'
+                : 'bg-[var(--background-subtle)] border border-[var(--border)]'
             }`}
           >
             {isFocusMode ? (
@@ -97,14 +95,12 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
           <button
             onClick={toggleFocusMode}
             className={`relative h-6 w-11 rounded-full transition-all flex-shrink-0 ${
-              isFocusMode
-                ? "bg-[var(--primary)]"
-                : "bg-gray-300 dark:bg-gray-700"
+              isFocusMode ? 'bg-[var(--primary)]' : 'bg-gray-300 dark:bg-gray-700'
             }`}
           >
             <span
               className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-lg transition-transform ${
-                isFocusMode ? "translate-x-5" : "translate-x-0"
+                isFocusMode ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
           </button>
@@ -118,21 +114,31 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
             ) : (
               <Bell className="w-3.5 h-3.5 text-[var(--text-muted)]" />
             )}
-            <span className={isFocusMode ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}>
+            <span
+              className={isFocusMode ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}
+            >
               {isFocusMode ? t('focusMode.notificationsMuted') : t('focusMode.muteNotifications')}
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <div className={`w-2 h-2 rounded-full ${isFocusMode ? "bg-red-500" : "bg-[var(--text-muted)]"}`} />
-            <span className={isFocusMode ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}>
+            <div
+              className={`w-2 h-2 rounded-full ${isFocusMode ? 'bg-red-500' : 'bg-[var(--text-muted)]'}`}
+            />
+            <span
+              className={isFocusMode ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}
+            >
               {isFocusMode ? t('focusMode.statusBusy') : t('focusMode.setStatusBusy')}
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <Zap className={`w-3.5 h-3.5 ${isFocusMode ? "text-[var(--primary)]" : "text-[var(--text-muted)]"}`} />
-            <span className={isFocusMode ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}>
+            <Zap
+              className={`w-3.5 h-3.5 ${isFocusMode ? 'text-[var(--primary)]' : 'text-[var(--text-muted)]'}`}
+            />
+            <span
+              className={isFocusMode ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}
+            >
               {isFocusMode ? t('focusMode.deepWorkEnabled') : t('focusMode.enableDeepWork')}
             </span>
           </div>
@@ -148,11 +154,7 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
       </div>
 
       {!isFocusMode && (
-        <Button
-          onClick={toggleFocusMode}
-          className="w-full mt-3"
-          size="sm"
-        >
+        <Button onClick={toggleFocusMode} className="w-full mt-3" size="sm">
           <Zap className="w-4 h-4 mr-2" />
           {t('focusMode.activateFocusMode')}
         </Button>

@@ -1,12 +1,17 @@
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import type { NextAuthOptions } from "next-auth";
+import NextAuth from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
+import type { NextAuthOptions } from 'next-auth';
 
 // ═══════════════════════════════════════════════════════��═══════
 // VALIDATE ENVIRONMENT — fail fast, not silently
 // ═══════════════════════════════════════════════════════════════
-const requiredEnvVars = ['NEXTAUTH_SECRET', 'NEXTAUTH_URL', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
-const missingVars = requiredEnvVars.filter(v => !process.env[v]);
+const requiredEnvVars = [
+  'NEXTAUTH_SECRET',
+  'NEXTAUTH_URL',
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+];
+const missingVars = requiredEnvVars.filter((v) => !process.env[v]);
 
 if (missingVars.length > 0) {
   console.error('[NextAuth] ❌ Missing required environment variables:', missingVars);
@@ -122,7 +127,7 @@ export const authOptions: NextAuthOptions = {
 
     async redirect({ url, baseUrl }) {
       if (url.startsWith(baseUrl)) return url;
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
       return baseUrl;
     },
 
@@ -130,7 +135,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.sub!;
         session.user.email = token.email!;
-        session.user.name = token.name || token.email!.split("@")[0] || "User";
+        session.user.name = token.name || token.email!.split('@')[0] || 'User';
         session.user.image = token.picture as string | undefined;
 
         if (token.role) {

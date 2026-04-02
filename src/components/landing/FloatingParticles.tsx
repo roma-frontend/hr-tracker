@@ -19,11 +19,12 @@ const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
   size: Math.round(seededRandom(i * 3) * 4 + 1),
   duration: Math.round(seededRandom(i * 5) * 20 + 15),
   delay: -(seededRandom(i * 11) * 10), // negative delay = pre-started animation
-  color: i % 3 === 0
-    ? 'rgba(96,165,250,0.6)'
-    : i % 3 === 1
-    ? 'rgba(167,139,250,0.5)'
-    : 'rgba(52,211,153,0.4)',
+  color:
+    i % 3 === 0
+      ? 'rgba(96,165,250,0.6)'
+      : i % 3 === 1
+        ? 'rgba(167,139,250,0.5)'
+        : 'rgba(52,211,153,0.4)',
   animClass: `particle-float-${(i % 3) + 1}`,
 }));
 

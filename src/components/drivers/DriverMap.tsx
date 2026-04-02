@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Location {
   lat: number;
@@ -18,24 +18,24 @@ interface DriverMapProps {
   height?: string;
   zoom?: number;
   interactive?: boolean;
-  onLocationSelect?: (location: Location, type: "pickup" | "dropoff") => void;
+  onLocationSelect?: (location: Location, type: 'pickup' | 'dropoff') => void;
 }
 
 const DEFAULT_CENTER: Location = { lat: 40.7128, lng: -74.006 };
 
-const LEAFLET_CSS_ID = "leaflet-css";
+const LEAFLET_CSS_ID = 'leaflet-css';
 
 function ensureLeafletCSS() {
   if (document.getElementById(LEAFLET_CSS_ID)) return;
-  const link = document.createElement("link");
+  const link = document.createElement('link');
   link.id = LEAFLET_CSS_ID;
-  link.rel = "stylesheet";
-  link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-  link.crossOrigin = "";
+  link.rel = 'stylesheet';
+  link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  link.crossOrigin = '';
   document.head.appendChild(link);
-  
+
   // Add custom styles for zoom controls
-  const style = document.createElement("style");
+  const style = document.createElement('style');
   style.textContent = `
     .leaflet-control-zoom {
       border: 2px solid rgba(0,0,0,0.2) !important;
@@ -72,7 +72,7 @@ export function DriverMap({
   pickupCoords,
   dropoffCoords,
   driverCoords,
-  height = "400px",
+  height = '400px',
   zoom = 13,
   interactive = false,
   onLocationSelect,
@@ -90,22 +90,22 @@ export function DriverMap({
   // Get user's current location
   useEffect(() => {
     if (!navigator.geolocation) {
-      console.log("[DriverMap] Geolocation not supported");
+      console.log('[DriverMap] Geolocation not supported');
       return;
     }
 
-    console.log("[DriverMap] Requesting user location...");
+    console.log('[DriverMap] Requesting user location...');
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const loc = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        console.log("[DriverMap] User location:", loc);
+        console.log('[DriverMap] User location:', loc);
         setUserLocation(loc);
       },
       (error) => {
-        console.warn("[DriverMap] Location error:", error.code, error.message);
+        console.warn('[DriverMap] Location error:', error.code, error.message);
         // Use default location on error
         setUserLocation(DEFAULT_CENTER);
       },
@@ -113,7 +113,7 @@ export function DriverMap({
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 300000, // 5 minutes
-      }
+      },
     );
   }, []);
 
@@ -128,28 +128,33 @@ export function DriverMap({
     let cancelled = false;
     ensureLeafletCSS();
 
-    import("leaflet").then((L) => {
+    import('leaflet').then((L) => {
       if (cancelled) return;
       LRef.current = L.default || L;
       setReady(true);
     });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Reverse geocode
-  const reverseGeocode = useCallback(async (lat: number, lng: number): Promise<string | undefined> => {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-        { headers: { "Accept-Language": "en" } }
-      );
-      const data = await res.json();
-      return data.display_name || undefined;
-    } catch {
-      return undefined;
-    }
-  }, []);
+  const reverseGeocode = useCallback(
+    async (lat: number, lng: number): Promise<string | undefined> => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+          { headers: { 'Accept-Language': 'en' } },
+        );
+        const data = await res.json();
+        return data.display_name || undefined;
+      } catch {
+        return undefined;
+      }
+    },
+    [],
+  );
 
   // Init map
   useEffect(() => {
@@ -162,9 +167,9 @@ export function DriverMap({
     // Ensure container has dimensions
     const rect = el.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) {
-      console.warn("[DriverMap] Container has no dimensions, waiting...");
+      console.warn('[DriverMap] Container has no dimensions, waiting...');
       const timeout = setTimeout(() => {
-        console.log("[DriverMap] Retrying initialization...");
+        console.log('[DriverMap] Retrying initialization...');
         // Force re-render by toggling ready
         setReady(false);
         setTimeout(() => setReady(true), 50);
@@ -174,20 +179,20 @@ export function DriverMap({
 
     const L = LRef.current;
 
-    console.log("[DriverMap] Initializing map...", { width: rect.width, height: rect.height });
+    console.log('[DriverMap] Initializing map...', { width: rect.width, height: rect.height });
 
     // Fix marker icons
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-      iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     });
 
     // Use user location if no coords provided
     const center = userLocation || driverCoords || pickupCoords || dropoffCoords || DEFAULT_CENTER;
-    console.log("[DriverMap] Center:", center);
-    
+    console.log('[DriverMap] Center:', center);
+
     const map = L.map(el, {
       center: [center.lat, center.lng],
       zoom: userLocation ? 14 : 13,
@@ -203,15 +208,17 @@ export function DriverMap({
       maxZoom: 19,
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
       maxZoom: 19,
     }).addTo(map);
 
     // Add zoom control in bottom-right corner
-    L.control.zoom({
-      position: 'bottomright'
-    }).addTo(map);
+    L.control
+      .zoom({
+        position: 'bottomright',
+      })
+      .addTo(map);
 
     mapInstanceRef.current = map;
 
@@ -219,18 +226,26 @@ export function DriverMap({
     const safeInvalidate = () => {
       const m = mapInstanceRef.current;
       if (!m || !m._container || !m._container.parentNode) return;
-      try { m.getCenter(); } catch { return; }
-      try { m.invalidateSize(); } catch { /* map removed */ }
+      try {
+        m.getCenter();
+      } catch {
+        return;
+      }
+      try {
+        m.invalidateSize();
+      } catch {
+        /* map removed */
+      }
     };
 
     // Force resize after dialog opens
-    const timeouts = [100, 300, 600, 1000, 1500, 2000].map(delay =>
+    const timeouts = [100, 300, 600, 1000, 1500, 2000].map((delay) =>
       setTimeout(() => {
         safeInvalidate();
         if (mapInstanceRef.current) {
-          console.log("[DriverMap] Invalidated size at", delay, "ms");
+          console.log('[DriverMap] Invalidated size at', delay, 'ms');
         }
-      }, delay)
+      }, delay),
     );
 
     // ResizeObserver
@@ -241,16 +256,16 @@ export function DriverMap({
 
     // Click handler for interactive mode
     if (interactive) {
-      map.on("click", async (e: any) => {
+      map.on('click', async (e: any) => {
         const { lat, lng } = e.latlng;
         const cb = onLocationSelectRef.current;
         if (!cb) return;
         const address = await reverseGeocode(lat, lng);
-        cb({ lat, lng, address }, !pickupCoordsRef.current ? "pickup" : "dropoff");
+        cb({ lat, lng, address }, !pickupCoordsRef.current ? 'pickup' : 'dropoff');
       });
     }
 
-    console.log("[DriverMap] Map initialized successfully");
+    console.log('[DriverMap] Map initialized successfully');
 
     return () => {
       timeouts.forEach(clearTimeout);
@@ -259,7 +274,7 @@ export function DriverMap({
         try {
           mapInstanceRef.current.remove();
         } catch (e) {
-          console.warn("[DriverMap] Error removing map:", e);
+          console.warn('[DriverMap] Error removing map:', e);
         }
         mapInstanceRef.current = null;
       }
@@ -276,7 +291,7 @@ export function DriverMap({
 
     // Check if map container still exists and is attached to DOM
     if (!map || !map._container || !map._container.parentNode) {
-      console.warn("[DriverMap] Map container not found or detached, skipping update");
+      console.warn('[DriverMap] Map container not found or detached, skipping update');
       return;
     }
 
@@ -284,15 +299,19 @@ export function DriverMap({
     try {
       map.getCenter();
     } catch {
-      console.warn("[DriverMap] Map not ready yet, skipping marker update");
+      console.warn('[DriverMap] Map not ready yet, skipping marker update');
       return;
     }
 
-    console.log("[DriverMap] Updating markers:", { pickupCoords, dropoffCoords, driverCoords });
+    console.log('[DriverMap] Updating markers:', { pickupCoords, dropoffCoords, driverCoords });
 
     // Clear existing - guard against removed map
     markersRef.current.forEach((m) => {
-      try { m.remove(); } catch { /* marker already removed */ }
+      try {
+        m.remove();
+      } catch {
+        /* marker already removed */
+      }
     });
     markersRef.current = [];
     if (polylineRef.current) {
@@ -302,7 +321,7 @@ export function DriverMap({
 
     const icon = (color: string) =>
       L.divIcon({
-        className: "",
+        className: '',
         html: `<div style="width:42px;height:42px;border-radius:50%;background:${color};border:4px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;"><div style="width:16px;height:16px;border-radius:50%;background:white;opacity:0.3"></div></div>`,
         iconSize: [42, 42],
         iconAnchor: [21, 21],
@@ -311,53 +330,70 @@ export function DriverMap({
     const bounds: [number, number][] = [];
 
     if (pickupCoords) {
-      const m = L.marker([pickupCoords.lat, pickupCoords.lng], { icon: icon("#10B981") })
+      const m = L.marker([pickupCoords.lat, pickupCoords.lng], { icon: icon('#10B981') })
         .addTo(map)
-        .bindPopup(`<b>${t("driver.pickup", "Pickup")}</b><br/>${pickupCoords.address || pickupLocation || ""}`);
+        .bindPopup(
+          `<b>${t('driver.pickup', 'Pickup')}</b><br/>${pickupCoords.address || pickupLocation || ''}`,
+        );
       markersRef.current.push(m);
       bounds.push([pickupCoords.lat, pickupCoords.lng]);
     }
 
     if (dropoffCoords) {
-      const m = L.marker([dropoffCoords.lat, dropoffCoords.lng], { icon: icon("#EF4444") })
+      const m = L.marker([dropoffCoords.lat, dropoffCoords.lng], { icon: icon('#EF4444') })
         .addTo(map)
-        .bindPopup(`<b>${t("driver.dropoff", "Dropoff")}</b><br/>${dropoffCoords.address || dropoffLocation || ""}`);
+        .bindPopup(
+          `<b>${t('driver.dropoff', 'Dropoff')}</b><br/>${dropoffCoords.address || dropoffLocation || ''}`,
+        );
       markersRef.current.push(m);
       bounds.push([dropoffCoords.lat, dropoffCoords.lng]);
     }
 
     if (driverCoords) {
-      const m = L.marker([driverCoords.lat, driverCoords.lng], { icon: icon("#3B82F6") })
+      const m = L.marker([driverCoords.lat, driverCoords.lng], { icon: icon('#3B82F6') })
         .addTo(map)
-        .bindPopup(`<b>${t("driver.driver", "Driver")}</b>`);
+        .bindPopup(`<b>${t('driver.driver', 'Driver')}</b>`);
       markersRef.current.push(m);
       bounds.push([driverCoords.lat, driverCoords.lng]);
     }
 
     if (pickupCoords && dropoffCoords) {
       polylineRef.current = L.polyline(
-        [[pickupCoords.lat, pickupCoords.lng], [dropoffCoords.lat, dropoffCoords.lng]],
-        { color: "#3B82F6", weight: 3, opacity: 0.7, dashArray: "8,8" }
+        [
+          [pickupCoords.lat, pickupCoords.lng],
+          [dropoffCoords.lat, dropoffCoords.lng],
+        ],
+        { color: '#3B82F6', weight: 3, opacity: 0.7, dashArray: '8,8' },
       ).addTo(map);
     }
 
     // Center map on all markers — guard against detached map
     try {
       if (bounds.length >= 2) {
-        console.log("[DriverMap] Fitting bounds:", bounds);
+        console.log('[DriverMap] Fitting bounds:', bounds);
         map.fitBounds(bounds, {
           padding: [50, 50],
           maxZoom: 16,
-          minZoom: 10
+          minZoom: 10,
         });
       } else if (bounds.length === 1) {
-        console.log("[DriverMap] Setting view:", bounds[0]);
+        console.log('[DriverMap] Setting view:', bounds[0]);
         map.setView(bounds[0], 14);
       }
     } catch (e) {
-      console.warn("[DriverMap] Error centering map:", e);
+      console.warn('[DriverMap] Error centering map:', e);
     }
-  }, [pickupCoords, dropoffCoords, driverCoords, ready, pickupLocation, dropoffLocation, t, zoom, userLocation]);
+  }, [
+    pickupCoords,
+    dropoffCoords,
+    driverCoords,
+    ready,
+    pickupLocation,
+    dropoffLocation,
+    t,
+    zoom,
+    userLocation,
+  ]);
 
   // Center map on user location when it becomes available
   useEffect(() => {
@@ -365,23 +401,31 @@ export function DriverMap({
     if (!m || !ready || !userLocation) return;
     if (pickupCoords || dropoffCoords || driverCoords) return; // Don't center if we already have coords
     if (!m._container || !m._container.parentNode) return;
-    try { m.getCenter(); } catch { return; }
+    try {
+      m.getCenter();
+    } catch {
+      return;
+    }
 
-    console.log("[DriverMap] Centering on user location:", userLocation);
-    try { m.setView([userLocation.lat, userLocation.lng], 14); } catch { /* detached */ }
+    console.log('[DriverMap] Centering on user location:', userLocation);
+    try {
+      m.setView([userLocation.lat, userLocation.lng], 14);
+    } catch {
+      /* detached */
+    }
   }, [userLocation, ready, pickupCoords, dropoffCoords, driverCoords]);
 
   // Update click handler when pickupCoords changes
   useEffect(() => {
     if (!mapInstanceRef.current || !interactive) return;
     const map = mapInstanceRef.current;
-    map.off("click");
-    map.on("click", async (e: any) => {
+    map.off('click');
+    map.on('click', async (e: any) => {
       const { lat, lng } = e.latlng;
       const cb = onLocationSelectRef.current;
       if (!cb) return;
       const address = await reverseGeocode(lat, lng);
-      cb({ lat, lng, address }, !pickupCoordsRef.current ? "pickup" : "dropoff");
+      cb({ lat, lng, address }, !pickupCoordsRef.current ? 'pickup' : 'dropoff');
     });
   }, [pickupCoords, interactive, reverseGeocode]);
 
@@ -389,7 +433,7 @@ export function DriverMap({
     <div
       ref={containerRef}
       className="relative w-full rounded-lg overflow-hidden"
-      style={{ height, minHeight: "300px", position: "relative" }}
+      style={{ height, minHeight: '300px', position: 'relative' }}
     >
       {!ready ? (
         <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -399,7 +443,15 @@ export function DriverMap({
         <div
           ref={mapDivRef}
           className="w-full h-full"
-          style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
         />
       )}
 
@@ -409,19 +461,25 @@ export function DriverMap({
           {pickupCoords && (
             <div className="flex items-center gap-2 text-xs">
               <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">{t("driver.pickup", "Pickup")}</span>
+              <span className="text-gray-700 dark:text-gray-300">
+                {t('driver.pickup', 'Pickup')}
+              </span>
             </div>
           )}
           {dropoffCoords && (
             <div className="flex items-center gap-2 text-xs">
               <div className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">{t("driver.dropoff", "Dropoff")}</span>
+              <span className="text-gray-700 dark:text-gray-300">
+                {t('driver.dropoff', 'Dropoff')}
+              </span>
             </div>
           )}
           {driverCoords && (
             <div className="flex items-center gap-2 text-xs">
               <div className="w-3 h-3 rounded-full bg-blue-500 shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">{t("driver.driver", "Driver")}</span>
+              <span className="text-gray-700 dark:text-gray-300">
+                {t('driver.driver', 'Driver')}
+              </span>
             </div>
           )}
         </div>
@@ -431,10 +489,10 @@ export function DriverMap({
       {interactive && ready && (
         <div className="absolute top-3 right-3 z-[1000] bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-lg px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 pointer-events-none">
           {!pickupCoords
-            ? t("driver.clickPickup", "Click to set pickup")
+            ? t('driver.clickPickup', 'Click to set pickup')
             : !dropoffCoords
-              ? t("driver.clickDropoff", "Click to set dropoff")
-              : t("driver.clickToChange", "Click to change dropoff")}
+              ? t('driver.clickDropoff', 'Click to set dropoff')
+              : t('driver.clickToChange', 'Click to change dropoff')}
         </div>
       )}
 
@@ -455,36 +513,34 @@ export function DriverMap({
 
 const NAVIGATORS = [
   {
-    id: "google",
-    name: "Google Maps",
-    color: "#4285F4",
-    icon: "🗺️",
+    id: 'google',
+    name: 'Google Maps',
+    color: '#4285F4',
+    icon: '🗺️',
     buildUrl: (lat: number, lng: number) =>
       `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
   },
   {
-    id: "yandex",
-    name: "Yandex Maps",
-    color: "#FC3F1D",
-    icon: "🧭",
-    buildUrl: (lat: number, lng: number) =>
-      `https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto`,
+    id: 'yandex',
+    name: 'Yandex Maps',
+    color: '#FC3F1D',
+    icon: '🧭',
+    buildUrl: (lat: number, lng: number) => `https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto`,
   },
   {
-    id: "2gis",
-    name: "2GIS",
-    color: "#1DAD4E",
-    icon: "🏢",
+    id: '2gis',
+    name: '2GIS',
+    color: '#1DAD4E',
+    icon: '🏢',
     buildUrl: (lat: number, lng: number) =>
       `https://2gis.ru/routeSearch/rsType/car/to/${lng},${lat}`,
   },
   {
-    id: "waze",
-    name: "Waze",
-    color: "#33CCFF",
-    icon: "🚗",
-    buildUrl: (lat: number, lng: number) =>
-      `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+    id: 'waze',
+    name: 'Waze',
+    color: '#33CCFF',
+    icon: '🚗',
+    buildUrl: (lat: number, lng: number) => `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
   },
 ];
 
@@ -500,9 +556,9 @@ function NavigatorButtons({
   dropoffLabel?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [target, setTarget] = useState<"dropoff" | "pickup">(dropoffCoords ? "dropoff" : "pickup");
+  const [target, setTarget] = useState<'dropoff' | 'pickup'>(dropoffCoords ? 'dropoff' : 'pickup');
 
-  const coords = target === "dropoff" ? dropoffCoords : pickupCoords;
+  const coords = target === 'dropoff' ? dropoffCoords : pickupCoords;
   if (!coords) return null;
 
   return (
@@ -513,11 +569,26 @@ function NavigatorButtons({
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg shadow-lg text-xs font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          />
         </svg>
         Navigate
-        <svg className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className={`w-3 h-3 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -529,22 +600,22 @@ function NavigatorButtons({
           {pickupCoords && dropoffCoords && (
             <div className="flex gap-1 mb-2.5 p-0.5 rounded-md bg-gray-100 dark:bg-gray-700">
               <button
-                onClick={() => setTarget("pickup")}
+                onClick={() => setTarget('pickup')}
                 className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
-                  target === "pickup"
-                    ? "bg-white dark:bg-gray-600 shadow-sm text-emerald-600 dark:text-emerald-400"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                  target === 'pickup'
+                    ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600 dark:text-emerald-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 Pickup
               </button>
               <button
-                onClick={() => setTarget("dropoff")}
+                onClick={() => setTarget('dropoff')}
                 className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
-                  target === "dropoff"
-                    ? "bg-white dark:bg-gray-600 shadow-sm text-red-600 dark:text-red-400"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                  target === 'dropoff'
+                    ? 'bg-white dark:bg-gray-600 shadow-sm text-red-600 dark:text-red-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-red-500" />
@@ -565,8 +636,18 @@ function NavigatorButtons({
               >
                 <span className="text-base leading-none">{nav.icon}</span>
                 <span className="font-medium">{nav.name}</span>
-                <svg className="w-3.5 h-3.5 ml-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                <svg
+                  className="w-3.5 h-3.5 ml-auto text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
                 </svg>
               </a>
             ))}

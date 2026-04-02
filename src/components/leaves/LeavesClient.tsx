@@ -1,49 +1,58 @@
-﻿"use client";
+﻿'use client';
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from '@/lib/cssMotion';
-import { useTranslation } from "react-i18next";
-import { Plus, Search, CheckCircle, XCircle, Trash2 } from "lucide-react";
-import { format } from "date-fns";
-import { toast } from "sonner";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from 'react-i18next';
+import { Plus, Search, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { LeaveRequestModal } from "@/components/leaves/LeaveRequestModal";
-import { LeaveRequestWizard } from "@/components/leaves/LeaveRequestWizard";
-import { useAuthStore, type User } from "@/store/useAuthStore";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { LeaveRequestModal } from '@/components/leaves/LeaveRequestModal';
+import { LeaveRequestWizard } from '@/components/leaves/LeaveRequestWizard';
+import { useAuthStore, type User } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
-import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from "@/lib/types";
-import dynamic from "next/dynamic";
-import { playNotificationSound, sendBrowserNotification } from "@/lib/notificationSound";
-import { useSelectedOrganization } from "@/hooks/useSelectedOrganization";
+import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from '@/lib/types';
+import dynamic from 'next/dynamic';
+import { playNotificationSound, sendBrowserNotification } from '@/lib/notificationSound';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
-const AILeaveAssistant = dynamic(() => import("@/components/leaves/AILeaveAssistant"), { ssr: false });
+const AILeaveAssistant = dynamic(() => import('@/components/leaves/AILeaveAssistant'), {
+  ssr: false,
+});
 
 function safeFormat(dateStr: string | undefined | null, fmt: string): string {
-  if (!dateStr) return "—";
+  if (!dateStr) return '—';
   try {
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "—";
+    if (isNaN(d.getTime())) return '—';
     return format(d, fmt);
   } catch {
-    return "—";
+    return '—';
   }
 }
 
 function StatusBadge({ status }: { status: LeaveStatus }) {
   const { t } = useTranslation();
-  const map: Record<LeaveStatus, { variant: "warning" | "success" | "destructive"; label: string }> = {
-    pending: { variant: "warning", label: t('leave.pending') },
-    approved: { variant: "success", label: t('leave.approved') },
-    rejected: { variant: "destructive", label: t('leave.rejected') },
+  const map: Record<
+    LeaveStatus,
+    { variant: 'warning' | 'success' | 'destructive'; label: string }
+  > = {
+    pending: { variant: 'warning', label: t('leave.pending') },
+    approved: { variant: 'success', label: t('leave.approved') },
+    rejected: { variant: 'destructive', label: t('leave.rejected') },
   };
   const { variant, label } = map[status];
   return <Badge variant={variant}>{label}</Badge>;
@@ -51,14 +60,16 @@ function StatusBadge({ status }: { status: LeaveStatus }) {
 
 function LeaveTypeBadge({ type }: { type: LeaveType }) {
   const colorMap: Record<LeaveType, string> = {
-    paid: "bg-[#2563eb]/20 text-[#2563eb] border-[#2563eb]/30",
-    unpaid: "bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30",
-    sick: "bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/30",
-    family: "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30",
-    doctor: "bg-[#06b6d4]/20 text-[#06b6d4] border-[#06b6d4]/30",
+    paid: 'bg-[#2563eb]/20 text-[#2563eb] border-[#2563eb]/30',
+    unpaid: 'bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30',
+    sick: 'bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/30',
+    family: 'bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30',
+    doctor: 'bg-[#06b6d4]/20 text-[#06b6d4] border-[#06b6d4]/30',
   };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${colorMap[type]}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${colorMap[type]}`}
+    >
       {LEAVE_TYPE_LABELS[type]}
     </span>
   );
@@ -70,26 +81,29 @@ export function LeavesClient() {
   const selectedOrgId = useSelectedOrganization();
   const [wizardOpen, setWizardOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [previousUnreadCount, setPreviousUnreadCount] = useState(0);
 
   // Determine which query to use based on selectedOrgId
   const shouldUseOrgQuery = selectedOrgId && user?.id;
   const queryParams = shouldUseOrgQuery
-    ? { organizationId: selectedOrgId as Id<"organizations"> }
-    : (user?.id ? { requesterId: user.id as Id<"users"> } : null);
+    ? { organizationId: selectedOrgId as Id<'organizations'> }
+    : user?.id
+      ? { requesterId: user.id as Id<'users'> }
+      : null;
 
   // Use organization-specific query if superadmin has selected an org, otherwise use default
   const leaves = useQuery(
     shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    user?.id && queryParams !== null
-      ? queryParams
-      : "skip"
+    user?.id && queryParams !== null ? queryParams : 'skip',
   );
-  const unreadCount = useQuery(api.leaves.getUnreadCount, user?.id ? { requesterId: user.id as Id<"users"> } : "skip");
+  const unreadCount = useQuery(
+    api.leaves.getUnreadCount,
+    user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
+  );
 
   const approveLeave = useMutation(api.leaves.approveLeave);
   const rejectLeave = useMutation(api.leaves.rejectLeave);
@@ -98,16 +112,16 @@ export function LeavesClient() {
 
   // Play notification sound when new unread requests appear (only for admin, once per request)
   useEffect(() => {
-    const isAdmin = user?.role === "admin";
+    const isAdmin = user?.role === 'admin';
     if (!isAdmin || !unreadCount) return;
 
     const hasPlayed = sessionStorage.getItem(`leave_sound_${unreadCount}`);
     if (unreadCount > previousUnreadCount && !hasPlayed) {
-      sessionStorage.setItem(`leave_sound_${unreadCount}`, "1");
-      playNotificationSound("new_request");
-      sendBrowserNotification("New Leave Request! 🏖️", {
+      sessionStorage.setItem(`leave_sound_${unreadCount}`, '1');
+      playNotificationSound('new_request');
+      sendBrowserNotification('New Leave Request! 🏖️', {
         body: `You have ${unreadCount} pending leave request(s)`,
-        soundType: "new_request",
+        soundType: 'new_request',
       });
     }
     setPreviousUnreadCount(unreadCount);
@@ -118,37 +132,37 @@ export function LeavesClient() {
     return leaves.filter((l) => {
       if (!search) return true;
       return (
-        (l.userName ?? "").toLowerCase().includes(search.toLowerCase()) ||
-        (l.userDepartment ?? "").toLowerCase().includes(search.toLowerCase()) ||
+        (l.userName ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (l.userDepartment ?? '').toLowerCase().includes(search.toLowerCase()) ||
         l.reason.toLowerCase().includes(search.toLowerCase())
       );
     });
   }, [leaves, search]);
 
-  const handleApprove = async (id: Id<"leaveRequests">, comment?: string) => {
+  const handleApprove = async (id: Id<'leaveRequests'>, comment?: string) => {
     if (!user?.id) {
-      toast.error(t("toasts.pleaseLoginAgain"));
+      toast.error(t('toasts.pleaseLoginAgain'));
       return;
     }
     try {
       // Mark as read first
       await markLeaveAsRead({ leaveId: id });
-      
-      await approveLeave({ 
-        leaveId: id, 
-        reviewerId: user.id as Id<"users">,
-        comment 
+
+      await approveLeave({
+        leaveId: id,
+        reviewerId: user.id as Id<'users'>,
+        comment,
       });
-      
-      playNotificationSound("approved");
+
+      playNotificationSound('approved');
       toast.success(t('leave.approvedSuccess'));
     } catch (err) {
-      console.error("Approve error:", err);
+      console.error('Approve error:', err);
       toast.error(err instanceof Error ? err.message : t('leave.approveFailed'));
     }
   };
 
-  const handleReject = async (id: Id<"leaveRequests">, comment?: string) => {
+  const handleReject = async (id: Id<'leaveRequests'>, comment?: string) => {
     if (!user?.id) {
       toast.error(t('errors.unauthorized'));
       return;
@@ -156,63 +170,70 @@ export function LeavesClient() {
     try {
       // Mark as read first
       await markLeaveAsRead({ leaveId: id });
-      
-      await rejectLeave({ 
-        leaveId: id, 
-        reviewerId: user.id as Id<"users">,
-        comment 
+
+      await rejectLeave({
+        leaveId: id,
+        reviewerId: user.id as Id<'users'>,
+        comment,
       });
-      
-      playNotificationSound("rejected");
+
+      playNotificationSound('rejected');
       toast.success(t('leave.rejectedSuccess'));
     } catch (err) {
-      console.error("Reject error:", err);
+      console.error('Reject error:', err);
       toast.error(err instanceof Error ? err.message : t('leave.rejectFailed'));
     }
   };
 
-  const handleDelete = async (id: Id<"leaveRequests">) => {
+  const handleDelete = async (id: Id<'leaveRequests'>) => {
     if (!user?.id) {
       toast.error(t('errors.unauthorized'));
       return;
     }
     try {
-      await deleteLeave({ leaveId: id, requesterId: user.id as Id<"users"> });
+      await deleteLeave({ leaveId: id, requesterId: user.id as Id<'users'> });
       toast.success(t('leave.deletedSuccess'));
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error('Delete error:', err);
       toast.error(err instanceof Error ? err.message : t('leave.deleteFailed'));
     }
   };
 
   const isLoading = leaves === undefined;
   const isError = leaves === null;
-  const isSuperadmin = user?.role === "superadmin";
-  const isAdmin = !isSuperadmin && (user?.role === "admin" || user?.role === "supervisor");
+  const isSuperadmin = user?.role === 'superadmin';
+  const isAdmin = !isSuperadmin && (user?.role === 'admin' || user?.role === 'supervisor');
 
-  if (isError) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-        <Plus className="w-8 h-8 text-amber-500" />
+  if (isError)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+          <Plus className="w-8 h-8 text-amber-500" />
+        </div>
+        <h2 className="text-xl font-bold text-(--text-primary)">
+          {t('dashboard.convexNotDeployed')}
+        </h2>
+        <p className="text-(--text-muted) text-sm max-w-sm">
+          Run{' '}
+          <code className="bg-(--background-subtle) px-2 py-0.5 rounded text-[#2563eb]">
+            npx convex dev
+          </code>{' '}
+          in the terminal to connect to the database.
+        </p>
       </div>
-      <h2 className="text-xl font-bold text-(--text-primary)">{t('dashboard.convexNotDeployed')}</h2>
-      <p className="text-(--text-muted) text-sm max-w-sm">
-        Run <code className="bg-(--background-subtle) px-2 py-0.5 rounded text-[#2563eb]">npx convex dev</code> in the terminal to connect to the database.
-      </p>
-    </div>
-  );
+    );
 
   return (
     <div className="space-y-4 sm:space-y-6">
-
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
         <div>
           <h2 className="text-2xl font-bold text-(--text-primary)">{t('leave.title')}</h2>
-          <p className="text-(--text-muted) text-sm mt-1">
-            {t('leave.manageAndTrack')}
-          </p>
+          <p className="text-(--text-muted) text-sm mt-1">{t('leave.manageAndTrack')}</p>
         </div>
         <Button
           onClick={() => setWizardOpen(true)}
@@ -223,7 +244,11 @@ export function LeavesClient() {
       </motion.div>
 
       {/* Filters */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+      >
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -253,9 +278,13 @@ export function LeavesClient() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('leave.allTypes')}</SelectItem>
-                  {(Object.entries(LEAVE_TYPE_LABELS) as [LeaveType, string][]).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
-                  ))}
+                  {(Object.entries(LEAVE_TYPE_LABELS) as [LeaveType, string][]).map(
+                    ([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ),
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -264,21 +293,29 @@ export function LeavesClient() {
       </motion.div>
 
       {/* Table */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               {/* Only show count for admins, not superadmin */}
               {isAdmin && (
                 <CardTitle className="text-sm font-semibold text-(--text-muted) uppercase tracking-wider">
-                  {isLoading ? t('common.loading') : `${filtered.length} request${filtered.length !== 1 ? "s" : ""}`}
+                  {isLoading
+                    ? t('common.loading')
+                    : `${filtered.length} request${filtered.length !== 1 ? 's' : ''}`}
                 </CardTitle>
               )}
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="p-12 text-center text-(--text-muted) text-sm">{t('ui.loadingFromConvex')}</div>
+              <div className="p-12 text-center text-(--text-muted) text-sm">
+                {t('ui.loadingFromConvex')}
+              </div>
             ) : filtered.length === 0 ? (
               <div className="p-12 text-center">
                 <p className="text-(--text-muted) text-sm">{t('leave.noLeaves')}</p>
@@ -291,13 +328,29 @@ export function LeavesClient() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-(--border)">
-                      <th className="text-left px-6 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">{t('dashboard.employee')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">{t('dashboard.type')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider hidden md:table-cell">{t('dashboard.dates')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider hidden sm:table-cell">{t('dashboard.days')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider hidden lg:table-cell">{t('common.reason')}</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">{t('dashboard.status')}</th>
-                      {isAdmin && <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">{t('common.actions')}</th>}
+                      <th className="text-left px-6 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">
+                        {t('dashboard.employee')}
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">
+                        {t('dashboard.type')}
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider hidden md:table-cell">
+                        {t('dashboard.dates')}
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider hidden sm:table-cell">
+                        {t('dashboard.days')}
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider hidden lg:table-cell">
+                        {t('common.reason')}
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">
+                        {t('dashboard.status')}
+                      </th>
+                      {isAdmin && (
+                        <th className="text-left px-4 py-3 text-xs font-medium text-(--text-muted) uppercase tracking-wider">
+                          {t('common.actions')}
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-(--border)">
@@ -306,65 +359,101 @@ export function LeavesClient() {
                         <tr
                           className="hover:bg-(--background-subtle) transition-colors cursor-pointer animate-fade-in"
                           style={{ animationDelay: `${i * 30}ms` }}
-                          onClick={() => isAdmin && req.status === "pending" && setExpandedRow(expandedRow === req._id ? null : req._id)}
+                          onClick={() =>
+                            isAdmin &&
+                            req.status === 'pending' &&
+                            setExpandedRow(expandedRow === req._id ? null : req._id)
+                          }
                         >
-                        <td className="px-6 py-3">
-                          <div>
-                            <p className="text-sm font-medium text-(--text-primary)">{req.userName}</p>
-                            <p className="text-xs text-(--text-muted)">{req.userDepartment}</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3"><LeaveTypeBadge type={req.type as LeaveType} /></td>
-                        <td className="px-4 py-3 hidden md:table-cell">
-                          <p className="text-xs text-(--text-secondary)">
-                            {safeFormat(req.startDate, "MMM d")} – {safeFormat(req.endDate, "MMM d, yyyy")}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3 hidden sm:table-cell">
-                          <span className="text-sm font-medium text-(--text-primary)">{req.days}d</span>
-                        </td>
-                        <td className="px-4 py-3 hidden lg:table-cell">
-                          <p className="text-xs text-(--text-muted) max-w-45 truncate">{req.reason}</p>
-                        </td>
-                        <td className="px-4 py-3"><StatusBadge status={req.status as LeaveStatus} /></td>
-                        {isAdmin && (
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1">
-                              {req.status === "pending" && (
-                                <>
-                                  <Button size="icon-sm" variant="ghost" className="text-emerald-500 hover:text-emerald-400"
-                                    onClick={(e) => { e.stopPropagation(); handleApprove(req._id); }}>
-                                    <CheckCircle className="w-4 h-4" />
-                                  </Button>
-                                  <Button size="icon-sm" variant="ghost" className="text-red-500 hover:text-red-400"
-                                    onClick={(e) => { e.stopPropagation(); handleReject(req._id); }}>
-                                    <XCircle className="w-4 h-4" />
-                                  </Button>
-                                </>
-                              )}
-                              <Button size="icon-sm" variant="ghost" className="text-(--text-muted) hover:text-red-400"
-                                onClick={(e) => { e.stopPropagation(); handleDelete(req._id); }}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                          <td className="px-6 py-3">
+                            <div>
+                              <p className="text-sm font-medium text-(--text-primary)">
+                                {req.userName}
+                              </p>
+                              <p className="text-xs text-(--text-muted)">{req.userDepartment}</p>
                             </div>
                           </td>
-                        )}
-                      </tr>
-
-                      {/* AI Assistant Expandable Row */}
-                      {isAdmin && req.status === "pending" && expandedRow === req._id && (
-                        <tr className="animate-fade-in">
-                          <td colSpan={7} className="px-6 py-4 bg-(--background-subtle)">
-                            <AILeaveAssistant
-                              leaveRequestId={req._id}
-                              userId={req.userId}
-                              onApprove={(comment?: string) => handleApprove(req._id, comment)}
-                              onReject={(comment?: string) => handleReject(req._id, comment)}
-                            />
+                          <td className="px-4 py-3">
+                            <LeaveTypeBadge type={req.type as LeaveType} />
                           </td>
+                          <td className="px-4 py-3 hidden md:table-cell">
+                            <p className="text-xs text-(--text-secondary)">
+                              {safeFormat(req.startDate, 'MMM d')} –{' '}
+                              {safeFormat(req.endDate, 'MMM d, yyyy')}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3 hidden sm:table-cell">
+                            <span className="text-sm font-medium text-(--text-primary)">
+                              {req.days}d
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 hidden lg:table-cell">
+                            <p className="text-xs text-(--text-muted) max-w-45 truncate">
+                              {req.reason}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <StatusBadge status={req.status as LeaveStatus} />
+                          </td>
+                          {isAdmin && (
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-1">
+                                {req.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="icon-sm"
+                                      variant="ghost"
+                                      className="text-emerald-500 hover:text-emerald-400"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleApprove(req._id);
+                                      }}
+                                    >
+                                      <CheckCircle className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      size="icon-sm"
+                                      variant="ghost"
+                                      className="text-red-500 hover:text-red-400"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleReject(req._id);
+                                      }}
+                                    >
+                                      <XCircle className="w-4 h-4" />
+                                    </Button>
+                                  </>
+                                )}
+                                <Button
+                                  size="icon-sm"
+                                  variant="ghost"
+                                  className="text-(--text-muted) hover:text-red-400"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(req._id);
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
-                      )}
-                    </React.Fragment>
+
+                        {/* AI Assistant Expandable Row */}
+                        {isAdmin && req.status === 'pending' && expandedRow === req._id && (
+                          <tr className="animate-fade-in">
+                            <td colSpan={7} className="px-6 py-4 bg-(--background-subtle)">
+                              <AILeaveAssistant
+                                leaveRequestId={req._id}
+                                userId={req.userId}
+                                onApprove={(comment?: string) => handleApprove(req._id, comment)}
+                                onReject={(comment?: string) => handleReject(req._id, comment)}
+                              />
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>
@@ -376,10 +465,7 @@ export function LeavesClient() {
 
       {/* Leave Request Wizard (New) */}
       {wizardOpen && user?.id && (
-        <LeaveRequestWizard
-          userId={user.id as Id<"users">}
-          onClose={() => setWizardOpen(false)}
-        />
+        <LeaveRequestWizard userId={user.id as Id<'users'>} onClose={() => setWizardOpen(false)} />
       )}
 
       {/* Legacy Modal (keep for backward compatibility) */}

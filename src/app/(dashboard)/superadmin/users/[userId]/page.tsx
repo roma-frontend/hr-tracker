@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import {
   User,
   Mail,
@@ -26,23 +26,20 @@ import {
   Key,
   Eye,
   ArrowLeft,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 export default function UserProfile360Page() {
   const params = useParams();
   const router = useRouter();
-  const userId = params.userId as Id<"users">;
+  const userId = params.userId as Id<'users'>;
 
-  const data = useQuery(
-    api.superadmin.getUser360,
-    userId ? { userId } : "skip"
-  );
+  const data = useQuery(api.superadmin.getUser360, userId ? { userId } : 'skip');
 
   if (!data) {
     return (
@@ -52,23 +49,32 @@ export default function UserProfile360Page() {
     );
   }
 
-  const { user, organization, leaves, tasks, driverRequests, supportTickets, stats, loginAttempts } = data;
+  const {
+    user,
+    organization,
+    leaves,
+    tasks,
+    driverRequests,
+    supportTickets,
+    stats,
+    loginAttempts,
+  } = data;
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "superadmin":
-        return "bg-purple-500/10 text-purple-600 border-purple-500/30";
-      case "admin":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/30";
-      case "supervisor":
-        return "bg-green-500/10 text-green-600 border-green-500/30";
+      case 'superadmin':
+        return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
+      case 'admin':
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
+      case 'supervisor':
+        return 'bg-green-500/10 text-green-600 border-green-500/30';
       default:
-        return "bg-gray-500/10 text-gray-600 border-gray-500/30";
+        return 'bg-gray-500/10 text-gray-600 border-gray-500/30';
     }
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Back Button */}
         <div className="mb-4">
@@ -79,19 +85,23 @@ export default function UserProfile360Page() {
         </div>
 
         {/* Header - User Profile */}
-        <Card className="mb-6" style={{ background: "var(--card)" }}>
+        <Card className="mb-6" style={{ background: 'var(--card)' }}>
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
                 <Avatar className="w-20 h-20">
                   <AvatarImage src={user.avatarUrl} />
                   <AvatarFallback className="text-2xl">
-                    {user.name.split(" ").map((n) => n[0]).join("").toUpperCase()}
+                    {user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+                    <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                       {user.name}
                     </h1>
                     <Badge className={getRoleBadgeColor(user.role)}>
@@ -157,7 +167,11 @@ export default function UserProfile360Page() {
                   <Key className="w-4 h-4" />
                   Войти как
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2 text-red-600 hover:text-red-700">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 text-red-600 hover:text-red-700"
+                >
                   <Ban className="w-4 h-4" />
                   Заблокировать
                 </Button>
@@ -171,13 +185,43 @@ export default function UserProfile360Page() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-          <StatCard title={t('superadmin.leaves')} value={stats.totalLeaves} icon={Calendar} color="blue" />
+          <StatCard
+            title={t('superadmin.leaves')}
+            value={stats.totalLeaves}
+            icon={Calendar}
+            color="blue"
+          />
           <StatCard title="Ожидают" value={stats.pendingLeaves} icon={Clock} color="orange" />
-          <StatCard title="Одобрено" value={stats.approvedLeaves} icon={CheckCircle} color="green" />
-          <StatCard title={t('superadmin.tasks')} value={stats.totalTasks} icon={Briefcase} color="purple" />
-          <StatCard title="Выполнено" value={stats.completedTasks} icon={CheckCircle} color="green" />
-          <StatCard title={t('superadmin.rides')} value={stats.totalDriverRequests} icon={Car} color="blue" />
-          <StatCard title={t('superadmin.tickets')} value={stats.totalTickets} icon={Ticket} color="purple" />
+          <StatCard
+            title="Одобрено"
+            value={stats.approvedLeaves}
+            icon={CheckCircle}
+            color="green"
+          />
+          <StatCard
+            title={t('superadmin.tasks')}
+            value={stats.totalTasks}
+            icon={Briefcase}
+            color="purple"
+          />
+          <StatCard
+            title="Выполнено"
+            value={stats.completedTasks}
+            icon={CheckCircle}
+            color="green"
+          />
+          <StatCard
+            title={t('superadmin.rides')}
+            value={stats.totalDriverRequests}
+            icon={Car}
+            color="blue"
+          />
+          <StatCard
+            title={t('superadmin.tickets')}
+            value={stats.totalTickets}
+            icon={Ticket}
+            color="purple"
+          />
           <StatCard title="Входы" value={stats.totalLoginAttempts} icon={LogIn} color="gray" />
         </div>
 
@@ -216,12 +260,10 @@ export default function UserProfile360Page() {
 
           {/* Leaves Tab */}
           <TabsContent value="leaves">
-            <Card style={{ background: "var(--card)" }}>
+            <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
                 <CardTitle>Заявки на отпуск</CardTitle>
-                <CardDescription>
-                  {leaves.length} заявок найдено
-                </CardDescription>
+                <CardDescription>{leaves.length} заявок найдено</CardDescription>
               </CardHeader>
               <CardContent>
                 {leaves.length === 0 ? (
@@ -235,7 +277,7 @@ export default function UserProfile360Page() {
                       <div
                         key={leave._id}
                         className="p-4 rounded-lg border"
-                        style={{ background: "var(--background-subtle)" }}
+                        style={{ background: 'var(--background-subtle)' }}
                       >
                         <div className="flex items-start justify-between">
                           <div>
@@ -243,17 +285,17 @@ export default function UserProfile360Page() {
                               <Badge>{leave.type}</Badge>
                               <Badge
                                 variant={
-                                  leave.status === "approved"
-                                    ? "outline"
-                                    : leave.status === "rejected"
-                                    ? "destructive"
-                                    : "secondary"
+                                  leave.status === 'approved'
+                                    ? 'outline'
+                                    : leave.status === 'rejected'
+                                      ? 'destructive'
+                                      : 'secondary'
                                 }
                               >
                                 {leave.status}
                               </Badge>
                             </div>
-                            <p className="text-sm mb-1" style={{ color: "var(--text-primary)" }}>
+                            <p className="text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
                               {leave.startDate} → {leave.endDate} ({leave.days} дн.)
                             </p>
                             <p className="text-sm text-muted-foreground">{leave.reason}</p>
@@ -266,9 +308,7 @@ export default function UserProfile360Page() {
                           <div className="text-right text-xs text-muted-foreground">
                             {new Date(leave.createdAt).toLocaleDateString()}
                             {leave.reviewerName && (
-                              <div className="mt-1">
-                                Проверил: {leave.reviewerName}
-                              </div>
+                              <div className="mt-1">Проверил: {leave.reviewerName}</div>
                             )}
                           </div>
                         </div>
@@ -282,12 +322,10 @@ export default function UserProfile360Page() {
 
           {/* Tasks Tab */}
           <TabsContent value="tasks">
-            <Card style={{ background: "var(--card)" }}>
+            <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
                 <CardTitle>Задачи</CardTitle>
-                <CardDescription>
-                  {tasks.length} задач найдено
-                </CardDescription>
+                <CardDescription>{tasks.length} задач найдено</CardDescription>
               </CardHeader>
               <CardContent>
                 {tasks.length === 0 ? (
@@ -301,7 +339,7 @@ export default function UserProfile360Page() {
                       <div
                         key={task._id}
                         className="p-4 rounded-lg border"
-                        style={{ background: "var(--background-subtle)" }}
+                        style={{ background: 'var(--background-subtle)' }}
                       >
                         <div className="flex items-start justify-between">
                           <div>
@@ -309,17 +347,20 @@ export default function UserProfile360Page() {
                               <Badge>{task.priority}</Badge>
                               <Badge
                                 variant={
-                                  task.status === "completed"
-                                    ? "outline"
-                                    : task.status === "in_progress"
-                                    ? "default"
-                                    : "secondary"
+                                  task.status === 'completed'
+                                    ? 'outline'
+                                    : task.status === 'in_progress'
+                                      ? 'default'
+                                      : 'secondary'
                                 }
                               >
                                 {task.status}
                               </Badge>
                             </div>
-                            <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                            <p
+                              className="font-semibold mb-1"
+                              style={{ color: 'var(--text-primary)' }}
+                            >
                               {task.title}
                             </p>
                             {task.description && (
@@ -345,12 +386,10 @@ export default function UserProfile360Page() {
 
           {/* Drivers Tab */}
           <TabsContent value="drivers">
-            <Card style={{ background: "var(--card)" }}>
+            <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
                 <CardTitle>Поездки</CardTitle>
-                <CardDescription>
-                  {driverRequests.length} поездок найдено
-                </CardDescription>
+                <CardDescription>{driverRequests.length} поездок найдено</CardDescription>
               </CardHeader>
               <CardContent>
                 {driverRequests.length === 0 ? (
@@ -364,24 +403,25 @@ export default function UserProfile360Page() {
                       <div
                         key={req._id}
                         className="p-4 rounded-lg border"
-                        style={{ background: "var(--background-subtle)" }}
+                        style={{ background: 'var(--background-subtle)' }}
                       >
                         <div className="flex items-start justify-between">
                           <div>
                             <div className="flex items-center gap-2 mb-2">
                               <Badge>{req.status}</Badge>
                               {req.priority && (
-                                <Badge variant={req.priority === "P1" ? "destructive" : "outline"}>
+                                <Badge variant={req.priority === 'P1' ? 'destructive' : 'outline'}>
                                   {req.priority}
                                 </Badge>
                               )}
                             </div>
-                            <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                            <p
+                              className="font-semibold mb-1"
+                              style={{ color: 'var(--text-primary)' }}
+                            >
                               {req.tripInfo?.from} → {req.tripInfo?.to}
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                              {req.tripInfo?.purpose}
-                            </p>
+                            <p className="text-sm text-muted-foreground">{req.tripInfo?.purpose}</p>
                             {req.driverName && (
                               <p className="text-xs text-muted-foreground mt-2">
                                 🚗 {req.driverName} {req.driverPhone && `• ${req.driverPhone}`}
@@ -402,12 +442,10 @@ export default function UserProfile360Page() {
 
           {/* Tickets Tab */}
           <TabsContent value="tickets">
-            <Card style={{ background: "var(--card)" }}>
+            <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
                 <CardTitle>Тикеты поддержки</CardTitle>
-                <CardDescription>
-                  {supportTickets.length} тикетов найдено
-                </CardDescription>
+                <CardDescription>{supportTickets.length} тикетов найдено</CardDescription>
               </CardHeader>
               <CardContent>
                 {supportTickets.length === 0 ? (
@@ -421,7 +459,7 @@ export default function UserProfile360Page() {
                       <div
                         key={ticket._id}
                         className="p-4 rounded-lg border"
-                        style={{ background: "var(--background-subtle)" }}
+                        style={{ background: 'var(--background-subtle)' }}
                       >
                         <div className="flex items-start justify-between">
                           <div>
@@ -430,15 +468,18 @@ export default function UserProfile360Page() {
                               <Badge>{ticket.priority}</Badge>
                               <Badge
                                 variant={
-                                  ticket.status === "closed" || ticket.status === "resolved"
-                                    ? "outline"
-                                    : "default"
+                                  ticket.status === 'closed' || ticket.status === 'resolved'
+                                    ? 'outline'
+                                    : 'default'
                                 }
                               >
                                 {ticket.status}
                               </Badge>
                             </div>
-                            <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                            <p
+                              className="font-semibold mb-1"
+                              style={{ color: 'var(--text-primary)' }}
+                            >
                               {ticket.title}
                             </p>
                             <p className="text-sm text-muted-foreground line-clamp-2">
@@ -459,12 +500,10 @@ export default function UserProfile360Page() {
 
           {/* Activity Tab */}
           <TabsContent value="activity">
-            <Card style={{ background: "var(--card)" }}>
+            <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
                 <CardTitle>Последняя активность</CardTitle>
-                <CardDescription>
-                  Уведомления и действия пользователя
-                </CardDescription>
+                <CardDescription>Уведомления и действия пользователя</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -472,11 +511,11 @@ export default function UserProfile360Page() {
                     <div
                       key={notif._id}
                       className={`p-3 rounded-lg border flex items-start gap-3 ${!notif.isRead ? 'bg-blue-500/5 border-blue-500/30' : ''}`}
-                      style={{ background: "var(--background-subtle)" }}
+                      style={{ background: 'var(--background-subtle)' }}
                     >
                       <div className="w-2 h-2 rounded-full mt-2 bg-blue-500 shrink-0" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                           {notif.title}
                         </p>
                         <p className="text-xs text-muted-foreground">{notif.message}</p>
@@ -493,12 +532,10 @@ export default function UserProfile360Page() {
 
           {/* Security Tab */}
           <TabsContent value="security">
-            <Card style={{ background: "var(--card)" }}>
+            <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
                 <CardTitle>История входов</CardTitle>
-                <CardDescription>
-                  Последние попытки входа в систему
-                </CardDescription>
+                <CardDescription>Последние попытки входа в систему</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -506,7 +543,7 @@ export default function UserProfile360Page() {
                     <div
                       key={attempt._id}
                       className={`p-3 rounded-lg border flex items-start gap-3 ${!attempt.success ? 'bg-red-500/5 border-red-500/30' : ''}`}
-                      style={{ background: "var(--background-subtle)" }}
+                      style={{ background: 'var(--background-subtle)' }}
                     >
                       {attempt.success ? (
                         <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
@@ -515,18 +552,25 @@ export default function UserProfile360Page() {
                       )}
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                            {attempt.success ? "Успешный вход" : "Неудачная попытка"}
+                          <span
+                            className="text-sm font-medium"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            {attempt.success ? 'Успешный вход' : 'Неудачная попытка'}
                           </span>
-                          <Badge variant="outline">{attempt.authMethod || "password"}</Badge>
+                          <Badge variant="outline">{attempt.authMethod || 'password'}</Badge>
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          <div>IP: {attempt.ipAddress || "N/A"}</div>
-                          <div>Устройство: {attempt.userAgent || "N/A"}</div>
+                          <div>IP: {attempt.ipAddress || 'N/A'}</div>
+                          <div>Устройство: {attempt.userAgent || 'N/A'}</div>
                           {attempt.riskScore && (
                             <div>
-                              Риск:{" "}
-                              <span className={attempt.riskScore > 50 ? "text-red-500" : "text-green-500"}>
+                              Риск:{' '}
+                              <span
+                                className={
+                                  attempt.riskScore > 50 ? 'text-red-500' : 'text-green-500'
+                                }
+                              >
                                 {attempt.riskScore}
                               </span>
                             </div>
@@ -545,12 +589,10 @@ export default function UserProfile360Page() {
 
           {/* Chat Tab */}
           <TabsContent value="chat">
-            <Card style={{ background: "var(--card)" }}>
+            <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
                 <CardTitle>Сообщения в чате</CardTitle>
-                <CardDescription>
-                  Последние сообщения пользователя
-                </CardDescription>
+                <CardDescription>Последние сообщения пользователя</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -558,15 +600,17 @@ export default function UserProfile360Page() {
                     <div
                       key={msg._id}
                       className="p-3 rounded-lg border"
-                      style={{ background: "var(--background-subtle)" }}
+                      style={{ background: 'var(--background-subtle)' }}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <p className="text-sm" style={{ color: "var(--text-primary)" }}>
+                          <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
                             {msg.content}
                           </p>
-                          {msg.type === "system" && (
-                            <Badge variant="secondary" className="mt-1">Системное</Badge>
+                          {msg.type === 'system' && (
+                            <Badge variant="secondary" className="mt-1">
+                              Системное
+                            </Badge>
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -598,16 +642,16 @@ function StatCard({
   color: string;
 }) {
   const colorClasses: Record<string, string> = {
-    blue: "text-blue-500",
-    green: "text-green-500",
-    red: "text-red-500",
-    purple: "text-purple-500",
-    gray: "text-gray-500",
-    orange: "text-orange-500",
+    blue: 'text-blue-500',
+    green: 'text-green-500',
+    red: 'text-red-500',
+    purple: 'text-purple-500',
+    gray: 'text-gray-500',
+    orange: 'text-orange-500',
   };
 
   return (
-    <Card style={{ background: "var(--background-subtle)" }}>
+    <Card style={{ background: 'var(--background-subtle)' }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs text-muted-foreground">{title}</p>

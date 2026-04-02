@@ -23,17 +23,13 @@ export default function DashboardError({
       </div>
 
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight">
-          Something went wrong
-        </h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Something went wrong</h2>
         <p className="text-muted-foreground max-w-md">
-          An unexpected error occurred. Don&apos;t worry — your data is safe.
-          Try refreshing or go back to the dashboard.
+          An unexpected error occurred. Don&apos;t worry — your data is safe. Try refreshing or go
+          back to the dashboard.
         </p>
         {error.digest && (
-          <p className="text-xs text-muted-foreground/60 font-mono">
-            Error ID: {error.digest}
-          </p>
+          <p className="text-xs text-muted-foreground/60 font-mono">Error ID: {error.digest}</p>
         )}
       </div>
 

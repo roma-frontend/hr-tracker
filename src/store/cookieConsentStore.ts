@@ -13,7 +13,7 @@ interface CookieConsentStore {
   showBanner: boolean;
   showSettings: boolean;
   preferences: CookiePreferences;
-  
+
   // Actions
   acceptAll: () => void;
   rejectAll: () => void;
@@ -99,6 +99,6 @@ export const useCookieConsent = create<CookieConsentStore>()(
         hasConsent: state.hasConsent,
         preferences: state.preferences,
       }),
-    }
-  )
+    },
+  ),
 );

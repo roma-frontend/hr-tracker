@@ -2,7 +2,17 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star, CheckCircle2 } from 'lucide-react';
+import {
+  Check,
+  Zap,
+  Building2,
+  Rocket,
+  Sparkles,
+  ArrowRight,
+  Shield,
+  Star,
+  CheckCircle2,
+} from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -96,10 +106,16 @@ function useReveal(delay = '0s') {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const el = ref.current; if (!el) return;
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.08, rootMargin: '-30px' }
+      ([e]) => {
+        if (e.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.08, rootMargin: '-30px' },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -115,7 +131,15 @@ function useReveal(delay = '0s') {
 }
 
 // ── PricingCard ───────────────────────────────────────────────────────────────
-function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: number; currentPlan?: string }) {
+function PricingCard({
+  tier,
+  delay,
+  currentPlan,
+}: {
+  tier: PricingTier;
+  delay: number;
+  currentPlan?: string;
+}) {
   const { ref, style } = useReveal(`${delay}s`);
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -156,7 +180,11 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
         <div className="absolute -top-5 inset-x-0 flex justify-center z-20">
           <div
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg"
-            style={{ background: `linear-gradient(90deg, ${tier.accentFrom}, ${tier.accentTo})`, boxShadow: `0 4px 20px ${tier.glowColor}`, color: '#ffffff' }}
+            style={{
+              background: `linear-gradient(90deg, ${tier.accentFrom}, ${tier.accentTo})`,
+              boxShadow: `0 4px 20px ${tier.glowColor}`,
+              color: '#ffffff',
+            }}
           >
             <Star size={11} fill="currentColor" />
             {t(tier.badgeKey!)}
@@ -191,13 +219,15 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
           borderColor: tier.popular ? tier.accentFrom : 'var(--landing-card-border)',
           borderWidth: tier.popular ? '2px' : '1px',
           backgroundColor: 'var(--landing-card-bg)',
-          boxShadow: tier.popular ? `0 0 30px ${tier.glowColor}` : 'none'
+          boxShadow: tier.popular ? `0 0 30px ${tier.glowColor}` : 'none',
         }}
       >
         {/* Top accent line */}
         <div
           className="h-[2px] w-full"
-          style={{ background: `linear-gradient(90deg, transparent, ${tier.accentFrom}, ${tier.accentTo}, transparent)` }}
+          style={{
+            background: `linear-gradient(90deg, transparent, ${tier.accentFrom}, ${tier.accentTo}, transparent)`,
+          }}
         />
 
         <div className="p-5 sm:p-6 md:p-8 flex flex-col flex-1">
@@ -215,8 +245,18 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
               >
                 {tier.icon}
               </div>
-              <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>{t(tier.nameKey)}</h3>
-              <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{t(tier.descriptionKey)}</p>
+              <h3
+                className="text-lg sm:text-xl font-bold"
+                style={{ color: 'var(--landing-text-primary)' }}
+              >
+                {t(tier.nameKey)}
+              </h3>
+              <p
+                className="text-xs sm:text-sm mt-1"
+                style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}
+              >
+                {t(tier.descriptionKey)}
+              </p>
             </div>
           </div>
 
@@ -230,11 +270,19 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
                 {t(tier.priceKey)}
               </span>
               {tier.priceMonthly !== undefined && (
-                <span className="text-sm pb-1.5" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>{t('pricing.perMonth')}</span>
+                <span
+                  className="text-sm pb-1.5"
+                  style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+                >
+                  {t('pricing.perMonth')}
+                </span>
               )}
             </div>
             {tier.priceMonthly !== undefined && tier.priceMonthly >= 0 && (
-              <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
+              <p
+                className="text-xs mt-2 flex items-center gap-1.5"
+                style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+              >
                 <Shield size={11} />
                 {t('pricing.freeTrial')}
               </p>
@@ -247,11 +295,23 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
               <li key={i} className="flex items-start gap-2 sm:gap-3">
                 <div
                   className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: `${tier.accentFrom}22`, border: `1px solid ${tier.accentFrom}44` }}
+                  style={{
+                    background: `${tier.accentFrom}22`,
+                    border: `1px solid ${tier.accentFrom}44`,
+                  }}
                 >
-                  <Check size={10} className="sm:w-[11px] sm:h-[11px]" style={{ color: tier.accentFrom }} />
+                  <Check
+                    size={10}
+                    className="sm:w-[11px] sm:h-[11px]"
+                    style={{ color: tier.accentFrom }}
+                  />
                 </div>
-                <span className="text-xs sm:text-sm flex-1 leading-relaxed" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>{t(feature)}</span>
+                <span
+                  className="text-xs sm:text-sm flex-1 leading-relaxed"
+                  style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}
+                >
+                  {t(feature)}
+                </span>
               </li>
             ))}
           </ul>
@@ -263,29 +323,37 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
             className={`relative w-full p-3 sm:p-4 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden group/btn
               ${loading || isCurrentPlan ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}
             `}
-            style={tier.popular || isCurrentPlan ? {
-              background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
-              boxShadow: `0 8px 32px ${tier.glowColor}`,
-              color: '#ffffff',
-            } : {
-              background: `${tier.accentFrom}15`,
-              border: `1px solid ${tier.accentFrom}55`,
-              color: 'var(--landing-text-primary)',
-            }}
+            style={
+              tier.popular || isCurrentPlan
+                ? {
+                    background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
+                    boxShadow: `0 8px 32px ${tier.glowColor}`,
+                    color: '#ffffff',
+                  }
+                : {
+                    background: `${tier.accentFrom}15`,
+                    border: `1px solid ${tier.accentFrom}55`,
+                    color: 'var(--landing-text-primary)',
+                  }
+            }
           >
             {/* Shimmer effect */}
             {!loading && !isCurrentPlan && (
               <div
                 className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"
                 style={{
-                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)',
+                  background:
+                    'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)',
                   backgroundSize: '200% 100%',
                   animation: 'shimmer 1.5s infinite',
                 }}
               />
             )}
             {loading ? (
-              <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }} />
+              <div
+                className="w-5 h-5 border-2 rounded-full animate-spin"
+                style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }}
+              />
             ) : isCurrentPlan ? (
               <>
                 <CheckCircle2 size={15} />
@@ -294,7 +362,10 @@ function PricingCard({ tier, delay, currentPlan }: { tier: PricingTier; delay: n
             ) : (
               <>
                 {t(tier.buttonTextKey)}
-                <ArrowRight size={15} className="group-hover/btn:translate-x-0.5 transition-transform" />
+                <ArrowRight
+                  size={15}
+                  className="group-hover/btn:translate-x-0.5 transition-transform"
+                />
               </>
             )}
           </button>
@@ -325,11 +396,17 @@ export default function PricingPreview() {
       {/* Header */}
       <div ref={ref} className="text-center mb-20" style={style}>
         <span className="section-eyebrow">{t('pricing.eyebrow')}</span>
-        <h2 className="mt-3 text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--landing-text-primary)' }}>
+        <h2
+          className="mt-3 text-3xl md:text-5xl font-black leading-tight"
+          style={{ color: 'var(--landing-text-primary)' }}
+        >
           {t('pricing.headingStart')}{' '}
           <span className="heading-gradient">{t('pricing.headingHighlight')}</span>
         </h2>
-        <p className="mt-4 max-w-2xl mx-auto text-lg" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
+        <p
+          className="mt-4 max-w-2xl mx-auto text-lg"
+          style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}
+        >
           {t('pricing.subtitle')}{' '}
           <span style={{ color: 'var(--landing-text-muted)' }}>{t('pricing.allPlansInclude')}</span>
         </p>
@@ -342,7 +419,11 @@ export default function PricingPreview() {
             { icon: <Zap size={14} />, textKey: 'pricing.cancelAnytime' },
             { icon: <Star size={14} />, textKey: 'pricing.gdprCompliant' },
           ].map(({ icon, textKey }) => (
-            <div key={textKey} className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}>
+            <div
+              key={textKey}
+              className="flex items-center gap-1.5 text-sm"
+              style={{ color: 'var(--landing-text-secondary)', opacity: 0.9 }}
+            >
               <span style={{ color: 'var(--primary)' }}>{icon}</span>
               {t(textKey)}
             </div>
@@ -358,10 +439,16 @@ export default function PricingPreview() {
       </div>
 
       {/* Footer note */}
-      <p className="text-center text-sm mt-14 flex items-center justify-center gap-2" style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}>
+      <p
+        className="text-center text-sm mt-14 flex items-center justify-center gap-2"
+        style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
+      >
         <Shield size={13} style={{ color: 'var(--primary)' }} />
         {t('pricing.footerNote')}{' '}
-        <span className="font-semibold" style={{ color: 'var(--landing-text-muted)' }}>Stripe</span>.
+        <span className="font-semibold" style={{ color: 'var(--landing-text-muted)' }}>
+          Stripe
+        </span>
+        .
       </p>
 
       {/* Shimmer keyframe */}

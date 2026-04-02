@@ -35,8 +35,13 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold: 0.15, rootMargin: '-30px' }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15, rootMargin: '-30px' },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -69,13 +74,15 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
         className="relative rounded-2xl border backdrop-blur-xl p-6 flex flex-col items-center text-center gap-3 overflow-hidden group-hover:-translate-y-2 group-hover:scale-[1.03] transition-transform duration-300"
         style={{
           borderColor: 'var(--landing-card-border)',
-          backgroundColor: 'var(--landing-card-bg)'
+          backgroundColor: 'var(--landing-card-bg)',
         }}
       >
         {/* Shimmer top border */}
         <div
           className="absolute top-0 left-0 right-0 h-px opacity-60"
-          style={{ background: `linear-gradient(90deg, transparent, ${color.replace('0.15', '0.8')}, transparent)` }}
+          style={{
+            background: `linear-gradient(90deg, transparent, ${color.replace('0.15', '0.8')}, transparent)`,
+          }}
           aria-hidden="true"
         />
 
@@ -89,12 +96,17 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
         </div>
 
         {/* Count-up number */}
-        <div className="text-3xl font-bold tracking-tight tabular-nums" style={{ color: 'var(--landing-text-primary)' }}>
+        <div
+          className="text-3xl font-bold tracking-tight tabular-nums"
+          style={{ color: 'var(--landing-text-primary)' }}
+        >
           {numericTarget > 0 ? `${count}${suffix}` : value}
         </div>
 
         {/* Label */}
-        <div className="text-sm font-medium" style={{ color: 'var(--landing-text-muted)' }}>{label}</div>
+        <div className="text-sm font-medium" style={{ color: 'var(--landing-text-muted)' }}>
+          {label}
+        </div>
 
         {/* Corner glow */}
         <div

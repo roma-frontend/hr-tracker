@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function AuthLoading() {
   return (

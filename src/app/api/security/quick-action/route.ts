@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { NextRequest, NextResponse } from 'next/server';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -15,32 +15,29 @@ export async function POST(req: NextRequest) {
 
     if (!action || !userId || !adminId) {
       return NextResponse.json(
-        { error: "Missing required fields: action, userId, adminId" },
-        { status: 400 }
+        { error: 'Missing required fields: action, userId, adminId' },
+        { status: 400 },
       );
     }
 
     // Validate action type
-    if (!["suspend", "unsuspend"].includes(action)) {
+    if (!['suspend', 'unsuspend'].includes(action)) {
       return NextResponse.json(
         { error: "Invalid action. Must be 'suspend' or 'unsuspend'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     let result;
 
-    if (action === "suspend") {
+    if (action === 'suspend') {
       if (!reason) {
-        return NextResponse.json(
-          { error: "Reason is required for suspension" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Reason is required for suspension' }, { status: 400 });
       }
 
       result = await convex.mutation(api.users.suspendUser, {
-        adminId: adminId as Id<"users">,
-        userId: userId as Id<"users">,
+        adminId: adminId as Id<'users'>,
+        userId: userId as Id<'users'>,
         reason,
         duration: duration || 24, // Default 24 hours
       });
@@ -53,21 +50,21 @@ export async function POST(req: NextRequest) {
     } else {
       // unsuspend
       result = await convex.mutation(api.users.unsuspendUser, {
-        adminId: adminId as Id<"users">,
-        userId: userId as Id<"users">,
+        adminId: adminId as Id<'users'>,
+        userId: userId as Id<'users'>,
       });
 
       return NextResponse.json({
         success: true,
-        message: "User unsuspended successfully",
+        message: 'User unsuspended successfully',
         data: result,
       });
     }
   } catch (error: any) {
-    console.error("[Quick Action API Error]:", error);
+    console.error('[Quick Action API Error]:', error);
     return NextResponse.json(
-      { error: error.message || "Failed to perform action" },
-      { status: 500 }
+      { error: error.message || 'Failed to perform action' },
+      { status: 500 },
     );
   }
 }

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../../../../convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useRouter, useParams } from "next/navigation";
-import { useState, useEffect } from "react"
-import { useTranslation } from 'react-i18next';;
-import { Building2, Save, ArrowLeft } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { toast } from "sonner";
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../../../../../convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Building2, Save, ArrowLeft } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { toast } from 'sonner';
 
 export default function EditOrganizationPage() {
   const { t } = useTranslation();
@@ -16,28 +16,29 @@ export default function EditOrganizationPage() {
   const params = useParams();
   const { user } = useAuthStore();
   const orgId = params.id as string;
-  const isSuperadmin = user?.role === "superadmin" || user?.email?.toLowerCase() === "romangulanyan@gmail.com";
-  
+  const isSuperadmin =
+    user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
+
   // Check if admin is trying to access their own organization
   const isOwnOrganization = user?.organizationId === orgId;
-  const canAccess = isSuperadmin || (user?.role === "admin" && isOwnOrganization);
+  const canAccess = isSuperadmin || (user?.role === 'admin' && isOwnOrganization);
 
   const organization = useQuery(
     api.organizations.getOrganizationById,
     user?.id && orgId && canAccess
       ? { callerUserId: user.id as any, organizationId: orgId as any }
-      : "skip"
+      : 'skip',
   );
 
   const updateOrg = useMutation(api.organizations.updateOrganization);
 
   const [formData, setFormData] = useState({
-    name: "",
-    plan: "starter" as "starter" | "professional" | "enterprise",
+    name: '',
+    plan: 'starter' as 'starter' | 'professional' | 'enterprise',
     isActive: true,
-    timezone: "UTC",
-    country: "",
-    industry: "",
+    timezone: 'UTC',
+    country: '',
+    industry: '',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -48,21 +49,21 @@ export default function EditOrganizationPage() {
         name: organization.name,
         plan: organization.plan,
         isActive: organization.isActive,
-        timezone: organization.timezone || "UTC",
-        country: organization.country || "",
-        industry: organization.industry || "",
+        timezone: organization.timezone || 'UTC',
+        country: organization.country || '',
+        industry: organization.industry || '',
       });
     }
   }, [organization]);
 
   useEffect(() => {
     if (!user) {
-      router.push("/login");
+      router.push('/login');
       return;
     }
-    
+
     if (!isSuperadmin && !canAccess) {
-      router.push("/dashboard");
+      router.push('/dashboard');
     }
   }, [user, isSuperadmin, canAccess, router]);
 
@@ -103,7 +104,7 @@ export default function EditOrganizationPage() {
           <h1 className="text-2xl font-bold mb-2">Organization Not Found</h1>
           <p className="text-muted-foreground">The organization you're looking for doesn't exist</p>
           <button
-            onClick={() => router.push("/superadmin/organizations")}
+            onClick={() => router.push('/superadmin/organizations')}
             className="mt-4 px-4 py-2 rounded-lg bg-primary text-white"
           >
             {t('ui.backToOrganizations')}
@@ -129,23 +130,23 @@ export default function EditOrganizationPage() {
         industry: formData.industry || undefined,
       });
 
-      toast.success(t("toasts.orgUpdated"));
-      router.push("/superadmin/organizations");
+      toast.success(t('toasts.orgUpdated'));
+      router.push('/superadmin/organizations');
     } catch (error) {
-      console.error("Failed to update organization:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to update organization");
+      console.error('Failed to update organization:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update organization');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen p-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen p-6" style={{ background: 'var(--background)' }}>
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push("/superadmin/organizations")}
+            onClick={() => router.push('/superadmin/organizations')}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -156,7 +157,7 @@ export default function EditOrganizationPage() {
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+              <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Edit Organization
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -170,11 +171,14 @@ export default function EditOrganizationPage() {
         <form
           onSubmit={handleSubmit}
           className="p-6 rounded-xl border space-y-6 animate-fade-in"
-          style={{ background: "var(--card)" }}
+          style={{ background: 'var(--card)' }}
         >
           {/* Organization Name */}
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Organization Name *
             </label>
             <input
@@ -184,9 +188,9 @@ export default function EditOrganizationPage() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-2.5 rounded-lg border outline-none transition-all"
               style={{
-                background: "var(--input)",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
+                background: 'var(--input)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)',
               }}
               placeholder={t('placeholders.auraMedicalCenter')}
             />
@@ -194,7 +198,10 @@ export default function EditOrganizationPage() {
 
           {/* Plan */}
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Plan *
             </label>
             <select
@@ -203,9 +210,9 @@ export default function EditOrganizationPage() {
               onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
               className="w-full px-4 py-2.5 rounded-lg border outline-none transition-all"
               style={{
-                background: "var(--input)",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
+                background: 'var(--input)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)',
               }}
             >
               <option value="starter">Starter (10 employees)</option>
@@ -224,7 +231,7 @@ export default function EditOrganizationPage() {
                 className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <div>
-                <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                   Organization is active
                 </span>
                 <p className="text-xs text-muted-foreground">
@@ -236,7 +243,10 @@ export default function EditOrganizationPage() {
 
           {/* Timezone */}
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Timezone
             </label>
             <select
@@ -244,9 +254,9 @@ export default function EditOrganizationPage() {
               onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
               className="w-full px-4 py-2.5 rounded-lg border outline-none transition-all"
               style={{
-                background: "var(--input)",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
+                background: 'var(--input)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)',
               }}
             >
               <option value="UTC">UTC</option>
@@ -264,7 +274,10 @@ export default function EditOrganizationPage() {
 
           {/* Country */}
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Country
             </label>
             <input
@@ -273,9 +286,9 @@ export default function EditOrganizationPage() {
               onChange={(e) => setFormData({ ...formData, country: e.target.value })}
               className="w-full px-4 py-2.5 rounded-lg border outline-none transition-all"
               style={{
-                background: "var(--input)",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
+                background: 'var(--input)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)',
               }}
               placeholder={t('placeholders.unitedStates')}
             />
@@ -283,7 +296,10 @@ export default function EditOrganizationPage() {
 
           {/* Industry */}
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Industry
             </label>
             <input
@@ -292,9 +308,9 @@ export default function EditOrganizationPage() {
               onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
               className="w-full px-4 py-2.5 rounded-lg border outline-none transition-all"
               style={{
-                background: "var(--input)",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
+                background: 'var(--input)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)',
               }}
               placeholder={t('placeholders.healthcareTechnology')}
             />
@@ -304,11 +320,15 @@ export default function EditOrganizationPage() {
           <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted/30">
             <div>
               <p className="text-xs text-muted-foreground">{t('organization.totalEmployees')}</p>
-              <p className="text-lg font-semibold">{(organization as any).totalEmployees || organization.employeeCount || 0}</p>
+              <p className="text-lg font-semibold">
+                {(organization as any).totalEmployees || organization.employeeCount || 0}
+              </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">{t('organization.activeEmployees')}</p>
-              <p className="text-lg font-semibold text-green-600">{(organization as any).activeEmployees || organization.employeeCount || 0}</p>
+              <p className="text-lg font-semibold text-green-600">
+                {(organization as any).activeEmployees || organization.employeeCount || 0}
+              </p>
             </div>
           </div>
 
@@ -316,15 +336,17 @@ export default function EditOrganizationPage() {
           <div className="flex gap-3 pt-4">
             <button
               type="button"
-              onClick={() => router.push("/superadmin/organizations")}
+              onClick={() => router.push('/superadmin/organizations')}
               className="flex-1 px-6 py-2.5 rounded-lg border font-semibold transition-all hover:bg-muted"
-              style={{ borderColor: "var(--border)" }}
-            >{t('common.cancel')}</button>
+              style={{ borderColor: 'var(--border)' }}
+            >
+              {t('common.cancel')}
+            </button>
             <button
               type="submit"
               disabled={isLoading}
               className="flex-1 px-6 py-2.5 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
+              style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
             >
               {isLoading ? (
                 <>

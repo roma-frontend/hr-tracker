@@ -49,7 +49,7 @@ export async function loadFaceApiModels() {
 // Detect face and get descriptor
 export async function detectFace(videoElement: HTMLVideoElement) {
   if (!modelsLoaded) {
-    console.log("📦 Models not loaded, loading now...");
+    console.log('📦 Models not loaded, loading now...');
     await loadFaceApiModels();
   }
 
@@ -57,7 +57,7 @@ export async function detectFace(videoElement: HTMLVideoElement) {
 
   // Verify video element is ready
   if (!videoElement || videoElement.readyState < 2) {
-    console.warn("⚠️ Video element not ready for detection");
+    console.warn('⚠️ Video element not ready for detection');
     return null;
   }
 
@@ -71,19 +71,22 @@ export async function detectFace(videoElement: HTMLVideoElement) {
       console.log('👤 Face detection result:', {
         score: detection.detection.score,
         box: detection.detection.box,
-        descriptorLength: detection.descriptor.length
+        descriptorLength: detection.descriptor.length,
       });
     }
 
     return detection;
   } catch (error) {
-    console.error("❌ Error detecting face:", error);
+    console.error('❌ Error detecting face:', error);
     return null;
   }
 }
 
 // Compare two face descriptors
-export async function compareFaces(descriptor1: Float32Array, descriptor2: number[]): Promise<number> {
+export async function compareFaces(
+  descriptor1: Float32Array,
+  descriptor2: number[],
+): Promise<number> {
   const api = await loadFaceApiLibrary();
   const distance = api.euclideanDistance(descriptor1, descriptor2);
   return distance;
@@ -97,7 +100,7 @@ export function isFaceMatch(distance: number, threshold: number = 0.6): boolean 
 // Find best matching face from a list
 export async function findBestMatch(
   inputDescriptor: Float32Array,
-  knownDescriptors: { userId: string; name: string; descriptor: number[] }[]
+  knownDescriptors: { userId: string; name: string; descriptor: number[] }[],
 ): Promise<{ userId: string; name: string; distance: number } | null> {
   if (knownDescriptors.length === 0) return null;
 
@@ -136,12 +139,16 @@ export function createCanvasFromVideo(video: HTMLVideoElement): HTMLCanvasElemen
 // Convert canvas to blob for upload
 export async function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) {
-        resolve(blob);
-      } else {
-        reject(new Error('Failed to convert canvas to blob'));
-      }
-    }, 'image/jpeg', 0.95);
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to convert canvas to blob'));
+        }
+      },
+      'image/jpeg',
+      0.95,
+    );
   });
 }

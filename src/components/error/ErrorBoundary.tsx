@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { AlertTriangle, RefreshCw, Bug, Home, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle, RefreshCw, Bug, Home, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface Props {
   children: ReactNode;
@@ -19,10 +19,10 @@ interface State {
 
 /**
  * 🛡️ ERROR BOUNDARY COMPONENT
- * 
+ *
  * Catches JavaScript errors anywhere in the component tree
  * Prevents whole app crashes and provides user-friendly error UI
- * 
+ *
  * Usage:
  * ```tsx
  * <ErrorBoundary>
@@ -42,10 +42,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("🛡️ ErrorBoundary caught an error:", error, errorInfo);
-    
+    console.error('🛡️ ErrorBoundary caught an error:', error, errorInfo);
+
     // Log to error reporting service (Sentry)
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // @ts-ignore - Sentry might be available
       if (window.Sentry) {
         // @ts-ignore
@@ -68,7 +68,7 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleGoHome = () => {
-    window.location.href = "/";
+    window.location.href = '/';
   };
 
   public render() {
@@ -85,16 +85,14 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8 text-destructive" />
               </div>
-              <CardTitle className="text-xl">
-                Oops! Something went wrong
-              </CardTitle>
+              <CardTitle className="text-xl">Oops! Something went wrong</CardTitle>
               <CardDescription className="text-muted-foreground">
                 We&apos;re sorry for the inconvenience. Please try refreshing the page.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Error details (development only) */}
-              {process.env.NODE_ENV === "development" && this.state.error && (
+              {process.env.NODE_ENV === 'development' && this.state.error && (
                 <div className="p-4 rounded-lg bg-muted/50 text-xs font-mono text-muted-foreground overflow-auto max-h-48">
                   <div className="flex items-start gap-2 mb-2">
                     <Bug className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -116,18 +114,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  onClick={this.handleReload}
-                  className="flex-1"
-                >
+                <Button onClick={this.handleReload} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Reload Page
                 </Button>
-                <Button
-                  onClick={this.handleGoHome}
-                  variant="outline"
-                  className="flex-1"
-                >
+                <Button onClick={this.handleGoHome} variant="outline" className="flex-1">
                   <Home className="w-4 h-4 mr-2" />
                   Go Home
                 </Button>
@@ -135,9 +126,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
               {/* Support link */}
               <div className="text-center text-xs text-muted-foreground">
-                <p>
-                  If the problem persists, please contact support.
-                </p>
+                <p>If the problem persists, please contact support.</p>
               </div>
             </CardContent>
           </Card>
@@ -167,7 +156,7 @@ export function ErrorBoundaryFallback({ error, resetError }: ErrorBoundaryFallba
           </div>
           <CardTitle className="text-xl">Something went wrong</CardTitle>
           <CardDescription className="text-muted-foreground">
-            {error?.message || "An unexpected error occurred"}
+            {error?.message || 'An unexpected error occurred'}
           </CardDescription>
         </CardHeader>
         <CardContent>

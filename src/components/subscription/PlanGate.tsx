@@ -3,7 +3,12 @@
 import React, { useState } from 'react';
 import { Lock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { usePlanFeatures, PLAN_LABELS, type PlanFeatures, type PlanType } from '@/hooks/usePlanFeatures';
+import {
+  usePlanFeatures,
+  PLAN_LABELS,
+  type PlanFeatures,
+  type PlanType,
+} from '@/hooks/usePlanFeatures';
 import { UpgradeModal } from './UpgradeModal';
 import { useTranslation } from 'react-i18next';
 
@@ -71,7 +76,7 @@ export function PlanGate({
   const { t } = useTranslation();
   const { canAccess, requiresPlan, isLoading } = usePlanFeatures();
   const [modalOpen, setModalOpen] = useState(false);
-  
+
   // Use translations as defaults
   const finalTitle = title || t('planGate.upgradeRequired');
   const finalDescription = description || t('planGate.featureNotAvailable');
@@ -91,7 +96,9 @@ export function PlanGate({
       onClose={() => setModalOpen(false)}
       featureTitle={finalTitle}
       featureDescription={finalDescription}
-      recommendedPlan={needed === 'starter' ? 'professional' : needed as Exclude<PlanType, 'starter'>}
+      recommendedPlan={
+        needed === 'starter' ? 'professional' : (needed as Exclude<PlanType, 'starter'>)
+      }
     />
   );
 
@@ -99,9 +106,7 @@ export function PlanGate({
     return (
       <>
         <div className="relative">
-          <div className="pointer-events-none select-none blur-sm opacity-40">
-            {children}
-          </div>
+          <div className="pointer-events-none select-none blur-sm opacity-40">{children}</div>
           <div className="absolute inset-0 flex items-center justify-center bg-[var(--background)]/60 backdrop-blur-sm rounded-2xl">
             <UpgradeCard
               title={finalTitle}
@@ -155,13 +160,7 @@ export function useUpgradeModal() {
     setOpen(true);
   };
 
-  const modal = (
-    <UpgradeModal
-      open={open}
-      onClose={() => setOpen(false)}
-      {...config}
-    />
-  );
+  const modal = <UpgradeModal open={open} onClose={() => setOpen(false)} {...config} />;
 
   return { openModal, modal };
 }

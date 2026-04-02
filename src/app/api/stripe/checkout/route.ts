@@ -17,10 +17,13 @@ export async function POST(req: NextRequest) {
 
     // Starter plan is free, redirect to direct signup
     if (plan === 'starter') {
-      return NextResponse.json({ 
-        error: 'Starter plan is free. Please use the direct signup instead.',
-        redirect: '/register-org/create?plan=starter'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Starter plan is free. Please use the direct signup instead.',
+          redirect: '/register-org/create?plan=starter',
+        },
+        { status: 400 },
+      );
     }
 
     if (!plan || !PLANS[plan]) {
@@ -29,14 +32,19 @@ export async function POST(req: NextRequest) {
 
     const priceId = PLANS[plan].priceId;
     if (!priceId || priceId.startsWith('prod_')) {
-      console.error(`[Stripe Checkout] Invalid price ID for plan "${plan}": "${priceId}". Must be a price_... ID, not a prod_... ID.`);
+      console.error(
+        `[Stripe Checkout] Invalid price ID for plan "${plan}": "${priceId}". Must be a price_... ID, not a prod_... ID.`,
+      );
       return NextResponse.json(
-        { error: `Stripe price ID for plan "${plan}" is not configured correctly. Expected a price_... ID.` },
-        { status: 500 }
+        {
+          error: `Stripe price ID for plan "${plan}" is not configured correctly. Expected a price_... ID.`,
+        },
+        { status: 500 },
       );
     }
 
-    const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000';
+    const origin =
+      req.headers.get('origin') ?? process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000';
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',

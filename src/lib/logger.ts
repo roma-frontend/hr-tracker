@@ -1,6 +1,6 @@
 /**
  * Professional Logging System
- * 
+ *
  * Replaces console.log with structured logging
  * Features:
  * - Log levels (debug, info, warn, error)
@@ -201,21 +201,23 @@ export const log = {
   debug: (message: string, context?: LogContext) => logger.debug(message, context),
   info: (message: string, context?: LogContext) => logger.info(message, context),
   warn: (message: string, context?: LogContext) => logger.warn(message, context),
-  error: (message: string, error?: Error, context?: LogContext) => logger.error(message, error, context),
-  
+  error: (message: string, error?: Error, context?: LogContext) =>
+    logger.error(message, error, context),
+
   // Performance
   time: (label: string) => logger.startTimer(label),
-  
+
   // API
   api: {
-    call: (method: string, url: string, context?: LogContext) => logger.apiCall(method, url, context),
-    response: (method: string, url: string, status: number, context?: LogContext) => 
+    call: (method: string, url: string, context?: LogContext) =>
+      logger.apiCall(method, url, context),
+    response: (method: string, url: string, status: number, context?: LogContext) =>
       logger.apiResponse(method, url, status, context),
   },
-  
+
   // User actions
   user: (action: string, context?: LogContext) => logger.userAction(action, context),
-  
+
   // Component lifecycle
   component: (name: string, lifecycle: 'mount' | 'unmount' | 'update', context?: LogContext) =>
     logger.component(name, lifecycle, context),

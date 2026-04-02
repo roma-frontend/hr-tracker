@@ -9,36 +9,34 @@ export async function POST(req: NextRequest) {
   try {
     const { userId, organizationId, driverId, startTime, endTime, tripInfo } = await req.json();
 
-    console.log('[book-driver] Received request:', { userId, organizationId, driverId, startTime, endTime, tripInfo });
+    console.log('[book-driver] Received request:', {
+      userId,
+      organizationId,
+      driverId,
+      startTime,
+      endTime,
+      tripInfo,
+    });
 
     if (!userId || !organizationId || !driverId || !startTime || !endTime || !tripInfo) {
       console.error('[book-driver] Missing required fields');
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Validate IDs are proper Convex IDs
     if (!userId || !userId.startsWith('jn')) {
       console.error('[book-driver] Invalid userId:', userId);
-      return NextResponse.json(
-        { error: 'Invalid userId format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid userId format' }, { status: 400 });
     }
     if (!organizationId || (!organizationId.startsWith('jn') && !organizationId.startsWith('n5'))) {
       console.error('[book-driver] Invalid organizationId:', organizationId);
-      return NextResponse.json(
-        { error: 'Invalid organizationId format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid organizationId format' }, { status: 400 });
     }
     if (!driverId || !driverId.startsWith('jn')) {
       console.error('[book-driver] Invalid driverId:', driverId);
       return NextResponse.json(
         { error: `Invalid driverId format. Must start with "jn", got: "${driverId}"` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -46,18 +44,18 @@ export async function POST(req: NextRequest) {
     // CONFLICT DETECTION — Check driver availability
     // ═══════════════════════════════════════════════════════════════
     const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<"organizations">,
-      requestType: "driver" as const,
-      userId: userId as Id<"users">,
+      organizationId: organizationId as Id<'organizations'>,
+      requestType: 'driver' as const,
+      userId: userId as Id<'users'>,
       startDate: new Date(startTime).getTime(),
       endDate: new Date(endTime).getTime(),
-      metadata: { driverId: driverId as Id<"drivers"> },
+      metadata: { driverId: driverId as Id<'drivers'> },
     });
 
     // Если есть критические конфликты (водитель занят)
     if (conflictResult.hasCritical) {
-      const criticalConflicts = conflictResult.conflicts.filter(c => c.severity === 'critical');
-      
+      const criticalConflicts = conflictResult.conflicts.filter((c) => c.severity === 'critical');
+
       return NextResponse.json({
         success: false,
         conflict: true,
@@ -65,7 +63,7 @@ export async function POST(req: NextRequest) {
         conflictCount: conflictResult.conflicts.length,
         message: buildDriverConflictMessage(criticalConflicts, startTime, endTime),
         conflicts: conflictResult.conflicts,
-        suggestion: "Please choose a different time or select another driver.",
+        suggestion: 'Please choose a different time or select another driver.',
       });
     }
 
@@ -73,9 +71,9 @@ export async function POST(req: NextRequest) {
     // CREATE DRIVER REQUEST
     // ═══════════════════════════════════════════════════════════════
     const requestId = await convex.mutation(api.drivers.requestDriver, {
-      organizationId: organizationId as Id<"organizations">,
-      requesterId: userId as Id<"users">,
-      driverId: driverId as Id<"drivers">,
+      organizationId: organizationId as Id<'organizations'>,
+      requesterId: userId as Id<'users'>,
+      driverId: driverId as Id<'drivers'>,
       startTime,
       endTime,
       tripInfo: {
@@ -93,14 +91,11 @@ export async function POST(req: NextRequest) {
       message: '✅ Driver request submitted successfully!',
       success: true,
       requestId,
-      hasWarnings: conflictResult.conflicts.filter(c => c.severity === 'warning').length > 0,
+      hasWarnings: conflictResult.conflicts.filter((c) => c.severity === 'warning').length > 0,
     });
   } catch (error: any) {
     console.error('[book-driver] Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to book driver' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to book driver' }, { status: 500 });
   }
 }
 

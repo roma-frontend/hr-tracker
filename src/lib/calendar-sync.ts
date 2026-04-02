@@ -18,22 +18,22 @@ export interface CalendarEvent {
  * Generate iCal format from events
  */
 export function generateICalendar(events: CalendarEvent[]): string {
-  let icsContent = "BEGIN:VCALENDAR\n";
-  icsContent += "VERSION:2.0\n";
-  icsContent += "PRODID:-//Office Leave Management//EN\n";
-  icsContent += "CALSCALE:GREGORIAN\n";
-  icsContent += "METHOD:PUBLISH\n";
-  icsContent += "X-WR-CALNAME:Company Leaves\n";
-  icsContent += "X-WR-TIMEZONE:UTC\n";
-  icsContent += "X-WR-CALDESC:Employee leave schedule\n";
+  let icsContent = 'BEGIN:VCALENDAR\n';
+  icsContent += 'VERSION:2.0\n';
+  icsContent += 'PRODID:-//Office Leave Management//EN\n';
+  icsContent += 'CALSCALE:GREGORIAN\n';
+  icsContent += 'METHOD:PUBLISH\n';
+  icsContent += 'X-WR-CALNAME:Company Leaves\n';
+  icsContent += 'X-WR-TIMEZONE:UTC\n';
+  icsContent += 'X-WR-CALDESC:Employee leave schedule\n';
 
   events.forEach((event) => {
-    const startDate = event.startDate.replace(/-/g, "");
-    const endDate = event.endDate.replace(/-/g, "");
+    const startDate = event.startDate.replace(/-/g, '');
+    const endDate = event.endDate.replace(/-/g, '');
     const uid = `${event.id}@office.company.com`;
-    const timestamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    const timestamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
-    icsContent += "BEGIN:VEVENT\n";
+    icsContent += 'BEGIN:VEVENT\n';
     icsContent += `UID:${uid}\n`;
     icsContent += `DTSTAMP:${timestamp}\n`;
     icsContent += `DTSTART;VALUE=DATE:${startDate}\n`;
@@ -41,12 +41,12 @@ export function generateICalendar(events: CalendarEvent[]): string {
     icsContent += `SUMMARY:${escapeICalText(event.title)}\n`;
     icsContent += `DESCRIPTION:${escapeICalText(event.description)}\\nDepartment: ${escapeICalText(event.department)}\\nType: ${escapeICalText(event.type)}\n`;
     icsContent += `LOCATION:${escapeICalText(event.department)}\n`;
-    icsContent += "STATUS:CONFIRMED\n";
-    icsContent += "TRANSP:OPAQUE\n";
-    icsContent += "END:VEVENT\n";
+    icsContent += 'STATUS:CONFIRMED\n';
+    icsContent += 'TRANSP:OPAQUE\n';
+    icsContent += 'END:VEVENT\n';
   });
 
-  icsContent += "END:VCALENDAR";
+  icsContent += 'END:VCALENDAR';
   return icsContent;
 }
 
@@ -55,19 +55,19 @@ export function generateICalendar(events: CalendarEvent[]): string {
  */
 function escapeICalText(text: string): string {
   return text
-    .replace(/\\/g, "\\\\")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,")
-    .replace(/\n/g, "\\n");
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
 }
 
 /**
  * Download iCal file
  */
 export function downloadICalFile(icsContent: string, filename: string) {
-  const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
   const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);
@@ -82,16 +82,16 @@ export function downloadICalFile(icsContent: string, filename: string) {
 export function getGoogleCalendarAuthUrl(redirectUri: string): string {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   if (!clientId) {
-    throw new Error("Google Client ID not configured");
+    throw new Error('Google Client ID not configured');
   }
 
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
-    response_type: "code",
-    scope: "https://www.googleapis.com/auth/calendar.events",
-    access_type: "offline",
-    prompt: "consent",
+    response_type: 'code',
+    scope: 'https://www.googleapis.com/auth/calendar.events',
+    access_type: 'offline',
+    prompt: 'consent',
   });
 
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
@@ -103,15 +103,15 @@ export function getGoogleCalendarAuthUrl(redirectUri: string): string {
 export function getOutlookAuthUrl(redirectUri: string): string {
   const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID;
   if (!clientId) {
-    throw new Error("Microsoft Client ID not configured");
+    throw new Error('Microsoft Client ID not configured');
   }
 
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
-    response_type: "code",
-    scope: "Calendars.ReadWrite offline_access",
-    response_mode: "query",
+    response_type: 'code',
+    scope: 'Calendars.ReadWrite offline_access',
+    response_mode: 'query',
   });
 
   return `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?${params.toString()}`;
@@ -120,10 +120,7 @@ export function getOutlookAuthUrl(redirectUri: string): string {
 /**
  * Create Google Calendar event
  */
-export async function createGoogleCalendarEvent(
-  accessToken: string,
-  event: CalendarEvent
-) {
+export async function createGoogleCalendarEvent(accessToken: string, event: CalendarEvent) {
   const calendarEvent = {
     summary: event.title,
     description: `${event.description}\n\nDepartment: ${event.department}\nType: ${event.type}\nEmployee: ${event.userName}`,
@@ -136,20 +133,17 @@ export async function createGoogleCalendarEvent(
     colorId: getColorIdForLeaveType(event.type),
   };
 
-  const response = await fetch(
-    "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(calendarEvent),
-    }
-  );
+  const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(calendarEvent),
+  });
 
   if (!response.ok) {
-    throw new Error("Failed to create Google Calendar event");
+    throw new Error('Failed to create Google Calendar event');
   }
 
   return response.json();
@@ -158,41 +152,35 @@ export async function createGoogleCalendarEvent(
 /**
  * Create Outlook Calendar event
  */
-export async function createOutlookCalendarEvent(
-  accessToken: string,
-  event: CalendarEvent
-) {
+export async function createOutlookCalendarEvent(accessToken: string, event: CalendarEvent) {
   const calendarEvent = {
     subject: event.title,
     body: {
-      contentType: "Text",
+      contentType: 'Text',
       content: `${event.description}\n\nDepartment: ${event.department}\nType: ${event.type}\nEmployee: ${event.userName}`,
     },
     start: {
       dateTime: `${event.startDate}T00:00:00`,
-      timeZone: "UTC",
+      timeZone: 'UTC',
     },
     end: {
       dateTime: `${event.endDate}T23:59:59`,
-      timeZone: "UTC",
+      timeZone: 'UTC',
     },
     isAllDay: true,
   };
 
-  const response = await fetch(
-    "https://graph.microsoft.com/v1.0/me/events",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(calendarEvent),
-    }
-  );
+  const response = await fetch('https://graph.microsoft.com/v1.0/me/events', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(calendarEvent),
+  });
 
   if (!response.ok) {
-    throw new Error("Failed to create Outlook Calendar event");
+    throw new Error('Failed to create Outlook Calendar event');
   }
 
   return response.json();
@@ -203,12 +191,12 @@ export async function createOutlookCalendarEvent(
  */
 function getColorIdForLeaveType(type: string): string {
   const colorMap: Record<string, string> = {
-    paid: "9", // Blue
-    sick: "11", // Red
-    family: "5", // Yellow
-    unpaid: "8", // Gray
+    paid: '9', // Blue
+    sick: '11', // Red
+    family: '5', // Yellow
+    unpaid: '8', // Gray
   };
-  return colorMap[type.toLowerCase()] || "1"; // Default: Lavender
+  return colorMap[type.toLowerCase()] || '1'; // Default: Lavender
 }
 
 /**
@@ -216,34 +204,35 @@ function getColorIdForLeaveType(type: string): string {
  */
 export async function exchangeCodeForTokens(
   code: string,
-  provider: "google" | "outlook",
-  callbackRedirectUri?: string
+  provider: 'google' | 'outlook',
+  callbackRedirectUri?: string,
 ): Promise<{
   access_token: string;
   refresh_token?: string;
   expires_in?: number;
 }> {
-  if (provider === "google") {
-    const tokenEndpoint = "https://oauth2.googleapis.com/token";
+  if (provider === 'google') {
+    const tokenEndpoint = 'https://oauth2.googleapis.com/token';
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`;
+    const redirectUri =
+      callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`;
 
     if (!clientId || !clientSecret) {
-      throw new Error("Google OAuth credentials not configured");
+      throw new Error('Google OAuth credentials not configured');
     }
 
     const response = await fetch(tokenEndpoint, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
         code,
         client_id: clientId,
         client_secret: clientSecret,
         redirect_uri: redirectUri,
-        grant_type: "authorization_code",
+        grant_type: 'authorization_code',
       }),
     });
 
@@ -255,26 +244,27 @@ export async function exchangeCodeForTokens(
     return response.json();
   } else {
     // Outlook
-    const tokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+    const tokenEndpoint = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
     const clientId = process.env.MICROSOFT_CLIENT_ID;
     const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
-    const redirectUri = callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/outlook/callback`;
+    const redirectUri =
+      callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/outlook/callback`;
 
     if (!clientId || !clientSecret) {
-      throw new Error("Microsoft OAuth credentials not configured");
+      throw new Error('Microsoft OAuth credentials not configured');
     }
 
     const response = await fetch(tokenEndpoint, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
         code,
         client_id: clientId,
         client_secret: clientSecret,
         redirect_uri: redirectUri,
-        grant_type: "authorization_code",
+        grant_type: 'authorization_code',
       }),
     });
 

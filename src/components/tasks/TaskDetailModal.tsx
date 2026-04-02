@@ -1,98 +1,116 @@
-﻿"use client";
+﻿'use client';
 
-import React, { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { useTranslation } from "react-i18next";
-import { api } from "../../../convex/_generated/api";
-import { TaskAttachments } from "./TaskAttachments";
-import { Button } from "@/components/ui/button";
-import type { Id } from "../../../convex/_generated/dataModel";
+import React, { useState } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../../convex/_generated/api';
+import { TaskAttachments } from './TaskAttachments';
+import { Button } from '@/components/ui/button';
+import type { Id } from '../../../convex/_generated/dataModel';
 
-type Status = "pending" | "in_progress" | "review" | "completed" | "cancelled";
-type Priority = "low" | "medium" | "high" | "urgent";
+type Status = 'pending' | 'in_progress' | 'review' | 'completed' | 'cancelled';
+type Priority = 'low' | 'medium' | 'high' | 'urgent';
 
 const STATUS_STYLES: Record<Status, { color: string; bg: string; dot: string }> = {
-  pending:     { color: "text-[var(--text-muted)]", bg: "bg-[var(--background-subtle)]", dot: "bg-[var(--text-muted)]" },
-  in_progress: { color: "text-blue-400",            bg: "bg-blue-500/10",                dot: "bg-blue-500" },
-  review:      { color: "text-amber-400",           bg: "bg-amber-500/10",               dot: "bg-amber-500" },
-  completed:   { color: "text-emerald-400",         bg: "bg-emerald-500/10",             dot: "bg-emerald-500" },
-  cancelled:   { color: "text-rose-400",            bg: "bg-rose-500/10",                dot: "bg-rose-400" },
+  pending: {
+    color: 'text-[var(--text-muted)]',
+    bg: 'bg-[var(--background-subtle)]',
+    dot: 'bg-[var(--text-muted)]',
+  },
+  in_progress: { color: 'text-blue-400', bg: 'bg-blue-500/10', dot: 'bg-blue-500' },
+  review: { color: 'text-amber-400', bg: 'bg-amber-500/10', dot: 'bg-amber-500' },
+  completed: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', dot: 'bg-emerald-500' },
+  cancelled: { color: 'text-rose-400', bg: 'bg-rose-500/10', dot: 'bg-rose-400' },
 };
 
 const PRIORITY_STYLES: Record<Priority, { color: string; bg: string; icon: string }> = {
-  low:    { color: "text-[var(--text-muted)]", bg: "bg-[var(--background-subtle)]", icon: "↓" },
-  medium: { color: "text-blue-400",            bg: "bg-blue-500/10",                icon: "→" },
-  high:   { color: "text-orange-400",          bg: "bg-orange-500/10",              icon: "↑" },
-  urgent: { color: "text-rose-400",            bg: "bg-rose-500/10",                icon: "⚡" },
+  low: { color: 'text-[var(--text-muted)]', bg: 'bg-[var(--background-subtle)]', icon: '↓' },
+  medium: { color: 'text-blue-400', bg: 'bg-blue-500/10', icon: '→' },
+  high: { color: 'text-orange-400', bg: 'bg-orange-500/10', icon: '↑' },
+  urgent: { color: 'text-rose-400', bg: 'bg-rose-500/10', icon: '⚡' },
 };
 
 function getStatusLabel(status: Status, t: (key: string) => string): string {
   const keys: Record<Status, string> = {
-    pending: "tasksClient.pending",
-    in_progress: "tasksClient.inProgress",
-    review: "tasksClient.inReview",
-    completed: "tasksClient.completed",
-    cancelled: "tasksClient.cancelled",
+    pending: 'tasksClient.pending',
+    in_progress: 'tasksClient.inProgress',
+    review: 'tasksClient.inReview',
+    completed: 'tasksClient.completed',
+    cancelled: 'tasksClient.cancelled',
   };
   return t(keys[status]);
 }
 
 function getPriorityLabel(priority: Priority, t: (key: string) => string): string {
   const keys: Record<Priority, string> = {
-    low: "tasksClient.low",
-    medium: "tasksClient.medium",
-    high: "tasksClient.high",
-    urgent: "tasksClient.urgent",
+    low: 'tasksClient.low',
+    medium: 'tasksClient.medium',
+    high: 'tasksClient.high',
+    urgent: 'tasksClient.urgent',
   };
   return t(keys[priority]);
 }
 
 // Status transitions available per role
 const EMPLOYEE_TRANSITIONS: Record<Status, Status[]> = {
-  pending:     ["in_progress"],
-  in_progress: ["review", "pending"],
-  review:      ["in_progress"],
-  completed:   [],
-  cancelled:   [],
+  pending: ['in_progress'],
+  in_progress: ['review', 'pending'],
+  review: ['in_progress'],
+  completed: [],
+  cancelled: [],
 };
 
 const MANAGER_TRANSITIONS: Record<Status, Status[]> = {
-  pending:     ["in_progress", "cancelled"],
-  in_progress: ["review", "pending", "cancelled"],
-  review:      ["completed", "in_progress", "cancelled"],
-  completed:   ["in_progress"],
-  cancelled:   ["pending"],
+  pending: ['in_progress', 'cancelled'],
+  in_progress: ['review', 'pending', 'cancelled'],
+  review: ['completed', 'in_progress', 'cancelled'],
+  completed: ['in_progress'],
+  cancelled: ['pending'],
 };
 
 function Avatar({ name, url }: { name: string; url?: string | null }) {
-  const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
   return (
     <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white text-xs bg-gradient-to-br from-blue-500 to-sky-500">
-      {url ? <img src={url} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : initials}
+      {url ? (
+        <img
+          src={url}
+          alt={name}
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      ) : (
+        initials
+      )}
     </div>
   );
 }
 
 interface Props {
   task: any;
-  currentUserId: Id<"users">;
-  userRole: "admin" | "supervisor" | "employee";
+  currentUserId: Id<'users'>;
+  userRole: 'admin' | 'supervisor' | 'employee';
   onClose: () => void;
 }
 
 export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Props) {
   const { t } = useTranslation();
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
-  const [editDesc, setEditDesc] = useState(task.description ?? "");
+  const [editDesc, setEditDesc] = useState(task.description ?? '');
   const [editPriority, setEditPriority] = useState<Priority>(task.priority);
   const [editDeadline, setEditDeadline] = useState(
-    task.deadline ? new Date(task.deadline).toISOString().split("T")[0] : ""
+    task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : '',
   );
 
-  const canManage = userRole === "admin" || userRole === "supervisor";
+  const canManage = userRole === 'admin' || userRole === 'supervisor';
   const isAssignee = task.assignedTo === currentUserId;
 
   const comments = useQuery(api.tasks.getTaskComments, { taskId: task._id });
@@ -144,17 +162,16 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
     if (!comment.trim()) return;
     setSubmitting(true);
     await addComment({ taskId: task._id, authorId: currentUserId, content: comment.trim() });
-    setComment("");
+    setComment('');
     setSubmitting(false);
   };
 
-  const deadlinePassed = task.deadline && task.deadline < Date.now() && task.status !== "completed";
+  const deadlinePassed = task.deadline && task.deadline < Date.now() && task.status !== 'completed';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border)]">
-
         {/* Header */}
         <div className="px-6 py-5 flex-shrink-0">
           <div className="flex items-start justify-between gap-3">
@@ -162,7 +179,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               {editMode ? (
                 <input
                   value={editTitle}
-                  onChange={e => setEditTitle(e.target.value)}
+                  onChange={(e) => setEditTitle(e.target.value)}
                   className="w-full bg-white/20 text-white placeholder-white/60 rounded-xl px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-white/50"
                 />
               ) : (
@@ -176,7 +193,9 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                   {priorityCfg.icon} {priorityLabel}
                 </span>
                 {deadlinePassed && (
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/80 text-white">⏰ Overdue</span>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/80 text-white">
+                    ⏰ Overdue
+                  </span>
                 )}
               </div>
             </div>
@@ -194,8 +213,12 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               )}
               {editMode && (
                 <>
-                  <Button onClick={handleSaveEdit} variant="default" size="sm">{t('buttons.save')}</Button>
-                  <Button onClick={() => setEditMode(false)} variant="ghost" size="sm">{t('buttons.cancel')}</Button>
+                  <Button onClick={handleSaveEdit} variant="default" size="sm">
+                    {t('buttons.save')}
+                  </Button>
+                  <Button onClick={() => setEditMode(false)} variant="ghost" size="sm">
+                    {t('buttons.cancel')}
+                  </Button>
                 </>
               )}
               {canManage && !editMode && (
@@ -224,20 +247,23 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
-
             {/* Description */}
             <div>
-              <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Description</h3>
+              <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                Description
+              </h3>
               {editMode ? (
                 <textarea
                   value={editDesc}
-                  onChange={e => setEditDesc(e.target.value)}
+                  onChange={(e) => setEditDesc(e.target.value)}
                   rows={3}
                   className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
                 />
               ) : (
                 <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
-                  {task.description || <span className="text-[var(--text-muted)] italic">No description</span>}
+                  {task.description || (
+                    <span className="text-[var(--text-muted)] italic">No description</span>
+                  )}
                 </p>
               )}
             </div>
@@ -245,48 +271,87 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Meta info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Assigned To</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                  Assigned To
+                </h3>
                 <div className="flex items-center gap-2">
-                  <Avatar name={task.assignedToUser?.name ?? "?"} url={task.assignedToUser?.avatarUrl} />
+                  <Avatar
+                    name={task.assignedToUser?.name ?? '?'}
+                    url={task.assignedToUser?.avatarUrl}
+                  />
                   <div>
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{task.assignedToUser?.name ?? "—"}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{task.assignedToUser?.position ?? ""}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                      {task.assignedToUser?.name ?? '—'}
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {task.assignedToUser?.position ?? ''}
+                    </p>
                   </div>
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Assigned By</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                  Assigned By
+                </h3>
                 <div className="flex items-center gap-2">
-                  <Avatar name={task.assignedByUser?.name ?? "?"} url={task.assignedByUser?.avatarUrl} />
+                  <Avatar
+                    name={task.assignedByUser?.name ?? '?'}
+                    url={task.assignedByUser?.avatarUrl}
+                  />
                   <div>
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{task.assignedByUser?.name ?? "—"}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{task.assignedByUser?.role ?? ""}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                      {task.assignedByUser?.name ?? '—'}
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {task.assignedByUser?.role ?? ''}
+                    </p>
                   </div>
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Priority</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                  Priority
+                </h3>
                 {editMode ? (
-                  <select value={editPriority} onChange={e => setEditPriority(e.target.value as Priority)} className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  <select
+                    value={editPriority}
+                    onChange={(e) => setEditPriority(e.target.value as Priority)}
+                    className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
                     <option value="low">↓ Low</option>
                     <option value="medium">→ Medium</option>
                     <option value="high">↑ High</option>
                     <option value="urgent">⚡ Urgent</option>
                   </select>
                 ) : (
-                  <span className={`text-sm font-semibold px-3 py-1 rounded-full ${priorityCfg.bg} ${priorityCfg.color}`}>
+                  <span
+                    className={`text-sm font-semibold px-3 py-1 rounded-full ${priorityCfg.bg} ${priorityCfg.color}`}
+                  >
                     {priorityCfg.icon} {priorityLabel}
                   </span>
                 )}
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Deadline</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                  Deadline
+                </h3>
                 {editMode ? (
-                  <input type="date" value={editDeadline} onChange={e => setEditDeadline(e.target.value)} className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                  <input
+                    type="date"
+                    value={editDeadline}
+                    onChange={(e) => setEditDeadline(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
                 ) : task.deadline ? (
-                  <p className={`text-sm font-medium ${deadlinePassed ? "text-rose-400" : "text-[var(--text-primary)]"}`}>
-                    {deadlinePassed ? "⏰ " : "📅 "}
-                    {new Date(task.deadline).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                  <p
+                    className={`text-sm font-medium ${deadlinePassed ? 'text-rose-400' : 'text-[var(--text-primary)]'}`}
+                  >
+                    {deadlinePassed ? '⏰ ' : '📅 '}
+                    {new Date(task.deadline).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
                   </p>
                 ) : (
                   <p className="text-sm text-[var(--text-muted)] italic">No deadline</p>
@@ -297,10 +362,17 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Tags */}
             {task.tags && task.tags.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Tags</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                  Tags
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {task.tags.map((tag: any) => (
-                    <span key={tag} className="text-xs bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-medium">#{tag}</span>
+                    <span
+                      key={tag}
+                      className="text-xs bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-medium"
+                    >
+                      #{tag}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -309,9 +381,11 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Status transitions */}
             {transitions.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Move To</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                  Move To
+                </h3>
                 <div className="flex flex-wrap gap-2">
-                  {transitions.map(st => {
+                  {transitions.map((st) => {
                     const cfg = STATUS_STYLES[st];
                     return (
                       <button
@@ -331,7 +405,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Attachments */}
             <div>
               <TaskAttachments
-                taskId={task._id as Id<"tasks">}
+                taskId={task._id as Id<'tasks'>}
                 attachments={task.attachments ?? []}
                 currentUserId={currentUserId}
                 canUpload={true}
@@ -341,21 +415,34 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Comments */}
             <div>
               <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
-                Comments {comments ? `(${comments.length})` : ""}
+                Comments {comments ? `(${comments.length})` : ''}
               </h3>
               <div className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-1">
                 {comments?.length === 0 && (
-                  <p className="text-sm text-[var(--text-muted)] italic text-center py-3">No comments yet</p>
+                  <p className="text-sm text-[var(--text-muted)] italic text-center py-3">
+                    No comments yet
+                  </p>
                 )}
-                {comments?.map(c => (
+                {comments?.map((c) => (
                   <div key={c._id} className="flex gap-3">
-                    <Avatar name={c.author?.name ?? "?"} url={(c.author as any)?.avatarUrl} />
+                    <Avatar name={c.author?.name ?? '?'} url={(c.author as any)?.avatarUrl} />
                     <div className="flex-1 bg-[var(--background-subtle)] rounded-2xl px-4 py-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold text-[var(--text-primary)]">{c.author?.name}</span>
-                        <span className="text-xs text-[var(--text-muted)]">{new Date(c.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                        <span className="text-xs font-semibold text-[var(--text-primary)]">
+                          {c.author?.name}
+                        </span>
+                        <span className="text-xs text-[var(--text-muted)]">
+                          {new Date(c.createdAt).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
                       </div>
-                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{c.content}</p>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                        {c.content}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -365,7 +452,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               <form onSubmit={handleComment} className="flex gap-2">
                 <input
                   value={comment}
-                  onChange={e => setComment(e.target.value)}
+                  onChange={(e) => setComment(e.target.value)}
                   placeholder={t('placeholders.addAComment')}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-[var(--text-muted)]"
                 />

@@ -1,6 +1,6 @@
 /**
  * Translation System Tests
- * 
+ *
  * These tests verify that all translation files are in sync and
  * that no translation keys are missing across languages.
  */
@@ -18,15 +18,9 @@ describe('Translation System', () => {
 
   beforeAll(() => {
     // Load all translation files
-    enTranslations = JSON.parse(
-      fs.readFileSync(path.join(LOCALES_DIR, 'en.json'), 'utf-8')
-    );
-    ruTranslations = JSON.parse(
-      fs.readFileSync(path.join(LOCALES_DIR, 'ru.json'), 'utf-8')
-    );
-    hyTranslations = JSON.parse(
-      fs.readFileSync(path.join(LOCALES_DIR, 'hy.json'), 'utf-8')
-    );
+    enTranslations = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, 'en.json'), 'utf-8'));
+    ruTranslations = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, 'ru.json'), 'utf-8'));
+    hyTranslations = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, 'hy.json'), 'utf-8'));
   });
 
   describe('File Structure', () => {
@@ -74,8 +68,8 @@ describe('Translation System', () => {
       const enKeys = getAllKeys(enTranslations);
       const ruKeys = getAllKeys(ruTranslations);
 
-      const missingInRu = enKeys.filter(key => !ruKeys.includes(key));
-      const extraInRu = ruKeys.filter(key => !enKeys.includes(key));
+      const missingInRu = enKeys.filter((key) => !ruKeys.includes(key));
+      const extraInRu = ruKeys.filter((key) => !enKeys.includes(key));
 
       expect(missingInRu).toEqual([]);
       expect(extraInRu).toEqual([]);
@@ -85,8 +79,8 @@ describe('Translation System', () => {
       const enKeys = getAllKeys(enTranslations);
       const hyKeys = getAllKeys(hyTranslations);
 
-      const missingInHy = enKeys.filter(key => !hyKeys.includes(key));
-      const extraInHy = hyKeys.filter(key => !enKeys.includes(key));
+      const missingInHy = enKeys.filter((key) => !hyKeys.includes(key));
+      const extraInHy = hyKeys.filter((key) => !enKeys.includes(key));
 
       expect(missingInHy).toEqual([]);
       expect(extraInHy).toEqual([]);
@@ -133,8 +127,8 @@ describe('Translation System', () => {
       const ruText = JSON.stringify(ruTranslations).toLowerCase();
 
       // This is a simple heuristic - adjust as needed
-      const suspiciousMatches = commonEnglishWords.filter(word =>
-        ruText.includes(`"${word}"`) || ruText.includes(` ${word} `)
+      const suspiciousMatches = commonEnglishWords.filter(
+        (word) => ruText.includes(`"${word}"`) || ruText.includes(` ${word} `),
       );
 
       // Some technical terms might legitimately appear
@@ -181,10 +175,10 @@ describe('Translation System', () => {
       'errors',
       'success',
       'placeholders',
-      'ui'
+      'ui',
     ];
 
-    requiredSections.forEach(section => {
+    requiredSections.forEach((section) => {
       it(`should have '${section}' section in all languages`, () => {
         expect(enTranslations[section]).toBeDefined();
         expect(ruTranslations[section]).toBeDefined();
@@ -200,10 +194,10 @@ describe('Translation System', () => {
         'hrMetricsOverview',
         'pendingLeaves',
         'approvedLeaves',
-        'approvalRate'
+        'approvalRate',
       ];
 
-      requiredKeys.forEach(key => {
+      requiredKeys.forEach((key) => {
         expect(enTranslations.analytics?.[key]).toBeDefined();
         expect(ruTranslations.analytics?.[key]).toBeDefined();
         expect(hyTranslations.analytics?.[key]).toBeDefined();

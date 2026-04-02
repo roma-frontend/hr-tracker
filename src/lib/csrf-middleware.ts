@@ -23,27 +23,27 @@ export function withCsrfProtection(handler: (req: NextRequest) => Promise<NextRe
     const host = req.headers.get('host');
 
     if (!referer && !origin) {
-      return new NextResponse(
-        JSON.stringify({ error: 'CSRF validation failed: Missing origin' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new NextResponse(JSON.stringify({ error: 'CSRF validation failed: Missing origin' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Verify origin matches
     if (origin && !origin.includes(host || '')) {
-      return new NextResponse(
-        JSON.stringify({ error: 'CSRF validation failed: Invalid origin' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new NextResponse(JSON.stringify({ error: 'CSRF validation failed: Invalid origin' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Verify CSRF token
     const isValid = verifyCsrfFromRequest(req);
     if (!isValid) {
-      return new NextResponse(
-        JSON.stringify({ error: 'CSRF validation failed: Invalid token' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new NextResponse(JSON.stringify({ error: 'CSRF validation failed: Invalid token' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // CSRF validation passed, proceed to handler

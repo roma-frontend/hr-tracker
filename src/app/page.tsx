@@ -1,7 +1,7 @@
 'use client';
 
-import LandingClient from "@/components/landing/LandingClient";
-import ScrollToTop from "@/components/landing/ScrollToTop";
+import LandingClient from '@/components/landing/LandingClient';
+import ScrollToTop from '@/components/landing/ScrollToTop';
 
 export default function RootPage() {
   return (

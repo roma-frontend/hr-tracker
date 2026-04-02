@@ -12,29 +12,24 @@
 // ══════════════════════════════════════════════════════════════
 // FACE-API.JS (~2MB) — dynamic import
 // ══════════════════════════════════════════════════════════════
-export const loadFaceApi = () =>
-  import('face-api.js').then((mod) => mod);
+export const loadFaceApi = () => import('face-api.js').then((mod) => mod);
 
 // ══════════════════════════════════════════════════════════════
 // THREE.JS — dynamic import for 3D components
 // ══════════════════════════════════════════════════════════════
-export const loadThree = () =>
-  import('three').then((mod) => mod);
+export const loadThree = () => import('three').then((mod) => mod);
 
 // ══════════════════════════════════════════════════════════════
 // PDFMAKE — dynamic import for PDF generation
 // ══════════════════════════════════════════════════════════════
-export const loadPdfMake = () =>
-  import('pdfmake/build/pdfmake').then((mod) => mod.default || mod);
+export const loadPdfMake = () => import('pdfmake/build/pdfmake').then((mod) => mod.default || mod);
 
 // ══════════════════════════════════════════════════════════════
 // LEAFLET — dynamic import for maps
 // ══════════════════════════════════════════════════════════════
-export const loadLeaflet = () =>
-  import('leaflet').then((mod) => mod.default || mod);
+export const loadLeaflet = () => import('leaflet').then((mod) => mod.default || mod);
 
 // ══════════════════════════════════════════════════════════════
 // QRCODE — dynamic import
 // ══════════════════════════════════════════════════════════════
-export const loadQRCode = () =>
-  import('qrcode').then((mod) => mod.default || mod);
+export const loadQRCode = () => import('qrcode').then((mod) => mod.default || mod);

@@ -1,41 +1,36 @@
 /**
  * Driver Request Modal
- * 
+ *
  * Allows users to request a driver for a specific date/time
  * from the calendar view
  */
 
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
-import { Car, MapPin, Clock, Users, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { DriverMap } from "@/components/drivers/DriverMap";
-import { PlaceAutocomplete } from "@/components/drivers/PlaceAutocomplete";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from '@/components/ui/select';
+import { toast } from 'sonner';
+import { Car, MapPin, Clock, Users, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { DriverMap } from '@/components/drivers/DriverMap';
+import { PlaceAutocomplete } from '@/components/drivers/PlaceAutocomplete';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface DriverRequestModalProps {
   open: boolean;
@@ -43,19 +38,15 @@ interface DriverRequestModalProps {
   selectedDate?: Date;
 }
 
-export function DriverRequestModal({
-  open,
-  onOpenChange,
-  selectedDate,
-}: DriverRequestModalProps) {
+export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverRequestModalProps) {
   const { t } = useTranslation();
   const currentUser = useQuery(api.users.getCurrentUser, { email: undefined });
-  const userId = currentUser?._id as Id<"users"> | undefined;
-  const organizationId = currentUser?.organizationId as Id<"organizations"> | undefined;
+  const userId = currentUser?._id as Id<'users'> | undefined;
+  const organizationId = currentUser?.organizationId as Id<'organizations'> | undefined;
 
   const availableDrivers = useQuery(
     api.drivers.getAvailableDrivers,
-    organizationId ? { organizationId } : "skip"
+    organizationId ? { organizationId } : 'skip',
   );
 
   const requestDriver = useMutation(api.drivers.requestDriver);
@@ -69,18 +60,22 @@ export function DriverRequestModal({
     reason: string;
   } | null>(null);
 
-  const [selectedDriver, setSelectedDriver] = useState<Id<"drivers"> | "">("");
+  const [selectedDriver, setSelectedDriver] = useState<Id<'drivers'> | ''>('');
   const [tripInfo, setTripInfo] = useState({
-    from: "",
-    to: "",
-    purpose: "",
+    from: '',
+    to: '',
+    purpose: '',
     passengerCount: 1,
-    notes: "",
+    notes: '',
   });
-  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number; address?: string } | undefined>();
-  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number; address?: string } | undefined>();
-  const [startTime, setStartTime] = useState<string>("");
-  const [endTime, setEndTime] = useState<string>("");
+  const [pickupCoords, setPickupCoords] = useState<
+    { lat: number; lng: number; address?: string } | undefined
+  >();
+  const [dropoffCoords, setDropoffCoords] = useState<
+    { lat: number; lng: number; address?: string } | undefined
+  >();
+  const [startTime, setStartTime] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
 
   // Get alternative drivers when current driver is on leave
   const alternativeDrivers = useQuery(
@@ -90,52 +85,59 @@ export function DriverRequestModal({
           organizationId: organizationId!,
           startTime: new Date(startTime).getTime(),
           endTime: new Date(endTime).getTime(),
-          excludeDriverId: selectedDriver as Id<"drivers">,
+          excludeDriverId: selectedDriver as Id<'drivers'>,
         }
-      : "skip"
+      : 'skip',
   );
 
   // Geocode search state
-  const [pickupQuery, setPickupQuery] = useState("");
-  const [dropoffQuery, setDropoffQuery] = useState("");
-  const [pickupResults, setPickupResults] = useState<{ lat: number; lng: number; display_name: string }[]>([]);
-  const [dropoffResults, setDropoffResults] = useState<{ lat: number; lng: number; display_name: string }[]>([]);
+  const [pickupQuery, setPickupQuery] = useState('');
+  const [dropoffQuery, setDropoffQuery] = useState('');
+  const [pickupResults, setPickupResults] = useState<
+    { lat: number; lng: number; display_name: string }[]
+  >([]);
+  const [dropoffResults, setDropoffResults] = useState<
+    { lat: number; lng: number; display_name: string }[]
+  >([]);
   const [showPickupResults, setShowPickupResults] = useState(false);
   const [showDropoffResults, setShowDropoffResults] = useState(false);
   const pickupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropoffTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const geocodeSearch = useCallback(async (query: string): Promise<{ lat: number; lng: number; display_name: string }[]> => {
-    if (query.length < 3) {
-      console.log("[geocode] Query too short:", query);
-      return [];
-    }
-    try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
-      console.log("[geocode] Searching:", url);
-      const res = await fetch(url, {
-        headers: { "Accept-Language": "en,ru" },
-      });
-      if (!res.ok) {
-        console.error("[geocode] HTTP error:", res.status);
+  const geocodeSearch = useCallback(
+    async (query: string): Promise<{ lat: number; lng: number; display_name: string }[]> => {
+      if (query.length < 3) {
+        console.log('[geocode] Query too short:', query);
         return [];
       }
-      const data = await res.json();
-      console.log("[geocode] Results:", data.length, data);
-      if (data.length === 0) {
-        console.log("[geocode] No results found");
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
+        console.log('[geocode] Searching:', url);
+        const res = await fetch(url, {
+          headers: { 'Accept-Language': 'en,ru' },
+        });
+        if (!res.ok) {
+          console.error('[geocode] HTTP error:', res.status);
+          return [];
+        }
+        const data = await res.json();
+        console.log('[geocode] Results:', data.length, data);
+        if (data.length === 0) {
+          console.log('[geocode] No results found');
+          return [];
+        }
+        return data.map((item: any) => ({
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+          display_name: item.display_name,
+        }));
+      } catch (err) {
+        console.error('[geocode] Error:', err);
         return [];
       }
-      return data.map((item: any) => ({
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon),
-        display_name: item.display_name,
-      }));
-    } catch (err) {
-      console.error("[geocode] Error:", err);
-      return [];
-    }
-  }, []);
+    },
+    [],
+  );
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -152,7 +154,7 @@ export function DriverRequestModal({
 
   const handlePickupInputChange = (value: string) => {
     setPickupQuery(value);
-    setTripInfo(prev => ({ ...prev, from: value }));
+    setTripInfo((prev) => ({ ...prev, from: value }));
     setPickupCoords(undefined);
     if (pickupTimerRef.current) clearTimeout(pickupTimerRef.current);
     if (value.length >= 3) {
@@ -169,7 +171,7 @@ export function DriverRequestModal({
 
   const handleDropoffInputChange = (value: string) => {
     setDropoffQuery(value);
-    setTripInfo(prev => ({ ...prev, to: value }));
+    setTripInfo((prev) => ({ ...prev, to: value }));
     setDropoffCoords(undefined);
     if (dropoffTimerRef.current) clearTimeout(dropoffTimerRef.current);
     if (value.length >= 3) {
@@ -185,9 +187,9 @@ export function DriverRequestModal({
   };
 
   const selectPickupResult = (result: { lat: number; lng: number; display_name: string }) => {
-    console.log("[selectPickupResult]", result);
+    console.log('[selectPickupResult]', result);
     setPickupCoords({ lat: result.lat, lng: result.lng, address: result.display_name });
-    setTripInfo(prev => ({ ...prev, from: result.display_name }));
+    setTripInfo((prev) => ({ ...prev, from: result.display_name }));
     setPickupQuery(result.display_name);
     setPickupResults([]);
     setShowPickupResults(false);
@@ -195,9 +197,9 @@ export function DriverRequestModal({
   };
 
   const selectDropoffResult = (result: { lat: number; lng: number; display_name: string }) => {
-    console.log("[selectDropoffResult]", result);
+    console.log('[selectDropoffResult]', result);
     setDropoffCoords({ lat: result.lat, lng: result.lng, address: result.display_name });
-    setTripInfo(prev => ({ ...prev, to: result.display_name }));
+    setTripInfo((prev) => ({ ...prev, to: result.display_name }));
     setDropoffQuery(result.display_name);
     setDropoffResults([]);
     setShowDropoffResults(false);
@@ -205,16 +207,19 @@ export function DriverRequestModal({
   };
 
   // Handle location selection from map
-  const handleLocationSelect = (location: { lat: number; lng: number; address?: string }, type: "pickup" | "dropoff") => {
-    if (type === "pickup") {
+  const handleLocationSelect = (
+    location: { lat: number; lng: number; address?: string },
+    type: 'pickup' | 'dropoff',
+  ) => {
+    if (type === 'pickup') {
       setPickupCoords(location);
-      setTripInfo(prev => ({ ...prev, from: location.address || prev.from }));
-      setPickupQuery(location.address || "");
+      setTripInfo((prev) => ({ ...prev, from: location.address || prev.from }));
+      setPickupQuery(location.address || '');
       setShowPickupResults(false);
     } else {
       setDropoffCoords(location);
-      setTripInfo(prev => ({ ...prev, to: location.address || prev.to }));
-      setDropoffQuery(location.address || "");
+      setTripInfo((prev) => ({ ...prev, to: location.address || prev.to }));
+      setDropoffQuery(location.address || '');
       setShowDropoffResults(false);
     }
   };
@@ -240,11 +245,11 @@ export function DriverRequestModal({
     api.drivers.isDriverOnLeave,
     selectedDriver && startTime && endTime
       ? {
-          driverId: selectedDriver as Id<"drivers">,
+          driverId: selectedDriver as Id<'drivers'>,
           startTime: new Date(startTime).getTime(),
           endTime: new Date(endTime).getTime(),
         }
-      : "skip"
+      : 'skip',
   );
 
   const isCheckingLeave = selectedDriver && startTime && endTime && isDriverOnLeave === undefined;
@@ -252,7 +257,7 @@ export function DriverRequestModal({
   React.useEffect(() => {
     if (isDriverOnLeave?.onLeave && isDriverOnLeave.leave) {
       setLeaveWarning({
-        type: "driver_on_leave",
+        type: 'driver_on_leave',
         message: `Водитель находится в отпуске с ${isDriverOnLeave.leave.startDate} по ${isDriverOnLeave.leave.endDate}`,
         leaveType: isDriverOnLeave.leave.type,
         startDate: isDriverOnLeave.leave.startDate,
@@ -266,22 +271,22 @@ export function DriverRequestModal({
 
   const handleSubmit = async () => {
     if (!userId || !organizationId) {
-      toast.error(t("toasts.pleaseLogin"));
+      toast.error(t('toasts.pleaseLogin'));
       return;
     }
 
     if (!selectedDriver) {
-      toast.error(t("toasts.pleaseSelectDriver"));
+      toast.error(t('toasts.pleaseSelectDriver'));
       return;
     }
 
     if (!startTime || !endTime) {
-      toast.error(t("toasts.pleaseSelectTime"));
+      toast.error(t('toasts.pleaseSelectTime'));
       return;
     }
 
     if (!tripInfo.from || !tripInfo.to) {
-      toast.error(t("toasts.pleaseFillLocations"));
+      toast.error(t('toasts.pleaseFillLocations'));
       return;
     }
 
@@ -289,11 +294,13 @@ export function DriverRequestModal({
     if (isDriverOnLeave?.onLeave || leaveWarning) {
       const leaveInfo = isDriverOnLeave?.leave || leaveWarning;
       toast.error(
-        t("driver.driverOnLeaveBlock", "Невозможно заказать водителя: он находится в отпуске"),
+        t('driver.driverOnLeaveBlock', 'Невозможно заказать водителя: он находится в отпуске'),
         {
-          description: (leaveInfo as any).message || `Отпуск с ${(leaveInfo as any).startDate} по ${(leaveInfo as any).endDate}`,
+          description:
+            (leaveInfo as any).message ||
+            `Отпуск с ${(leaveInfo as any).startDate} по ${(leaveInfo as any).endDate}`,
           duration: 6000,
-        }
+        },
       );
       return;
     }
@@ -302,44 +309,48 @@ export function DriverRequestModal({
       const result = await requestDriver({
         organizationId,
         requesterId: userId,
-        driverId: selectedDriver as Id<"drivers">,
+        driverId: selectedDriver as Id<'drivers'>,
         startTime: new Date(startTime).getTime(),
         endTime: new Date(endTime).getTime(),
         tripInfo: {
           ...tripInfo,
           pickupCoords: pickupCoords ? { lat: pickupCoords.lat, lng: pickupCoords.lng } : undefined,
-          dropoffCoords: dropoffCoords ? { lat: dropoffCoords.lat, lng: dropoffCoords.lng } : undefined,
+          dropoffCoords: dropoffCoords
+            ? { lat: dropoffCoords.lat, lng: dropoffCoords.lng }
+            : undefined,
         },
       });
 
       // Handle error from server (driver on leave)
       if (result?.error) {
         toast.error(
-          t("driver.driverOnLeaveBlock", "Невозможно заказать водителя: он находится в отпуске"),
+          t('driver.driverOnLeaveBlock', 'Невозможно заказать водителя: он находится в отпуске'),
           {
             description: result.error.message,
             duration: 6000,
-          }
+          },
         );
         return;
       }
 
-      toast.success(t("driver.requestSubmitted", "Driver request submitted!"));
+      toast.success(t('driver.requestSubmitted', 'Driver request submitted!'));
       onOpenChange(false);
 
       // Reset form
-      setSelectedDriver("");
+      setSelectedDriver('');
       setTripInfo({
-        from: "",
-        to: "",
-        purpose: "",
+        from: '',
+        to: '',
+        purpose: '',
         passengerCount: 1,
-        notes: "",
+        notes: '',
       });
       setPickupCoords(undefined);
       setDropoffCoords(undefined);
     } catch (error: any) {
-      toast.error(error.message || t("driver.failedToRequestDriver", "Не удалось запросить водителя"));
+      toast.error(
+        error.message || t('driver.failedToRequestDriver', 'Не удалось запросить водителя'),
+      );
     }
   };
 
@@ -351,29 +362,33 @@ export function DriverRequestModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Car className="w-5 h-5" />
-            {t("driver.requestDriver", "Request Driver")}
+            {t('driver.requestDriver', 'Request Driver')}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4" style={{ overflow: "visible" }}>
+        <div className="space-y-4" style={{ overflow: 'visible' }}>
           {/* Select Driver */}
           <div>
-            <Label>{t("driver.selectDriver", "Select Driver")}</Label>
-            <Select value={selectedDriver} onValueChange={(v: Id<"drivers"> | "") => setSelectedDriver(v)}>
+            <Label>{t('driver.selectDriver', 'Select Driver')}</Label>
+            <Select
+              value={selectedDriver}
+              onValueChange={(v: Id<'drivers'> | '') => setSelectedDriver(v)}
+            >
               <SelectTrigger>
-                <SelectValue placeholder={t("driver.chooseDriver", "Choose a driver")} />
+                <SelectValue placeholder={t('driver.chooseDriver', 'Choose a driver')} />
               </SelectTrigger>
               <SelectContent>
                 {availableDrivers?.filter(Boolean).map((driver: any) => (
                   <SelectItem key={driver!._id} value={driver!._id}>
-                    {driver!.userName} - {driver!.vehicleInfo.model} ({driver!.vehicleInfo.plateNumber})
+                    {driver!.userName} - {driver!.vehicleInfo.model} (
+                    {driver!.vehicleInfo.plateNumber})
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {availableDrivers && availableDrivers.length === 0 && (
               <p className="text-sm text-muted-foreground mt-1">
-                {t("driver.noDriversFound", "No drivers available")}
+                {t('driver.noDriversFound', 'No drivers available')}
               </p>
             )}
           </div>
@@ -383,37 +398,37 @@ export function DriverRequestModal({
             <Alert variant="warning" className="border-amber-500 bg-amber-50 dark:bg-amber-950">
               <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertTitle className="text-amber-800 dark:text-amber-200">
-                {t("driver.driverOnLeave", "Driver on leave")}
+                {t('driver.driverOnLeave', 'Driver on leave')}
               </AlertTitle>
               <AlertDescription className="text-amber-700 dark:text-amber-300">
                 <p className="font-semibold mb-2">
-                  ⛔ {t("driver.bookingUnavailable", "Booking unavailable")}
+                  ⛔ {t('driver.bookingUnavailable', 'Booking unavailable')}
                 </p>
-                {t("driver.onLeaveFrom", "On leave from")} {leaveWarning.startDate} {t("driver.to", "to")} {leaveWarning.endDate}
+                {t('driver.onLeaveFrom', 'On leave from')} {leaveWarning.startDate}{' '}
+                {t('driver.to', 'to')} {leaveWarning.endDate}
                 <div className="mt-2 text-sm">
-                  <strong>{t("driver.leaveType", "Leave type")}:</strong>{" "}
-                  {leaveWarning.leaveType === "paid"
-                    ? t("leave.types.paid", "Paid")
-                    : leaveWarning.leaveType === "sick"
-                    ? t("leave.types.sick", "Sick")
-                    : leaveWarning.leaveType === "family"
-                    ? t("leave.types.family", "Family")
-                    : leaveWarning.leaveType === "unpaid"
-                    ? t("leave.types.unpaid", "Unpaid")
-                    : leaveWarning.leaveType}
+                  <strong>{t('driver.leaveType', 'Leave type')}:</strong>{' '}
+                  {leaveWarning.leaveType === 'paid'
+                    ? t('leave.types.paid', 'Paid')
+                    : leaveWarning.leaveType === 'sick'
+                      ? t('leave.types.sick', 'Sick')
+                      : leaveWarning.leaveType === 'family'
+                        ? t('leave.types.family', 'Family')
+                        : leaveWarning.leaveType === 'unpaid'
+                          ? t('leave.types.unpaid', 'Unpaid')
+                          : leaveWarning.leaveType}
                 </div>
                 {leaveWarning.reason && (
                   <div className="text-sm mt-1">
-                    <strong>{t("driver.reason", "Reason")}:</strong> {leaveWarning.reason}
+                    <strong>{t('driver.reason', 'Reason')}:</strong> {leaveWarning.reason}
                   </div>
                 )}
-                
                 {/* Alternative Drivers */}
                 {alternativeDrivers && alternativeDrivers.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-800">
                     <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      {t("driver.alternativeDrivers", "Доступные водители:")}
+                      {t('driver.alternativeDrivers', 'Доступные водители:')}
                     </p>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {alternativeDrivers.map((driver: any) => (
@@ -432,7 +447,8 @@ export function DriverRequestModal({
                               </p>
                               <p className="text-xs text-amber-700 dark:text-amber-300">
                                 {driver.vehicleInfo?.model} • {driver.vehicleInfo?.plateNumber}
-                                {driver.vehicleInfo?.capacity && ` • ${driver.vehicleInfo.capacity} ${t("driver.seats", "мест")}`}
+                                {driver.vehicleInfo?.capacity &&
+                                  ` • ${driver.vehicleInfo.capacity} ${t('driver.seats', 'мест')}`}
                               </p>
                             </div>
                           </div>
@@ -443,21 +459,24 @@ export function DriverRequestModal({
                             onClick={() => {
                               setSelectedDriver(driver._id);
                               toast.success(
-                                `${t("driver.driverSelected", "Выбран водитель")}: ${driver.userName}`
+                                `${t('driver.driverSelected', 'Выбран водитель')}: ${driver.userName}`,
                               );
                             }}
                           >
-                            {t("driver.select", "Выбрать")}
+                            {t('driver.select', 'Выбрать')}
                           </Button>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-                
                 {(!alternativeDrivers || alternativeDrivers.length === 0) && (
                   <p className="text-sm mt-3 text-amber-800 dark:text-amber-200">
-                    💡 {t("driver.noAlternativeDrivers", "Нет доступных водителей. Измените даты бронирования или обратитесь к администратору.")}
+                    💡{' '}
+                    {t(
+                      'driver.noAlternativeDrivers',
+                      'Нет доступных водителей. Измените даты бронирования или обратитесь к администратору.',
+                    )}
                   </p>
                 )}
               </AlertDescription>
@@ -470,21 +489,21 @@ export function DriverRequestModal({
             <div>
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-emerald-500" />
-                {t("driver.pickupLocation", "Pickup Location")}
+                {t('driver.pickupLocation', 'Pickup Location')}
               </Label>
               <PlaceAutocomplete
                 value={pickupQuery || tripInfo.from}
                 onChange={(val) => {
                   setPickupQuery(val);
-                  setTripInfo(prev => ({ ...prev, from: val }));
+                  setTripInfo((prev) => ({ ...prev, from: val }));
                   setPickupCoords(undefined);
                 }}
                 onSelect={(place) => {
                   setPickupCoords({ lat: place.lat, lng: place.lng, address: place.address });
-                  setTripInfo(prev => ({ ...prev, from: place.address }));
+                  setTripInfo((prev) => ({ ...prev, from: place.address }));
                   setPickupQuery(place.address);
                 }}
-                placeholder={t("driver.fromPlaceholder", "e.g., Office")}
+                placeholder={t('driver.fromPlaceholder', 'e.g., Office')}
               />
             </div>
 
@@ -492,21 +511,21 @@ export function DriverRequestModal({
             <div>
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-red-500" />
-                {t("driver.dropoffLocation", "Dropoff Location")}
+                {t('driver.dropoffLocation', 'Dropoff Location')}
               </Label>
               <PlaceAutocomplete
                 value={dropoffQuery || tripInfo.to}
                 onChange={(val) => {
                   setDropoffQuery(val);
-                  setTripInfo(prev => ({ ...prev, to: val }));
+                  setTripInfo((prev) => ({ ...prev, to: val }));
                   setDropoffCoords(undefined);
                 }}
                 onSelect={(place) => {
                   setDropoffCoords({ lat: place.lat, lng: place.lng, address: place.address });
-                  setTripInfo(prev => ({ ...prev, to: place.address }));
+                  setTripInfo((prev) => ({ ...prev, to: place.address }));
                   setDropoffQuery(place.address);
                 }}
-                placeholder={t("driver.toPlaceholder", "e.g., Airport")}
+                placeholder={t('driver.toPlaceholder', 'e.g., Airport')}
               />
             </div>
           </div>
@@ -516,7 +535,7 @@ export function DriverRequestModal({
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                {t("driver.selectOnMap", "Select on Map")}
+                {t('driver.selectOnMap', 'Select on Map')}
               </Label>
               <Badge variant="secondary" className="text-xs">
                 Click to pick location
@@ -538,11 +557,11 @@ export function DriverRequestModal({
 
           {/* Purpose */}
           <div>
-            <Label>{t("driver.tripPurpose", "Trip Purpose")}</Label>
+            <Label>{t('driver.tripPurpose', 'Trip Purpose')}</Label>
             <Input
               value={tripInfo.purpose}
               onChange={(e) => setTripInfo({ ...tripInfo, purpose: e.target.value })}
-              placeholder={t("driver.purposePlaceholder", "e.g., Airport transfer, Client meeting")}
+              placeholder={t('driver.purposePlaceholder', 'e.g., Airport transfer, Client meeting')}
             />
           </div>
 
@@ -551,7 +570,7 @@ export function DriverRequestModal({
             <div>
               <Label className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                {t("driver.startTime", "Start Time")}
+                {t('driver.startTime', 'Start Time')}
               </Label>
               <Input
                 type="datetime-local"
@@ -562,7 +581,7 @@ export function DriverRequestModal({
             <div>
               <Label className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                {t("driver.endTime", "End Time")}
+                {t('driver.endTime', 'End Time')}
               </Label>
               <Input
                 type="datetime-local"
@@ -576,24 +595,28 @@ export function DriverRequestModal({
           <div>
             <Label className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              {t("driver.passengerCount", "Passengers")}
+              {t('driver.passengerCount', 'Passengers')}
             </Label>
             <Input
               type="number"
               min={1}
               max={10}
               value={tripInfo.passengerCount}
-              onChange={(e) => setTripInfo({ ...tripInfo, passengerCount: parseInt(e.target.value) || 1 })}
+              onChange={(e) =>
+                setTripInfo({ ...tripInfo, passengerCount: parseInt(e.target.value) || 1 })
+              }
             />
           </div>
 
           {/* Notes */}
           <div>
-            <Label>{t("driver.notes", "Notes")} ({t("optional", "Optional")})</Label>
+            <Label>
+              {t('driver.notes', 'Notes')} ({t('optional', 'Optional')})
+            </Label>
             <Textarea
               value={tripInfo.notes}
               onChange={(e) => setTripInfo({ ...tripInfo, notes: e.target.value })}
-              placeholder={t("driver.notesPlaceholder", "Additional information for the driver...")}
+              placeholder={t('driver.notesPlaceholder', 'Additional information for the driver...')}
               rows={3}
             />
           </div>
@@ -601,17 +624,17 @@ export function DriverRequestModal({
           {/* Actions */}
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t("cancel", "Cancel")}
+              {t('cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={Boolean(leaveWarning) || Boolean(isCheckingLeave)}
             >
               {isCheckingLeave
-                ? t("driver.checking", "Проверка...")
+                ? t('driver.checking', 'Проверка...')
                 : leaveWarning
-                ? t("driver.driverOnLeave", "Водитель в отпуске")
-                : t("driver.submitRequest", "Submit Request")}
+                  ? t('driver.driverOnLeave', 'Водитель в отпуске')
+                  : t('driver.submitRequest', 'Submit Request')}
             </Button>
           </div>
         </div>

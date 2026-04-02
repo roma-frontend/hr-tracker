@@ -2,11 +2,7 @@
 
 // Check if browser supports push notifications
 export function isPushNotificationSupported(): boolean {
-  return (
-    'serviceWorker' in navigator &&
-    'PushManager' in window &&
-    'Notification' in window
-  );
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 }
 
 // Register service worker
@@ -73,8 +69,8 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(
           process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-          // Default test key (replace with your own)
-          'BEl62iUYgUivxIkv69yViEuiBIa-Ib37gp65oYI-vA0e-CvnG8V8RswNPQNBrD7xHYb9rJXLGYvO6CYnlPqEm0U'
+            // Default test key (replace with your own)
+            'BEl62iUYgUivxIkv69yViEuiBIa-Ib37gp65oYI-vA0e-CvnG8V8RswNPQNBrD7xHYb9rJXLGYvO6CYnlPqEm0U',
         ) as any,
       });
 
@@ -110,7 +106,7 @@ export async function unsubscribeFromPushNotifications(): Promise<boolean> {
 // Send a local push notification (doesn't require server)
 export async function sendLocalPushNotification(
   title: string,
-  options: NotificationOptions = {}
+  options: NotificationOptions = {},
 ): Promise<void> {
   if (!isPushNotificationSupported()) {
     console.warn('Push notifications not supported');

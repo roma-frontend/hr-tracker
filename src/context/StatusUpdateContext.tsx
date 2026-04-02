@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from 'react';
 
 interface StatusUpdateNotification {
   statusKey: string;
@@ -41,7 +41,7 @@ export function StatusUpdateProvider({ children }: { children: React.ReactNode }
 export function useStatusUpdate() {
   const context = useContext(StatusUpdateContext);
   if (context === undefined) {
-    throw new Error("useStatusUpdate must be used within StatusUpdateProvider");
+    throw new Error('useStatusUpdate must be used within StatusUpdateProvider');
   }
   return context;
 }

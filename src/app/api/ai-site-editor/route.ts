@@ -12,7 +12,7 @@ const groq = createGroq({
 });
 
 /** Задержка в мс */
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Выполняет запрос к AI с retry при превышении лимита */
 async function withRetry<T>(fn: () => Promise<T>, retries = 3, delayMs = 5000): Promise<T> {
@@ -20,7 +20,10 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, delayMs = 5000): 
     try {
       return await fn();
     } catch (error: any) {
-      const isRateLimit = error?.message?.includes('quota') || error?.message?.includes('rate') || error?.message?.includes('429');
+      const isRateLimit =
+        error?.message?.includes('quota') ||
+        error?.message?.includes('rate') ||
+        error?.message?.includes('429');
       if (isRateLimit && i < retries - 1) {
         const wait = delayMs * (i + 1);
         console.log(`[AI Site Editor] Rate limit hit, retrying in ${wait}ms...`);
@@ -40,11 +43,7 @@ import path from 'path';
 
 // ─── Whitelist / Blacklist ────────────────────────────────────────────────────
 
-const ALLOWED_DIRECTORIES = [
-  'src/app',
-  'src/components',
-  'src/i18n/locales',
-];
+const ALLOWED_DIRECTORIES = ['src/app', 'src/components', 'src/i18n/locales'];
 
 const FORBIDDEN_PATHS = [
   'src/components/ui',
@@ -78,10 +77,7 @@ function isPathAllowed(filePath: string): boolean {
   }
 
   for (const allowed of ALLOWED_DIRECTORIES) {
-    if (
-      normalizedPath.startsWith(allowed) ||
-      normalizedPath.includes(`/${allowed}/`)
-    ) {
+    if (normalizedPath.startsWith(allowed) || normalizedPath.includes(`/${allowed}/`)) {
       return true;
     }
   }
@@ -111,7 +107,7 @@ function readFileSecure(filePath: string): string | null {
 function writeFileSecure(
   filePath: string,
   content: string,
-  description: string = 'AI Site Editor'
+  description: string = 'AI Site Editor',
 ): { success: boolean; timestamp?: number; error?: string } {
   try {
     if (!isPathAllowed(filePath)) {
@@ -131,24 +127,14 @@ function writeFileSecure(
 
     // Создаём резервную копию существующего файла
     if (fs.existsSync(fullPath)) {
-      const backupPath = path.join(
-        backupDir,
-        `${path.basename(filePath)}.${timestamp}.backup`
-      );
+      const backupPath = path.join(backupDir, `${path.basename(filePath)}.${timestamp}.backup`);
       fs.copyFileSync(fullPath, backupPath);
 
       // Мета-данные backup
-      const metaPath = path.join(
-        backupDir,
-        `${path.basename(filePath)}.${timestamp}.meta.json`
-      );
+      const metaPath = path.join(backupDir, `${path.basename(filePath)}.${timestamp}.meta.json`);
       fs.writeFileSync(
         metaPath,
-        JSON.stringify(
-          { originalPath: filePath, timestamp, description },
-          null,
-          2
-        )
+        JSON.stringify({ originalPath: filePath, timestamp, description }, null, 2),
       );
     }
 
@@ -158,7 +144,7 @@ function writeFileSecure(
       const newSize = Buffer.byteLength(content, 'utf-8');
       // For large files (>5KB), require at least 80% of original size
       // For small files (>500B), require at least 70% of original size
-      const threshold = originalSize > 5000 ? 0.80 : 0.70;
+      const threshold = originalSize > 5000 ? 0.8 : 0.7;
       if (originalSize > 500 && newSize < originalSize * threshold) {
         const msg = `[writeFileSecure] Rejected: new content (${newSize}b) is less than ${threshold * 100}% of original (${originalSize}b) — likely truncated`;
         console.warn(msg);
@@ -214,40 +200,40 @@ function findRelevantFiles(message: string): string[] {
   const lower = message.toLowerCase();
 
   const keywordMap: Record<string, string[]> = {
-    'dashboard': [
+    dashboard: [
       'src/components/dashboard/DashboardClient.tsx',
       'src/app/(dashboard)/dashboard/page.tsx',
     ],
     'manage org': ['src/components/dashboard/DashboardClient.tsx'],
-    'employees': ['src/app/(dashboard)/employees/page.tsx'],
-    'settings': ['src/app/(dashboard)/settings/page.tsx'],
-    'navbar': ['src/components/layout/Navbar.tsx'],
-    'sidebar': ['src/components/layout/Sidebar.tsx'],
-    'calendar': ['src/app/(dashboard)/calendar/page.tsx'],
-    'profile': ['src/components/settings/ProfileSettings.tsx'],
-    'landing': ['src/components/landing/LandingClient.tsx'],
-    'leaves': ['src/app/(dashboard)/leaves/page.tsx'],
-    'tasks': ['src/app/(dashboard)/tasks/page.tsx'],
-    'analytics': ['src/app/(dashboard)/analytics/page.tsx'],
-    'aitestcomponent': ['src/components/test/AITestComponent.tsx'],
+    employees: ['src/app/(dashboard)/employees/page.tsx'],
+    settings: ['src/app/(dashboard)/settings/page.tsx'],
+    navbar: ['src/components/layout/Navbar.tsx'],
+    sidebar: ['src/components/layout/Sidebar.tsx'],
+    calendar: ['src/app/(dashboard)/calendar/page.tsx'],
+    profile: ['src/components/settings/ProfileSettings.tsx'],
+    landing: ['src/components/landing/LandingClient.tsx'],
+    leaves: ['src/app/(dashboard)/leaves/page.tsx'],
+    tasks: ['src/app/(dashboard)/tasks/page.tsx'],
+    analytics: ['src/app/(dashboard)/analytics/page.tsx'],
+    aitestcomponent: ['src/components/test/AITestComponent.tsx'],
     'test component': ['src/components/test/AITestComponent.tsx'],
     'ai-site-editor': ['src/components/ai/SiteEditorChat.tsx'],
     'site editor': ['src/components/ai/SiteEditorChat.tsx'],
     'ai chat editor': ['src/components/ai/SiteEditorChat.tsx'],
     'ai editor': ['src/components/ai/SiteEditorChat.tsx'],
-    'siteeditorchat': ['src/components/ai/SiteEditorChat.tsx'],
-    'chatwidget': ['src/components/ai/ChatWidget.tsx'],
+    siteeditorchat: ['src/components/ai/SiteEditorChat.tsx'],
+    chatwidget: ['src/components/ai/ChatWidget.tsx'],
     'chat widget': ['src/components/ai/ChatWidget.tsx'],
     'ai chat': ['src/components/ai/ChatWidget.tsx'],
     'ai assistant': ['src/components/leaves/AILeaveAssistant.tsx'],
     'leave assistant': ['src/components/leaves/AILeaveAssistant.tsx'],
     'weekly digest': ['src/components/ai/WeeklyDigestWidget.tsx'],
-    'login': ['src/app/(auth)/login/page.tsx'],
-    'register': ['src/app/(auth)/register/page.tsx'],
-    'approvals': ['src/app/(dashboard)/approvals/page.tsx'],
-    'attendance': ['src/components/attendance/AttendanceDashboard.tsx'],
-    'reports': ['src/app/(dashboard)/reports/page.tsx'],
-    'joins': ['src/app/(dashboard)/join-requests/page.tsx'],
+    login: ['src/app/(auth)/login/page.tsx'],
+    register: ['src/app/(auth)/register/page.tsx'],
+    approvals: ['src/app/(dashboard)/approvals/page.tsx'],
+    attendance: ['src/components/attendance/AttendanceDashboard.tsx'],
+    reports: ['src/app/(dashboard)/reports/page.tsx'],
+    joins: ['src/app/(dashboard)/join-requests/page.tsx'],
   };
 
   const relevant: string[] = [];
@@ -259,7 +245,7 @@ function findRelevantFiles(message: string): string[] {
     relevant.push(
       'src/i18n/locales/en.json',
       'src/i18n/locales/ru.json',
-      'src/i18n/locales/hy.json'
+      'src/i18n/locales/hy.json',
     );
   }
 
@@ -281,8 +267,11 @@ function findRelevantFiles(message: string): string[] {
     }
     // Split CamelCase into words and check if ALL words appear in message
     // e.g. "ChatWidget" → ["Chat", "Widget"], "SiteEditorChat" → ["Site", "Editor", "Chat"]
-    const words = baseName.split(/(?=[A-Z])/).map(w => w.toLowerCase()).filter(w => w.length > 2);
-    if (words.length >= 2 && words.every(w => lower.includes(w))) {
+    const words = baseName
+      .split(/(?=[A-Z])/)
+      .map((w) => w.toLowerCase())
+      .filter((w) => w.length > 2);
+    if (words.length >= 2 && words.every((w) => lower.includes(w))) {
       relevant.push(comp);
     }
   }
@@ -293,7 +282,7 @@ function findRelevantFiles(message: string): string[] {
 /** Парсит ответ AI для извлечения изменений файлов */
 function parseAIResponseForFileChanges(
   response: string,
-  fallbackFiles: string[] = []
+  fallbackFiles: string[] = [],
 ): Array<{
   filePath: string;
   content: string;
@@ -323,7 +312,8 @@ function parseAIResponseForFileChanges(
 
   // Pattern 2: path on its own line then ```code``` (model omits FILE: prefix)
   if (changes.length === 0) {
-    const pathThenBlock = /(src\/[\w\-/.()]+\.(tsx?|jsx?|json))\s*\n```(?:tsx?|jsx?|json|js)?\n([\s\S]*?)```/g;
+    const pathThenBlock =
+      /(src\/[\w\-/.()]+\.(tsx?|jsx?|json))\s*\n```(?:tsx?|jsx?|json|js)?\n([\s\S]*?)```/g;
     while ((match = pathThenBlock.exec(response)) !== null) {
       const filePath = match[1].trim();
       const content = match[3];
@@ -387,7 +377,8 @@ function parseCSSPatches(response: string): Array<{
 
   // Support both single and double quotes, and optional whitespace variations
   // Pattern: PATCH: path\nOLD: "value"\nNEW: "value"
-  const patchPattern = /PATCH:\s*([^\n]+)\s*\nOLD:\s*["']([^"'\n]+)["']\s*\nNEW:\s*["']([^"'\n]+)["']/g;
+  const patchPattern =
+    /PATCH:\s*([^\n]+)\s*\nOLD:\s*["']([^"'\n]+)["']\s*\nNEW:\s*["']([^"'\n]+)["']/g;
   let match;
   while ((match = patchPattern.exec(response)) !== null) {
     const filePath = match[1].trim();
@@ -419,7 +410,7 @@ function applyCSSPatch(
   filePath: string,
   oldClass: string,
   newClass: string,
-  description: string
+  description: string,
 ): { success: boolean; error?: string; timestamp?: number } {
   try {
     if (!isPathAllowed(filePath)) {
@@ -441,7 +432,10 @@ function applyCSSPatch(
     const backupPath = path.join(backupDir, `${path.basename(filePath)}.${timestamp}.backup`);
     fs.copyFileSync(fullPath, backupPath);
     const metaPath = path.join(backupDir, `${path.basename(filePath)}.${timestamp}.meta.json`);
-    fs.writeFileSync(metaPath, JSON.stringify({ originalPath: filePath, timestamp, description }, null, 2));
+    fs.writeFileSync(
+      metaPath,
+      JSON.stringify({ originalPath: filePath, timestamp, description }, null, 2),
+    );
 
     // Apply patch — replace only the className string
     const newContent = content.replace(oldClass, newClass);
@@ -456,8 +450,11 @@ function applyCSSPatch(
 /** Генерирует CSS-патчи через AI для design-изменений */
 async function generateCSSPatches(
   message: string,
-  filesToRead: string[]
-): Promise<{ aiText: string; patches: Array<{ filePath: string; oldClass: string; newClass: string }> }> {
+  filesToRead: string[],
+): Promise<{
+  aiText: string;
+  patches: Array<{ filePath: string; oldClass: string; newClass: string }>;
+}> {
   const fileContextParts: string[] = [];
   for (const filePath of filesToRead) {
     const content = readFileSecure(filePath);
@@ -477,12 +474,14 @@ ${fileContextParts.join('\n')}
 
 USER REQUEST: ${message}`;
 
-  const result = await withRetry(() => generateText({
-    model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.2,
-    maxOutputTokens: 4000,
-  }));
+  const result = await withRetry(() =>
+    generateText({
+      model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.2,
+      maxOutputTokens: 4000,
+    }),
+  );
 
   const aiText = result.text;
   console.log('[CSS Patch] Full AI response:\n', aiText);
@@ -529,27 +528,72 @@ FORBIDDEN:
 
 // ─── Edit type detection ───────────────────────────────────────────────────────
 
-function detectEditType(message: string): 'design' | 'content' | 'layout' | 'logic' | 'full_control' {
+function detectEditType(
+  message: string,
+): 'design' | 'content' | 'layout' | 'logic' | 'full_control' {
   const lower = message.toLowerCase();
 
-  if (['полный контроль', 'все изменить', 'переделать сайт', 'полностью изменить'].some(kw => lower.includes(kw))) {
+  if (
+    ['полный контроль', 'все изменить', 'переделать сайт', 'полностью изменить'].some((kw) =>
+      lower.includes(kw),
+    )
+  ) {
     return 'full_control';
   }
-  if (['функция', 'логика', 'добавить фичу', 'исправить баг', 'функционал', 'обработчик'].some(kw => lower.includes(kw))) {
+  if (
+    ['функция', 'логика', 'добавить фичу', 'исправить баг', 'функционал', 'обработчик'].some((kw) =>
+      lower.includes(kw),
+    )
+  ) {
     return 'logic';
   }
-  if (['макет', 'расположение', 'структура', 'компонент', 'переставить', 'реорганизовать'].some(kw => lower.includes(kw))) {
+  if (
+    ['макет', 'расположение', 'структура', 'компонент', 'переставить', 'реорганизовать'].some(
+      (kw) => lower.includes(kw),
+    )
+  ) {
     return 'layout';
   }
-  if (['текст', 'контент', 'надпись', 'перевод', 'слово', 'фраза', 'заголовок', 'i18n'].some(kw => lower.includes(kw))) {
+  if (
+    ['текст', 'контент', 'надпись', 'перевод', 'слово', 'фраза', 'заголовок', 'i18n'].some((kw) =>
+      lower.includes(kw),
+    )
+  ) {
     return 'content';
   }
-  if ([
-    'дизайн', 'цвет', 'стиль', 'шрифт', 'размер', 'анимация', 'css', 'красиво', 'внешний вид',
-    'hover', 'кнопка', 'белеет', 'темная тема', 'светлая тема', 'граница', 'фон', 'background',
-    'исправь', 'измени', 'theme', 'темный', 'светлый', 'соответствовал',
-    'dashboard', 'manage org', 'employees', 'settings', 'navbar', 'sidebar',
-  ].some(kw => lower.includes(kw))) {
+  if (
+    [
+      'дизайн',
+      'цвет',
+      'стиль',
+      'шрифт',
+      'размер',
+      'анимация',
+      'css',
+      'красиво',
+      'внешний вид',
+      'hover',
+      'кнопка',
+      'белеет',
+      'темная тема',
+      'светлая тема',
+      'граница',
+      'фон',
+      'background',
+      'исправь',
+      'измени',
+      'theme',
+      'темный',
+      'светлый',
+      'соответствовал',
+      'dashboard',
+      'manage org',
+      'employees',
+      'settings',
+      'navbar',
+      'sidebar',
+    ].some((kw) => lower.includes(kw))
+  ) {
     return 'design';
   }
 
@@ -564,19 +608,24 @@ function detectEditType(message: string): 'design' | 'content' | 'layout' | 'log
 async function generateFileChanges(
   message: string,
   plan: string,
-  filesToRead: string[]
-): Promise<{ aiText: string; changes: Array<{ filePath: string; content: string; description: string }> }> {
-
+  filesToRead: string[],
+): Promise<{
+  aiText: string;
+  changes: Array<{ filePath: string; content: string; description: string }>;
+}> {
   // Read all relevant files upfront and include in prompt
   const fileContextParts: string[] = [];
   for (const filePath of filesToRead) {
     const content = readFileSecure(filePath);
     if (content) {
       // If file is large, warn AI about size so it doesn't truncate output
-      const sizeWarning = content.length > 10000
-        ? `\n[NOTE: This file is ${content.length} chars / ~${Math.round(content.length / 4)} tokens. You MUST output the COMPLETE file without any truncation or abbreviation.]\n`
-        : '';
-      fileContextParts.push(`\n--- FILE: ${filePath} ---${sizeWarning}\n${content}\n--- END FILE ---`);
+      const sizeWarning =
+        content.length > 10000
+          ? `\n[NOTE: This file is ${content.length} chars / ~${Math.round(content.length / 4)} tokens. You MUST output the COMPLETE file without any truncation or abbreviation.]\n`
+          : '';
+      fileContextParts.push(
+        `\n--- FILE: ${filePath} ---${sizeWarning}\n${content}\n--- END FILE ---`,
+      );
     }
   }
 
@@ -597,12 +646,14 @@ USER REQUEST: ${message}
 
 IMPORTANT: Only output FILE blocks for files that need to change. Do NOT rewrite files that don't need modification. Files provided: ${fileList}`;
 
-  const result = await withRetry(() => generateText({
-    model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.3,
-    maxOutputTokens: 8000,
-  }));
+  const result = await withRetry(() =>
+    generateText({
+      model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+      maxOutputTokens: 8000,
+    }),
+  );
 
   const aiText = result.text;
   console.log('[AI Site Editor] Raw AI response length:', aiText.length);
@@ -622,12 +673,20 @@ export async function POST(req: NextRequest) {
     console.log('[AI Site Editor] Request received');
 
     const body = await req.json();
-    console.log('[AI Site Editor] Body parsed:', { message: body.message?.substring(0, 50), userId: body.userId, plan: body.plan });
+    console.log('[AI Site Editor] Body parsed:', {
+      message: body.message?.substring(0, 50),
+      userId: body.userId,
+      plan: body.plan,
+    });
 
     const { message, userId, organizationId, plan } = body;
 
     if (!message || !userId || !organizationId) {
-      console.error('[AI Site Editor] Missing fields:', { message: !!message, userId: !!userId, organizationId: !!organizationId });
+      console.error('[AI Site Editor] Missing fields:', {
+        message: !!message,
+        userId: !!userId,
+        organizationId: !!organizationId,
+      });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -647,7 +706,7 @@ export async function POST(req: NextRequest) {
     if (!canEdit.allowed) {
       return NextResponse.json(
         { error: canEdit.reason, limitReached: true, upgradeRequired: true },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -667,8 +726,8 @@ export async function POST(req: NextRequest) {
     let aiText = '';
 
     // Force CSS patch mode if any of the files are too large for full rewrite
-    const forceCSSPatch = filesToRead.some(f =>
-      CSS_PATCH_ONLY_FILES.some(large => f.includes(large) || large.includes(f))
+    const forceCSSPatch = filesToRead.some((f) =>
+      CSS_PATCH_ONLY_FILES.some((large) => f.includes(large) || large.includes(f)),
     );
 
     if (editType === 'design' || forceCSSPatch) {
@@ -680,9 +739,18 @@ export async function POST(req: NextRequest) {
       console.log('[AI Site Editor] CSS patches generated:', patches.length);
 
       for (const patch of patches) {
-        const result = applyCSSPatch(patch.filePath, patch.oldClass, patch.newClass, 'AI CSS Patch');
+        const result = applyCSSPatch(
+          patch.filePath,
+          patch.oldClass,
+          patch.newClass,
+          'AI CSS Patch',
+        );
         if (result.success) {
-          appliedFiles.push({ file: patch.filePath, type: editType, description: `CSS patch: "${patch.oldClass}" → "${patch.newClass}"` });
+          appliedFiles.push({
+            file: patch.filePath,
+            type: editType,
+            description: `CSS patch: "${patch.oldClass}" → "${patch.newClass}"`,
+          });
         } else {
           console.warn('[AI Site Editor] CSS patch failed:', result.error);
         }
@@ -691,7 +759,9 @@ export async function POST(req: NextRequest) {
       // If no patches found, inform user — do NOT make a second API call
       if (patches.length === 0) {
         console.log('[AI Site Editor] No CSS patches found in AI response.');
-        aiText = aiText || 'AI не смог определить конкретные классы для изменения. Попробуйте уточнить запрос, например: "измени hover цвет кнопки manage orgs на синий".';
+        aiText =
+          aiText ||
+          'AI не смог определить конкретные классы для изменения. Попробуйте уточнить запрос, например: "измени hover цвет кнопки manage orgs на синий".';
       }
     } else {
       // Full file mode for content/layout/logic/full_control changes
@@ -701,7 +771,11 @@ export async function POST(req: NextRequest) {
       for (const change of changes) {
         const result = writeFileSecure(change.filePath, change.content, change.description);
         if (result.success) {
-          appliedFiles.push({ file: change.filePath, type: editType, description: change.description });
+          appliedFiles.push({
+            file: change.filePath,
+            type: editType,
+            description: change.description,
+          });
           console.log('[AI Site Editor] Applied:', change.filePath);
         } else {
           console.warn('[AI Site Editor] Failed to apply:', change.filePath, result.error);
@@ -748,10 +822,9 @@ export async function POST(req: NextRequest) {
         details: String(error),
         type: error?.name || 'Error',
         // Всегда показываем stack в dev режиме
-        stack: error?.stack
+        stack: error?.stack,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

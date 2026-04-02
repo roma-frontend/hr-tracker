@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
@@ -53,7 +53,10 @@ export function SmartEmailInput({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="email" className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]">
+      <Label
+        htmlFor="email"
+        className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]"
+      >
         {label}
         {required && <span className="text-red-500">*</span>}
       </Label>
@@ -76,8 +79,8 @@ export function SmartEmailInput({
             validation?.isValid
               ? 'border-green-500 focus:border-green-500 focus:ring-green-500'
               : validation && !validation.isValid && value
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-              : ''
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                : ''
           }`}
         />
 
@@ -112,10 +115,10 @@ export function SmartEmailInput({
               validation.feedback.type === 'success'
                 ? 'bg-green-500/10 text-green-600 dark:text-green-400'
                 : validation.feedback.type === 'error'
-                ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                : validation.feedback.type === 'warning'
-                ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                  ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                  : validation.feedback.type === 'warning'
+                    ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+                    : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
             }`}
           >
             <p className="flex-1 leading-relaxed">{validation.feedback.message}</p>

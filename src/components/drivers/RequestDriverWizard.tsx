@@ -3,82 +3,80 @@
  * Использует универсальный Wizard компонент
  */
 
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Wizard, WizardStep } from "@/components/ui/wizard";
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Wizard, WizardStep } from '@/components/ui/wizard';
 import {
   TextInputStep,
   TextareaStep,
   CardSelectionStep,
-} from "@/components/ui/wizard-step-components";
-import { Car, MapPin, Clock, Calendar, Users } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/wizard-step-components';
+import { Car, MapPin, Clock, Calendar, Users } from 'lucide-react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface RequestDriverWizardProps {
-  userId: Id<"users">;
+  userId: Id<'users'>;
   onComplete?: () => void;
   onCancel?: () => void;
 }
 
-export function RequestDriverWizard({
-  userId,
-  onComplete,
-  onCancel,
-}: RequestDriverWizardProps) {
+export function RequestDriverWizard({ userId, onComplete, onCancel }: RequestDriverWizardProps) {
   const { t } = useTranslation();
   const requestDriver = useMutation(api.drivers.requestDriver);
-  const user = useQuery(api["users/queries"].getCurrentUser, {});
+  const user = useQuery(api['users/queries'].getCurrentUser, {});
   const drivers = useQuery(
     api.drivers.getAvailableDrivers,
-    user?.organizationId ? { organizationId: user.organizationId } : "skip"
+    user?.organizationId ? { organizationId: user.organizationId } : 'skip',
   );
 
-  const [wizardData, setWizardData] = useState<Record<string, string | number | boolean | null>>({});
+  const [wizardData, setWizardData] = useState<Record<string, string | number | boolean | null>>(
+    {},
+  );
 
   const updateStepData = (key: string, value: string | number | boolean | null) => {
-    setWizardData(prev => ({ ...prev, [key]: value }));
+    setWizardData((prev) => ({ ...prev, [key]: value }));
   };
 
   const steps: WizardStep[] = [
     {
-      id: "type",
-      title: t("driverWizard.steps.type.title"),
-      description: t("driverWizard.steps.type.description"),
+      id: 'type',
+      title: t('driverWizard.steps.type.title'),
+      description: t('driverWizard.steps.type.description'),
       icon: <Car className="w-5 h-5" />,
       content: (
         <CardSelectionStep
           stepData={wizardData}
           updateStepData={updateStepData}
           field="tripCategory"
-          label={t("driverWizard.steps.type.typeLabel")}
+          label={t('driverWizard.steps.type.typeLabel')}
           options={[
             {
-              value: "airport",
-              title: t("driverWizard.types.airport"),
-              description: t("driverWizard.types.airportDesc"),
+              value: 'airport',
+              title: t('driverWizard.types.airport'),
+              description: t('driverWizard.types.airportDesc'),
               icon: <Calendar className="w-6 h-6" />,
-              color: "bg-blue-500/10 text-blue-600",
+              color: 'bg-blue-500/10 text-blue-600',
             },
             {
-              value: "office_transfer",
-              title: t("driverWizard.types.officeTransfer"),
-              description: t("driverWizard.types.officeTransferDesc"),
+              value: 'office_transfer',
+              title: t('driverWizard.types.officeTransfer'),
+              description: t('driverWizard.types.officeTransferDesc'),
               icon: <MapPin className="w-6 h-6" />,
-              color: "bg-green-500/10 text-green-600",
+              color: 'bg-green-500/10 text-green-600',
             },
             {
-              value: "client_meeting",
-              title: t("driverWizard.types.clientMeeting"),
-              description: t("driverWizard.types.clientMeetingDesc"),
+              value: 'client_meeting',
+              title: t('driverWizard.types.clientMeeting'),
+              description: t('driverWizard.types.clientMeetingDesc'),
               icon: <Users className="w-6 h-6" />,
-              color: "bg-purple-500/10 text-purple-600",
+              color: 'bg-purple-500/10 text-purple-600',
             },
           ]}
           columns={3}
@@ -87,9 +85,9 @@ export function RequestDriverWizard({
       ),
     },
     {
-      id: "route",
-      title: t("driverWizard.steps.route.title"),
-      description: t("driverWizard.steps.route.description"),
+      id: 'route',
+      title: t('driverWizard.steps.route.title'),
+      description: t('driverWizard.steps.route.description'),
       icon: <MapPin className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
@@ -97,38 +95,40 @@ export function RequestDriverWizard({
             stepData={wizardData}
             updateStepData={updateStepData}
             field="from"
-            label={t("driverWizard.steps.route.fromLabel")}
-            placeholder={t("driverWizard.steps.route.fromPlaceholder")}
+            label={t('driverWizard.steps.route.fromLabel')}
+            placeholder={t('driverWizard.steps.route.fromPlaceholder')}
             required
           />
           <TextInputStep
             stepData={wizardData}
             updateStepData={updateStepData}
             field="to"
-            label={t("driverWizard.steps.route.toLabel")}
-            placeholder={t("driverWizard.steps.route.toPlaceholder")}
+            label={t('driverWizard.steps.route.toLabel')}
+            placeholder={t('driverWizard.steps.route.toPlaceholder')}
             required
           />
           <div className="space-y-2">
-            <Label htmlFor="purpose">{t("driverWizard.steps.route.purposeLabel")}</Label>
+            <Label htmlFor="purpose">{t('driverWizard.steps.route.purposeLabel')}</Label>
             <TextInputStep
               stepData={wizardData}
               updateStepData={updateStepData}
               field="purpose"
-              label={t("driverWizard.steps.route.purposeLabel")}
-              placeholder={t("driverWizard.steps.route.purposePlaceholder")}
+              label={t('driverWizard.steps.route.purposeLabel')}
+              placeholder={t('driverWizard.steps.route.purposePlaceholder')}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="passengerCount">{t("driverWizard.steps.route.passengerCountLabel")}</Label>
+            <Label htmlFor="passengerCount">
+              {t('driverWizard.steps.route.passengerCountLabel')}
+            </Label>
             <Input
               id="passengerCount"
               type="number"
               min="1"
               max="10"
-              value={String(wizardData.passengerCount || "1")}
-              onChange={(e) => updateStepData("passengerCount", parseInt(e.target.value) || 1)}
+              value={String(wizardData.passengerCount || '1')}
+              onChange={(e) => updateStepData('passengerCount', parseInt(e.target.value) || 1)}
               className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)]"
             />
           </div>
@@ -136,38 +136,39 @@ export function RequestDriverWizard({
       ),
     },
     {
-      id: "driver",
-      title: t("driverWizard.steps.driver.title"),
-      description: t("driverWizard.steps.driver.description"),
+      id: 'driver',
+      title: t('driverWizard.steps.driver.title'),
+      description: t('driverWizard.steps.driver.description'),
       icon: <Car className="w-5 h-5" />,
-      content: drivers && drivers.length > 0 ? (
-        <CardSelectionStep
-          stepData={wizardData}
-          updateStepData={updateStepData}
-          field="driverId"
-          label={t("driverWizard.steps.driver.selectLabel")}
-          options={drivers
-            .filter(driver => driver !== null)
-            .map(driver => ({
-              value: driver._id,
-              title: driver.userName,
-              description: driver.userPosition || "",
-              icon: <Car className="w-6 h-6" />,
-              color: "bg-blue-500/10 text-blue-600",
-            }))}
-          columns={2}
-          required
-        />
-      ) : (
-        <div className="text-center py-8 text-[var(--text-muted)]">
-          {t("driverWizard.steps.driver.noDrivers")}
-        </div>
-      ),
+      content:
+        drivers && drivers.length > 0 ? (
+          <CardSelectionStep
+            stepData={wizardData}
+            updateStepData={updateStepData}
+            field="driverId"
+            label={t('driverWizard.steps.driver.selectLabel')}
+            options={drivers
+              .filter((driver) => driver !== null)
+              .map((driver) => ({
+                value: driver._id,
+                title: driver.userName,
+                description: driver.userPosition || '',
+                icon: <Car className="w-6 h-6" />,
+                color: 'bg-blue-500/10 text-blue-600',
+              }))}
+            columns={2}
+            required
+          />
+        ) : (
+          <div className="text-center py-8 text-[var(--text-muted)]">
+            {t('driverWizard.steps.driver.noDrivers')}
+          </div>
+        ),
     },
     {
-      id: "datetime",
-      title: t("driverWizard.steps.datetime.title"),
-      description: t("driverWizard.steps.datetime.description"),
+      id: 'datetime',
+      title: t('driverWizard.steps.datetime.title'),
+      description: t('driverWizard.steps.datetime.description'),
       icon: <Clock className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
@@ -176,7 +177,7 @@ export function RequestDriverWizard({
               stepData={wizardData}
               updateStepData={updateStepData}
               field="date"
-              label={t("driverWizard.steps.datetime.dateLabel")}
+              label={t('driverWizard.steps.datetime.dateLabel')}
               type="text"
               placeholder="YYYY-MM-DD"
               required
@@ -185,7 +186,7 @@ export function RequestDriverWizard({
               stepData={wizardData}
               updateStepData={updateStepData}
               field="time"
-              label={t("driverWizard.steps.datetime.timeLabel")}
+              label={t('driverWizard.steps.datetime.timeLabel')}
               type="text"
               placeholder="HH:MM"
               required
@@ -195,8 +196,8 @@ export function RequestDriverWizard({
             stepData={wizardData}
             updateStepData={updateStepData}
             field="notes"
-            label={t("driverWizard.steps.datetime.notesLabel")}
-            placeholder={t("driverWizard.steps.datetime.notesPlaceholder")}
+            label={t('driverWizard.steps.datetime.notesLabel')}
+            placeholder={t('driverWizard.steps.datetime.notesPlaceholder')}
             rows={3}
           />
         </div>
@@ -207,7 +208,7 @@ export function RequestDriverWizard({
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
       if (!user?.organizationId) {
-        toast.error(t("driverWizard.toast.noOrg"));
+        toast.error(t('driverWizard.toast.noOrg'));
         return;
       }
 
@@ -219,7 +220,7 @@ export function RequestDriverWizard({
       const result = await requestDriver({
         organizationId: user.organizationId,
         requesterId: userId,
-        driverId: data.driverId as Id<"drivers">,
+        driverId: data.driverId as Id<'drivers'>,
         startTime,
         endTime,
         tripInfo: {
@@ -229,7 +230,13 @@ export function RequestDriverWizard({
           passengerCount: Number(data.passengerCount) || 1,
           notes: data.notes ? String(data.notes) : undefined,
         },
-        tripCategory: data.tripCategory as "client_meeting" | "airport" | "office_transfer" | "emergency" | "team_event" | "personal",
+        tripCategory: data.tripCategory as
+          | 'client_meeting'
+          | 'airport'
+          | 'office_transfer'
+          | 'emergency'
+          | 'team_event'
+          | 'personal',
       });
 
       if (result.error) {
@@ -237,10 +244,10 @@ export function RequestDriverWizard({
         return;
       }
 
-      toast.success(t("driverWizard.toast.success"));
+      toast.success(t('driverWizard.toast.success'));
       onComplete?.();
     } catch (error) {
-      toast.error(t("driverWizard.toast.error"));
+      toast.error(t('driverWizard.toast.error'));
       console.error(error);
     }
   };
@@ -250,8 +257,8 @@ export function RequestDriverWizard({
       steps={steps}
       onComplete={handleSubmit}
       onCancel={onCancel}
-      submitLabel={t("driverWizard.submit")}
-      cancelLabel={t("actions.cancel")}
+      submitLabel={t('driverWizard.submit')}
+      cancelLabel={t('actions.cancel')}
     />
   );
 }

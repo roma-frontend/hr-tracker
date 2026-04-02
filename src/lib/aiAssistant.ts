@@ -1,6 +1,6 @@
 /**
  * AI Assistant Router - Intelligent request processing based on user roles
- * 
+ *
  * Deep knowledge engine for the ShieldOffice HR platform.
  * Every feature, policy, and capability is documented here so the AI
  * can answer any question about the system with expert-level accuracy.
@@ -39,23 +39,51 @@ export const AI_CAPABILITIES: AICapability[] = [
     name: 'View Calendar',
     description: 'Open and view the team calendar with all approved leaves',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['calendar', 'календарь', 'покажи календарь', 'show calendar', 'открой календарь', 'open calendar', 'օdelays', 'delaysdelays'],
-    action: '/calendar'
+    keywords: [
+      'calendar',
+      'календарь',
+      'покажи календарь',
+      'show calendar',
+      'открой календарь',
+      'open calendar',
+      'օdelays',
+      'delaysdelays',
+    ],
+    action: '/calendar',
   },
   {
     id: 'view_my_leaves',
     name: 'View My Leaves',
     description: 'Check personal leave requests and balances',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['my leaves', 'мои отпуска', 'мой отпуск', 'my vacation', 'leave balance', 'остаток отпуска', 'իdelays', 'delaysdelays'],
-    action: '/leaves'
+    keywords: [
+      'my leaves',
+      'мои отпуска',
+      'мой отпуск',
+      'my vacation',
+      'leave balance',
+      'остаток отпуска',
+      'իdelays',
+      'delaysdelays',
+    ],
+    action: '/leaves',
   },
   {
     id: 'book_leave',
     name: 'Book Leave',
     description: 'Request a new leave/vacation through the AI assistant',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['book leave', 'забронировать отпуск', 'хочу в отпуск', 'request vacation', 'взять отпуск', 'request leave', 'sick day', 'болею', 'больничный'],
+    keywords: [
+      'book leave',
+      'забронировать отпуск',
+      'хочу в отпуск',
+      'request vacation',
+      'взять отпуск',
+      'request leave',
+      'sick day',
+      'болею',
+      'больничный',
+    ],
   },
   {
     id: 'view_tasks',
@@ -63,7 +91,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Check assigned tasks with priorities and deadlines',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
     keywords: ['tasks', 'задачи', 'мои задачи', 'my tasks', 'todo', 'что делать', 'առdelays'],
-    action: '/tasks'
+    action: '/tasks',
   },
   {
     id: 'view_profile',
@@ -71,7 +99,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Open user profile settings',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
     keywords: ['profile', 'профиль', 'мой профиль', 'my profile'],
-    action: '/profile'
+    action: '/profile',
   },
   {
     id: 'view_settings',
@@ -79,22 +107,37 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Open app settings (theme, language, notifications)',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
     keywords: ['settings', 'настройки', 'параmetры', 'language', 'theme', 'тема'],
-    action: '/settings'
+    action: '/settings',
   },
   {
     id: 'check_attendance',
     name: 'Check In/Out',
     description: 'View attendance records and check in/out status',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['attendance', 'посещаемость', 'check in', 'отметиться', 'check out', 'рабочее время'],
-    action: '/attendance'
+    keywords: [
+      'attendance',
+      'посещаемость',
+      'check in',
+      'отметиться',
+      'check out',
+      'рабочее время',
+    ],
+    action: '/attendance',
   },
   {
     id: 'view_team',
     name: 'View Team',
     description: 'Check who is available, on leave, or busy',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['team', 'команда', 'коллеги', 'who is available', 'кто на работе', 'кто в отпуске', 'who is on leave'],
+    keywords: [
+      'team',
+      'команда',
+      'коллеги',
+      'who is available',
+      'кто на работе',
+      'кто в отпуске',
+      'who is on leave',
+    ],
   },
   // ═══════════════════════════════════════════════════════════════
   // DRIVER MANAGEMENT
@@ -104,40 +147,75 @@ export const AI_CAPABILITIES: AICapability[] = [
     name: 'Request Driver',
     description: 'Book a driver for a business trip or airport transfer',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['driver', 'водитель', 'заказать водителя', 'book driver', 'трансфер', 'airport transfer', 'поездка', 'drive me', 'need a car'],
-    action: '/drivers'
+    keywords: [
+      'driver',
+      'водитель',
+      'заказать водителя',
+      'book driver',
+      'трансфер',
+      'airport transfer',
+      'поездка',
+      'drive me',
+      'need a car',
+    ],
+    action: '/drivers',
   },
   {
     id: 'check_driver_availability',
     name: 'Check Driver Availability',
     description: 'Check if a driver is available at a specific time',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['driver available', 'водитель свободен', 'driver availability', 'когда водитель', 'driver schedule', 'расписание водителя', 'занятость водителя'],
-    action: '/drivers'
+    keywords: [
+      'driver available',
+      'водитель свободен',
+      'driver availability',
+      'когда водитель',
+      'driver schedule',
+      'расписание водителя',
+      'занятость водителя',
+    ],
+    action: '/drivers',
   },
   {
     id: 'view_driver_calendar',
     name: 'View Driver Calendar',
     description: 'View driver calendar and schedule (requires access permission)',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['driver calendar', 'календарь водителя', 'driver schedule', 'расписание', 'view availability', 'посмотреть занятость'],
-    action: '/drivers'
+    keywords: [
+      'driver calendar',
+      'календарь водителя',
+      'driver schedule',
+      'расписание',
+      'view availability',
+      'посмотреть занятость',
+    ],
+    action: '/drivers',
   },
   {
     id: 'my_driver_requests',
     name: 'My Driver Requests',
     description: 'View status of your driver booking requests',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['my driver requests', 'мои заявки на водителя', 'driver booking status', 'статус заявки'],
-    action: '/drivers'
+    keywords: [
+      'my driver requests',
+      'мои заявки на водителя',
+      'driver booking status',
+      'статус заявки',
+    ],
+    action: '/drivers',
   },
   {
     id: 'driver_access_request',
     name: 'Request Driver Calendar Access',
     description: 'Request permission to view a driver calendar',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
-    keywords: ['driver access', 'доступ к водителю', 'calendar permission', 'разрешение на календарь'],
-    action: '/drivers'
+    keywords: [
+      'driver access',
+      'доступ к водителю',
+      'calendar permission',
+      'разрешение на календарь',
+    ],
+    action: '/drivers',
   },
   {
     id: 'view_dashboard',
@@ -145,7 +223,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Open the main dashboard with overview widgets',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
     keywords: ['dashboard', 'дашборд', 'главная', 'home', 'обзор', 'overview'],
-    action: '/dashboard'
+    action: '/dashboard',
   },
   {
     id: 'open_chat',
@@ -153,7 +231,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Open the team messaging / chat page',
     requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
     keywords: ['chat', 'чат', 'сообщения', 'messages', 'написать', 'мессенджер', 'messenger'],
-    action: '/chat'
+    action: '/chat',
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -164,16 +242,29 @@ export const AI_CAPABILITIES: AICapability[] = [
     name: 'Approve Leave Requests',
     description: 'Review and approve/reject team leave requests',
     requiredRole: ['supervisor', 'admin', 'superadmin'],
-    keywords: ['approve leaves', 'одобрить отпуска', 'review requests', 'проверить заявки', 'pending approvals', 'ожидающие одобрения'],
-    action: '/approvals'
+    keywords: [
+      'approve leaves',
+      'одобрить отпуска',
+      'review requests',
+      'проверить заявки',
+      'pending approvals',
+      'ожидающие одобрения',
+    ],
+    action: '/approvals',
   },
   {
     id: 'view_team_attendance',
     name: 'View Team Attendance',
     description: 'Monitor team attendance, late arrivals, and work hours',
     requiredRole: ['supervisor', 'admin', 'superadmin'],
-    keywords: ['team attendance', 'посещаемость команды', 'who is late', 'кто опоздал', 'team status'],
-    action: '/attendance'
+    keywords: [
+      'team attendance',
+      'посещаемость команды',
+      'who is late',
+      'кто опоздал',
+      'team status',
+    ],
+    action: '/attendance',
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -184,8 +275,15 @@ export const AI_CAPABILITIES: AICapability[] = [
     name: 'Manage Employees',
     description: 'Add, edit, or remove employees in the organization',
     requiredRole: ['admin', 'superadmin'],
-    keywords: ['employees', 'сотрудники', 'add employee', 'добавить сотрудника', 'manage team', 'управление персоналом'],
-    action: '/employees'
+    keywords: [
+      'employees',
+      'сотрудники',
+      'add employee',
+      'добавить сотрудника',
+      'manage team',
+      'управление персоналом',
+    ],
+    action: '/employees',
   },
   {
     id: 'view_analytics',
@@ -193,15 +291,21 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Access HR analytics — leave trends, attendance patterns, team metrics',
     requiredRole: ['admin', 'superadmin'],
     keywords: ['analytics', 'аналитика', 'reports', 'отчеты', 'статистика', 'statistics', 'trends'],
-    action: '/analytics'
+    action: '/analytics',
   },
   {
     id: 'approve_join_requests',
     name: 'Approve Join Requests',
     description: 'Review requests from people wanting to join the organization',
     requiredRole: ['admin', 'superadmin'],
-    keywords: ['join requests', 'заявки на присоединение', 'new employees', 'новые сотрудники', 'join organization'],
-    action: '/join-requests'
+    keywords: [
+      'join requests',
+      'заявки на присоединение',
+      'new employees',
+      'новые сотрудники',
+      'join organization',
+    ],
+    action: '/join-requests',
   },
   {
     id: 'organization_settings',
@@ -209,7 +313,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Configure organization settings, departments, work schedule',
     requiredRole: ['admin', 'superadmin'],
     keywords: ['org settings', 'настройки организации', 'configure', 'конфигурация'],
-    action: '/settings'
+    action: '/settings',
   },
   {
     id: 'view_reports',
@@ -217,7 +321,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Generate and export leave/attendance reports',
     requiredRole: ['admin', 'superadmin'],
     keywords: ['reports', 'отчеты', 'download report', 'скачать отчет', 'export', 'экспорт'],
-    action: '/reports'
+    action: '/reports',
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -229,7 +333,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Create and manage all organizations on the platform',
     requiredRole: ['superadmin'],
     keywords: ['organizations', 'организации', 'all orgs', 'все организации', 'create org'],
-    action: '/superadmin/organizations'
+    action: '/superadmin/organizations',
   },
   {
     id: 'approve_org_requests',
@@ -237,15 +341,22 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Review new organization creation requests',
     requiredRole: ['superadmin'],
     keywords: ['org requests', 'заявки организаций', 'organization requests', 'новые организации'],
-    action: '/superadmin/org-requests'
+    action: '/superadmin/org-requests',
   },
   {
     id: 'security_monitoring',
     name: 'Security Monitoring',
     description: 'Monitor security alerts, suspicious logins, brute-force attempts',
     requiredRole: ['superadmin'],
-    keywords: ['security', 'безопасность', 'alerts', 'оповещения', 'suspicious', 'подозрительная активность'],
-    action: '/superadmin/security'
+    keywords: [
+      'security',
+      'безопасность',
+      'alerts',
+      'оповещения',
+      'suspicious',
+      'подозрительная активность',
+    ],
+    action: '/superadmin/security',
   },
   {
     id: 'stripe_dashboard',
@@ -253,7 +364,7 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'View payment and subscription data across all organizations',
     requiredRole: ['superadmin'],
     keywords: ['stripe', 'payments', 'платежи', 'subscriptions', 'подписки', 'billing', 'оплата'],
-    action: '/superadmin/stripe-dashboard'
+    action: '/superadmin/stripe-dashboard',
   },
   {
     id: 'manage_subscriptions',
@@ -261,15 +372,23 @@ export const AI_CAPABILITIES: AICapability[] = [
     description: 'Manage organization subscriptions and plans (Starter, Professional, Enterprise)',
     requiredRole: ['superadmin'],
     keywords: ['subscriptions', 'подписки', 'plans', 'тарифы', 'upgrade', 'downgrade'],
-    action: '/superadmin/subscriptions'
+    action: '/superadmin/subscriptions',
   },
   {
     id: 'maintenance_broadcasts',
     name: 'Send Broadcast Announcements',
     description: 'Send maintenance/announcement broadcasts to all organization users',
     requiredRole: ['superadmin'],
-    keywords: ['broadcast', 'рассылка', 'announcement', 'объявление', 'maintenance', 'обслуживание', 'уведомление'],
-    action: '/superadmin/broadcasts'
+    keywords: [
+      'broadcast',
+      'рассылка',
+      'announcement',
+      'объявление',
+      'maintenance',
+      'обслуживание',
+      'уведомление',
+    ],
+    action: '/superadmin/broadcasts',
   },
 ];
 
@@ -277,7 +396,7 @@ export const AI_CAPABILITIES: AICapability[] = [
  * Get capabilities available to a specific role
  */
 export function getCapabilitiesForRole(role: UserRole): AICapability[] {
-  return AI_CAPABILITIES.filter(cap => cap.requiredRole.includes(role));
+  return AI_CAPABILITIES.filter((cap) => cap.requiredRole.includes(role));
 }
 
 /**
@@ -303,7 +422,7 @@ export function detectIntent(message: string, userRole: UserRole): AICapability 
  */
 export function buildRoleBasedPrompt(userContext: UserContext, fullContext?: any): string {
   const capabilities = getCapabilitiesForRole(userContext.role);
-  
+
   let prompt = `You are **Shield HR AI** — the intelligent assistant built into the ShieldOffice HR platform. You are an expert on every feature, policy, and capability of this system. Users trust you for accurate, thoughtful, and helpful answers.
 
 ═══════════════════════════════════════════════════════════════
@@ -333,7 +452,7 @@ CURRENT USER
 💼 Position: ${userContext.position || 'Not specified'}
 
 AVAILABLE CAPABILITIES FOR THIS USER:
-${capabilities.map(cap => `• ${cap.name} — ${cap.description}`).join('\n')}
+${capabilities.map((cap) => `• ${cap.name} — ${cap.description}`).join('\n')}
 
 `;
 
@@ -657,36 +776,36 @@ export function hasPermission(userRole: UserRole, requiredRoles: UserRole[]): bo
 export function getRoleSuggestions(role: UserRole): string[] {
   const allSuggestions: Record<UserRole, string[]> = {
     employee: [
-      "📋 Сколько дней отпуска осталось?",
-      "📅 Кто сегодня в отпуске?",
-      "🤒 Хочу взять больничный",
-      "✅ Мои задачи на сегодня",
-      "💬 Открой чат",
-      "📊 Покажи мою посещаемость",
+      '📋 Сколько дней отпуска осталось?',
+      '📅 Кто сегодня в отпуске?',
+      '🤒 Хочу взять больничный',
+      '✅ Мои задачи на сегодня',
+      '💬 Открой чат',
+      '📊 Покажи мою посещаемость',
     ],
     supervisor: [
-      "👥 Кто из команды сегодня на работе?",
-      "📋 Ожидающие заявки на отпуск",
-      "⏰ Кто опоздал сегодня?",
-      "✅ Создать задачу для команды",
-      "📅 Покажи календарь команды",
-      "📊 Статистика команды",
+      '👥 Кто из команды сегодня на работе?',
+      '📋 Ожидающие заявки на отпуск',
+      '⏰ Кто опоздал сегодня?',
+      '✅ Создать задачу для команды',
+      '📅 Покажи календарь команды',
+      '📊 Статистика команды',
     ],
     admin: [
-      "📊 Показать аналитику",
-      "👥 Список всех сотрудников",
-      "📋 Заявки на присоединение",
-      "📈 Отчет по отпускам",
-      "✅ Назначить задачу",
-      "⏰ Посещаемость за сегодня",
+      '📊 Показать аналитику',
+      '👥 Список всех сотрудников',
+      '📋 Заявки на присоединение',
+      '📈 Отчет по отпускам',
+      '✅ Назначить задачу',
+      '⏰ Посещаемость за сегодня',
     ],
     superadmin: [
-      "🏢 Все организации",
-      "🔒 Проверить безопасность",
-      "💳 Stripe подписки",
-      "📢 Отправить объявление",
-      "📊 Статистика платформы",
-      "👥 Все пользователи",
+      '🏢 Все организации',
+      '🔒 Проверить безопасность',
+      '💳 Stripe подписки',
+      '📢 Отправить объявление',
+      '📊 Статистика платформы',
+      '👥 Все пользователи',
     ],
   };
 

@@ -1,30 +1,30 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
 
 export interface Notification {
-  id: string
-  title: string
-  message: string
-  type: 'info' | 'success' | 'warning' | 'error'
-  read: boolean
-  createdAt: Date
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  read: boolean;
+  createdAt: Date;
 }
 
 interface UIState {
   // Sidebar
-  sidebarOpen: boolean
-  toggleSidebar: () => void
-  setSidebarOpen: (open: boolean) => void
+  sidebarOpen: boolean;
+  toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
 
   // Selected date
-  selectedDate: Date | null
-  setSelectedDate: (date: Date | null) => void
+  selectedDate: Date | null;
+  setSelectedDate: (date: Date | null) => void;
 
   // Notifications
-  notifications: Notification[]
-  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void
-  removeNotification: (id: string) => void
-  markNotificationRead: (id: string) => void
-  clearAllNotifications: () => void
+  notifications: Notification[];
+  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void;
+  removeNotification: (id: string) => void;
+  markNotificationRead: (id: string) => void;
+  clearAllNotifications: () => void;
 }
 
 export const useUIStore = create<UIState>()((set) => ({
@@ -60,10 +60,8 @@ export const useUIStore = create<UIState>()((set) => ({
 
   markNotificationRead: (id: string) =>
     set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
     })),
 
   clearAllNotifications: () => set({ notifications: [] }),
-}))
+}));

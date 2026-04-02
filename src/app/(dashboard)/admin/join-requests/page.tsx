@@ -1,24 +1,24 @@
 /**
  * Join Requests Management Page
- * 
+ *
  * For admins to approve or reject join requests from new users.
  */
 
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, XCircle, Clock, Users, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
+import React, { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import { CheckCircle2, XCircle, Clock, Users, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export default function JoinRequestsPage() {
   const { t } = useTranslation();
@@ -26,48 +26,48 @@ export default function JoinRequestsPage() {
 
   const requests = useQuery(
     api.organizationJoinRequests.getOrgJoinRequests,
-    user?.organizationId ? { organizationId: user.organizationId as Id<"organizations"> } : "skip"
+    user?.organizationId ? { organizationId: user.organizationId as Id<'organizations'> } : 'skip',
   );
 
   const approveRequest = useMutation(api.organizationJoinRequests.approveJoinRequest);
   const rejectRequest = useMutation(api.organizationJoinRequests.rejectJoinRequest);
 
-  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReason, setRejectReason] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
 
-  const handleApprove = async (inviteId: Id<"organizationInvites">) => {
+  const handleApprove = async (inviteId: Id<'organizationInvites'>) => {
     if (!user?.id) return;
 
     try {
       await approveRequest({
         inviteId,
-        reviewerId: user.id as Id<"users">,
+        reviewerId: user.id as Id<'users'>,
       });
-      toast.success(t("joinRequests.approved", "Request approved"));
+      toast.success(t('joinRequests.approved', 'Request approved'));
     } catch (error: any) {
-      toast.error(error.message || t("joinRequests.approveFailed", "Failed to approve"));
+      toast.error(error.message || t('joinRequests.approveFailed', 'Failed to approve'));
     }
   };
 
-  const handleReject = async (inviteId: Id<"organizationInvites">) => {
+  const handleReject = async (inviteId: Id<'organizationInvites'>) => {
     if (!user?.id) return;
 
     if (!rejectReason.trim()) {
-      toast.error(t("joinRequests.enterReason", "Please enter a reason"));
+      toast.error(t('joinRequests.enterReason', 'Please enter a reason'));
       return;
     }
 
     try {
       await rejectRequest({
         inviteId,
-        reviewerId: user.id as Id<"users">,
+        reviewerId: user.id as Id<'users'>,
         reason: rejectReason,
       });
-      toast.success(t("joinRequests.rejected", "Request rejected"));
-      setRejectReason("");
+      toast.success(t('joinRequests.rejected', 'Request rejected'));
+      setRejectReason('');
       setRejectingId(null);
     } catch (error: any) {
-      toast.error(error.message || t("joinRequests.rejectFailed", "Failed to reject"));
+      toast.error(error.message || t('joinRequests.rejectFailed', 'Failed to reject'));
     }
   };
 
@@ -83,9 +83,9 @@ export default function JoinRequestsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">{t("joinRequests.title", "Join Requests")}</h1>
+        <h1 className="text-2xl font-bold">{t('joinRequests.title', 'Join Requests')}</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          {t("joinRequests.desc", "Review and approve join requests from new users")}
+          {t('joinRequests.desc', 'Review and approve join requests from new users')}
         </p>
       </div>
 
@@ -98,8 +98,10 @@ export default function JoinRequestsPage() {
                 <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{requests.filter((r: any) => r.status === "pending").length}</p>
-                <p className="text-sm text-gray-500">{t("joinRequests.pending", "Pending")}</p>
+                <p className="text-2xl font-bold">
+                  {requests.filter((r: any) => r.status === 'pending').length}
+                </p>
+                <p className="text-sm text-gray-500">{t('joinRequests.pending', 'Pending')}</p>
               </div>
             </div>
           </CardContent>
@@ -112,8 +114,10 @@ export default function JoinRequestsPage() {
                 <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{requests.filter((r: any) => r.status === "approved").length}</p>
-                <p className="text-sm text-gray-500">{t("joinRequests.approved", "Approved")}</p>
+                <p className="text-2xl font-bold">
+                  {requests.filter((r: any) => r.status === 'approved').length}
+                </p>
+                <p className="text-sm text-gray-500">{t('joinRequests.approved', 'Approved')}</p>
               </div>
             </div>
           </CardContent>
@@ -126,8 +130,10 @@ export default function JoinRequestsPage() {
                 <XCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{requests.filter((r: any) => r.status === "rejected").length}</p>
-                <p className="text-sm text-gray-500">{t("joinRequests.rejected", "Rejected")}</p>
+                <p className="text-2xl font-bold">
+                  {requests.filter((r: any) => r.status === 'rejected').length}
+                </p>
+                <p className="text-sm text-gray-500">{t('joinRequests.rejected', 'Rejected')}</p>
               </div>
             </div>
           </CardContent>
@@ -140,7 +146,7 @@ export default function JoinRequestsPage() {
           <Card>
             <CardContent className="py-8 text-center text-gray-500">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>{t("joinRequests.noRequests", "No join requests yet")}</p>
+              <p>{t('joinRequests.noRequests', 'No join requests yet')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -151,12 +157,20 @@ export default function JoinRequestsPage() {
                   <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12">
                       <AvatarImage src={request.requesterAvatar} />
-                      <AvatarFallback>{request.requesterName?.charAt(0) || "?"}</AvatarFallback>
+                      <AvatarFallback>{request.requesterName?.charAt(0) || '?'}</AvatarFallback>
                     </Avatar>
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         {request.requesterName}
-                        <Badge variant={request.status === "pending" ? "secondary" : request.status === "approved" ? "default" : t('common.destructive')}>
+                        <Badge
+                          variant={
+                            request.status === 'pending'
+                              ? 'secondary'
+                              : request.status === 'approved'
+                                ? 'default'
+                                : t('common.destructive')
+                          }
+                        >
                           {request.status}
                         </Badge>
                       </CardTitle>
@@ -173,14 +187,22 @@ export default function JoinRequestsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {request.status === "pending" && (
+                {request.status === 'pending' && (
                   <div className="space-y-4">
                     <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950 rounded-lg">
                       <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
                       <div className="text-sm text-amber-800 dark:text-amber-200">
-                        <p className="font-medium">{t("joinRequests.pendingInfo", "This user is waiting to join your organization")}</p>
+                        <p className="font-medium">
+                          {t(
+                            'joinRequests.pendingInfo',
+                            'This user is waiting to join your organization',
+                          )}
+                        </p>
                         <p className="text-amber-600 dark:text-amber-400">
-                          {t("joinRequests.pendingInfo2", "Approve to grant access, or reject with a reason")}
+                          {t(
+                            'joinRequests.pendingInfo2',
+                            'Approve to grant access, or reject with a reason',
+                          )}
                         </p>
                       </div>
                     </div>
@@ -191,7 +213,7 @@ export default function JoinRequestsPage() {
                         className="bg-green-600 hover:bg-green-700"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {t("joinRequests.approve", "Approve")}
+                        {t('joinRequests.approve', 'Approve')}
                       </Button>
 
                       {rejectingId === request._id ? (
@@ -199,7 +221,7 @@ export default function JoinRequestsPage() {
                           <Textarea
                             value={rejectReason}
                             onChange={(e) => setRejectReason(e.target.value)}
-                            placeholder={t("joinRequests.rejectReason", "Reason for rejection...")}
+                            placeholder={t('joinRequests.rejectReason', 'Reason for rejection...')}
                             className="min-h-[80px]"
                           />
                           <div className="flex gap-2">
@@ -208,17 +230,17 @@ export default function JoinRequestsPage() {
                               variant="destructive"
                               size="sm"
                             >
-                              {t("joinRequests.confirmReject", "Confirm Reject")}
+                              {t('joinRequests.confirmReject', 'Confirm Reject')}
                             </Button>
                             <Button
                               onClick={() => {
                                 setRejectingId(null);
-                                setRejectReason("");
+                                setRejectReason('');
                               }}
                               variant="outline"
                               size="sm"
                             >
-                              {t("cancel", "Cancel")}
+                              {t('cancel', 'Cancel')}
                             </Button>
                           </div>
                         </div>
@@ -226,38 +248,43 @@ export default function JoinRequestsPage() {
                         <Button
                           onClick={() => {
                             setRejectingId(request._id);
-                            setRejectReason("");
+                            setRejectReason('');
                           }}
                           variant="outline"
                         >
                           <XCircle className="w-4 h-4 mr-2" />
-                          {t("joinRequests.reject", "Reject")}
+                          {t('joinRequests.reject', 'Reject')}
                         </Button>
                       )}
                     </div>
                   </div>
                 )}
 
-                {request.status === "approved" && (
+                {request.status === 'approved' && (
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle2 className="w-5 h-5" />
                     <span>
-                      {t("joinRequests.approvedOn", "Approved on")} {request.reviewedAt ? new Date(request.reviewedAt).toLocaleDateString() : ""}
+                      {t('joinRequests.approvedOn', 'Approved on')}{' '}
+                      {request.reviewedAt ? new Date(request.reviewedAt).toLocaleDateString() : ''}
                     </span>
                   </div>
                 )}
 
-                {request.status === "rejected" && (
+                {request.status === 'rejected' && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-red-600">
                       <XCircle className="w-5 h-5" />
                       <span>
-                        {t("joinRequests.rejectedOn", "Rejected on")} {request.reviewedAt ? new Date(request.reviewedAt).toLocaleDateString() : ""}
+                        {t('joinRequests.rejectedOn', 'Rejected on')}{' '}
+                        {request.reviewedAt
+                          ? new Date(request.reviewedAt).toLocaleDateString()
+                          : ''}
                       </span>
                     </div>
                     {request.rejectionReason && (
                       <div className="p-3 bg-red-50 dark:bg-red-950 rounded-lg text-sm text-red-800 dark:text-red-200">
-                        <strong>{t("joinRequests.reason", "Reason")}:</strong> {request.rejectionReason}
+                        <strong>{t('joinRequests.reason', 'Reason')}:</strong>{' '}
+                        {request.rejectionReason}
                       </div>
                     )}
                   </div>

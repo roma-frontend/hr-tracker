@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { CreateSupportTicketWizard } from "@/components/superadmin/CreateSupportTicketWizard";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useTranslation } from "react-i18next";
+import { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { CreateSupportTicketWizard } from '@/components/superadmin/CreateSupportTicketWizard';
+import type { Id } from '@/convex/_generated/dataModel';
+import { useTranslation } from 'react-i18next';
 import {
   Ticket,
   AlertCircle,
@@ -24,17 +24,17 @@ import {
   MessageSquare,
   Eye,
   X,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -42,36 +42,33 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { t } from "i18next";
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { t } from 'i18next';
 
 export default function SupportTicketsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
-  const [createDialogOpen, setCreateDialogOpen] = useState(searchParams.get("new") === "true");
+  const [createDialogOpen, setCreateDialogOpen] = useState(searchParams.get('new') === 'true');
 
-  const tickets = useQuery(
-    api.tickets.getAllTickets,
-    user?.id ? {} : "skip"
-  );
-  
+  const tickets = useQuery(api.tickets.getAllTickets, user?.id ? {} : 'skip');
+
   const stats = useQuery(api.tickets.getTicketStats);
 
   const filteredTickets = tickets?.filter((ticket: any) => {
-    const matchesStatus = statusFilter === "all" || ticket.status === statusFilter;
-    const matchesPriority = priorityFilter === "all" || ticket.priority === priorityFilter;
-    const matchesSearch = 
+    const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
+    const matchesSearch =
       ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticket.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticket.creatorName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -80,31 +77,31 @@ export default function SupportTicketsPage() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "critical":
-        return "bg-red-500/10 text-red-600 border-red-500/30";
-      case "high":
-        return "bg-orange-500/10 text-orange-600 border-orange-500/30";
-      case "medium":
-        return "bg-yellow-500/10 text-yellow-600 border-yellow-500/30";
+      case 'critical':
+        return 'bg-red-500/10 text-red-600 border-red-500/30';
+      case 'high':
+        return 'bg-orange-500/10 text-orange-600 border-orange-500/30';
+      case 'medium':
+        return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30';
       default:
-        return "bg-blue-500/10 text-blue-600 border-blue-500/30";
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/30";
-      case "in_progress":
-        return "bg-purple-500/10 text-purple-600 border-purple-500/30";
-      case "waiting_customer":
-        return "bg-orange-500/10 text-orange-600 border-orange-500/30";
-      case "resolved":
-        return "bg-green-500/10 text-green-600 border-green-500/30";
-      case "closed":
-        return "bg-gray-500/10 text-gray-600 border-gray-500/30";
+      case 'open':
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
+      case 'in_progress':
+        return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
+      case 'waiting_customer':
+        return 'bg-orange-500/10 text-orange-600 border-orange-500/30';
+      case 'resolved':
+        return 'bg-green-500/10 text-green-600 border-green-500/30';
+      case 'closed':
+        return 'bg-gray-500/10 text-gray-600 border-gray-500/30';
       default:
-        return "bg-gray-500/10 text-gray-600 border-gray-500/30";
+        return 'bg-gray-500/10 text-gray-600 border-gray-500/30';
     }
   };
 
@@ -117,18 +114,19 @@ export default function SupportTicketsPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+              <h1
+                className="text-3xl md:text-4xl font-bold mb-2"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {t('superadmin.support.title')}
               </h1>
-              <p className="text-muted-foreground">
-                {t('superadmin.support.subtitle')}
-              </p>
+              <p className="text-muted-foreground">{t('superadmin.support.subtitle')}</p>
             </div>
             <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
               <Plus className="w-4 h-4" />
@@ -192,7 +190,7 @@ export default function SupportTicketsPage() {
         )}
 
         {/* Filters */}
-        <Card className="mb-6" style={{ background: "var(--card)" }}>
+        <Card className="mb-6" style={{ background: 'var(--card)' }}>
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-3 items-center">
               <div className="relative flex-1 min-w-[200px] max-w-md">
@@ -212,7 +210,9 @@ export default function SupportTicketsPage() {
                   <SelectItem value="all">{t('superadmin.support.allStatuses')}</SelectItem>
                   <SelectItem value="open">{t('superadmin.support.open')}</SelectItem>
                   <SelectItem value="in_progress">{t('superadmin.support.inProgress')}</SelectItem>
-                  <SelectItem value="waiting_customer">{t('superadmin.support.waitingCustomer')}</SelectItem>
+                  <SelectItem value="waiting_customer">
+                    {t('superadmin.support.waitingCustomer')}
+                  </SelectItem>
                   <SelectItem value="resolved">{t('superadmin.support.resolved')}</SelectItem>
                   <SelectItem value="closed">{t('superadmin.support.closed')}</SelectItem>
                 </SelectContent>
@@ -234,7 +234,7 @@ export default function SupportTicketsPage() {
         </Card>
 
         {/* Tickets List */}
-        <Card style={{ background: "var(--card)" }}>
+        <Card style={{ background: 'var(--card)' }}>
           <CardHeader>
             <CardTitle>{t('superadmin.support.tickets')}</CardTitle>
             <CardDescription>
@@ -273,8 +273,8 @@ export default function SupportTicketsPage() {
             <DialogTitle>{t('superadmin.support.createTicket')}</DialogTitle>
           </DialogHeader>
           <CreateSupportTicketWizard
-            userId={user.id as Id<"users">}
-            organizationId={user.organizationId as Id<"organizations">}
+            userId={user.id as Id<'users'>}
+            organizationId={user.organizationId as Id<'organizations'>}
             onComplete={() => {
               setCreateDialogOpen(false);
               router.refresh();
@@ -290,7 +290,7 @@ export default function SupportTicketsPage() {
           ticketId={selectedTicket}
           open={!!selectedTicket}
           onOpenChange={(open) => !open && setSelectedTicket(null)}
-          userId={user.id as Id<"users">}
+          userId={user.id as Id<'users'>}
         />
       )}
     </div>
@@ -310,15 +310,15 @@ function StatCard({
   color: string;
 }) {
   const colorClasses: Record<string, string> = {
-    blue: "text-blue-500",
-    green: "text-green-500",
-    red: "text-red-500",
-    purple: "text-purple-500",
-    orange: "text-orange-500",
+    blue: 'text-blue-500',
+    green: 'text-green-500',
+    red: 'text-red-500',
+    purple: 'text-purple-500',
+    orange: 'text-orange-500',
   };
 
   return (
-    <Card style={{ background: "var(--background-subtle)" }}>
+    <Card style={{ background: 'var(--background-subtle)' }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs text-muted-foreground">{title}</p>
@@ -346,12 +346,12 @@ function TicketRow({
     <div
       onClick={onClick}
       className="p-4 rounded-lg border hover:border-primary/50 transition-colors cursor-pointer"
-      style={{ background: "var(--background-subtle)" }}
+      style={{ background: 'var(--background-subtle)' }}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
               {ticket.ticketNumber}
             </span>
             <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
@@ -362,7 +362,7 @@ function TicketRow({
               </Badge>
             )}
           </div>
-          <p className="text-sm truncate mb-1" style={{ color: "var(--text-primary)" }}>
+          <p className="text-sm truncate mb-1" style={{ color: 'var(--text-primary)' }}>
             {ticket.title}
           </p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -404,19 +404,21 @@ function CreateTicketDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userId: Id<"users">;
-  organizationId?: Id<"organizations">;
+  userId: Id<'users'>;
+  organizationId?: Id<'organizations'>;
 }) {
   const { t } = useTranslation();
   const createTicket = useMutation(api.tickets.createTicket);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high" | "critical">("medium");
-  const [category, setCategory] = useState<"technical" | "billing" | "access" | "feature_request" | "bug" | "other">("technical");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium');
+  const [category, setCategory] = useState<
+    'technical' | 'billing' | 'access' | 'feature_request' | 'bug' | 'other'
+  >('technical');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !description.trim()) {
       toast.error(t('error.fillRequiredFields'));
       return;
@@ -434,10 +436,10 @@ function CreateTicketDialog({
 
       toast.success(t('superadmin.support.ticketCreated', { ticketNumber: result.ticketNumber }));
       onOpenChange(false);
-      setTitle("");
-      setDescription("");
-      setPriority("medium");
-      setCategory("technical");
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
+      setCategory('technical');
     } catch (error) {
       toast.error(t('superadmin.support.createError'));
       console.error(error);
@@ -450,9 +452,7 @@ function CreateTicketDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t('superadmin.support.create.title')}</DialogTitle>
-            <DialogDescription>
-              {t('superadmin.support.create.description')}
-            </DialogDescription>
+            <DialogDescription>{t('superadmin.support.create.description')}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -501,7 +501,9 @@ function CreateTicketDialog({
             </div>
 
             <div>
-              <Label htmlFor={t('common.description')}>{t('superadmin.support.create.descriptionLabel')}</Label>
+              <Label htmlFor={t('common.description')}>
+                {t('superadmin.support.create.descriptionLabel')}
+              </Label>
               <Textarea
                 id={t('common.description')}
                 value={description}
@@ -516,9 +518,7 @@ function CreateTicketDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('actions.cancel')}
             </Button>
-            <Button type="submit">
-              {t('superadmin.support.create.submit')}
-            </Button>
+            <Button type="submit">{t('superadmin.support.create.submit')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -536,19 +536,19 @@ function TicketDetailDialog({
   ticketId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userId: Id<"users">;
+  userId: Id<'users'>;
 }) {
   const ticket = useQuery(
     api.tickets.getTicketById,
-    open ? { ticketId: ticketId as Id<"supportTickets"> } : "skip"
+    open ? { ticketId: ticketId as Id<'supportTickets'> } : 'skip',
   );
-  
+
   const updateStatus = useMutation(api.tickets.updateTicketStatus);
   const assignTicket = useMutation(api.tickets.assignTicket);
   const addComment = useMutation(api.tickets.addTicketComment);
   const resolveTicket = useMutation(api.tickets.resolveTicket);
 
-  const [commentText, setCommentText] = useState("");
+  const [commentText, setCommentText] = useState('');
   const [isInternal, setIsInternal] = useState(false);
 
   const handleAddComment = async () => {
@@ -556,32 +556,32 @@ function TicketDetailDialog({
 
     try {
       await addComment({
-        ticketId: ticketId as Id<"supportTickets">,
+        ticketId: ticketId as Id<'supportTickets'>,
         authorId: userId,
         message: commentText,
         isInternal: isInternal,
       });
-      setCommentText("");
-      toast.success("Комментарий добавлен");
+      setCommentText('');
+      toast.success('Комментарий добавлен');
     } catch (error) {
-      toast.error("Ошибка при добавлении комментария");
+      toast.error('Ошибка при добавлении комментария');
     }
   };
 
   const handleResolve = async () => {
-    const resolution = prompt("Введите решение:");
+    const resolution = prompt('Введите решение:');
     if (!resolution) return;
 
     try {
       await resolveTicket({
-        ticketId: ticketId as Id<"supportTickets">,
+        ticketId: ticketId as Id<'supportTickets'>,
         resolution,
         userId,
       });
-      toast.success("Тикет решен");
+      toast.success('Тикет решен');
       onOpenChange(false);
     } catch (error) {
-      toast.error("Ошибка при решении тикета");
+      toast.error('Ошибка при решении тикета');
     }
   };
 
@@ -634,14 +634,16 @@ function TicketDetailDialog({
                 <div
                   key={comment._id}
                   className={`p-3 rounded-lg ${comment.isInternal ? 'bg-yellow-500/10 border-yellow-500/30' : 'bg-muted'}`}
-                  style={{ border: "1px solid var(--border)" }}
+                  style={{ border: '1px solid var(--border)' }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm font-medium">{comment.authorName}</span>
                       {comment.isInternal && (
-                        <Badge variant="secondary" className="text-xs">Внутренний</Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          Внутренний
+                        </Badge>
                       )}
                     </div>
                     <span className="text-xs text-muted-foreground">
@@ -686,15 +688,15 @@ function TicketDetailDialog({
               value={ticket.status}
               onValueChange={(value: any) => {
                 updateStatus({
-                  ticketId: ticketId as Id<"supportTickets">,
+                  ticketId: ticketId as Id<'supportTickets'>,
                   status: value,
                   userId,
                 });
-                toast.success("Статус обновлен");
+                toast.success('Статус обновлен');
               }}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t("superadmin.status")}/>
+                <SelectValue placeholder={t('superadmin.status')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="open">Открытый</SelectItem>
@@ -705,7 +707,7 @@ function TicketDetailDialog({
               </SelectContent>
             </Select>
 
-            {ticket.status !== "closed" && ticket.status !== "resolved" && (
+            {ticket.status !== 'closed' && ticket.status !== 'resolved' && (
               <Button onClick={handleResolve} variant="outline" size="sm">
                 Решить
               </Button>

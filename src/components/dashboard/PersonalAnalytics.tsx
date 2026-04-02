@@ -1,14 +1,14 @@
-﻿"use client";
+﻿'use client';
 
-import { useQuery } from "convex/react";
-import { useTranslation } from "react-i18next";
-import { api } from "../../../convex/_generated/api";
-import { Id } from "../../../convex/_generated/dataModel";
+import { useQuery } from 'convex/react';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../../convex/_generated/api';
+import { Id } from '../../../convex/_generated/dataModel';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Calendar, TrendingUp, Clock } from 'lucide-react';
 
 interface PersonalAnalyticsProps {
-  userId: Id<"users">;
+  userId: Id<'users'>;
 }
 
 const COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'];
@@ -35,9 +35,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
   }));
 
   // Recent leaves
-  const recentLeaves = userLeaves
-    .sort((a, b) => b.createdAt - a.createdAt)
-    .slice(0, 5);
+  const recentLeaves = userLeaves.sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -78,7 +76,10 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart */}
         {pieData.length > 0 && (
-          <div className="rounded-2xl p-6 shadow-lg border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div
+            className="rounded-2xl p-6 shadow-lg border"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+          >
             <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
               📊 Leave Distribution
             </h3>
@@ -98,15 +99,15 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    background: "var(--card)", 
-                    border: "1px solid var(--border)", 
-                    borderRadius: "8px", 
-                    color: "var(--text-primary)" 
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    color: 'var(--text-primary)',
                   }}
-                  itemStyle={{ color: "var(--text-primary)" }}
-                  labelStyle={{ color: "var(--text-primary)" }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -114,13 +115,18 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
         )}
 
         {/* Recent Leaves */}
-        <div className="rounded-2xl p-6 shadow-lg border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div
+          className="rounded-2xl p-6 shadow-lg border"
+          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+        >
           <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
             📅 Recent Requests
           </h3>
           <div className="space-y-3">
             {recentLeaves.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dashboard.noRecentRequests')}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                {t('dashboard.noRecentRequests')}
+              </p>
             ) : (
               recentLeaves.map((leave: any) => (
                 <div
@@ -132,7 +138,8 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
                       {leave.type.charAt(0).toUpperCase() + leave.type.slice(1)} Leave
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
+                      {new Date(leave.startDate).toLocaleDateString()} -{' '}
+                      {new Date(leave.endDate).toLocaleDateString()}
                     </p>
                   </div>
                   <span
@@ -140,8 +147,8 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
                       leave.status === 'approved'
                         ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                         : leave.status === 'pending'
-                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                     }`}
                   >
                     {leave.status}
@@ -154,15 +161,20 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
       </div>
 
       {/* Leave Balances */}
-      <div className="rounded-2xl p-6 shadow-lg border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-        <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
-          💼 Leave Balances
-        </h3>
+      <div
+        className="rounded-2xl p-6 shadow-lg border"
+        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">💼 Leave Balances</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">{t('dashboard.paidLeave')}</span>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">{balances.paid}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {t('dashboard.paidLeave')}
+              </span>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                {balances.paid}
+              </span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
@@ -174,8 +186,12 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">{t('dashboard.sickLeave')}</span>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">{balances.sick}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {t('dashboard.sickLeave')}
+              </span>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                {balances.sick}
+              </span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
@@ -187,8 +203,12 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">{t('dashboard.familyLeave')}</span>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">{balances.family}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {t('dashboard.familyLeave')}
+              </span>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                {balances.family}
+              </span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div

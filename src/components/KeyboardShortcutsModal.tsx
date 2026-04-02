@@ -1,10 +1,10 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { X, Keyboard, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { X, Keyboard, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -13,28 +13,28 @@ interface KeyboardShortcutsModalProps {
 
 export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsModalProps) {
   const { t } = useTranslation();
-  
+
   const shortcuts = [
     {
-      category: t("keyboard.navigation"),
+      category: t('keyboard.navigation'),
       items: [
-        { keys: ["⌘", "K"], description: t("keyboard.commandPalette") },
-        { keys: ["⌘", "/"], description: t("keyboard.toggleSidebar") },
+        { keys: ['⌘', 'K'], description: t('keyboard.commandPalette') },
+        { keys: ['⌘', '/'], description: t('keyboard.toggleSidebar') },
       ],
     },
     {
-      category: t("keyboard.quickActions"),
+      category: t('keyboard.quickActions'),
       items: [
-        { keys: ["⌘", "T"], description: t("keyboard.newTask") },
-        { keys: ["⌘", "L"], description: t("keyboard.requestLeave") },
-        { keys: ["⌘", "A"], description: t("keyboard.attendance") },
+        { keys: ['⌘', 'T'], description: t('keyboard.newTask') },
+        { keys: ['⌘', 'L'], description: t('keyboard.requestLeave') },
+        { keys: ['⌘', 'A'], description: t('keyboard.attendance') },
       ],
     },
     {
-      category: t("keyboard.interface"),
+      category: t('keyboard.interface'),
       items: [
-        { keys: ["⌘", "B"], description: t("keyboard.toggleNotifications") },
-        { keys: ["Esc"], description: t("keyboard.closeModal") },
+        { keys: ['⌘', 'B'], description: t('keyboard.toggleNotifications') },
+        { keys: ['Esc'], description: t('keyboard.closeModal') },
       ],
     },
   ];
@@ -58,7 +58,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300, duration: 0.3 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300, duration: 0.3 }}
               className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
@@ -149,4 +149,3 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
     </AnimatePresence>
   );
 }
-

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Shield } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AvatarUpload } from "@/components/ui/avatar-upload";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
+import React, { useState, useEffect } from 'react';
+import { Shield } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AvatarUpload } from '@/components/ui/avatar-upload';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileSettingsProps {
   user: any;
@@ -17,9 +17,15 @@ interface ProfileSettingsProps {
   email: string;
 }
 
-export function ProfileSettings({ user, onNameChange, onEmailChange, name, email }: ProfileSettingsProps) {
+export function ProfileSettings({
+  user,
+  onNameChange,
+  onEmailChange,
+  name,
+  email,
+}: ProfileSettingsProps) {
   const { t } = useTranslation();
-  
+
   return (
     <Card>
       <CardHeader>
@@ -33,16 +39,18 @@ export function ProfileSettings({ user, onNameChange, onEmailChange, name, email
         {/* Avatar Section */}
         <div className="flex items-center gap-6 pb-6 border-b border-[var(--border)]">
           <AvatarUpload
-            userId={user?.id ?? ""}
+            userId={user?.id ?? ''}
             currentUrl={user?.avatar}
-            name={user?.name ?? "User"}
+            name={user?.name ?? 'User'}
             size="lg"
             onSuccess={(url) => {
               toast.success(t('settingsProfile.avatarUpdated'));
             }}
           />
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsProfile.profilePicture')}</p>
+            <p className="text-sm font-medium text-[var(--text-primary)]">
+              {t('settingsProfile.profilePicture')}
+            </p>
             <p className="text-xs text-[var(--text-muted)] mt-1">
               {t('settingsProfile.clickToUpload')}
             </p>
@@ -55,19 +63,19 @@ export function ProfileSettings({ user, onNameChange, onEmailChange, name, email
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">{t('labels.fullName')}</Label>
-              <Input 
+              <Input
                 id="name"
-                value={name} 
+                value={name}
                 onChange={(e) => onNameChange(e.target.value)}
                 placeholder={t('placeholders.enterFullName')}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t('labels.emailAddress')}</Label>
-              <Input 
+              <Input
                 id="email"
-                value={email} 
-                onChange={(e) => onEmailChange(e.target.value)} 
+                value={email}
+                onChange={(e) => onEmailChange(e.target.value)}
                 type="email"
                 placeholder={t('settingsProfile.emailPlaceholder')}
               />
@@ -77,18 +85,18 @@ export function ProfileSettings({ user, onNameChange, onEmailChange, name, email
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="role">{t('labels.role')}</Label>
-              <Input 
+              <Input
                 id="role"
-                value={user?.role || ""} 
-                disabled 
-                className="opacity-60 bg-[var(--surface-hover)]" 
+                value={user?.role || ''}
+                disabled
+                className="opacity-60 bg-[var(--surface-hover)]"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="department">{t('labels.department')}</Label>
-              <Input 
+              <Input
                 id="department"
-                defaultValue={user?.department ?? t('settingsProfile.notAssigned')} 
+                defaultValue={user?.department ?? t('settingsProfile.notAssigned')}
                 disabled
                 className="opacity-60 bg-[var(--surface-hover)]"
               />

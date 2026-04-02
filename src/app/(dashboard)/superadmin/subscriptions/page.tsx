@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Users,
   Plus,
@@ -20,15 +20,15 @@ import {
   X,
   CheckCircle,
   AlertCircle,
-  ShieldAlert
-} from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useAuthStore } from "@/store/useAuthStore";
-import { CreateManualSubscriptionWizard } from "@/components/superadmin/CreateManualSubscriptionWizard";
+  ShieldAlert,
+} from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import type { Id } from '@/convex/_generated/dataModel';
+import { useAuthStore } from '@/store/useAuthStore';
+import { CreateManualSubscriptionWizard } from '@/components/superadmin/CreateManualSubscriptionWizard';
 
-const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
 export default function SubscriptionsManagementPage() {
   const { t } = useTranslation();
@@ -39,7 +39,7 @@ export default function SubscriptionsManagementPage() {
 
   const allOrganizations = useQuery(
     api.organizations.getAllOrganizations,
-    user?.id ? { superadminUserId: user.id as any } : "skip"
+    user?.id ? { superadminUserId: user.id as any } : 'skip',
   );
 
   const createManual = useMutation(api.subscriptions_admin.createManualSubscription);
@@ -57,7 +57,7 @@ export default function SubscriptionsManagementPage() {
   }
 
   // Check if user is superadmin - only after user is loaded
-  const isSuperAdmin = user.role === "superadmin" || user.email?.toLowerCase() === SUPERADMIN_EMAIL;
+  const isSuperAdmin = user.role === 'superadmin' || user.email?.toLowerCase() === SUPERADMIN_EMAIL;
 
   // If not superadmin, show access denied
   if (!isSuperAdmin) {
@@ -69,9 +69,7 @@ export default function SubscriptionsManagementPage() {
               <ShieldAlert className="w-6 h-6" />
               <CardTitle>{t('superadmin.subscriptions.accessDenied')}</CardTitle>
             </div>
-            <CardDescription>
-              {t('ui.onlySuperadminCanAccess')}
-            </CardDescription>
+            <CardDescription>{t('ui.onlySuperadminCanAccess')}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
@@ -83,7 +81,7 @@ export default function SubscriptionsManagementPage() {
     );
   }
 
-  const handleCancel = async (subId: Id<"subscriptions">) => {
+  const handleCancel = async (subId: Id<'subscriptions'>) => {
     if (!confirm(t('superadmin.subscriptions.confirmCancelSub'))) return;
 
     try {
@@ -96,16 +94,16 @@ export default function SubscriptionsManagementPage() {
 
   const getStatusBadge = (status: string) => {
     const colors: Record<string, string> = {
-      active: "bg-green-500/10 text-green-500 border-green-500/20",
-      canceled: "bg-red-500/10 text-red-500 border-red-500/20",
-      trialing: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-      past_due: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+      active: 'bg-green-500/10 text-green-500 border-green-500/20',
+      canceled: 'bg-red-500/10 text-red-500 border-red-500/20',
+      trialing: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+      past_due: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
     };
 
     return (
-      <Badge variant="outline" className={colors[status] || ""}>
-        {status === "active" && <CheckCircle className="w-3 h-3 mr-1" />}
-        {status === "canceled" && <X className="w-3 h-3 mr-1" />}
+      <Badge variant="outline" className={colors[status] || ''}>
+        {status === 'active' && <CheckCircle className="w-3 h-3 mr-1" />}
+        {status === 'canceled' && <X className="w-3 h-3 mr-1" />}
         {status}
       </Badge>
     );
@@ -115,15 +113,21 @@ export default function SubscriptionsManagementPage() {
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">{t('superadmin.subscriptions.title')}</h1>
-          <p className="text-sm md:text-base text-[var(--text-muted)] mt-1">{t('superadmin.subscriptions.subtitle')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
+            {t('superadmin.subscriptions.title')}
+          </h1>
+          <p className="text-sm md:text-base text-[var(--text-muted)] mt-1">
+            {t('superadmin.subscriptions.subtitle')}
+          </p>
         </div>
         <Button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
-          {showForm ? t('superadmin.subscriptions.cancelButtonText') : t('superadmin.subscriptions.addManualSubscription')}
+          {showForm
+            ? t('superadmin.subscriptions.cancelButtonText')
+            : t('superadmin.subscriptions.addManualSubscription')}
         </Button>
       </div>
 
@@ -135,9 +139,7 @@ export default function SubscriptionsManagementPage() {
               <Shield className="w-5 h-5 text-[var(--primary)]" />
               {t('superadmin.subscriptions.createManualSubscription')}
             </CardTitle>
-            <CardDescription>
-              {t('superadmin.subscriptions.createManualSubDesc')}
-            </CardDescription>
+            <CardDescription>{t('superadmin.subscriptions.createManualSubDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <CreateManualSubscriptionWizard
@@ -165,22 +167,43 @@ export default function SubscriptionsManagementPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.organization')}</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.employees')}</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.plan')}</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.status')}</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.type')}</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.price')}</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.expires')}</th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">{t('superadmin.subscriptions.actions')}</th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.organization')}
+                  </th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.employees')}
+                  </th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.plan')}
+                  </th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.status')}
+                  </th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.type')}
+                  </th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.price')}
+                  </th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.expires')}
+                  </th>
+                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                    {t('superadmin.subscriptions.actions')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {subscriptions?.map((sub: any) => (
-                  <tr key={sub._id} className="border-b border-[var(--border)] hover:bg-[var(--background-subtle)] transition-colors">
+                  <tr
+                    key={sub._id}
+                    className="border-b border-[var(--border)] hover:bg-[var(--background-subtle)] transition-colors"
+                  >
                     <td className="py-3 px-2">
                       <div>
-                        <p className="font-medium text-[var(--text-primary)]">{sub.organizationName || "Unknown"}</p>
+                        <p className="font-medium text-[var(--text-primary)]">
+                          {sub.organizationName || 'Unknown'}
+                        </p>
                         <p className="text-xs text-[var(--text-muted)]">{sub.organizationSlug}</p>
                       </div>
                     </td>
@@ -192,28 +215,38 @@ export default function SubscriptionsManagementPage() {
                     </td>
                     <td className="py-3 px-2">
                       <span className="capitalize font-semibold text-[var(--text-primary)]">
-                        {sub.plan === "enterprise" && "🏢 "}
-                        {sub.plan === "professional" && "💼 "}
-                        {sub.plan === "starter" && "⚡ "}
+                        {sub.plan === 'enterprise' && '🏢 '}
+                        {sub.plan === 'professional' && '💼 '}
+                        {sub.plan === 'starter' && '⚡ '}
                         {sub.plan}
                       </span>
                     </td>
-                    <td className="py-3 px-2">
-                      {getStatusBadge(sub.status)}
-                    </td>
+                    <td className="py-3 px-2">{getStatusBadge(sub.status)}</td>
                     <td className="py-3 px-2">
                       {sub.isManual ? (
-                        <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">
+                        <Badge
+                          variant="outline"
+                          className="bg-purple-500/10 text-purple-500 border-purple-500/20"
+                        >
                           {t('superadmin.subscriptions.manual')}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-500/10 text-blue-500 border-blue-500/20"
+                        >
                           {t('superadmin.subscriptions.stripe')}
                         </Badge>
                       )}
                     </td>
                     <td className="py-3 px-2 text-[var(--text-primary)]">
-                      ${(sub as any).metadata?.customPrice || (sub.plan === "professional" ? "49" : sub.plan === "enterprise" ? "Custom" : "0")}
+                      $
+                      {(sub as any).metadata?.customPrice ||
+                        (sub.plan === 'professional'
+                          ? '49'
+                          : sub.plan === 'enterprise'
+                            ? 'Custom'
+                            : '0')}
                     </td>
                     <td className="py-3 px-2 text-[var(--text-muted)] text-sm">
                       <div className="flex items-center gap-1">
@@ -222,7 +255,7 @@ export default function SubscriptionsManagementPage() {
                       </div>
                     </td>
                     <td className="py-3 px-2">
-                      {sub.status === "active" && (
+                      {sub.status === 'active' && (
                         <Button
                           variant="ghost"
                           size="sm"

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { motion } from '@/lib/cssMotion';
-import { Fingerprint } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { toast } from "sonner";
+import { Fingerprint } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { toast } from 'sonner';
 
 interface WebAuthnButtonProps {
-  mode: "register" | "login";
+  mode: 'register' | 'login';
   userId?: string;
   onSuccess?: (credentialId: string) => void;
   disabled?: boolean;
@@ -18,19 +18,19 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
 
   const isSupported = () => {
     return (
-      typeof window !== "undefined" &&
+      typeof window !== 'undefined' &&
       window.PublicKeyCredential !== undefined &&
-      typeof window.PublicKeyCredential === "function"
+      typeof window.PublicKeyCredential === 'function'
     );
   };
 
   const handleRegister = async () => {
     if (!isSupported()) {
-      toast.error(t("toasts.webAuthnNotSupported"));
+      toast.error(t('toasts.webAuthnNotSupported'));
       return;
     }
     if (!userId) {
-      toast.error(t("toasts.completeRegistrationFirst"));
+      toast.error(t('toasts.completeRegistrationFirst'));
       return;
     }
 
@@ -40,50 +40,48 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
 
-      const credential = await navigator.credentials.create({
+      const credential = (await navigator.credentials.create({
         publicKey: {
           challenge,
           rp: {
-            name: "HR Office",
+            name: 'HR Office',
             id: window.location.hostname,
           },
           user: {
             id: new TextEncoder().encode(userId),
             name: userId,
-            displayName: "HR Office User",
+            displayName: 'HR Office User',
           },
           pubKeyCredParams: [
-            { alg: -7, type: "public-key" },   // ES256
-            { alg: -257, type: "public-key" },  // RS256
+            { alg: -7, type: 'public-key' }, // ES256
+            { alg: -257, type: 'public-key' }, // RS256
           ],
           authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            userVerification: "required",
-            residentKey: "preferred",
+            authenticatorAttachment: 'platform',
+            userVerification: 'required',
+            residentKey: 'preferred',
           },
           timeout: 60000,
-          attestation: "none",
+          attestation: 'none',
         },
-      }) as PublicKeyCredential;
+      })) as PublicKeyCredential;
 
-      if (!credential) throw new Error("No credential created");
+      if (!credential) throw new Error('No credential created');
 
       const response = credential.response as AuthenticatorAttestationResponse;
-      const credentialId = btoa(
-        String.fromCharCode(...new Uint8Array(credential.rawId))
-      );
+      const credentialId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
 
       // Store credential ID for future logins
-      localStorage.setItem("webauthn-credential-id", credentialId);
-      localStorage.setItem("webauthn-user-id", userId);
+      localStorage.setItem('webauthn-credential-id', credentialId);
+      localStorage.setItem('webauthn-user-id', userId);
 
       onSuccess?.(credentialId);
-      toast.success(t("toasts.biometricRegistered"));
+      toast.success(t('toasts.biometricRegistered'));
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === "NotAllowedError") {
-        toast.error(t("toasts.authCancelled"));
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        toast.error(t('toasts.authCancelled'));
       } else {
-        toast.error(t("toasts.biometricRegFailed"));
+        toast.error(t('toasts.biometricRegFailed'));
         console.error(err);
       }
     } finally {
@@ -93,13 +91,13 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
 
   const handleLogin = async () => {
     if (!isSupported()) {
-      toast.error(t("toasts.webAuthnNotSupported"));
+      toast.error(t('toasts.webAuthnNotSupported'));
       return;
     }
 
     setLoading(true);
     try {
-      const credentialId = localStorage.getItem("webauthn-credential-id");
+      const credentialId = localStorage.getItem('webauthn-credential-id');
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
 
@@ -107,32 +105,30 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
         ? [
             {
               id: Uint8Array.from(atob(credentialId), (c) => c.charCodeAt(0)),
-              type: "public-key",
+              type: 'public-key',
             },
           ]
         : [];
 
-      const assertion = await navigator.credentials.get({
+      const assertion = (await navigator.credentials.get({
         publicKey: {
           challenge,
           allowCredentials,
-          userVerification: "required",
+          userVerification: 'required',
           timeout: 60000,
         },
-      }) as PublicKeyCredential;
+      })) as PublicKeyCredential;
 
-      if (!assertion) throw new Error("No assertion");
+      if (!assertion) throw new Error('No assertion');
 
-      const assertedCredentialId = btoa(
-        String.fromCharCode(...new Uint8Array(assertion.rawId))
-      );
+      const assertedCredentialId = btoa(String.fromCharCode(...new Uint8Array(assertion.rawId)));
 
       onSuccess?.(assertedCredentialId);
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === "NotAllowedError") {
-        toast.error(t("toasts.authCancelled"));
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        toast.error(t('toasts.authCancelled'));
       } else {
-        toast.error(t("toasts.biometricLoginFailed"));
+        toast.error(t('toasts.biometricLoginFailed'));
         console.error(err);
       }
     } finally {
@@ -140,7 +136,7 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
     }
   };
 
-  const handle = mode === "register" ? handleRegister : handleLogin;
+  const handle = mode === 'register' ? handleRegister : handleLogin;
 
   return (
     <motion.button
@@ -151,17 +147,13 @@ export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnBu
       whileTap={{ scale: 0.98 }}
       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 font-medium transition-all disabled:opacity-50"
       style={{
-        borderColor: "var(--primary)",
-        color: "var(--primary)",
-        background: "var(--primary-muted)",
+        borderColor: 'var(--primary)',
+        color: 'var(--primary)',
+        background: 'var(--primary-muted)',
       }}
-      title={mode === "register" ? "Register biometric" : "Sign in with biometric"}
+      title={mode === 'register' ? 'Register biometric' : 'Sign in with biometric'}
     >
-      {loading ? (
-        <ShieldLoader size="sm" variant="inline" />
-      ) : (
-        <Fingerprint className="w-4 h-4" />
-      )}
+      {loading ? <ShieldLoader size="sm" variant="inline" /> : <Fingerprint className="w-4 h-4" />}
       {!loading && <span className="text-xs">Touch ID</span>}
     </motion.button>
   );

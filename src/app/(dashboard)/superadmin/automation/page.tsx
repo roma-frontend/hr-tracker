@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useQuery, useMutation, useAction } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useTranslation } from "react-i18next";
-import { motion } from "@/lib/cssMotion";
+import React, { useState } from 'react';
+import { useQuery, useMutation, useAction } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
+import { motion } from '@/lib/cssMotion';
 import {
   Zap,
   Activity,
@@ -17,11 +17,11 @@ import {
   RefreshCw,
   Play,
   Pause,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 export default function AutomationPage() {
   const { t } = useTranslation();
@@ -41,9 +41,9 @@ export default function AutomationPage() {
     setIsRunning(true);
     try {
       await runAutomationAction();
-      toast.success(t("automation.runSuccess") || "Automation started successfully");
+      toast.success(t('automation.runSuccess') || 'Automation started successfully');
     } catch (error) {
-      toast.error(t("automation.runError") || "Failed to run automation");
+      toast.error(t('automation.runError') || 'Failed to run automation');
     } finally {
       setIsRunning(false);
     }
@@ -59,26 +59,23 @@ export default function AutomationPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
-            {t("superadmin.automation.title") || "Automation Dashboard"}
+            {t('superadmin.automation.title') || 'Automation Dashboard'}
           </h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            {t("superadmin.automation.description") || "Monitor and manage your automation workflows"}
+            {t('superadmin.automation.description') ||
+              'Monitor and manage your automation workflows'}
           </p>
         </div>
-        <Button
-          onClick={handleRunAutomation}
-          disabled={isRunning}
-          className="gap-2"
-        >
+        <Button onClick={handleRunAutomation} disabled={isRunning} className="gap-2">
           {isRunning ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin" />
-              {t("automation.running") || "Running..."}
+              {t('automation.running') || 'Running...'}
             </>
           ) : (
             <>
               <Play className="w-4 h-4" />
-              {t("automation.runNow") || "Run Now"}
+              {t('automation.runNow') || 'Run Now'}
             </>
           )}
         </Button>
@@ -87,28 +84,28 @@ export default function AutomationPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
-          title={t("automation.stats.totalTasks") || "Total Tasks"}
+          title={t('automation.stats.totalTasks') || 'Total Tasks'}
           value={stats?.totalTasks ?? 0}
           icon={<Activity className="w-5 h-5" />}
           color="blue"
           trend={stats?.tasksTrend ?? 0}
         />
         <StatsCard
-          title={t("automation.stats.completed") || "Completed"}
+          title={t('automation.stats.completed') || 'Completed'}
           value={stats?.completedTasks ?? 0}
           icon={<CheckCircle className="w-5 h-5" />}
           color="green"
           trend={stats?.completedTrend ?? 0}
         />
         <StatsCard
-          title={t("automation.stats.pending") || "Pending"}
+          title={t('automation.stats.pending') || 'Pending'}
           value={stats?.pendingTasks ?? 0}
           icon={<Clock className="w-5 h-5" />}
           color="yellow"
           trend={stats?.pendingTrend ?? 0}
         />
         <StatsCard
-          title={t("automation.stats.failed") || "Failed"}
+          title={t('automation.stats.failed') || 'Failed'}
           value={stats?.failedTasks ?? 0}
           icon={<AlertTriangle className="w-5 h-5" />}
           color="red"
@@ -121,7 +118,7 @@ export default function AutomationPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-yellow-500" />
-            {t("automation.activeWorkflows") || "Active Workflows"}
+            {t('automation.activeWorkflows') || 'Active Workflows'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -135,24 +132,18 @@ export default function AutomationPage() {
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-2 h-2 rounded-full ${
-                        workflow.isActive ? "bg-green-500" : "bg-gray-400"
+                        workflow.isActive ? 'bg-green-500' : 'bg-gray-400'
                       }`}
                     />
                     <div>
-                      <p className="font-medium text-[var(--text-primary)]">
-                        {workflow.name}
-                      </p>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {workflow.description}
-                      </p>
+                      <p className="font-medium text-[var(--text-primary)]">{workflow.name}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{workflow.description}</p>
                     </div>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      toggleWorkflow({ workflowId: workflow._id })
-                    }
+                    onClick={() => toggleWorkflow({ workflowId: workflow._id })}
                   >
                     {workflow.isActive ? (
                       <Pause className="w-4 h-4" />
@@ -165,7 +156,7 @@ export default function AutomationPage() {
             </div>
           ) : (
             <p className="text-sm text-[var(--text-muted)] text-center py-4">
-              {t("automation.noWorkflows") || "No active workflows"}
+              {t('automation.noWorkflows') || 'No active workflows'}
             </p>
           )}
         </CardContent>
@@ -176,7 +167,7 @@ export default function AutomationPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-500" />
-            {t("automation.recentTasks") || "Recent Tasks"}
+            {t('automation.recentTasks') || 'Recent Tasks'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -190,9 +181,7 @@ export default function AutomationPage() {
                   <div className="flex items-center gap-3">
                     <StatusIcon status={task.status} />
                     <div>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
-                        {task.name}
-                      </p>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">{task.name}</p>
                       <p className="text-xs text-[var(--text-muted)]">
                         {new Date(task.createdAt).toLocaleString()}
                       </p>
@@ -200,11 +189,11 @@ export default function AutomationPage() {
                   </div>
                   <Badge
                     variant={
-                      task.status === "completed"
-                        ? "success"
-                        : task.status === "failed"
-                        ? "destructive"
-                        : "secondary"
+                      task.status === 'completed'
+                        ? 'success'
+                        : task.status === 'failed'
+                          ? 'destructive'
+                          : 'secondary'
                     }
                   >
                     {task.status}
@@ -214,7 +203,7 @@ export default function AutomationPage() {
             </div>
           ) : (
             <p className="text-sm text-[var(--text-muted)] text-center py-4">
-              {t("automation.noTasks") || "No recent tasks"}
+              {t('automation.noTasks') || 'No recent tasks'}
             </p>
           )}
         </CardContent>
@@ -237,10 +226,10 @@ function StatsCard({
   trend: number;
 }) {
   const colorClasses: Record<string, string> = {
-    blue: "bg-blue-500/10 text-blue-600",
-    green: "bg-green-500/10 text-green-600",
-    yellow: "bg-yellow-500/10 text-yellow-600",
-    red: "bg-red-500/10 text-red-600",
+    blue: 'bg-blue-500/10 text-blue-600',
+    green: 'bg-green-500/10 text-green-600',
+    yellow: 'bg-yellow-500/10 text-yellow-600',
+    red: 'bg-red-500/10 text-red-600',
   };
 
   return (
@@ -249,25 +238,19 @@ function StatsCard({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-[var(--text-muted)]">{title}</p>
-            <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">
-              {value}
-            </p>
+            <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">{value}</p>
             {trend !== 0 && (
               <div
                 className={`flex items-center gap-1 mt-1 text-xs ${
-                  trend > 0 ? "text-green-600" : "text-red-600"
+                  trend > 0 ? 'text-green-600' : 'text-red-600'
                 }`}
               >
-                <TrendingUp
-                  className={`w-3 h-3 ${trend < 0 ? "rotate-180" : ""}`}
-                />
+                <TrendingUp className={`w-3 h-3 ${trend < 0 ? 'rotate-180' : ''}`} />
                 {Math.abs(trend)}%
               </div>
             )}
           </div>
-          <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-            {icon}
-          </div>
+          <div className={`p-3 rounded-lg ${colorClasses[color]}`}>{icon}</div>
         </div>
       </CardContent>
     </Card>
@@ -276,9 +259,9 @@ function StatsCard({
 
 function StatusIcon({ status }: { status: string }) {
   switch (status) {
-    case "completed":
+    case 'completed':
       return <CheckCircle className="w-4 h-4 text-green-500" />;
-    case "failed":
+    case 'failed':
       return <AlertTriangle className="w-4 h-4 text-red-500" />;
     default:
       return <Clock className="w-4 h-4 text-yellow-500" />;

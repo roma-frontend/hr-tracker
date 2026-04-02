@@ -1,9 +1,9 @@
 /**
  * 🚀 CONVEX QUERY CACHE
- * 
+ *
  * Server-side caching for Convex queries using Redis
  * Reduces database load and improves response times
- * 
+ *
  * Usage:
  * ```typescript
  * const cached = await withCache(
@@ -32,13 +32,9 @@ const DEFAULT_PREFIX = 'convex';
 export async function withCache<T>(
   key: string,
   fn: () => Promise<T>,
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): Promise<T> {
-  const {
-    ttl = DEFAULT_TTL,
-    prefix = DEFAULT_PREFIX,
-    enabled = true,
-  } = options;
+  const { ttl = DEFAULT_TTL, prefix = DEFAULT_PREFIX, enabled = true } = options;
 
   if (!enabled) {
     return fn();
@@ -85,7 +81,7 @@ export async function invalidateCache(key: string, prefix: string = DEFAULT_PREF
  */
 export async function invalidateCachePattern(
   pattern: string,
-  prefix: string = DEFAULT_PREFIX
+  prefix: string = DEFAULT_PREFIX,
 ): Promise<void> {
   const fullPattern = `${prefix}:${pattern}`;
   try {

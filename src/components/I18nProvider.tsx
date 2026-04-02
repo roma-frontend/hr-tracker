@@ -14,14 +14,14 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('i18nextLng');
       const currentLang = i18n.language;
-      
+
       console.log('🔄 I18nProvider mounted:');
       console.log('   - localStorage has:', savedLang);
       console.log('   - i18n.language is:', currentLang);
-      
+
       // Check if saved language is valid
       const validLanguages = ['en', 'hy', 'ru'];
-      
+
       if (savedLang && validLanguages.includes(savedLang)) {
         if (savedLang !== currentLang) {
           console.log('🔄 Restoring language from localStorage:', savedLang);
@@ -68,9 +68,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div 
+    <div
       className="transition-all duration-200 ease-in-out"
-      style={{ 
+      style={{
         opacity: isChanging ? 0.5 : 1,
         transform: isChanging ? 'scale(0.98)' : 'scale(1)',
       }}

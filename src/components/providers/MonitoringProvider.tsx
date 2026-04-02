@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { initSentryClient } from "../../../sentry.client.config";
+import { useEffect } from 'react';
+import { initSentryClient } from '../../../sentry.client.config';
 
 /**
  * Monitoring Provider Component
@@ -19,29 +19,29 @@ export function MonitoringProvider({ children }: { children: React.ReactNode }) 
     }
 
     // Initialize OpenTelemetry client-side with deferred timing
-    if (process.env.NEXT_PUBLIC_ENABLE_OTEL === "true") {
+    if (process.env.NEXT_PUBLIC_ENABLE_OTEL === 'true') {
       if ('requestIdleCallback' in window) {
         requestIdleCallback(
           () => {
-            import("../../../opentelemetry.client.config").then(({ initOpenTelemetryClient }) => {
+            import('../../../opentelemetry.client.config').then(({ initOpenTelemetryClient }) => {
               try {
                 initOpenTelemetryClient();
-                console.log("✅ OpenTelemetry initialized in browser");
+                console.log('✅ OpenTelemetry initialized in browser');
               } catch (error) {
-                console.error("Failed to initialize OpenTelemetry:", error);
+                console.error('Failed to initialize OpenTelemetry:', error);
               }
             });
           },
-          { timeout: 5000 }
+          { timeout: 5000 },
         );
       } else {
         setTimeout(() => {
-          import("../../../opentelemetry.client.config").then(({ initOpenTelemetryClient }) => {
+          import('../../../opentelemetry.client.config').then(({ initOpenTelemetryClient }) => {
             try {
               initOpenTelemetryClient();
-              console.log("✅ OpenTelemetry initialized in browser");
+              console.log('✅ OpenTelemetry initialized in browser');
             } catch (error) {
-              console.error("Failed to initialize OpenTelemetry:", error);
+              console.error('Failed to initialize OpenTelemetry:', error);
             }
           });
         }, 2000);

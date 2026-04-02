@@ -1,29 +1,32 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useQuery } from "convex/react";
-import { useTranslation } from "react-i18next";
-import { api } from "../../../convex/_generated/api";
-import { Button } from "@/components/ui/button";
-import { ServiceBroadcastDialog } from "./ServiceBroadcastDialog";
-import { ServiceBroadcastsManager } from "./ServiceBroadcastsManager";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, MessageSquare } from "lucide-react";
-import type { Id } from "../../../convex/_generated/dataModel";
+import { useState } from 'react';
+import { useQuery } from 'convex/react';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../../convex/_generated/api';
+import { Button } from '@/components/ui/button';
+import { ServiceBroadcastDialog } from './ServiceBroadcastDialog';
+import { ServiceBroadcastsManager } from './ServiceBroadcastsManager';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, MessageSquare } from 'lucide-react';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 interface SuperadminBroadcastsPanelProps {
-  organizationId?: Id<"organizations">;
-  userId?: Id<"users">;
+  organizationId?: Id<'organizations'>;
+  userId?: Id<'users'>;
 }
 
 /**
  * SuperAdmin Service Broadcasts Panel
  * Allows superadmin to send official company-wide announcements and manage them
  */
-export function SuperadminBroadcastsPanel({ organizationId, userId }: SuperadminBroadcastsPanelProps) {
+export function SuperadminBroadcastsPanel({
+  organizationId,
+  userId,
+}: SuperadminBroadcastsPanelProps) {
   const { t } = useTranslation();
   const [broadcastDialogOpen, setBroadcastDialogOpen] = useState(false);
-  
+
   const currentUser = useQuery(api.users.getCurrentUser, {});
 
   const finalOrgId = organizationId || currentUser?.organizationId;
@@ -39,26 +42,20 @@ export function SuperadminBroadcastsPanel({ organizationId, userId }: Superadmin
       {/* Broadcast creation card */}
       <Card
         style={{
-          borderColor: "#f97316",
-          backgroundColor: "rgba(249, 115, 22, 0.08)",
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249, 115, 22, 0.08)',
         }}
       >
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5" style={{ color: "#f97316" }} />
+              <AlertCircle className="w-5 h-5" style={{ color: '#f97316' }} />
               <div>
                 <CardTitle>{t('broadcasts.title')}</CardTitle>
-                <CardDescription>
-                  {t('broadcasts.description')}
-                </CardDescription>
+                <CardDescription>{t('broadcasts.description')}</CardDescription>
               </div>
             </div>
-            <Button 
-              onClick={() => setBroadcastDialogOpen(true)}
-              className="gap-2"
-              size="sm"
-            >
+            <Button onClick={() => setBroadcastDialogOpen(true)} className="gap-2" size="sm">
               <MessageSquare className="w-4 h-4" />
               {t('broadcasts.newButton')}
             </Button>
@@ -67,12 +64,12 @@ export function SuperadminBroadcastsPanel({ organizationId, userId }: Superadmin
 
         <CardContent>
           <div className="prose dark:prose-invert text-sm max-w-none">
-            <p className="text-muted-foreground">
-              {t('broadcasts.allUsersGetMessage')}
-            </p>
-            
+            <p className="text-muted-foreground">{t('broadcasts.allUsersGetMessage')}</p>
+
             <div className="mt-4 space-y-2">
-              <h4 className="font-semibold" style={{ color: "var(--text-primary)" }}>{t('broadcasts.typicalScenarios')}</h4>
+              <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {t('broadcasts.typicalScenarios')}
+              </h4>
               <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                 <li>{t('broadcasts.maintenance')}</li>
                 <li>{t('broadcasts.warnings')}</li>
@@ -94,10 +91,7 @@ export function SuperadminBroadcastsPanel({ organizationId, userId }: Superadmin
       </Card>
 
       {/* Broadcasts management card */}
-      <ServiceBroadcastsManager
-        organizationId={finalOrgId}
-        userId={finalUserId}
-      />
+      <ServiceBroadcastsManager organizationId={finalOrgId} userId={finalUserId} />
     </div>
   );
 }

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import type { Id } from "@/convex/_generated/dataModel";
+import { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import type { Id } from '@/convex/_generated/dataModel';
 import {
   User,
   Search,
@@ -17,13 +17,13 @@ import {
   LogOut,
   History,
   Eye,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -31,33 +31,33 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
+} from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export default function ImpersonationPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [startDialogOpen, setStartDialogOpen] = useState(false);
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState('');
 
   const searchResults = useQuery(
     api.superadmin.searchUsersByPrefix,
-    searchQuery.length >= 2 ? { prefix: searchQuery } : "skip"
+    searchQuery.length >= 2 ? { prefix: searchQuery } : 'skip',
   );
 
   const activeSession = useQuery(
     api.superadmin.getActiveImpersonation,
-    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
   const impersonationHistory = useQuery(
     api.superadmin.getImpersonationHistory,
-    user?.id ? { superadminId: user.id as Id<"users">, limit: 20 } : "skip"
+    user?.id ? { superadminId: user.id as Id<'users'>, limit: 20 } : 'skip',
   );
 
   const startImpersonation = useMutation(api.superadmin.startImpersonation);
@@ -71,15 +71,17 @@ export default function ImpersonationPage() {
 
     try {
       await startImpersonation({
-        superadminId: user!.id as Id<"users">,
-        targetUserId: selectedUser.id as Id<"users">,
+        superadminId: user!.id as Id<'users'>,
+        targetUserId: selectedUser.id as Id<'users'>,
         reason: reason.trim(),
       });
 
-      toast.success(t('superadmin.impersonate.alerts.impersonationStarted', { name: selectedUser.name }));
+      toast.success(
+        t('superadmin.impersonate.alerts.impersonationStarted', { name: selectedUser.name }),
+      );
       setStartDialogOpen(false);
       setSelectedUser(null);
-      setReason("");
+      setReason('');
 
       // Redirect to user's dashboard
       // window.location.href = "/dashboard";
@@ -94,12 +96,12 @@ export default function ImpersonationPage() {
 
     try {
       await endImpersonation({
-        sessionId: activeSession.sessionId as Id<"impersonationSessions">,
-        userId: user!.id as Id<"users">,
+        sessionId: activeSession.sessionId as Id<'impersonationSessions'>,
+        userId: user!.id as Id<'users'>,
       });
 
       toast.success(t('superadmin.impersonate.alerts.impersonationEnded'));
-      router.push("/superadmin/impersonate");
+      router.push('/superadmin/impersonate');
     } catch (error) {
       toast.error(t('superadmin.impersonate.alerts.endImpersonationError'));
       console.error(error);
@@ -115,25 +117,22 @@ export default function ImpersonationPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+              <h1
+                className="text-3xl md:text-4xl font-bold mb-2"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {t('superadmin.impersonate.title')}
               </h1>
-              <p className="text-muted-foreground">
-                {t('superadmin.impersonate.subtitle')}
-              </p>
+              <p className="text-muted-foreground">{t('superadmin.impersonate.subtitle')}</p>
             </div>
             {activeSession && (
-              <Button
-                variant="destructive"
-                onClick={handleEndImpersonation}
-                className="gap-2"
-              >
+              <Button variant="destructive" onClick={handleEndImpersonation} className="gap-2">
                 <LogOut className="w-4 h-4" />
                 {t('superadmin.impersonate.exitMode')}
               </Button>
@@ -143,7 +142,10 @@ export default function ImpersonationPage() {
 
         {/* Active Session Alert */}
         {activeSession && (
-          <Card className="mb-6 border-orange-500/50 bg-orange-500/5" style={{ background: "var(--card)" }}>
+          <Card
+            className="mb-6 border-orange-500/50 bg-orange-500/5"
+            style={{ background: 'var(--card)' }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center gap-4">
                 <AlertTriangle className="w-8 h-8 text-orange-500" />
@@ -152,13 +154,17 @@ export default function ImpersonationPage() {
                     {t('superadmin.impersonate.activeSession')}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {t('superadmin.impersonate.activeSessionDesc')} <strong>{activeSession.targetUser?.name}</strong> ({activeSession.targetUser?.email})
+                    {t('superadmin.impersonate.activeSessionDesc')}{' '}
+                    <strong>{activeSession.targetUser?.name}</strong> (
+                    {activeSession.targetUser?.email})
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {t('superadmin.impersonate.sessionInfo.reason')}: {activeSession.reason} • {t('superadmin.impersonate.sessionInfo.expiresAt')}: {new Date(activeSession.expiresAt).toLocaleString()}
+                    {t('superadmin.impersonate.sessionInfo.reason')}: {activeSession.reason} •{' '}
+                    {t('superadmin.impersonate.sessionInfo.expiresAt')}:{' '}
+                    {new Date(activeSession.expiresAt).toLocaleString()}
                   </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => router.push("/dashboard")}>
+                <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
                   <Eye className="w-4 h-4 mr-2" />
                   {t('superadmin.impersonate.goToDashboard')}
                 </Button>
@@ -168,15 +174,13 @@ export default function ImpersonationPage() {
         )}
 
         {/* Search User */}
-        <Card className="mb-6" style={{ background: "var(--card)" }}>
+        <Card className="mb-6" style={{ background: 'var(--card)' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="w-5 h-5" />
               {t('superadmin.impersonate.searchUser')}
             </CardTitle>
-            <CardDescription>
-              {t('superadmin.impersonate.searchDesc')}
-            </CardDescription>
+            <CardDescription>{t('superadmin.impersonate.searchDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="relative">
@@ -196,17 +200,21 @@ export default function ImpersonationPage() {
                   <div
                     key={u.id}
                     className="flex items-center justify-between p-3 rounded-lg border hover:border-primary/50 transition-colors"
-                    style={{ background: "var(--background-subtle)" }}
+                    style={{ background: 'var(--background-subtle)' }}
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="w-10 h-10">
                         <AvatarImage src={u.avatarUrl} />
                         <AvatarFallback>
-                          {u.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                          {u.name
+                            .split(' ')
+                            .map((n: string) => n[0])
+                            .join('')
+                            .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
+                        <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                           {u.name}
                         </p>
                         <p className="text-sm text-muted-foreground">{u.email}</p>
@@ -247,15 +255,13 @@ export default function ImpersonationPage() {
         </Card>
 
         {/* History */}
-        <Card style={{ background: "var(--card)" }}>
+        <Card style={{ background: 'var(--card)' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <History className="w-5 h-5" />
               История имперсонаций
             </CardTitle>
-            <CardDescription>
-              Последние 20 сессий
-            </CardDescription>
+            <CardDescription>Последние 20 сессий</CardDescription>
           </CardHeader>
           <CardContent>
             {impersonationHistory === undefined ? (
@@ -271,33 +277,31 @@ export default function ImpersonationPage() {
                   <div
                     key={session._id}
                     className="p-4 rounded-lg border"
-                    style={{ background: "var(--background-subtle)" }}
+                    style={{ background: 'var(--background-subtle)' }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant={session.isActive ? "default" : "outline"}>
-                            {session.isActive ? "Активно" : "Завершено"}
+                          <Badge variant={session.isActive ? 'default' : 'outline'}>
+                            {session.isActive ? 'Активно' : 'Завершено'}
                           </Badge>
-                          {session.isActive && (
-                            <Badge variant="destructive">Сейчас</Badge>
-                          )}
+                          {session.isActive && <Badge variant="destructive">Сейчас</Badge>}
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="text-muted-foreground">Супер-админ:</span>{" "}
+                            <span className="text-muted-foreground">Супер-админ:</span>{' '}
                             <span className="font-medium">{session.superadminName}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Пользователь:</span>{" "}
+                            <span className="text-muted-foreground">Пользователь:</span>{' '}
                             <span className="font-medium">{session.targetUserName}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Email:</span>{" "}
+                            <span className="text-muted-foreground">Email:</span>{' '}
                             <span className="font-mono">{session.targetUserEmail}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Организация:</span>{" "}
+                            <span className="text-muted-foreground">Организация:</span>{' '}
                             <span className="font-medium">{session.organizationName}</span>
                           </div>
                         </div>
@@ -311,9 +315,7 @@ export default function ImpersonationPage() {
                             Начато: {new Date(session.startedAt).toLocaleString()}
                           </span>
                           {session.endedAt && (
-                            <span>
-                              Длительность: {Math.round(session.duration / 60000)} мин
-                            </span>
+                            <span>Длительность: {Math.round(session.duration / 60000)} мин</span>
                           )}
                         </div>
                       </div>
@@ -334,9 +336,7 @@ export default function ImpersonationPage() {
               <Shield className="w-5 h-5 text-primary" />
               Войти как пользователь
             </DialogTitle>
-            <DialogDescription>
-              Вы получите полный доступ к аккаунту пользователя
-            </DialogDescription>
+            <DialogDescription>Вы получите полный доступ к аккаунту пользователя</DialogDescription>
           </DialogHeader>
 
           {selectedUser && (
@@ -345,15 +345,17 @@ export default function ImpersonationPage() {
                 <Avatar className="w-12 h-12">
                   <AvatarImage src={selectedUser.avatarUrl} />
                   <AvatarFallback>
-                    {selectedUser.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                    {selectedUser.name
+                      .split(' ')
+                      .map((n: string) => n[0])
+                      .join('')
+                      .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-semibold">{selectedUser.name}</p>
                   <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Роль: {selectedUser.role}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Роль: {selectedUser.role}</p>
                 </div>
               </div>
 
@@ -395,15 +397,12 @@ export default function ImpersonationPage() {
               onClick={() => {
                 setStartDialogOpen(false);
                 setSelectedUser(null);
-                setReason("");
+                setReason('');
               }}
             >
               Отмена
             </Button>
-            <Button
-              onClick={handleStartImpersonation}
-              disabled={!reason.trim()}
-            >
+            <Button onClick={handleStartImpersonation} disabled={!reason.trim()}>
               <Shield className="w-4 h-4 mr-2" />
               Начать сессию
             </Button>

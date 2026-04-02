@@ -1,36 +1,46 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Clock, Play, Square, Pause, Coffee, History, TrendingUp } from "lucide-react";
-import { toast } from "sonner";
-import { format } from "date-fns";
+import React, { useState } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Clock, Play, Square, Pause, Coffee, History, TrendingUp } from 'lucide-react';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 interface DriverShiftControlsProps {
-  driverId: Id<"drivers">;
-  userId: Id<"users">;
-  organizationId: Id<"organizations">;
+  driverId: Id<'drivers'>;
+  userId: Id<'users'>;
+  organizationId: Id<'organizations'>;
 }
 
-export function DriverShiftControls({ driverId, userId, organizationId }: DriverShiftControlsProps) {
+export function DriverShiftControls({
+  driverId,
+  userId,
+  organizationId,
+}: DriverShiftControlsProps) {
   const { t } = useTranslation();
   const [showEndShiftModal, setShowEndShiftModal] = useState(false);
-  const [breakTime, setBreakTime] = useState("");
-  const [driverNotes, setDriverNotes] = useState("");
+  const [breakTime, setBreakTime] = useState('');
+  const [driverNotes, setDriverNotes] = useState('');
 
   // Get current shift
   const currentShift = useQuery(api.drivers.getCurrentShift, { driverId });
-  
+
   // Get driver info
   const driver = useQuery(api.drivers.getDriverById, { driverId });
 
@@ -46,16 +56,16 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
         driverId,
         userId,
         organizationId,
-        scheduledStartTime: driver?.workingHours?.startTime 
+        scheduledStartTime: driver?.workingHours?.startTime
           ? Date.now() // Could parse workingHours.startTime to set scheduled time
           : undefined,
         scheduledEndTime: driver?.workingHours?.endTime
           ? Date.now() // Could parse workingHours.endTime to set scheduled time
           : undefined,
       });
-      toast.success(t("driver.shift.started", "Shift started successfully!"));
+      toast.success(t('driver.shift.started', 'Shift started successfully!'));
     } catch (error: any) {
-      toast.error(error.message || t("driver.shift.startFailed", "Failed to start shift"));
+      toast.error(error.message || t('driver.shift.startFailed', 'Failed to start shift'));
     }
   };
 
@@ -67,30 +77,30 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
         breakTime: breakTime ? parseInt(breakTime) : undefined,
         driverNotes: driverNotes || undefined,
       });
-      toast.success(t("driver.shift.ended", "Shift ended successfully!"));
+      toast.success(t('driver.shift.ended', 'Shift ended successfully!'));
       setShowEndShiftModal(false);
-      setBreakTime("");
-      setDriverNotes("");
+      setBreakTime('');
+      setDriverNotes('');
     } catch (error: any) {
-      toast.error(error.message || t("driver.shift.endFailed", "Failed to end shift"));
+      toast.error(error.message || t('driver.shift.endFailed', 'Failed to end shift'));
     }
   };
 
   const handlePauseShift = async () => {
     try {
       await pauseShiftMutation({ driverId, userId });
-      toast.success(t("driver.shift.paused", "Shift paused"));
+      toast.success(t('driver.shift.paused', 'Shift paused'));
     } catch (error: any) {
-      toast.error(error.message || t("driver.shift.pauseFailed", "Failed to pause shift"));
+      toast.error(error.message || t('driver.shift.pauseFailed', 'Failed to pause shift'));
     }
   };
 
   const handleResumeShift = async () => {
     try {
       await resumeShiftMutation({ driverId, userId });
-      toast.success(t("driver.shift.resumed", "Shift resumed"));
+      toast.success(t('driver.shift.resumed', 'Shift resumed'));
     } catch (error: any) {
-      toast.error(error.message || t("driver.shift.resumeFailed", "Failed to resume shift"));
+      toast.error(error.message || t('driver.shift.resumeFailed', 'Failed to resume shift'));
     }
   };
 
@@ -111,25 +121,25 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              {t("driver.shift.currentShift", "Current Shift")}
+              {t('driver.shift.currentShift', 'Current Shift')}
             </CardTitle>
             {currentShift ? (
-              <Badge variant={currentShift.status === "active" ? "default" : "secondary"}>
-                {currentShift.status === "active" && (
+              <Badge variant={currentShift.status === 'active' ? 'default' : 'secondary'}>
+                {currentShift.status === 'active' && (
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    {t("driver.shift.active", "Active")}
+                    {t('driver.shift.active', 'Active')}
                   </span>
                 )}
-                {currentShift.status === "paused" && (
+                {currentShift.status === 'paused' && (
                   <span className="flex items-center gap-1">
                     <Pause className="w-3 h-3" />
-                    {t("driver.shift.paused", "Paused")}
+                    {t('driver.shift.paused', 'Paused')}
                   </span>
                 )}
               </Badge>
             ) : (
-              <Badge variant="outline">{t("driver.shift.offShift", "Off Shift")}</Badge>
+              <Badge variant="outline">{t('driver.shift.offShift', 'Off Shift')}</Badge>
             )}
           </div>
         </CardHeader>
@@ -139,46 +149,51 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
               {/* Shift Timer */}
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("driver.shift.duration", "Duration")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('driver.shift.duration', 'Duration')}
+                  </p>
                   <p className="text-2xl font-bold font-mono">
                     {formatDuration(currentShift.currentDuration || 0)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">{t("driver.shift.startedAt", "Started")}</p>
-                  <p className="text-sm font-medium">
-                    {format(currentShift.startTime, "HH:mm")}
+                  <p className="text-sm text-muted-foreground">
+                    {t('driver.shift.startedAt', 'Started')}
                   </p>
+                  <p className="text-sm font-medium">{format(currentShift.startTime, 'HH:mm')}</p>
                 </div>
               </div>
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="text-center p-2 bg-muted/50 rounded">
-                  <p className="text-xs text-muted-foreground">{t("driver.shift.trips", "Trips")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('driver.shift.trips', 'Trips')}
+                  </p>
                   <p className="text-lg font-semibold">{currentShift.tripsCompleted}</p>
                 </div>
                 <div className="text-center p-2 bg-muted/50 rounded">
-                  <p className="text-xs text-muted-foreground">{t("driver.shift.distance", "Distance")}</p>
-                  <p className="text-lg font-semibold">{(currentShift.totalDistance || 0).toFixed(1)} km</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('driver.shift.distance', 'Distance')}
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {(currentShift.totalDistance || 0).toFixed(1)} km
+                  </p>
                 </div>
                 <div className="text-center p-2 bg-muted/50 rounded">
-                  <p className="text-xs text-muted-foreground">{t("driver.shift.duration", "Duration")}</p>
-                  <p className="text-lg font-semibold">{(currentShift.totalDuration || 0)} min</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('driver.shift.duration', 'Duration')}
+                  </p>
+                  <p className="text-lg font-semibold">{currentShift.totalDuration || 0} min</p>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex gap-2">
-                {currentShift.status === "active" ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handlePauseShift}
-                    className="flex-1"
-                  >
+                {currentShift.status === 'active' ? (
+                  <Button variant="outline" size="sm" onClick={handlePauseShift} className="flex-1">
                     <Pause className="w-4 h-4 mr-2" />
-                    {t("driver.shift.pause", "Pause")}
+                    {t('driver.shift.pause', 'Pause')}
                   </Button>
                 ) : (
                   <Button
@@ -188,7 +203,7 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
                     className="flex-1"
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    {t("driver.shift.resume", "Resume")}
+                    {t('driver.shift.resume', 'Resume')}
                   </Button>
                 )}
                 <Button
@@ -198,7 +213,7 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
                   className="flex-1"
                 >
                   <Square className="w-4 h-4 mr-2" />
-                  {t("driver.shift.end", "End Shift")}
+                  {t('driver.shift.end', 'End Shift')}
                 </Button>
               </div>
 
@@ -206,7 +221,7 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
                 <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
                   <p className="text-sm text-orange-600 font-medium flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
-                    {t("driver.shift.overtime", "Overtime")}
+                    {t('driver.shift.overtime', 'Overtime')}
                   </p>
                 </div>
               )}
@@ -215,11 +230,11 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
             <div className="text-center py-8">
               <Clock className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="text-muted-foreground mb-4">
-                {t("driver.shift.notStarted", "No active shift")}
+                {t('driver.shift.notStarted', 'No active shift')}
               </p>
               <Button onClick={handleStartShift} size="sm">
                 <Play className="w-4 h-4 mr-2" />
-                {t("driver.shift.start", "Start Shift")}
+                {t('driver.shift.start', 'Start Shift')}
               </Button>
             </div>
           )}
@@ -232,12 +247,12 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Square className="w-5 h-5" />
-              {t("driver.shift.endShift", "End Shift")}
+              {t('driver.shift.endShift', 'End Shift')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>{t("driver.shift.breakTime", "Break Time (minutes)")}</Label>
+              <Label>{t('driver.shift.breakTime', 'Break Time (minutes)')}</Label>
               <Input
                 type="number"
                 min="0"
@@ -248,21 +263,21 @@ export function DriverShiftControls({ driverId, userId, organizationId }: Driver
               />
             </div>
             <div>
-              <Label>{t("driver.shift.notes", "Notes")} ({t("common.optional", "Optional")})</Label>
+              <Label>
+                {t('driver.shift.notes', 'Notes')} ({t('common.optional', 'Optional')})
+              </Label>
               <Textarea
                 value={driverNotes}
                 onChange={(e) => setDriverNotes(e.target.value)}
-                placeholder={t("driver.shift.notesPlaceholder", "Any notes about this shift...")}
+                placeholder={t('driver.shift.notesPlaceholder', 'Any notes about this shift...')}
                 rows={3}
               />
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowEndShiftModal(false)}>
-                {t("common.cancel", "Cancel")}
+                {t('common.cancel', 'Cancel')}
               </Button>
-              <Button onClick={handleEndShift}>
-                {t("driver.shift.endConfirm", "End Shift")}
-              </Button>
+              <Button onClick={handleEndShift}>{t('driver.shift.endConfirm', 'End Shift')}</Button>
             </div>
           </div>
         </DialogContent>

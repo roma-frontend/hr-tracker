@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useTransition, useEffect } from "react"
-import { useTranslation } from 'react-i18next';;
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useState, useTransition, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from '@/lib/cssMotion';
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Building2,
   User,
@@ -22,11 +22,11 @@ import {
   Users,
   MessageSquare,
   Crown,
-} from "lucide-react";
-import { toast } from "sonner";
-import bcrypt from "bcryptjs";
-import { useMutation } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import bcrypt from 'bcryptjs';
+import { useMutation } from 'convex/react';
+import { api } from '../../../../../convex/_generated/api';
 
 const passwordStrength = (pwd: string) => {
   if (pwd.length < 8) return 0;
@@ -37,10 +37,10 @@ const passwordStrength = (pwd: string) => {
   return strength;
 };
 
-const STRENGTH_COLORS = ["#ef4444", "#f59e0b", "#22c55e", "#10b981"];
-const STRENGTH_LABELS = ["Weak", "Fair", "Good", "Strong"];
+const STRENGTH_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#10b981'];
+const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
 
-const TEAM_SIZES = ["1-10", "11-50", "51-200", "200+"];
+const TEAM_SIZES = ['1-10', '11-50', '51-200', '200+'];
 
 export default function RequestOrgPage() {
   const { t } = useTranslation();
@@ -50,25 +50,25 @@ export default function RequestOrgPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    orgName: "",
-    slug: "",
-    userName: "",
-    email: "",
-    password: "",
-    phone: "",
-    country: "",
-    industry: "",
-    teamSize: "",
-    description: "",
+    orgName: '',
+    slug: '',
+    userName: '',
+    email: '',
+    password: '',
+    phone: '',
+    country: '',
+    industry: '',
+    teamSize: '',
+    description: '',
   });
 
   const requestOrg = useMutation(api.organizationRequests.requestOrganization);
 
-  const plan = searchParams.get("plan") as "professional" | "enterprise" | null;
+  const plan = searchParams.get('plan') as 'professional' | 'enterprise' | null;
 
   useEffect(() => {
-    if (plan !== "professional" && plan !== "enterprise") {
-      router.push("/register-org");
+    if (plan !== 'professional' && plan !== 'enterprise') {
+      router.push('/register-org');
     }
   }, [plan, router]);
 
@@ -77,8 +77,8 @@ export default function RequestOrgPage() {
     if (formData.orgName && !formData.slug) {
       const slug = formData.orgName
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
         .substring(0, 30);
       setFormData((prev) => ({ ...prev, slug }));
     }
@@ -91,17 +91,17 @@ export default function RequestOrgPage() {
     setError(null);
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError('Password must be at least 8 characters');
       return;
     }
 
     if (!formData.slug) {
-      setError("Organization slug is required");
+      setError('Organization slug is required');
       return;
     }
 
     if (!plan) {
-      setError("Plan not selected");
+      setError('Plan not selected');
       return;
     }
 
@@ -125,35 +125,40 @@ export default function RequestOrgPage() {
           description: formData.description || undefined,
         });
 
-        toast.success("🎉 Request submitted successfully!");
-        
+        toast.success('🎉 Request submitted successfully!');
+
         // Redirect to confirmation page
-        router.push("/register-org/pending");
+        router.push('/register-org/pending');
       } catch (err: any) {
-        setError(err.message || "Failed to submit request");
-        toast.error(err.message || "Failed to submit request");
+        setError(err.message || 'Failed to submit request');
+        toast.error(err.message || 'Failed to submit request');
       }
     });
   };
 
-  const planColor = plan === "enterprise" ? "from-purple-500 to-pink-500" : "from-blue-500 to-cyan-500";
-  const planIcon = plan === "enterprise" ? Crown : Building2;
+  const planColor =
+    plan === 'enterprise' ? 'from-purple-500 to-pink-500' : 'from-blue-500 to-cyan-500';
+  const planIcon = plan === 'enterprise' ? Crown : Building2;
   const Icon = planIcon;
 
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "var(--background)" }}
+      style={{ background: 'var(--background)' }}
     >
       {/* Background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: `radial-gradient(circle, ${plan === "enterprise" ? "#a855f7" : "#2563eb"}, transparent)` }}
+          style={{
+            background: `radial-gradient(circle, ${plan === 'enterprise' ? '#a855f7' : '#2563eb'}, transparent)`,
+          }}
         />
         <div
           className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: `radial-gradient(circle, ${plan === "enterprise" ? "#ec4899" : "#0ea5e9"}, transparent)` }}
+          style={{
+            background: `radial-gradient(circle, ${plan === 'enterprise' ? '#ec4899' : '#0ea5e9'}, transparent)`,
+          }}
         />
       </div>
 
@@ -165,7 +170,7 @@ export default function RequestOrgPage() {
       >
         <div
           className="rounded-2xl p-8 shadow-2xl border"
-          style={{ background: "var(--card)", borderColor: "var(--border)" }}
+          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
@@ -176,11 +181,17 @@ export default function RequestOrgPage() {
               <Icon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold capitalize" style={{ color: "var(--text-primary)" }}>
+              <h1
+                className="text-2xl font-bold capitalize"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 Request {plan} Plan
               </h1>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                {plan === "enterprise" ? "Custom pricing • 100+ employees" : "$29/mo • Up to 50 employees"} • Approved within 24h
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                {plan === 'enterprise'
+                  ? 'Custom pricing • 100+ employees'
+                  : '$29/mo • Up to 50 employees'}{' '}
+                • Approved within 24h
               </p>
             </div>
           </div>
@@ -188,13 +199,16 @@ export default function RequestOrgPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Organization Details */}
-            <div className="space-y-4 p-4 rounded-xl" style={{ background: "rgba(37,99,235,0.05)" }}>
-              <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            <div
+              className="space-y-4 p-4 rounded-xl"
+              style={{ background: 'rgba(37,99,235,0.05)' }}
+            >
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Organization Details
               </h3>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                   Organization Name
                 </label>
                 <div className="relative">
@@ -207,18 +221,20 @@ export default function RequestOrgPage() {
                     placeholder={t('placeholders.acmeCorporation')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
-                      background: "var(--input)",
-                      borderColor: "var(--border)",
-                      color: "var(--text-primary)",
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                    onFocus={(e) =>
+                      (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                    }
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                   Organization URL
                 </label>
                 <div className="relative">
@@ -230,28 +246,30 @@ export default function RequestOrgPage() {
                     onChange={(e) =>
                       setFormData((p) => ({
                         ...p,
-                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
                       }))
                     }
                     placeholder="acme-corp"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
-                      background: "var(--input)",
-                      borderColor: "var(--border)",
-                      color: "var(--text-primary)",
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                    onFocus={(e) =>
+                      (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                    }
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  yourteam.officehub.com/<strong>{formData.slug || "your-org"}</strong>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  yourteam.officehub.com/<strong>{formData.slug || 'your-org'}</strong>
                 </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     Industry
                   </label>
                   <div className="relative">
@@ -263,18 +281,20 @@ export default function RequestOrgPage() {
                       placeholder={t('placeholders.technology')}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
-                        background: "var(--input)",
-                        borderColor: "var(--border)",
-                        color: "var(--text-primary)",
+                        background: 'var(--input)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-primary)',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                      }
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     Team Size
                   </label>
                   <div className="relative">
@@ -284,12 +304,14 @@ export default function RequestOrgPage() {
                       onChange={(e) => setFormData((p) => ({ ...p, teamSize: e.target.value }))}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
-                        background: "var(--input)",
-                        borderColor: "var(--border)",
-                        color: "var(--text-primary)",
+                        background: 'var(--input)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-primary)',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                      }
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                     >
                       <option value="">Select size</option>
                       {TEAM_SIZES.map((size) => (
@@ -305,13 +327,13 @@ export default function RequestOrgPage() {
 
             {/* Your Details */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Your Details (Admin Account)
               </h3>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     Your Name
                   </label>
                   <div className="relative">
@@ -324,18 +346,22 @@ export default function RequestOrgPage() {
                       placeholder={t('placeholders.johnDoe')}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
-                        background: "var(--input)",
-                        borderColor: "var(--border)",
-                        color: "var(--text-primary)",
+                        background: 'var(--input)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-primary)',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                      }
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.email')}</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {t('auth.email')}
+                  </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                     <input
@@ -346,12 +372,14 @@ export default function RequestOrgPage() {
                       placeholder="you@company.com"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
-                        background: "var(--input)",
-                        borderColor: "var(--border)",
-                        color: "var(--text-primary)",
+                        background: 'var(--input)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-primary)',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                      }
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                     />
                   </div>
                 </div>
@@ -359,7 +387,7 @@ export default function RequestOrgPage() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     Phone
                   </label>
                   <div className="relative">
@@ -371,18 +399,20 @@ export default function RequestOrgPage() {
                       placeholder="+1 234 567 890"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
-                        background: "var(--input)",
-                        borderColor: "var(--border)",
-                        color: "var(--text-primary)",
+                        background: 'var(--input)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-primary)',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                      onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                      }
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     Country
                   </label>
                   <input
@@ -392,34 +422,40 @@ export default function RequestOrgPage() {
                     placeholder={t('placeholders.unitedStates')}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
-                      background: "var(--input)",
-                      borderColor: "var(--border)",
-                      color: "var(--text-primary)",
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                    onFocus={(e) =>
+                      (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                    }
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {t('auth.password')}
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
                     onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
                     placeholder={t('placeholders.minCharacters')}
                     className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
-                      background: "var(--input)",
-                      borderColor: "var(--border)",
-                      color: "var(--text-primary)",
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                    onFocus={(e) =>
+                      (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                    }
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                   <button
                     type="button"
@@ -437,16 +473,19 @@ export default function RequestOrgPage() {
                           key={i}
                           className="flex-1 h-1 rounded-full transition-all"
                           style={{
-                            background: i < strength ? STRENGTH_COLORS[strength - 1] : "var(--border)",
+                            background:
+                              i < strength ? STRENGTH_COLORS[strength - 1] : 'var(--border)',
                           }}
                         />
                       ))}
                     </div>
                     <p
                       className="text-xs"
-                      style={{ color: strength > 0 ? STRENGTH_COLORS[strength - 1] : "var(--text-muted)" }}
+                      style={{
+                        color: strength > 0 ? STRENGTH_COLORS[strength - 1] : 'var(--text-muted)',
+                      }}
                     >
-                      {strength > 0 ? STRENGTH_LABELS[strength - 1] : ""}
+                      {strength > 0 ? STRENGTH_LABELS[strength - 1] : ''}
                     </p>
                   </div>
                 )}
@@ -455,7 +494,7 @@ export default function RequestOrgPage() {
 
             {/* Additional Info */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 Tell us about your needs (optional)
               </label>
               <div className="relative">
@@ -467,12 +506,14 @@ export default function RequestOrgPage() {
                   rows={3}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all resize-none"
                   style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--input)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = plan === "enterprise" ? "#a855f7" : "#2563eb")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                  onFocus={(e) =>
+                    (e.target.style.borderColor = plan === 'enterprise' ? '#a855f7' : '#2563eb')
+                  }
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                 />
               </div>
             </div>
@@ -483,7 +524,7 @@ export default function RequestOrgPage() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-2 p-3 rounded-xl text-sm"
-                style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}
+                style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
               >
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
@@ -510,7 +551,7 @@ export default function RequestOrgPage() {
               )}
             </motion.button>
 
-            <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
               We'll review your request and get back to you within 24 hours.
             </p>
           </form>
@@ -520,7 +561,7 @@ export default function RequestOrgPage() {
           <Link
             href="/register-org"
             className="text-sm hover:underline flex items-center justify-center gap-1"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: 'var(--text-muted)' }}
           >
             <ArrowLeft className="w-3 h-3" /> {t('ui.backToPlans')}
           </Link>

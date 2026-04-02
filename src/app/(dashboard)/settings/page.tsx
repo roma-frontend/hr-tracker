@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import { useTranslation } from 'react-i18next';
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   Save,
@@ -18,39 +18,39 @@ import {
   ShieldCheck,
   User,
   ChevronLeft,
-  ChevronRight
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuthStore } from "@/store/useAuthStore";
-import { toast } from "sonner";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import dynamic from "next/dynamic";
-import { SubscriptionPlanCard } from "@/components/subscription/SubscriptionPlanCard";
-import { CookiePreferences } from "@/components/settings/CookiePreferences";
-import { NotificationSettings } from "@/components/settings/NotificationSettings";
-import { SecuritySettings } from "@/components/settings/SecuritySettings";
-import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
-import { ProductivitySettings } from "@/components/settings/ProductivitySettings";
-import { LocalizationSettings } from "@/components/settings/LocalizationSettings";
-import { DashboardCustomization } from "@/components/settings/DashboardCustomization";
-import { AdvancedSecuritySettings } from "@/components/settings/AdvancedSecuritySettings";
-import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
-import { ProfileSettings } from "@/components/settings/ProfileSettings";
+  ChevronRight,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuthStore } from '@/store/useAuthStore';
+import { toast } from 'sonner';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import dynamic from 'next/dynamic';
+import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard';
+import { CookiePreferences } from '@/components/settings/CookiePreferences';
+import { NotificationSettings } from '@/components/settings/NotificationSettings';
+import { SecuritySettings } from '@/components/settings/SecuritySettings';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
+import { ProductivitySettings } from '@/components/settings/ProductivitySettings';
+import { LocalizationSettings } from '@/components/settings/LocalizationSettings';
+import { DashboardCustomization } from '@/components/settings/DashboardCustomization';
+import { AdvancedSecuritySettings } from '@/components/settings/AdvancedSecuritySettings';
+import { IntegrationSettings } from '@/components/settings/IntegrationSettings';
+import { ProfileSettings } from '@/components/settings/ProfileSettings';
 
-const SLASettings = dynamic(() => import("@/components/admin/SLASettings"), { ssr: false });
+const SLASettings = dynamic(() => import('@/components/admin/SLASettings'), { ssr: false });
 
 export default function SettingsPage() {
   const { t } = useTranslation();
   const { user, login } = useAuthStore();
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState('profile');
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [pushNotifs, setPushNotifs] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [name, setName] = useState(user?.name ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
+  const [name, setName] = useState(user?.name ?? '');
+  const [email, setEmail] = useState(user?.email ?? '');
   const [productivitySettings, setProductivitySettings] = useState({});
   const [localizationSettings, setLocalizationSettings] = useState({});
   const [dashboardSettings, setDashboardSettings] = useState({});
@@ -104,7 +104,7 @@ export default function SettingsPage() {
       }
       el.scrollLeft = dragRef.current.scrollLeft - dx;
     },
-    [isDragging]
+    [isDragging],
   );
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -113,7 +113,7 @@ export default function SettingsPage() {
     if (!dragRef.current.hasMoved) {
       const tab = (e.target as HTMLElement).closest("[role='tab']");
       if (tab) {
-        const value = tab.getAttribute("data-value") || tab.getAttribute("value");
+        const value = tab.getAttribute('data-value') || tab.getAttribute('value');
         if (value) setActiveTab(value);
       }
     }
@@ -125,8 +125,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     updateScrollState();
-    window.addEventListener("resize", updateScrollState);
-    return () => window.removeEventListener("resize", updateScrollState);
+    window.addEventListener('resize', updateScrollState);
+    return () => window.removeEventListener('resize', updateScrollState);
   }, [updateScrollState]);
 
   // Debug: log user data on mount
@@ -145,8 +145,8 @@ export default function SettingsPage() {
 
   // Auto-migrate: copy faceImageUrl → avatarUrl for users who registered face but have no avatar
   useEffect(() => {
-    if (user?.role === "admin") {
-      migrateFaceToAvatar({}).catch(() => { });
+    if (user?.role === 'admin') {
+      migrateFaceToAvatar({}).catch(() => {});
     }
   }, [user?.role]);
 
@@ -179,11 +179,11 @@ export default function SettingsPage() {
         ...allSettings,
       });
 
-      toast.success(t("toasts.settingsSaved"));
+      toast.success(t('toasts.settingsSaved'));
       console.log('Settings saved to store:', { ...user, ...allSettings });
     } catch (err) {
       console.error('Failed to save settings:', err);
-      toast.error(err instanceof Error ? err.message : "Failed to save");
+      toast.error(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setSaving(false);
     }
@@ -191,74 +191,74 @@ export default function SettingsPage() {
 
   const tabs = [
     {
-      value: "profile",
+      value: 'profile',
       label: t('settings.profile'),
       icon: User,
       description: t('settings.profileDesc'),
     },
     {
-      value: "productivity",
+      value: 'productivity',
       label: t('settings.productivity'),
       icon: Zap,
       description: t('settings.productivityDesc'),
     },
     {
-      value: "notifications",
+      value: 'notifications',
       label: t('settings.notifications'),
       icon: Bell,
       description: t('settings.notificationsDesc'),
     },
     {
-      value: "security",
+      value: 'security',
       label: t('settings.security'),
       icon: Shield,
       description: t('settings.securityDesc'),
     },
     {
-      value: "advanced-security",
+      value: 'advanced-security',
       label: t('settings.privacy'),
       icon: ShieldCheck,
       description: t('settings.privacyDesc'),
     },
     {
-      value: "appearance",
+      value: 'appearance',
       label: t('settings.appearance'),
       icon: Palette,
       description: t('settings.appearanceDesc'),
     },
     {
-      value: "dashboard",
+      value: 'dashboard',
       label: t('nav.dashboard'),
       icon: LayoutDashboard,
       description: t('settings.dashboardDesc'),
     },
     {
-      value: "localization",
+      value: 'localization',
       label: t('settings.regional'),
       icon: Globe,
       description: t('settings.regionalDesc'),
     },
     {
-      value: "integrations",
+      value: 'integrations',
       label: t('settings.integrations'),
       icon: Link2,
       description: t('settings.integrationsDesc'),
     },
     {
-      value: "billing",
+      value: 'billing',
       label: t('settings.billing'),
       icon: CreditCard,
       description: t('settings.billingDesc'),
     },
-    ...(user?.role === "admin"
+    ...(user?.role === 'admin'
       ? [
-        {
-          value: "admin",
-          label: t('settings.admin'),
-          icon: SettingsIcon,
-          description: t('settings.adminDesc'),
-        },
-      ]
+          {
+            value: 'admin',
+            label: t('settings.admin'),
+            icon: SettingsIcon,
+            description: t('settings.adminDesc'),
+          },
+        ]
       : []),
   ];
 
@@ -271,10 +271,10 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">{t('nav.settings')}</h2>
-          <p className="text-[var(--text-muted)] text-sm mt-2">
-            {t('dashboard.settingsSubtitle')}
-          </p>
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
+            {t('nav.settings')}
+          </h2>
+          <p className="text-[var(--text-muted)] text-sm mt-2">{t('dashboard.settingsSubtitle')}</p>
         </div>
       </div>
 
@@ -284,10 +284,10 @@ export default function SettingsPage() {
           <button
             onClick={() => {
               const el = tabsScrollRef.current;
-              if (el) el.scrollBy({ left: -200, behavior: "smooth" });
+              if (el) el.scrollBy({ left: -200, behavior: 'smooth' });
             }}
             className="absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-transparent rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ display: canScrollLeft ? undefined : "none" }}
+            style={{ display: canScrollLeft ? undefined : 'none' }}
             aria-label={t('settings.scrollLeft')}
           >
             <ChevronLeft className="w-4 h-4 text-[var(--text-muted)]" />
@@ -301,7 +301,7 @@ export default function SettingsPage() {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
             className={`bg-[var(--surface)] p-1.5 rounded-xl border border-[var(--border)] overflow-x-auto scrollbar-hide ${
-              isDragging ? "cursor-grabbing select-none" : "cursor-grab"
+              isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
             }`}
           >
             <TabsList className="inline-flex w-auto min-w-full gap-1 bg-transparent h-auto">
@@ -326,10 +326,10 @@ export default function SettingsPage() {
           <button
             onClick={() => {
               const el = tabsScrollRef.current;
-              if (el) el.scrollBy({ left: 200, behavior: "smooth" });
+              if (el) el.scrollBy({ left: 200, behavior: 'smooth' });
             }}
             className="absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-l from-[var(--surface)] via-[var(--surface)] to-transparent rounded-r-xl opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ display: canScrollRight ? undefined : "none" }}
+            style={{ display: canScrollRight ? undefined : 'none' }}
             aria-label={t('settings.scrollRight')}
           >
             <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
@@ -358,10 +358,7 @@ export default function SettingsPage() {
 
             {/* Productivity Tab */}
             <TabsContent value="productivity" className="space-y-6 mt-0">
-              <ProductivitySettings
-                user={user}
-                onSettingsChange={setProductivitySettings}
-              />
+              <ProductivitySettings user={user} onSettingsChange={setProductivitySettings} />
             </TabsContent>
 
             {/* Notifications Tab */}
@@ -378,7 +375,7 @@ export default function SettingsPage() {
 
             {/* Security Tab */}
             <TabsContent value="security" className="space-y-6 mt-0">
-              <SecuritySettings userId={user?.id ?? ""} />
+              <SecuritySettings userId={user?.id ?? ''} />
             </TabsContent>
 
             {/* Advanced Security Tab */}
@@ -393,10 +390,7 @@ export default function SettingsPage() {
 
             {/* Dashboard Customization Tab */}
             <TabsContent value="dashboard" className="space-y-6 mt-0">
-              <DashboardCustomization
-                user={user}
-                onSettingsChange={setDashboardSettings}
-              />
+              <DashboardCustomization user={user} onSettingsChange={setDashboardSettings} />
             </TabsContent>
 
             {/* Localization Tab */}
@@ -420,7 +414,7 @@ export default function SettingsPage() {
             </TabsContent>
 
             {/* Admin Tab */}
-            {user?.role === "admin" && (
+            {user?.role === 'admin' && (
               <TabsContent value="admin" className="space-y-6 mt-0">
                 <SLASettings />
               </TabsContent>

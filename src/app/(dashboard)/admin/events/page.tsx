@@ -14,7 +14,16 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, AlertCircle, Users, CheckCircle, RefreshCw, Edit, Trash2 } from 'lucide-react';
+import {
+  Calendar,
+  Plus,
+  AlertCircle,
+  Users,
+  CheckCircle,
+  RefreshCw,
+  Edit,
+  Trash2,
+} from 'lucide-react';
 import { CreateEventModal } from '@/components/events/CreateEventModal';
 import { LeaveConflictAlerts } from '@/components/events/LeaveConflictAlerts';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -47,19 +56,21 @@ export default function CompanyEventsPage() {
   // Get current user from auth store
   const { user: authUser } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
-  
+
   // For superadmin, use selectedOrgId if available, otherwise use user's organizationId
   const isSuperadmin = authUser?.role === 'superadmin';
-  const effectiveOrgId = (isSuperadmin && selectedOrgId) ? selectedOrgId : authUser?.organizationId;
+  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : authUser?.organizationId;
   const userId = authUser?.id as Id<'users'> | undefined;
 
-  const events = useQuery(api.events.getCompanyEvents,
-    effectiveOrgId ? { organizationId: effectiveOrgId as any } : 'skip'
+  const events = useQuery(
+    api.events.getCompanyEvents,
+    effectiveOrgId ? { organizationId: effectiveOrgId as any } : 'skip',
   );
 
   // Get pending leave requests for admin review
-  const pendingLeaves = useQuery(api.leaves.getLeavesForOrganization,
-    effectiveOrgId ? { organizationId: effectiveOrgId as any } : 'skip'
+  const pendingLeaves = useQuery(
+    api.leaves.getLeavesForOrganization,
+    effectiveOrgId ? { organizationId: effectiveOrgId as any } : 'skip',
   );
 
   const updateEvent = useMutation(api.events.updateCompanyEvent);
@@ -74,7 +85,9 @@ export default function CompanyEventsPage() {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 mx-auto mb-3 text-red-500" />
           <h2 className="text-xl font-semibold">{t('common.accessDenied', 'Access Denied')}</h2>
-          <p className="text-muted-foreground">{t('events.adminOnly', 'Only administrators can manage company events')}</p>
+          <p className="text-muted-foreground">
+            {t('events.adminOnly', 'Only administrators can manage company events')}
+          </p>
         </div>
       </div>
     );
@@ -86,7 +99,9 @@ export default function CompanyEventsPage() {
       <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t('events.title', 'Company Events')}</h1>
-          <p className="text-muted-foreground mt-1">{t('events.subtitle', 'Manage events and review leave conflicts')}</p>
+          <p className="text-muted-foreground mt-1">
+            {t('events.subtitle', 'Manage events and review leave conflicts')}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -94,7 +109,7 @@ export default function CompanyEventsPage() {
             onClick={async () => {
               // Check conflicts for all pending leaves
               let totalConflicts = 0;
-              const pendingList = (pendingLeaves as any[]).filter(l => l.status === 'pending');
+              const pendingList = (pendingLeaves as any[]).filter((l) => l.status === 'pending');
               for (const leave of pendingList) {
                 try {
                   const result = await checkConflicts({
@@ -109,12 +124,21 @@ export default function CompanyEventsPage() {
                   console.error('Conflict check failed:', e);
                 }
               }
-              
+
               if (totalConflicts > 0) {
-                toast.success(t('events.conflictsFound', 'Found {{count}} conflict(s)! Check Conflict Alerts tab.', { count: totalConflicts }), {
-                  description: t('events.leavesChecked', '{{count}} leave requests checked', { count: pendingList.length }),
-                  duration: 5000,
-                });
+                toast.success(
+                  t(
+                    'events.conflictsFound',
+                    'Found {{count}} conflict(s)! Check Conflict Alerts tab.',
+                    { count: totalConflicts },
+                  ),
+                  {
+                    description: t('events.leavesChecked', '{{count}} leave requests checked', {
+                      count: pendingList.length,
+                    }),
+                    duration: 5000,
+                  },
+                );
               } else {
                 toast.info(t('events.noConflicts', 'No conflicts found'), {
                   description: t('events.allClear', 'All leave requests are clear'),
@@ -158,11 +182,12 @@ export default function CompanyEventsPage() {
         >
           <AlertCircle className="w-4 h-4 inline mr-2" />
           {t('events.conflictAlertsTab', 'Conflict Alerts')}
-          {pendingLeaves && (pendingLeaves as any[]).filter(l => l.status === 'pending').length > 0 && (
-            <Badge variant="secondary" className="ml-2">
-              {(pendingLeaves as any[]).filter(l => l.status === 'pending').length}
-            </Badge>
-          )}
+          {pendingLeaves &&
+            (pendingLeaves as any[]).filter((l) => l.status === 'pending').length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {(pendingLeaves as any[]).filter((l) => l.status === 'pending').length}
+              </Badge>
+            )}
         </button>
       </div>
 
@@ -201,8 +226,8 @@ export default function CompanyEventsPage() {
                               event.priority === 'high'
                                 ? 'destructive'
                                 : event.priority === 'medium'
-                                ? 'default'
-                                : 'secondary'
+                                  ? 'default'
+                                  : 'secondary'
                             }
                           >
                             {(() => {
@@ -246,7 +271,13 @@ export default function CompanyEventsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={async () => {
-                            if (confirm(t('events.confirmDelete', 'Delete event "{{name}}"?', { name: event.name }))) {
+                            if (
+                              confirm(
+                                t('events.confirmDelete', 'Delete event "{{name}}"?', {
+                                  name: event.name,
+                                }),
+                              )
+                            ) {
                               try {
                                 await deleteEvent({
                                   eventId: event._id,
@@ -254,7 +285,10 @@ export default function CompanyEventsPage() {
                                 });
                                 toast.success(t('events.eventDeleted', 'Event deleted'));
                               } catch (error: any) {
-                                toast.error(error.message || t('events.deleteFailed', 'Failed to delete event'));
+                                toast.error(
+                                  error.message ||
+                                    t('events.deleteFailed', 'Failed to delete event'),
+                                );
                               }
                             }
                           }}
@@ -270,10 +304,7 @@ export default function CompanyEventsPage() {
           </CardContent>
         </Card>
       ) : (
-        <LeaveConflictAlerts
-          organizationId={effectiveOrgId as any}
-          userId={userId!}
-        />
+        <LeaveConflictAlerts organizationId={effectiveOrgId as any} userId={userId!} />
       )}
 
       {/* Create Event Modal */}
@@ -288,10 +319,13 @@ export default function CompanyEventsPage() {
       />
 
       {/* Edit Event Modal */}
-      <Dialog open={showEditModal} onOpenChange={(open) => {
-        setShowEditModal(open);
-        if (!open) setSelectedEvent(null);
-      }}>
+      <Dialog
+        open={showEditModal}
+        onOpenChange={(open) => {
+          setShowEditModal(open);
+          if (!open) setSelectedEvent(null);
+        }}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{t('events.editEvent', 'Edit Event')}</DialogTitle>
@@ -300,10 +334,7 @@ export default function CompanyEventsPage() {
             <div className="space-y-4">
               <div>
                 <Label>{t('events.eventName', 'Event Name')}</Label>
-                <Input
-                  defaultValue={selectedEvent.name}
-                  id="edit-name"
-                />
+                <Input defaultValue={selectedEvent.name} id="edit-name" />
               </div>
               <div>
                 <Label>{t('events.description', 'Description')}</Label>
@@ -333,7 +364,7 @@ export default function CompanyEventsPage() {
               </div>
               <div>
                 <Label>{t('events.priority', 'Priority')}</Label>
-                <Select 
+                <Select
                   defaultValue={selectedEvent.priority || 'medium'}
                   onValueChange={(value) => {
                     // Force re-render by updating state
@@ -344,8 +375,12 @@ export default function CompanyEventsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="high">{String(t('events.priority.high', 'High'))}</SelectItem>
-                    <SelectItem value="medium">{String(t('events.priority.medium', 'Medium'))}</SelectItem>
+                    <SelectItem value="high">
+                      {String(t('events.priority.high', 'High'))}
+                    </SelectItem>
+                    <SelectItem value="medium">
+                      {String(t('events.priority.medium', 'Medium'))}
+                    </SelectItem>
                     <SelectItem value="low">{String(t('events.priority.low', 'Low'))}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -354,24 +389,36 @@ export default function CompanyEventsPage() {
                 <Button variant="outline" onClick={() => setShowEditModal(false)}>
                   {t('common.cancel', 'Cancel')}
                 </Button>
-                <Button onClick={async () => {
-                  try {
-                    const priorityValue = (document.getElementById('edit-priority') as HTMLSelectElement).value;
-                    await updateEvent({
-                      eventId: selectedEvent._id,
-                      userId: userId!,
-                      name: (document.getElementById('edit-name') as HTMLInputElement).value,
-                      description: (document.getElementById('edit-description') as HTMLTextAreaElement).value,
-                      startDate: new Date((document.getElementById('edit-start') as HTMLInputElement).value).getTime(),
-                      endDate: new Date((document.getElementById('edit-end') as HTMLInputElement).value).getTime(),
-                      priority: priorityValue as 'high' | 'medium' | 'low',
-                    });
-                    setShowEditModal(false);
-                    toast.success(t('events.eventUpdated', 'Event updated successfully'));
-                  } catch (error: any) {
-                    toast.error(error.message || t('events.updateFailed', 'Failed to update event'));
-                  }
-                }}>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const priorityValue = (
+                        document.getElementById('edit-priority') as HTMLSelectElement
+                      ).value;
+                      await updateEvent({
+                        eventId: selectedEvent._id,
+                        userId: userId!,
+                        name: (document.getElementById('edit-name') as HTMLInputElement).value,
+                        description: (
+                          document.getElementById('edit-description') as HTMLTextAreaElement
+                        ).value,
+                        startDate: new Date(
+                          (document.getElementById('edit-start') as HTMLInputElement).value,
+                        ).getTime(),
+                        endDate: new Date(
+                          (document.getElementById('edit-end') as HTMLInputElement).value,
+                        ).getTime(),
+                        priority: priorityValue as 'high' | 'medium' | 'low',
+                      });
+                      setShowEditModal(false);
+                      toast.success(t('events.eventUpdated', 'Event updated successfully'));
+                    } catch (error: any) {
+                      toast.error(
+                        error.message || t('events.updateFailed', 'Failed to update event'),
+                      );
+                    }
+                  }}
+                >
                   {t('common.save', 'Save Changes')}
                 </Button>
               </DialogFooter>

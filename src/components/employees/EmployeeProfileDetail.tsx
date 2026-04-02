@@ -1,19 +1,34 @@
-﻿"use client";
+﻿'use client';
 import Image from 'next/image';
 
-import React, { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { User, Mail, Phone, Building2, Calendar, Briefcase, Star, Clock, Target, Award, AlertTriangle, Plus, Edit2, Trash2 } from "lucide-react";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { format } from "date-fns";
-import { useAuthStore } from "@/store/useAuthStore";
-import { SupervisorRatingForm } from "@/components/attendance/SupervisorRatingForm";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import React, { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  User,
+  Mail,
+  Phone,
+  Building2,
+  Calendar,
+  Briefcase,
+  Star,
+  Clock,
+  Target,
+  Award,
+  AlertTriangle,
+  Plus,
+  Edit2,
+  Trash2,
+} from 'lucide-react';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { format } from 'date-fns';
+import { useAuthStore } from '@/store/useAuthStore';
+import { SupervisorRatingForm } from '@/components/attendance/SupervisorRatingForm';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   Dialog,
@@ -22,11 +37,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { EditEmployeeModal } from "./EditEmployeeModal";
+} from '@/components/ui/dialog';
+import { EditEmployeeModal } from './EditEmployeeModal';
 
 interface EmployeeProfileDetailProps {
-  employeeId: Id<"users">;
+  employeeId: Id<'users'>;
 }
 
 export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDetailProps) {
@@ -45,13 +60,19 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
     userId: employeeId,
     month: new Date().toISOString().slice(0, 7),
   });
-  const ratingHistory = useQuery(api.supervisorRatings.getEmployeeRatings, { employeeId, limit: 3 });
+  const ratingHistory = useQuery(api.supervisorRatings.getEmployeeRatings, {
+    employeeId,
+    limit: 3,
+  });
 
   const deleteUser = useMutation(api.users.deleteUser);
 
-  const isAdminOrSupervisor = currentUser?.role === "admin" || currentUser?.role === "supervisor";
-  const isSuperadmin = currentUser?.role === "superadmin" || currentUser?.email?.toLowerCase() === "romangulanyan@gmail.com";
-  const isTargetSuperadmin = employee?.role === "superadmin" || employee?.email?.toLowerCase() === "romangulanyan@gmail.com";
+  const isAdminOrSupervisor = currentUser?.role === 'admin' || currentUser?.role === 'supervisor';
+  const isSuperadmin =
+    currentUser?.role === 'superadmin' ||
+    currentUser?.email?.toLowerCase() === 'romangulanyan@gmail.com';
+  const isTargetSuperadmin =
+    employee?.role === 'superadmin' || employee?.email?.toLowerCase() === 'romangulanyan@gmail.com';
   const canEdit = isAdminOrSupervisor || isSuperadmin;
   const canDelete = canEdit && !isTargetSuperadmin && employeeId !== currentUser?.id;
 
@@ -59,10 +80,13 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
     setDeleting(true);
     try {
       if (!currentUser?.id) {
-        toast.error("User ID not found");
+        toast.error('User ID not found');
         return;
       }
-      await deleteUser({ userId: employeeId as Id<"users">, adminId: currentUser.id as Id<"users"> });
+      await deleteUser({
+        userId: employeeId as Id<'users'>,
+        adminId: currentUser.id as Id<'users'>,
+      });
       toast.success(t('employees.employeeDeleted', 'Employee deleted successfully'));
       window.history.back();
     } catch (error: any) {
@@ -76,7 +100,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
     [1, 2, 3, 4, 5].map((i: any) => (
       <Star
         key={i}
-        className={`w-3.5 h-3.5 ${i <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+        className={`w-3.5 h-3.5 ${i <= Math.round(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
       />
     ));
 
@@ -99,21 +123,33 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
                 {(employee as any).avatarUrl ? (
-                  <img src={(employee as any).avatarUrl} alt={employee.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <img
+                    src={(employee as any).avatarUrl}
+                    alt={employee.name}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
                 ) : (
-                  employee.name.split(" ").map((n: any) => n[0]).join("").toUpperCase().slice(0, 2)
+                  employee.name
+                    .split(' ')
+                    .map((n: any) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)
                 )}
               </div>
               <div>
                 <CardTitle className="text-2xl">{employee.name}</CardTitle>
-                <p className="text-[var(--text-muted)] text-sm mt-1">{employee.position || "Employee"}</p>
+                <p className="text-[var(--text-muted)] text-sm mt-1">
+                  {employee.position || 'Employee'}
+                </p>
                 <div className="flex gap-2 mt-2 flex-wrap">
-                  <Badge variant={employee.role === "admin" ? "default" : "secondary"}>
+                  <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>
                     {employee.role}
                   </Badge>
                   <Badge variant="outline">{employee.employeeType}</Badge>
-                  <Badge variant={employee.isActive ? "success" : "destructive"}>
-                    {employee.isActive ? "Active" : "Inactive"}
+                  <Badge variant={employee.isActive ? 'success' : 'destructive'}>
+                    {employee.isActive ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
               </div>
@@ -122,7 +158,9 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               {score && (
                 <div className="text-right">
                   <p className="text-xs text-[var(--text-muted)]">AI Score</p>
-                  <p className="text-3xl font-bold text-[var(--primary)]">{score.overallScore}/100</p>
+                  <p className="text-3xl font-bold text-[var(--primary)]">
+                    {score.overallScore}/100
+                  </p>
                 </div>
               )}
               <div className="flex gap-2">
@@ -153,7 +191,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                     className="bg-gradient-to-r from-blue-600 to-sky-700 hover:from-blue-700 hover:to-sky-800 text-white"
                   >
                     <Star className="w-4 h-4 mr-1" />
-                    {showRatingForm ? "Cancel Rating" : "Rate Performance"}
+                    {showRatingForm ? 'Cancel Rating' : 'Rate Performance'}
                   </Button>
                 )}
               </div>
@@ -190,7 +228,9 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <Calendar className="w-5 h-5 text-[var(--text-muted)]" />
             <div>
               <p className="text-xs text-[var(--text-muted)]">Joined</p>
-              <p className="text-sm font-medium">{format(new Date(employee.createdAt), "MMM d, yyyy")}</p>
+              <p className="text-sm font-medium">
+                {format(new Date(employee.createdAt), 'MMM d, yyyy')}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -219,18 +259,28 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.daysWorked')}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  {t('attendance.daysWorked')}
+                </p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
-                <p className="text-2xl font-bold text-green-500">{monthlyStats.totalWorkedHours}h</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.totalHours')}</p>
+                <p className="text-2xl font-bold text-green-500">
+                  {monthlyStats.totalWorkedHours}h
+                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  {t('attendance.totalHours')}
+                </p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
                 <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.punctuality')}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  {t('attendance.punctuality')}
+                </p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
-                <p className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? "text-red-500" : "text-green-500"}`}>
+                <p
+                  className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? 'text-red-500' : 'text-green-500'}`}
+                >
                   {monthlyStats.lateDays}
                 </p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.lateDays')}</p>
@@ -240,9 +290,13 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
                 <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0" />
                 <p className="text-sm text-orange-700 dark:text-orange-200">
-                  {Number(monthlyStats.lateDays) > 0 && `${monthlyStats.lateDays} ${t('attendance.lateArrivals')}`}
-                  {Number(monthlyStats.lateDays) > 0 && Number(monthlyStats.earlyLeaveDays) > 0 && " · "}
-                  {Number(monthlyStats.earlyLeaveDays) > 0 && `${monthlyStats.earlyLeaveDays} ${t('attendance.earlyLeaves')}`}
+                  {Number(monthlyStats.lateDays) > 0 &&
+                    `${monthlyStats.lateDays} ${t('attendance.lateArrivals')}`}
+                  {Number(monthlyStats.lateDays) > 0 &&
+                    Number(monthlyStats.earlyLeaveDays) > 0 &&
+                    ' · '}
+                  {Number(monthlyStats.earlyLeaveDays) > 0 &&
+                    `${monthlyStats.earlyLeaveDays} ${t('attendance.earlyLeaves')}`}
                 </p>
               </div>
             )}
@@ -265,7 +319,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                   <span className="text-sm font-normal text-[var(--text-muted)]">/5</span>
                 </p>
                 <p className="text-xs text-[var(--text-muted)]">
-                  by {latestRating.supervisor?.name ?? "Supervisor"} · {latestRating.ratingPeriod}
+                  by {latestRating.supervisor?.name ?? 'Supervisor'} · {latestRating.ratingPeriod}
                 </p>
               </div>
             </div>
@@ -283,7 +337,10 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 <span className="text-sm text-[var(--text-muted)] w-36">{label}</span>
                 <div className="flex items-center gap-2">
                   <div className="flex">{renderStars(value)}</div>
-                  <span className="text-sm font-semibold w-5 text-right" style={{ color: "var(--text-primary)" }}>
+                  <span
+                    className="text-sm font-semibold w-5 text-right"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
                     {value}
                   </span>
                 </div>
@@ -291,14 +348,22 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             ))}
             {latestRating.strengths && (
               <div className="mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-950">
-                <p className="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">💪 Strengths</p>
-                <p className="text-sm text-green-700 dark:text-green-300">{latestRating.strengths}</p>
+                <p className="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">
+                  💪 Strengths
+                </p>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  {latestRating.strengths}
+                </p>
               </div>
             )}
             {latestRating.areasForImprovement && (
               <div className="mt-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
-                <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 mb-1">📈 Areas for Improvement</p>
-                <p className="text-sm text-orange-700 dark:text-orange-300">{latestRating.areasForImprovement}</p>
+                <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 mb-1">
+                  📈 Areas for Improvement
+                </p>
+                <p className="text-sm text-orange-700 dark:text-orange-300">
+                  {latestRating.areasForImprovement}
+                </p>
               </div>
             )}
             {latestRating.generalComments && (
@@ -323,14 +388,14 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 <div
                   key={rating._id}
                   className="flex items-center justify-between p-3 rounded-lg border"
-                  style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
+                  style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
                 >
                   <div>
-                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {rating.ratingPeriod}
                     </p>
                     <p className="text-xs text-[var(--text-muted)]">
-                      by {rating.supervisor?.name ?? "Supervisor"}
+                      by {rating.supervisor?.name ?? 'Supervisor'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -397,19 +462,27 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-[var(--text-muted)]">Performance</p>
-              <p className="text-2xl font-bold text-[var(--primary)]">{score.breakdown.performance}%</p>
+              <p className="text-2xl font-bold text-[var(--primary)]">
+                {score.breakdown.performance}%
+              </p>
             </div>
             <div>
               <p className="text-sm text-[var(--text-muted)]">Attendance</p>
-              <p className="text-2xl font-bold text-[var(--primary)]">{score.breakdown.attendance}%</p>
+              <p className="text-2xl font-bold text-[var(--primary)]">
+                {score.breakdown.attendance}%
+              </p>
             </div>
             <div>
               <p className="text-sm text-[var(--text-muted)]">Behavior</p>
-              <p className="text-2xl font-bold text-[var(--primary)]">{score.breakdown.behavior}%</p>
+              <p className="text-2xl font-bold text-[var(--primary)]">
+                {score.breakdown.behavior}%
+              </p>
             </div>
             <div>
               <p className="text-sm text-[var(--text-muted)]">Leave History</p>
-              <p className="text-2xl font-bold text-[var(--primary)]">{score.breakdown.leaveHistory}%</p>
+              <p className="text-2xl font-bold text-[var(--primary)]">
+                {score.breakdown.leaveHistory}%
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -427,21 +500,26 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 <p className="text-sm font-medium mb-2">Skills</p>
                 <div className="flex flex-wrap gap-2">
                   {profile.profile.biography.skills.map((skill: any, i: any) => (
-                    <Badge key={i} variant="secondary">{skill}</Badge>
+                    <Badge key={i} variant="secondary">
+                      {skill}
+                    </Badge>
                   ))}
                 </div>
               </div>
             )}
-            {profile.profile.biography.languages && profile.profile.biography.languages.length > 0 && (
-              <div>
-                <p className="text-sm font-medium mb-2">Languages</p>
-                <div className="flex flex-wrap gap-2">
-                  {profile.profile.biography.languages.map((lang: any, i: any) => (
-                    <Badge key={i} variant="outline">{lang}</Badge>
-                  ))}
+            {profile.profile.biography.languages &&
+              profile.profile.biography.languages.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Languages</p>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.profile.biography.languages.map((lang: any, i: any) => (
+                      <Badge key={i} variant="outline">
+                        {lang}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </CardContent>
         </Card>
       )}
@@ -455,7 +533,10 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           <CardContent>
             <div className="space-y-2">
               {profile.documents.map((doc: any) => (
-                <div key={doc._id} className="flex items-center justify-between p-3 bg-[var(--card-hover)] rounded-lg">
+                <div
+                  key={doc._id}
+                  className="flex items-center justify-between p-3 bg-[var(--card-hover)] rounded-lg"
+                >
                   <div className="flex items-center gap-3">
                     <Briefcase className="w-5 h-5 text-[var(--text-muted)]" />
                     <div>
@@ -464,7 +545,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                     </div>
                   </div>
                   <p className="text-xs text-[var(--text-muted)]">
-                    {format(new Date(doc.uploadedAt), "MMM d, yyyy")}
+                    {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
                   </p>
                 </div>
               ))}
@@ -484,7 +565,10 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                   {t('employees.confirmDelete', 'Confirm Deletion')}
                 </DialogTitle>
                 <DialogDescription>
-                  {t('employees.deleteWarning', 'Are you sure you want to delete this employee? This action cannot be undone.')}
+                  {t(
+                    'employees.deleteWarning',
+                    'Are you sure you want to delete this employee? This action cannot be undone.',
+                  )}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -495,11 +579,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 >
                   {t('common.cancel', 'Cancel')}
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                >
+                <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                   {deleting ? (
                     <>
                       <Clock className="w-4 h-4 mr-2 animate-spin" />

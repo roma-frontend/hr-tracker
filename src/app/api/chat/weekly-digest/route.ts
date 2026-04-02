@@ -35,10 +35,8 @@ export async function GET(req: NextRequest) {
     const pendingLeaves = allLeaves.filter((l: any) => l.status === 'pending');
 
     // Who is on leave this week
-    const onLeaveThisWeek = allLeaves.filter((l: any) =>
-      l.status === 'approved' &&
-      l.startDate <= weekEndStr &&
-      l.endDate >= weekStartStr
+    const onLeaveThisWeek = allLeaves.filter(
+      (l: any) => l.status === 'approved' && l.startDate <= weekEndStr && l.endDate >= weekStartStr,
     );
 
     // Late arrivals this week (from time tracking)
@@ -46,14 +44,19 @@ export async function GET(req: NextRequest) {
     const lateThisMonth: any[] = [];
     for (const emp of activeEmployees.slice(0, 20)) {
       try {
-        const history = await convex.query(api.timeTracking.getUserHistory, { userId: emp._id, limit: 30 });
+        const history = await convex.query(api.timeTracking.getUserHistory, {
+          userId: emp._id,
+          limit: 30,
+        });
         const lateCount = history.filter((r: any) => {
           return r.isLate && r.date >= weekStartStr && r.date <= weekEndStr;
         }).length;
         if (lateCount > 0) {
           lateThisMonth.push({ name: emp.name, lateCount });
         }
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
 
     // Build context for AI
@@ -64,10 +67,23 @@ Week: ${weekStartStr} to ${weekEndStr}
 TEAM SIZE: ${activeEmployees.length} active employees
 
 ON LEAVE THIS WEEK (${onLeaveThisWeek.length}):
-${onLeaveThisWeek.slice(0, 10).map((l: any) => `- ${l.userName}: ${l.type} leave (${l.startDate} → ${l.endDate})`).join('\n') || 'None'}
+${
+  onLeaveThisWeek
+    .slice(0, 10)
+    .map((l: any) => `- ${l.userName}: ${l.type} leave (${l.startDate} → ${l.endDate})`)
+    .join('\n') || 'None'
+}
 
 PENDING APPROVAL (${pendingLeaves.length}):
-${pendingLeaves.slice(0, 5).map((l: any) => `- ${l.userName}: ${l.days} day(s) ${l.type} leave (${l.startDate} → ${l.endDate})`).join('\n') || 'None'}
+${
+  pendingLeaves
+    .slice(0, 5)
+    .map(
+      (l: any) =>
+        `- ${l.userName}: ${l.days} day(s) ${l.type} leave (${l.startDate} → ${l.endDate})`,
+    )
+    .join('\n') || 'None'
+}
 
 LATE ARRIVALS THIS WEEK:
 ${lateThisMonth.length > 0 ? lateThisMonth.map((e) => `- ${e.name}: ${e.lateCount} late arrival(s)`).join('\n') : 'None recorded'}

@@ -1,15 +1,26 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Calendar, Mail, MessageSquare, Download, Cloud, Check, Loader2, Clock, Users, RefreshCw } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { getGoogleCalendarAuthUrl } from "@/lib/calendar-sync";
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Calendar,
+  Mail,
+  MessageSquare,
+  Download,
+  Cloud,
+  Check,
+  Loader2,
+  Clock,
+  Users,
+  RefreshCw,
+} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { getGoogleCalendarAuthUrl } from '@/lib/calendar-sync';
 
 export function IntegrationSettings() {
   const { t } = useTranslation();
@@ -31,7 +42,7 @@ export function IntegrationSettings() {
   // Check Google Calendar connection status
   const checkGoogleStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/calendar/google/status");
+      const res = await fetch('/api/calendar/google/status');
       const data = await res.json();
       setGoogleConnected(data.connected);
       setGoogleEmail(data.email || null);
@@ -48,12 +59,12 @@ export function IntegrationSettings() {
 
   // Handle OAuth callback result
   useEffect(() => {
-    const status = searchParams.get("google_calendar");
-    if (status === "connected") {
-      toast.success(t("settingsIntegration.googleCalendarConnected"));
+    const status = searchParams.get('google_calendar');
+    if (status === 'connected') {
+      toast.success(t('settingsIntegration.googleCalendarConnected'));
       checkGoogleStatus();
-    } else if (status === "error") {
-      toast.error(t("settingsIntegration.googleCalendarError"));
+    } else if (status === 'error') {
+      toast.error(t('settingsIntegration.googleCalendarError'));
     }
   }, [searchParams, t, checkGoogleStatus]);
 
@@ -63,19 +74,19 @@ export function IntegrationSettings() {
       const authUrl = getGoogleCalendarAuthUrl(redirectUri);
       window.location.href = authUrl;
     } catch {
-      toast.error(t("settingsIntegration.googleNotConfigured"));
+      toast.error(t('settingsIntegration.googleNotConfigured'));
     }
   };
 
   const handleGoogleDisconnect = async () => {
     setDisconnecting(true);
     try {
-      await fetch("/api/calendar/google/disconnect", { method: "POST" });
+      await fetch('/api/calendar/google/disconnect', { method: 'POST' });
       setGoogleConnected(false);
       setGoogleEmail(null);
-      toast.success(t("settingsIntegration.googleCalendarDisconnected"));
+      toast.success(t('settingsIntegration.googleCalendarDisconnected'));
     } catch {
-      toast.error(t("settingsIntegration.disconnectError"));
+      toast.error(t('settingsIntegration.disconnectError'));
     } finally {
       setDisconnecting(false);
     }
@@ -84,7 +95,7 @@ export function IntegrationSettings() {
   // ── SharePoint status & handlers ──────────────────────────────────────────
   const checkSharepointStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/sharepoint/status");
+      const res = await fetch('/api/sharepoint/status');
       const data = await res.json();
       setSharepointConnected(data.connected);
       setSharepointEmail(data.email || null);
@@ -101,28 +112,28 @@ export function IntegrationSettings() {
 
   // Handle SharePoint OAuth callback result
   useEffect(() => {
-    const status = searchParams.get("sharepoint");
-    if (status === "connected") {
-      toast.success(t("toasts.sharePointConnected"));
+    const status = searchParams.get('sharepoint');
+    if (status === 'connected') {
+      toast.success(t('toasts.sharePointConnected'));
       checkSharepointStatus();
-    } else if (status === "error") {
-      toast.error(t("toasts.sharePointConnectFailed"));
+    } else if (status === 'error') {
+      toast.error(t('toasts.sharePointConnectFailed'));
     }
   }, [searchParams, checkSharepointStatus]);
 
   const handleSharepointConnect = () => {
-    window.location.href = "/api/sharepoint/auth";
+    window.location.href = '/api/sharepoint/auth';
   };
 
   const handleSharepointDisconnect = async () => {
     setSharepointDisconnecting(true);
     try {
-      await fetch("/api/sharepoint/disconnect", { method: "POST" });
+      await fetch('/api/sharepoint/disconnect', { method: 'POST' });
       setSharepointConnected(false);
       setSharepointEmail(null);
-      toast.success(t("toasts.sharePointDisconnected"));
+      toast.success(t('toasts.sharePointDisconnected'));
     } catch {
-      toast.error(t("toasts.sharePointDisconnectFailed"));
+      toast.error(t('toasts.sharePointDisconnectFailed'));
     } finally {
       setSharepointDisconnecting(false);
     }
@@ -132,15 +143,15 @@ export function IntegrationSettings() {
     setSharepointSyncing(true);
     try {
       // We need adminId and organizationId — read from localStorage or session
-      const storedUser = localStorage.getItem("currentUser");
+      const storedUser = localStorage.getItem('currentUser');
       if (!storedUser) {
-        toast.error(t("toasts.pleaseLoginAgain"));
+        toast.error(t('toasts.pleaseLoginAgain'));
         return;
       }
       const user = JSON.parse(storedUser);
-      const res = await fetch("/api/sharepoint/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/sharepoint/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           adminId: user._id,
           organizationId: user.organizationId,
@@ -149,16 +160,16 @@ export function IntegrationSettings() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Sync failed");
+        toast.error(data.error || 'Sync failed');
         return;
       }
 
       toast.success(
         `Sync complete: ${data.created} created, ${data.updated} updated, ${data.deactivated} deactivated` +
-          (data.errors?.length ? `, ${data.errors.length} errors` : "")
+          (data.errors?.length ? `, ${data.errors.length} errors` : ''),
       );
     } catch {
-      toast.error(t("toasts.sharePointSyncFailed"));
+      toast.error(t('toasts.sharePointSyncFailed'));
     } finally {
       setSharepointSyncing(false);
     }
@@ -171,9 +182,9 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
+            <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
-          <CardDescription>{t("settingsIntegration.calendarSync")}</CardDescription>
+          <CardDescription>{t('settingsIntegration.calendarSync')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Google Calendar — working */}
@@ -185,22 +196,20 @@ export function IntegrationSettings() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-sm font-medium text-[var(--text-primary)]">
-                    {t("settingsIntegration.googleCalendar")}
+                    {t('settingsIntegration.googleCalendar')}
                   </p>
                   {googleConnected && (
                     <Badge variant="default" className="text-xs gap-1">
                       <Check className="w-3 h-3" />
-                      {t("settingsIntegration.connected")}
+                      {t('settingsIntegration.connected')}
                     </Badge>
                   )}
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  {t("settingsIntegration.googleCalendarDesc")}
+                  {t('settingsIntegration.googleCalendarDesc')}
                 </p>
                 {googleConnected && googleEmail && (
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    {googleEmail}
-                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{googleEmail}</p>
                 )}
               </div>
             </div>
@@ -213,14 +222,12 @@ export function IntegrationSettings() {
                 onClick={handleGoogleDisconnect}
                 disabled={disconnecting}
               >
-                {disconnecting ? (
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                ) : null}
-                {t("settingsIntegration.disconnect")}
+                {disconnecting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                {t('settingsIntegration.disconnect')}
               </Button>
             ) : (
               <Button variant="default" size="sm" onClick={handleGoogleConnect}>
-                {t("settingsIntegration.connect")}
+                {t('settingsIntegration.connect')}
               </Button>
             )}
           </div>
@@ -234,20 +241,20 @@ export function IntegrationSettings() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-sm font-medium text-[var(--text-primary)]">
-                    {t("settingsIntegration.outlookCalendar")}
+                    {t('settingsIntegration.outlookCalendar')}
                   </p>
                   <Badge variant="outline" className="text-xs gap-1">
                     <Clock className="w-3 h-3" />
-                    {t("settingsIntegration.comingSoon")}
+                    {t('settingsIntegration.comingSoon')}
                   </Badge>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  {t("settingsIntegration.outlookCalendarDesc")}
+                  {t('settingsIntegration.outlookCalendarDesc')}
                 </p>
               </div>
             </div>
             <Button variant="default" size="sm" disabled>
-              {t("settingsIntegration.connect")}
+              {t('settingsIntegration.connect')}
             </Button>
           </div>
         </CardContent>
@@ -278,7 +285,7 @@ export function IntegrationSettings() {
                   {sharepointConnected && (
                     <Badge variant="default" className="text-xs gap-1">
                       <Check className="w-3 h-3" />
-                      {t("settingsIntegration.connected")}
+                      {t('settingsIntegration.connected')}
                     </Badge>
                   )}
                 </div>
@@ -286,9 +293,7 @@ export function IntegrationSettings() {
                   Automatically sync employees from your SharePoint List
                 </p>
                 {sharepointConnected && sharepointEmail && (
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    {sharepointEmail}
-                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{sharepointEmail}</p>
                 )}
               </div>
             </div>
@@ -319,12 +324,12 @@ export function IntegrationSettings() {
                     {sharepointDisconnecting ? (
                       <Loader2 className="w-3 h-3 animate-spin mr-1" />
                     ) : null}
-                    {t("settingsIntegration.disconnect")}
+                    {t('settingsIntegration.disconnect')}
                   </Button>
                 </>
               ) : (
                 <Button variant="default" size="sm" onClick={handleSharepointConnect}>
-                  {t("settingsIntegration.connect")}
+                  {t('settingsIntegration.connect')}
                 </Button>
               )}
             </div>
@@ -337,18 +342,20 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
+            <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
-          <CardDescription>{t("settingsIntegration.emailReports")}</CardDescription>
+          <CardDescription>{t('settingsIntegration.emailReports')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
             <div className="flex items-start gap-3">
               <span className="text-2xl">📧</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsIntegration.automatedReports")}</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">
+                  {t('settingsIntegration.automatedReports')}
+                </p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  {t("settingsIntegration.automatedReportsDesc")}
+                  {t('settingsIntegration.automatedReportsDesc')}
                 </p>
               </div>
             </div>
@@ -357,11 +364,13 @@ export function IntegrationSettings() {
 
           {emailReports && (
             <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5 space-y-2">
-              <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsIntegration.reportSchedule")}</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">
+                {t('settingsIntegration.reportSchedule')}
+              </p>
               <div className="space-y-1 text-xs text-[var(--text-muted)]">
-                <p>• {t("settingsIntegration.weeklySummary")}</p>
-                <p>• {t("settingsIntegration.monthlyAnalytics")}</p>
-                <p>• {t("settingsIntegration.leaveApprovals")}</p>
+                <p>• {t('settingsIntegration.weeklySummary')}</p>
+                <p>• {t('settingsIntegration.monthlyAnalytics')}</p>
+                <p>• {t('settingsIntegration.leaveApprovals')}</p>
               </div>
             </div>
           )}
@@ -373,9 +382,9 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
+            <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
-          <CardDescription>{t("settingsIntegration.teamCommunication")}</CardDescription>
+          <CardDescription>{t('settingsIntegration.teamCommunication')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Slack */}
@@ -386,21 +395,27 @@ export function IntegrationSettings() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsIntegration.slack")}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                    {t('settingsIntegration.slack')}
+                  </p>
                   {slackNotifications && (
-                    <Badge variant="default" className="text-xs">{t("settingsIntegration.connected")}</Badge>
+                    <Badge variant="default" className="text-xs">
+                      {t('settingsIntegration.connected')}
+                    </Badge>
                   )}
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t("settingsIntegration.slackDesc")}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  {t('settingsIntegration.slackDesc')}
+                </p>
               </div>
             </div>
             {slackNotifications ? (
               <Button variant="outline" size="sm" onClick={() => setSlackNotifications(false)}>
-                {t("settingsIntegration.disconnect")}
+                {t('settingsIntegration.disconnect')}
               </Button>
             ) : (
               <Button variant="default" size="sm" onClick={() => setSlackNotifications(true)}>
-                {t("settingsIntegration.connect")}
+                {t('settingsIntegration.connect')}
               </Button>
             )}
           </div>
@@ -413,17 +428,21 @@ export function IntegrationSettings() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsIntegration.microsoftTeams")}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                    {t('settingsIntegration.microsoftTeams')}
+                  </p>
                   <Badge variant="outline" className="text-xs gap-1">
                     <Clock className="w-3 h-3" />
-                    {t("settingsIntegration.comingSoon")}
+                    {t('settingsIntegration.comingSoon')}
                   </Badge>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t("settingsIntegration.microsoftTeamsDesc")}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  {t('settingsIntegration.microsoftTeamsDesc')}
+                </p>
               </div>
             </div>
             <Button variant="default" size="sm" disabled>
-              {t("settingsIntegration.connect")}
+              {t('settingsIntegration.connect')}
             </Button>
           </div>
         </CardContent>
@@ -434,27 +453,27 @@ export function IntegrationSettings() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Download className="w-5 h-5 text-[var(--primary)]" />
-            <CardTitle>{t("settingsIntegration.title")}</CardTitle>
+            <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
-          <CardDescription>{t("settingsIntegration.dataManagement")}</CardDescription>
+          <CardDescription>{t('settingsIntegration.dataManagement')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Button variant="outline" className="justify-start">
               <Download className="w-4 h-4 mr-2" />
-              {t("settingsIntegration.exportAsCSV")}
+              {t('settingsIntegration.exportAsCSV')}
             </Button>
             <Button variant="outline" className="justify-start">
               <Download className="w-4 h-4 mr-2" />
-              {t("settingsIntegration.exportAsExcel")}
+              {t('settingsIntegration.exportAsExcel')}
             </Button>
             <Button variant="outline" className="justify-start">
               <Download className="w-4 h-4 mr-2" />
-              {t("settingsIntegration.exportAsPDFReport")}
+              {t('settingsIntegration.exportAsPDFReport')}
             </Button>
             <Button variant="outline" className="justify-start">
               <Cloud className="w-4 h-4 mr-2" />
-              {t("settingsIntegration.backupToCloud")}
+              {t('settingsIntegration.backupToCloud')}
             </Button>
           </div>
 
@@ -462,9 +481,11 @@ export function IntegrationSettings() {
             <div className="flex items-start gap-3">
               <span className="text-xl">💾</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{t("settingsIntegration.lastBackup")}</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">
+                  {t('settingsIntegration.lastBackup')}
+                </p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  {t("settingsIntegration.neverBackedUp")}
+                  {t('settingsIntegration.neverBackedUp')}
                 </p>
               </div>
             </div>

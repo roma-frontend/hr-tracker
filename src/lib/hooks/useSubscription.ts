@@ -13,7 +13,7 @@ export interface SubscriptionData {
   trialEnd: number | null;
   currentPeriodEnd: number | null;
   cancelAtPeriodEnd: boolean;
-  isActive: boolean;      // trialing or active
+  isActive: boolean; // trialing or active
   isTrial: boolean;
   isPastDue: boolean;
   isCanceled: boolean;
@@ -26,7 +26,7 @@ export function useSubscription(): { subscription: SubscriptionData; loading: bo
 
   const raw = useQuery(
     api.subscriptions.getSubscriptionByEmail,
-    user?.email ? { email: user.email } : 'skip'
+    user?.email ? { email: user.email } : 'skip',
   );
 
   // loading state — raw is undefined while Convex is fetching

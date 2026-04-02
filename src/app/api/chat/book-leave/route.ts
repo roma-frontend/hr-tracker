@@ -17,9 +17,9 @@ export async function POST(req: Request) {
     // CONFLICT DETECTION — Unified Conflict Service
     // ═══════════════════════════════════════════════════════════════
     const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<"organizations">,
-      requestType: "leave" as const,
-      userId: userId as Id<"users">,
+      organizationId: organizationId as Id<'organizations'>,
+      requestType: 'leave' as const,
+      userId: userId as Id<'users'>,
       startDate: new Date(startDate).getTime(),
       endDate: new Date(endDate).getTime(),
       metadata: { leaveType: type },
@@ -27,8 +27,8 @@ export async function POST(req: Request) {
 
     // Если есть критические конфликты — возвращаем ошибку
     if (conflictResult.hasCritical) {
-      const criticalConflicts = conflictResult.conflicts.filter(c => c.severity === 'critical');
-      
+      const criticalConflicts = conflictResult.conflicts.filter((c) => c.severity === 'critical');
+
       return NextResponse.json({
         success: false,
         conflict: true,
@@ -111,11 +111,11 @@ export async function POST(req: Request) {
     });
 
     // Формируем ответ с учётом предупреждений
-    const warnings = conflictResult.conflicts.filter(c => c.severity === 'warning');
+    const warnings = conflictResult.conflicts.filter((c) => c.severity === 'warning');
     let message = `✅ Your ${type} leave request for ${days} day(s) (${startDate} → ${endDate}) has been submitted and sent to admin for approval!`;
-    
+
     if (warnings.length > 0) {
-      message += `\n\n⚠️ Note: ${warnings.map(w => w.message).join(' ')}`;
+      message += `\n\n⚠️ Note: ${warnings.map((w) => w.message).join(' ')}`;
     }
 
     return NextResponse.json({
@@ -129,7 +129,7 @@ export async function POST(req: Request) {
     console.error('Book leave error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create leave request' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -137,7 +137,12 @@ export async function POST(req: Request) {
 /**
  * Build human-readable conflict message for AI
  */
-function buildConflictMessage(conflicts: any[], leaveType: string, startDate: string, endDate: string): string {
+function buildConflictMessage(
+  conflicts: any[],
+  leaveType: string,
+  startDate: string,
+  endDate: string,
+): string {
   if (conflicts.length === 0) return '';
 
   let message = `🚨 **Conflict detected for your ${leaveType} leave request (${startDate} → ${endDate})**:\n\n`;
@@ -148,7 +153,7 @@ function buildConflictMessage(conflicts: any[], leaveType: string, startDate: st
     message += `   💡 ${conflict.suggestion}\n\n`;
   });
 
-  message += "Please consider alternative dates or discuss with your manager before proceeding.";
+  message += 'Please consider alternative dates or discuss with your manager before proceeding.';
 
   return message;
 }

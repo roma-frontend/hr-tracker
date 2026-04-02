@@ -22,13 +22,13 @@ export function LanguageSwitcher() {
 
   const changeLanguage = async (lng: string) => {
     console.log('🔄 LanguageSwitcher: Changing language from', i18n.language, 'to', lng);
-    
+
     // Save to localStorage BEFORE changing language
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('i18nextLng', lng);
         console.log('💾 Saved to localStorage FIRST:', lng);
-        
+
         // Verify it was saved
         const saved = localStorage.getItem('i18nextLng');
         console.log('✅ Verification - localStorage now has:', saved);
@@ -36,7 +36,7 @@ export function LanguageSwitcher() {
         console.error('❌ Failed to save to localStorage:', error);
       }
     }
-    
+
     // Then change the language
     await i18n.changeLanguage(lng);
     console.log('✅ Language changed to:', i18n.language);
@@ -59,10 +59,7 @@ export function LanguageSwitcher() {
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end"
-        sideOffset={5}
-      >
+      <DropdownMenuContent align="end" sideOffset={5}>
         {availableLanguages.map(([code, { name, flag }]) => (
           <DropdownMenuItem
             key={code}

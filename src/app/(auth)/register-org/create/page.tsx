@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useTransition, useEffect } from "react"
-import { useTranslation } from 'react-i18next';;
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useState, useTransition, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from '@/lib/cssMotion';
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Building2,
   User,
@@ -20,12 +20,12 @@ import {
   CheckCircle2,
   AlertCircle,
   Zap,
-} from "lucide-react";
-import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuthStore";
-import bcrypt from "bcryptjs";
-import { useMutation } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
+import bcrypt from 'bcryptjs';
+import { useMutation } from 'convex/react';
+import { api } from '../../../../../convex/_generated/api';
 
 const passwordStrength = (pwd: string) => {
   if (pwd.length < 8) return 0;
@@ -36,8 +36,8 @@ const passwordStrength = (pwd: string) => {
   return strength;
 };
 
-const STRENGTH_COLORS = ["#ef4444", "#f59e0b", "#22c55e", "#10b981"];
-const STRENGTH_LABELS = ["Weak", "Fair", "Good", "Strong"];
+const STRENGTH_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#10b981'];
+const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
 
 export default function CreateStarterOrgPage() {
   const { t } = useTranslation();
@@ -48,23 +48,23 @@ export default function CreateStarterOrgPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    orgName: "",
-    slug: "",
-    userName: "",
-    email: "",
-    password: "",
-    phone: "",
-    country: "",
-    industry: "",
+    orgName: '',
+    slug: '',
+    userName: '',
+    email: '',
+    password: '',
+    phone: '',
+    country: '',
+    industry: '',
   });
 
   const createStarterOrg = useMutation(api.organizationRequests.createStarterOrganization);
 
-  const plan = searchParams.get("plan");
+  const plan = searchParams.get('plan');
 
   useEffect(() => {
-    if (plan !== "starter") {
-      router.push("/register-org");
+    if (plan !== 'starter') {
+      router.push('/register-org');
     }
   }, [plan, router]);
 
@@ -73,8 +73,8 @@ export default function CreateStarterOrgPage() {
     if (formData.orgName && !formData.slug) {
       const slug = formData.orgName
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
         .substring(0, 30);
       setFormData((prev) => ({ ...prev, slug }));
     }
@@ -87,12 +87,12 @@ export default function CreateStarterOrgPage() {
     setError(null);
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError('Password must be at least 8 characters');
       return;
     }
 
     if (!formData.slug) {
-      setError("Organization slug is required");
+      setError('Organization slug is required');
       return;
     }
 
@@ -113,16 +113,16 @@ export default function CreateStarterOrgPage() {
           industry: formData.industry || undefined,
         });
 
-        toast.success("🎉 Organization created successfully!");
-        
+        toast.success('🎉 Organization created successfully!');
+
         // Auto-login (you'll need to implement this)
         // For now, redirect to login
         setTimeout(() => {
-          router.push("/login?message=Organization created! Please log in.");
+          router.push('/login?message=Organization created! Please log in.');
         }, 1500);
       } catch (err: any) {
-        setError(err.message || "Failed to create organization");
-        toast.error(err.message || "Failed to create organization");
+        setError(err.message || 'Failed to create organization');
+        toast.error(err.message || 'Failed to create organization');
       }
     });
   };
@@ -130,17 +130,17 @@ export default function CreateStarterOrgPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "var(--background)" }}
+      style={{ background: 'var(--background)' }}
     >
       {/* Background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #10b981, transparent)" }}
+          style={{ background: 'radial-gradient(circle, #10b981, transparent)' }}
         />
         <div
           className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #22c55e, transparent)" }}
+          style={{ background: 'radial-gradient(circle, #22c55e, transparent)' }}
         />
       </div>
 
@@ -152,21 +152,21 @@ export default function CreateStarterOrgPage() {
       >
         <div
           className="rounded-2xl p-8 shadow-2xl border"
-          style={{ background: "var(--card)", borderColor: "var(--border)" }}
+          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
-              style={{ background: "linear-gradient(135deg, #10b981, #22c55e)" }}
+              style={{ background: 'linear-gradient(135deg, #10b981, #22c55e)' }}
             >
               <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 {t('register.createStarterOrg')}
               </h1>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 {t('register.starterOrgSubtitle')}
               </p>
             </div>
@@ -176,7 +176,7 @@ export default function CreateStarterOrgPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Organization Name */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 {t('register.orgNameLabel')}
               </label>
               <div className="relative">
@@ -189,19 +189,19 @@ export default function CreateStarterOrgPage() {
                   placeholder={t('placeholders.acmeInc')}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--input)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                  onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                 />
               </div>
             </div>
 
             {/* Slug */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 {t('register.orgUrlLabel')}
               </label>
               <div className="relative">
@@ -213,21 +213,21 @@ export default function CreateStarterOrgPage() {
                   onChange={(e) =>
                     setFormData((p) => ({
                       ...p,
-                      slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+                      slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
                     }))
                   }
                   placeholder="acme-inc"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--input)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                  onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                 />
               </div>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 {t('register.yourTeamSubdomain')}
               </p>
             </div>
@@ -235,7 +235,7 @@ export default function CreateStarterOrgPage() {
             <div className="grid md:grid-cols-2 gap-4">
               {/* Your Name */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                   {t('register.yourNameLabel')}
                 </label>
                 <div className="relative">
@@ -248,19 +248,21 @@ export default function CreateStarterOrgPage() {
                     placeholder={t('placeholders.johnDoe')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
-                      background: "var(--input)",
-                      borderColor: "var(--border)",
-                      color: "var(--text-primary)",
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                    onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.email')}</label>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {t('auth.email')}
+                </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                   <input
@@ -271,12 +273,12 @@ export default function CreateStarterOrgPage() {
                     placeholder={t('placeholders.youAtCompany')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
-                      background: "var(--input)",
-                      borderColor: "var(--border)",
-                      color: "var(--text-primary)",
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                    onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
               </div>
@@ -285,7 +287,7 @@ export default function CreateStarterOrgPage() {
             <div className="grid md:grid-cols-2 gap-4">
               {/* Phone */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                   {t('register.phoneOptional')}
                 </label>
                 <div className="relative">
@@ -297,19 +299,19 @@ export default function CreateStarterOrgPage() {
                     placeholder={t('placeholders.phonePlaceholder')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
-                      background: "var(--input)",
-                      borderColor: "var(--border)",
-                      color: "var(--text-primary)",
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                    onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
               </div>
 
               {/* Country */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                   {t('register.countryOptional')}
                 </label>
                 <input
@@ -319,19 +321,19 @@ export default function CreateStarterOrgPage() {
                   placeholder={t('placeholders.unitedStates')}
                   className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--input)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                  onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                 />
               </div>
             </div>
 
             {/* Industry */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 {t('register.industryOptional')}
               </label>
               <div className="relative">
@@ -343,35 +345,37 @@ export default function CreateStarterOrgPage() {
                   placeholder={t('placeholders.technologyHealthcare')}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--input)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                  onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t('auth.password')}</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                {t('auth.password')}
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
                   onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
                   placeholder={t('placeholders.minCharacters')}
                   className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
-                    background: "var(--input)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
+                    background: 'var(--input)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#10b981")}
-                  onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                  onFocus={(e) => (e.target.style.borderColor = '#10b981')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                 />
                 <button
                   type="button"
@@ -389,16 +393,19 @@ export default function CreateStarterOrgPage() {
                         key={i}
                         className="flex-1 h-1 rounded-full transition-all"
                         style={{
-                          background: i < strength ? STRENGTH_COLORS[strength - 1] : "var(--border)",
+                          background:
+                            i < strength ? STRENGTH_COLORS[strength - 1] : 'var(--border)',
                         }}
                       />
                     ))}
                   </div>
                   <p
                     className="text-xs"
-                    style={{ color: strength > 0 ? STRENGTH_COLORS[strength - 1] : "var(--text-muted)" }}
+                    style={{
+                      color: strength > 0 ? STRENGTH_COLORS[strength - 1] : 'var(--text-muted)',
+                    }}
                   >
-                    {strength > 0 ? t(`register.passwordStrength${strength - 1}`) : ""}
+                    {strength > 0 ? t(`register.passwordStrength${strength - 1}`) : ''}
                   </p>
                 </div>
               )}
@@ -410,7 +417,7 @@ export default function CreateStarterOrgPage() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-2 p-3 rounded-xl text-sm"
-                style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}
+                style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
               >
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
@@ -424,11 +431,12 @@ export default function CreateStarterOrgPage() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               className="w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
-              style={{ background: "linear-gradient(135deg, #10b981, #22c55e)" }}
+              style={{ background: 'linear-gradient(135deg, #10b981, #22c55e)' }}
             >
               {isPending ? (
                 <>
-                  <ShieldLoader size="xs" variant="inline" className="mr-2" /> {t('register.creatingOrg')}
+                  <ShieldLoader size="xs" variant="inline" className="mr-2" />{' '}
+                  {t('register.creatingOrg')}
                 </>
               ) : (
                 <>
@@ -438,13 +446,17 @@ export default function CreateStarterOrgPage() {
             </motion.button>
           </form>
 
-          <p className="text-center text-xs mt-6" style={{ color: "var(--text-muted)" }}>
+          <p className="text-center text-xs mt-6" style={{ color: 'var(--text-muted)' }}>
             {t('register.termsAgreement')}
           </p>
         </div>
 
         <div className="text-center mt-4">
-          <Link href="/register-org" className="text-sm hover:underline flex items-center justify-center gap-1" style={{ color: "var(--text-muted)" }}>
+          <Link
+            href="/register-org"
+            className="text-sm hover:underline flex items-center justify-center gap-1"
+            style={{ color: 'var(--text-muted)' }}
+          >
             <ArrowLeft className="w-3 h-3" /> {t('ui.backToPlans')}
           </Link>
         </div>

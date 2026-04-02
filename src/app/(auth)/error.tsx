@@ -22,9 +22,7 @@ export default function AuthError({
       </div>
 
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight">
-          Authentication Error
-        </h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Authentication Error</h2>
         <p className="text-muted-foreground max-w-md">
           Something went wrong during authentication. Please try again.
         </p>

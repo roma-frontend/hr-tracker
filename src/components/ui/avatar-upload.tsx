@@ -1,40 +1,40 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import React, { useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { Camera, X, User } from "lucide-react";
-import { ShieldLoader } from "./ShieldLoader";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { uploadAvatarToCloudinary } from "@/actions/cloudinary";
-import { updateSessionAvatarAction } from "@/actions/auth";
-import { toast } from "sonner";
-import Image from "next/image";
-import { Id } from "../../../convex/_generated/dataModel";
-import { useAuthStore } from "@/store/useAuthStore";
-import { log } from "@/lib/logger";
+import { Camera, X, User } from 'lucide-react';
+import { ShieldLoader } from './ShieldLoader';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { uploadAvatarToCloudinary } from '@/actions/cloudinary';
+import { updateSessionAvatarAction } from '@/actions/auth';
+import { toast } from 'sonner';
+import Image from 'next/image';
+import { Id } from '../../../convex/_generated/dataModel';
+import { useAuthStore } from '@/store/useAuthStore';
+import { log } from '@/lib/logger';
 
 interface AvatarUploadProps {
   userId: string;
   currentUrl?: string;
   name: string;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   onSuccess?: (url: string) => void;
   readonly?: boolean;
 }
 
 const sizes = {
-  sm: "w-10 h-10 text-sm",
-  md: "w-16 h-16 text-lg",
-  lg: "w-24 h-24 text-2xl",
+  sm: 'w-10 h-10 text-sm',
+  md: 'w-16 h-16 text-lg',
+  lg: 'w-24 h-24 text-2xl',
 };
 
-export function AvatarUpload({ 
-userId,
+export function AvatarUpload({
+  userId,
   currentUrl,
   name,
-  size = "md",
+  size = 'md',
   onSuccess,
   readonly = false,
 }: AvatarUploadProps) {
@@ -46,9 +46,9 @@ userId,
   const { user, setUser } = useAuthStore();
 
   const initials = name
-    .split(" ")
+    .split(' ')
     .map((n) => n[0])
-    .join("")
+    .join('')
     .toUpperCase()
     .slice(0, 2);
 
@@ -56,33 +56,33 @@ userId,
 
   const handleFile = async (file: File) => {
     const endTimer = log.time('Avatar Upload');
-    
+
     log.info('Avatar upload started', {
       component: 'AvatarUpload',
       fileName: file.name,
       fileType: file.type,
       fileSize: file.size,
-      userId
+      userId,
     });
-    
-    if (!file.type.startsWith("image/")) {
+
+    if (!file.type.startsWith('image/')) {
       log.warn('Invalid file type selected', { fileType: file.type });
-      toast.error(t("toasts.pleaseSelectImage"));
+      toast.error(t('toasts.pleaseSelectImage'));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       log.warn('File size exceeds limit', {
         fileSize: file.size,
-        maxSize: 5 * 1024 * 1024
+        maxSize: 5 * 1024 * 1024,
       });
-      toast.error(t("toasts.imageTooLarge"));
+      toast.error(t('toasts.imageTooLarge'));
       return;
     }
 
     setUploading(true);
     try {
       log.debug('Converting file to base64', { fileName: file.name });
-      
+
       // Convert to base64
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -91,23 +91,23 @@ userId,
         reader.readAsDataURL(file);
       });
 
-      log.debug('Base64 conversion complete', { 
-        base64Length: base64.length 
+      log.debug('Base64 conversion complete', {
+        base64Length: base64.length,
       });
       setPreview(base64);
 
       log.info('Uploading to Cloudinary', { userId });
-      
+
       // Upload to Cloudinary
       const url = await uploadAvatarToCloudinary(base64, userId);
 
       log.info('Cloudinary upload complete', { url, userId });
 
       log.debug('Saving avatar URL to Convex', { userId });
-      
+
       // Save URL to Convex
       await updateAvatar({
-        userId: userId as Id<"users">,
+        userId: userId as Id<'users'>,
         avatarUrl: url,
       });
 
@@ -127,7 +127,7 @@ userId,
       }
 
       setPreview(null);
-      
+
       // Update user in store
       if (user && user.id === userId) {
         log.debug('Updating user in store', { userId });
@@ -135,11 +135,11 @@ userId,
       }
 
       onSuccess?.(url);
-      toast.success(t("toasts.avatarUpdated"));
+      toast.success(t('toasts.avatarUpdated'));
 
       log.info('Avatar upload completed successfully', {
         userId,
-        url
+        url,
       });
 
       endTimer();
@@ -148,11 +148,11 @@ userId,
         component: 'AvatarUpload',
         userId,
         fileName: file.name,
-        errorMessage: err instanceof Error ? err.message : String(err)
+        errorMessage: err instanceof Error ? err.message : String(err),
       });
 
       setPreview(null);
-      toast.error(err instanceof Error ? err.message : t("toasts.uploadFailed"));
+      toast.error(err instanceof Error ? err.message : t('toasts.uploadFailed'));
       endTimer();
     } finally {
       setUploading(false);
@@ -163,19 +163,14 @@ userId,
     <div className="relative inline-block">
       <div
         className={`${sizes[size]} rounded-full relative overflow-hidden flex-shrink-0`}
-        style={{ background: "var(--primary-muted)" }}
+        style={{ background: 'var(--primary-muted)' }}
       >
         {displayUrl ? (
-          <Image
-            src={displayUrl}
-            alt={name}
-            fill
-            className="object-cover"
-          />
+          <Image src={displayUrl} alt={name} fill className="object-cover" />
         ) : (
           <div
             className={`${sizes[size]} rounded-full flex items-center justify-center font-bold`}
-            style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)", color: "#fff" }}
+            style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)', color: '#fff' }}
           >
             {initials || <User className="w-1/2 h-1/2" />}
           </div>
@@ -189,7 +184,7 @@ userId,
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 flex items-center justify-center rounded-full"
-              style={{ background: "rgba(0,0,0,0.6)" }}
+              style={{ background: 'rgba(0,0,0,0.6)' }}
             >
               <ShieldLoader size="md" variant="inline" className="text-white" />
             </motion.div>
@@ -205,9 +200,9 @@ userId,
             disabled={uploading}
             className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 transition-all hover:scale-110 disabled:opacity-50"
             style={{
-              background: "var(--primary)",
-              borderColor: "var(--background)",
-              color: "#fff",
+              background: 'var(--primary)',
+              borderColor: 'var(--background)',
+              color: '#fff',
             }}
             title={t('ariaLabels.changeAvatar')}
           >
@@ -221,7 +216,7 @@ userId,
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) handleFile(file);
-              e.target.value = "";
+              e.target.value = '';
             }}
           />
         </>

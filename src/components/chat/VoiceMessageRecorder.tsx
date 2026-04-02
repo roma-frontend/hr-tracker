@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useRef, useCallback } from "react";
-import { Mic, Square, Send, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useState, useRef, useCallback } from 'react';
+import { Mic, Square, Send, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Props {
   onRecordingStart: () => void;
@@ -11,12 +11,17 @@ interface Props {
   disabled?: boolean;
 }
 
-export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onRecordingCancel, disabled }: Props) {
+export function VoiceMessageRecorder({
+  onRecordingStart,
+  onRecordingStop,
+  onRecordingCancel,
+  disabled,
+}: Props) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -36,12 +41,12 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start();
@@ -56,8 +61,8 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
 
       onRecordingStart();
     } catch (err) {
-      console.error("Error accessing microphone:", err);
-      alert("Could not access microphone. Please check permissions.");
+      console.error('Error accessing microphone:', err);
+      alert('Could not access microphone. Please check permissions.');
     }
   }, [onRecordingStart]);
 
@@ -71,7 +76,7 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
       setIsRecording(false);
       const duration = Math.floor((Date.now() - startTimeRef.current) / 1000);
       // Create blob from chunks directly
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+      const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
       onRecordingStop(blob, duration);
     }
   }, [isRecording, onRecordingStop]);
@@ -104,7 +109,7 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Visualizer bars
@@ -116,11 +121,11 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
           <div
             key={i}
             className={cn(
-              "w-1 rounded-full transition-all duration-100",
-              isRecording ? "bg-red-500 animate-pulse" : "bg-gray-400"
+              'w-1 rounded-full transition-all duration-100',
+              isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-400',
             )}
             style={{
-              height: isRecording ? `${Math.random() * 24 + 8}px` : "4px",
+              height: isRecording ? `${Math.random() * 24 + 8}px` : '4px',
               animationDelay: `${i * 0.05}s`,
             }}
           />
@@ -130,17 +135,20 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-xl border" style={{ 
-      borderColor: isRecording ? "rgba(239,68,68,0.3)" : "var(--border)",
-      background: isRecording ? "rgba(239,68,68,0.05)" : "var(--background-subtle)"
-    }}>
+    <div
+      className="flex items-center gap-2 p-2 rounded-xl border"
+      style={{
+        borderColor: isRecording ? 'rgba(239,68,68,0.3)' : 'var(--border)',
+        background: isRecording ? 'rgba(239,68,68,0.05)' : 'var(--background-subtle)',
+      }}
+    >
       {isRecording ? (
         <>
           {/* Recording indicator */}
           <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-          
+
           {/* Timer */}
-          <span className="text-sm font-mono min-w-[50px]" style={{ color: "var(--text-primary)" }}>
+          <span className="text-sm font-mono min-w-[50px]" style={{ color: 'var(--text-primary)' }}>
             {formatTime(recordingTime)}
           </span>
 
@@ -170,7 +178,7 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
           {/* Preview mode */}
           <div className="flex items-center gap-2 flex-1">
             {renderVisualizer()}
-            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
               {formatTime(recordingTime)}
             </span>
           </div>
@@ -198,17 +206,17 @@ export function VoiceMessageRecorder({ onRecordingStart, onRecordingStop, onReco
             onClick={startRecording}
             disabled={disabled}
             className={cn(
-              "p-2 rounded-lg transition-colors",
-              disabled 
-                ? "opacity-50 cursor-not-allowed" 
-                : "hover:bg-red-100 dark:hover:bg-red-900/20"
+              'p-2 rounded-lg transition-colors',
+              disabled
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-red-100 dark:hover:bg-red-900/20',
             )}
-            style={{ background: "transparent" }}
+            style={{ background: 'transparent' }}
             title="Record voice message"
           >
-            <Mic className={cn("w-4 h-4", disabled ? "" : "text-red-500")} />
+            <Mic className={cn('w-4 h-4', disabled ? '' : 'text-red-500')} />
           </button>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
             Voice message
           </span>
         </>

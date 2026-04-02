@@ -39,7 +39,10 @@ export async function POST(req: NextRequest) {
     // Verify temp token
     const payload = await verifyJWT(tempToken);
     if (!payload || payload.type !== '2fa-pending') {
-      return NextResponse.json({ error: 'Invalid or expired verification session' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Invalid or expired verification session' },
+        { status: 401 },
+      );
     }
 
     const userId = payload.userId;

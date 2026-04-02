@@ -3,18 +3,18 @@
  * Real-time unread requests counter with blinking effect
  */
 
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useEffect, useState } from "react";
-import type { Id } from "@/convex/_generated/dataModel";
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useEffect, useState } from 'react';
+import type { Id } from '@/convex/_generated/dataModel';
 
-export function useUnreadRequestsCount(userId?: Id<"users"> | null) {
+export function useUnreadRequestsCount(userId?: Id<'users'> | null) {
   const [isBlinking, setIsBlinking] = useState(false);
 
   // Get unread count from Convex
   const unreadCount = useQuery(
     api.leaves.getUnreadCount,
-    userId ? { requesterId: userId } : "skip"
+    userId ? { requesterId: userId } : 'skip',
   );
 
   // Reset blinking when component mounts and unread changes
@@ -37,7 +37,7 @@ export function useUnreadRequestsCount(userId?: Id<"users"> | null) {
  * Hook to update document title with unread count
  * Shows "[3] Dashboard" when 3 unread requests
  */
-export function useTitleBadge(count: number, originalTitle = "Dashboard") {
+export function useTitleBadge(count: number, originalTitle = 'Dashboard') {
   useEffect(() => {
     if (count > 0) {
       document.title = `[${count}] ${originalTitle}`;

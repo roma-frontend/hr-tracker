@@ -1,17 +1,16 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Lightbulb, Sparkles } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useTranslation } from 'react-i18next';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Lightbulb, Sparkles } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function SmartSuggestions() {
-  
   const { t } = useTranslation();
-const suggestions = useQuery(api.admin.getSmartSuggestions);
+  const suggestions = useQuery(api.admin.getSmartSuggestions);
 
   if (!suggestions) {
     return (
@@ -25,26 +24,26 @@ const suggestions = useQuery(api.admin.getSmartSuggestions);
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "optimization":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/30";
-      case "cost":
-        return "bg-green-500/10 text-green-500 border-green-500/30";
-      case "conflict":
-        return "bg-red-500/10 text-red-500 border-red-500/30";
-      case "policy":
-        return "bg-sky-400/10 text-sky-400 border-sky-400/30";
+      case 'optimization':
+        return 'bg-blue-500/10 text-blue-500 border-blue-500/30';
+      case 'cost':
+        return 'bg-green-500/10 text-green-500 border-green-500/30';
+      case 'conflict':
+        return 'bg-red-500/10 text-red-500 border-red-500/30';
+      case 'policy':
+        return 'bg-sky-400/10 text-sky-400 border-sky-400/30';
       default:
-        return "bg-gray-500/10 text-gray-500 border-gray-500/30";
+        return 'bg-gray-500/10 text-gray-500 border-gray-500/30';
     }
   };
 
   const getImpactBadge = (impact: string) => {
     switch (impact) {
-      case "high":
+      case 'high':
         return <Badge variant="destructive">High Impact</Badge>;
-      case "medium":
+      case 'medium':
         return <Badge variant="secondary">Medium Impact</Badge>;
-      case "low":
+      case 'low':
         return <Badge variant="outline">Low Impact</Badge>;
       default:
         return null;
@@ -56,7 +55,7 @@ const suggestions = useQuery(api.admin.getSmartSuggestions);
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-sky-400" />
-          {t("aiSuggestions.title")}
+          {t('aiSuggestions.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -64,11 +63,9 @@ const suggestions = useQuery(api.admin.getSmartSuggestions);
           <div className="flex flex-col items-center justify-center p-8 text-center">
             <Lightbulb className="mb-3 h-12 w-12 text-sky-400 opacity-50" />
             <p className="text-sm font-medium text-[var(--text-primary)]">
-              {t("aiSuggestions.noSuggestions")}
+              {t('aiSuggestions.noSuggestions')}
             </p>
-            <p className="text-xs text-[var(--text-secondary)]">
-              {t("aiSuggestions.optimal")}
-            </p>
+            <p className="text-xs text-[var(--text-secondary)]">{t('aiSuggestions.optimal')}</p>
           </div>
         ) : (
           <div className="max-h-[400px] space-y-3 overflow-y-auto">
@@ -81,9 +78,7 @@ const suggestions = useQuery(api.admin.getSmartSuggestions);
                   <div className="flex-1">
                     <div className="mb-1 flex items-center gap-2">
                       <Lightbulb className="h-4 w-4" />
-                      <p className="font-semibold text-[var(--text-primary)]">
-                        {suggestion.title}
-                      </p>
+                      <p className="font-semibold text-[var(--text-primary)]">{suggestion.title}</p>
                     </div>
                     <p className="text-sm text-[var(--text-primary)] opacity-90">
                       {suggestion.description}
@@ -91,7 +86,7 @@ const suggestions = useQuery(api.admin.getSmartSuggestions);
                   </div>
                   {getImpactBadge(suggestion.impact)}
                 </div>
-                
+
                 <div className="mt-2">
                   <Badge variant="outline" className="text-xs capitalize">
                     {suggestion.category}
@@ -105,4 +100,3 @@ const suggestions = useQuery(api.admin.getSmartSuggestions);
     </Card>
   );
 }
-

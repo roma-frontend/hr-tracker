@@ -1,75 +1,143 @@
-"use client";
+'use client';
 
-import React, { useState, useRef } from "react";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Reply, Edit2, Trash2, Trash, Pin, Copy, MoreHorizontal, Phone, Video, FileText, Download, X, CheckCheck, Check, MessageSquare } from "lucide-react";
-import Link from "next/link";
-import { format } from "date-fns";
-import { SmartReply } from "./SmartReply";
-import { LinkPreview, extractUrl } from "./LinkPreview";
-import { createPortal } from "react-dom";
+import React, { useState, useRef } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import {
+  Reply,
+  Edit2,
+  Trash2,
+  Trash,
+  Pin,
+  Copy,
+  MoreHorizontal,
+  Phone,
+  Video,
+  FileText,
+  Download,
+  X,
+  CheckCheck,
+  Check,
+  MessageSquare,
+} from 'lucide-react';
+import Link from 'next/link';
+import { format } from 'date-fns';
+import { SmartReply } from './SmartReply';
+import { LinkPreview, extractUrl } from './LinkPreview';
+import { createPortal } from 'react-dom';
 
 // ── i18n labels for delivered / seen ──────────────────────────────────────────
-type Lang = "en" | "ru" | "hy";
+type Lang = 'en' | 'ru' | 'hy';
 
 function getLang(): Lang {
-  if (typeof window === "undefined") return "en";
-  const l = document.documentElement.lang || navigator.language || "en";
-  if (l.startsWith("ru")) return "ru";
-  if (l.startsWith("hy") || l.startsWith("am")) return "hy";
-  return "en";
+  if (typeof window === 'undefined') return 'en';
+  const l = document.documentElement.lang || navigator.language || 'en';
+  if (l.startsWith('ru')) return 'ru';
+  if (l.startsWith('hy') || l.startsWith('am')) return 'hy';
+  return 'en';
 }
 
 const RECEIPT_LABELS: Record<Lang, { delivered: string; seen: string }> = {
-  en: { delivered: "Delivered", seen: "Seen" },
-  ru: { delivered: "Доставлено", seen: "Просмотрено" },
-  hy: { delivered: "Հասցված է", seen: "Դիտված է" },
+  en: { delivered: 'Delivered', seen: 'Seen' },
+  ru: { delivered: 'Доставлено', seen: 'Просмотрено' },
+  hy: { delivered: 'Հասցված է', seen: 'Դիտված է' },
 };
 
 // ── UI labels by language ─────────────────────────────────────────────────────
-const UI_LABELS: Record<Lang, {
-  deleted: string; pollClosed: string; votes: string; closePoll: string;
-  copy: string; pin: string; unpin: string; edit: string;
-  deleteForMe: string; deleteForEveryone: string; deleteMsg: string;
-  deleteDesc: string; canOnlyDelete: string; cancel: string;
-  missed: string; declined: string; download: string; reply: string;
-}> = {
+const UI_LABELS: Record<
+  Lang,
+  {
+    deleted: string;
+    pollClosed: string;
+    votes: string;
+    closePoll: string;
+    copy: string;
+    pin: string;
+    unpin: string;
+    edit: string;
+    deleteForMe: string;
+    deleteForEveryone: string;
+    deleteMsg: string;
+    deleteDesc: string;
+    canOnlyDelete: string;
+    cancel: string;
+    missed: string;
+    declined: string;
+    download: string;
+    reply: string;
+  }
+> = {
   en: {
-    deleted: "This message was deleted", pollClosed: "Poll closed", votes: "votes",
-    closePoll: "Close poll", copy: "Copy", pin: "Pin", unpin: "Unpin", edit: "Edit",
-    deleteForMe: "Delete for me", deleteForEveryone: "Delete for everyone",
-    deleteMsg: "Delete message", deleteDesc: "Choose how to delete this message.",
-    canOnlyDelete: "⏱ Can only delete for everyone within 5 minutes", cancel: "Cancel",
-    missed: "Missed", declined: "Declined", download: "Download", reply: "Reply",
+    deleted: 'This message was deleted',
+    pollClosed: 'Poll closed',
+    votes: 'votes',
+    closePoll: 'Close poll',
+    copy: 'Copy',
+    pin: 'Pin',
+    unpin: 'Unpin',
+    edit: 'Edit',
+    deleteForMe: 'Delete for me',
+    deleteForEveryone: 'Delete for everyone',
+    deleteMsg: 'Delete message',
+    deleteDesc: 'Choose how to delete this message.',
+    canOnlyDelete: '⏱ Can only delete for everyone within 5 minutes',
+    cancel: 'Cancel',
+    missed: 'Missed',
+    declined: 'Declined',
+    download: 'Download',
+    reply: 'Reply',
   },
   ru: {
-    deleted: "Это сообщение было удалено", pollClosed: "Опрос закрыт", votes: "голосов",
-    closePoll: "Закрыть опрос", copy: "Копировать", pin: "Закрепить", unpin: "Открепить", edit: "Редактировать",
-    deleteForMe: "Удалить у меня", deleteForEveryone: "Удалить у всех",
-    deleteMsg: "Удалить сообщение", deleteDesc: "Выберите способ удаления этого сообщения.",
-    canOnlyDelete: "⏱ Удалить у всех можно только в течение 5 минут", cancel: "Отмена",
-    missed: "Пропущен", declined: "Отклонён", download: "Скачать", reply: "Ответить",
+    deleted: 'Это сообщение было удалено',
+    pollClosed: 'Опрос закрыт',
+    votes: 'голосов',
+    closePoll: 'Закрыть опрос',
+    copy: 'Копировать',
+    pin: 'Закрепить',
+    unpin: 'Открепить',
+    edit: 'Редактировать',
+    deleteForMe: 'Удалить у меня',
+    deleteForEveryone: 'Удалить у всех',
+    deleteMsg: 'Удалить сообщение',
+    deleteDesc: 'Выберите способ удаления этого сообщения.',
+    canOnlyDelete: '⏱ Удалить у всех можно только в течение 5 минут',
+    cancel: 'Отмена',
+    missed: 'Пропущен',
+    declined: 'Отклонён',
+    download: 'Скачать',
+    reply: 'Ответить',
   },
   hy: {
-    deleted: "Այս հաղորդագրությունը ջնջված է", pollClosed: "Հարցումը փակված է", votes: "ձայն",
-    closePoll: "Փակել հարցումը", copy: "Պատճենել", pin: "Ամրացնել", unpin: "Ապամրացնել", edit: "Խմբագրել",
-    deleteForMe: "Ջնջել ինձ համար", deleteForEveryone: "Ջնջել բոլորի համար",
-    deleteMsg: "Ջնջել հաղորդագրությունը", deleteDesc: "Ընտրեք, թե ինչպես ջնջել այս հաղորդագրությունը:",
-    canOnlyDelete: "⏱ Կարելի է ջնջել բոլորի համար միայն 5 րոպեի ընթացքում", cancel: "Չեղարկել",
-    missed: "Բաց թողնված", declined: "Մերժված", download: "Ներբեռնել", reply: "Պատասխանել",
+    deleted: 'Այս հաղորդագրությունը ջնջված է',
+    pollClosed: 'Հարցումը փակված է',
+    votes: 'ձայն',
+    closePoll: 'Փակել հարցումը',
+    copy: 'Պատճենել',
+    pin: 'Ամրացնել',
+    unpin: 'Ապամրացնել',
+    edit: 'Խմբագրել',
+    deleteForMe: 'Ջնջել ինձ համար',
+    deleteForEveryone: 'Ջնջել բոլորի համար',
+    deleteMsg: 'Ջնջել հաղորդագրությունը',
+    deleteDesc: 'Ընտրեք, թե ինչպես ջնջել այս հաղորդագրությունը:',
+    canOnlyDelete: '⏱ Կարելի է ջնջել բոլորի համար միայն 5 րոպեի ընթացքում',
+    cancel: 'Չեղարկել',
+    missed: 'Բաց թողնված',
+    declined: 'Մերժված',
+    download: 'Ներբեռնել',
+    reply: 'Պատասխանել',
   },
 };
 
 function getLabelLang(lang?: string): Lang {
-  if (!lang) return "en";
-  if (lang.startsWith("ru")) return "ru";
-  if (lang.startsWith("hy") || lang.startsWith("am")) return "hy";
-  return "en";
+  if (!lang) return 'en';
+  if (lang.startsWith('ru')) return 'ru';
+  if (lang.startsWith('hy') || lang.startsWith('am')) return 'hy';
+  return 'en';
 }
 
 // ── Emoji Key Conversion Helpers for Reactions ────────────────────────────────
@@ -95,7 +163,7 @@ function emojiToKey(emoji: string): string {
 function keyToEmoji(key: string): string {
   return key
     .split('_')
-    .map(part => {
+    .map((part) => {
       const codePoint = parseInt(part.substring(1), 16);
       return String.fromCodePoint(codePoint);
     })
@@ -103,15 +171,32 @@ function keyToEmoji(key: string): string {
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface ReadEntry { userId: string; readAt: number }
+interface ReadEntry {
+  userId: string;
+  readAt: number;
+}
 
-interface PollOption { id: string; text: string; votes: string[] }
-interface Poll { question: string; options: PollOption[]; closedAt?: number }
-interface LinkPreviewData { url: string; title?: string; description?: string; image?: string; siteName?: string }
+interface PollOption {
+  id: string;
+  text: string;
+  votes: string[];
+}
+interface Poll {
+  question: string;
+  options: PollOption[];
+  closedAt?: number;
+}
+interface LinkPreviewData {
+  url: string;
+  title?: string;
+  description?: string;
+  image?: string;
+  siteName?: string;
+}
 
 interface Message {
-  _id: Id<"chatMessages">;
-  senderId: Id<"users">;
+  _id: Id<'chatMessages'>;
+  senderId: Id<'users'>;
   type: string;
   content: string;
   createdAt: number;
@@ -133,7 +218,7 @@ interface Message {
   callType?: string;
   callStatus?: string;
   callDuration?: number;
-  sender?: { _id: Id<"users">; name: string; avatarUrl?: string } | null;
+  sender?: { _id: Id<'users'>; name: string; avatarUrl?: string } | null;
 }
 
 interface Props {
@@ -141,39 +226,65 @@ interface Props {
   isOwn: boolean;
   showAvatar: boolean;
   showName: boolean;
-  currentUserId: Id<"users">;
+  currentUserId: Id<'users'>;
   currentUserAvatar?: string;
   currentUserName?: string;
-  onReply: (id: Id<"chatMessages">, content: string, senderName: string) => void;
-  onOpenThread: (id: Id<"chatMessages">, content: string) => void;
+  onReply: (id: Id<'chatMessages'>, content: string, senderName: string) => void;
+  onOpenThread: (id: Id<'chatMessages'>, content: string) => void;
   onSendMessage?: (text: string) => void;
   lang?: string;
 }
 
-const QUICK_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
 
 function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function formatFileSize(bytes: number) {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / 1048576).toFixed(1) + " MB";
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
 }
 
-function isImage(type: string) { return type.startsWith("image/"); }
-function isPDF(type: string) { return type === "application/pdf"; }
-function canDeleteForEveryone(createdAt: number) { return Date.now() - createdAt < 5 * 60 * 1000; }
+function isImage(type: string) {
+  return type.startsWith('image/');
+}
+function isPDF(type: string) {
+  return type === 'application/pdf';
+}
+function canDeleteForEveryone(createdAt: number) {
+  return Date.now() - createdAt < 5 * 60 * 1000;
+}
 
 // ── Read receipt status ───────────────────────────────────────────────────────
 const RECEIPT_LABELS_SENT: Record<Lang, string> = {
-  en: "Sent", ru: "Отправлено", hy: "Ուղարկված է",
+  en: 'Sent',
+  ru: 'Отправлено',
+  hy: 'Ուղարկված է',
 };
 
-function ReadReceipt({ readBy, isOwn, lang = "en" }: { readBy?: ReadEntry[]; isOwn: boolean; isDirect: boolean; lang?: string }) {
+function ReadReceipt({
+  readBy,
+  isOwn,
+  lang = 'en',
+}: {
+  readBy?: ReadEntry[];
+  isOwn: boolean;
+  isDirect: boolean;
+  lang?: string;
+}) {
   if (!isOwn) return null;
-  const effectiveLang: Lang = lang.startsWith("ru") ? "ru" : lang.startsWith("hy") || lang.startsWith("am") ? "hy" : "en";
+  const effectiveLang: Lang = lang.startsWith('ru')
+    ? 'ru'
+    : lang.startsWith('hy') || lang.startsWith('am')
+      ? 'hy'
+      : 'en';
   const labels = RECEIPT_LABELS[effectiveLang];
   const entries = readBy ?? [];
 
@@ -184,7 +295,10 @@ function ReadReceipt({ readBy, isOwn, lang = "en" }: { readBy?: ReadEntry[]; isO
 
   if (seenEntries.length > 0) {
     return (
-      <span className="flex items-center gap-0.5 text-[10px] transition-all duration-300" style={{ color: "var(--primary)" }}>
+      <span
+        className="flex items-center gap-0.5 text-[10px] transition-all duration-300"
+        style={{ color: 'var(--primary)' }}
+      >
         <CheckCheck className="w-3 h-3" />
         {labels.seen}
       </span>
@@ -192,7 +306,10 @@ function ReadReceipt({ readBy, isOwn, lang = "en" }: { readBy?: ReadEntry[]; isO
   }
   if (deliveredEntries.length > 0) {
     return (
-      <span className="flex items-center gap-0.5 text-[10px] transition-all duration-300" style={{ color: "var(--text-muted)" }}>
+      <span
+        className="flex items-center gap-0.5 text-[10px] transition-all duration-300"
+        style={{ color: 'var(--text-muted)' }}
+      >
         <CheckCheck className="w-3 h-3 opacity-60" />
         {labels.delivered}
       </span>
@@ -200,7 +317,10 @@ function ReadReceipt({ readBy, isOwn, lang = "en" }: { readBy?: ReadEntry[]; isO
   }
   // Sent — always show for own messages
   return (
-    <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "var(--text-disabled)" }}>
+    <span
+      className="flex items-center gap-0.5 text-[10px]"
+      style={{ color: 'var(--text-disabled)' }}
+    >
       <Check className="w-3 h-3" />
       {RECEIPT_LABELS_SENT[effectiveLang]}
     </span>
@@ -208,12 +328,28 @@ function ReadReceipt({ readBy, isOwn, lang = "en" }: { readBy?: ReadEntry[]; isO
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showAvatar, showName, currentUserId, currentUserAvatar, currentUserName, onReply, onOpenThread, onSendMessage, lang = "en" }: Props) {
+export const MessageBubble = React.memo(function MessageBubble({
+  message,
+  isOwn,
+  showAvatar,
+  showName,
+  currentUserId,
+  currentUserAvatar,
+  currentUserName,
+  onReply,
+  onOpenThread,
+  onSendMessage,
+  lang = 'en',
+}: Props) {
   const L = UI_LABELS[getLabelLang(lang)];
   const [showActions, setShowActions] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [menuOpenDown, setMenuOpenDown] = useState(false);
-  const [menuPosition, setMenuPosition] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    left?: number;
+    right?: number;
+  } | null>(null);
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -239,11 +375,11 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
 
   if (message.isDeleted) {
     return (
-      <div className={cn("flex items-end gap-2 my-0.5", isOwn ? "flex-row-reverse" : "flex-row")}>
+      <div className={cn('flex items-end gap-2 my-0.5', isOwn ? 'flex-row-reverse' : 'flex-row')}>
         <div className="w-8 shrink-0" />
         <div
           className="px-3 py-2 rounded-2xl text-xs italic animate-fade-in"
-          style={{ background: "var(--background-subtle)", color: "var(--text-disabled)" }}
+          style={{ background: 'var(--background-subtle)', color: 'var(--text-disabled)' }}
         >
           🗑 {L.deleted}
         </div>
@@ -251,46 +387,47 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
     );
   }
 
-  if (message.type === "system") {
+  if (message.type === 'system') {
     // Service broadcast: official company-wide announcement
     if (message.isServiceBroadcast) {
-      const icon = message.broadcastIcon || "ℹ️";
-      const senderIcon = "🔧"; // System icon
-      
+      const icon = message.broadcastIcon || 'ℹ️';
+      const senderIcon = '🔧'; // System icon
+
       // Remove sender name prefix (e.g., "Roman: ") from content for system announcements
       let cleanContent = message.content;
-      if (message.sender?.name && cleanContent.startsWith(message.sender.name + ":")) {
+      if (message.sender?.name && cleanContent.startsWith(message.sender.name + ':')) {
         cleanContent = cleanContent.substring(message.sender.name.length + 1).trim();
       }
-      
+
       return (
         <div className="flex justify-center my-4 animate-fade-in px-4">
           <div className="max-w-lg w-full">
             {/* Message card - no sender info for System Announcements */}
-            <div 
+            <div
               className="border-l-4 rounded-lg p-4 shadow-md animate-fade-in"
               style={{
-                borderLeftColor: "var(--warning, #f59e0b)",
-                background: "var(--background-elevated)",
-                color: "var(--text-primary)",
+                borderLeftColor: 'var(--warning, #f59e0b)',
+                background: 'var(--background-elevated)',
+                color: 'var(--text-primary)',
               }}
             >
               {/* Header with icon and title */}
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-lg">{icon}</span>
-                <span className="font-semibold text-sm tracking-wide" style={{ color: "var(--warning, #f59e0b)" }}>
-                  {message.broadcastTitle || "СЕРВИСНОЕ ОБЪЯВЛЕНИЕ"}
+                <span
+                  className="font-semibold text-sm tracking-wide"
+                  style={{ color: 'var(--warning, #f59e0b)' }}
+                >
+                  {message.broadcastTitle || 'СЕРВИСНОЕ ОБЪЯВЛЕНИЕ'}
                 </span>
               </div>
-              
+
               {/* Message content */}
-              <p className="text-sm leading-relaxed">
-                {cleanContent}
-              </p>
-              
+              <p className="text-sm leading-relaxed">{cleanContent}</p>
+
               {/* Timestamp */}
-              <div className="mt-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                {format(new Date(message.createdAt), "HH:mm, dd MMM")}
+              <div className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+                {format(new Date(message.createdAt), 'HH:mm, dd MMM')}
               </div>
             </div>
           </div>
@@ -301,24 +438,43 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
     // Regular system message (e.g., "John joined the chat")
     return (
       <div className="flex justify-center my-2 animate-fade-in">
-        <span className="px-3 py-1 rounded-full text-[11px]" style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}>
+        <span
+          className="px-3 py-1 rounded-full text-[11px]"
+          style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
+        >
           {message.content}
         </span>
       </div>
     );
   }
 
-  if (message.type === "call") {
-    const icon = message.callType === "video" ? <Video className="w-4 h-4" /> : <Phone className="w-4 h-4" />;
-    const statusColor = message.callStatus === "answered" ? "text-green-500" : "text-red-500";
-    const statusText = message.callStatus === "answered"
-      ? `${message.callDuration ? Math.floor(message.callDuration / 60) + "m " + (message.callDuration % 60) + "s" : ""}`
-      : message.callStatus === "missed" ? L.missed : L.declined;
+  if (message.type === 'call') {
+    const icon =
+      message.callType === 'video' ? <Video className="w-4 h-4" /> : <Phone className="w-4 h-4" />;
+    const statusColor = message.callStatus === 'answered' ? 'text-green-500' : 'text-red-500';
+    const statusText =
+      message.callStatus === 'answered'
+        ? `${message.callDuration ? Math.floor(message.callDuration / 60) + 'm ' + (message.callDuration % 60) + 's' : ''}`
+        : message.callStatus === 'missed'
+          ? L.missed
+          : L.declined;
     return (
-      <div className={cn("flex items-end gap-2 my-0.5 animate-fade-in", isOwn ? "flex-row-reverse" : "flex-row")}>
+      <div
+        className={cn(
+          'flex items-end gap-2 my-0.5 animate-fade-in',
+          isOwn ? 'flex-row-reverse' : 'flex-row',
+        )}
+      >
         <div className="w-8 shrink-0" />
-        <div className="flex items-center gap-2 px-3 py-2 rounded-2xl border text-xs" style={{ background: "var(--background-subtle)", borderColor: "var(--border)", color: "var(--text-muted)" }}>
-          <span style={{ color: "var(--primary)" }}>{icon}</span>
+        <div
+          className="flex items-center gap-2 px-3 py-2 rounded-2xl border text-xs"
+          style={{
+            background: 'var(--background-subtle)',
+            borderColor: 'var(--border)',
+            color: 'var(--text-muted)',
+          }}
+        >
+          <span style={{ color: 'var(--primary)' }}>{icon}</span>
           <span>{message.content}</span>
           <span className={statusColor}>{statusText}</span>
         </div>
@@ -334,8 +490,15 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
   };
 
   const handleEdit = async () => {
-    if (editContent.trim() === message.content) { setEditing(false); return; }
-    await editMessage({ messageId: message._id, userId: currentUserId, content: editContent.trim() });
+    if (editContent.trim() === message.content) {
+      setEditing(false);
+      return;
+    }
+    await editMessage({
+      messageId: message._id,
+      userId: currentUserId,
+      content: editContent.trim(),
+    });
     setEditing(false);
   };
 
@@ -361,7 +524,10 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
     setShowMenu(false);
   };
 
-  const totalReactions = Object.values(message.reactions ?? {}).reduce((s, arr) => s + arr.length, 0);
+  const totalReactions = Object.values(message.reactions ?? {}).reduce(
+    (s, arr) => s + arr.length,
+    0,
+  );
   const withinFiveMin = canDeleteForEveryone(message.createdAt);
 
   return (
@@ -395,26 +561,38 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
           <div
             className="rounded-2xl shadow-2xl border p-5 w-72 flex flex-col gap-3 animate-slide-up"
-            style={{ background: "var(--background)", borderColor: "var(--border)" }}
+            style={{ background: 'var(--background)', borderColor: 'var(--border)' }}
           >
-            <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{L.deleteMsg}</h3>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>{L.deleteDesc}</p>
+            <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+              {L.deleteMsg}
+            </h3>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {L.deleteDesc}
+            </p>
             <div className="flex flex-col gap-2">
               <Button onClick={handleDeleteForMe} variant="outline" className="w-full text-sm">
                 {L.deleteForMe}
               </Button>
               {isOwn && withinFiveMin && (
-                <Button onClick={handleDeleteForEveryone} variant="destructive" className="w-full text-sm">
+                <Button
+                  onClick={handleDeleteForEveryone}
+                  variant="destructive"
+                  className="w-full text-sm"
+                >
                   {L.deleteForEveryone}
                 </Button>
               )}
               {isOwn && !withinFiveMin && (
-                <p className="text-[11px] text-center" style={{ color: "var(--text-disabled)" }}>
+                <p className="text-[11px] text-center" style={{ color: 'var(--text-disabled)' }}>
                   {L.canOnlyDelete}
                 </p>
               )}
             </div>
-            <Button onClick={() => setShowDeleteDialog(false)} variant="ghost" className="text-xs hover:opacity-70 transition-opacity">
+            <Button
+              onClick={() => setShowDeleteDialog(false)}
+              variant="ghost"
+              className="text-xs hover:opacity-70 transition-opacity"
+            >
               {L.cancel}
             </Button>
           </div>
@@ -424,8 +602,8 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
       {/* Message row */}
       <div
         className={cn(
-          "flex items-end gap-2 my-0.5 group animate-msg-in overflow-x-hidden",
-          isOwn ? "flex-row-reverse" : "flex-row"
+          'flex items-end gap-2 my-0.5 group animate-msg-in overflow-x-hidden',
+          isOwn ? 'flex-row-reverse' : 'flex-row',
         )}
         onMouseEnter={() => {
           setShowActions(true);
@@ -450,8 +628,14 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
             >
               <Avatar className="w-7 h-7 ring-2 ring-transparent hover:ring-[var(--primary)] transition-all duration-200">
                 {message.sender?.avatarUrl && <AvatarImage src={message.sender.avatarUrl} />}
-                <AvatarFallback className="text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}>
-                  {getInitials(message.sender?.name ?? "?")}
+                <AvatarFallback
+                  className="text-[10px] font-bold text-white"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
+                  }}
+                >
+                  {getInitials(message.sender?.name ?? '?')}
                 </AvatarFallback>
               </Avatar>
             </Link>
@@ -459,8 +643,14 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
             // Own avatar on the right
             <Avatar className="w-7 h-7">
               {currentUserAvatar && <AvatarImage src={currentUserAvatar} />}
-              <AvatarFallback className="text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))" }}>
-                {getInitials(currentUserName ?? "Me")}
+              <AvatarFallback
+                className="text-[10px] font-bold text-white"
+                style={{
+                  background:
+                    'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
+                }}
+              >
+                {getInitials(currentUserName ?? 'Me')}
               </AvatarFallback>
             </Avatar>
           ) : (
@@ -468,17 +658,34 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
           )}
         </div>
 
-        <div className={cn("flex flex-col max-w-[88%] xs:max-w-[85%] sm:max-w-[75%] md:max-w-[65%] min-w-0", isOwn ? "items-end" : "items-start")}>
+        <div
+          className={cn(
+            'flex flex-col max-w-[88%] xs:max-w-[85%] sm:max-w-[75%] md:max-w-[65%] min-w-0',
+            isOwn ? 'items-end' : 'items-start',
+          )}
+        >
           {showName && (
-            <span className="text-[11px] font-medium mb-0.5 px-1" style={{ color: "var(--text-muted)" }}>
-              {message.sender?.name ?? "Unknown"}
+            <span
+              className="text-[11px] font-medium mb-0.5 px-1"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {message.sender?.name ?? 'Unknown'}
             </span>
           )}
 
           {/* Reply preview */}
           {message.replyToContent && (
-            <div className="mb-1 px-2 py-1 rounded-lg border-l-2 text-xs max-w-full transition-all duration-200" style={{ borderColor: "var(--primary)", background: "var(--background-subtle)", color: "var(--text-muted)" }}>
-              <span className="font-medium" style={{ color: "var(--primary)" }}>{message.replyToSenderName}</span>
+            <div
+              className="mb-1 px-2 py-1 rounded-lg border-l-2 text-xs max-w-full transition-all duration-200"
+              style={{
+                borderColor: 'var(--primary)',
+                background: 'var(--background-subtle)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              <span className="font-medium" style={{ color: 'var(--primary)' }}>
+                {message.replyToSenderName}
+              </span>
               <p className="truncate">{message.replyToContent}</p>
             </div>
           )}
@@ -488,11 +695,11 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
             className="relative rounded-2xl px-3 py-2 text-sm break-words transition-all duration-200 hover:brightness-105"
             style={{
               background: isOwn
-                ? "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)"
-                : "var(--background-subtle)",
-              color: isOwn ? "white" : "var(--text-primary)",
-              borderBottomRightRadius: isOwn ? "4px" : undefined,
-              borderBottomLeftRadius: !isOwn ? "4px" : undefined,
+                ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)'
+                : 'var(--background-subtle)',
+              color: isOwn ? 'white' : 'var(--text-primary)',
+              borderBottomRightRadius: isOwn ? '4px' : undefined,
+              borderBottomLeftRadius: !isOwn ? '4px' : undefined,
             }}
           >
             {editing ? (
@@ -502,67 +709,105 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   className="flex-1 bg-transparent outline-none resize-none text-sm"
-                  style={{ color: isOwn ? "white" : "var(--text-primary)" }}
-                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEdit(); } if (e.key === "Escape") setEditing(false); }}
+                  style={{ color: isOwn ? 'white' : 'var(--text-primary)' }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleEdit();
+                    }
+                    if (e.key === 'Escape') setEditing(false);
+                  }}
                   rows={1}
                 />
-                <button onClick={handleEdit} className="text-xs opacity-80 hover:opacity-100 transition-opacity">✓</button>
-                <button onClick={() => setEditing(false)} className="text-xs opacity-80 hover:opacity-100 transition-opacity">✕</button>
+                <button
+                  onClick={handleEdit}
+                  className="text-xs opacity-80 hover:opacity-100 transition-opacity"
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="text-xs opacity-80 hover:opacity-100 transition-opacity"
+                >
+                  ✕
+                </button>
               </div>
             ) : (
-              message.content && <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+              message.content && (
+                <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+              )
             )}
 
             {/* Attachments */}
             {message.attachments && message.attachments.length > 0 && (
-              <div className={cn("space-y-2", message.content ? "mt-2" : "")}>
+              <div className={cn('space-y-2', message.content ? 'mt-2' : '')}>
                 {message.attachments.map((att, i) => {
                   // Voice/Audio message
-                  if (att.type.startsWith("audio/") || message.type === "audio") {
+                  if (att.type.startsWith('audio/') || message.type === 'audio') {
                     const duration = message.callDuration || 0;
                     const formatDuration = (secs: number) => {
                       const m = Math.floor(secs / 60);
                       const s = Math.floor(secs % 60);
-                      return `${m}:${s.toString().padStart(2, "0")}`;
+                      return `${m}:${s.toString().padStart(2, '0')}`;
                     };
                     return (
-                      <div key={i} className="flex items-center gap-2 p-2 rounded-xl min-w-[200px] max-w-[280px]"
-                        style={{ background: isOwn ? "rgba(255,255,255,0.15)" : "var(--background-subtle)" }}>
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 p-2 rounded-xl min-w-[200px] max-w-[280px]"
+                        style={{
+                          background: isOwn ? 'rgba(255,255,255,0.15)' : 'var(--background-subtle)',
+                        }}
+                      >
                         {/* Play icon */}
-                        <button className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
-                          style={{ background: isOwn ? "rgba(255,255,255,0.2)" : "var(--primary)", color: "white" }}>
+                        <button
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
+                          style={{
+                            background: isOwn ? 'rgba(255,255,255,0.2)' : 'var(--primary)',
+                            color: 'white',
+                          }}
+                        >
                           <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         </button>
-                        
+
                         {/* Waveform visualization placeholder */}
                         <div className="flex-1 flex items-center gap-0.5 h-8">
                           {Array.from({ length: 20 }).map((_, j) => (
-                            <div key={j} className="w-1 rounded-full"
+                            <div
+                              key={j}
+                              className="w-1 rounded-full"
                               style={{
                                 height: `${Math.random() * 20 + 8}px`,
-                                background: isOwn ? "rgba(255,255,255,0.6)" : "var(--primary)",
+                                background: isOwn ? 'rgba(255,255,255,0.6)' : 'var(--primary)',
                               }}
                             />
                           ))}
                         </div>
-                        
+
                         {/* Duration */}
-                        <span className="text-xs font-mono" style={{ color: isOwn ? "rgba(255,255,255,0.8)" : "var(--text-muted)" }}>
+                        <span
+                          className="text-xs font-mono"
+                          style={{ color: isOwn ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)' }}
+                        >
                           {formatDuration(duration)}
                         </span>
-                        
+
                         {/* Download */}
-                        <a href={att.url} download={att.name} target="_blank" rel="noopener noreferrer"
+                        <a
+                          href={att.url}
+                          download={att.name}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="p-1.5 rounded-lg hover:opacity-80 transition-opacity"
-                          style={{ color: isOwn ? "rgba(255,255,255,0.8)" : "var(--text-muted)" }}>
+                          style={{ color: isOwn ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)' }}
+                        >
                           <Download className="w-3.5 h-3.5" />
                         </a>
                       </div>
                     );
                   }
-                  
+
                   // Image
                   if (isImage(att.type)) {
                     return (
@@ -584,34 +829,66 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
                         >
                           <Download className="w-3.5 h-3.5 text-white" />
                         </a>
-                        <p className="text-[9px] xs:text-[10px] mt-0.5 opacity-70 truncate max-w-[28vw] xs:max-w-[180px] sm:max-w-[200px]">{att.name}</p>
+                        <p className="text-[9px] xs:text-[10px] mt-0.5 opacity-70 truncate max-w-[28vw] xs:max-w-[180px] sm:max-w-[200px]">
+                          {att.name}
+                        </p>
                       </div>
                     );
                   }
                   if (isPDF(att.type)) {
                     return (
-                      <div key={i} className="rounded-xl overflow-hidden w-full max-w-[200px] xs:max-w-[220px] sm:max-w-[240px]">
-                        <div className="flex items-center gap-2 px-2 py-1.5 text-xs" style={{ background: isOwn ? "rgba(255,255,255,0.15)" : "var(--border)" }}>
+                      <div
+                        key={i}
+                        className="rounded-xl overflow-hidden w-full max-w-[200px] xs:max-w-[220px] sm:max-w-[240px]"
+                      >
+                        <div
+                          className="flex items-center gap-2 px-2 py-1.5 text-xs"
+                          style={{ background: isOwn ? 'rgba(255,255,255,0.15)' : 'var(--border)' }}
+                        >
                           <FileText className="w-4 h-4 shrink-0 text-red-400" />
                           <span className="truncate flex-1 text-[10px] xs:text-xs">{att.name}</span>
-                          <span className="shrink-0 opacity-70 text-[9px] xs:text-[10px]">{formatFileSize(att.size)}</span>
+                          <span className="shrink-0 opacity-70 text-[9px] xs:text-[10px]">
+                            {formatFileSize(att.size)}
+                          </span>
                         </div>
-                        <iframe src={att.url + "#toolbar=0&navpanes=0&scrollbar=0"} className="w-full" style={{ height: 140 }} title={att.name} />
-                        <a href={att.url} download={att.name} target="_blank" rel="noopener noreferrer"
+                        <iframe
+                          src={att.url + '#toolbar=0&navpanes=0&scrollbar=0'}
+                          className="w-full"
+                          style={{ height: 140 }}
+                          title={att.name}
+                        />
+                        <a
+                          href={att.url}
+                          download={att.name}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center justify-center gap-1 py-1.5 text-[9px] xs:text-xs hover:opacity-80 transition-opacity"
-                          style={{ background: isOwn ? "rgba(255,255,255,0.1)" : "var(--background-subtle)", color: isOwn ? "white" : "var(--text-muted)" }}>
+                          style={{
+                            background: isOwn
+                              ? 'rgba(255,255,255,0.1)'
+                              : 'var(--background-subtle)',
+                            color: isOwn ? 'white' : 'var(--text-muted)',
+                          }}
+                        >
                           <Download className="w-3 h-3" /> {L.download}
                         </a>
                       </div>
                     );
                   }
                   return (
-                    <a key={i} href={att.url} target="_blank" rel="noopener noreferrer"
+                    <a
+                      key={i}
+                      href={att.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs hover:opacity-80 transition-all duration-200 hover:scale-[1.01]"
-                      style={{ background: isOwn ? "rgba(255,255,255,0.15)" : "var(--border)" }}>
+                      style={{ background: isOwn ? 'rgba(255,255,255,0.15)' : 'var(--border)' }}
+                    >
                       <span>📎</span>
                       <span className="truncate flex-1 text-[9px] xs:text-xs">{att.name}</span>
-                      <span className="shrink-0 opacity-70 text-[9px] xs:text-[10px]">{formatFileSize(att.size)}</span>
+                      <span className="shrink-0 opacity-70 text-[9px] xs:text-[10px]">
+                        {formatFileSize(att.size)}
+                      </span>
                     </a>
                   );
                 })}
@@ -619,59 +896,92 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
             )}
 
             {/* Link Preview */}
-            {urlInContent && !message.poll && (
-              <LinkPreview url={urlInContent} isOwn={isOwn} />
-            )}
+            {urlInContent && !message.poll && <LinkPreview url={urlInContent} isOwn={isOwn} />}
 
-            {message.isEdited && <span className="sm:text-[9px] text-xs opacity-60 ml-1">(edited)</span>}
-            {message.isPinned && <span className="absolute -top-2 -right-1 sm:text-[10px] text-xs">📌</span>}
+            {message.isEdited && (
+              <span className="sm:text-[9px] text-xs opacity-60 ml-1">(edited)</span>
+            )}
+            {message.isPinned && (
+              <span className="absolute -top-2 -right-1 sm:text-[10px] text-xs">📌</span>
+            )}
           </div>
 
           {/* Poll UI */}
           {message.poll && (
             <div
               className="mt-1 rounded-xl overflow-hidden border w-full max-w-[200px] xs:max-w-[220px] sm:max-w-[240px] animate-fade-in"
-              style={{ borderColor: "var(--border)", background: "var(--background-subtle)" }}
+              style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
             >
-              <div className="px-2.5 xs:px-3 py-2 border-b" style={{ borderColor: "var(--border)" }}>
-                <p className="text-xs xs:text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              <div
+                className="px-2.5 xs:px-3 py-2 border-b"
+                style={{ borderColor: 'var(--border)' }}
+              >
+                <p
+                  className="text-xs xs:text-sm font-semibold"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   📊 {message.poll.question}
                 </p>
                 {message.poll.closedAt && (
-                  <p className="text-[9px] xs:text-[10px] mt-1" style={{ color: "var(--text-disabled)" }}>{L.pollClosed}</p>
+                  <p
+                    className="text-[9px] xs:text-[10px] mt-1"
+                    style={{ color: 'var(--text-disabled)' }}
+                  >
+                    {L.pollClosed}
+                  </p>
                 )}
               </div>
               <div className="px-2.5 xs:px-3 py-2 space-y-1">
                 {(() => {
                   const totalVotes = message.poll.options.reduce((s, o) => s + o.votes.length, 0);
-                  const userVote = message.poll.options.find((o) => o.votes.includes(currentUserId))?.id;
+                  const userVote = message.poll.options.find((o) =>
+                    o.votes.includes(currentUserId),
+                  )?.id;
                   return message.poll.options.map((opt) => {
-                    const pct = totalVotes > 0 ? Math.round((opt.votes.length / totalVotes) * 100) : 0;
+                    const pct =
+                      totalVotes > 0 ? Math.round((opt.votes.length / totalVotes) * 100) : 0;
                     const isVoted = opt.id === userVote;
                     const isClosed = !!message.poll!.closedAt;
                     return (
                       <button
                         key={opt.id}
                         disabled={isClosed}
-                        onClick={() => votePoll({ messageId: message._id, userId: currentUserId, optionId: opt.id })}
+                        onClick={() =>
+                          votePoll({
+                            messageId: message._id,
+                            userId: currentUserId,
+                            optionId: opt.id,
+                          })
+                        }
                         className="w-full text-left relative rounded-lg overflow-hidden transition-all duration-200 hover:opacity-80 disabled:cursor-default"
-                        style={{ background: "var(--background)" }}
+                        style={{ background: 'var(--background)' }}
                       >
                         {/* Progress bar */}
                         <div
                           className="absolute inset-0 rounded-lg transition-all duration-500"
                           style={{
                             width: `${pct}%`,
-                            background: isVoted ? "var(--primary)" : "var(--border)",
+                            background: isVoted ? 'var(--primary)' : 'var(--border)',
                             opacity: 0.25,
                           }}
                         />
                         <div className="relative flex items-center justify-between px-2.5 xs:px-3 py-2 min-h-[36px] xs:min-h-[32px]">
-                          <span className="text-[10px] xs:text-[11px] font-medium flex items-center gap-1 truncate" style={{ color: isVoted ? "var(--primary)" : "var(--text-primary)" }}>
-                            {isVoted && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--primary)" }} />}
+                          <span
+                            className="text-[10px] xs:text-[11px] font-medium flex items-center gap-1 truncate"
+                            style={{ color: isVoted ? 'var(--primary)' : 'var(--text-primary)' }}
+                          >
+                            {isVoted && (
+                              <span
+                                className="w-1.5 h-1.5 rounded-full shrink-0"
+                                style={{ background: 'var(--primary)' }}
+                              />
+                            )}
                             {opt.text}
                           </span>
-                          <span className="text-[9px] xs:text-[10px] font-bold shrink-0 ml-1" style={{ color: "var(--text-muted)" }}>
+                          <span
+                            className="text-[9px] xs:text-[10px] font-bold shrink-0 ml-1"
+                            style={{ color: 'var(--text-muted)' }}
+                          >
                             {pct}%
                           </span>
                         </div>
@@ -680,15 +990,21 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
                   });
                 })()}
               </div>
-              <div className="px-2.5 xs:px-3 py-1.5 border-t flex items-center justify-between" style={{ borderColor: "var(--border)" }}>
-                <span className="text-[9px] xs:text-[10px]" style={{ color: "var(--text-disabled)" }}>
+              <div
+                className="px-2.5 xs:px-3 py-1.5 border-t flex items-center justify-between"
+                style={{ borderColor: 'var(--border)' }}
+              >
+                <span
+                  className="text-[9px] xs:text-[10px]"
+                  style={{ color: 'var(--text-disabled)' }}
+                >
                   {message.poll.options.reduce((s, o) => s + o.votes.length, 0)} {L.votes}
                 </span>
                 {isOwn && !message.poll.closedAt && (
                   <button
                     onClick={() => closePoll({ messageId: message._id, userId: currentUserId })}
                     className="text-[9px] xs:text-[10px] hover:opacity-70 transition-opacity py-0.5 px-1.5 hover:bg-opacity-50 rounded"
-                    style={{ color: "var(--primary)" }}
+                    style={{ color: 'var(--primary)' }}
                   >
                     {L.closePoll}
                   </button>
@@ -702,26 +1018,46 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
             <button
               onClick={() => onOpenThread(message._id, message.content)}
               className="flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full sm:text-[10px] text-xs font-medium border transition-all duration-200 hover:scale-105"
-              style={{ borderColor: "var(--primary)", color: "var(--primary)", background: "transparent" }}
+              style={{
+                borderColor: 'var(--primary)',
+                color: 'var(--primary)',
+                background: 'transparent',
+              }}
             >
               <MessageSquare className="w-2.5 h-2.5" />
-              {message.threadCount} repl{message.threadCount === 1 ? "y" : "ies"}
+              {message.threadCount} repl{message.threadCount === 1 ? 'y' : 'ies'}
             </button>
           )}
 
           {/* Smart Reply — only for incoming messages */}
-          {!isOwn && !message.isDeleted && message.type !== "system" && message.type !== "call" && message.content && (
-            <SmartReply
-              message={message.content}
-              lang={lang}
-              onSelect={(reply) => onSendMessage ? onSendMessage(reply) : onReply(message._id, message.content, message.sender?.name ?? "Someone")}
-            />
-          )}
+          {!isOwn &&
+            !message.isDeleted &&
+            message.type !== 'system' &&
+            message.type !== 'call' &&
+            message.content && (
+              <SmartReply
+                message={message.content}
+                lang={lang}
+                onSelect={(reply) =>
+                  onSendMessage
+                    ? onSendMessage(reply)
+                    : onReply(message._id, message.content, message.sender?.name ?? 'Someone')
+                }
+              />
+            )}
 
           {/* Timestamp + read receipt */}
-          <div className={cn("flex items-center gap-1 mt-1 px-1", isOwn ? "flex-row-reverse" : "flex-row")}>
-            <span className="sm:text-[10px] text-xs opacity-60" style={{ color: "var(--text-muted)" }}>
-              {format(new Date(message.createdAt), "HH:mm")}
+          <div
+            className={cn(
+              'flex items-center gap-1 mt-1 px-1',
+              isOwn ? 'flex-row-reverse' : 'flex-row',
+            )}
+          >
+            <span
+              className="sm:text-[10px] text-xs opacity-60"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {format(new Date(message.createdAt), 'HH:mm')}
             </span>
             {isOwn && (
               <ReadReceipt readBy={message.readBy} isOwn={isOwn} isDirect={isDirect} lang={lang} />
@@ -740,11 +1076,15 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
                     onClick={() => handleReaction(displayEmoji)}
                     className="flex items-center gap-0.5 sm:px-1.5 px-2 sm:py-0.5 py-1 rounded-full sm:text-xs text-sm border transition-all duration-200 hover:scale-110 min-h-[28px] sm:min-h-auto"
                     style={{
-                      background: users.includes(currentUserId) ? "var(--primary)" : "var(--background-subtle)",
-                      borderColor: users.includes(currentUserId) ? "var(--primary)" : "var(--border)",
-                      color: users.includes(currentUserId) ? "white" : "var(--text-primary)",
+                      background: users.includes(currentUserId)
+                        ? 'var(--primary)'
+                        : 'var(--background-subtle)',
+                      borderColor: users.includes(currentUserId)
+                        ? 'var(--primary)'
+                        : 'var(--border)',
+                      color: users.includes(currentUserId) ? 'white' : 'var(--text-primary)',
                     }}
-                    title={users.join(", ")}
+                    title={users.join(', ')}
                   >
                     {displayEmoji} {users.length}
                   </button>
@@ -759,8 +1099,8 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
           <div
             ref={actionBarRef}
             className={cn(
-              "flex items-center gap-0.5 shrink-0 transition-all duration-200 relative",
-              showActions ? "opacity-100 scale-100 z-40" : "opacity-0 scale-95 pointer-events-none"
+              'flex items-center gap-0.5 shrink-0 transition-all duration-200 relative',
+              showActions ? 'opacity-100 scale-100 z-40' : 'opacity-0 scale-95 pointer-events-none',
             )}
             onMouseEnter={() => {
               if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -777,15 +1117,17 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
                 key={emoji}
                 onClick={() => handleReaction(emoji)}
                 className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-sm sm:text-xs hover:scale-125 transition-transform duration-150 min-h-[36px]"
-                style={{ background: "var(--background-subtle)" }}
+                style={{ background: 'var(--background-subtle)' }}
               >
                 {emoji}
               </button>
             ))}
             <button
-              onClick={() => onReply(message._id, message.content, message.sender?.name ?? "Someone")}
+              onClick={() =>
+                onReply(message._id, message.content, message.sender?.name ?? 'Someone')
+              }
               className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-150 min-h-[36px]"
-              style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}
+              style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
               title={L.reply}
             >
               <Reply className="sm:w-3 sm:h-3 w-4 h-4" />
@@ -808,7 +1150,7 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
                   setShowMenu((prev) => !prev);
                 }}
                 className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-150 min-h-[36px]"
-                style={{ background: "var(--background-subtle)", color: "var(--text-muted)" }}
+                style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
               >
                 <MoreHorizontal className="sm:w-3 sm:h-3 w-4 h-4" />
               </button>
@@ -835,33 +1177,78 @@ export const MessageBubble = React.memo(function MessageBubble({ message, isOwn,
       >
         <div ref={menuRef}>
           <MenuItem icon={<Copy className="w-3.5 h-3.5" />} label={L.copy} onClick={handleCopy} />
-          <MenuItem icon={<Pin className="w-3.5 h-3.5" />} label={message.isPinned ? L.unpin : L.pin} onClick={handlePin} />
-          {isOwn && <MenuItem icon={<Edit2 className="w-3.5 h-3.5" />} label={L.edit} onClick={() => { setEditing(true); setShowMenu(false); }} />}
-          <MenuItem icon={<Trash className="w-3.5 h-3.5" />} label={L.deleteForMe} onClick={() => { setShowDeleteDialog(true); setShowMenu(false); }} danger />
+          <MenuItem
+            icon={<Pin className="w-3.5 h-3.5" />}
+            label={message.isPinned ? L.unpin : L.pin}
+            onClick={handlePin}
+          />
+          {isOwn && (
+            <MenuItem
+              icon={<Edit2 className="w-3.5 h-3.5" />}
+              label={L.edit}
+              onClick={() => {
+                setEditing(true);
+                setShowMenu(false);
+              }}
+            />
+          )}
+          <MenuItem
+            icon={<Trash className="w-3.5 h-3.5" />}
+            label={L.deleteForMe}
+            onClick={() => {
+              setShowDeleteDialog(true);
+              setShowMenu(false);
+            }}
+            danger
+          />
           {isOwn && withinFiveMin && (
-            <MenuItem icon={<Trash2 className="w-3.5 h-3.5" />} label={L.deleteForEveryone} onClick={() => { setShowDeleteDialog(true); setShowMenu(false); }} danger />
+            <MenuItem
+              icon={<Trash2 className="w-3.5 h-3.5" />}
+              label={L.deleteForEveryone}
+              onClick={() => {
+                setShowDeleteDialog(true);
+                setShowMenu(false);
+              }}
+              danger
+            />
           )}
         </div>
       </MessageMenuPortal>
 
       <style jsx>{`
         @keyframes msg-in {
-          from { opacity: 0; transform: translateY(6px) scale(0.98); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
+          from {
+            opacity: 0;
+            transform: translateY(6px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
         .animate-msg-in {
           animation: msg-in 0.2s ease-out both;
         }
         @keyframes slide-up {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(6px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         .animate-slide-up {
           animation: slide-up 0.18s ease-out both;
         }
         @keyframes fade-in {
-          from { opacity: 0; }
-          to   { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
         .animate-fade-in {
           animation: fade-in 0.2s ease-out both;
@@ -887,7 +1274,7 @@ function MessageMenuPortal({
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }) {
-  if (!open || !position || typeof document === "undefined") return null;
+  if (!open || !position || typeof document === 'undefined') return null;
   return createPortal(
     <div
       className="fixed z-[120] rounded-xl shadow-2xl border py-1 min-w-[160px] animate-slide-up"
@@ -895,27 +1282,37 @@ function MessageMenuPortal({
         top: position.top,
         left: position.left,
         right: position.right,
-        background: "var(--background)",
-        borderColor: "var(--border)",
-        transform: openDown ? "translateY(0)" : "translateY(-100%)",
+        background: 'var(--background)',
+        borderColor: 'var(--border)',
+        transform: openDown ? 'translateY(0)' : 'translateY(-100%)',
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       {children}
     </div>,
-    document.body
+    document.body,
   );
 }
 
-function MenuItem({ icon, label, onClick, danger }: { icon: React.ReactNode; label: string; onClick: () => void; danger?: boolean }) {
+function MenuItem({
+  icon,
+  label,
+  onClick,
+  danger,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  danger?: boolean;
+}) {
   return (
     <button
       onClick={onClick}
       className="w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-all duration-150 hover:opacity-80"
-      style={{ color: danger ? "#ef4444" : "var(--text-primary)" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sidebar-item-hover)")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+      style={{ color: danger ? '#ef4444' : 'var(--text-primary)' }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--sidebar-item-hover)')}
+      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {icon}
       {label}

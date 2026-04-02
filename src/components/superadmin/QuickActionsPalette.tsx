@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useTranslation } from "react-i18next";
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
 import {
   Search,
   Users,
@@ -23,18 +23,18 @@ import {
   ArrowRight,
   HelpCircle,
   HelpCircleIcon,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { GlobalSearch } from "./GlobalSearch";
-import type { Id } from "@/convex/_generated/dataModel";
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { GlobalSearch } from './GlobalSearch';
+import type { Id } from '@/convex/_generated/dataModel';
 
 interface QuickAction {
   id: string;
   label: string;
   icon: React.ReactNode;
   shortcut: string;
-  category: "action" | "navigation" | "user";
+  category: 'action' | 'navigation' | 'user';
   action: () => void;
   requiresSelection?: boolean;
   superadminOnly?: boolean;
@@ -45,184 +45,185 @@ export function QuickActionsPalette() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   // Check if user is superadmin
-  const isSuperadmin = user?.role === "superadmin" || user?.email?.toLowerCase() === "romangulanyan@gmail.com";
+  const isSuperadmin =
+    user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
 
   // Quick actions list - filtered by role
   const allActions: QuickAction[] = [
     {
-      id: "find-user",
-      label: t("superadmin.quickActions.findUser"),
+      id: 'find-user',
+      label: t('superadmin.quickActions.findUser'),
       icon: <Search className="w-4 h-4" />,
-      shortcut: "⌘U",
-      category: "action",
+      shortcut: '⌘U',
+      category: 'action',
       action: () => {
         setIsOpen(false);
         // Focus global search if on superadmin page
-        document.getElementById("global-search-input")?.focus();
+        document.getElementById('global-search-input')?.focus();
       },
     },
     {
-      id: "create-ticket",
-      label: t("superadmin.quickActions.createTicket"),
+      id: 'create-ticket',
+      label: t('superadmin.quickActions.createTicket'),
       icon: <Ticket className="w-4 h-4" />,
-      shortcut: "⌘T",
-      category: "action",
+      shortcut: '⌘T',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/help?new=true");
+        router.push('/help?new=true');
       },
     },
     // Superadmin-only actions
     {
-      id: "bulk-approve",
-      label: t("superadmin.quickActions.bulkApprove"),
+      id: 'bulk-approve',
+      label: t('superadmin.quickActions.bulkApprove'),
       icon: <CheckCircle className="w-4 h-4" />,
-      shortcut: "⌘A",
-      category: "action",
+      shortcut: '⌘A',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/bulk-actions");
+        router.push('/superadmin/bulk-actions');
       },
       superadminOnly: true,
     },
     {
-      id: "emergency",
-      label: t("superadmin.quickActions.emergencyMode"),
+      id: 'emergency',
+      label: t('superadmin.quickActions.emergencyMode'),
       icon: <AlertTriangle className="w-4 h-4" />,
-      shortcut: "⌘E",
-      category: "action",
+      shortcut: '⌘E',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/emergency");
+        router.push('/superadmin/emergency');
       },
       superadminOnly: true,
     },
     {
-      id: "broadcast",
-      label: t("superadmin.quickActions.broadcast"),
+      id: 'broadcast',
+      label: t('superadmin.quickActions.broadcast'),
       icon: <MessageSquare className="w-4 h-4" />,
-      shortcut: "⌘B",
-      category: "action",
+      shortcut: '⌘B',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/organizations?tab=announcements");
+        router.push('/superadmin/organizations?tab=announcements');
       },
       superadminOnly: true,
     },
     {
-      id: "maintenance",
-      label: t("superadmin.quickActions.maintenanceMode"),
+      id: 'maintenance',
+      label: t('superadmin.quickActions.maintenanceMode'),
       icon: <Wrench className="w-4 h-4" />,
-      shortcut: "⌘M",
-      category: "action",
+      shortcut: '⌘M',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/organizations?tab=maintenance");
+        router.push('/superadmin/organizations?tab=maintenance');
       },
       superadminOnly: true,
     },
     {
-      id: "impersonate",
-      label: t("superadmin.quickActions.impersonate"),
+      id: 'impersonate',
+      label: t('superadmin.quickActions.impersonate'),
       icon: <User className="w-4 h-4" />,
-      shortcut: "⌘I",
-      category: "action",
+      shortcut: '⌘I',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/impersonate");
+        router.push('/superadmin/impersonate');
       },
       superadminOnly: true,
     },
     {
-      id: "automation",
-      label: t("superadmin.quickActions.automation"),
+      id: 'automation',
+      label: t('superadmin.quickActions.automation'),
       icon: <Zap className="w-4 h-4" />,
-      shortcut: "⌘L",
-      category: "action",
+      shortcut: '⌘L',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/automation");
+        router.push('/superadmin/automation');
       },
       superadminOnly: true,
     },
     {
-      id: "reports",
-      label: t("superadmin.quickActions.reports"),
+      id: 'reports',
+      label: t('superadmin.quickActions.reports'),
       icon: <FileText className="w-4 h-4" />,
-      shortcut: "⌘R",
-      category: "action",
+      shortcut: '⌘R',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/reports");
+        router.push('/reports');
       },
     },
     {
-      id: "security",
-      label: t("superadmin.quickActions.security"),
+      id: 'security',
+      label: t('superadmin.quickActions.security'),
       icon: <Shield className="w-4 h-4" />,
-      shortcut: "⌘S",
-      category: "action",
+      shortcut: '⌘S',
+      category: 'action',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/security");
+        router.push('/superadmin/security');
       },
       superadminOnly: true,
     },
     {
-      id: "dashboard",
-      label: t("superadmin.quickActions.dashboard"),
+      id: 'dashboard',
+      label: t('superadmin.quickActions.dashboard'),
       icon: <Command className="w-4 h-4" />,
-      shortcut: "⌘D",
-      category: "navigation",
+      shortcut: '⌘D',
+      category: 'navigation',
       action: () => {
         setIsOpen(false);
-        router.push("/dashboard");
+        router.push('/dashboard');
       },
     },
     {
-      id: "organizations",
-      label: t("superadmin.quickActions.organizations"),
+      id: 'organizations',
+      label: t('superadmin.quickActions.organizations'),
       icon: <Users className="w-4 h-4" />,
-      shortcut: "⌘O",
-      category: "navigation",
+      shortcut: '⌘O',
+      category: 'navigation',
       action: () => {
         setIsOpen(false);
-        router.push("/superadmin/organizations");
+        router.push('/superadmin/organizations');
       },
       superadminOnly: true,
     },
     {
-      id: "support",
-      label: t("superadmin.quickActions.support"),
+      id: 'support',
+      label: t('superadmin.quickActions.support'),
       icon: <Ticket className="w-4 h-4" />,
-      shortcut: "⌘P",
-      category: "navigation",
+      shortcut: '⌘P',
+      category: 'navigation',
       action: () => {
         setIsOpen(false);
-        router.push(isSuperadmin ? "/superadmin/support" : "/help");
+        router.push(isSuperadmin ? '/superadmin/support' : '/help');
       },
     },
     {
-      id: "help",
-      label: t("superadmin.quickActions.help"),
+      id: 'help',
+      label: t('superadmin.quickActions.help'),
       icon: <HelpCircleIcon className="w-4 h-4" />,
-      shortcut: "⌘H",
-      category: "navigation",
+      shortcut: '⌘H',
+      category: 'navigation',
       action: () => {
         setIsOpen(false);
-        router.push("/help");
+        router.push('/help');
       },
     },
   ];
 
   // Filter actions based on user role
-  const actions = allActions.filter(action => {
+  const actions = allActions.filter((action) => {
     if (action.superadminOnly && !isSuperadmin) {
       return false;
     }
@@ -231,45 +232,45 @@ export function QuickActionsPalette() {
 
   // Filter actions by search query
   const filteredActions = actions.filter((action) =>
-    action.label.toLowerCase().includes(searchQuery.toLowerCase())
+    action.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd/Ctrl + K to toggle
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setIsOpen((prev) => !prev);
       }
 
       // Close on Escape
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === 'Escape' && isOpen) {
         setIsOpen(false);
-        setSearchQuery("");
+        setSearchQuery('');
       }
 
       // Arrow down to navigate
-      if (e.key === "ArrowDown" && isOpen) {
+      if (e.key === 'ArrowDown' && isOpen) {
         e.preventDefault();
         setSelectedIndex((prev) => Math.min(prev + 1, filteredActions.length - 1));
       }
 
       // Arrow up to navigate
-      if (e.key === "ArrowUp" && isOpen) {
+      if (e.key === 'ArrowUp' && isOpen) {
         e.preventDefault();
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
       }
 
       // Enter to select
-      if (e.key === "Enter" && isOpen && selectedIndex >= 0) {
+      if (e.key === 'Enter' && isOpen && selectedIndex >= 0) {
         e.preventDefault();
         filteredActions[selectedIndex]?.action();
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, filteredActions, selectedIndex]);
 
   // Focus input when opened
@@ -289,7 +290,7 @@ export function QuickActionsPalette() {
       acc[action.category].push(action);
       return acc;
     },
-    { action: [] as QuickAction[], navigation: [] as QuickAction[], user: [] as QuickAction[] }
+    { action: [] as QuickAction[], navigation: [] as QuickAction[], user: [] as QuickAction[] },
   );
 
   const allGroupedActions = [
@@ -306,7 +307,7 @@ export function QuickActionsPalette() {
         className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
       >
         <Command className="w-4 h-4" />
-        <span className="hidden md:inline">{t("superadmin.quickActions.title") || "Команды"}</span>
+        <span className="hidden md:inline">{t('superadmin.quickActions.title') || 'Команды'}</span>
         <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-[var(--background-subtle)] border border-[var(--border)] rounded text-[10px] font-medium text-[var(--muted-foreground)]">
           <span>⌘K</span>
         </kbd>
@@ -331,7 +332,9 @@ export function QuickActionsPalette() {
                 <Input
                   ref={inputRef}
                   type="text"
-                  placeholder={t("superadmin.quickActions.placeholder") || "Type a command or search..."}
+                  placeholder={
+                    t('superadmin.quickActions.placeholder') || 'Type a command or search...'
+                  }
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -341,7 +344,7 @@ export function QuickActionsPalette() {
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-[var(--background-subtle)] rounded-full transition-colors"
                   >
                     <X className="w-3 h-3 text-[var(--muted-foreground)]" />
@@ -351,10 +354,7 @@ export function QuickActionsPalette() {
             </div>
 
             {/* Actions list */}
-            <div
-              ref={listRef}
-              className="max-h-[60vh] overflow-y-auto p-2"
-            >
+            <div ref={listRef} className="max-h-[60vh] overflow-y-auto p-2">
               {searchQuery ? (
                 // Show filtered results
                 filteredActions.length > 0 ? (
@@ -373,17 +373,27 @@ export function QuickActionsPalette() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center py-8 text-muted-foreground">
-                    <p>{t("superadmin.quickActions.noResults") || "Ничего не найдено"}</p>
+                    <p>{t('superadmin.quickActions.noResults') || 'Ничего не найдено'}</p>
                   </div>
                 )
               ) : (
                 // Show grouped actions
                 <>
                   {groupedActions.action.length > 0 && (
-                    <ActionGroup title={t("superadmin.quickActions.actions")} actions={groupedActions.action} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
+                    <ActionGroup
+                      title={t('superadmin.quickActions.actions')}
+                      actions={groupedActions.action}
+                      selectedIndex={selectedIndex}
+                      setSelectedIndex={setSelectedIndex}
+                    />
                   )}
                   {groupedActions.navigation.length > 0 && (
-                    <ActionGroup title={t("superadmin.quickActions.navigation")} actions={groupedActions.navigation} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
+                    <ActionGroup
+                      title={t('superadmin.quickActions.navigation')}
+                      actions={groupedActions.navigation}
+                      selectedIndex={selectedIndex}
+                      setSelectedIndex={setSelectedIndex}
+                    />
                   )}
                 </>
               )}
@@ -393,22 +403,28 @@ export function QuickActionsPalette() {
             <div className="border-t border-[var(--border)] p-3 text-xs text-[var(--muted-foreground)] flex items-center justify-between bg-[var(--background-subtle)]/50">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">↑↓</kbd>
-                  {t("superadmin.quickActions.navigate")}
+                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">
+                    ↑↓
+                  </kbd>
+                  {t('superadmin.quickActions.navigate')}
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">↵</kbd>
-                  {t("superadmin.quickActions.select")}
+                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">
+                    ↵
+                  </kbd>
+                  {t('superadmin.quickActions.select')}
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">esc</kbd>
-                  {t("superadmin.quickActions.close")}
+                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">
+                    esc
+                  </kbd>
+                  {t('superadmin.quickActions.close')}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-[10px]">
                 <Command className="w-3 h-3" />
                 <span className="font-medium">K</span>
-                <span className="mx-1">{t("superadmin.quickActions.toClose")}</span>
+                <span className="mx-1">{t('superadmin.quickActions.toClose')}</span>
               </div>
             </div>
           </div>
@@ -473,32 +489,34 @@ function ActionButton({
     <button
       onClick={onSelect}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left",
+        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left',
         isSelected
-          ? "bg-[var(--primary)]/10 text-[var(--foreground)]"
-          : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground)]"
+          ? 'bg-[var(--primary)]/10 text-[var(--foreground)]'
+          : 'hover:bg-[var(--background-subtle)]/50 text-[var(--foreground)]',
       )}
     >
-      <span className={cn("shrink-0", isSelected ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]")}>
+      <span
+        className={cn(
+          'shrink-0',
+          isSelected ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]',
+        )}
+      >
         {action.icon}
       </span>
       <span className="flex-1 font-medium">{action.label}</span>
       <div className="flex items-center gap-2 shrink-0">
         <kbd
           className={cn(
-            "px-1.5 py-0.5 rounded text-[10px] font-mono border",
+            'px-1.5 py-0.5 rounded text-[10px] font-mono border',
             isSelected
-              ? "bg-[var(--primary)]/20 border-[var(--primary)]/30 text-[var(--primary)]"
-              : "bg-[var(--background-subtle)] border-[var(--border)] text-[var(--muted-foreground)]"
+              ? 'bg-[var(--primary)]/20 border-[var(--primary)]/30 text-[var(--primary)]'
+              : 'bg-[var(--background-subtle)] border-[var(--border)] text-[var(--muted-foreground)]',
           )}
         >
           {action.shortcut}
         </kbd>
         <ArrowRight
-          className={cn(
-            "w-4 h-4 transition-opacity",
-            isSelected ? "opacity-100" : "opacity-0"
-          )}
+          className={cn('w-4 h-4 transition-opacity', isSelected ? 'opacity-100' : 'opacity-0')}
         />
       </div>
     </button>

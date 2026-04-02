@@ -1,51 +1,51 @@
-﻿"use client";
+﻿'use client';
 import Image from 'next/image';
 
-import { useTranslation } from "react-i18next";
-import { useState, useRef } from "react";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { toast } from "sonner";
-import { uploadTaskAttachment } from "@/actions/cloudinary";
+import { useTranslation } from 'react-i18next';
+import { useState, useRef } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { toast } from 'sonner';
+import { uploadTaskAttachment } from '@/actions/cloudinary';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface Attachment {
   url: string;
   name: string;
   type: string;
   size: number;
-  uploadedBy: Id<"users">;
+  uploadedBy: Id<'users'>;
   uploadedAt: number;
 }
 
 interface Props {
-  taskId: Id<"tasks">;
+  taskId: Id<'tasks'>;
   attachments: Attachment[];
-  currentUserId: Id<"users">;
+  currentUserId: Id<'users'>;
   canUpload: boolean;
 }
 
 const FILE_ICONS: Record<string, string> = {
-  "application/pdf": "📄",
-  "image/": "🖼️",
-  "video/": "🎬",
-  "audio/": "🎵",
-  "text/": "📝",
-  "application/zip": "🗜️",
-  "application/x-zip": "🗜️",
-  "application/msword": "📃",
-  "application/vnd.openxmlformats": "📃",
-  "application/vnd.ms-excel": "📊",
-  "application/vnd.ms-powerpoint": "📊",
+  'application/pdf': '📄',
+  'image/': '🖼️',
+  'video/': '🎬',
+  'audio/': '🎵',
+  'text/': '📝',
+  'application/zip': '🗜️',
+  'application/x-zip': '🗜️',
+  'application/msword': '📃',
+  'application/vnd.openxmlformats': '📃',
+  'application/vnd.ms-excel': '📊',
+  'application/vnd.ms-powerpoint': '📊',
 };
 
 function getFileIcon(type: string): string {
   for (const [key, icon] of Object.entries(FILE_ICONS)) {
     if (type.startsWith(key)) return icon;
   }
-  return "📎";
+  return '📎';
 }
 
 function formatSize(bytes: number): string {
@@ -54,8 +54,7 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function TaskAttachments({ 
-taskId, attachments, currentUserId, canUpload }: Props) {
+export function TaskAttachments({ taskId, attachments, currentUserId, canUpload }: Props) {
   const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<Attachment | null>(null);
@@ -68,43 +67,47 @@ taskId, attachments, currentUserId, canUpload }: Props) {
     if (!files.length) return;
 
     // Max 5 files at once, max 10MB each
-    const validFiles = files.filter(f => {
-      if (f.size > 10 * 1024 * 1024) {
-        toast.error(`${f.name} is too large (max 10MB)`);
-        return false;
-      }
-      return true;
-    }).slice(0, 5);
+    const validFiles = files
+      .filter((f) => {
+        if (f.size > 10 * 1024 * 1024) {
+          toast.error(`${f.name} is too large (max 10MB)`);
+          return false;
+        }
+        return true;
+      })
+      .slice(0, 5);
 
     if (!validFiles.length) return;
     setUploading(true);
 
     try {
-      await Promise.all(validFiles.map(async (file) => {
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+      await Promise.all(
+        validFiles.map(async (file) => {
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
 
-        const url = await uploadTaskAttachment(base64, file.name);
+          const url = await uploadTaskAttachment(base64, file.name);
 
-        await addAttachment({
-          taskId,
-          url,
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          uploadedBy: currentUserId,
-        });
-      }));
-      toast.success(`${validFiles.length} file${validFiles.length > 1 ? "s" : ""} uploaded ✓`);
+          await addAttachment({
+            taskId,
+            url,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            uploadedBy: currentUserId,
+          });
+        }),
+      );
+      toast.success(`${validFiles.length} file${validFiles.length > 1 ? 's' : ''} uploaded ✓`);
     } catch {
-      toast.error(t("toasts.uploadFailed"));
+      toast.error(t('toasts.uploadFailed'));
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -112,15 +115,15 @@ taskId, attachments, currentUserId, canUpload }: Props) {
     if (!confirm(`Remove "${name}"?`)) return;
     try {
       await removeAttachment({ taskId, url });
-      toast.success(t("toasts.removed"));
+      toast.success(t('toasts.removed'));
       if (preview?.url === url) setPreview(null);
     } catch {
-      toast.error(t("toasts.removeFailed"));
+      toast.error(t('toasts.removeFailed'));
     }
   };
 
-  const isImage = (type: string) => type.startsWith("image/");
-  const isPdf = (type: string) => type === "application/pdf";
+  const isImage = (type: string) => type.startsWith('image/');
+  const isPdf = (type: string) => type === 'application/pdf';
 
   return (
     <div className="space-y-3">
@@ -139,13 +142,9 @@ taskId, attachments, currentUserId, canUpload }: Props) {
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl text-white transition-all disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
+            style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
           >
-            {uploading ? (
-              <ShieldLoader size="xs" variant="inline" />
-            ) : (
-              <>+ Attach File</>
-            )}
+            {uploading ? <ShieldLoader size="xs" variant="inline" /> : <>+ Attach File</>}
           </button>
         )}
         <input
@@ -163,12 +162,12 @@ taskId, attachments, currentUserId, canUpload }: Props) {
         <div
           onClick={() => canUpload && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors border-[var(--border)] ${
-            canUpload ? "cursor-pointer hover:border-blue-400/50 hover:bg-blue-500/5" : ""
+            canUpload ? 'cursor-pointer hover:border-blue-400/50 hover:bg-blue-500/5' : ''
           }`}
         >
           <p className="text-2xl mb-1">📎</p>
           <p className="text-sm text-[var(--text-muted)]">
-            {canUpload ? "Click to attach files (PDF, images, docs...)" : "No attachments"}
+            {canUpload ? 'Click to attach files (PDF, images, docs...)' : 'No attachments'}
           </p>
         </div>
       ) : (
@@ -196,14 +195,22 @@ taskId, attachments, currentUserId, canUpload }: Props) {
 
                 {/* File info */}
                 <div className="p-2">
-                  <p className="text-xs font-medium text-[var(--text-primary)] truncate" title={att.name}>{att.name}</p>
+                  <p
+                    className="text-xs font-medium text-[var(--text-primary)] truncate"
+                    title={att.name}
+                  >
+                    {att.name}
+                  </p>
                   <p className="text-xs text-[var(--text-muted)]">{formatSize(att.size)}</p>
                 </div>
 
                 {/* Remove button */}
                 {canUpload && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleRemove(att.url, att.name); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(att.url, att.name);
+                    }}
                     className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                   >
                     ×
@@ -237,7 +244,9 @@ taskId, attachments, currentUserId, canUpload }: Props) {
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{getFileIcon(preview.type)}</span>
                   <div>
-                    <p className="font-semibold text-[var(--text-primary)] text-sm">{preview.name}</p>
+                    <p className="font-semibold text-[var(--text-primary)] text-sm">
+                      {preview.name}
+                    </p>
                     <p className="text-xs text-[var(--text-muted)]">{formatSize(preview.size)}</p>
                   </div>
                 </div>
@@ -248,7 +257,7 @@ taskId, attachments, currentUserId, canUpload }: Props) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-medium px-3 py-1.5 rounded-xl text-white"
-                    style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
+                    style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
                     onClick={(e) => e.stopPropagation()}
                   >
                     ⬇ Download
@@ -265,21 +274,31 @@ taskId, attachments, currentUserId, canUpload }: Props) {
               {/* Preview content */}
               <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-[var(--background-subtle)] min-h-[300px]">
                 {isImage(preview.type) ? (
-                  <img src={preview.url} alt={preview.name} className="max-w-full max-h-[60vh] object-contain rounded-xl shadow" />
+                  <img
+                    src={preview.url}
+                    alt={preview.name}
+                    className="max-w-full max-h-[60vh] object-contain rounded-xl shadow"
+                  />
                 ) : isPdf(preview.type) ? (
-                  <iframe src={preview.url} className="w-full h-[60vh] rounded-xl" title={preview.name} />
+                  <iframe
+                    src={preview.url}
+                    className="w-full h-[60vh] rounded-xl"
+                    title={preview.name}
+                  />
                 ) : (
                   <div className="text-center space-y-4">
                     <p className="text-6xl">{getFileIcon(preview.type)}</p>
                     <p className="text-[var(--text-secondary)] font-medium">{preview.name}</p>
-                    <p className="text-[var(--text-muted)] text-sm">Preview not available for this file type</p>
+                    <p className="text-[var(--text-muted)] text-sm">
+                      Preview not available for this file type
+                    </p>
                     <a
                       href={preview.url}
                       download={preview.name}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl text-white"
-                      style={{ background: "linear-gradient(135deg, #2563eb, #0ea5e9)" }}
+                      style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
                     >
                       ⬇ Download to view
                     </a>

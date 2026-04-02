@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Lightweight device fingerprinting — no external libs needed.
@@ -24,8 +24,8 @@ export async function getDeviceFingerprint(): Promise<{
   userAgent: string;
   data: FingerprintData;
 }> {
-  if (typeof window === "undefined") {
-    return { fingerprint: "server", userAgent: "", data: {} as FingerprintData };
+  if (typeof window === 'undefined') {
+    return { fingerprint: 'server', userAgent: '', data: {} as FingerprintData };
   }
 
   const data: FingerprintData = {
@@ -50,7 +50,10 @@ export async function getDeviceFingerprint(): Promise<{
 async function hashString(str: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+  return hashArray
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+    .slice(0, 32);
 }

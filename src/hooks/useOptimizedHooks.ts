@@ -1,6 +1,6 @@
 /**
  * Performance-optimized React hooks
- * 
+ *
  * Usage:
  * import { useOptimizedQuery, useDebouncedValue } from '@/hooks/useOptimizedHooks';
  */
@@ -28,7 +28,7 @@ export function useDebouncedValue<T>(value: T, delay: number = 300): T {
  */
 export function useDeepMemo<T>(factory: () => T, deps: any[]): T {
   const ref = useRef<{ deps: any[]; value: T } | null>(null);
-  
+
   const isSameDeps = useMemo(() => {
     if (!ref.current) return false;
     if (ref.current.deps.length !== deps.length) return false;
@@ -47,7 +47,7 @@ export function useDeepMemo<T>(factory: () => T, deps: any[]): T {
  */
 export function useVirtualList<T>(
   items: T[],
-  options: { itemHeight: number; viewportHeight: number }
+  options: { itemHeight: number; viewportHeight: number },
 ) {
   const { itemHeight, viewportHeight } = options;
   const [scrollTop, setScrollTop] = useState(0);
@@ -58,12 +58,13 @@ export function useVirtualList<T>(
   const endIndex = Math.min(startIndex + visibleCount, items.length);
 
   const visibleItems = useMemo(
-    () => items.slice(startIndex, endIndex).map((item, index) => ({
-      item,
-      index: startIndex + index,
-      top: (startIndex + index) * itemHeight,
-    })),
-    [items, startIndex, endIndex, itemHeight]
+    () =>
+      items.slice(startIndex, endIndex).map((item, index) => ({
+        item,
+        index: startIndex + index,
+        top: (startIndex + index) * itemHeight,
+      })),
+    [items, startIndex, endIndex, itemHeight],
   );
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLElement>) => {
@@ -92,7 +93,7 @@ export function useLazyLoad(threshold: number = 0.1) {
           observer.disconnect();
         }
       },
-      { threshold }
+      { threshold },
     );
 
     if (ref.current) {
@@ -127,26 +128,29 @@ export function useCachedValue<T>(key: string, compute: () => T): T {
 export function useRateLimitedCallback<T extends (...args: any[]) => any>(
   callback: T,
   limit: number,
-  interval: number
+  interval: number,
 ): T {
   const lastCallRef = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  return useCallback(((...args: Parameters<T>) => {
-    const now = Date.now();
-    const timeSinceLastCall = now - lastCallRef.current;
+  return useCallback(
+    ((...args: Parameters<T>) => {
+      const now = Date.now();
+      const timeSinceLastCall = now - lastCallRef.current;
 
-    if (timeSinceLastCall >= interval) {
-      lastCallRef.current = now;
-      callback(...args);
-    } else {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        lastCallRef.current = Date.now();
+      if (timeSinceLastCall >= interval) {
+        lastCallRef.current = now;
         callback(...args);
-      }, interval - timeSinceLastCall);
-    }
-  }) as T, [callback, limit, interval]);
+      } else {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(() => {
+          lastCallRef.current = Date.now();
+          callback(...args);
+        }, interval - timeSinceLastCall);
+      }
+    }) as T,
+    [callback, limit, interval],
+  );
 }

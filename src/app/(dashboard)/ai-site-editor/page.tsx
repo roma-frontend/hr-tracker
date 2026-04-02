@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { SiteEditorChat } from "@/components/ai/SiteEditorChat";
-import { PlanGate } from "@/components/billing/PlanGate";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { SiteEditorChat } from '@/components/ai/SiteEditorChat';
+import { PlanGate } from '@/components/billing/PlanGate';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Sparkles,
   Code2,
@@ -18,14 +18,14 @@ import {
   Crown,
   Info,
   BookOpen,
-  TrendingUp
-} from "lucide-react";
-import { usePlanFeatures } from "@/hooks/usePlanFeatures";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Id } from "@/convex/_generated/dataModel";
-import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
-import React from "react";
+  TrendingUp,
+} from 'lucide-react';
+import { usePlanFeatures } from '@/hooks/usePlanFeatures';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Id } from '@/convex/_generated/dataModel';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 
 export default function AISiteEditorPage() {
   const { t } = useTranslation();
@@ -36,12 +36,12 @@ export default function AISiteEditorPage() {
   // Get user details from Convex
   const currentUser = useQuery(
     api.users.getUserById,
-    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
   // Only superadmin can access AI Site Editor
   React.useEffect(() => {
-    if (user && user.role !== "superadmin") {
+    if (user && user.role !== 'superadmin') {
       // Don't redirect, just show Coming Soon
     }
   }, [user, router]);
@@ -55,7 +55,7 @@ export default function AISiteEditorPage() {
   }
 
   // Show Coming Soon for non-superadmin users
-  if (user.role !== "superadmin") {
+  if (user.role !== 'superadmin') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-6 text-center px-4">
         <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center animate-pulse">
@@ -63,56 +63,59 @@ export default function AISiteEditorPage() {
         </div>
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-            {t("aiSiteEditor.comingSoon")}
+            {t('aiSiteEditor.comingSoon')}
           </h1>
           <p className="text-lg text-[var(--text-muted)] max-w-md">
-            {t("aiSiteEditor.comingSoonDesc")}
+            {t('aiSiteEditor.comingSoonDesc')}
           </p>
           <div className="flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
             <Crown className="w-5 h-5 text-amber-500" />
             <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
-              {t("aiSiteEditor.superadminOnly")}
+              {t('aiSiteEditor.superadminOnly')}
             </span>
           </div>
         </div>
         <Button
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push('/dashboard')}
           className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg"
         >
-          {t("common.backToDashboard")}
+          {t('common.backToDashboard')}
         </Button>
       </div>
     );
   }
 
-  const isProfessionalOrHigher = plan === "professional" || plan === "enterprise";
+  const isProfessionalOrHigher = plan === 'professional' || plan === 'enterprise';
 
   return (
-    <PlanGate feature={"aiSiteEditor" as any}>
+    <PlanGate feature={'aiSiteEditor' as any}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 md:gap-3">
               <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-              {t("aiSiteEditor.title")}
+              {t('aiSiteEditor.title')}
             </h1>
             <p className="text-sm md:text-base text-muted-foreground mt-2">
-              {t("aiSiteEditor.subtitle")}
+              {t('aiSiteEditor.subtitle')}
             </p>
           </div>
-          <Badge variant={isProfessionalOrHigher ? "default" : "secondary"} className="text-lg px-4 py-2">
-            {plan === "starter" && t("aiSiteEditor.starterPlan")}
-            {plan === "professional" && (
+          <Badge
+            variant={isProfessionalOrHigher ? 'default' : 'secondary'}
+            className="text-lg px-4 py-2"
+          >
+            {plan === 'starter' && t('aiSiteEditor.starterPlan')}
+            {plan === 'professional' && (
               <>
                 <Crown className="h-4 w-4 mr-1" />
-                {t("aiSiteEditor.professionalPlan")}
+                {t('aiSiteEditor.professionalPlan')}
               </>
             )}
-            {plan === "enterprise" && (
+            {plan === 'enterprise' && (
               <>
                 <Crown className="h-4 w-4 mr-1" />
-                {t("aiSiteEditor.enterprisePlan")}
+                {t('aiSiteEditor.enterprisePlan')}
               </>
             )}
           </Badge>
@@ -122,24 +125,21 @@ export default function AISiteEditorPage() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="chat">
               <Sparkles className="h-4 w-4 mr-2" />
-              {t("aiSiteEditor.aiChat")}
+              {t('aiSiteEditor.aiChat')}
             </TabsTrigger>
             <TabsTrigger value="features">
               <Info className="h-4 w-4 mr-2" />
-              {t("aiSiteEditor.features")}
+              {t('aiSiteEditor.features')}
             </TabsTrigger>
             <TabsTrigger value="guide">
               <BookOpen className="h-4 w-4 mr-2" />
-              {t("aiSiteEditor.guide")}
+              {t('aiSiteEditor.guide')}
             </TabsTrigger>
           </TabsList>
 
           {/* Chat Tab */}
           <TabsContent value="chat" className="min-h-[600px]">
-            <SiteEditorChat
-              userId={currentUser._id}
-              organizationId={currentUser.organizationId!}
-            />
+            <SiteEditorChat userId={currentUser._id} organizationId={currentUser.organizationId!} />
           </TabsContent>
 
           {/* Features Tab */}
@@ -152,13 +152,17 @@ export default function AISiteEditorPage() {
                     <Palette className="h-6 w-6 text-blue-700 dark:text-blue-300" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.designChanges")}</h3>
+                    <h3 className="font-semibold text-lg mb-2">
+                      {t('aiSiteEditor.designChanges')}
+                    </h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      {t("aiSiteEditor.designChangesDesc")}
+                      {t('aiSiteEditor.designChangesDesc')}
                     </p>
                     <div className="flex items-center gap-2">
-                      <Badge variant={isProfessionalOrHigher ? "default" : "secondary"}>
-                        {isProfessionalOrHigher ? t("aiSiteEditor.unlimited") : `${features.aiSiteEditorDesignChanges}${t("aiSiteEditor.perMonth")}`}
+                      <Badge variant={isProfessionalOrHigher ? 'default' : 'secondary'}>
+                        {isProfessionalOrHigher
+                          ? t('aiSiteEditor.unlimited')
+                          : `${features.aiSiteEditorDesignChanges}${t('aiSiteEditor.perMonth')}`}
                       </Badge>
                     </div>
                   </div>
@@ -172,13 +176,17 @@ export default function AISiteEditorPage() {
                     <Code2 className="h-6 w-6 text-green-700 dark:text-green-300" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.contentChanges")}</h3>
+                    <h3 className="font-semibold text-lg mb-2">
+                      {t('aiSiteEditor.contentChanges')}
+                    </h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      {t("aiSiteEditor.contentChangesDesc")}
+                      {t('aiSiteEditor.contentChangesDesc')}
                     </p>
                     <div className="flex items-center gap-2">
-                      <Badge variant={isProfessionalOrHigher ? "default" : "secondary"}>
-                        {isProfessionalOrHigher ? t("aiSiteEditor.unlimited") : `${features.aiSiteEditorContentChanges}${t("aiSiteEditor.perMonth")}`}
+                      <Badge variant={isProfessionalOrHigher ? 'default' : 'secondary'}>
+                        {isProfessionalOrHigher
+                          ? t('aiSiteEditor.unlimited')
+                          : `${features.aiSiteEditorContentChanges}${t('aiSiteEditor.perMonth')}`}
                       </Badge>
                     </div>
                   </div>
@@ -192,13 +200,17 @@ export default function AISiteEditorPage() {
                     <Layout className="h-6 w-6 text-purple-700 dark:text-purple-300" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.layoutChanges")}</h3>
+                    <h3 className="font-semibold text-lg mb-2">
+                      {t('aiSiteEditor.layoutChanges')}
+                    </h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      {t("aiSiteEditor.layoutChangesDesc")}
+                      {t('aiSiteEditor.layoutChangesDesc')}
                     </p>
                     <div className="flex items-center gap-2">
-                      <Badge variant={isProfessionalOrHigher ? "default" : "secondary"}>
-                        {isProfessionalOrHigher ? t("aiSiteEditor.unlimited") : `${features.aiSiteEditorLayoutChanges}${t("aiSiteEditor.perMonth")}`}
+                      <Badge variant={isProfessionalOrHigher ? 'default' : 'secondary'}>
+                        {isProfessionalOrHigher
+                          ? t('aiSiteEditor.unlimited')
+                          : `${features.aiSiteEditorLayoutChanges}${t('aiSiteEditor.perMonth')}`}
                       </Badge>
                     </div>
                   </div>
@@ -206,26 +218,26 @@ export default function AISiteEditorPage() {
               </Card>
 
               {/* Logic Changes */}
-              <Card className={`p-6 ${!features.aiSiteEditorLogicChanges ? "opacity-60" : ""}`}>
+              <Card className={`p-6 ${!features.aiSiteEditorLogicChanges ? 'opacity-60' : ''}`}>
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-orange-100 dark:bg-orange-500/20 rounded-lg border border-orange-200 dark:border-orange-500/30">
                     <Zap className="h-6 w-6 text-orange-700 dark:text-orange-300" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                      {t("aiSiteEditor.logicChanges")}
+                      {t('aiSiteEditor.logicChanges')}
                       {!features.aiSiteEditorLogicChanges && (
                         <Crown className="h-4 w-4 text-amber-500" />
                       )}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      {t("aiSiteEditor.logicChangesDesc")}
+                      {t('aiSiteEditor.logicChangesDesc')}
                     </p>
                     <div className="flex items-center gap-2">
                       {features.aiSiteEditorLogicChanges ? (
-                        <Badge variant="default">{t("aiSiteEditor.unlimited")}</Badge>
+                        <Badge variant="default">{t('aiSiteEditor.unlimited')}</Badge>
                       ) : (
-                        <Badge variant="outline">{t("aiSiteEditor.proRequired")}</Badge>
+                        <Badge variant="outline">{t('aiSiteEditor.proRequired')}</Badge>
                       )}
                     </div>
                   </div>
@@ -233,33 +245,35 @@ export default function AISiteEditorPage() {
               </Card>
 
               {/* Full Control */}
-              <Card className={`p-6 md:col-span-2 ${!features.aiSiteEditorFullControl ? "opacity-60" : ""}`}>
+              <Card
+                className={`p-6 md:col-span-2 ${!features.aiSiteEditorFullControl ? 'opacity-60' : ''}`}
+              >
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-700/50 dark:to-pink-700/50 rounded-lg">
                     <Crown className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                      {t("aiSiteEditor.fullControl")}
+                      {t('aiSiteEditor.fullControl')}
                       {!features.aiSiteEditorFullControl && (
                         <Crown className="h-4 w-4 text-amber-500" />
                       )}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      {t("aiSiteEditor.fullControlDesc")}
+                      {t('aiSiteEditor.fullControlDesc')}
                     </p>
                     <div className="flex items-center gap-2">
                       {features.aiSiteEditorFullControl ? (
-                        <Badge variant="default">{t("aiSiteEditor.available")}</Badge>
+                        <Badge variant="default">{t('aiSiteEditor.available')}</Badge>
                       ) : (
                         <>
-                          <Badge variant="outline">{t("aiSiteEditor.proRequired")}</Badge>
+                          <Badge variant="outline">{t('aiSiteEditor.proRequired')}</Badge>
                           <Button
                             size="sm"
-                            onClick={() => window.location.href = "/settings?tab=billing"}
+                            onClick={() => (window.location.href = '/settings?tab=billing')}
                           >
                             <Crown className="h-4 w-4 mr-2" />
-                            {t("aiSiteEditor.upgradePlan")}
+                            {t('aiSiteEditor.upgradePlan')}
                           </Button>
                         </>
                       )}
@@ -273,7 +287,7 @@ export default function AISiteEditorPage() {
           {/* Guide Tab */}
           <TabsContent value="guide">
             <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-6">{t("aiSiteEditor.guideTitle")}</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('aiSiteEditor.guideTitle')}</h2>
 
               <div className="space-y-8">
                 {/* Step 1 */}
@@ -282,15 +296,13 @@ export default function AISiteEditorPage() {
                     1
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.step1Title")}</h3>
-                    <p className="text-muted-foreground mb-2">
-                      {t("aiSiteEditor.step1Desc")}
-                    </p>
+                    <h3 className="font-semibold text-lg mb-2">{t('aiSiteEditor.step1Title')}</h3>
+                    <p className="text-muted-foreground mb-2">{t('aiSiteEditor.step1Desc')}</p>
                     <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                      <li>"{t("aiSiteEditor.step1Example1")}"</li>
-                      <li>"{t("aiSiteEditor.step1Example2")}"</li>
-                      <li>"{t("aiSiteEditor.step1Example3")}"</li>
-                      <li>"{t("aiSiteEditor.step1Example4")}"</li>
+                      <li>"{t('aiSiteEditor.step1Example1')}"</li>
+                      <li>"{t('aiSiteEditor.step1Example2')}"</li>
+                      <li>"{t('aiSiteEditor.step1Example3')}"</li>
+                      <li>"{t('aiSiteEditor.step1Example4')}"</li>
                     </ul>
                   </div>
                 </div>
@@ -301,10 +313,8 @@ export default function AISiteEditorPage() {
                     2
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.step2Title")}</h3>
-                    <p className="text-muted-foreground">
-                      {t("aiSiteEditor.step2Desc")}
-                    </p>
+                    <h3 className="font-semibold text-lg mb-2">{t('aiSiteEditor.step2Title')}</h3>
+                    <p className="text-muted-foreground">{t('aiSiteEditor.step2Desc')}</p>
                   </div>
                 </div>
 
@@ -314,10 +324,8 @@ export default function AISiteEditorPage() {
                     3
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.step3Title")}</h3>
-                    <p className="text-muted-foreground">
-                      {t("aiSiteEditor.step3Desc")}
-                    </p>
+                    <h3 className="font-semibold text-lg mb-2">{t('aiSiteEditor.step3Title')}</h3>
+                    <p className="text-muted-foreground">{t('aiSiteEditor.step3Desc')}</p>
                   </div>
                 </div>
 
@@ -327,10 +335,8 @@ export default function AISiteEditorPage() {
                     4
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">{t("aiSiteEditor.step4Title")}</h3>
-                    <p className="text-muted-foreground">
-                      {t("aiSiteEditor.step4Desc")}
-                    </p>
+                    <h3 className="font-semibold text-lg mb-2">{t('aiSiteEditor.step4Title')}</h3>
+                    <p className="text-muted-foreground">{t('aiSiteEditor.step4Desc')}</p>
                   </div>
                 </div>
               </div>
@@ -339,13 +345,13 @@ export default function AISiteEditorPage() {
               <div className="mt-8 p-4 bg-blue-50/20 dark:bg-blue-950/10 rounded-lg border border-blue-200/30 dark:border-blue-900/20">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
-                  {t("aiSiteEditor.tipsTitle")}
+                  {t('aiSiteEditor.tipsTitle')}
                 </h4>
                 <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>✅ {t("aiSiteEditor.tip1")}</li>
-                  <li>✅ {t("aiSiteEditor.tip2")}</li>
-                  <li>✅ {t("aiSiteEditor.tip3")}</li>
-                  <li>✅ {t("aiSiteEditor.tip4")}</li>
+                  <li>✅ {t('aiSiteEditor.tip1')}</li>
+                  <li>✅ {t('aiSiteEditor.tip2')}</li>
+                  <li>✅ {t('aiSiteEditor.tip3')}</li>
+                  <li>✅ {t('aiSiteEditor.tip4')}</li>
                 </ul>
               </div>
             </Card>

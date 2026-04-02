@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import * as Sentry from "@sentry/nextjs";
+import { useEffect, useRef } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Hook for tracking component lifecycle in development
@@ -11,18 +11,15 @@ export function useComponentTracing(componentName: string) {
   useEffect(() => {
     renderCountRef.current++;
 
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === 'development') {
       console.log(`[${componentName}] Rendered (count: ${renderCountRef.current})`);
     }
 
     // Report to Sentry in production for critical components
-    if (
-      process.env.NODE_ENV === "production" &&
-      renderCountRef.current > 10
-    ) {
+    if (process.env.NODE_ENV === 'production' && renderCountRef.current > 10) {
       Sentry.captureMessage(
         `Component [${componentName}] rendered ${renderCountRef.current} times`,
-        "warning"
+        'warning',
       );
     }
 
@@ -40,26 +37,22 @@ export function useComponentTracing(componentName: string) {
  * Hook for tracking async operations (API calls, data fetching)
  */
 export function useAsyncTracing(operationName: string) {
-  return async function tracedFetch<T>(
-    fn: () => Promise<T>
-  ): Promise<T> {
+  return async function tracedFetch<T>(fn: () => Promise<T>): Promise<T> {
     const startTime = performance.now();
 
     try {
       const result = await fn();
       const duration = performance.now() - startTime;
 
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          `[${operationName}] Completed in ${duration.toFixed(2)}ms`
-        );
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[${operationName}] Completed in ${duration.toFixed(2)}ms`);
       }
 
       // Report slow operations
       if (duration > 3000) {
         Sentry.captureMessage(
           `Slow operation: [${operationName}] took ${duration.toFixed(2)}ms`,
-          "warning"
+          'warning',
         );
       }
 
@@ -69,7 +62,7 @@ export function useAsyncTracing(operationName: string) {
         contexts: {
           operation: {
             name: operationName,
-            type: "async_operation",
+            type: 'async_operation',
           },
         },
       });
@@ -82,24 +75,19 @@ export function useAsyncTracing(operationName: string) {
  * Hook for tracking form submissions
  */
 export function useFormTracing(formName: string) {
-  const handleSubmit = async (
-    onSubmit: (data: any) => Promise<void>
-  ) => {
+  const handleSubmit = async (onSubmit: (data: any) => Promise<void>) => {
     return async (data: any) => {
       const startTime = performance.now();
 
       try {
-        Sentry.captureMessage(
-          `Form submitted: ${formName}`,
-          "info"
-        );
+        Sentry.captureMessage(`Form submitted: ${formName}`, 'info');
 
         await onSubmit(data);
 
         const duration = performance.now() - startTime;
         Sentry.captureMessage(
           `Form processed successfully: ${formName} (${duration.toFixed(2)}ms)`,
-          "info"
+          'info',
         );
       } catch (error) {
         Sentry.captureException(error, {
@@ -124,28 +112,22 @@ export function useFormTracing(formName: string) {
 export function useNavigationTracing() {
   useEffect(() => {
     const handleNavigation = (event: any) => {
-      const pathName = event.destination?.pathname || "unknown";
-      Sentry.captureMessage(
-        `Navigation: ${pathName}`,
-        "info"
-      );
+      const pathName = event.destination?.pathname || 'unknown';
+      Sentry.captureMessage(`Navigation: ${pathName}`, 'info');
     };
 
     // Next.js router events
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const handleRouteChange = (url: string) => {
-        Sentry.captureMessage(
-          `Page load: ${url}`,
-          "info"
-        );
+        Sentry.captureMessage(`Page load: ${url}`, 'info');
       };
 
       // Listen to route changes
-      window.addEventListener("popstate", handleNavigation);
+      window.addEventListener('popstate', handleNavigation);
     }
 
     return () => {
-      window?.removeEventListener("popstate", handleNavigation);
+      window?.removeEventListener('popstate', handleNavigation);
     };
   }, []);
 }
@@ -155,7 +137,7 @@ export function useNavigationTracing() {
  */
 export function withErrorTracking<T extends (...args: any[]) => Promise<any>>(
   fn: T,
-  operationName: string
+  operationName: string,
 ): T {
   return (async (...args: any[]) => {
     try {

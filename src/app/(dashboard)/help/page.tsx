@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useTranslation } from "react-i18next";
-import type { Id } from "@/convex/_generated/dataModel";
+import { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
+import type { Id } from '@/convex/_generated/dataModel';
 import {
   HelpCircle,
   Ticket,
@@ -17,10 +17,10 @@ import {
   Search,
   MessageSquare,
   XCircle,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -29,21 +29,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { CreateTicketWizard } from "@/components/help/CreateTicketWizard";
-import { t } from "i18next";
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import { CreateTicketWizard } from '@/components/help/CreateTicketWizard';
+import { t } from 'i18next';
 
 export default function HelpSupportPage() {
   const { t } = useTranslation();
@@ -55,30 +55,33 @@ export default function HelpSupportPage() {
 
   const myTickets = useQuery(
     api.tickets.getMyTickets,
-    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
   const stats = useQuery(api.tickets.getTicketStats);
-  
+
   // Get organization plan
   const userOrg = useQuery(
     api.organizations.getMyOrganization,
-    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
   // Check plan limitations
-  const canCreateTickets = userOrg?.plan === "professional" || userOrg?.plan === "enterprise";
-  const canUseCriticalPriority = userOrg?.plan === "enterprise";
-  const hasSLA = userOrg?.plan === "enterprise";
-  const ticketLimit = userOrg?.plan === "professional" ? 10 : null;
-  const historyDays = userOrg?.plan === "professional" ? 30 : null;
+  const canCreateTickets = userOrg?.plan === 'professional' || userOrg?.plan === 'enterprise';
+  const canUseCriticalPriority = userOrg?.plan === 'enterprise';
+  const hasSLA = userOrg?.plan === 'enterprise';
+  const ticketLimit = userOrg?.plan === 'professional' ? 10 : null;
+  const historyDays = userOrg?.plan === 'professional' ? 30 : null;
 
   // Count tickets this month
-  const currentMonthTickets = myTickets?.filter((t: any) => {
-    const ticketDate = new Date(t.createdAt);
-    const now = new Date();
-    return ticketDate.getMonth() === now.getMonth() && ticketDate.getFullYear() === now.getFullYear();
-  }).length || 0;
+  const currentMonthTickets =
+    myTickets?.filter((t: any) => {
+      const ticketDate = new Date(t.createdAt);
+      const now = new Date();
+      return (
+        ticketDate.getMonth() === now.getMonth() && ticketDate.getFullYear() === now.getFullYear()
+      );
+    }).length || 0;
 
   const isLimitReached = ticketLimit ? currentMonthTickets >= ticketLimit : false;
 
@@ -90,8 +93,10 @@ export default function HelpSupportPage() {
     );
   }
 
-  const openTickets = myTickets?.filter((t: any) => t.status !== "closed" && t.status !== "resolved") || [];
-  const closedTickets = myTickets?.filter((t: any) => t.status === "closed" || t.status === "resolved") || [];
+  const openTickets =
+    myTickets?.filter((t: any) => t.status !== 'closed' && t.status !== 'resolved') || [];
+  const closedTickets =
+    myTickets?.filter((t: any) => t.status === 'closed' || t.status === 'resolved') || [];
 
   const handleCreateTicket = () => {
     if (!canCreateTickets) {
@@ -106,42 +111,47 @@ export default function HelpSupportPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-6 md:mb-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold" style={{ color: "var(--text-primary)" }}>
+                <h1
+                  className="text-2xl md:text-3xl lg:text-4xl font-bold"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {t('help.title')}
                 </h1>
                 {userOrg && (
                   <Badge
                     variant="outline"
                     className={
-                      userOrg.plan === "enterprise"
-                        ? "border-purple-500 text-purple-600"
-                        : userOrg.plan === "professional"
-                        ? "border-blue-500 text-blue-600"
-                        : ""
+                      userOrg.plan === 'enterprise'
+                        ? 'border-purple-500 text-purple-600'
+                        : userOrg.plan === 'professional'
+                          ? 'border-blue-500 text-blue-600'
+                          : ''
                     }
                   >
                     {userOrg.plan.toUpperCase()}
                   </Badge>
                 )}
               </div>
-              <p className="text-sm md:text-base text-muted-foreground">
-                {t('help.subtitle')}
-              </p>
-              {userOrg?.plan === "starter" && (
+              <p className="text-sm md:text-base text-muted-foreground">{t('help.subtitle')}</p>
+              {userOrg?.plan === 'starter' && (
                 <p className="text-xs md:text-sm text-orange-600 mt-2">
                   ⚠️ {t('help.planLimit.starter')}
                 </p>
               )}
-              {userOrg?.plan === "professional" && (
+              {userOrg?.plan === 'professional' && (
                 <p className="text-xs md:text-sm text-blue-600 mt-2">
-                  📊 {t('help.planLimit.professional', { used: currentMonthTickets, limit: ticketLimit })}
+                  📊{' '}
+                  {t('help.planLimit.professional', {
+                    used: currentMonthTickets,
+                    limit: ticketLimit,
+                  })}
                 </p>
               )}
             </div>
@@ -169,7 +179,7 @@ export default function HelpSupportPage() {
                           onClick={() => setUseWizard(!useWizard)}
                           className="text-xs w-full sm:w-auto"
                         >
-                          {useWizard ? "📝 Обычная форма" : "✨ Wizard"}
+                          {useWizard ? '📝 Обычная форма' : '✨ Wizard'}
                         </Button>
                       </div>
                     </DialogTitle>
@@ -180,7 +190,7 @@ export default function HelpSupportPage() {
 
                   {useWizard ? (
                     <CreateTicketWizard
-                      userId={user.id as Id<"users">}
+                      userId={user.id as Id<'users'>}
                       onComplete={() => setCreateDialogOpen(false)}
                       onCancel={() => setCreateDialogOpen(false)}
                     />
@@ -188,8 +198,8 @@ export default function HelpSupportPage() {
                     <CreateTicketDialog
                       open={createDialogOpen}
                       onOpenChange={setCreateDialogOpen}
-                      userId={user.id as Id<"users">}
-                      organizationId={user.organizationId as Id<"organizations">}
+                      userId={user.id as Id<'users'>}
+                      organizationId={user.organizationId as Id<'organizations'>}
                       canUseCriticalPriority={canUseCriticalPriority}
                       hasSLA={hasSLA}
                     />
@@ -230,7 +240,7 @@ export default function HelpSupportPage() {
           />
           <StatCard
             title={t('help.stats.avgResponse')}
-            value={stats?.avgResponseTime ? `${Math.round(stats.avgResponseTime)}ч` : "—"}
+            value={stats?.avgResponseTime ? `${Math.round(stats.avgResponseTime)}ч` : '—'}
             icon={Clock}
             color="purple"
           />
@@ -239,17 +249,27 @@ export default function HelpSupportPage() {
         {/* Tickets Tabs */}
         <Tabs defaultValue="open" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="open" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+            <TabsTrigger
+              value="open"
+              className="flex items-center gap-1 md:gap-2 text-xs md:text-sm"
+            >
               <AlertCircle className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden sm:inline">{t('help.tabs.open')}</span>
               <span className="sm:hidden">Open</span>
-              <Badge variant="secondary" className="ml-1 md:ml-2 text-xs">{openTickets.length}</Badge>
+              <Badge variant="secondary" className="ml-1 md:ml-2 text-xs">
+                {openTickets.length}
+              </Badge>
             </TabsTrigger>
-            <TabsTrigger value="closed" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+            <TabsTrigger
+              value="closed"
+              className="flex items-center gap-1 md:gap-2 text-xs md:text-sm"
+            >
               <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden sm:inline">{t('help.tabs.closed')}</span>
               <span className="sm:hidden">Closed</span>
-              <Badge variant="secondary" className="ml-1 md:ml-2 text-xs">{closedTickets.length}</Badge>
+              <Badge variant="secondary" className="ml-1 md:ml-2 text-xs">
+                {closedTickets.length}
+              </Badge>
             </TabsTrigger>
           </TabsList>
 
@@ -263,15 +283,13 @@ export default function HelpSupportPage() {
         </Tabs>
 
         {/* Quick Help */}
-        <Card className="mt-6" style={{ background: "var(--card)" }}>
+        <Card className="mt-6" style={{ background: 'var(--card)' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
               {t('help.quickHelp.title')}
             </CardTitle>
-            <CardDescription>
-              {t('help.quickHelp.subtitle')}
-            </CardDescription>
+            <CardDescription>{t('help.quickHelp.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -312,15 +330,15 @@ function StatCard({
   color: string;
 }) {
   const colorClasses: Record<string, string> = {
-    blue: "text-blue-500",
-    green: "text-green-500",
-    red: "text-red-500",
-    purple: "text-purple-500",
-    orange: "text-orange-500",
+    blue: 'text-blue-500',
+    green: 'text-green-500',
+    red: 'text-red-500',
+    purple: 'text-purple-500',
+    orange: 'text-orange-500',
   };
 
   return (
-    <Card style={{ background: "var(--background-subtle)" }}>
+    <Card style={{ background: 'var(--background-subtle)' }}>
       <CardContent className="p-3 md:p-4">
         <div className="flex items-center justify-between mb-1 md:mb-2">
           <p className="text-[10px] md:text-xs text-muted-foreground truncate">{title}</p>
@@ -333,18 +351,12 @@ function StatCard({
 }
 
 // Ticket List Component
-function TicketList({
-  tickets,
-  emptyMessage,
-}: {
-  tickets: any[];
-  emptyMessage: string;
-}) {
+function TicketList({ tickets, emptyMessage }: { tickets: any[]; emptyMessage: string }) {
   const { t } = useTranslation();
 
   if (tickets.length === 0) {
     return (
-      <Card style={{ background: "var(--card)" }}>
+      <Card style={{ background: 'var(--card)' }}>
         <CardContent className="py-8 md:py-12 text-center text-muted-foreground">
           <Ticket className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm md:text-base">{emptyMessage}</p>
@@ -356,7 +368,7 @@ function TicketList({
   return (
     <div className="space-y-3">
       {tickets.map((ticket: any) => (
-        <Card key={ticket._id} style={{ background: "var(--card)" }}>
+        <Card key={ticket._id} style={{ background: 'var(--card)' }}>
           <CardContent className="p-3 md:p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
@@ -364,9 +376,9 @@ function TicketList({
                   <span className="font-mono text-xs md:text-sm">{ticket.ticketNumber}</span>
                   <Badge
                     variant={
-                      ticket.status === "closed" || ticket.status === "resolved"
-                        ? "outline"
-                        : "default"
+                      ticket.status === 'closed' || ticket.status === 'resolved'
+                        ? 'outline'
+                        : 'default'
                     }
                     className="text-xs"
                   >
@@ -374,18 +386,21 @@ function TicketList({
                   </Badge>
                   <Badge
                     variant={
-                      ticket.priority === "critical"
-                        ? "destructive"
-                        : ticket.priority === "high"
-                        ? "default"
-                        : "secondary"
+                      ticket.priority === 'critical'
+                        ? 'destructive'
+                        : ticket.priority === 'high'
+                          ? 'default'
+                          : 'secondary'
                     }
                     className="text-xs"
                   >
                     {ticket.priority}
                   </Badge>
                 </div>
-                <p className="font-semibold mb-1 text-sm md:text-base truncate" style={{ color: "var(--text-primary)" }}>
+                <p
+                  className="font-semibold mb-1 text-sm md:text-base truncate"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {ticket.title}
                 </p>
                 <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
@@ -425,10 +440,13 @@ function QuickHelpCard({
     <div
       onClick={onClick}
       className={`p-3 md:p-4 rounded-lg border cursor-pointer transition-colors hover:border-primary/50 ${onClick ? 'hover:bg-primary/5' : ''}`}
-      style={{ background: "var(--background-subtle)" }}
+      style={{ background: 'var(--background-subtle)' }}
     >
       <div className="text-xl md:text-2xl mb-2">{icon}</div>
-      <h4 className="font-semibold mb-1 text-sm md:text-base" style={{ color: "var(--text-primary)" }}>
+      <h4
+        className="font-semibold mb-1 text-sm md:text-base"
+        style={{ color: 'var(--text-primary)' }}
+      >
         {title}
       </h4>
       <p className="text-xs md:text-sm text-muted-foreground">{description}</p>
@@ -447,21 +465,23 @@ function CreateTicketDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userId: Id<"users">;
-  organizationId?: Id<"organizations">;
+  userId: Id<'users'>;
+  organizationId?: Id<'organizations'>;
   canUseCriticalPriority: boolean;
   hasSLA: boolean;
 }) {
   const { t } = useTranslation();
   const createTicket = useMutation(api.tickets.createTicket);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [category, setCategory] = useState<"technical" | "billing" | "access" | "feature_request" | "bug" | "other">("technical");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [category, setCategory] = useState<
+    'technical' | 'billing' | 'access' | 'feature_request' | 'bug' | 'other'
+  >('technical');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !description.trim()) {
       toast.error(t('error.fillRequiredFields'));
       return;
@@ -479,10 +499,10 @@ function CreateTicketDialog({
 
       toast.success(t('help.ticketCreated', { ticketNumber: result.ticketNumber }));
       onOpenChange(false);
-      setTitle("");
-      setDescription("");
-      setPriority("medium");
-      setCategory("technical");
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
+      setCategory('technical');
     } catch (error) {
       toast.error(t('help.createError'));
       console.error(error);
@@ -506,7 +526,9 @@ function CreateTicketDialog({
 
         <div className="space-y-3 md:space-y-4 py-4">
           <div>
-            <Label htmlFor="title" className="text-sm">{t('help.create.titleLabel')}</Label>
+            <Label htmlFor="title" className="text-sm">
+              {t('help.create.titleLabel')}
+            </Label>
             <Input
               id="title"
               value={title}
@@ -518,7 +540,9 @@ function CreateTicketDialog({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <Label htmlFor="priority" className="text-sm">{t('help.create.priorityLabel')}</Label>
+              <Label htmlFor="priority" className="text-sm">
+                {t('help.create.priorityLabel')}
+              </Label>
               <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
                 <SelectTrigger className="text-sm">
                   <SelectValue />
@@ -542,7 +566,9 @@ function CreateTicketDialog({
             </div>
 
             <div>
-              <Label htmlFor="category" className="text-sm">{t('help.create.categoryLabel')}</Label>
+              <Label htmlFor="category" className="text-sm">
+                {t('help.create.categoryLabel')}
+              </Label>
               <Select value={category} onValueChange={(v: any) => setCategory(v)}>
                 <SelectTrigger className="text-sm">
                   <SelectValue />
@@ -560,7 +586,9 @@ function CreateTicketDialog({
           </div>
 
           <div>
-            <Label htmlFor={t('common.description')} className="text-sm">{t('help.create.descriptionLabel')}</Label>
+            <Label htmlFor={t('common.description')} className="text-sm">
+              {t('help.create.descriptionLabel')}
+            </Label>
             <Textarea
               id={t('common.description')}
               value={description}
@@ -573,7 +601,12 @@ function CreateTicketDialog({
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="w-full sm:w-auto"
+          >
             {t('actions.cancel')}
           </Button>
           <Button type="submit" className="w-full sm:w-auto">
@@ -618,7 +651,7 @@ function PlanLimitDialog({
                 { text: t('help.plans.starter.docs'), included: true },
                 { text: t('help.plans.starter.community'), included: true },
               ]}
-              current={userOrg?.plan === "starter"}
+              current={userOrg?.plan === 'starter'}
             />
             <PlanCard
               name={t('superadmin.professional')}
@@ -629,7 +662,7 @@ function PlanLimitDialog({
                 { text: t('help.plans.professional.email'), included: true },
                 { text: t('help.plans.professional.sla'), included: false },
               ]}
-              current={userOrg?.plan === "professional"}
+              current={userOrg?.plan === 'professional'}
               recommended
             />
             <PlanCard
@@ -641,16 +674,24 @@ function PlanLimitDialog({
                 { text: t('help.plans.enterprise.sla'), included: true },
                 { text: t('help.plans.enterprise.manager'), included: true },
               ]}
-              current={userOrg?.plan === "enterprise"}
+              current={userOrg?.plan === 'enterprise'}
             />
           </div>
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="w-full sm:w-auto"
+          >
             {t('actions.close')}
           </Button>
-          <Button onClick={() => router.push('/superadmin/subscriptions')} className="w-full sm:w-auto">
+          <Button
+            onClick={() => router.push('/superadmin/subscriptions')}
+            className="w-full sm:w-auto"
+          >
             {t('help.upgradePlan')}
           </Button>
         </DialogFooter>
@@ -682,15 +723,9 @@ function PlanCard({
       <div className="text-center mb-3">
         <h4 className="font-bold text-sm md:text-base">{name}</h4>
         <p className="text-xl md:text-2xl font-bold">{price}</p>
-        {current && (
-          <Badge className="mt-2 bg-green-500 text-xs">
-            {t('help.plans.current')}
-          </Badge>
-        )}
+        {current && <Badge className="mt-2 bg-green-500 text-xs">{t('help.plans.current')}</Badge>}
         {recommended && !current && (
-          <Badge className="mt-2 bg-blue-500 text-xs">
-            {t('help.plans.recommended')}
-          </Badge>
+          <Badge className="mt-2 bg-blue-500 text-xs">{t('help.plans.recommended')}</Badge>
         )}
       </div>
       <ul className="space-y-2 text-xs md:text-sm">
@@ -701,9 +736,7 @@ function PlanCard({
             ) : (
               <XCircle className="w-3 h-3 md:w-4 md:h-4 text-red-500 shrink-0 mt-0.5" />
             )}
-            <span className={feature.included ? '' : 'text-muted-foreground'}>
-              {feature.text}
-            </span>
+            <span className={feature.included ? '' : 'text-muted-foreground'}>{feature.text}</span>
           </li>
         ))}
       </ul>

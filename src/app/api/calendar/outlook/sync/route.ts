@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createOutlookCalendarEvent } from "@/lib/calendar-sync";
+import { NextRequest, NextResponse } from 'next/server';
+import { createOutlookCalendarEvent } from '@/lib/calendar-sync';
 
 export async function POST(request: NextRequest) {
   try {
-    const accessToken = request.cookies.get("outlook_access_token")?.value;
+    const accessToken = request.cookies.get('outlook_access_token')?.value;
 
     if (!accessToken) {
       return NextResponse.json(
-        { error: "Not authenticated with Outlook Calendar" },
-        { status: 401 }
+        { error: 'Not authenticated with Outlook Calendar' },
+        { status: 401 },
       );
     }
 
     const { events } = await request.json();
 
     if (!Array.isArray(events)) {
-      return NextResponse.json({ error: "Invalid events data" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid events data' }, { status: 400 });
     }
 
     // Create events in Outlook Calendar
@@ -29,18 +29,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    const failureCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
 
     return NextResponse.json({
       message: `Synced ${successCount} events, ${failureCount} failed`,
       results,
     });
   } catch (error) {
-    console.error("Outlook Calendar sync error:", error);
-    return NextResponse.json(
-      { error: "Failed to sync with Outlook Calendar" },
-      { status: 500 }
-    );
+    console.error('Outlook Calendar sync error:', error);
+    return NextResponse.json({ error: 'Failed to sync with Outlook Calendar' }, { status: 500 });
   }
 }

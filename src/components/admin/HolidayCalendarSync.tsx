@@ -1,23 +1,27 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Download, ExternalLink, CheckCircle2, Lock } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
-import { toast } from "sonner";
-import { generateICalendar, downloadICalFile, getGoogleCalendarAuthUrl, getOutlookAuthUrl } from "@/lib/calendar-sync";
-import { useUpgradeModal } from "@/components/subscription/PlanGate";
-import { usePlanFeatures } from "@/hooks/usePlanFeatures";
+import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Download, ExternalLink, CheckCircle2, Lock } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { toast } from 'sonner';
+import {
+  generateICalendar,
+  downloadICalFile,
+  getGoogleCalendarAuthUrl,
+  getOutlookAuthUrl,
+} from '@/lib/calendar-sync';
+import { useUpgradeModal } from '@/components/subscription/PlanGate';
+import { usePlanFeatures } from '@/hooks/usePlanFeatures';
 
 export default function HolidayCalendarSync() {
-  
   const { t } = useTranslation();
-const [isExporting, setIsExporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isSyncingGoogle, setIsSyncingGoogle] = useState(false);
   const [isSyncingOutlook, setIsSyncingOutlook] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
@@ -32,36 +36,36 @@ const [isExporting, setIsExporting] = useState(false);
   // Check connection status on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("google_calendar") === "connected") {
+    if (params.get('google_calendar') === 'connected') {
       setGoogleConnected(true);
-      toast.success(t("calendarSync.googleSuccess"));
+      toast.success(t('calendarSync.googleSuccess'));
       // Clean URL
-      window.history.replaceState({}, "", window.location.pathname);
+      window.history.replaceState({}, '', window.location.pathname);
     }
-    if (params.get("outlook_calendar") === "connected") {
+    if (params.get('outlook_calendar') === 'connected') {
       setOutlookConnected(true);
-      toast.success(t("calendarSync.outlookSuccess"));
+      toast.success(t('calendarSync.outlookSuccess'));
       // Clean URL
-      window.history.replaceState({}, "", window.location.pathname);
+      window.history.replaceState({}, '', window.location.pathname);
     }
-    if (params.get("error")) {
-      toast.error("Failed to connect to calendar");
-      window.history.replaceState({}, "", window.location.pathname);
+    if (params.get('error')) {
+      toast.error('Failed to connect to calendar');
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
   const handleExportICS = async () => {
     if (!calendarData) return;
-    
+
     setIsExporting(true);
     try {
       const icsContent = generateICalendar(calendarData);
       const filename = `company-leaves-${new Date().toISOString().split('T')[0]}.ics`;
       downloadICalFile(icsContent, filename);
-      toast.success("iCal file downloaded successfully");
+      toast.success('iCal file downloaded successfully');
     } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Failed to export calendar");
+      console.error('Export error:', error);
+      toast.error('Failed to export calendar');
     } finally {
       setIsExporting(false);
     }
@@ -71,27 +75,27 @@ const [isExporting, setIsExporting] = useState(false);
     if (googleConnected) {
       // Already connected, sync events
       if (!calendarData || calendarData.length === 0) {
-        toast.info("No events to sync");
+        toast.info('No events to sync');
         return;
       }
 
       setIsSyncingGoogle(true);
       try {
-        const response = await fetch("/api/calendar/google/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const response = await fetch('/api/calendar/google/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ events: calendarData }),
         });
 
         if (!response.ok) {
-          throw new Error("Sync failed");
+          throw new Error('Sync failed');
         }
 
         const result = await response.json();
         toast.success(result.message);
       } catch (error) {
-        console.error("Google sync error:", error);
-        toast.error("Failed to sync with Google Calendar");
+        console.error('Google sync error:', error);
+        toast.error('Failed to sync with Google Calendar');
         setGoogleConnected(false);
       } finally {
         setIsSyncingGoogle(false);
@@ -103,8 +107,8 @@ const [isExporting, setIsExporting] = useState(false);
         const authUrl = getGoogleCalendarAuthUrl(redirectUri);
         window.location.href = authUrl;
       } catch (error) {
-        console.error("Google auth error:", error);
-        toast.error("Google Calendar is not configured");
+        console.error('Google auth error:', error);
+        toast.error('Google Calendar is not configured');
       }
     }
   };
@@ -113,27 +117,27 @@ const [isExporting, setIsExporting] = useState(false);
     if (outlookConnected) {
       // Already connected, sync events
       if (!calendarData || calendarData.length === 0) {
-        toast.info("No events to sync");
+        toast.info('No events to sync');
         return;
       }
 
       setIsSyncingOutlook(true);
       try {
-        const response = await fetch("/api/calendar/outlook/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const response = await fetch('/api/calendar/outlook/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ events: calendarData }),
         });
 
         if (!response.ok) {
-          throw new Error("Sync failed");
+          throw new Error('Sync failed');
         }
 
         const result = await response.json();
         toast.success(result.message);
       } catch (error) {
-        console.error("Outlook sync error:", error);
-        toast.error("Failed to sync with Outlook Calendar");
+        console.error('Outlook sync error:', error);
+        toast.error('Failed to sync with Outlook Calendar');
         setOutlookConnected(false);
       } finally {
         setIsSyncingOutlook(false);
@@ -145,8 +149,8 @@ const [isExporting, setIsExporting] = useState(false);
         const authUrl = getOutlookAuthUrl(redirectUri);
         window.location.href = authUrl;
       } catch (error) {
-        console.error("Outlook auth error:", error);
-        toast.error("Outlook Calendar is not configured");
+        console.error('Outlook auth error:', error);
+        toast.error('Outlook Calendar is not configured');
       }
     }
   };
@@ -163,144 +167,149 @@ const [isExporting, setIsExporting] = useState(false);
 
   return (
     <>
-    {upgradeModal}
-    <Card className="border-[var(--border)]">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-blue-500" />
-          Calendar Sync
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Stats */}
-        <div className="rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4">
-          <p className="text-sm text-[var(--text-secondary)]">{t("calendarSync.upcomingLeaves")}</p>
-          <p className="text-3xl font-bold text-[var(--text-primary)]">
-            {calendarData.length}
-          </p>
-        </div>
-
-        {/* Export Options */}
-        <div className="space-y-2">
-          <h4 className="mb-2 text-sm font-semibold text-[var(--text-primary)]">
-            Export Calendar
-          </h4>
-          
-          <Button
-            onClick={handleExportICS}
-            disabled={isExporting || calendarData.length === 0}
-            className="w-full justify-start"
-            variant="outline"
-          >
-            {isExporting ? (
-              <ShieldLoader size="xs" variant="inline" className="mr-2" />
-            ) : (
-              <Download className="mr-2 h-4 w-4" />
-            )}
-            Download iCal (.ics)
-          </Button>
-
-          <div className="relative">
-            <Button
-              onClick={() => {
-                if (!hasCalendarSync) {
-                  openModal({
-                    featureTitle: 'Google Calendar Sync',
-                    featureDescription: 'Sync leave schedules with Google Calendar. Available on Professional plan and above.',
-                    recommendedPlan: 'professional',
-                  });
-                  return;
-                }
-                handleGoogleCalendar();
-              }}
-              className="w-full justify-start"
-              variant="outline"
-              disabled={isSyncingGoogle || calendarData.length === 0}
-            >
-              {isSyncingGoogle ? (
-                <ShieldLoader size="xs" variant="inline" className="mr-2" />
-              ) : !hasCalendarSync ? (
-                <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
-              ) : googleConnected ? (
-                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-              ) : (
-                <ExternalLink className="mr-2 h-4 w-4" />
-              )}
-              {googleConnected && hasCalendarSync ? t("calendarSync.syncWithGoogle") : t("calendarSync.connectGoogle")}
-            </Button>
-            {googleConnected && hasCalendarSync && (
-              <Badge
-                variant="secondary"
-                className="absolute -right-2 -top-2 bg-green-500 text-white"
-              >
-                Connected
-              </Badge>
-            )}
-            {!hasCalendarSync && (
-              <Badge
-                variant="secondary"
-                className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
-              >
-                Pro
-              </Badge>
-            )}
+      {upgradeModal}
+      <Card className="border-[var(--border)]">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-blue-500" />
+            Calendar Sync
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Stats */}
+          <div className="rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4">
+            <p className="text-sm text-[var(--text-secondary)]">
+              {t('calendarSync.upcomingLeaves')}
+            </p>
+            <p className="text-3xl font-bold text-[var(--text-primary)]">{calendarData.length}</p>
           </div>
 
-          <div className="relative">
+          {/* Export Options */}
+          <div className="space-y-2">
+            <h4 className="mb-2 text-sm font-semibold text-[var(--text-primary)]">
+              Export Calendar
+            </h4>
+
             <Button
-              onClick={() => {
-                if (!hasCalendarSync) {
-                  openModal({
-                    featureTitle: 'Outlook Calendar Sync',
-                    featureDescription: 'Sync leave schedules with Outlook Calendar. Available on Professional plan and above.',
-                    recommendedPlan: 'professional',
-                  });
-                  return;
-                }
-                handleOutlook();
-              }}
+              onClick={handleExportICS}
+              disabled={isExporting || calendarData.length === 0}
               className="w-full justify-start"
               variant="outline"
-              disabled={isSyncingOutlook || calendarData.length === 0}
             >
-              {isSyncingOutlook ? (
+              {isExporting ? (
                 <ShieldLoader size="xs" variant="inline" className="mr-2" />
-              ) : !hasCalendarSync ? (
-                <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
-              ) : outlookConnected ? (
-                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
               ) : (
-                <ExternalLink className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-4 w-4" />
               )}
-              {outlookConnected && hasCalendarSync ? t("calendarSync.syncWithOutlook") : t("calendarSync.connectOutlook")}
+              Download iCal (.ics)
             </Button>
-            {outlookConnected && hasCalendarSync && (
-              <Badge
-                variant="secondary"
-                className="absolute -right-2 -top-2 bg-green-500 text-white"
-              >
-                Connected
-              </Badge>
-            )}
-            {!hasCalendarSync && (
-              <Badge
-                variant="secondary"
-                className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
-              >
-                Pro
-              </Badge>
-            )}
-          </div>
-        </div>
 
-        {calendarData.length === 0 && (
-          <p className="text-center text-sm text-[var(--text-secondary)]">
-            {t("calendarSync.noUpcoming")}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+            <div className="relative">
+              <Button
+                onClick={() => {
+                  if (!hasCalendarSync) {
+                    openModal({
+                      featureTitle: 'Google Calendar Sync',
+                      featureDescription:
+                        'Sync leave schedules with Google Calendar. Available on Professional plan and above.',
+                      recommendedPlan: 'professional',
+                    });
+                    return;
+                  }
+                  handleGoogleCalendar();
+                }}
+                className="w-full justify-start"
+                variant="outline"
+                disabled={isSyncingGoogle || calendarData.length === 0}
+              >
+                {isSyncingGoogle ? (
+                  <ShieldLoader size="xs" variant="inline" className="mr-2" />
+                ) : !hasCalendarSync ? (
+                  <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
+                ) : googleConnected ? (
+                  <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                ) : (
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                )}
+                {googleConnected && hasCalendarSync
+                  ? t('calendarSync.syncWithGoogle')
+                  : t('calendarSync.connectGoogle')}
+              </Button>
+              {googleConnected && hasCalendarSync && (
+                <Badge
+                  variant="secondary"
+                  className="absolute -right-2 -top-2 bg-green-500 text-white"
+                >
+                  Connected
+                </Badge>
+              )}
+              {!hasCalendarSync && (
+                <Badge
+                  variant="secondary"
+                  className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
+                >
+                  Pro
+                </Badge>
+              )}
+            </div>
+
+            <div className="relative">
+              <Button
+                onClick={() => {
+                  if (!hasCalendarSync) {
+                    openModal({
+                      featureTitle: 'Outlook Calendar Sync',
+                      featureDescription:
+                        'Sync leave schedules with Outlook Calendar. Available on Professional plan and above.',
+                      recommendedPlan: 'professional',
+                    });
+                    return;
+                  }
+                  handleOutlook();
+                }}
+                className="w-full justify-start"
+                variant="outline"
+                disabled={isSyncingOutlook || calendarData.length === 0}
+              >
+                {isSyncingOutlook ? (
+                  <ShieldLoader size="xs" variant="inline" className="mr-2" />
+                ) : !hasCalendarSync ? (
+                  <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
+                ) : outlookConnected ? (
+                  <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                ) : (
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                )}
+                {outlookConnected && hasCalendarSync
+                  ? t('calendarSync.syncWithOutlook')
+                  : t('calendarSync.connectOutlook')}
+              </Button>
+              {outlookConnected && hasCalendarSync && (
+                <Badge
+                  variant="secondary"
+                  className="absolute -right-2 -top-2 bg-green-500 text-white"
+                >
+                  Connected
+                </Badge>
+              )}
+              {!hasCalendarSync && (
+                <Badge
+                  variant="secondary"
+                  className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
+                >
+                  Pro
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {calendarData.length === 0 && (
+            <p className="text-center text-sm text-[var(--text-secondary)]">
+              {t('calendarSync.noUpcoming')}
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }
-

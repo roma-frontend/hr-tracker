@@ -1,21 +1,46 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Navigation2 } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { Navigation2 } from 'lucide-react';
 
 const NAVIGATOR_LINKS = [
-  { id: "google", name: "Google Maps", color: "#4285F4", icon: "🗺️", url: (lat: number, lng: number) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` },
-  { id: "yandex", name: "Yandex Maps", color: "#FC3F1D", icon: "🧭", url: (lat: number, lng: number) => `https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto` },
-  { id: "2gis", name: "2GIS", color: "#1DAD4E", icon: "🏢", url: (lat: number, lng: number) => `https://2gis.ru/routeSearch/rsType/car/to/${lng},${lat}` },
-  { id: "waze", name: "Waze", color: "#33CCFF", icon: "🚗", url: (lat: number, lng: number) => `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` },
+  {
+    id: 'google',
+    name: 'Google Maps',
+    color: '#4285F4',
+    icon: '🗺️',
+    url: (lat: number, lng: number) =>
+      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+  },
+  {
+    id: 'yandex',
+    name: 'Yandex Maps',
+    color: '#FC3F1D',
+    icon: '🧭',
+    url: (lat: number, lng: number) => `https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto`,
+  },
+  {
+    id: '2gis',
+    name: '2GIS',
+    color: '#1DAD4E',
+    icon: '🏢',
+    url: (lat: number, lng: number) => `https://2gis.ru/routeSearch/rsType/car/to/${lng},${lat}`,
+  },
+  {
+    id: 'waze',
+    name: 'Waze',
+    color: '#33CCFF',
+    icon: '🚗',
+    url: (lat: number, lng: number) => `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+  },
 ];
 
 interface NavigatorDropdownProps {

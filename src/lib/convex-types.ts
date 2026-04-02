@@ -1,14 +1,14 @@
-import { Id } from "@/../convex/_generated/dataModel";
+import { Id } from '@/../convex/_generated/dataModel';
 
 export interface User {
-  _id: Id<"users">;
+  _id: Id<'users'>;
   _creationTime: number;
   name: string;
   email: string;
-  organizationId?: Id<"organizations">;
-  role: "admin" | "manager" | "staff" | "superadmin";
+  organizationId?: Id<'organizations'>;
+  role: 'admin' | 'manager' | 'staff' | 'superadmin';
   department?: string;
-  employeeType?: "full-time" | "part-time" | "contract" | "staff";
+  employeeType?: 'full-time' | 'part-time' | 'contract' | 'staff';
   avatarUrl?: string;
   passwordHash?: string;
   loginAttempts?: number;
@@ -25,43 +25,43 @@ export interface User {
   workdayEnd?: number;
   workingDays?: number[];
   timezone?: string;
-  language?: "en" | "ru" | "hy";
+  language?: 'en' | 'ru' | 'hy';
   createdAt: number;
   updatedAt: number;
 }
 
 export interface Leave {
-  _id: Id<"leaves">;
+  _id: Id<'leaves'>;
   _creationTime: number;
-  organizationId: Id<"organizations">;
-  userId: Id<"users">;
-  type: "paid" | "unpaid" | "sick" | "family" | "doctor";
-  status: "pending" | "approved" | "rejected";
+  organizationId: Id<'organizations'>;
+  userId: Id<'users'>;
+  type: 'paid' | 'unpaid' | 'sick' | 'family' | 'doctor';
+  status: 'pending' | 'approved' | 'rejected';
   startDate: string;
   endDate: string;
   reason?: string;
-  reviewedBy?: Id<"users">;
+  reviewedBy?: Id<'users'>;
   reviewedAt?: number;
   rejectionReason?: string;
   duration?: number;
   createdAt: number;
   updatedAt: number;
-  
+
   // Enriched fields from backend
   userName?: string;
   userEmail?: string;
   userDepartment?: string;
-  userEmployeeType?: "full-time" | "part-time" | "contract" | "staff";
+  userEmployeeType?: 'full-time' | 'part-time' | 'contract' | 'staff';
   userAvatarUrl?: string;
   reviewerName?: string;
 }
 
 export interface Organization {
-  _id: Id<"organizations">;
+  _id: Id<'organizations'>;
   _creationTime: number;
   name: string;
   slug: string;
-  plan: "starter" | "professional" | "enterprise";
+  plan: 'starter' | 'professional' | 'enterprise';
   isActive: boolean;
   createdBySuperadmin?: boolean;
   logoUrl?: string;
@@ -75,9 +75,9 @@ export interface Organization {
 }
 
 export interface Event {
-  _id: Id<"events">;
+  _id: Id<'events'>;
   _creationTime: number;
-  organizationId: Id<"organizations">;
+  organizationId: Id<'organizations'>;
   title: string;
   description?: string;
   startDate: string;
@@ -89,9 +89,9 @@ export interface Event {
 }
 
 export interface MaintenanceMode {
-  _id: Id<"admin">;
+  _id: Id<'admin'>;
   _creationTime: number;
-  organizationId?: Id<"organizations">;
+  organizationId?: Id<'organizations'>;
   isActive: boolean;
   startTime: number;
   endTime?: number;

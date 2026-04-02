@@ -8,7 +8,10 @@ export async function POST(req: Request) {
     const { leaveId, requesterId, startDate, endDate, days, reason, type } = await req.json();
 
     if (!leaveId || !requesterId) {
-      return NextResponse.json({ success: false, message: 'Missing leaveId or requesterId' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: 'Missing leaveId or requesterId' },
+        { status: 400 },
+      );
     }
 
     // Get the leave to validate
@@ -33,14 +36,15 @@ export async function POST(req: Request) {
     if (!isAdmin && !isOwner) {
       return NextResponse.json({
         success: false,
-        message: "❌ You can only edit your own leave requests. You don't have permission to edit other employees' leaves."
+        message:
+          "❌ You can only edit your own leave requests. You don't have permission to edit other employees' leaves.",
       });
     }
 
     if (!isAdmin && leave.status !== 'pending') {
       return NextResponse.json({
         success: false,
-        message: `❌ Cannot edit this leave — it's already ${leave.status}. Only pending leaves can be edited by employees. Contact admin for changes.`
+        message: `❌ Cannot edit this leave — it's already ${leave.status}. Only pending leaves can be edited by employees. Contact admin for changes.`,
       });
     }
 

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export function GoogleSignInButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,12 +11,12 @@ export function GoogleSignInButton() {
     setIsLoading(true);
     try {
       // Redirect to dashboard after successful Google sign in
-      await signIn("google", { 
-        callbackUrl: "/dashboard",
-        redirect: true 
+      await signIn('google', {
+        callbackUrl: '/dashboard',
+        redirect: true,
       });
     } catch (error) {
-      console.error("Error signing in:", error);
+      console.error('Error signing in:', error);
       setIsLoading(false);
     }
   };
@@ -28,9 +28,9 @@ export function GoogleSignInButton() {
       disabled={isLoading}
       className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
-        background: "var(--background)",
-        borderColor: "var(--border)",
-        color: "var(--text-primary)",
+        background: 'var(--background)',
+        borderColor: 'var(--border)',
+        color: 'var(--text-primary)',
       }}
     >
       {isLoading ? (

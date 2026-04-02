@@ -8,20 +8,40 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Briefcase, DollarSign, FileText } from 'lucide-react';
 
 interface CorporateTripFieldsProps {
-  priority: "P0" | "P1" | "P2" | "P3";
-  tripCategory: "client_meeting" | "airport" | "office_transfer" | "emergency" | "team_event" | "personal";
+  priority: 'P0' | 'P1' | 'P2' | 'P3';
+  tripCategory:
+    | 'client_meeting'
+    | 'airport'
+    | 'office_transfer'
+    | 'emergency'
+    | 'team_event'
+    | 'personal';
   costCenter: string;
   businessJustification: string;
   requiresApproval: boolean;
-  onPriorityChange: (value: "P0" | "P1" | "P2" | "P3") => void;
-  onCategoryChange: (value: "client_meeting" | "airport" | "office_transfer" | "emergency" | "team_event" | "personal") => void;
+  onPriorityChange: (value: 'P0' | 'P1' | 'P2' | 'P3') => void;
+  onCategoryChange: (
+    value:
+      | 'client_meeting'
+      | 'airport'
+      | 'office_transfer'
+      | 'emergency'
+      | 'team_event'
+      | 'personal',
+  ) => void;
   onCostCenterChange: (value: string) => void;
   onBusinessJustificationChange: (value: string) => void;
   onRequiresApprovalChange: (value: boolean) => void;
@@ -42,7 +62,11 @@ export function CorporateTripFields({
   const { t } = useTranslation();
 
   const priorityLabels = {
-    P0: { label: t('driver.executive'), desc: t('driver.immediateResponse'), color: 'text-red-600' },
+    P0: {
+      label: t('driver.executive'),
+      desc: t('driver.immediateResponse'),
+      color: 'text-red-600',
+    },
     P1: { label: t('driver.client'), desc: t('driver.clientFacing'), color: 'text-orange-600' },
     P2: { label: t('driver.standard'), desc: t('driver.internalMeetings'), color: 'text-blue-600' },
     P3: { label: t('driver.personal'), desc: t('driver.nonUrgent'), color: 'text-gray-600' },
@@ -95,7 +119,9 @@ export function CorporateTripFields({
           </SelectTrigger>
           <SelectContent>
             {Object.entries(categoryLabels).map(([key, label]) => (
-              <SelectItem key={key} value={key}>{label}</SelectItem>
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -105,7 +131,8 @@ export function CorporateTripFields({
       <div className="flex flex-col gap-2">
         <Label className="flex items-center gap-2">
           <DollarSign className="w-4 h-4" />
-          {t('driver.costCenter')} <span className="text-muted-foreground">{t('driver.costCenterOptional')}</span>
+          {t('driver.costCenter')}{' '}
+          <span className="text-muted-foreground">{t('driver.costCenterOptional')}</span>
         </Label>
         <Input
           value={costCenter}
@@ -134,7 +161,10 @@ export function CorporateTripFields({
           <AlertCircle className="w-4 h-4 text-blue-600" />
           <AlertDescription className="text-sm text-blue-900">
             {t('driver.requiresApprovalDesc', {
-              reason: priority === 'P0' || priority === 'P1' ? t('driver.highPriority') : t('driver.emergencyCategory')
+              reason:
+                priority === 'P0' || priority === 'P1'
+                  ? t('driver.highPriority')
+                  : t('driver.emergencyCategory'),
             })}
           </AlertDescription>
         </Alert>

@@ -10,46 +10,47 @@ export async function POST(req: Request) {
   try {
     console.log('🤖 AI Chat request received');
     const { messages, userId, lang } = await req.json();
-    
+
     console.log('📋 [AI Chat] Request params:', { userId, lang, messagesCount: messages.length });
-    
-    const langInstruction = lang === 'ru'
-      ? 'ЯЗЫК: Пользователь пишет на русском. Отвечай ТОЛЬКО на русском языке.'
-      : lang === 'hy'
-      ? 'ԼԵdelays: Delaysdelays delays. Delaysdelays delaysdelaysdelaysdelays delaysdelays.'
-      : 'LANGUAGE: The user is writing in English. Reply ONLY in English.';
+
+    const langInstruction =
+      lang === 'ru'
+        ? 'ЯЗЫК: Пользователь пишет на русском. Отвечай ТОЛЬКО на русском языке.'
+        : lang === 'hy'
+          ? 'ԼԵdelays: Delaysdelays delays. Delaysdelays delaysdelaysdelaysdelays delaysdelays.'
+          : 'LANGUAGE: The user is writing in English. Reply ONLY in English.';
 
     // Current date & time context
     const now = new Date();
     const dateContext = `CURRENT DATE & TIME: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}. Use this to determine "today", "this week", "tomorrow", etc.`;
     console.log('📝 Messages count:', messages.length);
 
-  // Fetch user context
-  let userContext = '';
-  let userRole: UserRole = 'employee';
-  let userEmail = '';
-  let userName = '';
-  let userDepartment = '';
-  let userPosition = '';
-  let userOrgId = '';
-  
-  try {
-    const contextRes = await fetch(`${req.headers.get('origin')}/api/chat/context`, {
-      headers: {
-        cookie: req.headers.get('cookie') || '',
-      },
-    });
-    
-    if (contextRes.ok) {
-      const context = await contextRes.json();
-      userRole = context.user.role as UserRole;
-      userEmail = context.user.email;
-      userName = context.user.name;
-      userDepartment = context.user.department;
-      userPosition = context.user.position;
-      userOrgId = context.user.organizationId;
-      
-      userContext = `
+    // Fetch user context
+    let userContext = '';
+    let userRole: UserRole = 'employee';
+    let userEmail = '';
+    let userName = '';
+    let userDepartment = '';
+    let userPosition = '';
+    let userOrgId = '';
+
+    try {
+      const contextRes = await fetch(`${req.headers.get('origin')}/api/chat/context`, {
+        headers: {
+          cookie: req.headers.get('cookie') || '',
+        },
+      });
+
+      if (contextRes.ok) {
+        const context = await contextRes.json();
+        userRole = context.user.role as UserRole;
+        userEmail = context.user.email;
+        userName = context.user.name;
+        userDepartment = context.user.department;
+        userPosition = context.user.position;
+        userOrgId = context.user.organizationId;
+
+        userContext = `
 
 USER CONTEXT:
 - Name: ${context.user.name}
@@ -71,16 +72,16 @@ ${context.recentLeaves.map((l: any) => `- ${l.type}: ${l.startDate} to ${l.endDa
 TEAM AVAILABILITY (Next 30 days):
 ${context.teamAvailability.map((l: any) => `- ${l.userName} (${l.department}): ${l.startDate} to ${l.endDate}`).join('\n')}
 `;
-    
-    console.log('👤 [AI Chat] User context:', { 
-      userId: context.user.id, 
-      orgId: context.user.organizationId,
-      role: context.user.role 
-    });
+
+        console.log('👤 [AI Chat] User context:', {
+          userId: context.user.id,
+          orgId: context.user.organizationId,
+          role: context.user.role,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch context:', error);
     }
-  } catch (error) {
-    console.error('Failed to fetch context:', error);
-  }
 
     console.log('🧠 Calling Groq AI...');
 
@@ -97,37 +98,64 @@ ${context.teamAvailability.map((l: any) => `- ${l.userName} (${l.department}): $
     // ═══════════════════════════════════════════════════════════════
     let conflictCheckData = '';
     const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop()?.content || '';
-    
+
     // Проверяем, хочет ли пользователь забронировать отпуск или водителя
-    const wantsLeaveBooking = /хочу отпуск|book leave|request vacation|отпуск с \d|vacation from \d|sick leave|больничный/i.test(lastUserMessage);
-    const wantsDriverBooking = /заказать водителя|book driver|driver from \d|водитель/i.test(lastUserMessage);
-    
+    const wantsLeaveBooking =
+      /хочу отпуск|book leave|request vacation|отпуск с \d|vacation from \d|sick leave|больничный/i.test(
+        lastUserMessage,
+      );
+    const wantsDriverBooking = /заказать водителя|book driver|driver from \d|водитель/i.test(
+      lastUserMessage,
+    );
+
     if ((wantsLeaveBooking || wantsDriverBooking) && userId && userOrgId) {
       try {
         // Извлекаем даты из сообщения
-        const dateMatch = lastUserMessage.match(/с (\d{1,2})[\/\.-](\d{1,2})|from (\d{1,2})[\/\.-](\d{1,2})|(\d{1,2})[\/\.-](\d{1,2}) (марта|марта|апреля|апреля|мая|мая|июня|июня)/i);
-        
+        const dateMatch = lastUserMessage.match(
+          /с (\d{1,2})[\/\.-](\d{1,2})|from (\d{1,2})[\/\.-](\d{1,2})|(\d{1,2})[\/\.-](\d{1,2}) (марта|марта|апреля|апреля|мая|мая|июня|июня)/i,
+        );
+
         if (dateMatch) {
           const day1 = parseInt(dateMatch[1] || dateMatch[3] || dateMatch[5]);
           const monthStr = dateMatch[2] || dateMatch[4] || dateMatch[6];
-          const monthMap: Record<string, number> = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, 'марта': 2, 'апреля': 3, 'мая': 4, 'июня': 5 };
-          const month = monthMap[monthStr.toLowerCase()] || (parseInt(monthStr) - 1);
+          const monthMap: Record<string, number> = {
+            '1': 0,
+            '2': 1,
+            '3': 2,
+            '4': 3,
+            '5': 4,
+            '6': 5,
+            марта: 2,
+            апреля: 3,
+            мая: 4,
+            июня: 5,
+          };
+          const month = monthMap[monthStr.toLowerCase()] || parseInt(monthStr) - 1;
           const year = new Date().getFullYear();
-          
+
           const startDate = new Date(year, month, day1).getTime();
           const endDate = new Date(year, month, day1 + 7).getTime(); // +7 дней по умолчанию
-          
+
           const requestType = wantsLeaveBooking ? 'leave' : 'driver';
-          
-          console.log('🔍 [Conflict Check] Checking conflicts:', { userId, userOrgId, requestType, startDate, endDate });
-          
-          const conflictRes = await fetch(`${req.headers.get('origin')}/api/chat/conflict-check?userId=${userId}&organizationId=${userOrgId}&requestType=${requestType}&startDate=${startDate}&endDate=${endDate}`, {
-            headers: { cookie: req.headers.get('cookie') || '' },
+
+          console.log('🔍 [Conflict Check] Checking conflicts:', {
+            userId,
+            userOrgId,
+            requestType,
+            startDate,
+            endDate,
           });
-          
+
+          const conflictRes = await fetch(
+            `${req.headers.get('origin')}/api/chat/conflict-check?userId=${userId}&organizationId=${userOrgId}&requestType=${requestType}&startDate=${startDate}&endDate=${endDate}`,
+            {
+              headers: { cookie: req.headers.get('cookie') || '' },
+            },
+          );
+
           if (conflictRes.ok) {
             const conflictData = await conflictRes.json();
-            
+
             if (conflictData.hasConflicts) {
               conflictCheckData = `
 
@@ -161,13 +189,16 @@ You can safely create the <ACTION> tag for this booking.
         // Ignore errors, continue without conflict check
       }
     }
-    
+
     // Fetch AI insights (patterns, best dates, balance warnings)
     let aiInsights = '';
     try {
-      const insightsRes = await fetch(`${req.headers.get('origin')}/api/chat/insights${userId ? `?userId=${userId}` : ''}`, {
-        headers: { cookie: req.headers.get('cookie') || '' },
-      });
+      const insightsRes = await fetch(
+        `${req.headers.get('origin')}/api/chat/insights${userId ? `?userId=${userId}` : ''}`,
+        {
+          headers: { cookie: req.headers.get('cookie') || '' },
+        },
+      );
       if (insightsRes.ok) {
         const insights = await insightsRes.json();
         if (insights) {
@@ -189,24 +220,34 @@ ${insights.teamConflicts?.length ? `⚠️ TEAM CONFLICTS (people already on lea
     let fullContext = '';
     let availableDriversInfo = '';
     try {
-      const fullRes = await fetch(`${req.headers.get('origin')}/api/chat/full-context?requesterId=${userId}`, {
-        headers: { cookie: req.headers.get('cookie') || '' },
-      });
+      const fullRes = await fetch(
+        `${req.headers.get('origin')}/api/chat/full-context?requesterId=${userId}`,
+        {
+          headers: { cookie: req.headers.get('cookie') || '' },
+        },
+      );
       if (fullRes.ok) {
         const data = await fullRes.json();
 
         // Fetch available drivers
         try {
-          const driversRes = await fetch(`${req.headers.get('origin')}/api/drivers/available?organizationId=${userOrgId}`, {
-            headers: { cookie: req.headers.get('cookie') || '' },
-          });
+          const driversRes = await fetch(
+            `${req.headers.get('origin')}/api/drivers/available?organizationId=${userOrgId}`,
+            {
+              headers: { cookie: req.headers.get('cookie') || '' },
+            },
+          );
           if (driversRes.ok) {
             const drivers = await driversRes.json();
-            console.log('[chat] Drivers API response:', { count: drivers?.length, orgId: userOrgId });
+            console.log('[chat] Drivers API response:', {
+              count: drivers?.length,
+              orgId: userOrgId,
+            });
             if (drivers && drivers.length > 0) {
               availableDriversInfo = `\n\nAVAILABLE DRIVERS (use these driverId values for booking):\n${drivers.map((d: any) => `  - driverId: "${d._id}" | Name: ${d.userName} | Vehicle: ${d.vehicleInfo.model} (${d.vehicleInfo.plateNumber}) | Capacity: ${d.vehicleInfo.capacity} seats | Status: ${d.isAvailable ? 'Available' : 'Busy'}`).join('\n')}`;
             } else {
-              availableDriversInfo = '\n\nAVAILABLE DRIVERS: No drivers available in your organization.';
+              availableDriversInfo =
+                '\n\nAVAILABLE DRIVERS: No drivers available in your organization.';
             }
           } else {
             console.error('[chat] Failed to fetch drivers, status:', driversRes.status);
@@ -216,59 +257,89 @@ ${insights.teamConflicts?.length ? `⚠️ TEAM CONFLICTS (people already on lea
           console.error('[chat] Failed to fetch drivers:', e);
           availableDriversInfo = '\n\nAVAILABLE DRIVERS: Could not fetch driver list.';
         }
-        
+
         // Build employees info
-        const employeesInfo = (data.employees ?? []).map((e: any) => {
-          const presenceEmoji: Record<string, string> = {
-            available: '🟢', in_meeting: '📅', in_call: '📞', out_of_office: '🏠', busy: '⛔'
-          };
-          const lines = [`👤 ${e.name} (${e.role}, ${e.department ?? 'No dept'}, ${e.position ?? 'No position'})`];
-          lines.push(`  Status: ${presenceEmoji[e.presenceStatus] ?? '🟢'} ${e.presenceStatus ?? 'available'}`);
-          if (e.supervisorName) lines.push(`  Supervisor: ${e.supervisorName}`);
-          if (e.todayStatus) {
-            lines.push(`  Today: ${e.todayStatus.status} | In: ${e.todayStatus.checkIn ?? '—'} | Out: ${e.todayStatus.checkOut ?? '—'}${e.todayStatus.isLate ? ` | LATE by ${e.todayStatus.lateMinutes}min` : ''} | Worked: ${e.todayStatus.workedHours ?? '—'}h`);
-          } else {
-            lines.push(`  Today: not checked in`);
-          }
-          if (e.currentLeave) {
-            lines.push(`  🏖 ON LEAVE NOW: ${e.currentLeave.type} (${e.currentLeave.startDate} → ${e.currentLeave.endDate}) [leaveId: ${e.currentLeave.leaveId}]`);
-          }
-          if (e.upcomingLeaves?.length) {
-            e.upcomingLeaves.forEach((l: any) => {
-              lines.push(`  📅 Upcoming: ${l.type} ${l.startDate} → ${l.endDate} [leaveId: ${l.leaveId}]`);
-            });
-          }
-          if (e.pendingLeaves?.length) {
-            e.pendingLeaves.forEach((l: any) => {
-              lines.push(`  ⏳ Pending: ${l.type} ${l.startDate} → ${l.endDate} (${l.days}d) [leaveId: ${l.leaveId}]`);
-            });
-          }
-          if (e.allLeaves?.length) {
-            lines.push(`  All leaves:`);
-            e.allLeaves.forEach((l: any) => {
-              lines.push(`    - ${l.type} ${l.startDate}→${l.endDate} status:${l.status} [leaveId: ${l.leaveId}]`);
-            });
-          }
-          lines.push(`  Leave balance: Paid: ${e.leaveBalance?.paid ?? '?'}d, Sick: ${e.leaveBalance?.sick ?? '?'}d, Family: ${e.leaveBalance?.family ?? '?'}d`);
-          if (e.tasks?.length) {
-            lines.push(`  Tasks (${e.tasks.length}):`);
-            e.tasks.forEach((t: any) => {
-              const deadline = t.deadline ? ` | deadline: ${t.deadline}` : '';
-              lines.push(`    - [${t.status}] ${t.title} (${t.priority} priority${deadline}) assigned by ${t.assignedBy} [taskId: ${t.taskId}]`);
-            });
-          }
-          return lines.join('\n');
-        }).join('\n\n');
+        const employeesInfo = (data.employees ?? [])
+          .map((e: any) => {
+            const presenceEmoji: Record<string, string> = {
+              available: '🟢',
+              in_meeting: '📅',
+              in_call: '📞',
+              out_of_office: '🏠',
+              busy: '⛔',
+            };
+            const lines = [
+              `👤 ${e.name} (${e.role}, ${e.department ?? 'No dept'}, ${e.position ?? 'No position'})`,
+            ];
+            lines.push(
+              `  Status: ${presenceEmoji[e.presenceStatus] ?? '🟢'} ${e.presenceStatus ?? 'available'}`,
+            );
+            if (e.supervisorName) lines.push(`  Supervisor: ${e.supervisorName}`);
+            if (e.todayStatus) {
+              lines.push(
+                `  Today: ${e.todayStatus.status} | In: ${e.todayStatus.checkIn ?? '—'} | Out: ${e.todayStatus.checkOut ?? '—'}${e.todayStatus.isLate ? ` | LATE by ${e.todayStatus.lateMinutes}min` : ''} | Worked: ${e.todayStatus.workedHours ?? '—'}h`,
+              );
+            } else {
+              lines.push(`  Today: not checked in`);
+            }
+            if (e.currentLeave) {
+              lines.push(
+                `  🏖 ON LEAVE NOW: ${e.currentLeave.type} (${e.currentLeave.startDate} → ${e.currentLeave.endDate}) [leaveId: ${e.currentLeave.leaveId}]`,
+              );
+            }
+            if (e.upcomingLeaves?.length) {
+              e.upcomingLeaves.forEach((l: any) => {
+                lines.push(
+                  `  📅 Upcoming: ${l.type} ${l.startDate} → ${l.endDate} [leaveId: ${l.leaveId}]`,
+                );
+              });
+            }
+            if (e.pendingLeaves?.length) {
+              e.pendingLeaves.forEach((l: any) => {
+                lines.push(
+                  `  ⏳ Pending: ${l.type} ${l.startDate} → ${l.endDate} (${l.days}d) [leaveId: ${l.leaveId}]`,
+                );
+              });
+            }
+            if (e.allLeaves?.length) {
+              lines.push(`  All leaves:`);
+              e.allLeaves.forEach((l: any) => {
+                lines.push(
+                  `    - ${l.type} ${l.startDate}→${l.endDate} status:${l.status} [leaveId: ${l.leaveId}]`,
+                );
+              });
+            }
+            lines.push(
+              `  Leave balance: Paid: ${e.leaveBalance?.paid ?? '?'}d, Sick: ${e.leaveBalance?.sick ?? '?'}d, Family: ${e.leaveBalance?.family ?? '?'}d`,
+            );
+            if (e.tasks?.length) {
+              lines.push(`  Tasks (${e.tasks.length}):`);
+              e.tasks.forEach((t: any) => {
+                const deadline = t.deadline ? ` | deadline: ${t.deadline}` : '';
+                lines.push(
+                  `    - [${t.status}] ${t.title} (${t.priority} priority${deadline}) assigned by ${t.assignedBy} [taskId: ${t.taskId}]`,
+                );
+              });
+            }
+            return lines.join('\n');
+          })
+          .join('\n\n');
 
         // Calendar events next 90 days
-        const calendarInfo = (data.calendarEvents ?? []).map((ev: any) =>
-          `  📅 ${ev.employee} (${ev.department}): ${ev.type} ${ev.startDate} → ${ev.endDate} (${ev.days} days)`
-        ).join('\n');
+        const calendarInfo = (data.calendarEvents ?? [])
+          .map(
+            (ev: any) =>
+              `  📅 ${ev.employee} (${ev.department}): ${ev.type} ${ev.startDate} → ${ev.endDate} (${ev.days} days)`,
+          )
+          .join('\n');
 
         // Today's attendance
-        const attendanceInfo = (data.todayAttendance ?? []).map((t: any) =>
-          `  ${t.status === 'checked_in' ? '🟢' : t.status === 'checked_out' ? '🔵' : '🔴'} ${t.name} (${t.department}): ${t.checkIn ?? '—'} → ${t.checkOut ?? 'still working'}${t.isLate ? ` [LATE ${t.lateMinutes}min]` : ''}`
-        ).join('\n');
+        const attendanceInfo = (data.todayAttendance ?? [])
+          .map(
+            (t: any) =>
+              `  ${t.status === 'checked_in' ? '🟢' : t.status === 'checked_out' ? '🔵' : '🔴'} ${t.name} (${t.department}): ${t.checkIn ?? '—'} → ${t.checkOut ?? 'still working'}${t.isLate ? ` [LATE ${t.lateMinutes}min]` : ''}`,
+          )
+          .join('\n');
 
         fullContext = `
 
@@ -311,9 +382,22 @@ ${availableDriversInfo || ''}
     let navigationHint = '';
     // ONLY navigate if user explicitly asks to OPEN/SHOW/GO TO a page
     // Keywords for explicit navigation: "открой", "покажи страницу", "перейди", "open", "show page", "go to"
-    const explicitNavigationKeywords = ['открой', 'откройте', 'покажи страницу', 'покажи мне страницу', 'перейди', 'перейдите', 'go to', 'open', 'show page', 'navigate to'];
-    const hasExplicitNavigation = explicitNavigationKeywords.some(keyword => lastUserMessage.toLowerCase().includes(keyword));
-    
+    const explicitNavigationKeywords = [
+      'открой',
+      'откройте',
+      'покажи страницу',
+      'покажи мне страницу',
+      'перейди',
+      'перейдите',
+      'go to',
+      'open',
+      'show page',
+      'navigate to',
+    ];
+    const hasExplicitNavigation = explicitNavigationKeywords.some((keyword) =>
+      lastUserMessage.toLowerCase().includes(keyword),
+    );
+
     if (detectedIntent?.action && hasExplicitNavigation) {
       navigationHint = `\n\nDETECTED EXPLICIT NAVIGATION REQUEST: User wants to OPEN/SHOW page "${detectedIntent.name}".
 Route: ${detectedIntent.action}
@@ -553,14 +637,14 @@ When asked about specific employees, use the COMPLETE SYSTEM DATA above to give 
   } catch (error) {
     console.error('❌ Chat API error:', error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error instanceof Error ? error.message : 'Unknown error',
-        details: error 
-      }), 
-      { 
+        details: error,
+      }),
+      {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
+        headers: { 'Content-Type': 'application/json' },
+      },
     );
   }
 }

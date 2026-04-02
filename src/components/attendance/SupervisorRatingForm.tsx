@@ -1,71 +1,71 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import React, { useState } from "react";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
-import { Star, Send, X } from "lucide-react";
+import { Star, Send, X } from 'lucide-react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuthStore";
-import type { Id } from "../../../convex/_generated/dataModel";
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 interface SupervisorRatingFormProps {
-  employeeId: Id<"users">;
+  employeeId: Id<'users'>;
   employeeName: string;
   onClose?: () => void;
   onSuccess?: () => void;
 }
 
 interface RatingCategory {
-  key: "qualityOfWork" | "efficiency" | "teamwork" | "initiative" | "communication" | "reliability";
+  key: 'qualityOfWork' | 'efficiency' | 'teamwork' | 'initiative' | 'communication' | 'reliability';
   label: string;
   description: string;
 }
 
-export function SupervisorRatingForm({ 
-employeeId,
+export function SupervisorRatingForm({
+  employeeId,
   employeeName,
   onClose,
   onSuccess,
 }: SupervisorRatingFormProps) {
   const { t } = useTranslation();
-  
+
   const categories: RatingCategory[] = [
     {
-      key: "qualityOfWork",
+      key: 'qualityOfWork',
       label: t('dashboard.qualityOfWork'),
-      description: "Accuracy, thoroughness, and attention to detail",
+      description: 'Accuracy, thoroughness, and attention to detail',
     },
     {
-      key: "efficiency",
+      key: 'efficiency',
       label: t('dashboard.efficiency'),
-      description: "Speed and productivity in completing tasks",
+      description: 'Speed and productivity in completing tasks',
     },
     {
-      key: "teamwork",
+      key: 'teamwork',
       label: t('dashboard.teamwork'),
-      description: "Collaboration and support for colleagues",
+      description: 'Collaboration and support for colleagues',
     },
     {
-      key: "initiative",
+      key: 'initiative',
       label: t('dashboard.initiative'),
-      description: "Proactiveness and self-motivation",
+      description: 'Proactiveness and self-motivation',
     },
     {
-      key: "communication",
+      key: 'communication',
       label: t('dashboard.communication'),
-      description: "Clarity and effectiveness in communication",
+      description: 'Clarity and effectiveness in communication',
     },
     {
-      key: "reliability",
+      key: 'reliability',
       label: t('dashboard.reliability'),
-      description: "Dependability and consistency",
+      description: 'Dependability and consistency',
     },
   ];
   const { user } = useAuthStore();
@@ -80,9 +80,9 @@ employeeId,
     reliability: 3,
   });
 
-  const [strengths, setStrengths] = useState("");
-  const [areasForImprovement, setAreasForImprovement] = useState("");
-  const [generalComments, setGeneralComments] = useState("");
+  const [strengths, setStrengths] = useState('');
+  const [areasForImprovement, setAreasForImprovement] = useState('');
+  const [generalComments, setGeneralComments] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRatingChange = (category: string, value: number) => {
@@ -112,7 +112,7 @@ employeeId,
       onSuccess?.();
       onClose?.();
     } catch (error: any) {
-      toast.error(error.message || "Failed to submit rating");
+      toast.error(error.message || 'Failed to submit rating');
     } finally {
       setIsSubmitting(false);
     }
@@ -146,7 +146,7 @@ employeeId,
       <CardContent className="p-6 space-y-6">
         {/* Rating Categories */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
+          <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>
             Rate Performance (1-5)
           </h3>
 
@@ -168,13 +168,16 @@ employeeId,
                       <Star
                         className={`w-6 h-6 ${
                           value <= ratings[category.key]
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300'
                         }`}
                       />
                     </button>
                   ))}
-                  <span className="ml-2 text-lg font-semibold w-8 text-center" style={{ color: "var(--text-primary)" }}>
+                  <span
+                    className="ml-2 text-lg font-semibold w-8 text-center"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
                     {ratings[category.key]}
                   </span>
                 </div>
@@ -186,7 +189,7 @@ employeeId,
         {/* Average Score */}
         <div className="p-4 rounded-lg bg-gradient-to-r from-sky-50 to-pink-50 dark:from-sky-950 dark:to-pink-950">
           <div className="flex items-center justify-between">
-            <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
               Overall Average
             </span>
             <div className="flex items-center gap-2">
@@ -201,7 +204,7 @@ employeeId,
 
         {/* Text Feedback */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
+          <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>
             Written Feedback (Optional)
           </h3>
 
@@ -220,7 +223,9 @@ employeeId,
             <Textarea
               placeholder={t('placeholders.canImprove')}
               value={areasForImprovement}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAreasForImprovement(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setAreasForImprovement(e.target.value)
+              }
               rows={2}
             />
           </div>
@@ -230,7 +235,9 @@ employeeId,
             <Textarea
               placeholder={t('placeholders.additionalFeedbackNotes')}
               value={generalComments}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setGeneralComments(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setGeneralComments(e.target.value)
+              }
               rows={3}
             />
           </div>
@@ -249,7 +256,7 @@ employeeId,
             className="flex-1 bg-gradient-to-r from-sky-400 to-pink-500 hover:from-sky-500 hover:to-pink-600 text-white"
           >
             {isSubmitting ? (
-              "Submitting..."
+              'Submitting...'
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />

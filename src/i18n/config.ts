@@ -87,7 +87,7 @@ if (typeof window !== 'undefined') {
     language: i18n.language,
     languages: Object.keys(resources),
     keysCount: Object.keys(enTranslations).length,
-    savedLanguage: localStorage.getItem('i18nextLng')
+    savedLanguage: localStorage.getItem('i18nextLng'),
   });
 }
 

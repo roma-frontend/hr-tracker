@@ -23,7 +23,9 @@ export async function GET(req: NextRequest) {
 
     const today = new Date();
     const endOfYear = new Date(today.getFullYear(), 11, 31);
-    const daysToEndOfYear = Math.ceil((endOfYear.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const daysToEndOfYear = Math.ceil(
+      (endOfYear.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     // ── 1. Balance Warning ────────────────────────────────────────────────
     let balanceWarning = '';
@@ -46,7 +48,15 @@ export async function GET(req: NextRequest) {
       const lateRecords = timeHistory.filter((r: any) => r.isLate);
       if (lateRecords.length >= 3) {
         // Check if late on specific days
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayNames = [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ];
         const lateDayCounts: Record<number, number> = {};
         lateRecords.forEach((r: any) => {
           const day = new Date(r.checkInTime).getDay();
@@ -54,7 +64,9 @@ export async function GET(req: NextRequest) {
         });
         const mostLateDay = Object.entries(lateDayCounts).sort((a, b) => b[1] - a[1])[0];
         if (mostLateDay && Number(mostLateDay[1]) >= 2) {
-          patterns.push(`Frequent late arrivals on ${dayNames[Number(mostLateDay[0])]}s (${mostLateDay[1]} times recently)`);
+          patterns.push(
+            `Frequent late arrivals on ${dayNames[Number(mostLateDay[0])]}s (${mostLateDay[1]} times recently)`,
+          );
         } else {
           patterns.push(`${lateRecords.length} late arrivals in the past 2 months`);
         }
@@ -76,10 +88,20 @@ export async function GET(req: NextRequest) {
         const day = new Date(l.startDate).getDay();
         sickDayCounts[day] = (sickDayCounts[day] || 0) + 1;
       });
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
       const mostSickDay = Object.entries(sickDayCounts).sort((a, b) => b[1] - a[1])[0];
       if (mostSickDay && Number(mostSickDay[1]) >= 2) {
-        patterns.push(`Sick leaves often start on ${dayNames[Number(mostSickDay[0])]}s — consider scheduling preventive check-ups`);
+        patterns.push(
+          `Sick leaves often start on ${dayNames[Number(mostSickDay[0])]}s — consider scheduling preventive check-ups`,
+        );
       }
     }
 
@@ -101,7 +123,9 @@ export async function GET(req: NextRequest) {
 
     // Group by date range
     upcomingTeamLeaves.slice(0, 5).forEach((l: any) => {
-      teamConflicts.push(`${l.userName} (${l.userDepartment || 'Unknown dept'}) is on ${l.type} leave: ${l.startDate} → ${l.endDate}`);
+      teamConflicts.push(
+        `${l.userName} (${l.userDepartment || 'Unknown dept'}) is on ${l.type} leave: ${l.startDate} → ${l.endDate}`,
+      );
     });
 
     // ── 4. Best Dates (find weeks with no team conflicts) ─────────────────

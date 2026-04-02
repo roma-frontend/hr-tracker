@@ -5,11 +5,11 @@
  * Адаптируется под роль пользователя
  */
 
-"use client";
+'use client';
 
-import React, { useMemo, useCallback } from "react";
-import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
+import React, { useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
 import { motion } from '@/lib/cssMotion';
 import {
   Plus,
@@ -21,11 +21,11 @@ import {
   User,
   Settings,
   Zap,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/useAuthStore";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/useAuthStore';
+import { toast } from 'sonner';
 
 interface QuickAction {
   id: string;
@@ -49,100 +49,103 @@ export function QuickActions() {
     // Действия для всех ролей
     const commonActions: QuickAction[] = [
       {
-        id: "leave-request",
-        label: t("quickActions.leaveRequest"),
+        id: 'leave-request',
+        label: t('quickActions.leaveRequest'),
         icon: <Plus className="w-5 h-5" />,
-        href: "/leaves",
-        color: "bg-blue-500 hover:bg-blue-600",
-        description: t("quickActions.leaveRequestDesc"),
+        href: '/leaves',
+        color: 'bg-blue-500 hover:bg-blue-600',
+        description: t('quickActions.leaveRequestDesc'),
       },
       {
-        id: "check-in",
-        label: t("quickActions.checkIn"),
+        id: 'check-in',
+        label: t('quickActions.checkIn'),
         icon: <Clock className="w-5 h-5" />,
-        href: "/attendance",
-        color: "bg-green-500 hover:bg-green-600",
-        description: t("quickActions.checkInDesc"),
+        href: '/attendance',
+        color: 'bg-green-500 hover:bg-green-600',
+        description: t('quickActions.checkInDesc'),
       },
       {
-        id: "chat",
-        label: t("quickActions.chat"),
+        id: 'chat',
+        label: t('quickActions.chat'),
         icon: <MessageCircle className="w-5 h-5" />,
-        href: "/chat",
-        color: "bg-purple-500 hover:bg-purple-600",
-        description: t("quickActions.chatDesc"),
+        href: '/chat',
+        color: 'bg-purple-500 hover:bg-purple-600',
+        description: t('quickActions.chatDesc'),
       },
       {
-        id: "tasks",
-        label: t("quickActions.tasks"),
+        id: 'tasks',
+        label: t('quickActions.tasks'),
         icon: <CheckSquare className="w-5 h-5" />,
-        href: "/tasks",
-        color: "bg-orange-500 hover:bg-orange-600",
-        description: t("quickActions.tasksDesc"),
+        href: '/tasks',
+        color: 'bg-orange-500 hover:bg-orange-600',
+        description: t('quickActions.tasksDesc'),
       },
     ];
 
     // Дополнительные действия для менеджеров
     const managerActions: QuickAction[] = [
       {
-        id: "approvals",
-        label: t("quickActions.approvals"),
+        id: 'approvals',
+        label: t('quickActions.approvals'),
         icon: <User className="w-5 h-5" />,
-        href: "/approvals",
-        color: "bg-indigo-500 hover:bg-indigo-600",
-        description: t("quickActions.approvalsDesc"),
-        role: ["admin", "supervisor"],
+        href: '/approvals',
+        color: 'bg-indigo-500 hover:bg-indigo-600',
+        description: t('quickActions.approvalsDesc'),
+        role: ['admin', 'supervisor'],
       },
       {
-        id: "analytics",
-        label: t("quickActions.analytics"),
+        id: 'analytics',
+        label: t('quickActions.analytics'),
         icon: <FileText className="w-5 h-5" />,
-        href: "/analytics",
-        color: "bg-pink-500 hover:bg-pink-600",
-        description: t("quickActions.analyticsDesc"),
-        role: ["admin", "supervisor"],
+        href: '/analytics',
+        color: 'bg-pink-500 hover:bg-pink-600',
+        description: t('quickActions.analyticsDesc'),
+        role: ['admin', 'supervisor'],
       },
     ];
 
     // Действия для админов
     const adminActions: QuickAction[] = [
       {
-        id: "employees",
-        label: t("quickActions.employees"),
+        id: 'employees',
+        label: t('quickActions.employees'),
         icon: <User className="w-5 h-5" />,
-        href: "/employees",
-        color: "bg-teal-500 hover:bg-teal-600",
-        description: t("quickActions.employeesDesc"),
-        role: ["admin", "superadmin"],
+        href: '/employees',
+        color: 'bg-teal-500 hover:bg-teal-600',
+        description: t('quickActions.employeesDesc'),
+        role: ['admin', 'superadmin'],
       },
       {
-        id: "settings",
-        label: t("quickActions.settings"),
+        id: 'settings',
+        label: t('quickActions.settings'),
         icon: <Settings className="w-5 h-5" />,
-        href: "/settings",
-        color: "bg-gray-500 hover:bg-gray-600",
-        description: t("quickActions.settingsDesc"),
-        role: ["admin", "superadmin"],
+        href: '/settings',
+        color: 'bg-gray-500 hover:bg-gray-600',
+        description: t('quickActions.settingsDesc'),
+        role: ['admin', 'superadmin'],
       },
     ];
 
     // Собрать все действия для текущей роли
     return [
       ...commonActions,
-      ...(user?.role === "admin" || user?.role === "supervisor" ? managerActions : []),
-      ...(user?.role === "admin" || user?.role === "superadmin" ? adminActions : []),
+      ...(user?.role === 'admin' || user?.role === 'supervisor' ? managerActions : []),
+      ...(user?.role === 'admin' || user?.role === 'superadmin' ? adminActions : []),
     ];
   }, [user?.role, t]);
 
   // ═══════════════════════════════════════════════════════════════
   // OPTIMIZED: useCallback for handleAction
   // ═══════════════════════════════════════════════════════════════
-  const handleAction = useCallback((href: string, label: string) => {
-    router.push(href);
-    toast.success(t("quickActions.toast.success"), {
-      description: label,
-    });
-  }, [router, t]);
+  const handleAction = useCallback(
+    (href: string, label: string) => {
+      router.push(href);
+      toast.success(t('quickActions.toast.success'), {
+        description: label,
+      });
+    },
+    [router, t],
+  );
 
   return (
     <Card
@@ -155,11 +158,9 @@ export function QuickActions() {
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <CardTitle className="text-lg font-bold">
-              {t("quickActions.title")}
-            </CardTitle>
+            <CardTitle className="text-lg font-bold">{t('quickActions.title')}</CardTitle>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {t("quickActions.subtitle") || "Быстрый доступ к основным функциям"}
+              {t('quickActions.subtitle') || 'Быстрый доступ к основным функциям'}
             </p>
           </div>
         </div>
@@ -199,7 +200,7 @@ export function QuickActions() {
         {/* Keyboard shortcuts hint */}
         <div className="mt-5 pt-4 border-t border-gray-200/60 dark:border-gray-700/60">
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium">{t("quickActions.shortcuts.hint")}</span>
+            <span className="font-medium">{t('quickActions.shortcuts.hint')}</span>
             <div className="flex items-center gap-1.5">
               <kbd className="px-2.5 py-1.5 rounded-lg bg-gradient-to-b from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 border border-gray-300 dark:border-gray-600 font-mono text-xs font-semibold text-gray-700 dark:text-gray-200 shadow-sm">
                 Ctrl

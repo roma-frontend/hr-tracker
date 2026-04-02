@@ -14,12 +14,10 @@ const FaceRecognitionInner = dynamic(
     loading: () => (
       <div className="flex flex-col items-center justify-center gap-3 py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">
-          Loading face recognition...
-        </p>
+        <p className="text-sm text-muted-foreground">Loading face recognition...</p>
       </div>
     ),
-  }
+  },
 );
 
 export default FaceRecognitionInner;

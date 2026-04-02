@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { cn } from "@/lib/utils";
+import * as React from 'react';
+import * as TabsPrimitive from '@radix-ui/react-tabs';
+import { cn } from '@/lib/utils';
 
 const Tabs = TabsPrimitive.Root;
 
@@ -13,8 +13,8 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center justify-center rounded-lg bg-[var(--background-subtle)] p-1 text-[var(--text-muted)]",
-      className
+      'inline-flex h-10 items-center justify-center rounded-lg bg-[var(--background-subtle)] p-1 text-[var(--text-muted)]',
+      className,
     )}
     {...props}
   />
@@ -28,12 +28,12 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
-      "disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-[var(--card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm",
-      "data-[state=inactive]:text-[var(--text-muted)] data-[state=inactive]:hover:text-[var(--text-secondary)]",
-      className
+      'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
+      'disabled:pointer-events-none disabled:opacity-50',
+      'data-[state=active]:bg-[var(--card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm',
+      'data-[state=inactive]:text-[var(--text-muted)] data-[state=inactive]:hover:text-[var(--text-secondary)]',
+      className,
     )}
     {...props}
   />
@@ -47,8 +47,8 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
-      className
+      'mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
+      className,
     )}
     {...props}
   />

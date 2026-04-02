@@ -1,11 +1,11 @@
 /**
  * AI Conflict Check API
- * 
+ *
  * Проверяет конфликты для запросов AI Ассистента:
  * - Отпуска: проверяет мероприятия и department overlap
  * - Водители: проверяет доступность водителя
  * - Задачи: проверяет дедлайны и отпуска исполнителей
- * 
+ *
  * Возвращает human-readable сообщения для AI
  */
 
@@ -18,35 +18,30 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(req: NextRequest) {
   try {
-    const { 
-      userId, 
-      organizationId, 
-      requestType, 
-      startDate, 
-      endDate, 
-      metadata 
-    } = await req.json();
+    const { userId, organizationId, requestType, startDate, endDate, metadata } = await req.json();
 
-    console.log('[conflict-check] Request:', { 
-      userId, 
-      organizationId, 
-      requestType, 
-      startDate, 
-      endDate 
+    console.log('[conflict-check] Request:', {
+      userId,
+      organizationId,
+      requestType,
+      startDate,
+      endDate,
     });
 
     if (!userId || !organizationId || !requestType || !startDate || !endDate) {
       return NextResponse.json(
-        { error: 'Missing required fields: userId, organizationId, requestType, startDate, endDate' },
-        { status: 400 }
+        {
+          error: 'Missing required fields: userId, organizationId, requestType, startDate, endDate',
+        },
+        { status: 400 },
       );
     }
 
     // Вызываем Conflict Service
     const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<"organizations">,
-      requestType: requestType as "leave" | "driver" | "task" | "event",
-      userId: userId as Id<"users">,
+      organizationId: organizationId as Id<'organizations'>,
+      requestType: requestType as 'leave' | 'driver' | 'task' | 'event',
+      userId: userId as Id<'users'>,
       startDate: new Date(startDate).getTime(),
       endDate: new Date(endDate).getTime(),
       metadata: metadata || {},
@@ -56,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     // Форматируем для AI
     const aiFriendlyMessage = formatConflictsForAI(conflictResult.conflicts, requestType);
-    
+
     // Извлекаем альтернативные даты из конфликтов
     const alternativeDates = extractAlternativeDates(conflictResult.conflicts, requestType);
 
@@ -70,15 +65,14 @@ export async function POST(req: NextRequest) {
       alternativeDates,
       canProceed: !conflictResult.hasCritical,
     });
-
   } catch (error: any) {
     console.error('[conflict-check] Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: error.message || 'Failed to check conflicts',
         success: false,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -94,17 +88,14 @@ export async function GET(req: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     if (!userId || !organizationId || !requestType || !startDate || !endDate) {
-      return NextResponse.json(
-        { error: 'Missing required query params' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required query params' }, { status: 400 });
     }
 
     // Вызываем Conflict Service
     const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<"organizations">,
-      requestType: requestType as "leave" | "driver" | "task" | "event",
-      userId: userId as Id<"users">,
+      organizationId: organizationId as Id<'organizations'>,
+      requestType: requestType as 'leave' | 'driver' | 'task' | 'event',
+      userId: userId as Id<'users'>,
       startDate: parseInt(startDate),
       endDate: parseInt(endDate),
     });
@@ -119,12 +110,11 @@ export async function GET(req: NextRequest) {
       aiMessage: aiFriendlyMessage,
       canProceed: !conflictResult.hasCritical,
     });
-
   } catch (error: any) {
     console.error('[conflict-check] Error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to check conflicts' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -134,34 +124,34 @@ export async function GET(req: NextRequest) {
  */
 function formatConflictsForAI(conflicts: any[], requestType: string): string {
   if (conflicts.length === 0) {
-    return "✅ Конфликтов не обнаружено. Можно продолжать.";
+    return '✅ Конфликтов не обнаружено. Можно продолжать.';
   }
 
-  const critical = conflicts.filter(c => c.severity === 'critical');
-  const warnings = conflicts.filter(c => c.severity === 'warning');
+  const critical = conflicts.filter((c) => c.severity === 'critical');
+  const warnings = conflicts.filter((c) => c.severity === 'warning');
 
-  let message = "";
+  let message = '';
 
   if (critical.length > 0) {
-    message += "🚨 **КРИТИЧЕСКИЕ КОНФЛИКТЫ** (требуют внимания):\n";
-    critical.forEach(c => {
+    message += '🚨 **КРИТИЧЕСКИЕ КОНФЛИКТЫ** (требуют внимания):\n';
+    critical.forEach((c) => {
       message += `• ${c.title}: ${c.message} 💡 ${c.suggestion}\n`;
     });
   }
 
   if (warnings.length > 0) {
-    message += "\n⚠️ **ПРЕДУПРЕЖДЕНИЯ**:\n";
-    warnings.forEach(c => {
+    message += '\n⚠️ **ПРЕДУПРЕЖДЕНИЯ**:\n';
+    warnings.forEach((c) => {
       message += `• ${c.title}: ${c.message} 💡 ${c.suggestion}\n`;
     });
   }
 
   if (requestType === 'leave') {
-    message += "\n📅 **Рекомендация AI**: ";
+    message += '\n📅 **Рекомендация AI**: ';
     if (critical.length > 0) {
-      message += "Настоятельно рекомендую выбрать другие даты или обсудить с руководителем.";
+      message += 'Настоятельно рекомендую выбрать другие даты или обсудить с руководителем.';
     } else if (warnings.length > 0) {
-      message += "Можно продолжить, но будьте готовы к возможным сложностям.";
+      message += 'Можно продолжить, но будьте готовы к возможным сложностям.';
     }
   }
 
@@ -173,34 +163,34 @@ function formatConflictsForAI(conflicts: any[], requestType: string): string {
  */
 function extractAlternativeDates(conflicts: any[], requestType: string): string[] {
   const alternativeDates: string[] = [];
-  
+
   if (requestType !== 'leave') return alternativeDates;
-  
+
   // Если есть конфликты, предлагаем даты через 2 недели
   if (conflicts.length > 0) {
     const now = new Date();
     const alternativeStart = new Date(now);
     alternativeStart.setDate(alternativeStart.getDate() + 14);
-    
+
     const alternativeEnd = new Date(alternativeStart);
     alternativeEnd.setDate(alternativeEnd.getDate() + 7);
-    
+
     const options = [
       `${alternativeStart.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} - ${alternativeEnd.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`,
     ];
-    
+
     // Ещё одна опция через 3 недели
     const altStart2 = new Date(now);
     altStart2.setDate(altStart2.getDate() + 21);
     const altEnd2 = new Date(altStart2);
     altEnd2.setDate(altEnd2.getDate() + 7);
-    
+
     options.push(
-      `${altStart2.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} - ${altEnd2.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`
+      `${altStart2.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} - ${altEnd2.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`,
     );
-    
+
     return options;
   }
-  
+
   return alternativeDates;
 }

@@ -6,39 +6,46 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // Тип для совместимости с framer-motion
-export type HTMLMotionProps<T extends HTMLElement = HTMLDivElement> = MotionProps & React.HTMLAttributes<T>;
+export type HTMLMotionProps<T extends HTMLElement = HTMLDivElement> = MotionProps &
+  React.HTMLAttributes<T>;
 
 interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
   layout?: boolean;
-  initial?: {
-    opacity?: number;
-    x?: number | string;
-    y?: number | string;
-    scale?: number;
-    width?: number | string;
-    height?: number | string;
-    rotate?: number;
-  } | string;
-  animate?: {
-    opacity?: number;
-    x?: number | string;
-    y?: number | string;
-    scale?: number;
-    width?: number | string;
-    height?: number | string;
-    rotate?: number;
-  } | string;
-  exit?: {
-    opacity?: number;
-    x?: number | string;
-    y?: number | string;
-    scale?: number;
-    width?: number | string;
-    height?: number | string;
-    rotate?: number;
-  } | string;
+  initial?:
+    | {
+        opacity?: number;
+        x?: number | string;
+        y?: number | string;
+        scale?: number;
+        width?: number | string;
+        height?: number | string;
+        rotate?: number;
+      }
+    | string;
+  animate?:
+    | {
+        opacity?: number;
+        x?: number | string;
+        y?: number | string;
+        scale?: number;
+        width?: number | string;
+        height?: number | string;
+        rotate?: number;
+      }
+    | string;
+  exit?:
+    | {
+        opacity?: number;
+        x?: number | string;
+        y?: number | string;
+        scale?: number;
+        width?: number | string;
+        height?: number | string;
+        rotate?: number;
+      }
+    | string;
   transition?: {
     duration?: number;
     delay?: number;
@@ -58,9 +65,27 @@ interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
   };
   onAnimationComplete?: () => void;
   variants?: {
-    hidden?: { opacity?: number; x?: number | string; y?: number | string; scale?: number; width?: number | string; };
-    visible?: { opacity?: number; x?: number | string; y?: number | string; scale?: number; width?: number | string; };
-    exit?: { opacity?: number; x?: number | string; y?: number | string; scale?: number; width?: number | string; };
+    hidden?: {
+      opacity?: number;
+      x?: number | string;
+      y?: number | string;
+      scale?: number;
+      width?: number | string;
+    };
+    visible?: {
+      opacity?: number;
+      x?: number | string;
+      y?: number | string;
+      scale?: number;
+      width?: number | string;
+    };
+    exit?: {
+      opacity?: number;
+      x?: number | string;
+      y?: number | string;
+      scale?: number;
+      width?: number | string;
+    };
   };
 }
 
@@ -88,9 +113,12 @@ export function MotionDiv({
   const [mounted, setMounted] = useState(false);
 
   // Handle variants - convert string initial/animate to object
-  const initialObj = typeof initial === 'string' && variants ? variants[initial as keyof typeof variants] : initial;
-  const animateObj = typeof animate === 'string' && variants ? variants[animate as keyof typeof variants] : animate;
-  const exitObj = typeof exit === 'string' && variants ? variants[exit as keyof typeof variants] : exit;
+  const initialObj =
+    typeof initial === 'string' && variants ? variants[initial as keyof typeof variants] : initial;
+  const animateObj =
+    typeof animate === 'string' && variants ? variants[animate as keyof typeof variants] : animate;
+  const exitObj =
+    typeof exit === 'string' && variants ? variants[exit as keyof typeof variants] : exit;
 
   // Use layout effect to avoid cascading renders
   useEffect(() => {
@@ -118,7 +146,8 @@ export function MotionDiv({
     if (exiting && exitState) {
       if (exitState.opacity === 0) return 'animate-fade-out';
       if (exitState.scale && exitState.scale < 1) return 'animate-scale-out';
-      if (exitState.y && typeof exitState.y === 'string' && exitState.y.includes('-')) return 'animate-slide-down';
+      if (exitState.y && typeof exitState.y === 'string' && exitState.y.includes('-'))
+        return 'animate-slide-down';
       if (exitState.y) return 'animate-slide-up';
     }
 
@@ -126,9 +155,11 @@ export function MotionDiv({
       // Apply animation classes immediately, not waiting for mounted
       if (animateState.opacity === 1) return 'animate-fade-in';
       if (animateState.scale && animateState.scale > 1) return 'animate-scale-in';
-      if (animateState.y && typeof animateState.y === 'string' && animateState.y.includes('-')) return 'animate-slide-down';
+      if (animateState.y && typeof animateState.y === 'string' && animateState.y.includes('-'))
+        return 'animate-slide-down';
       if (animateState.y) return 'animate-slide-up';
-      if (animateState.x && typeof animateState.x === 'string' && animateState.x.includes('-')) return 'animate-slide-in-left';
+      if (animateState.x && typeof animateState.x === 'string' && animateState.x.includes('-'))
+        return 'animate-slide-in-left';
       if (animateState.x) return 'animate-slide-in-right';
     }
 
@@ -163,26 +194,30 @@ export function MotionDiv({
 
     if (exiting && exitState) {
       if (exitState.width !== undefined) {
-        style.width = typeof exitState.width === 'number' ? `${exitState.width}px` : exitState.width;
+        style.width =
+          typeof exitState.width === 'number' ? `${exitState.width}px` : exitState.width;
       }
       if (exitState.opacity !== undefined) style.opacity = exitState.opacity;
       if (exitState.x !== undefined) {
         style.transform = `translateX(${typeof exitState.x === 'number' ? `${exitState.x}px` : exitState.x})`;
       }
       if (exitState.y !== undefined) {
-        style.transform = `${style.transform || ''} translateY(${typeof exitState.y === 'number' ? `${exitState.y}px` : exitState.y})`.trim();
+        style.transform =
+          `${style.transform || ''} translateY(${typeof exitState.y === 'number' ? `${exitState.y}px` : exitState.y})`.trim();
       }
     } else if (animateState) {
       // Apply animate styles immediately, not waiting for mounted
       if (animateState.width !== undefined) {
-        style.width = typeof animateState.width === 'number' ? `${animateState.width}px` : animateState.width;
+        style.width =
+          typeof animateState.width === 'number' ? `${animateState.width}px` : animateState.width;
       }
       if (animateState.opacity !== undefined) style.opacity = animateState.opacity;
       if (animateState.x !== undefined) {
         style.transform = `translateX(${typeof animateState.x === 'number' ? `${animateState.x}px` : animateState.x})`;
       }
       if (animateState.y !== undefined) {
-        style.transform = `${style.transform || ''} translateY(${typeof animateState.y === 'number' ? `${animateState.y}px` : animateState.y})`.trim();
+        style.transform =
+          `${style.transform || ''} translateY(${typeof animateState.y === 'number' ? `${animateState.y}px` : animateState.y})`.trim();
       }
     }
 
@@ -197,15 +232,18 @@ export function MotionDiv({
     const style: React.CSSProperties = {};
     if (initialState.opacity !== undefined) style.opacity = initialState.opacity;
     if (initialState.width !== undefined) {
-      style.width = typeof initialState.width === 'number' ? `${initialState.width}px` : initialState.width;
+      style.width =
+        typeof initialState.width === 'number' ? `${initialState.width}px` : initialState.width;
     }
     if (initialState.x !== undefined) {
       style.transform = `translateX(${typeof initialState.x === 'number' ? `${initialState.x}px` : initialState.x})`;
     }
     if (initialState.y !== undefined) {
-      style.transform = `${style.transform || ''} translateY(${typeof initialState.y === 'number' ? `${initialState.y}px` : initialState.y})`.trim();
+      style.transform =
+        `${style.transform || ''} translateY(${typeof initialState.y === 'number' ? `${initialState.y}px` : initialState.y})`.trim();
     }
-    if (initialState.scale !== undefined) style.transform = `${style.transform || ''} scale(${initialState.scale})`.trim();
+    if (initialState.scale !== undefined)
+      style.transform = `${style.transform || ''} scale(${initialState.scale})`.trim();
 
     return style;
   };

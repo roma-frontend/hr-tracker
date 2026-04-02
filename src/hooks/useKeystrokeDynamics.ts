@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect } from 'react';
 
 export interface KeystrokeSample {
-  avgDwell: number;    // avg key hold time in ms
-  avgFlight: number;   // avg time between keydowns in ms
+  avgDwell: number; // avg key hold time in ms
+  avgFlight: number; // avg time between keydowns in ms
   stdDevDwell: number;
   stdDevFlight: number;
   sampleCount: number;
@@ -25,7 +25,7 @@ export function useKeystrokeDynamics() {
   const currentKey = useRef<Map<string, number>>(new Map());
 
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key.length === 1 || e.key === "Backspace") {
+    if (e.key.length === 1 || e.key === 'Backspace') {
       currentKey.current.set(e.key, Date.now());
     }
   }, []);

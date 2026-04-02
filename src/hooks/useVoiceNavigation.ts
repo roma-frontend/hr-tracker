@@ -1,6 +1,6 @@
 /**
  * Voice Navigation Hook
- * 
+ *
  * Provides voice-controlled navigation with role-based permissions
  */
 
@@ -23,41 +23,45 @@ export function useVoiceNavigation(options: VoiceNavigationOptions = {}) {
   const [transcript, setTranscript] = useState('');
   const recognitionRef = useRef<any>(null);
 
-  const navigate = useCallback((route: string) => {
-    console.log('🎯 Voice navigation:', route);
-    router.push(route);
-  }, [router]);
+  const navigate = useCallback(
+    (route: string) => {
+      console.log('🎯 Voice navigation:', route);
+      router.push(route);
+    },
+    [router],
+  );
 
-  const processVoiceCommand = useCallback((command: string) => {
-    if (!user) return;
+  const processVoiceCommand = useCallback(
+    (command: string) => {
+      if (!user) return;
 
-    console.log('🎤 Voice command:', command);
-    setTranscript(command);
+      console.log('🎤 Voice command:', command);
+      setTranscript(command);
 
-    // Detect intent based on user role
-    const intent = detectIntent(command, user.role as UserRole);
-    
-    if (intent?.action) {
-      console.log('✅ Intent detected:', intent.name, '→', intent.action);
-      navigate(intent.action);
-      
-      // Provide voice feedback
-      if (window.speechSynthesis) {
-        const utterance = new SpeechSynthesisUtterance(
-          language === 'ru-RU' 
-            ? `Открываю ${intent.name}`
-            : `Opening ${intent.name}`
-        );
-        utterance.lang = language;
-        window.speechSynthesis.speak(utterance);
+      // Detect intent based on user role
+      const intent = detectIntent(command, user.role as UserRole);
+
+      if (intent?.action) {
+        console.log('✅ Intent detected:', intent.name, '→', intent.action);
+        navigate(intent.action);
+
+        // Provide voice feedback
+        if (window.speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(
+            language === 'ru-RU' ? `Открываю ${intent.name}` : `Opening ${intent.name}`,
+          );
+          utterance.lang = language;
+          window.speechSynthesis.speak(utterance);
+        }
+      } else {
+        console.log('❌ No matching intent for:', command);
       }
-    } else {
-      console.log('❌ No matching intent for:', command);
-    }
-  }, [user, language, navigate]);
+    },
+    [user, language, navigate],
+  );
 
   const startListening = useCallback(() => {
-    if (!enabled || !window.SpeechRecognition && !window.webkitSpeechRecognition) {
+    if (!enabled || (!window.SpeechRecognition && !window.webkitSpeechRecognition)) {
       console.warn('Speech recognition not supported');
       return;
     }

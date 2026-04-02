@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useTranslation } from "react-i18next";
-import { Clock, X } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
+import { Clock, X } from 'lucide-react';
 
 export function MaintenanceBanner() {
   const { user } = useAuthStore();
   const { t, i18n } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
-  const [countdown, setCountdown] = useState("");
+  const [countdown, setCountdown] = useState('');
 
   const organizationId = user?.organizationId;
 
   const maintenance = useQuery(
     api.admin.getMaintenanceMode,
-    organizationId ? { organizationId: organizationId as any } : "skip"
+    organizationId ? { organizationId: organizationId as any } : 'skip',
   );
 
   // Countdown timer
@@ -39,12 +39,10 @@ export function MaintenanceBanner() {
       const endTime =
         maintenance.endTime ||
         startTime +
-          (maintenance.estimatedDuration
-            ? parseDuration(maintenance.estimatedDuration)
-            : 3600000);
+          (maintenance.estimatedDuration ? parseDuration(maintenance.estimatedDuration) : 3600000);
 
       if (now >= endTime) {
-        setCountdown("");
+        setCountdown('');
         return;
       }
 
@@ -69,28 +67,28 @@ export function MaintenanceBanner() {
   const hasStarted = now >= maintenance.startTime;
 
   // If already started and user is not superadmin — MaintenanceScreen handles it
-  if (hasStarted && user?.role !== "superadmin") return null;
+  if (hasStarted && user?.role !== 'superadmin') return null;
 
-  const icon = maintenance.icon || "🔧";
-  const title = maintenance.title || t("maintenance.title");
+  const icon = maintenance.icon || '🔧';
+  const title = maintenance.title || t('maintenance.title');
 
   // Build localized message
   const status = hasStarted
-    ? t("maintenance.bannerInProgress")
+    ? t('maintenance.bannerInProgress')
     : countdown
-      ? t("maintenance.bannerStartsIn", { time: countdown })
-      : t("maintenance.bannerStartsSoon");
+      ? t('maintenance.bannerStartsIn', { time: countdown })
+      : t('maintenance.bannerStartsSoon');
 
   const message = `${icon} ${title} — ${status}`;
-  const detail = maintenance.message || "";
+  const detail = maintenance.message || '';
 
   // Locale-aware date formatting
-  const locale = i18n.language === "hy" ? "hy-AM" : i18n.language === "ru" ? "ru-RU" : "en-US";
+  const locale = i18n.language === 'hy' ? 'hy-AM' : i18n.language === 'ru' ? 'ru-RU' : 'en-US';
   const startFormatted = new Date(maintenance.startTime).toLocaleString(locale, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
   return (
@@ -103,17 +101,13 @@ export function MaintenanceBanner() {
               {message}
             </p>
             <div className="flex items-center gap-3 text-xs text-amber-700 dark:text-amber-400/80">
-              {detail && (
-                <span className="truncate">{detail}</span>
-              )}
+              {detail && <span className="truncate">{detail}</span>}
               <span className="flex items-center gap-1 flex-shrink-0">
                 <Clock className="w-3 h-3" />
                 {startFormatted}
               </span>
               {maintenance.estimatedDuration && (
-                <span className="flex-shrink-0">
-                  ~ {maintenance.estimatedDuration}
-                </span>
+                <span className="flex-shrink-0">~ {maintenance.estimatedDuration}</span>
               )}
             </div>
           </div>
@@ -154,7 +148,7 @@ function formatRemaining(ms: number): string {
 function parseDuration(duration: string): number {
   const match = duration.match(/(\d+)/);
   const amount = match ? parseInt(match[1]) : 1;
-  if (duration.includes("hour") || duration.includes("час")) return amount * 3600000;
-  if (duration.includes("minute") || duration.includes("мин")) return amount * 60000;
+  if (duration.includes('hour') || duration.includes('час')) return amount * 3600000;
+  if (duration.includes('minute') || duration.includes('мин')) return amount * 60000;
   return amount * 3600000;
 }

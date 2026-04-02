@@ -3,13 +3,13 @@
  * Универсальный компонент для пошаговых форм
  */
 
-"use client";
+'use client';
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
+import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface StepContent {
   stepData?: Record<string, string | number | boolean | null>;
@@ -40,14 +40,15 @@ export function Wizard({
   steps,
   onComplete,
   onCancel,
-  submitLabel = "Submit",
-  cancelLabel = "Cancel",
+  submitLabel = 'Submit',
+  cancelLabel = 'Cancel',
   showStepper = true,
   className,
   defaultStepData = {},
 }: WizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [stepData, setStepData] = useState<Record<string, string | number | boolean | null>>(defaultStepData);
+  const [stepData, setStepData] =
+    useState<Record<string, string | number | boolean | null>>(defaultStepData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentStepData = steps[currentStep];
@@ -59,7 +60,7 @@ export function Wizard({
 
   const handleNext = () => {
     if (currentStep < steps.length - 1 && canGoNext()) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     } else if (currentStep === steps.length - 1) {
       handleSubmit();
     }
@@ -67,7 +68,7 @@ export function Wizard({
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   };
 
@@ -81,7 +82,7 @@ export function Wizard({
   };
 
   const updateStepData = (key: string, value: string | number | boolean | null) => {
-    setStepData(prev => ({
+    setStepData((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -90,7 +91,7 @@ export function Wizard({
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className={cn("w-full p-3 md:p-6", className)}>
+    <div className={cn('w-full p-3 md:p-6', className)}>
       {/* Stepper */}
       {showStepper && (
         <div className="mb-6 md:mb-8">
@@ -100,7 +101,7 @@ export function Wizard({
               className="absolute inset-y-0 left-0 bg-(--primary)"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
             />
           </div>
 
@@ -115,12 +116,12 @@ export function Wizard({
                   <div className="flex flex-col items-center flex-1 min-w-0">
                     <motion.div
                       className={cn(
-                        "w-7 h-7 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-colors shrink-0",
+                        'w-7 h-7 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-colors shrink-0',
                         isCompleted
-                          ? "bg-(--primary) border-(--primary) text-white"
+                          ? 'bg-(--primary) border-(--primary) text-white'
                           : isCurrent
-                          ? "border-(--primary) bg-(--background) text-(--primary)"
-                          : "border-(--border) bg-(--background) text-(--muted-foreground)"
+                            ? 'border-(--primary) bg-(--background) text-(--primary)'
+                            : 'border-(--border) bg-(--background) text-(--muted-foreground)',
                       )}
                       initial={{ scale: 1 }}
                       animate={{ scale: isCurrent ? 1.1 : 1 }}
@@ -135,10 +136,8 @@ export function Wizard({
                     <div className="mt-1 md:mt-2 text-center w-full px-1">
                       <p
                         className={cn(
-                          "text-[9px] md:text-xs font-medium transition-colors truncate",
-                          isCurrent
-                            ? "text-(--primary)"
-                            : "text-(--muted-foreground)"
+                          'text-[9px] md:text-xs font-medium transition-colors truncate',
+                          isCurrent ? 'text-(--primary)' : 'text-(--muted-foreground)',
                         )}
                       >
                         {step.title}
@@ -155,11 +154,11 @@ export function Wizard({
                     <div className="flex-1 h-0.5 bg-(--border) mx-1 md:mx-2 max-w-5 md:max-w-none">
                       <motion.div
                         className={cn(
-                          "h-full transition-colors",
-                          isCompleted ? "bg-(--primary)" : "bg-(--border)"
+                          'h-full transition-colors',
+                          isCompleted ? 'bg-(--primary)' : 'bg-(--border)',
                         )}
-                        initial={{ width: "0%" }}
-                        animate={{ width: isCompleted ? "100%" : "0%" }}
+                        initial={{ width: '0%' }}
+                        animate={{ width: isCompleted ? '100%' : '0%' }}
                         transition={{ duration: 0.3 }}
                       />
                     </div>
@@ -179,7 +178,7 @@ export function Wizard({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             className="h-full"
           >
             <div className="mb-4 md:mb-6">
@@ -194,10 +193,16 @@ export function Wizard({
             </div>
 
             <div className="space-y-3 md:space-y-4">
-              {React.cloneElement(currentStepData.content as React.ReactElement<{ stepData?: Record<string, string | number | boolean | null>; updateStepData?: (key: string, value: string | number | boolean | null) => void }>, {
-                stepData,
-                updateStepData,
-              })}
+              {React.cloneElement(
+                currentStepData.content as React.ReactElement<{
+                  stepData?: Record<string, string | number | boolean | null>;
+                  updateStepData?: (key: string, value: string | number | boolean | null) => void;
+                }>,
+                {
+                  stepData,
+                  updateStepData,
+                },
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -231,14 +236,14 @@ export function Wizard({
             onClick={handleNext}
             disabled={!canGoNext() || isSubmitting}
             className={cn(
-              "gap-1 md:gap-2 w-full sm:w-auto text-sm",
+              'gap-1 md:gap-2 w-full sm:w-auto text-sm',
               currentStep === steps.length - 1
-                ? "bg-(--primary) hover:bg-(--primary-hover) text-white"
-                : "bg-(--primary) hover:bg-(--primary-hover) text-white"
+                ? 'bg-(--primary) hover:bg-(--primary-hover) text-white'
+                : 'bg-(--primary) hover:bg-(--primary-hover) text-white',
             )}
           >
             {isSubmitting ? (
-              "Processing..."
+              'Processing...'
             ) : currentStep === steps.length - 1 ? (
               submitLabel
             ) : (

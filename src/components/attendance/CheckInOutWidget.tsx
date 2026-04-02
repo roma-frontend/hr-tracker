@@ -1,26 +1,26 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import React, { useState, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Clock, LogIn, LogOut, Calendar, TrendingUp, AlertCircle } from "lucide-react";
+import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Clock, LogIn, LogOut, Calendar, TrendingUp, AlertCircle } from 'lucide-react';
 import { motion } from '@/lib/cssMotion';
-import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuthStore";
-import { format } from "date-fns";
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
+import { format } from 'date-fns';
 
 export function CheckInOutWidget() {
-  
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
-  const todayStatus = useQuery(api.timeTracking.getTodayStatus,
-    user?.id ? { userId: user.id as any } : "skip"
+  const todayStatus = useQuery(
+    api.timeTracking.getTodayStatus,
+    user?.id ? { userId: user.id as any } : 'skip',
   );
 
   const checkIn = useMutation(api.timeTracking.checkIn);
@@ -36,9 +36,9 @@ export function CheckInOutWidget() {
     if (!user?.id) return;
     try {
       await checkIn({ userId: user.id as any });
-      toast.success(t("toasts.checkedInSuccess"));
+      toast.success(t('toasts.checkedInSuccess'));
     } catch (error: any) {
-      toast.error(error.message || "Failed to check in");
+      toast.error(error.message || 'Failed to check in');
     }
   };
 
@@ -46,17 +46,17 @@ export function CheckInOutWidget() {
     if (!user?.id) return;
     try {
       await checkOut({ userId: user.id as any });
-      toast.success(t("toasts.checkedOutSuccess"));
+      toast.success(t('toasts.checkedOutSuccess'));
     } catch (error: any) {
-      toast.error(error.message || "Failed to check out");
+      toast.error(error.message || 'Failed to check out');
     }
   };
 
-  const isCheckedIn = todayStatus?.status === "checked_in";
-  const isCheckedOut = todayStatus?.status === "checked_out";
+  const isCheckedIn = todayStatus?.status === 'checked_in';
+  const isCheckedOut = todayStatus?.status === 'checked_out';
 
   const formatTime = (timestamp: number) => {
-    return format(new Date(timestamp), "HH:mm:ss");
+    return format(new Date(timestamp), 'HH:mm:ss');
   };
 
   const formatDuration = (minutes: number) => {
@@ -74,7 +74,7 @@ export function CheckInOutWidget() {
             {t('attendance.timeTracker')}
           </CardTitle>
           <div className="text-2xl font-mono">
-            {currentTime ? format(currentTime, "HH:mm:ss") : "--:--:--"}
+            {currentTime ? format(currentTime, 'HH:mm:ss') : '--:--:--'}
           </div>
         </div>
       </CardHeader>
@@ -84,53 +84,47 @@ export function CheckInOutWidget() {
         <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--background-subtle)]">
           <div>
             <p className="text-sm text-[var(--text-muted)]">Status</p>
-            <p className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+            <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
               {!todayStatus && t('attendance.notCheckedIn')}
-              {isCheckedIn && "At Work"}
-              {isCheckedOut && "Finished for Today"}
+              {isCheckedIn && 'At Work'}
+              {isCheckedOut && 'Finished for Today'}
             </p>
           </div>
           <Badge
-            variant={isCheckedIn ? "default" : isCheckedOut ? "secondary" : "outline"}
+            variant={isCheckedIn ? 'default' : isCheckedOut ? 'secondary' : 'outline'}
             className={
-              isCheckedIn
-                ? "bg-green-500 text-white"
-                : isCheckedOut
-                ? "bg-blue-500 text-white"
-                : ""
+              isCheckedIn ? 'bg-green-500 text-white' : isCheckedOut ? 'bg-blue-500 text-white' : ''
             }
           >
-            {!todayStatus && "Offline"}
-            {isCheckedIn && "Online"}
-            {isCheckedOut && "Offline"}
+            {!todayStatus && 'Offline'}
+            {isCheckedIn && 'Online'}
+            {isCheckedOut && 'Offline'}
           </Badge>
         </div>
 
         {/* Check In/Out Times */}
         {todayStatus && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-3 rounded-lg border" style={{ borderColor: "var(--border)" }}>
+            <div className="p-3 rounded-lg border" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <LogIn className="w-4 h-4 text-green-500" />
                 <span className="text-xs text-[var(--text-muted)]">Check In</span>
               </div>
-              <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
+              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {formatTime(todayStatus.checkInTime)}
               </p>
               {todayStatus.isLate && todayStatus.lateMinutes && (
-                <p className="text-xs text-red-500 mt-1">
-                  Late by {todayStatus.lateMinutes} min
-                </p>
+                <p className="text-xs text-red-500 mt-1">Late by {todayStatus.lateMinutes} min</p>
               )}
             </div>
 
-            <div className="p-3 rounded-lg border" style={{ borderColor: "var(--border)" }}>
+            <div className="p-3 rounded-lg border" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <LogOut className="w-4 h-4 text-blue-500" />
                 <span className="text-xs text-[var(--text-muted)]">Check Out</span>
               </div>
-              <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                {todayStatus.checkOutTime ? formatTime(todayStatus.checkOutTime) : "—"}
+              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {todayStatus.checkOutTime ? formatTime(todayStatus.checkOutTime) : '—'}
               </p>
               {todayStatus.isEarlyLeave && todayStatus.earlyLeaveMinutes && (
                 <p className="text-xs text-orange-500 mt-1">
@@ -147,7 +141,7 @@ export function CheckInOutWidget() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   Total Worked
                 </span>
               </div>
@@ -189,9 +183,7 @@ export function CheckInOutWidget() {
 
           {isCheckedOut && (
             <div className="flex-1 p-4 rounded-lg bg-blue-50 dark:bg-blue-950 text-center">
-              <p className="text-blue-600 dark:text-blue-400 font-medium">
-                See you tomorrow! 👋
-              </p>
+              <p className="text-blue-600 dark:text-blue-400 font-medium">See you tomorrow! 👋</p>
             </div>
           )}
         </div>

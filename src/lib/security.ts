@@ -24,9 +24,7 @@ const CSRF_TOKEN_LENGTH = 32;
  */
 export function generateCSRFToken(): string {
   const token = randomBytes(CSRF_TOKEN_LENGTH).toString('hex');
-  const signature = createHmac('sha256', CSRF_SECRET)
-    .update(token)
-    .digest('hex');
+  const signature = createHmac('sha256', CSRF_SECRET).update(token).digest('hex');
   return `${token}.${signature}`;
 }
 
@@ -39,9 +37,7 @@ export function verifyCSRFToken(token: string): boolean {
   const [tokenPart, signature] = token.split('.');
   if (!tokenPart || !signature) return false;
 
-  const expectedSignature = createHmac('sha256', CSRF_SECRET)
-    .update(tokenPart)
-    .digest('hex');
+  const expectedSignature = createHmac('sha256', CSRF_SECRET).update(tokenPart).digest('hex');
 
   // Use timing-safe comparison to prevent timing attacks
   if (signature.length !== expectedSignature.length) return false;
@@ -57,7 +53,7 @@ export function verifyCSRFToken(token: string): boolean {
  */
 export function sanitizeString(input: string): string {
   if (typeof input !== 'string') return '';
-  
+
   return input
     .replace(/[<>]/g, '') // Удаляем < и >
     .replace(/javascript:/gi, '') // Удаляем javascript:
@@ -71,11 +67,11 @@ export function sanitizeString(input: string): string {
  */
 export function sanitizeHTML(html: string): string {
   if (typeof html !== 'string') return '';
-  
+
   // Список разрешенных тегов
   const allowedTags = ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li', 'a'];
   const tagPattern = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
-  
+
   return html.replace(tagPattern, (match, tag) => {
     return allowedTags.includes(tag.toLowerCase()) ? match : '';
   });
@@ -86,15 +82,15 @@ export function sanitizeHTML(html: string): string {
  */
 export function validateEmail(email: string): boolean {
   if (typeof email !== 'string') return false;
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isValid = emailRegex.test(email);
-  
+
   // Дополнительные проверки
   if (!isValid) return false;
   if (email.length > 254) return false; // RFC 5321
   if (email.includes('..')) return false; // Двойные точки
-  
+
   return true;
 }
 
@@ -103,10 +99,10 @@ export function validateEmail(email: string): boolean {
  */
 export function validatePhone(phone: string): boolean {
   if (typeof phone !== 'string') return false;
-  
+
   // Удаляем все символы кроме цифр и +
   const cleaned = phone.replace(/[^\d+]/g, '');
-  
+
   // Проверяем длину (от 10 до 15 цифр)
   return cleaned.length >= 10 && cleaned.length <= 15;
 }
@@ -116,7 +112,7 @@ export function validatePhone(phone: string): boolean {
  */
 export function validateURL(url: string): boolean {
   if (typeof url !== 'string') return false;
-  
+
   try {
     const parsed = new URL(url);
     // Разрешаем только http и https
@@ -131,7 +127,7 @@ export function validateURL(url: string): boolean {
  */
 export function containsSQLInjection(input: string): boolean {
   if (typeof input !== 'string') return false;
-  
+
   const sqlPatterns = [
     /(\bSELECT\b|\bUNION\b|\bDROP\b|\bINSERT\b|\bUPDATE\b|\bDELETE\b|\bEXEC\b|\bEXECUTE\b)/i,
     /(\bOR\b|\bAND\b)\s+[\d\w]+\s*=\s*[\d\w]+/i,
@@ -139,8 +135,8 @@ export function containsSQLInjection(input: string): boolean {
     /;.*(\bDROP\b|\bDELETE\b)/i,
     /'\s*(OR|AND)\s*'?\d/i,
   ];
-  
-  return sqlPatterns.some(pattern => pattern.test(input));
+
+  return sqlPatterns.some((pattern) => pattern.test(input));
 }
 
 /**
@@ -148,7 +144,7 @@ export function containsSQLInjection(input: string): boolean {
  */
 export function containsXSS(input: string): boolean {
   if (typeof input !== 'string') return false;
-  
+
   const xssPatterns = [
     /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
     /<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi,
@@ -158,8 +154,8 @@ export function containsXSS(input: string): boolean {
     /<object[\s\S]*?>/gi,
     /eval\s*\(/gi,
   ];
-  
-  return xssPatterns.some(pattern => pattern.test(input));
+
+  return xssPatterns.some((pattern) => pattern.test(input));
 }
 
 /**
@@ -167,21 +163,21 @@ export function containsXSS(input: string): boolean {
  */
 export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
   const sanitized = {} as T;
-  
+
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       sanitized[key as keyof T] = sanitizeString(value) as any;
     } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       sanitized[key as keyof T] = sanitizeObject(value);
     } else if (Array.isArray(value)) {
-      sanitized[key as keyof T] = value.map(item => 
-        typeof item === 'string' ? sanitizeString(item) : item
+      sanitized[key as keyof T] = value.map((item) =>
+        typeof item === 'string' ? sanitizeString(item) : item,
       ) as any;
     } else {
       sanitized[key as keyof T] = value;
     }
   }
-  
+
   return sanitized;
 }
 
@@ -197,41 +193,49 @@ export function validatePassword(password: string): {
   errors: string[];
 } {
   const errors: string[] = [];
-  
+
   if (typeof password !== 'string') {
     return { valid: false, errors: ['Password must be a string'] };
   }
-  
+
   if (password.length < 8) {
     errors.push('Password must be at least 8 characters long');
   }
-  
+
   if (!/[a-z]/.test(password)) {
     errors.push('Password must contain at least one lowercase letter');
   }
-  
+
   if (!/[A-Z]/.test(password)) {
     errors.push('Password must contain at least one uppercase letter');
   }
-  
+
   if (!/\d/.test(password)) {
     errors.push('Password must contain at least one number');
   }
-  
+
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     errors.push('Password must contain at least one special character');
   }
-  
+
   // Проверка на общие пароли
   const commonPasswords = [
-    'password', '12345678', 'qwerty', 'abc123', 'password123',
-    'admin', 'letmein', 'welcome', 'monkey', '1234567890'
+    'password',
+    '12345678',
+    'qwerty',
+    'abc123',
+    'password123',
+    'admin',
+    'letmein',
+    'welcome',
+    'monkey',
+    '1234567890',
   ];
-  
+
   if (commonPasswords.includes(password.toLowerCase())) {
     errors.push('This password is too common and not secure');
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
@@ -247,9 +251,9 @@ export function generateSecurePassword(length: number = 16): string {
   const numbers = '0123456789';
   const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
   const allChars = lowercase + uppercase + numbers + special;
-  
+
   let password = '';
-  
+
   // Гарантируем наличие каждого типа символов (crypto-safe)
   password += lowercase[crypto.getRandomValues(new Uint8Array(1))[0] % lowercase.length];
   password += uppercase[crypto.getRandomValues(new Uint8Array(1))[0] % uppercase.length];
@@ -276,13 +280,20 @@ export function generateSecurePassword(length: number = 16): string {
 // ═══════════════════════════════════════════════════════════════
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const ALLOWED_DOCUMENT_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**
  * Валидация загружаемого файла
  */
-export function validateFile(file: File, type: 'image' | 'document' = 'image'): {
+export function validateFile(
+  file: File,
+  type: 'image' | 'document' = 'image',
+): {
   valid: boolean;
   error?: string;
 } {
@@ -293,7 +304,7 @@ export function validateFile(file: File, type: 'image' | 'document' = 'image'): 
       error: `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`,
     };
   }
-  
+
   // Проверка MIME типа
   const allowedTypes = type === 'image' ? ALLOWED_IMAGE_TYPES : ALLOWED_DOCUMENT_TYPES;
   if (!allowedTypes.includes(file.type)) {
@@ -302,20 +313,19 @@ export function validateFile(file: File, type: 'image' | 'document' = 'image'): 
       error: `Invalid file type. Allowed types: ${allowedTypes.join(', ')}`,
     };
   }
-  
+
   // Проверка расширения файла
   const extension = file.name.split('.').pop()?.toLowerCase();
-  const allowedExtensions = type === 'image' 
-    ? ['jpg', 'jpeg', 'png', 'gif', 'webp']
-    : ['pdf', 'doc', 'docx'];
-  
+  const allowedExtensions =
+    type === 'image' ? ['jpg', 'jpeg', 'png', 'gif', 'webp'] : ['pdf', 'doc', 'docx'];
+
   if (!extension || !allowedExtensions.includes(extension)) {
     return {
       valid: false,
       error: `Invalid file extension. Allowed extensions: ${allowedExtensions.join(', ')}`,
     };
   }
-  
+
   return { valid: true };
 }
 
@@ -354,16 +364,18 @@ export function logSecurityEvent(event: SecurityEvent): void {
     ...event,
     timestamp: new Date(event.timestamp).toISOString(),
   };
-  
+
   // В продакшене отправляйте в систему мониторинга (Sentry, LogRocket, etc.)
   console.log(`🔒 [SECURITY] ${event.type}:`, logEntry);
-  
+
   // Критические события
-  if ([
-    SecurityEventType.SQL_INJECTION_ATTEMPT,
-    SecurityEventType.XSS_ATTEMPT,
-    SecurityEventType.ACCOUNT_LOCKED,
-  ].includes(event.type)) {
+  if (
+    [
+      SecurityEventType.SQL_INJECTION_ATTEMPT,
+      SecurityEventType.XSS_ATTEMPT,
+      SecurityEventType.ACCOUNT_LOCKED,
+    ].includes(event.type)
+  ) {
     console.error(`🚨 [CRITICAL SECURITY EVENT]`, logEntry);
     // TODO: Отправить алерт администратору
   }
@@ -421,8 +433,8 @@ export function containsSensitiveData(text: string): boolean {
     /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/, // Email
     /\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/, // Phone
   ];
-  
-  return patterns.some(pattern => pattern.test(text));
+
+  return patterns.some((pattern) => pattern.test(text));
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -433,36 +445,36 @@ export default {
   // CSRF
   generateCSRFToken,
   verifyCSRFToken,
-  
+
   // Sanitization
   sanitizeString,
   sanitizeHTML,
   sanitizeObject,
-  
+
   // Validation
   validateEmail,
   validatePhone,
   validateURL,
   validatePassword,
   validateFile,
-  
+
   // Detection
   containsSQLInjection,
   containsXSS,
   containsSensitiveData,
-  
+
   // Password
   generateSecurePassword,
-  
+
   // API Keys
   generateAPIKey,
   hashAPIKey,
   validateAPIKeyFormat,
-  
+
   // Logging
   logSecurityEvent,
   SecurityEventType,
-  
+
   // Data Protection
   maskSensitiveData,
 };

@@ -32,18 +32,22 @@ async function notifyManager({
   }
 
   const planLabels: Record<string, string> = {
-    starter:      'Starter ($29/mo)',
+    starter: 'Starter ($29/mo)',
     professional: 'Professional ($79/mo)',
-    enterprise:   'Enterprise (Custom)',
+    enterprise: 'Enterprise (Custom)',
   };
 
   const trialEndStr = trialEnd
-    ? new Date(trialEnd).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(trialEnd).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
     : '—';
 
   await resend.emails.send({
-    from:    process.env.RESEND_FROM_EMAIL ?? 'notifications@yourdomain.com',
-    to:      managerEmail,
+    from: process.env.RESEND_FROM_EMAIL ?? 'notifications@yourdomain.com',
+    to: managerEmail,
     subject: `🎉 New subscription: ${planLabels[plan] ?? plan} — ${email}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
@@ -89,14 +93,14 @@ async function notifyManager({
 
 // ── Plan resolution from Stripe Price ID ──────────────────────────────────────
 function resolvePlan(priceId: string): 'starter' | 'professional' | 'enterprise' {
-  if (priceId === process.env.STRIPE_PRICE_STARTER)      return 'starter';
+  if (priceId === process.env.STRIPE_PRICE_STARTER) return 'starter';
   if (priceId === process.env.STRIPE_PRICE_PROFESSIONAL) return 'professional';
   return 'starter';
 }
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
-  const sig  = req.headers.get('stripe-signature') ?? '';
+  const sig = req.headers.get('stripe-signature') ?? '';
 
   let event: Stripe.Event;
   try {
@@ -108,16 +112,16 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-
       // ── New successful checkout ───────────────────────────────────────────
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         console.log('[Stripe] ✅ checkout.session.completed:', session.id);
 
         if (session.mode === 'subscription' && session.subscription) {
-          const subscriptionId = typeof session.subscription === 'string'
-            ? session.subscription
-            : session.subscription.id;
+          const subscriptionId =
+            typeof session.subscription === 'string'
+              ? session.subscription
+              : session.subscription.id;
 
           // Fetch full subscription details from Stripe
           const sub = await stripe.subscriptions.retrieve(subscriptionId, {
@@ -125,20 +129,21 @@ export async function POST(req: NextRequest) {
           });
 
           const priceId = sub.items.data[0]?.price?.id ?? '';
-          const plan    = session.metadata?.plan as 'starter' | 'professional' | 'enterprise'
-                          ?? resolvePlan(priceId);
+          const plan =
+            (session.metadata?.plan as 'starter' | 'professional' | 'enterprise') ??
+            resolvePlan(priceId);
 
           await convex.mutation(api.subscriptions.upsertSubscription, {
-            stripeCustomerId:     typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
+            stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
             stripeSubscriptionId: sub.id,
-            stripeSessionId:      session.id,
+            stripeSessionId: session.id,
             plan,
-            status:               sub.status as any,
-            email:                session.customer_email ?? undefined,
-            currentPeriodStart:   (sub as any).current_period_start * 1000,
-            currentPeriodEnd:     (sub as any).current_period_end   * 1000,
-            cancelAtPeriodEnd:    sub.cancel_at_period_end,
-            trialEnd:             sub.trial_end ? sub.trial_end * 1000 : undefined,
+            status: sub.status as any,
+            email: session.customer_email ?? undefined,
+            currentPeriodStart: (sub as any).current_period_start * 1000,
+            currentPeriodEnd: (sub as any).current_period_end * 1000,
+            cancelAtPeriodEnd: sub.cancel_at_period_end,
+            trialEnd: sub.trial_end ? sub.trial_end * 1000 : undefined,
           });
 
           console.log('[Stripe] ✅ Subscription saved to Convex:', sub.id, '| plan:', plan);
@@ -147,10 +152,10 @@ export async function POST(req: NextRequest) {
           const customerEmail = session.customer_email ?? (session.customer_details as any)?.email;
           if (customerEmail) {
             await notifyManager({
-              email:          customerEmail,
+              email: customerEmail,
               plan,
               subscriptionId: sub.id,
-              trialEnd:       sub.trial_end ? sub.trial_end * 1000 : undefined,
+              trialEnd: sub.trial_end ? sub.trial_end * 1000 : undefined,
             });
           }
         }
@@ -164,10 +169,10 @@ export async function POST(req: NextRequest) {
 
         await convex.mutation(api.subscriptions.updateSubscriptionStatus, {
           stripeSubscriptionId: sub.id,
-          status:               sub.status as any,
-          cancelAtPeriodEnd:    sub.cancel_at_period_end,
-          currentPeriodStart:   (sub as any).current_period_start * 1000,
-          currentPeriodEnd:     (sub as any).current_period_end   * 1000,
+          status: sub.status as any,
+          cancelAtPeriodEnd: sub.cancel_at_period_end,
+          currentPeriodStart: (sub as any).current_period_start * 1000,
+          currentPeriodEnd: (sub as any).current_period_end * 1000,
         });
         break;
       }
@@ -179,8 +184,8 @@ export async function POST(req: NextRequest) {
 
         await convex.mutation(api.subscriptions.updateSubscriptionStatus, {
           stripeSubscriptionId: sub.id,
-          status:               'canceled',
-          cancelAtPeriodEnd:    false,
+          status: 'canceled',
+          cancelAtPeriodEnd: false,
         });
         break;
       }
@@ -188,16 +193,17 @@ export async function POST(req: NextRequest) {
       // ── Payment failed ────────────────────────────────────────────────────
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        const subId   = typeof (invoice as any).subscription === 'string'
-          ? (invoice as any).subscription
-          : (invoice as any).subscription?.id;
+        const subId =
+          typeof (invoice as any).subscription === 'string'
+            ? (invoice as any).subscription
+            : (invoice as any).subscription?.id;
         console.log('[Stripe] ⚠️ invoice.payment_failed:', invoice.id, '| sub:', subId);
 
         if (subId) {
           await convex.mutation(api.subscriptions.updateSubscriptionStatus, {
             stripeSubscriptionId: subId,
-            status:               'past_due',
-            cancelAtPeriodEnd:    false,
+            status: 'past_due',
+            cancelAtPeriodEnd: false,
           });
         }
         break;

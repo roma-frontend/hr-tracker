@@ -3,24 +3,24 @@
  * Готовые компоненты для использования в шагах Wizard
  */
 
-"use client";
+'use client';
 
-import React from "react";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 
 // ═══════════════════════════════════════════════════════════════
 // Text Input Step
@@ -33,7 +33,7 @@ interface TextInputStepProps {
   placeholder?: string;
   description?: string;
   required?: boolean;
-  type?: "text" | "email" | "number" | "password";
+  type?: 'text' | 'email' | 'number' | 'password';
 }
 
 export function TextInputStep({
@@ -44,7 +44,7 @@ export function TextInputStep({
   placeholder,
   description,
   required = false,
-  type = "text",
+  type = 'text',
 }: TextInputStepProps) {
   return (
     <div className="space-y-2">
@@ -55,15 +55,13 @@ export function TextInputStep({
         id={field}
         name={field}
         type={type}
-        value={stepData[field] || ""}
+        value={stepData[field] || ''}
         onChange={(e) => updateStepData(field, e.target.value)}
         placeholder={placeholder}
         className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)]"
         required={required}
       />
-      {description && (
-        <p className="text-xs text-[var(--text-muted)]">{description}</p>
-      )}
+      {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
     </div>
   );
 }
@@ -100,16 +98,14 @@ export function TextareaStep({
       <Textarea
         id={field}
         name={field}
-        value={stepData[field] || ""}
+        value={stepData[field] || ''}
         onChange={(e) => updateStepData(field, e.target.value)}
         placeholder={placeholder}
         rows={rows}
         className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none"
         required={required}
       />
-      {description && (
-        <p className="text-xs text-[var(--text-muted)]">{description}</p>
-      )}
+      {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
     </div>
   );
 }
@@ -135,7 +131,7 @@ export function SelectStep({
   field,
   label,
   options,
-  placeholder = "Select...",
+  placeholder = 'Select...',
   description,
   required = false,
 }: SelectStepProps) {
@@ -145,7 +141,7 @@ export function SelectStep({
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Select
-        value={stepData[field] || ""}
+        value={stepData[field] || ''}
         onValueChange={(value) => updateStepData(field, value)}
         required={required}
       >
@@ -167,9 +163,7 @@ export function SelectStep({
           ))}
         </SelectContent>
       </Select>
-      {description && (
-        <p className="text-xs text-[var(--text-muted)]">{description}</p>
-      )}
+      {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
     </div>
   );
 }
@@ -212,17 +206,15 @@ export function CardSelectionStep({
         <Label className="text-[var(--text-primary)] text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && (
-          <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>
-        )}
+        {description && <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>}
       </div>
 
       <div
         className={cn(
-          "grid gap-3",
-          columns === 2 && "grid-cols-2",
-          columns === 3 && "grid-cols-2 md:grid-cols-3",
-          columns === 4 && "grid-cols-2 md:grid-cols-4"
+          'grid gap-3',
+          columns === 2 && 'grid-cols-2',
+          columns === 3 && 'grid-cols-2 md:grid-cols-3',
+          columns === 4 && 'grid-cols-2 md:grid-cols-4',
         )}
       >
         {options.map((option) => {
@@ -232,20 +224,20 @@ export function CardSelectionStep({
             <Card
               key={option.value}
               className={cn(
-                "cursor-pointer transition-all duration-200 hover:shadow-md",
+                'cursor-pointer transition-all duration-200 hover:shadow-md',
                 isSelected
-                  ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-md"
-                  : "border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)]"
+                  ? 'border-[var(--primary)] bg-[var(--primary)]/5 shadow-md'
+                  : 'border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)]',
               )}
               onClick={() => updateStepData(field, option.value)}
             >
               <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
                 <div
                   className={cn(
-                    "p-3 rounded-full transition-colors",
+                    'p-3 rounded-full transition-colors',
                     isSelected
-                      ? "bg-[var(--primary)] text-white"
-                      : option.color || "bg-[var(--background-subtle)] text-[var(--text-muted)]"
+                      ? 'bg-[var(--primary)] text-white'
+                      : option.color || 'bg-[var(--background-subtle)] text-[var(--text-muted)]',
                   )}
                 >
                   {option.icon}
@@ -253,23 +245,15 @@ export function CardSelectionStep({
                 <div>
                   <p
                     className={cn(
-                      "font-medium text-sm",
-                      isSelected
-                        ? "text-[var(--primary)]"
-                        : "text-[var(--text-primary)]"
+                      'font-medium text-sm',
+                      isSelected ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]',
                     )}
                   >
                     {option.title}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    {option.description}
-                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{option.description}</p>
                 </div>
-                {isSelected && (
-                  <Badge className="bg-[var(--primary)] text-white">
-                    Selected
-                  </Badge>
-                )}
+                {isSelected && <Badge className="bg-[var(--primary)] text-white">Selected</Badge>}
               </CardContent>
             </Card>
           );
@@ -307,13 +291,11 @@ export function RadioGroupStep({
         <Label className="text-[var(--text-primary)] text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && (
-          <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>
-        )}
+        {description && <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>}
       </div>
 
       <RadioGroup
-        value={stepData[field] || ""}
+        value={stepData[field] || ''}
         onValueChange={(value) => updateStepData(field, value)}
         className="space-y-2"
       >
@@ -328,17 +310,10 @@ export function RadioGroupStep({
               id={`${field}-${option.value}`}
               className="mt-0.5"
             />
-            <Label
-              htmlFor={`${field}-${option.value}`}
-              className="flex-1 cursor-pointer"
-            >
-              <p className="font-medium text-[var(--text-primary)]">
-                {option.label}
-              </p>
+            <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
+              <p className="font-medium text-[var(--text-primary)]">{option.label}</p>
               {option.description && (
-                <p className="text-xs text-[var(--text-muted)] mt-1">
-                  {option.description}
-                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{option.description}</p>
               )}
             </Label>
           </div>
@@ -381,9 +356,7 @@ export function CheckboxStep({
     <div className="space-y-3">
       <div>
         <Label className="text-[var(--text-primary)] text-base">{label}</Label>
-        {description && (
-          <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>
-        )}
+        {description && <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>}
       </div>
 
       <div className="space-y-2">
@@ -401,17 +374,10 @@ export function CheckboxStep({
                 onCheckedChange={() => toggleValue(option.value)}
                 id={`${field}-${option.value}`}
               />
-              <Label
-                htmlFor={`${field}-${option.value}`}
-                className="flex-1 cursor-pointer"
-              >
-                <p className="font-medium text-[var(--text-primary)]">
-                  {option.label}
-                </p>
+              <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
+                <p className="font-medium text-[var(--text-primary)]">{option.label}</p>
                 {option.description && (
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    {option.description}
-                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{option.description}</p>
                 )}
               </Label>
             </div>

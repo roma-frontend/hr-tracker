@@ -1,7 +1,7 @@
-﻿"use client";
+﻿'use client';
 
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next';;
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Sparkles, RefreshCw, X, BarChart3, Clock, Users, AlertTriangle } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
@@ -56,7 +56,7 @@ export default function WeeklyDigestWidget() {
         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[#2563eb]/20"
       >
         <Sparkles className="w-4 h-4" />
-        {t("weeklyDigest.title")}
+        {t('weeklyDigest.title')}
       </button>
 
       {/* Modal */}
@@ -83,7 +83,7 @@ export default function WeeklyDigestWidget() {
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold">{t("weeklyDigest.title")}</h2>
+                      <h2 className="text-lg font-bold">{t('weeklyDigest.title')}</h2>
                       <p className="text-xs opacity-80">
                         {generatedAt
                           ? `{t("weeklyDigest.generated", { time: new Date(generatedAt).toLocaleTimeString() })}`
@@ -115,8 +115,18 @@ export default function WeeklyDigestWidget() {
                     {[
                       { icon: Users, label: 'On Leave', value: stats.onLeave, color: 'text-white' },
                       { icon: Clock, label: 'Pending', value: stats.pending, color: 'text-white' },
-                      { icon: AlertTriangle, label: 'Late Today', value: stats.lateToday, color: 'text-white' },
-                      { icon: BarChart3, label: t('nav.attendance'), value: `${stats.attendanceRate}%`, color: 'text-white' },
+                      {
+                        icon: AlertTriangle,
+                        label: 'Late Today',
+                        value: stats.lateToday,
+                        color: 'text-white',
+                      },
+                      {
+                        icon: BarChart3,
+                        label: t('nav.attendance'),
+                        value: `${stats.attendanceRate}%`,
+                        color: 'text-white',
+                      },
                     ].map((s) => (
                       <div key={s.label} className="bg-white/10 rounded-xl p-3 text-center">
                         <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
@@ -139,8 +149,12 @@ export default function WeeklyDigestWidget() {
                       <div className="absolute inset-0 rounded-full border-4 border-[#2563eb]/30 animate-ping" />
                     </div>
                     <div className="text-center">
-                      <p className="font-semibold text-[var(--text-primary)]">{t("weeklyDigest.generating")}</p>
-                      <p className="text-sm text-[var(--text-muted)] mt-1">{t("weeklyDigest.analyzing")}</p>
+                      <p className="font-semibold text-[var(--text-primary)]">
+                        {t('weeklyDigest.generating')}
+                      </p>
+                      <p className="text-sm text-[var(--text-muted)] mt-1">
+                        {t('weeklyDigest.analyzing')}
+                      </p>
                     </div>
                   </div>
                 ) : digest ? (
@@ -152,23 +166,25 @@ export default function WeeklyDigestWidget() {
                 ) : (
                   <div className="text-center py-16 text-[var(--text-muted)]">
                     <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                    <p>{t("weeklyDigest.clickRefresh")}</p>
+                    <p>{t('weeklyDigest.clickRefresh')}</p>
                   </div>
                 )}
               </div>
 
               {/* Footer */}
               <div className="p-4 border-t border-[var(--border)] flex-shrink-0 flex items-center justify-between">
-                <p className="text-xs text-[var(--text-muted)]">
-                  {t("weeklyDigest.poweredBy")}
-                </p>
+                <p className="text-xs text-[var(--text-muted)]">{t('weeklyDigest.poweredBy')}</p>
                 <Button
                   onClick={generateDigest}
                   disabled={loading}
                   size="sm"
                   className="bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white hover:opacity-90"
                 >
-                  {loading ? <ShieldLoader size="xs" variant="inline" className="mr-1" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+                  {loading ? (
+                    <ShieldLoader size="xs" variant="inline" className="mr-1" />
+                  ) : (
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                  )}
                   Refresh
                 </Button>
               </div>
@@ -179,4 +195,3 @@ export default function WeeklyDigestWidget() {
     </>
   );
 }
-

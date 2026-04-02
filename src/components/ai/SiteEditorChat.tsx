@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { usePlanFeatures } from "@/hooks/usePlanFeatures";
-import { useSubscription } from "@/hooks/useSubscription";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { usePlanFeatures } from '@/hooks/usePlanFeatures';
+import { useSubscription } from '@/hooks/useSubscription';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Send,
   Sparkles,
@@ -25,9 +25,9 @@ import {
   CheckCircle2,
   FileCode2,
   RefreshCw,
-} from "lucide-react";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,9 +38,9 @@ interface AppliedFile {
 }
 
 interface Message {
-  role: "user" | "assistant" | "system";
+  role: 'user' | 'assistant' | 'system';
   content: string;
-  editType?: "design" | "content" | "layout" | "logic" | "full_control";
+  editType?: 'design' | 'content' | 'layout' | 'logic' | 'full_control';
   timestamp: number;
   appliedFiles?: AppliedFile[];
 }
@@ -60,12 +60,18 @@ interface SiteEditorChatProps {
 
 function getEditTypeIcon(type?: string) {
   switch (type) {
-    case "design":      return <Palette className="h-3 w-3" />;
-    case "content":     return <Code2 className="h-3 w-3" />;
-    case "layout":      return <Layout className="h-3 w-3" />;
-    case "logic":       return <Zap className="h-3 w-3" />;
-    case "full_control": return <Crown className="h-3 w-3" />;
-    default:            return null;
+    case 'design':
+      return <Palette className="h-3 w-3" />;
+    case 'content':
+      return <Code2 className="h-3 w-3" />;
+    case 'layout':
+      return <Layout className="h-3 w-3" />;
+    case 'logic':
+      return <Zap className="h-3 w-3" />;
+    case 'full_control':
+      return <Crown className="h-3 w-3" />;
+    default:
+      return null;
   }
 }
 
@@ -76,12 +82,12 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
 
   const [messages, setMessages] = useState<Message[]>([
     {
-      role: "system",
-      content: t("aiSiteEditor.greeting"),
+      role: 'system',
+      content: t('aiSiteEditor.greeting'),
       timestamp: Date.now(),
     },
   ]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rollingBack, setRollingBack] = useState<string | null>(null); // "filePath:timestamp"
   const [backups, setBackups] = useState<BackupMeta[]>([]);
@@ -111,7 +117,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
   // Fetch backups list
   const fetchBackups = useCallback(async () => {
     try {
-      const res = await fetch("/api/ai-site-editor/apply");
+      const res = await fetch('/api/ai-site-editor/apply');
       if (res.ok) {
         const data = await res.json();
         setBackups(data.backups || []);
@@ -131,30 +137,30 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
-      role: "user",
+      role: 'user',
       content: input,
       timestamp: Date.now(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
     const currentInput = input;
-    setInput("");
+    setInput('');
     setIsLoading(true);
 
     // Добавляем плейсхолдер «думает...»
     setMessages((prev) => [
       ...prev,
       {
-        role: "assistant",
-        content: "",
+        role: 'assistant',
+        content: '',
         timestamp: Date.now(),
       },
     ]);
 
     try {
-      const response = await fetch("/api/ai-site-editor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/ai-site-editor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: currentInput,
           userId,
@@ -170,21 +176,21 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
         if (error.limitReached) {
           toast.error(error.error, {
             action: {
-              label: t("aiSiteEditor.upgradePlan"),
-              onClick: () => (window.location.href = "/settings?tab=billing"),
+              label: t('aiSiteEditor.upgradePlan'),
+              onClick: () => (window.location.href = '/settings?tab=billing'),
             },
           });
           setMessages((prev) => [
             ...prev,
             {
-              role: "system",
+              role: 'system',
               content: `⚠️ ${error.error}`,
               timestamp: Date.now(),
             },
           ]);
           return;
         }
-        throw new Error(error.error || "Server error");
+        throw new Error(error.error || 'Server error');
       }
 
       // Парсим JSON ответ
@@ -195,7 +201,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
-          role: "assistant",
+          role: 'assistant',
           content: aiText,
           editType,
           timestamp: Date.now(),
@@ -205,26 +211,28 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
 
       // Показываем результат
       if (appliedFiles && appliedFiles.length > 0) {
-        toast.success(`✅ Применено ${appliedFiles.length} изменений! Файлы обновлены.`, { duration: 5000 });
+        toast.success(`✅ Применено ${appliedFiles.length} изменений! Файлы обновлены.`, {
+          duration: 5000,
+        });
         console.log('Applied files:', appliedFiles);
       } else {
-        toast.info("AI ответил, но файлы не были изменены", { duration: 3000 });
+        toast.info('AI ответил, но файлы не были изменены', { duration: 3000 });
       }
 
       // Обновляем список backup'ов
       fetchBackups();
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
-          role: "system",
-          content: `❌ ${t("aiSiteEditor.error")}`,
+          role: 'system',
+          content: `❌ ${t('aiSiteEditor.error')}`,
           timestamp: Date.now(),
         };
         return updated;
       });
-      toast.error(t("aiSiteEditor.error"));
+      toast.error(t('aiSiteEditor.error'));
     } finally {
       setIsLoading(false);
     }
@@ -237,9 +245,9 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
     setRollingBack(key);
 
     try {
-      const res = await fetch("/api/ai-site-editor/apply", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/ai-site-editor/apply', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filePath, timestamp }),
       });
 
@@ -251,16 +259,16 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
         setMessages((prev) => [
           ...prev,
           {
-            role: "system",
+            role: 'system',
             content: `↩️ Откат выполнен для файла ${filePath}`,
             timestamp: Date.now(),
           },
         ]);
       } else {
-        toast.error(`Ошибка отката: ${data.error || "Неизвестная ошибка"}`);
+        toast.error(`Ошибка отката: ${data.error || 'Неизвестная ошибка'}`);
       }
     } catch {
-      toast.error("Ошибка при выполнении отката");
+      toast.error('Ошибка при выполнении отката');
     } finally {
       setRollingBack(null);
     }
@@ -270,22 +278,27 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
 
   const getEditTypeLabel = (type?: string) => {
     switch (type) {
-      case "design":      return t("aiSiteEditor.design");
-      case "content":     return t("aiSiteEditor.content");
-      case "layout":      return t("aiSiteEditor.layout");
-      case "logic":       return t("aiSiteEditor.logic");
-      case "full_control": return t("aiSiteEditor.fullControl");
-      default:            return "";
+      case 'design':
+        return t('aiSiteEditor.design');
+      case 'content':
+        return t('aiSiteEditor.content');
+      case 'layout':
+        return t('aiSiteEditor.layout');
+      case 'logic':
+        return t('aiSiteEditor.logic');
+      case 'full_control':
+        return t('aiSiteEditor.fullControl');
+      default:
+        return '';
     }
   };
 
-  const isProfessionalOrHigher = plan === "professional" || plan === "enterprise";
+  const isProfessionalOrHigher = plan === 'professional' || plan === 'enterprise';
 
   // ─── JSX ───────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex flex-col h-full space-y-4">
-
       {/* Usage Stats — только для starter */}
       {!isProfessionalOrHigher && usage && (
         <Card className="p-4 bg-gradient-to-r from-amber-100/10 to-orange-100/10 dark:from-amber-900/10 dark:to-orange-900/10 border-amber-300/20 dark:border-amber-800/20">
@@ -293,23 +306,29 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
             <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-600 mt-0.5" />
             <div className="flex-1">
               <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
-                {t("aiSiteEditor.usageThisMonth")}
+                {t('aiSiteEditor.usageThisMonth')}
               </h4>
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
-                  <div className="text-amber-500 dark:text-amber-600">{t("aiSiteEditor.design")}</div>
+                  <div className="text-amber-500 dark:text-amber-600">
+                    {t('aiSiteEditor.design')}
+                  </div>
                   <div className="font-semibold text-amber-900 dark:text-amber-100">
                     {usage.designChanges} / {features.aiSiteEditorDesignChanges}
                   </div>
                 </div>
                 <div>
-                  <div className="text-amber-600 dark:text-amber-500">{t("aiSiteEditor.content")}</div>
+                  <div className="text-amber-600 dark:text-amber-500">
+                    {t('aiSiteEditor.content')}
+                  </div>
                   <div className="font-semibold text-amber-900 dark:text-amber-100">
                     {usage.contentChanges} / {features.aiSiteEditorContentChanges}
                   </div>
                 </div>
                 <div>
-                  <div className="text-amber-600 dark:text-amber-500">{t("aiSiteEditor.layout")}</div>
+                  <div className="text-amber-600 dark:text-amber-500">
+                    {t('aiSiteEditor.layout')}
+                  </div>
                   <div className="font-semibold text-amber-900 dark:text-amber-100">
                     {usage.layoutChanges} / {features.aiSiteEditorLayoutChanges}
                   </div>
@@ -319,10 +338,10 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                 variant="outline"
                 size="sm"
                 className="mt-3 border-amber-300 dark:border-amber-700 md:border-amber-300/50 sm:min-w-[120px]"
-                onClick={() => (window.location.href = "/settings?tab=billing")}
+                onClick={() => (window.location.href = '/settings?tab=billing')}
               >
                 <Crown className="h-4 w-4 mr-2" />
-                {t("aiSiteEditor.upgradeForUnlimited")}
+                {t('aiSiteEditor.upgradeForUnlimited')}
               </Button>
             </div>
           </div>
@@ -336,10 +355,12 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
             <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             <div>
               <h4 className="font-semibold">
-                {plan === "professional" ? t("aiSiteEditor.professionalPlan") : t("aiSiteEditor.enterprisePlan")}
+                {plan === 'professional'
+                  ? t('aiSiteEditor.professionalPlan')
+                  : t('aiSiteEditor.enterprisePlan')}
               </h4>
               <p className="text-sm">
-                ✨ {t("aiSiteEditor.unlimited")} · {t("aiSiteEditor.aiAutoApplies")}
+                ✨ {t('aiSiteEditor.unlimited')} · {t('aiSiteEditor.aiAutoApplies')}
               </p>
             </div>
           </div>
@@ -353,15 +374,15 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
             {messages.map((msg: any, idx: any) => (
               <div
                 key={idx}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`max-w-[85%] rounded-lg p-4 ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : msg.role === "system"
-                      ? "bg-muted text-muted-foreground"
-                      : "bg-secondary text-secondary-foreground"
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : msg.role === 'system'
+                        ? 'bg-muted text-muted-foreground'
+                        : 'bg-secondary text-secondary-foreground'
                   }`}
                 >
                   {/* Edit type badge */}
@@ -398,9 +419,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                           >
                             <div className="flex items-center gap-1.5 min-w-0">
                               <FileCode2 className="h-3 w-3 shrink-0 text-green-500" />
-                              <span className="text-xs truncate font-mono">
-                                {af.filePath}
-                              </span>
+                              <span className="text-xs truncate font-mono">{af.filePath}</span>
                             </div>
                             <Button
                               variant="ghost"
@@ -428,7 +447,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
             ))}
 
             {/* Global loading indicator */}
-            {isLoading && messages[messages.length - 1]?.content === "" && (
+            {isLoading && messages[messages.length - 1]?.content === '' && (
               <div className="flex justify-start">
                 <div className="bg-secondary text-secondary-foreground rounded-lg p-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -448,12 +467,12 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSend();
                 }
               }}
-              placeholder={t("aiSiteEditor.inputPlaceholder")}
+              placeholder={t('aiSiteEditor.inputPlaceholder')}
               className="min-h-[60px] resize-none"
               disabled={isLoading}
             />
@@ -490,7 +509,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
               }}
             >
               <RefreshCw className="h-3 w-3 mr-1" />
-              {showBackups ? "Скрыть" : "Показать"}
+              {showBackups ? 'Скрыть' : 'Показать'}
             </Button>
           </div>
 
@@ -510,7 +529,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                         <span className="font-mono text-xs truncate">{b.originalPath}</span>
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        {new Date(b.timestamp).toLocaleString("ru-RU")} · {b.description}
+                        {new Date(b.timestamp).toLocaleString('ru-RU')} · {b.description}
                       </div>
                     </div>
                     <Button
@@ -542,7 +561,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
         <Card className="p-4">
           <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
             <History className="h-4 w-4" />
-            {t("aiSiteEditor.recentChanges")}
+            {t('aiSiteEditor.recentChanges')}
           </h3>
           <div className="space-y-2">
             {history.slice(0, 5).map((session: any) => (
@@ -554,10 +573,10 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                   {getEditTypeIcon(session.editType)}
                   <span className="text-muted-foreground truncate">
                     {session.userMessage.substring(0, 60)}
-                    {session.userMessage.length > 60 ? "…" : ""}
+                    {session.userMessage.length > 60 ? '…' : ''}
                   </span>
                 </div>
-                {session.status === "completed" && (
+                {session.status === 'completed' && (
                   <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
                 )}
               </div>

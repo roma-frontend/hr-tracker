@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     // Get all pending leave requests
     // Note: This is a simplified version - in production you'd use proper Convex queries
-    
+
     return Response.json({
       success: true,
       message: 'Conflict scan initiated',

@@ -1,10 +1,23 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { X, Send, Sparkles, CheckCircle, AlertCircle, Calendar, Pencil, Trash2, Mic, MicOff, Car, Maximize2 } from 'lucide-react';
+import {
+  X,
+  Send,
+  Sparkles,
+  CheckCircle,
+  AlertCircle,
+  Calendar,
+  Pencil,
+  Trash2,
+  Mic,
+  MicOff,
+  Car,
+  Maximize2,
+} from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -58,8 +71,8 @@ declare global {
 interface BookingState {
   status: 'pending' | 'booked' | 'conflict' | 'loading';
   result?: string;
-  conflicts?: any[];  // Массив конфликтов из Conflict Service
-  alternativeDates?: string[];  // Альтернативные даты от AI
+  conflicts?: any[]; // Массив конфликтов из Conflict Service
+  alternativeDates?: string[]; // Альтернативные даты от AI
 }
 
 interface Message {
@@ -129,22 +142,34 @@ function parseActions(content: string): { cleanContent: string; actions: AnyActi
     }
   }
 
-  const cleanContent = content.replace(/<ACTION>[\s\S]*?<\/ACTION>/g, '').replace(/\s{2,}/g, ' ').trim();
+  const cleanContent = content
+    .replace(/<ACTION>[\s\S]*?<\/ACTION>/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   return { cleanContent, actions };
 }
 
 // Generate follow-up suggestions based on assistant response content
-function getFollowUpSuggestions(content: string, userRole: string, t: (key: string) => string): string[] {
+function getFollowUpSuggestions(
+  content: string,
+  userRole: string,
+  t: (key: string) => string,
+): string[] {
   const lower = content.toLowerCase();
 
-  if (lower.includes('book') || lower.includes(t("chatWidget.leaveRequest")) || lower.includes('submitted') || lower.includes('approved')) {
-    return [t("chatWidget.showBalance"), t("chatWidget.viewUpcoming"), t("chatWidget.whoOnLeave")];
+  if (
+    lower.includes('book') ||
+    lower.includes(t('chatWidget.leaveRequest')) ||
+    lower.includes('submitted') ||
+    lower.includes('approved')
+  ) {
+    return [t('chatWidget.showBalance'), t('chatWidget.viewUpcoming'), t('chatWidget.whoOnLeave')];
   }
   if (lower.includes('balance') || lower.includes('days left') || lower.includes('remaining')) {
     return ['📆 Book a vacation', '🤒 Request sick leave', '📊 Show my leave history'];
   }
   if (lower.includes('sick') || lower.includes('doctor') || lower.includes('medical')) {
-    return ['🤒 Book sick leave for today', '👨‍⚕️ Book a doctor visit', t("chatWidget.showBalance")];
+    return ['🤒 Book sick leave for today', '👨‍⚕️ Book a doctor visit', t('chatWidget.showBalance')];
   }
   if (lower.includes('team') || lower.includes('colleague') || lower.includes('who is')) {
     return ['📅 Show team calendar', '📋 My leave balance', '📆 Book time off'];
@@ -153,9 +178,13 @@ function getFollowUpSuggestions(content: string, userRole: string, t: (key: stri
     return ['📋 Show my pending leaves', '📆 Book new leave', '📊 My leave balance'];
   }
   if (userRole === 'admin' || userRole === 'supervisor') {
-    return [t("chatWidget.whoOnLeaveToday"), t("chatWidget.teamStats"), t("chatWidget.pendingApprovals")];
+    return [
+      t('chatWidget.whoOnLeaveToday'),
+      t('chatWidget.teamStats'),
+      t('chatWidget.pendingApprovals'),
+    ];
   }
-  return ['📆 Book a vacation', t("chatWidget.showBalance"), '👥 Who is on leave this week?'];
+  return ['📆 Book a vacation', t('chatWidget.showBalance'), '👥 Who is on leave this week?'];
 }
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
@@ -168,13 +197,14 @@ const LEAVE_TYPE_LABELS: Record<string, string> = {
 
 // Dynamic suggestions based on user role - will be set in component
 const getInitialSuggestions = (role: UserRole | undefined): string[] => {
-  if (!role) return [
-    '💰 Show my leave balance',
-    '📆 Book a vacation',
-    '🤒 I feel sick today',
-    '👥 Who is on leave this week?',
-  ];
-  
+  if (!role)
+    return [
+      '💰 Show my leave balance',
+      '📆 Book a vacation',
+      '🤒 I feel sick today',
+      '👥 Who is on leave this week?',
+    ];
+
   return getRoleSuggestions(role as UserRole);
 };
 
@@ -237,8 +267,8 @@ export function ChatWidget() {
     window.speechSynthesis.cancel();
 
     const greetings = [
-      "Hi! How can I help you today?",
-      "Hello! What can I do for you?",
+      'Hi! How can I help you today?',
+      'Hello! What can I do for you?',
       "Hey! I'm here to help. What do you need?",
     ];
     const text = greetings[Math.floor(Math.random() * greetings.length)];
@@ -250,10 +280,13 @@ export function ChatWidget() {
     // Pick a female voice if available
     const pickVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      const female = voices.find(v =>
-        /female|woman|girl|zira|samantha|victoria|karen|moira|fiona|veena|susan|catherine|alice|amelie|anna|joanna|kendra|kimberly|ivy|salli/i.test(v.name)
-        && v.lang.startsWith('en')
-      ) || voices.find(v => v.lang.startsWith('en'));
+      const female =
+        voices.find(
+          (v) =>
+            /female|woman|girl|zira|samantha|victoria|karen|moira|fiona|veena|susan|catherine|alice|amelie|anna|joanna|kendra|kimberly|ivy|salli/i.test(
+              v.name,
+            ) && v.lang.startsWith('en'),
+        ) || voices.find((v) => v.lang.startsWith('en'));
       if (female) utterance.voice = female;
       window.speechSynthesis.speak(utterance);
     };
@@ -280,9 +313,15 @@ export function ChatWidget() {
     // All wake phrases — EN recognizer will also pick up some RU-like phonetics
     const ALL_PHRASES = [
       // English
-      'hey hr', 'hi hr', 'hey h r', 'hi h r', 'hey age are', 'hey aitch ar',
+      'hey hr',
+      'hi hr',
+      'hey h r',
+      'hi h r',
+      'hey age are',
+      'hey aitch ar',
       // Russian phonetics as heard by en-US engine
-      'привет', 'эй hr',
+      'привет',
+      'эй hr',
     ];
 
     let stopped = false;
@@ -296,9 +335,9 @@ export function ChatWidget() {
       rec.onresult = (e: SpeechRecognitionEvent) => {
         const last = e.results[e.results.length - 1];
         const transcript = last[0].transcript.toLowerCase().trim();
-        const matched = ALL_PHRASES.some(p => transcript.includes(p));
+        const matched = ALL_PHRASES.some((p) => transcript.includes(p));
         if (matched) {
-          setIsOpen(prev => {
+          setIsOpen((prev) => {
             if (!prev) {
               setWakeWordActive(true);
               setTimeout(() => setWakeWordActive(false), 2500);
@@ -311,11 +350,19 @@ export function ChatWidget() {
 
       rec.onend = () => {
         if (!stopped) {
-          try { rec.start(); } catch { /* ignore */ }
+          try {
+            rec.start();
+          } catch {
+            /* ignore */
+          }
         }
       };
 
-      try { rec.start(); } catch { /* browser may block */ }
+      try {
+        rec.start();
+      } catch {
+        /* browser may block */
+      }
       return rec;
     };
 
@@ -334,9 +381,13 @@ export function ChatWidget() {
 
     return () => {
       stopped = true;
-      wakeRecogRef.current.forEach(rec => {
+      wakeRecogRef.current.forEach((rec) => {
         rec.onend = null;
-        try { rec.stop(); } catch { /* ignore */ }
+        try {
+          rec.stop();
+        } catch {
+          /* ignore */
+        }
       });
       wakeRecogRef.current = [];
     };
@@ -413,19 +464,29 @@ export function ChatWidget() {
 
   const handleAction = async (messageId: string, action: AnyAction, actionIndex: number) => {
     if (!user?.id) {
-      setMessages(prev => prev.map(m =>
-        m.id === messageId
-          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: 'Not logged in.' } } }
-          : m
-      ));
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId
+            ? {
+                ...m,
+                bookingStates: {
+                  ...m.bookingStates,
+                  [actionIndex]: { status: 'conflict', result: 'Not logged in.' },
+                },
+              }
+            : m,
+        ),
+      );
       return;
     }
 
-    setMessages(prev => prev.map(m =>
-      m.id === messageId
-        ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'loading' } } }
-        : m
-    ));
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId
+          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'loading' } } }
+          : m,
+      ),
+    );
 
     try {
       let url = '';
@@ -437,35 +498,39 @@ export function ChatWidget() {
         // ═══════════════════════════════════════════════════════════════
         if (user.organizationId) {
           const conflictCheckRes = await fetch(
-            `/api/chat/conflict-check?userId=${user.id}&organizationId=${user.organizationId}&requestType=leave&startDate=${new Date(action.startDate).getTime()}&endDate=${new Date(action.endDate).getTime()}`
+            `/api/chat/conflict-check?userId=${user.id}&organizationId=${user.organizationId}&requestType=leave&startDate=${new Date(action.startDate).getTime()}&endDate=${new Date(action.endDate).getTime()}`,
           );
-          
+
           if (conflictCheckRes.ok) {
             const conflictData = await conflictCheckRes.json();
-            
+
             // Если есть критические конфликты — показываем предупреждение
             if (conflictData.hasCriticalConflicts) {
-              setMessages(prev => prev.map(m =>
-                m.id === messageId
-                  ? {
-                      ...m,
-                      bookingStates: {
-                        ...m.bookingStates,
-                        [actionIndex]: {
-                          status: 'conflict',
-                          result: conflictData.aiMessage || 'Обнаружены критические конфликты. Пожалуйста, выберите другие даты или обсудите с руководителем.',
-                          conflicts: conflictData.conflicts,
-                          alternativeDates: conflictData.alternativeDates || [],
-                        }
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === messageId
+                    ? {
+                        ...m,
+                        bookingStates: {
+                          ...m.bookingStates,
+                          [actionIndex]: {
+                            status: 'conflict',
+                            result:
+                              conflictData.aiMessage ||
+                              'Обнаружены критические конфликты. Пожалуйста, выберите другие даты или обсудите с руководителем.',
+                            conflicts: conflictData.conflicts,
+                            alternativeDates: conflictData.alternativeDates || [],
+                          },
+                        },
                       }
-                    }
-                  : m
-              ));
+                    : m,
+                ),
+              );
               return; // Не продолжаем, если критический конфликт
             }
           }
         }
-        
+
         url = '/api/chat/book-leave';
         body = {
           userId: user.id,
@@ -501,48 +566,52 @@ export function ChatWidget() {
         url = '/api/chat/book-driver';
         console.log('[ChatWidget] BOOK_DRIVER action:', action);
         console.log('[ChatWidget] User:', { id: user.id, organizationId: user.organizationId });
-        
+
         const startTime = new Date(action.startTime).getTime();
         const endTime = new Date(action.endTime).getTime();
-        
+
         if (!user.organizationId) {
           throw new Error('Organization not selected. Please select an organization first.');
         }
         if (isNaN(startTime) || isNaN(endTime)) {
           throw new Error('Invalid date/time for driver booking.');
         }
-        
+
         // ═══════════════════════════════════════════════════════════════
         // CONFLICT CHECK — Проверяем доступность водителя
         // ═══════════════════════════════════════════════════════════════
         const conflictCheckRes = await fetch(
-          `/api/chat/conflict-check?userId=${user.id}&organizationId=${user.organizationId}&requestType=driver&startDate=${startTime}&endDate=${endTime}`
+          `/api/chat/conflict-check?userId=${user.id}&organizationId=${user.organizationId}&requestType=driver&startDate=${startTime}&endDate=${endTime}`,
         );
-        
+
         if (conflictCheckRes.ok) {
           const conflictData = await conflictCheckRes.json();
-          
+
           // Если водитель занят — показываем предупреждение
           if (conflictData.hasCriticalConflicts) {
-            setMessages(prev => prev.map(m =>
-              m.id === messageId
-                ? { 
-                    ...m, 
-                    bookingStates: { 
-                      ...m.bookingStates, 
-                      [actionIndex]: { 
-                        status: 'conflict', 
-                        result: conflictData.aiMessage || 'Водитель уже забронирован на это время. Пожалуйста, выберите другое время или другого водителя.',
-                        conflicts: conflictData.conflicts,
-                      } 
-                    } 
-                  }
-                : m
-            ));
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === messageId
+                  ? {
+                      ...m,
+                      bookingStates: {
+                        ...m.bookingStates,
+                        [actionIndex]: {
+                          status: 'conflict',
+                          result:
+                            conflictData.aiMessage ||
+                            'Водитель уже забронирован на это время. Пожалуйста, выберите другое время или другого водителя.',
+                          conflicts: conflictData.conflicts,
+                        },
+                      },
+                    }
+                  : m,
+              ),
+            );
             return; // Не продолжаем, если критический конфликт
           }
         }
-        
+
         body = {
           userId: user.id,
           organizationId: user.organizationId,
@@ -575,128 +644,174 @@ export function ChatWidget() {
       }
 
       if (res.ok) {
-        setMessages(prev => prev.map(m =>
-          m.id === messageId
-            ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'booked', result: (data.message as string) || 'Done!' } } }
-            : m
-        ));
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  bookingStates: {
+                    ...m.bookingStates,
+                    [actionIndex]: {
+                      status: 'booked',
+                      result: (data.message as string) || 'Done!',
+                    },
+                  },
+                }
+              : m,
+          ),
+        );
       } else {
-        setMessages(prev => prev.map(m =>
-          m.id === messageId
-            ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: (data.error as string) || 'Something went wrong.' } } }
-            : m
-        ));
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  bookingStates: {
+                    ...m.bookingStates,
+                    [actionIndex]: {
+                      status: 'conflict',
+                      result: (data.error as string) || 'Something went wrong.',
+                    },
+                  },
+                }
+              : m,
+          ),
+        );
       }
     } catch (err) {
       console.error('[ChatWidget] Action error:', err);
       const errorMsg = err instanceof Error ? err.message : 'Network error. Please try again.';
-      setMessages(prev => prev.map(m =>
-        m.id === messageId
-          ? { ...m, bookingStates: { ...m.bookingStates, [actionIndex]: { status: 'conflict', result: errorMsg } } }
-          : m
-      ));
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId
+            ? {
+                ...m,
+                bookingStates: {
+                  ...m.bookingStates,
+                  [actionIndex]: { status: 'conflict', result: errorMsg },
+                },
+              }
+            : m,
+        ),
+      );
     }
   };
 
   // Smart navigation - detect navigation commands
   // IMPORTANT: Only navigate for VIEW requests, not for CREATE/BOOK requests!
-  const handleNavigation = useCallback((text: string) => {
-    const lowerText = text.toLowerCase();
+  const handleNavigation = useCallback(
+    (text: string) => {
+      const lowerText = text.toLowerCase();
 
-    // 🔴 Ключевые слова для СОЗДАНИЯ запросов — НЕ перенаправлять!
-    const createKeywords = [
-      'хочу', 'book', 'request', 'создать', 'забронировать', 'организуй',
-      'взять отпуск', 'go on leave', 'vacation', 'с \\d', 'from \\d', 'до \\d', 'by \\d'
-    ];
-    
-    // Проверяем, не хочет ли пользователь создать что-то
-    const isCreateRequest = createKeywords.some(keyword => {
-      // Проверяем как точное совпадение, так и regex
-      if (keyword.includes('\\d')) {
-        // Это regex паттерн для дат
-        const regex = new RegExp(keyword, 'i');
-        return regex.test(lowerText);
+      // 🔴 Ключевые слова для СОЗДАНИЯ запросов — НЕ перенаправлять!
+      const createKeywords = [
+        'хочу',
+        'book',
+        'request',
+        'создать',
+        'забронировать',
+        'организуй',
+        'взять отпуск',
+        'go on leave',
+        'vacation',
+        'с \\d',
+        'from \\d',
+        'до \\d',
+        'by \\d',
+      ];
+
+      // Проверяем, не хочет ли пользователь создать что-то
+      const isCreateRequest = createKeywords.some((keyword) => {
+        // Проверяем как точное совпадение, так и regex
+        if (keyword.includes('\\d')) {
+          // Это regex паттерн для дат
+          const regex = new RegExp(keyword, 'i');
+          return regex.test(lowerText);
+        }
+        return lowerText.includes(keyword);
+      });
+
+      if (isCreateRequest) {
+        // НЕ перенаправлять, отправить AI для обработки
+        console.log('🚫 [handleNavigation] Create request detected, skipping navigation:', text);
+        return false;
       }
-      return lowerText.includes(keyword);
-    });
-    
-    if (isCreateRequest) {
-      // НЕ перенаправлять, отправить AI для обработки
-      console.log('🚫 [handleNavigation] Create request detected, skipping navigation:', text);
-      return false;
-    }
 
-    const navigationMap: { [key: string]: string } = {
-      'покажи календарь': '/calendar',
-      'открой календарь': '/calendar',
-      'show calendar': '/calendar',
-      'view calendar': '/calendar',
-      'календарь': '/calendar',
-      'calendar': '/calendar',
+      const navigationMap: { [key: string]: string } = {
+        'покажи календарь': '/calendar',
+        'открой календарь': '/calendar',
+        'show calendar': '/calendar',
+        'view calendar': '/calendar',
+        календарь: '/calendar',
+        calendar: '/calendar',
 
-      'покажи отпуска': '/leaves',
-      'покажи мои отпуска': '/leaves',
-      'view my leaves': '/leaves',
-      'show leaves': '/leaves',
-      'my leaves': '/leaves',
-      'view leaves': '/leaves',
-      
-      'покажи сотрудников': '/employees',
-      'show employees': '/employees',
-      'view team': '/employees',
-      'сотрудники': '/employees',
-      'employees': '/employees',
-      'команда': '/employees',
-      'team': '/employees',
+        'покажи отпуска': '/leaves',
+        'покажи мои отпуска': '/leaves',
+        'view my leaves': '/leaves',
+        'show leaves': '/leaves',
+        'my leaves': '/leaves',
+        'view leaves': '/leaves',
 
-      'покажи задачи': '/tasks',
-      'show tasks': '/tasks',
-      'my tasks': '/tasks',
-      'задачи': '/tasks',
-      'tasks': '/tasks',
+        'покажи сотрудников': '/employees',
+        'show employees': '/employees',
+        'view team': '/employees',
+        сотрудники: '/employees',
+        employees: '/employees',
+        команда: '/employees',
+        team: '/employees',
 
-      'посещаемость': '/attendance',
-      'attendance': '/attendance',
-      'присутствие': '/attendance',
+        'покажи задачи': '/tasks',
+        'show tasks': '/tasks',
+        'my tasks': '/tasks',
+        задачи: '/tasks',
+        tasks: '/tasks',
 
-      'аналитика': '/analytics',
-      'analytics': '/analytics',
-      'статистика': '/analytics',
-      'reports': '/reports',
-      'отчеты': '/reports',
+        посещаемость: '/attendance',
+        attendance: '/attendance',
+        присутствие: '/attendance',
 
-      'настройки': '/settings',
-      'settings': '/settings',
+        аналитика: '/analytics',
+        analytics: '/analytics',
+        статистика: '/analytics',
+        reports: '/reports',
+        отчеты: '/reports',
 
-      'дашборд': '/dashboard',
-      'dashboard': '/dashboard',
-      'главная': '/dashboard',
-      'home': '/dashboard',
+        настройки: '/settings',
+        settings: '/settings',
 
-      'профиль': '/profile',
-      'profile': '/profile',
-      'мой профиль': '/profile',
-      'my profile': '/profile',
-    };
+        дашборд: '/dashboard',
+        dashboard: '/dashboard',
+        главная: '/dashboard',
+        home: '/dashboard',
 
-    for (const [keyword, path] of Object.entries(navigationMap)) {
-      // Точное совпадение или "покажи/открой X"
-      if (lowerText === keyword || 
-          lowerText.startsWith('покажи ') || 
+        профиль: '/profile',
+        profile: '/profile',
+        'мой профиль': '/profile',
+        'my profile': '/profile',
+      };
+
+      for (const [keyword, path] of Object.entries(navigationMap)) {
+        // Точное совпадение или "покажи/открой X"
+        if (
+          lowerText === keyword ||
+          lowerText.startsWith('покажи ') ||
           lowerText.startsWith('открой ') ||
           lowerText.startsWith('show ') ||
           lowerText.startsWith('view ') ||
-          lowerText.startsWith('open ')) {
-        if (keyword.includes(lowerText.split(' ')[1] || '')) {
-          router.push(path);
-          setIsOpen(false);
-          return true;
+          lowerText.startsWith('open ')
+        ) {
+          if (keyword.includes(lowerText.split(' ')[1] || '')) {
+            router.push(path);
+            setIsOpen(false);
+            return true;
+          }
         }
       }
-    }
 
-    return false;
-  }, [router]);
+      return false;
+    },
+    [router],
+  );
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -714,23 +829,23 @@ export function ChatWidget() {
       content: text.trim(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('🤖 [ChatWidget] Sending message to AI:', { 
-        userId: user?.id, 
+      console.log('🤖 [ChatWidget] Sending message to AI:', {
+        userId: user?.id,
         organizationId: user?.organizationId,
-        message: input 
+        message: input,
       });
-      
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content })),
+          messages: [...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
           userId: user?.id,
           lang,
         }),
@@ -746,7 +861,7 @@ export function ChatWidget() {
       let fullContent = '';
 
       const assistantId = (Date.now() + 1).toString();
-      setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+      setMessages((prev) => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
 
       if (reader) {
         while (true) {
@@ -754,9 +869,9 @@ export function ChatWidget() {
           if (done) break;
           fullContent += decoder.decode(value, { stream: true });
           const { cleanContent } = parseActions(fullContent);
-          setMessages(prev => prev.map(m =>
-            m.id === assistantId ? { ...m, content: cleanContent } : m
-          ));
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantId ? { ...m, content: cleanContent } : m)),
+          );
         }
       }
 
@@ -781,17 +896,21 @@ export function ChatWidget() {
         }, 800);
       }
 
-      setMessages(prev => prev.map(m =>
-        m.id === assistantId
-          ? {
-            ...m,
-            content: cleanContent.replace(/<NAVIGATE>.*?<\/NAVIGATE>/g, '').trim(),
-            actions,
-            bookingStates: Object.fromEntries(actions.map((_, i) => [i, { status: 'pending' as const }])),
-            suggestions,
-          }
-          : m
-      ));
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content: cleanContent.replace(/<NAVIGATE>.*?<\/NAVIGATE>/g, '').trim(),
+                actions,
+                bookingStates: Object.fromEntries(
+                  actions.map((_, i) => [i, { status: 'pending' as const }]),
+                ),
+                suggestions,
+              }
+            : m,
+        ),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -839,23 +958,36 @@ export function ChatWidget() {
             if (!hasAiChat) {
               openModal({
                 featureTitle: 'AI HR Assistant',
-                featureDescription: 'AI-powered leave assistant, smart suggestions, and voice commands are available on the Professional plan.',
+                featureDescription:
+                  'AI-powered leave assistant, smart suggestions, and voice commands are available on the Professional plan.',
                 recommendedPlan: 'professional',
               });
               return;
             }
-            setIsOpen(o => !o);
+            setIsOpen((o) => !o);
           }}
           className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white shadow-2xl shadow-[#2563eb]/40 flex items-center justify-center hover:scale-105 transition-transform"
           whileTap={{ scale: 0.95 }}
         >
           <AnimatePresence mode="wait">
             {isOpen ? (
-              <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <motion.div
+                key="x"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
                 <X className="w-6 h-6" />
               </motion.div>
             ) : (
-              <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <motion.div
+                key="chat"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
                 <Sparkles className="w-6 h-6" />
               </motion.div>
             )}
@@ -881,7 +1013,9 @@ export function ChatWidget() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-[var(--text-primary)]">Shield HR AI</p>
-                <p className="text-[10px] text-[var(--text-muted)]">{t('chatWidget.subtitle', { defaultValue: 'Your intelligent HR assistant' })}</p>
+                <p className="text-[10px] text-[var(--text-muted)]">
+                  {t('chatWidget.subtitle', { defaultValue: 'Your intelligent HR assistant' })}
+                </p>
               </div>
               <div className="flex items-center gap-1 ml-auto">
                 <button
@@ -895,7 +1029,11 @@ export function ChatWidget() {
                 >
                   <Maximize2 className="w-4 h-4 text-[var(--text-muted)]" />
                 </button>
-                <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors" aria-label={t('chatWidget.closeChat', { defaultValue: 'Close chat' })}>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                  aria-label={t('chatWidget.closeChat', { defaultValue: 'Close chat' })}
+                >
                   <X className="w-4 h-4 text-[var(--text-muted)]" />
                 </button>
               </div>
@@ -903,12 +1041,22 @@ export function ChatWidget() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-
               {/* Initial suggestions (shown when no messages) */}
               {messages.length === 0 && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-                  <p className="text-xs text-[var(--text-muted)] text-center mb-1">👋 {t("chatWidget.greeting", { name: user?.name?.split(" ")[0] || "there" })}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]/70 text-center mb-2">💡 {t('chatWidget.smartHint', { defaultValue: 'I know everything about Shield HR — ask me anything!' })}</p>
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-3"
+                >
+                  <p className="text-xs text-[var(--text-muted)] text-center mb-1">
+                    👋 {t('chatWidget.greeting', { name: user?.name?.split(' ')[0] || 'there' })}
+                  </p>
+                  <p className="text-[10px] text-[var(--text-muted)]/70 text-center mb-2">
+                    💡{' '}
+                    {t('chatWidget.smartHint', {
+                      defaultValue: 'I know everything about Shield HR — ask me anything!',
+                    })}
+                  </p>
                   <div className="grid grid-cols-2 gap-1.5">
                     {getInitialSuggestions(user?.role as UserRole).map((s) => (
                       <button
@@ -929,12 +1077,15 @@ export function ChatWidget() {
                 const isUser = m.role === 'user';
                 return (
                   <div key={m.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] space-y-2 ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
+                    <div
+                      className={`max-w-[85%] space-y-2 ${isUser ? 'items-end' : 'items-start'} flex flex-col`}
+                    >
                       <div
-                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${isUser
-                          ? 'bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white rounded-br-sm'
-                          : 'bg-[var(--background-subtle)] text-[var(--text-primary)] rounded-bl-sm'
-                          }`}
+                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                          isUser
+                            ? 'bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white rounded-br-sm'
+                            : 'bg-[var(--background-subtle)] text-[var(--text-primary)] rounded-bl-sm'
+                        }`}
                       >
                         {m.content}
                       </div>
@@ -953,33 +1104,79 @@ export function ChatWidget() {
                                 key={idx}
                                 initial={{ opacity: 0, y: 4 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className={`rounded-xl border p-3 text-xs space-y-2 ${isDelete ? 'border-red-500/20 bg-red-500/5' : isEdit ? 'border-yellow-500/20 bg-yellow-500/5' : isBookDriver ? 'border-purple-500/20 bg-purple-500/5' : 'border-[#2563eb]/20 bg-[#2563eb]/5'
-                                  }`}
+                                className={`rounded-xl border p-3 text-xs space-y-2 ${
+                                  isDelete
+                                    ? 'border-red-500/20 bg-red-500/5'
+                                    : isEdit
+                                      ? 'border-yellow-500/20 bg-yellow-500/5'
+                                      : isBookDriver
+                                        ? 'border-purple-500/20 bg-purple-500/5'
+                                        : 'border-[#2563eb]/20 bg-[#2563eb]/5'
+                                }`}
                               >
                                 <div className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
-                                  {isDelete ? <Trash2 className="w-3.5 h-3.5 text-red-500" /> : isEdit ? <Pencil className="w-3.5 h-3.5 text-yellow-500" /> : isBookDriver ? <Car className="w-3.5 h-3.5 text-purple-500" /> : <Calendar className="w-3.5 h-3.5 text-[#2563eb]" />}
-                                  {isDelete ? t("chatWidget.cancelLeave") : isEdit ? t("chatWidget.updateLeave") : isBookDriver ? t("chatWidget.bookDriver", "Book Driver") : (LEAVE_TYPE_LABELS[(action as BookLeaveAction).leaveType] ?? t("chatWidget.leaveRequest"))}
+                                  {isDelete ? (
+                                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                  ) : isEdit ? (
+                                    <Pencil className="w-3.5 h-3.5 text-yellow-500" />
+                                  ) : isBookDriver ? (
+                                    <Car className="w-3.5 h-3.5 text-purple-500" />
+                                  ) : (
+                                    <Calendar className="w-3.5 h-3.5 text-[#2563eb]" />
+                                  )}
+                                  {isDelete
+                                    ? t('chatWidget.cancelLeave')
+                                    : isEdit
+                                      ? t('chatWidget.updateLeave')
+                                      : isBookDriver
+                                        ? t('chatWidget.bookDriver', 'Book Driver')
+                                        : (LEAVE_TYPE_LABELS[
+                                            (action as BookLeaveAction).leaveType
+                                          ] ?? t('chatWidget.leaveRequest'))}
                                 </div>
                                 <div className="text-[var(--text-muted)] space-y-0.5">
                                   {isBookDriver ? (
                                     <>
                                       <p>🚗 {(action as BookDriverAction).driverName}</p>
-                                      <p>📅 {new Date((action as BookDriverAction).startTime).toLocaleString()}</p>
-                                      <p>📍 {(action as BookDriverAction).from} → {(action as BookDriverAction).to}</p>
-                                      <p>👥 {(action as BookDriverAction).passengerCount} passengers</p>
-                                      {(action as BookDriverAction).purpose && <p>💼 {(action as BookDriverAction).purpose}</p>}
+                                      <p>
+                                        📅{' '}
+                                        {new Date(
+                                          (action as BookDriverAction).startTime,
+                                        ).toLocaleString()}
+                                      </p>
+                                      <p>
+                                        📍 {(action as BookDriverAction).from} →{' '}
+                                        {(action as BookDriverAction).to}
+                                      </p>
+                                      <p>
+                                        👥 {(action as BookDriverAction).passengerCount} passengers
+                                      </p>
+                                      {(action as BookDriverAction).purpose && (
+                                        <p>💼 {(action as BookDriverAction).purpose}</p>
+                                      )}
                                     </>
                                   ) : action.type !== 'DELETE_LEAVE' ? (
                                     <>
-                                      <p>📅 {action.startDate} → {action.endDate}</p>
-                                      <p>⏱️ {action.days} day{action.days !== 1 ? 's' : ''}</p>
-                                      {(action as BookLeaveAction).reason && <p>📝 {(action as BookLeaveAction).reason}</p>}
+                                      <p>
+                                        📅 {action.startDate} → {action.endDate}
+                                      </p>
+                                      <p>
+                                        ⏱️ {action.days} day{action.days !== 1 ? 's' : ''}
+                                      </p>
+                                      {(action as BookLeaveAction).reason && (
+                                        <p>📝 {(action as BookLeaveAction).reason}</p>
+                                      )}
                                     </>
                                   ) : (
                                     <>
                                       <p>👤 {(action as DeleteLeaveAction).employeeName}</p>
-                                      <p>📅 {(action as DeleteLeaveAction).startDate} → {(action as DeleteLeaveAction).endDate}</p>
-                                      <p className="text-red-500 font-medium">⚠️ This action cannot be undone</p>
+                                      <p>
+                                        📅 {(action as DeleteLeaveAction).startDate} →{' '}
+                                        {(action as DeleteLeaveAction).endDate}
+                                      </p>
+                                      <p className="text-red-500 font-medium">
+                                        ⚠️ This action cannot be undone
+                                      </p>
                                     </>
                                   )}
                                 </div>
@@ -987,68 +1184,101 @@ export function ChatWidget() {
                                 {state.status === 'pending' && (
                                   <button
                                     onClick={() => handleAction(m.id, action, idx)}
-                                    className={`w-full py-2 px-3 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity ${isDelete ? 'bg-gradient-to-r from-red-500 to-red-600' : isEdit ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gradient-to-r from-[#2563eb] to-[#0ea5e9]'
-                                      }`}
+                                    className={`w-full py-2 px-3 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity ${
+                                      isDelete
+                                        ? 'bg-gradient-to-r from-red-500 to-red-600'
+                                        : isEdit
+                                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                                          : 'bg-gradient-to-r from-[#2563eb] to-[#0ea5e9]'
+                                    }`}
                                   >
-                                    {isDelete ? t("chatWidget.confirmDelete") : isEdit ? t("chatWidget.confirmUpdate") : t("chatWidget.confirmSend")}
+                                    {isDelete
+                                      ? t('chatWidget.confirmDelete')
+                                      : isEdit
+                                        ? t('chatWidget.confirmUpdate')
+                                        : t('chatWidget.confirmSend')}
                                   </button>
                                 )}
                                 {state.status === 'loading' && (
                                   <div className="flex items-center justify-center gap-2 py-2">
                                     <ShieldLoader size="xs" variant="inline" />
-                                    <span className="text-xs text-[var(--text-muted)]">{t('chatWidget.submitting')}</span>
+                                    <span className="text-xs text-[var(--text-muted)]">
+                                      {t('chatWidget.submitting')}
+                                    </span>
                                   </div>
                                 )}
                                 {state.status === 'booked' && (
                                   <div className="flex items-start gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
                                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                                    <p className="text-xs text-green-600 dark:text-green-400">{state.result}</p>
+                                    <p className="text-xs text-green-600 dark:text-green-400">
+                                      {state.result}
+                                    </p>
                                   </div>
                                 )}
                                 {state.status === 'conflict' && (
                                   <div className="flex items-start gap-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20">
                                     <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                                     <div className="flex-1">
-                                      <p className="text-xs text-red-600 dark:text-red-400 whitespace-pre-line">{state.result}</p>
-                                      
+                                      <p className="text-xs text-red-600 dark:text-red-400 whitespace-pre-line">
+                                        {state.result}
+                                      </p>
+
                                       {state.conflicts && state.conflicts.length > 0 && (
                                         <div className="mt-2 space-y-1">
                                           {state.conflicts.map((conflict: any, idx: number) => (
-                                            <div key={idx} className="text-xs text-red-700 dark:text-red-300 bg-red-500/5 p-2 rounded border border-red-500/10">
+                                            <div
+                                              key={idx}
+                                              className="text-xs text-red-700 dark:text-red-300 bg-red-500/5 p-2 rounded border border-red-500/10"
+                                            >
                                               <p className="font-medium">{conflict.title}</p>
-                                              <p className="mt-0.5 text-red-600 dark:text-red-400">{conflict.message}</p>
-                                              <p className="mt-1 text-red-500 dark:text-red-300">💡 {conflict.suggestion}</p>
+                                              <p className="mt-0.5 text-red-600 dark:text-red-400">
+                                                {conflict.message}
+                                              </p>
+                                              <p className="mt-1 text-red-500 dark:text-red-300">
+                                                💡 {conflict.suggestion}
+                                              </p>
                                             </div>
                                           ))}
                                         </div>
                                       )}
-                                      
+
                                       {/* Кнопки альтернативных дат */}
-                                      {state.alternativeDates && state.alternativeDates.length > 0 && (
-                                        <div className="mt-3">
-                                          <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">✅ Доступные даты без конфликтов:</p>
-                                          <div className="flex flex-wrap gap-1.5">
-                                            {state.alternativeDates.map((dateRange, idx) => (
-                                              <button
-                                                key={idx}
-                                                onClick={() => {
-                                                  // Вставляем даты в input
-                                                  setInput(`Хочу отпуск ${dateRange}`);
-                                                  // Обновляем состояние — убираем конфликт
-                                                  setMessages(prev => prev.map(msg =>
-                                                    msg.id === m.id
-                                                      ? { ...msg, bookingStates: { ...msg.bookingStates, [idx]: { status: 'pending' } } }
-                                                      : msg
-                                                  ));
-                                                }}
-                                                className="px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-xs text-green-700 dark:text-green-400 font-medium transition-all"
-                                              >
-                                                📅 {dateRange}
-                                              </button>
-                                            ))}
+                                      {state.alternativeDates &&
+                                        state.alternativeDates.length > 0 && (
+                                          <div className="mt-3">
+                                            <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">
+                                              ✅ Доступные даты без конфликтов:
+                                            </p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                              {state.alternativeDates.map((dateRange, idx) => (
+                                                <button
+                                                  key={idx}
+                                                  onClick={() => {
+                                                    // Вставляем даты в input
+                                                    setInput(`Хочу отпуск ${dateRange}`);
+                                                    // Обновляем состояние — убираем конфликт
+                                                    setMessages((prev) =>
+                                                      prev.map((msg) =>
+                                                        msg.id === m.id
+                                                          ? {
+                                                              ...msg,
+                                                              bookingStates: {
+                                                                ...msg.bookingStates,
+                                                                [idx]: { status: 'pending' },
+                                                              },
+                                                            }
+                                                          : msg,
+                                                      ),
+                                                    );
+                                                  }}
+                                                  className="px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-xs text-green-700 dark:text-green-400 font-medium transition-all"
+                                                >
+                                                  📅 {dateRange}
+                                                </button>
+                                              ))}
+                                            </div>
                                           </div>
-                                        </div>
-                                      )}
+                                        )}
                                     </div>
                                   </div>
                                 )}
@@ -1088,7 +1318,9 @@ export function ChatWidget() {
                 <div className="flex justify-start">
                   <div className="bg-[var(--background-subtle)] px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2">
                     <ShieldLoader size="xs" variant="inline" />
-                    <span className="text-xs text-[var(--text-muted)]">{t('chatWidget.thinking', { defaultValue: 'Thinking...' })}</span>
+                    <span className="text-xs text-[var(--text-muted)]">
+                      {t('chatWidget.thinking', { defaultValue: 'Thinking...' })}
+                    </span>
                   </div>
                 </div>
               )}
@@ -1104,16 +1336,24 @@ export function ChatWidget() {
             )}
 
             {/* Input */}
-            <form onSubmit={handleSubmit} className="p-4 border-t border-[var(--border)] flex-shrink-0">
+            <form
+              onSubmit={handleSubmit}
+              className="p-4 border-t border-[var(--border)] flex-shrink-0"
+            >
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <input
                     ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder={isListening ? t("chatWidget.listening") : t("chatWidget.placeholder")}
-                    className={`w-full px-4 py-2 pr-10 bg-[var(--background-subtle)] border rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-sm transition-colors ${isListening ? 'border-[#2563eb] ring-2 ring-[#2563eb]/30' : 'border-[var(--border)]'
-                      }`}
+                    placeholder={
+                      isListening ? t('chatWidget.listening') : t('chatWidget.placeholder')
+                    }
+                    className={`w-full px-4 py-2 pr-10 bg-[var(--background-subtle)] border rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-sm transition-colors ${
+                      isListening
+                        ? 'border-[#2563eb] ring-2 ring-[#2563eb]/30'
+                        : 'border-[var(--border)]'
+                    }`}
                     disabled={isLoading}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
@@ -1126,11 +1366,12 @@ export function ChatWidget() {
                     type="button"
                     onClick={startVoiceInput}
                     disabled={isLoading}
-                    title={isListening ? t("chatWidget.stopListening") : t("chatWidget.voiceInput")}
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors disabled:opacity-50 ${isListening
-                      ? 'text-[#2563eb] animate-pulse'
-                      : 'text-[var(--text-muted)] hover:text-[#2563eb]'
-                      }`}
+                    title={isListening ? t('chatWidget.stopListening') : t('chatWidget.voiceInput')}
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors disabled:opacity-50 ${
+                      isListening
+                        ? 'text-[#2563eb] animate-pulse'
+                        : 'text-[var(--text-muted)] hover:text-[#2563eb]'
+                    }`}
                   >
                     {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                   </button>
@@ -1140,7 +1381,11 @@ export function ChatWidget() {
                   disabled={isLoading || !input.trim()}
                   className="bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] hover:opacity-90 disabled:opacity-50"
                 >
-                  {isLoading ? <ShieldLoader size="xs" variant="inline" /> : <Send className="w-4 h-4" />}
+                  {isLoading ? (
+                    <ShieldLoader size="xs" variant="inline" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
             </form>
@@ -1152,4 +1397,3 @@ export function ChatWidget() {
 }
 
 export default ChatWidget;
-

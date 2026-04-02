@@ -3,45 +3,37 @@
  * Использует универсальный Wizard компонент
  */
 
-"use client";
+'use client';
 
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { Wizard, WizardStep } from "@/components/ui/wizard";
-import {
-  TextInputStep,
-  TextareaStep,
-  SelectStep,
-} from "@/components/ui/wizard-step-components";
-import { CheckSquare, Calendar, User, AlertCircle } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { toast } from "sonner";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Wizard, WizardStep } from '@/components/ui/wizard';
+import { TextInputStep, TextareaStep, SelectStep } from '@/components/ui/wizard-step-components';
+import { CheckSquare, Calendar, User, AlertCircle } from 'lucide-react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { toast } from 'sonner';
 
 interface CreateTaskWizardProps {
-  assigneeId?: Id<"users">;
+  assigneeId?: Id<'users'>;
   onComplete?: () => void;
   onCancel?: () => void;
 }
 
-export function CreateTaskWizard({
-  assigneeId,
-  onComplete,
-  onCancel,
-}: CreateTaskWizardProps) {
+export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTaskWizardProps) {
   const { t } = useTranslation();
   const createTask = useMutation(api.tasks.createTask);
   const user = useQuery(api.users.getCurrentUser);
-  
+
   // Получаем список сотрудников для назначения
   const employees = useQuery(api.users.getAllUsers) || [];
 
   const steps: WizardStep[] = [
     {
-      id: "details",
-      title: t("taskWizard.steps.details.title"),
-      description: t("taskWizard.steps.details.description"),
+      id: 'details',
+      title: t('taskWizard.steps.details.title'),
+      description: t('taskWizard.steps.details.description'),
       icon: <CheckSquare className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
@@ -49,25 +41,25 @@ export function CreateTaskWizard({
             stepData={{}}
             updateStepData={() => {}}
             field="title"
-            label={t("taskWizard.steps.details.titleLabel")}
-            placeholder={t("taskWizard.steps.details.titlePlaceholder")}
+            label={t('taskWizard.steps.details.titleLabel')}
+            placeholder={t('taskWizard.steps.details.titlePlaceholder')}
             required
           />
           <TextareaStep
             stepData={{}}
             updateStepData={() => {}}
             field="description"
-            label={t("taskWizard.steps.details.descriptionLabel")}
-            placeholder={t("taskWizard.steps.details.descriptionPlaceholder")}
+            label={t('taskWizard.steps.details.descriptionLabel')}
+            placeholder={t('taskWizard.steps.details.descriptionPlaceholder')}
             rows={5}
           />
         </div>
       ),
     },
     {
-      id: "priority",
-      title: t("taskWizard.steps.priority.title"),
-      description: t("taskWizard.steps.priority.description"),
+      id: 'priority',
+      title: t('taskWizard.steps.priority.title'),
+      description: t('taskWizard.steps.priority.description'),
       icon: <AlertCircle className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
@@ -75,37 +67,37 @@ export function CreateTaskWizard({
             stepData={{}}
             updateStepData={() => {}}
             field="priority"
-            label={t("taskWizard.steps.priority.priorityLabel")}
+            label={t('taskWizard.steps.priority.priorityLabel')}
             options={[
-              { value: "low", label: t("priority.low"), icon: null },
-              { value: "medium", label: t("priority.medium"), icon: null },
-              { value: "high", label: t("priority.high"), icon: null },
+              { value: 'low', label: t('priority.low'), icon: null },
+              { value: 'medium', label: t('priority.medium'), icon: null },
+              { value: 'high', label: t('priority.high'), icon: null },
             ]}
-            placeholder={t("taskWizard.steps.priority.priorityPlaceholder")}
+            placeholder={t('taskWizard.steps.priority.priorityPlaceholder')}
             defaultValue="medium"
           />
           <TextInputStep
             stepData={{}}
             updateStepData={() => {}}
             field="deadline"
-            label={t("taskWizard.steps.priority.deadlineLabel")}
+            label={t('taskWizard.steps.priority.deadlineLabel')}
             type="date"
-            description={t("taskWizard.steps.priority.deadlineDescription")}
+            description={t('taskWizard.steps.priority.deadlineDescription')}
           />
         </div>
       ),
     },
     {
-      id: "assignee",
-      title: t("taskWizard.steps.assignee.title"),
-      description: t("taskWizard.steps.assignee.description"),
+      id: 'assignee',
+      title: t('taskWizard.steps.assignee.title'),
+      description: t('taskWizard.steps.assignee.description'),
       icon: <User className="w-5 h-5" />,
       content: (
         <SelectStep
           stepData={{}}
           updateStepData={() => {}}
           field="assigneeId"
-          label={t("taskWizard.steps.assignee.assigneeLabel")}
+          label={t('taskWizard.steps.assignee.assigneeLabel')}
           options={employees
             .filter((e: any) => e.id !== user?.id)
             .map((e: any) => ({
@@ -113,7 +105,7 @@ export function CreateTaskWizard({
               label: e.name,
               description: e.email,
             }))}
-          placeholder={t("taskWizard.steps.assignee.assigneePlaceholder")}
+          placeholder={t('taskWizard.steps.assignee.assigneePlaceholder')}
           defaultValue={assigneeId || user?.id}
           required
         />
@@ -124,19 +116,19 @@ export function CreateTaskWizard({
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
       await createTask({
-        assigneeId: String(data.assigneeId) as Id<"users">,
-        assignerId: user?.id as Id<"users">,
-        organizationId: user?.organizationId as Id<"organizations">,
+        assigneeId: String(data.assigneeId) as Id<'users'>,
+        assignerId: user?.id as Id<'users'>,
+        organizationId: user?.organizationId as Id<'organizations'>,
         title: String(data.title),
-        description: String(data.description) || "",
-        priority: (String(data.priority) || "medium") as "low" | "medium" | "high" | "urgent",
+        description: String(data.description) || '',
+        priority: (String(data.priority) || 'medium') as 'low' | 'medium' | 'high' | 'urgent',
         deadline: data.deadline ? new Date(String(data.deadline)).getTime() : undefined,
       });
 
-      toast.success(t("taskWizard.toast.success"));
+      toast.success(t('taskWizard.toast.success'));
       onComplete?.();
     } catch (error) {
-      toast.error(t("taskWizard.toast.error"));
+      toast.error(t('taskWizard.toast.error'));
       console.error(error);
     }
   };
@@ -146,8 +138,8 @@ export function CreateTaskWizard({
       steps={steps}
       onComplete={handleSubmit}
       onCancel={onCancel}
-      submitLabel={t("taskWizard.submit")}
-      cancelLabel={t("actions.cancel")}
+      submitLabel={t('taskWizard.submit')}
+      cancelLabel={t('actions.cancel')}
     />
   );
 }

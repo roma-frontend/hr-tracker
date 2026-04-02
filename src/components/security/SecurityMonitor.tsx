@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
 import { Shield, AlertTriangle, Lock, Activity } from 'lucide-react';
@@ -78,9 +78,7 @@ export function SecurityMonitor() {
               <Activity className="w-4 h-4 text-gray-500" />
               <span className="text-sm">Threat Level</span>
             </div>
-            <Badge className={`${anomalyStatus.color} text-white`}>
-              {anomalyStatus.label}
-            </Badge>
+            <Badge className={`${anomalyStatus.color} text-white`}>{anomalyStatus.label}</Badge>
           </div>
 
           {/* Blocked IPs */}

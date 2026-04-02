@@ -1,24 +1,36 @@
-﻿"use client";
+﻿'use client';
 import Image from 'next/image';
 
-import { useTranslation } from "react-i18next";
-import React from "react";
+import { useTranslation } from 'react-i18next';
+import React from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { X, Clock, LogIn, LogOut, AlertTriangle, CheckCircle, Calendar, Timer, TrendingUp, User, Building2 } from "lucide-react";
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import type { Id } from "../../../convex/_generated/dataModel";
+import {
+  X,
+  Clock,
+  LogIn,
+  LogOut,
+  AlertTriangle,
+  CheckCircle,
+  Calendar,
+  Timer,
+  TrendingUp,
+  User,
+  Building2,
+} from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 interface AttendanceRecord {
   _id: string;
-  userId: Id<"users">;
+  userId: Id<'users'>;
   date: string;
   checkInTime: number;
   checkOutTime?: number;
   totalWorkedMinutes?: number;
-  status: "checked_in" | "checked_out" | "absent";
+  status: 'checked_in' | 'checked_out' | 'absent';
   isLate?: boolean;
   lateMinutes?: number;
   isEarlyLeave?: boolean;
@@ -41,7 +53,11 @@ interface AttendanceDetailModalProps {
 }
 
 function formatTime(timestamp: number) {
-  return new Date(timestamp).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return new Date(timestamp).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 }
 
 function formatDuration(minutes: number) {
@@ -50,25 +66,28 @@ function formatDuration(minutes: number) {
   return `${h}h ${m}m`;
 }
 
-export function AttendanceDetailModal({ 
-record, open, onClose }: AttendanceDetailModalProps) {
+export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetailModalProps) {
   const { t } = useTranslation();
   const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
   const monthlyStats = useQuery(
     api.timeTracking.getMonthlyStats,
-    record?.userId ? { userId: record.userId, month: currentMonth } : "skip"
+    record?.userId ? { userId: record.userId, month: currentMonth } : 'skip',
   );
 
   const recentRecords = useQuery(
     api.timeTracking.getRecentAttendance,
-    record?.userId ? { userId: record.userId, limit: 7 } : "skip"
+    record?.userId ? { userId: record.userId, limit: 7 } : 'skip',
   );
 
   if (!record) return null;
 
-  const workedHours = record.totalWorkedMinutes ? (record.totalWorkedMinutes / 60).toFixed(1) : null;
+  const workedHours = record.totalWorkedMinutes
+    ? (record.totalWorkedMinutes / 60).toFixed(1)
+    : null;
   const expectedHours = 9; // 9:00 to 18:00
-  const workCompletion = workedHours ? Math.min(100, (parseFloat(workedHours) / expectedHours) * 100) : 0;
+  const workCompletion = workedHours
+    ? Math.min(100, (parseFloat(workedHours) / expectedHours) * 100)
+    : 0;
 
   return (
     <AnimatePresence>
@@ -88,9 +107,9 @@ record, open, onClose }: AttendanceDetailModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border"
-            style={{ background: "var(--card)", borderColor: "var(--border)" }}
+            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
           >
             {/* Header gradient */}
             <div className="relative h-28 bg-gradient-to-br from-blue-600 to-sky-700 flex items-end px-6 pb-4">
@@ -107,31 +126,51 @@ record, open, onClose }: AttendanceDetailModalProps) {
               <div className="flex items-end gap-4">
                 <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden shadow-lg bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-2xl font-bold">
                   {record.user?.avatarUrl ? (
-                    <img src={record.user.avatarUrl} alt={record.user.name ?? ""} className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                    <img
+                      src={record.user.avatarUrl}
+                      alt={record.user.name ?? ''}
+                      className="w-full h-full object-cover scale-110"
+                      referrerPolicy="no-referrer"
+                    />
                   ) : (
-                    record.user?.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) ?? "?"
+                    (record.user?.name
+                      ?.split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2) ?? '?')
                   )}
                 </div>
                 <div className="pb-1">
-                  <h2 className="text-xl font-bold text-white">{record.user?.name ?? "Unknown"}</h2>
-                  <p className="text-white/70 text-sm">{record.user?.position ?? record.user?.role ?? "Employee"}</p>
+                  <h2 className="text-xl font-bold text-white">{record.user?.name ?? 'Unknown'}</h2>
+                  <p className="text-white/70 text-sm">
+                    {record.user?.position ?? record.user?.role ?? 'Employee'}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-
               {/* Date & Status */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Calendar className="w-4 h-4" />
-                  {new Date(record.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  {new Date(record.date).toLocaleDateString('en-GB', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
                 </div>
                 <div className="flex gap-2">
-                  {record.status === "checked_in" && <Badge className="bg-green-500 text-white">🟢 Active</Badge>}
-                  {record.status === "checked_out" && <Badge className="bg-blue-500 text-white">✅ Done</Badge>}
-                  {record.status === "absent" && <Badge variant="destructive">❌ Absent</Badge>}
+                  {record.status === 'checked_in' && (
+                    <Badge className="bg-green-500 text-white">🟢 Active</Badge>
+                  )}
+                  {record.status === 'checked_out' && (
+                    <Badge className="bg-blue-500 text-white">✅ Done</Badge>
+                  )}
+                  {record.status === 'absent' && <Badge variant="destructive">❌ Absent</Badge>}
                 </div>
               </div>
 
@@ -149,7 +188,7 @@ record, open, onClose }: AttendanceDetailModalProps) {
                       <span className="text-xs text-gray-500 dark:text-gray-400">Check In</span>
                     </div>
                     <p className="text-lg font-bold text-green-500">
-                      {record.checkInTime ? formatTime(record.checkInTime) : "—"}
+                      {record.checkInTime ? formatTime(record.checkInTime) : '—'}
                     </p>
                     {record.isLate && (
                       <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -175,7 +214,7 @@ record, open, onClose }: AttendanceDetailModalProps) {
                       <span className="text-xs text-gray-500 dark:text-gray-400">Check Out</span>
                     </div>
                     <p className="text-lg font-bold text-blue-500">
-                      {record.checkOutTime ? formatTime(record.checkOutTime) : "—"}
+                      {record.checkOutTime ? formatTime(record.checkOutTime) : '—'}
                     </p>
                     {record.isEarlyLeave && record.earlyLeaveMinutes && (
                       <p className="text-xs text-orange-500 mt-1 flex items-center gap-1">
@@ -189,7 +228,7 @@ record, open, onClose }: AttendanceDetailModalProps) {
                         Full day
                       </p>
                     )}
-                    {!record.checkOutTime && record.status === "checked_in" && (
+                    {!record.checkOutTime && record.status === 'checked_in' && (
                       <p className="text-xs text-green-500 mt-1">Still working...</p>
                     )}
                   </div>
@@ -199,20 +238,25 @@ record, open, onClose }: AttendanceDetailModalProps) {
                 {workedHours && (
                   <div>
                     <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      <span className="flex items-center gap-1"><Timer className="w-3 h-3" /> Worked</span>
-                      <span className="font-semibold text-gray-800 dark:text-gray-100">{workedHours}h / {expectedHours}h</span>
+                      <span className="flex items-center gap-1">
+                        <Timer className="w-3 h-3" /> Worked
+                      </span>
+                      <span className="font-semibold text-gray-800 dark:text-gray-100">
+                        {workedHours}h / {expectedHours}h
+                      </span>
                     </div>
                     <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${workCompletion}%` }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
                         className={`h-full rounded-full ${workCompletion >= 100 ? 'bg-green-500' : workCompletion >= 70 ? 'bg-blue-500' : 'bg-orange-500'}`}
                       />
                     </div>
                     {record.overtimeMinutes && record.overtimeMinutes > 0 && (
                       <p className="text-xs text-sky-400 mt-1">
-                        +{formatDuration(record.overtimeMinutes)} {t('attendanceExtra.overtime') || 'overtime'}
+                        +{formatDuration(record.overtimeMinutes)}{' '}
+                        {t('attendanceExtra.overtime') || 'overtime'}
                       </p>
                     )}
                   </div>
@@ -230,7 +274,8 @@ record, open, onClose }: AttendanceDetailModalProps) {
                 {(record.user as any)?.supervisorName && (
                   <div className="flex items-center gap-2 text-sm text-blue-500">
                     <User className="w-4 h-4" />
-                    Supervisor: <span className="font-semibold">{(record.user as any).supervisorName}</span>
+                    Supervisor:{' '}
+                    <span className="font-semibold">{(record.user as any).supervisorName}</span>
                   </div>
                 )}
               </div>
@@ -245,15 +290,23 @@ record, open, onClose }: AttendanceDetailModalProps) {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="text-center">
                       <p className="text-xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('attendanceExtra.daysWorked')}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {t('attendanceExtra.daysWorked')}
+                      </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xl font-bold text-green-500">{monthlyStats.punctualityRate}%</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('attendanceExtra.punctuality')}</p>
+                      <p className="text-xl font-bold text-green-500">
+                        {monthlyStats.punctualityRate}%
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {t('attendanceExtra.punctuality')}
+                      </p>
                     </div>
                     <div className="text-center">
                       <p className="text-xl font-bold text-orange-500">{monthlyStats.lateDays}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('attendanceExtra.lateDays') || 'Late days'}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {t('attendanceExtra.lateDays') || 'Late days'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -270,24 +323,38 @@ record, open, onClose }: AttendanceDetailModalProps) {
                     {recentRecords.map((r: any) => (
                       <div key={r._id} className="flex items-center justify-between text-sm">
                         <span className="text-gray-500 dark:text-gray-400">
-                          {new Date(r.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                          {new Date(r.date).toLocaleDateString('en-GB', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short',
+                          })}
                         </span>
                         <div className="flex items-center gap-2">
                           {r.checkInTime ? (
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {formatTime(r.checkInTime)} → {r.checkOutTime ? formatTime(r.checkOutTime) : "..."}
+                              {formatTime(r.checkInTime)} →{' '}
+                              {r.checkOutTime ? formatTime(r.checkOutTime) : '...'}
                             </span>
                           ) : null}
-                          {r.isLate && <Badge variant="destructive" className="text-xs py-0">{t('statuses.late')}</Badge>}
-                          {r.status === "checked_out" && !r.isLate && <Badge className="bg-green-500 text-white text-xs py-0">✓</Badge>}
-                          {r.status === "checked_in" && <Badge className="bg-green-500 text-white text-xs py-0">{t('statuses.active')}Active</Badge>}
+                          {r.isLate && (
+                            <Badge variant="destructive" className="text-xs py-0">
+                              {t('statuses.late')}
+                            </Badge>
+                          )}
+                          {r.status === 'checked_out' && !r.isLate && (
+                            <Badge className="bg-green-500 text-white text-xs py-0">✓</Badge>
+                          )}
+                          {r.status === 'checked_in' && (
+                            <Badge className="bg-green-500 text-white text-xs py-0">
+                              {t('statuses.active')}Active
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-
             </div>
           </motion.div>
         </div>

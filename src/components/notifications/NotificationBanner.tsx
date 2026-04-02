@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState, useCallback } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Id } from "../../../convex/_generated/dataModel";
-import { SmartBanner } from "@/components/ui/SmartBanner";
-import { useRouter } from "next/navigation";
-import { MessageSquare } from "lucide-react";
-import { playNotificationSound } from "@/lib/notificationSound";
+import React, { useEffect, useState, useCallback } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Id } from '../../../convex/_generated/dataModel';
+import { SmartBanner } from '@/components/ui/SmartBanner';
+import { useRouter } from 'next/navigation';
+import { MessageSquare } from 'lucide-react';
+import { playNotificationSound } from '@/lib/notificationSound';
 
 /**
  * Real-time notification banner that slides in from top
@@ -18,14 +18,14 @@ import { playNotificationSound } from "@/lib/notificationSound";
 export function NotificationBanner() {
   const { user } = useAuthStore();
   const router = useRouter();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === 'admin';
 
   // Only admin users see the banner and hear the sound
   if (!isAdmin) return null;
 
   const notifications = useQuery(
     api.notifications.getUserNotifications,
-    user?.id ? { userId: user.id as Id<"users"> } : "skip"
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
   const [lastSeenCount, setLastSeenCount] = useState<number | null>(null);
@@ -50,14 +50,14 @@ export function NotificationBanner() {
     // If new unread appeared, show the banner with sound (admin only)
     if (currentCount > lastSeenCount && unread.length > 0) {
       const latest = unread[0]; // most recent
-      
+
       // Play sound with sessionStorage to prevent repeats
       const hasPlayed = sessionStorage.getItem(`notif_sound_${currentCount}`);
       if (!hasPlayed) {
-        sessionStorage.setItem(`notif_sound_${currentCount}`, "1");
-        playNotificationSound("new_request");
+        sessionStorage.setItem(`notif_sound_${currentCount}`, '1');
+        playNotificationSound('new_request');
       }
-      
+
       setNewNotification({
         title: latest.title,
         message: latest.message,
@@ -76,13 +76,13 @@ export function NotificationBanner() {
 
   // Map notification type to banner type
   const bannerType =
-    newNotification.type === "leave_approved"
-      ? ("success" as const)
-      : newNotification.type === "leave_rejected"
-        ? ("error" as const)
-        : newNotification.type === "security_alert"
-          ? ("warning" as const)
-          : ("purple" as const);
+    newNotification.type === 'leave_approved'
+      ? ('success' as const)
+      : newNotification.type === 'leave_rejected'
+        ? ('error' as const)
+        : newNotification.type === 'security_alert'
+          ? ('warning' as const)
+          : ('purple' as const);
 
   return (
     <div className="w-full">
@@ -94,17 +94,17 @@ export function NotificationBanner() {
         onDismiss={handleDismiss}
         className="rounded-none border-x-0 border-t-0"
         action={{
-          label: "View",
+          label: 'View',
           onClick: () => {
             handleDismiss();
             if (
-              newNotification.type === "leave_request" ||
-              newNotification.type === "leave_approved" ||
-              newNotification.type === "leave_rejected"
+              newNotification.type === 'leave_request' ||
+              newNotification.type === 'leave_approved' ||
+              newNotification.type === 'leave_rejected'
             ) {
-              router.push("/leaves");
+              router.push('/leaves');
             } else {
-              router.push("/dashboard");
+              router.push('/dashboard');
             }
           },
         }}

@@ -1,27 +1,27 @@
-﻿import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { Resend } from 'resend';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 async function convexMutation(name: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: name, args }),
   });
   const data = await res.json();
-  if (data.status === "error") throw new Error(data.errorMessage ?? "Convex error");
+  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
   return data.value;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
-    if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 });
 
     // Request reset token from Convex
-    const result = await convexMutation("auth:requestPasswordReset", { email });
+    const result = await convexMutation('auth:requestPasswordReset', { email });
 
     // If user not found, still return success (security)
     if (!result.token) {
@@ -32,18 +32,20 @@ export async function POST(req: NextRequest) {
 
     // Send email via Resend
     const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey && !resendKey.includes("your_api_key")) {
+    if (resendKey && !resendKey.includes('your_api_key')) {
       const resend = new Resend(resendKey);
       // Resend requires verified domain to send to arbitrary emails.
       // Until adb.org DNS records are verified, send to test email (account owner).
-      const isDomainVerified = process.env.RESEND_DOMAIN_VERIFIED === "true";
-      const testEmail = process.env.RESEND_TEST_EMAIL || "romangulanyan@gmail.com";
+      const isDomainVerified = process.env.RESEND_DOMAIN_VERIFIED === 'true';
+      const testEmail = process.env.RESEND_TEST_EMAIL || 'romangulanyan@gmail.com';
       const toEmail = isDomainVerified ? result.email : testEmail;
-      const fromEmail = isDomainVerified ? "HR Office <hr@adb.org>" : "HR Office <onboarding@resend.dev>";
+      const fromEmail = isDomainVerified
+        ? 'HR Office <hr@adb.org>'
+        : 'HR Office <onboarding@resend.dev>';
       const subject = isDomainVerified
-        ? "Reset your HR Office password"
+        ? 'Reset your HR Office password'
         : `[For ${result.email}] Password Reset - HR Office`;
-      console.log("Sending email:", { from: fromEmail, to: toEmail, target: result.email });
+      console.log('Sending email:', { from: fromEmail, to: toEmail, target: result.email });
       const sendResult = await resend.emails.send({
         from: fromEmail,
         to: toEmail,
@@ -101,17 +103,17 @@ export async function POST(req: NextRequest) {
           </html>
         `,
       });
-      console.log("Resend result:", JSON.stringify(sendResult));
+      console.log('Resend result:', JSON.stringify(sendResult));
       if (sendResult.error) {
-        console.error("Resend error:", sendResult.error);
+        console.error('Resend error:', sendResult.error);
         // Don't throw — token is still saved, user can try again or admin can resend
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Forgot password error:", err);
-    const msg = err instanceof Error ? err.message : "Something went wrong";
+    console.error('Forgot password error:', err);
+    const msg = err instanceof Error ? err.message : 'Something went wrong';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

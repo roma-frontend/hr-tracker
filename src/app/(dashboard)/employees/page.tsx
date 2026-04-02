@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 function EmployeesSkeleton() {
   return (
@@ -19,13 +19,10 @@ function EmployeesSkeleton() {
 }
 
 // EmployeesClient pulls face-api.js + large modal components — lazy load
-const EmployeesClient = dynamic(
-  () => import("@/components/employees/EmployeesClient"),
-  {
-    ssr: false,
-    loading: () => <EmployeesSkeleton />,
-  }
-);
+const EmployeesClient = dynamic(() => import('@/components/employees/EmployeesClient'), {
+  ssr: false,
+  loading: () => <EmployeesSkeleton />,
+});
 
 export default function EmployeesPage() {
   return <EmployeesClient />;

@@ -1,19 +1,18 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { DollarSign } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { DollarSign } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function CostAnalysis() {
-  
   const { t } = useTranslation();
-const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
-  
+  const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
+
   const data = useQuery(api.admin.getCostAnalysis, { period });
 
   if (!data) {
@@ -36,23 +35,23 @@ const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
           </CardTitle>
           <div className="flex gap-2">
             <Button
-              variant={period === "month" ? "default" : "outline"}
+              variant={period === 'month' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setPeriod("month")}
+              onClick={() => setPeriod('month')}
             >
               Month
             </Button>
             <Button
-              variant={period === "quarter" ? "default" : "outline"}
+              variant={period === 'quarter' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setPeriod("quarter")}
+              onClick={() => setPeriod('quarter')}
             >
               Quarter
             </Button>
             <Button
-              variant={period === "year" ? "default" : "outline"}
+              variant={period === 'year' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setPeriod("year")}
+              onClick={() => setPeriod('year')}
             >
               Year
             </Button>
@@ -64,7 +63,7 @@ const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
         <div className="rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-secondary)]">{t("costAnalysis.totalCost")}</p>
+              <p className="text-sm text-[var(--text-secondary)]">{t('costAnalysis.totalCost')}</p>
               <p className="text-3xl font-bold text-[var(--text-primary)]">
                 ${data.totalCost.toLocaleString()}
               </p>
@@ -78,7 +77,9 @@ const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
         {/* By Department */}
         {data.byDepartment.length > 0 && (
           <div>
-            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">{t("costAnalysis.byDepartment")}</h4>
+            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">
+              {t('costAnalysis.byDepartment')}
+            </h4>
             <div className="space-y-2">
               {data.byDepartment.map((dept: any) => (
                 <div key={dept.name} className="space-y-1">
@@ -103,7 +104,9 @@ const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
         {/* By Type */}
         {data.byType.length > 0 && (
           <div>
-            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">{t("costAnalysis.byLeaveType")}</h4>
+            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">
+              {t('costAnalysis.byLeaveType')}
+            </h4>
             <div className="space-y-2">
               {data.byType.map((typeData: any) => (
                 <div key={typeData.type} className="space-y-1">
@@ -127,11 +130,10 @@ const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
 
         {data.totalCost === 0 && (
           <p className="text-center text-sm text-[var(--text-secondary)]">
-            {t("costAnalysis.noData")}
+            {t('costAnalysis.noData')}
           </p>
         )}
       </CardContent>
     </Card>
   );
 }
-

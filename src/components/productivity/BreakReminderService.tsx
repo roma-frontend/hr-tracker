@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useTranslation } from "react-i18next";
-import { useEffect, useRef } from "react";
-import { toast } from "sonner";
-import { Coffee } from "lucide-react";
+import { useTranslation } from 'react-i18next';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { Coffee } from 'lucide-react';
 import {
   subscribeToPushNotifications,
   sendLocalPushNotification,
   isPushNotificationSupported,
-  requestNotificationPermission
-} from "@/lib/pushNotifications";
+  requestNotificationPermission,
+} from '@/lib/pushNotifications';
 
 interface BreakReminderServiceProps {
   enabled: boolean;
@@ -21,8 +21,8 @@ interface BreakReminderServiceProps {
 export default function BreakReminderService({
   enabled,
   intervalMinutes,
-  workHoursStart = "09:00",
-  workHoursEnd = "18:00",
+  workHoursStart = '09:00',
+  workHoursEnd = '18:00',
 }: BreakReminderServiceProps) {
   const { t } = useTranslation();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -48,7 +48,7 @@ export default function BreakReminderService({
         gainNode.connect(ctx.destination);
 
         oscillator.frequency.value = frequency;
-        oscillator.type = "sine";
+        oscillator.type = 'sine';
 
         // Envelope for smooth sound
         gainNode.gain.setValueAtTime(0, startTime);
@@ -69,14 +69,14 @@ export default function BreakReminderService({
       createTone(659.25, now + 0.45, 0.1); // E5
       createTone(783.99, now + 0.5, 0.2); // G5
     } catch (error) {
-      console.error("Failed to play break sound:", error);
+      console.error('Failed to play break sound:', error);
     }
   };
 
   // Check if current time is within work hours
   const isWithinWorkHours = () => {
     const now = new Date();
-    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     return currentTime >= workHoursStart && currentTime <= workHoursEnd;
   };
 
@@ -108,23 +108,22 @@ export default function BreakReminderService({
           <p className="font-semibold text-[var(--foreground)] text-base">Time for a Break! ☕</p>
           <p className="text-sm text-[var(--text-muted)] mt-0.5 leading-relaxed">
             {intervalMinutes === 1
-              ? "Testing mode: Time to take a quick break!"
-              : `You've been working for ${intervalMinutes} minutes. Take 5 minutes to stretch and recharge!`
-            }
+              ? 'Testing mode: Time to take a quick break!'
+              : `You've been working for ${intervalMinutes} minutes. Take 5 minutes to stretch and recharge!`}
           </p>
         </div>
       </div>,
       {
         duration: 10000,
-        position: "top-center",
-        className: "break-reminder-toast",
-      }
+        position: 'top-center',
+        className: 'break-reminder-toast',
+      },
     );
 
     // Send push notification for mobile (works even when app is in background)
     if (isPushNotificationSupported()) {
       try {
-        await sendLocalPushNotification("Time for a Break! ☕", {
+        await sendLocalPushNotification('Time for a Break! ☕', {
           body: `You've been working for ${intervalMinutes} minutes. Take a 5-minute break to stretch and recharge!`,
           tag: `break-reminder-${Date.now()}`, // Unique tag to ensure it always shows
           requireInteraction: false, // Better for iOS - auto dismiss after some time

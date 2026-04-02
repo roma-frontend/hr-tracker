@@ -1,46 +1,54 @@
 /**
  * Leave Request Wizard — Пошаговый мастер создания заявки на отпуск
- * 
+ *
  * 3 шага вместо одной сложной формы:
  * 1. Тип отпуска + Даты
  * 2. Баланс и детали
  * 3. Подтверждение
  */
 
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { Calendar, CheckCircle, ChevronRight, ChevronLeft, X, Info, AlertTriangle } from "lucide-react";
-import { format, differenceInDays, addDays } from "date-fns";
-import { ru } from "date-fns/locale";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType } from "@/lib/types";
+import {
+  Calendar,
+  CheckCircle,
+  ChevronRight,
+  ChevronLeft,
+  X,
+  Info,
+  AlertTriangle,
+} from 'lucide-react';
+import { format, differenceInDays, addDays } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType } from '@/lib/types';
 
 interface LeaveRequestWizardProps {
-  userId: Id<"users">;
+  userId: Id<'users'>;
   onClose: () => void;
 }
 
-type LeaveStep = "dates" | "details" | "confirm";
+type LeaveStep = 'dates' | 'details' | 'confirm';
 
 export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps) {
   const { t } = useTranslation();
-  const [currentStep, setCurrentStep] = useState<LeaveStep>("dates");
-  
+  const [currentStep, setCurrentStep] = useState<LeaveStep>('dates');
+
   // Данные формы
-  const [leaveType, setLeaveType] = useState<LeaveType>("paid");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [reason, setReason] = useState<string>("");
-  const [comment, setComment] = useState<string>("");
+  const [leaveType, setLeaveType] = useState<LeaveType>('paid');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [reason, setReason] = useState<string>('');
+  const [comment, setComment] = useState<string>('');
 
   // Загрузка баланса пользователя
   const user = useQuery(api.users.getUserById, { userId });
@@ -61,10 +69,14 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
   const getBalance = () => {
     if (!user) return 0;
     switch (leaveType) {
-      case "paid": return user.paidLeaveBalance ?? 24;
-      case "sick": return user.sickLeaveBalance ?? 10;
-      case "family": return user.familyLeaveBalance ?? 5;
-      default: return 999;
+      case 'paid':
+        return user.paidLeaveBalance ?? 24;
+      case 'sick':
+        return user.sickLeaveBalance ?? 10;
+      case 'family':
+        return user.familyLeaveBalance ?? 5;
+      default:
+        return 999;
     }
   };
 
@@ -74,25 +86,25 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
 
   // Переход к следующему шагу
   const handleNext = () => {
-    if (currentStep === "dates" && startDate && endDate && days > 0) {
-      setCurrentStep("details");
-    } else if (currentStep === "details" && reason) {
-      setCurrentStep("confirm");
+    if (currentStep === 'dates' && startDate && endDate && days > 0) {
+      setCurrentStep('details');
+    } else if (currentStep === 'details' && reason) {
+      setCurrentStep('confirm');
     }
   };
 
   const handleBack = () => {
-    if (currentStep === "details") {
-      setCurrentStep("dates");
-    } else if (currentStep === "confirm") {
-      setCurrentStep("details");
+    if (currentStep === 'details') {
+      setCurrentStep('dates');
+    } else if (currentStep === 'confirm') {
+      setCurrentStep('details');
     }
   };
 
   // Отправка заявки
   const handleSubmit = async () => {
     if (!hasEnoughBalance) {
-      toast.error(t("leaveWizard.errors.insufficientBalance"));
+      toast.error(t('leaveWizard.errors.insufficientBalance'));
       return;
     }
 
@@ -108,12 +120,12 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
         comment: comment || undefined,
       });
 
-      toast.success(t("leaveWizard.toast.success"), {
-        description: t("leaveWizard.toast.description"),
+      toast.success(t('leaveWizard.toast.success'), {
+        description: t('leaveWizard.toast.description'),
       });
       onClose();
     } catch (error) {
-      toast.error(t("leaveWizard.toast.error"));
+      toast.error(t('leaveWizard.toast.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -122,11 +134,13 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
   // Рендер шагов
   const renderStep = () => {
     switch (currentStep) {
-      case "dates":
+      case 'dates':
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">{t("leaveWizard.steps.dates.title")}</h3>
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+                {t('leaveWizard.steps.dates.title')}
+              </h3>
 
               {/* Тип отпуска */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6">
@@ -136,8 +150,8 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
                     onClick={() => setLeaveType(type)}
                     className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
                       leaveType === type
-                        ? "border-[var(--primary)] bg-[var(--primary)] text-white !text-white"
-                        : "border-[var(--border)] bg-[var(--card)] text-[var(--text-primary)] hover:border-[var(--primary)]/50"
+                        ? 'border-[var(--primary)] bg-[var(--primary)] text-white !text-white'
+                        : 'border-[var(--border)] bg-[var(--card)] text-[var(--text-primary)] hover:border-[var(--primary)]/50'
                     }`}
                   >
                     {LEAVE_TYPE_LABELS[type]}
@@ -148,22 +162,26 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
               {/* Даты */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-[var(--text-primary)] mb-2 block">{t("leaveWizard.startDate")}</Label>
+                  <Label className="text-[var(--text-primary)] mb-2 block">
+                    {t('leaveWizard.startDate')}
+                  </Label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    min={format(new Date(), "yyyy-MM-dd")}
+                    min={format(new Date(), 'yyyy-MM-dd')}
                     className="w-full p-3 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <Label className="text-[var(--text-primary)] mb-2 block">{t("leaveWizard.endDate")}</Label>
+                  <Label className="text-[var(--text-primary)] mb-2 block">
+                    {t('leaveWizard.endDate')}
+                  </Label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    min={startDate || format(new Date(), "yyyy-MM-dd")}
+                    min={startDate || format(new Date(), 'yyyy-MM-dd')}
                     className="w-full p-3 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
                   />
                 </div>
@@ -172,11 +190,10 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
               {days > 0 && (
                 <div className="mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium">
-                    {t("leaveWizard.totalDays", { count: days })}
-                  </span>
+                  <span className="font-medium">{t('leaveWizard.totalDays', { count: days })}</span>
                   <span className="text-sm text-gray-500">
-                    {format(new Date(startDate), "dd MMM", { locale: ru })} — {format(new Date(endDate), "dd MMM yyyy", { locale: ru })}
+                    {format(new Date(startDate), 'dd MMM', { locale: ru })} —{' '}
+                    {format(new Date(endDate), 'dd MMM yyyy', { locale: ru })}
                   </span>
                 </div>
               )}
@@ -184,55 +201,67 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
           </div>
         );
 
-      case "details":
+      case 'details':
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">{t("leaveWizard.steps.details.title")}</h3>
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+                {t('leaveWizard.steps.details.title')}
+              </h3>
 
               {/* Баланс */}
-              <div className={`p-4 rounded-lg mb-6 ${hasEnoughBalance ? "bg-[var(--success)]/10" : "bg-[var(--destructive)]/10"}`}>
+              <div
+                className={`p-4 rounded-lg mb-6 ${hasEnoughBalance ? 'bg-[var(--success)]/10' : 'bg-[var(--destructive)]/10'}`}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-[var(--text-primary)]">
-                    {t("leaveWizard.currentBalance")}
+                    {t('leaveWizard.currentBalance')}
                   </span>
-                  <span className="text-lg font-bold text-[var(--text-primary)]">{balance} {t("leaveWizard.days")}</span>
+                  <span className="text-lg font-bold text-[var(--text-primary)]">
+                    {balance} {t('leaveWizard.days')}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-[var(--text-primary)]">
-                    {t("leaveWizard.afterLeave")}
+                    {t('leaveWizard.afterLeave')}
                   </span>
-                  <span className={`text-lg font-bold ${hasEnoughBalance ? "text-[var(--success)]" : "text-[var(--destructive)]"}`}>
-                    {remainingBalance} {t("leaveWizard.days")}
+                  <span
+                    className={`text-lg font-bold ${hasEnoughBalance ? 'text-[var(--success)]' : 'text-[var(--destructive)]'}`}
+                  >
+                    {remainingBalance} {t('leaveWizard.days')}
                   </span>
                 </div>
                 {!hasEnoughBalance && (
                   <div className="mt-3 flex items-center gap-2 text-[var(--destructive)] text-sm">
                     <AlertTriangle className="w-4 h-4" />
-                    {t("leaveWizard.errors.insufficientBalance")}
+                    {t('leaveWizard.errors.insufficientBalance')}
                   </div>
                 )}
               </div>
 
               {/* Причина */}
               <div className="mb-4">
-                <Label className="text-[var(--text-primary)] block mb-2">{t("leaveWizard.reason")} *</Label>
+                <Label className="text-[var(--text-primary)] block mb-2">
+                  {t('leaveWizard.reason')} *
+                </Label>
                 <input
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder={t("leaveWizard.reasonPlaceholder")}
+                  placeholder={t('leaveWizard.reasonPlaceholder')}
                   className="w-full p-3 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
                 />
               </div>
 
               {/* Комментарий */}
               <div>
-                <Label className="text-[var(--text-primary)] block mb-2">{t("leaveWizard.comment")} ({t("leaveWizard.optional")})</Label>
+                <Label className="text-[var(--text-primary)] block mb-2">
+                  {t('leaveWizard.comment')} ({t('leaveWizard.optional')})
+                </Label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder={t("leaveWizard.commentPlaceholder")}
+                  placeholder={t('leaveWizard.commentPlaceholder')}
                   rows={3}
                   className="w-full p-3 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-none"
                 />
@@ -241,42 +270,55 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
           </div>
         );
 
-      case "confirm":
+      case 'confirm':
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">{t("leaveWizard.steps.confirm.title")}</h3>
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+                {t('leaveWizard.steps.confirm.title')}
+              </h3>
 
               <div className="p-6 rounded-lg bg-[var(--background-subtle)] space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-[var(--text-muted)]">{t("leaveWizard.type")}</span>
-                  <span className="font-medium text-[var(--text-primary)]">{LEAVE_TYPE_LABELS[leaveType]}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-muted)]">{t("leaveWizard.dates")}</span>
+                  <span className="text-[var(--text-muted)]">{t('leaveWizard.type')}</span>
                   <span className="font-medium text-[var(--text-primary)]">
-                    {format(new Date(startDate), "dd MMM")} — {format(new Date(endDate), "dd MMM yyyy", { locale: ru })}
+                    {LEAVE_TYPE_LABELS[leaveType]}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[var(--text-muted)]">{t("leaveWizard.totalDays", { count: days })}</span>
-                  <span className="font-medium text-[var(--text-primary)]">{days} {t("leaveWizard.days")}</span>
+                  <span className="text-[var(--text-muted)]">{t('leaveWizard.dates')}</span>
+                  <span className="font-medium text-[var(--text-primary)]">
+                    {format(new Date(startDate), 'dd MMM')} —{' '}
+                    {format(new Date(endDate), 'dd MMM yyyy', { locale: ru })}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[var(--text-muted)]">{t("leaveWizard.reason")}</span>
+                  <span className="text-[var(--text-muted)]">
+                    {t('leaveWizard.totalDays', { count: days })}
+                  </span>
+                  <span className="font-medium text-[var(--text-primary)]">
+                    {days} {t('leaveWizard.days')}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[var(--text-muted)]">{t('leaveWizard.reason')}</span>
                   <span className="font-medium text-[var(--text-primary)]">{reason}</span>
                 </div>
                 {comment && (
                   <div className="flex justify-between">
-                    <span className="text-[var(--text-muted)]">{t("leaveWizard.comment")}</span>
+                    <span className="text-[var(--text-muted)]">{t('leaveWizard.comment')}</span>
                     <span className="font-medium text-[var(--text-primary)]">{comment}</span>
                   </div>
                 )}
                 <div className="pt-4 border-t border-[var(--border)]">
                   <div className="flex justify-between">
-                    <span className="text-[var(--text-muted)]">{t("leaveWizard.balanceAfter")}</span>
-                    <span className={`font-bold ${remainingBalance >= 0 ? "text-[var(--success)]" : "text-[var(--destructive)]"}`}>
-                      {remainingBalance} {t("leaveWizard.days")}
+                    <span className="text-[var(--text-muted)]">
+                      {t('leaveWizard.balanceAfter')}
+                    </span>
+                    <span
+                      className={`font-bold ${remainingBalance >= 0 ? 'text-[var(--success)]' : 'text-[var(--destructive)]'}`}
+                    >
+                      {remainingBalance} {t('leaveWizard.days')}
                     </span>
                   </div>
                 </div>
@@ -286,8 +328,10 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-[var(--primary)] mt-0.5" />
                   <div className="text-sm text-[var(--text-secondary)]">
-                    <p className="font-medium text-[var(--text-primary)] mb-1">{t("leaveWizard.info.title")}</p>
-                    <p>{t("leaveWizard.info.description")}</p>
+                    <p className="font-medium text-[var(--text-primary)] mb-1">
+                      {t('leaveWizard.info.title')}
+                    </p>
+                    <p>{t('leaveWizard.info.description')}</p>
                   </div>
                 </div>
               </div>
@@ -309,8 +353,8 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>{t("leaveWizard.title")}</CardTitle>
-                <CardDescription>{t("leaveWizard.description")}</CardDescription>
+                <CardTitle>{t('leaveWizard.title')}</CardTitle>
+                <CardDescription>{t('leaveWizard.description')}</CardDescription>
               </div>
               <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
@@ -319,25 +363,27 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
 
             {/* Индикатор прогресса */}
             <div className="flex items-center gap-2 mt-6">
-              {(["dates", "details", "confirm"] as LeaveStep[]).map((step, index) => (
+              {(['dates', 'details', 'confirm'] as LeaveStep[]).map((step, index) => (
                 <React.Fragment key={step}>
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                         currentStep === step
-                          ? "bg-blue-600 text-white"
-                          : (["dates", "details", "confirm"].indexOf(currentStep) > index)
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-200 dark:bg-gray-700 text-gray-500"
+                          ? 'bg-blue-600 text-white'
+                          : ['dates', 'details', 'confirm'].indexOf(currentStep) > index
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
                       }`}
                     >
-                      {["dates", "details", "confirm"].indexOf(currentStep) > index ? (
+                      {['dates', 'details', 'confirm'].indexOf(currentStep) > index ? (
                         <CheckCircle className="w-4 h-4" />
                       ) : (
                         index + 1
                       )}
                     </div>
-                    <span className={`text-sm font-medium ${currentStep === step ? "text-blue-600" : "text-gray-500"}`}>
+                    <span
+                      className={`text-sm font-medium ${currentStep === step ? 'text-blue-600' : 'text-gray-500'}`}
+                    >
                       {t(`leaveWizard.steps.${step}.short`)}
                     </span>
                   </div>
@@ -362,32 +408,32 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
 
             {/* Кнопки навигации */}
             <div className="flex justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              {currentStep !== "dates" ? (
+              {currentStep !== 'dates' ? (
                 <Button onClick={handleBack} variant="outline">
                   <ChevronLeft className="w-4 h-4 mr-2" />
-                  {t("common.back")}
+                  {t('common.back')}
                 </Button>
               ) : (
                 <Button onClick={onClose} variant="ghost">
-                  {t("common.cancel")}
+                  {t('common.cancel')}
                 </Button>
               )}
 
-              {currentStep === "confirm" ? (
+              {currentStep === 'confirm' ? (
                 <Button
                   onClick={handleSubmit}
                   disabled={isSubmitting || !hasEnoughBalance}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {isSubmitting ? t("leaveWizard.submitting") : t("leaveWizard.submit")}
+                  {isSubmitting ? t('leaveWizard.submitting') : t('leaveWizard.submit')}
                 </Button>
               ) : (
                 <Button
                   onClick={handleNext}
-                  disabled={(currentStep === "dates" && (!startDate || !endDate || days <= 0))}
+                  disabled={currentStep === 'dates' && (!startDate || !endDate || days <= 0)}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {t("common.next")}
+                  {t('common.next')}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               )}

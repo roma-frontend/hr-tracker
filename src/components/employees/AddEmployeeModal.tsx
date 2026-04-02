@@ -1,26 +1,35 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { motion } from '@/lib/cssMotion';
-import { useMutation } from "convex/react";
-import { useTranslation } from "react-i18next";
-import { api } from "../../../convex/_generated/api";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useMutation } from 'convex/react';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../../convex/_generated/api';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
-} from "@/components/ui/dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { DEPARTMENTS, getTravelAllowance } from "@/lib/types";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useQuery } from "convex/react";
-import type { Id } from "../../../convex/_generated/dataModel";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DEPARTMENTS, getTravelAllowance } from '@/lib/types';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useQuery } from 'convex/react';
+import type { Id } from '../../../convex/_generated/dataModel';
 
-const ADMIN_EMAIL = "romangulanyan@gmail.com";
+const ADMIN_EMAIL = 'romangulanyan@gmail.com';
 
 interface AddEmployeeModalProps {
   open: boolean;
@@ -28,7 +37,7 @@ interface AddEmployeeModalProps {
 }
 
 function formatCurrency(amount: number): string {
-  return amount.toLocaleString("hy-AM") + " ֏";
+  return amount.toLocaleString('hy-AM') + ' ֏';
 }
 
 export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
@@ -36,22 +45,19 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
   const createUser = useMutation(api.users.createUser);
   const currentUser = useAuthStore((s) => s.user);
   const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
-  const isSuperadmin = currentUser?.role === "superadmin";
+  const isSuperadmin = currentUser?.role === 'superadmin';
 
   // Fetch all organizations for superadmin to choose which org to add employee to
-  const organizations = useQuery(
-    api.organizations.getAllOrganizations,
-    isSuperadmin ? {} : "skip"
-  );
+  const organizations = useQuery(api.organizations.getAllOrganizations, isSuperadmin ? {} : 'skip');
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [department, setDepartment] = useState("");
-  const [position, setPosition] = useState("");
-  const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<"admin" | "supervisor" | "employee">("employee");
-  const [type, setType] = useState<"staff" | "contractor">("staff");
-  const [selectedOrgId, setSelectedOrgId] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [department, setDepartment] = useState('');
+  const [position, setPosition] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState<'admin' | 'supervisor' | 'employee'>('employee');
+  const [type, setType] = useState<'staff' | 'contractor'>('staff');
+  const [selectedOrgId, setSelectedOrgId] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -59,15 +65,22 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
   useEffect(() => {
     if (open) {
-      setName(""); setEmail(""); setDepartment(""); setPosition("");
-      setPhone(""); setType("staff"); setRole("employee"); setSelectedOrgId(""); setErrors({});
+      setName('');
+      setEmail('');
+      setDepartment('');
+      setPosition('');
+      setPhone('');
+      setType('staff');
+      setRole('employee');
+      setSelectedOrgId('');
+      setErrors({});
     }
   }, [open]);
 
   // Auto-detect contractor from email
   useEffect(() => {
-    if (email.toLowerCase().includes("contractor")) setType("contractor");
-    else if (email && !email.toLowerCase().includes("contractor")) setType("staff");
+    if (email.toLowerCase().includes('contractor')) setType('contractor');
+    else if (email && !email.toLowerCase().includes('contractor')) setType('staff');
   }, [email]);
 
   const validate = () => {
@@ -75,25 +88,31 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
     if (!name.trim()) errs.name = t('common.name') + ' ' + t('errors.required').toLowerCase();
     if (!email.trim()) errs.email = t('common.email') + ' ' + t('errors.required').toLowerCase();
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t('errors.invalidEmail');
-    if (!department) errs.department = t('employees.department') + ' ' + t('errors.required').toLowerCase();
-    if (!position.trim()) errs.position = t('employees.position') + ' ' + t('errors.required').toLowerCase();
-    if (isSuperadmin && !selectedOrgId) errs.organization = t('employees.organization') + ' ' + t('errors.required').toLowerCase();
+    if (!department)
+      errs.department = t('employees.department') + ' ' + t('errors.required').toLowerCase();
+    if (!position.trim())
+      errs.position = t('employees.position') + ' ' + t('errors.required').toLowerCase();
+    if (isSuperadmin && !selectedOrgId)
+      errs.organization = t('employees.organization') + ' ' + t('errors.required').toLowerCase();
     return errs;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
 
     setSubmitting(true);
     try {
       if (!currentUser?.id) {
-        toast.error(t("toasts.userIdNotFound"));
+        toast.error(t('toasts.userIdNotFound'));
         return;
       }
-      
-      console.log("[AddEmployeeModal] 👥 Creating employee with:", {
+
+      console.log('[AddEmployeeModal] 👥 Creating employee with:', {
         name,
         email,
         department,
@@ -101,18 +120,20 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
         role,
         employeeType: type,
       });
-      
+
       await createUser({
         adminId: currentUser.id as any,
         name,
         email,
-        passwordHash: "temp-password-will-be-changed", // User will need to reset password
+        passwordHash: 'temp-password-will-be-changed', // User will need to reset password
         role,
         department,
         position,
         employeeType: type,
         phone: phone || undefined,
-        ...(isSuperadmin && selectedOrgId ? { organizationId: selectedOrgId as Id<"organizations"> } : {}),
+        ...(isSuperadmin && selectedOrgId
+          ? { organizationId: selectedOrgId as Id<'organizations'> }
+          : {}),
       });
       toast.success(t('success.created'));
       onClose();
@@ -131,146 +152,171 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
             <DialogTitle>{t('employees.addEmployee')}</DialogTitle>
             <DialogDescription>{t('employees.enterDetails')}</DialogDescription>
           </DialogHeader>
-
           <form onSubmit={handleSubmit} className="space-y-4 pr-4">
-          {/* Organization (superadmin only) */}
-          {isSuperadmin && (
-            <div className="space-y-1.5">
-              <Label>{t('employees.organization')} *</Label>
-              <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
-                <SelectTrigger className={errors.organization ? "border-(--destructive)" : ""}>
-                  <SelectValue placeholder={t('employees.selectOrganization')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {organizations?.map((org: any) => (
-                    <SelectItem key={org._id} value={org._id}>{org.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.organization && <p className="text-xs text-(--destructive)">{errors.organization}</p>}
-            </div>
-          )}
-
-          {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="emp-name">{t('common.name')} *</Label>
-            <Input
-              id="emp-name" placeholder={t('placeholders.johnSmith')}
-              value={name} onChange={(e) => setName(e.target.value)}
-              className={errors.name ? "border-(--destructive)" : ""}
-            />
-            {errors.name && <p className="text-xs text-(--destructive)">{errors.name}</p>}
-          </div>
-
-          {/* Email */}
-          <div className="space-y-1.5">
-            <Label htmlFor="emp-email">{t('common.email')} *</Label>
-            <Input
-              id="emp-email" type="email" placeholder="john.smith@company.com"
-              value={email} onChange={(e) => setEmail(e.target.value)}
-              className={errors.email ? "border-(--destructive)" : ""}
-            />
-            {errors.email && <p className="text-xs text-(--destructive)">{errors.email}</p>}
-            <p className="text-xs text-[var(--text-muted)]">
-              {t('employees.contractorHint')}
-            </p>
-          </div>
-
-          {/* Department + Position */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t('employees.department')} *</Label>
-              <Select value={department} onValueChange={setDepartment}>
-                <SelectTrigger className={errors.department ? "border-(--destructive)" : ""}>
-                  <SelectValue placeholder={t('placeholders.selectEmployee')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {DEPARTMENTS.map((d) => (
-                    <SelectItem key={d} value={d}>{d}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.department && <p className="text-xs text-(--destructive)">{errors.department}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="emp-position">{t('employees.position')} *</Label>
-              <Input
-                id="emp-position" placeholder="e.g. Developer"
-                value={position} onChange={(e) => setPosition(e.target.value)}
-                className={errors.position ? "border-(--destructive)" : ""}
-              />
-              {errors.position && <p className="text-xs text-(--destructive)">{errors.position}</p>}
-            </div>
-          </div>
-
-          {/* Role */}
-          <div className="space-y-1.5">
-            <Label>{t('employees.role')}</Label>
-            <Select value={role} onValueChange={(v) => setRole(v as "admin" | "supervisor" | "employee")}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="employee">{t('roles.employee')}</SelectItem>
-                <SelectItem value="supervisor">{t('roles.supervisor')}</SelectItem>
-                <SelectItem value="driver">{t('roles.driver')}</SelectItem>
-                {isActualAdmin && (
-                  <SelectItem value="admin">{t('roles.admin')}</SelectItem>
+            {/* Organization (superadmin only) */}
+            {isSuperadmin && (
+              <div className="space-y-1.5">
+                <Label>{t('employees.organization')} *</Label>
+                <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
+                  <SelectTrigger className={errors.organization ? 'border-(--destructive)' : ''}>
+                    <SelectValue placeholder={t('employees.selectOrganization')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations?.map((org: any) => (
+                      <SelectItem key={org._id} value={org._id}>
+                        {org.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.organization && (
+                  <p className="text-xs text-(--destructive)">{errors.organization}</p>
                 )}
-              </SelectContent>
-            </Select>
-          </div>
+              </div>
+            )}
 
-          {/* Phone */}
-          <div className="space-y-1.5">
-            <Label htmlFor="emp-phone">{t('common.phone')}</Label>
-            <Input
-              id="emp-phone" placeholder="+374 91 123456"
-              value={phone} onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-
-          {/* Employee type */}
-          <div className="space-y-1.5">
-            <Label>{t('employees.employeeType')}</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {(["staff", "contractor"] as const).map((empType) => (
-                <button
-                  key={empType} type="button" onClick={() => setType(empType)}
-                  className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                    type === empType
-                      ? "border-(--primary) bg-(--primary)/10 text-(--text-primary)"
-                      : "border-(--border) text-(--text-muted) hover:border-(--border-subtle)"
-                  }`}
-                >
-                  {t(`employees.${empType}`)}
-                </button>
-              ))}
+            {/* Name */}
+            <div className="space-y-1.5">
+              <Label htmlFor="emp-name">{t('common.name')} *</Label>
+              <Input
+                id="emp-name"
+                placeholder={t('placeholders.johnSmith')}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={errors.name ? 'border-(--destructive)' : ''}
+              />
+              {errors.name && <p className="text-xs text-(--destructive)">{errors.name}</p>}
             </div>
-          </div>
 
-          {/* Travel allowance preview */}
-          <motion.div
-            key={allowance}
-            initial={{ scale: 0.97 }} animate={{ scale: 1 }}
-            className="rounded-lg bg-(--background-subtle) border border-(--border) p-3 flex items-center justify-between"
-          >
-            <div>
-              <p className="text-xs text-(--text-muted)">{t('employees.travelAllowance')}</p>
-              <p className="text-xs text-(--text-muted) mt-0.5">
-                {type === "contractor" ? t('employeeTypes.contractor') : t('employeeTypes.staff')} type
-              </p>
+            {/* Email */}
+            <div className="space-y-1.5">
+              <Label htmlFor="emp-email">{t('common.email')} *</Label>
+              <Input
+                id="emp-email"
+                type="email"
+                placeholder="john.smith@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={errors.email ? 'border-(--destructive)' : ''}
+              />
+              {errors.email && <p className="text-xs text-(--destructive)">{errors.email}</p>}
+              <p className="text-xs text-[var(--text-muted)]">{t('employees.contractorHint')}</p>
             </div>
-            <p className="text-lg font-bold text-(--text-primary)">{formatCurrency(allowance)}</p>
-          </motion.div>
 
-          <DialogFooter className="gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? t('employees.adding') : t('employees.addEmployee')}
-            </Button>
-          </DialogFooter>
-        </form>        </div>      </DialogContent>
+            {/* Department + Position */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>{t('employees.department')} *</Label>
+                <Select value={department} onValueChange={setDepartment}>
+                  <SelectTrigger className={errors.department ? 'border-(--destructive)' : ''}>
+                    <SelectValue placeholder={t('placeholders.selectEmployee')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEPARTMENTS.map((d) => (
+                      <SelectItem key={d} value={d}>
+                        {d}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.department && (
+                  <p className="text-xs text-(--destructive)">{errors.department}</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="emp-position">{t('employees.position')} *</Label>
+                <Input
+                  id="emp-position"
+                  placeholder="e.g. Developer"
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                  className={errors.position ? 'border-(--destructive)' : ''}
+                />
+                {errors.position && (
+                  <p className="text-xs text-(--destructive)">{errors.position}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Role */}
+            <div className="space-y-1.5">
+              <Label>{t('employees.role')}</Label>
+              <Select
+                value={role}
+                onValueChange={(v) => setRole(v as 'admin' | 'supervisor' | 'employee')}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">{t('roles.employee')}</SelectItem>
+                  <SelectItem value="supervisor">{t('roles.supervisor')}</SelectItem>
+                  <SelectItem value="driver">{t('roles.driver')}</SelectItem>
+                  {isActualAdmin && <SelectItem value="admin">{t('roles.admin')}</SelectItem>}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-1.5">
+              <Label htmlFor="emp-phone">{t('common.phone')}</Label>
+              <Input
+                id="emp-phone"
+                placeholder="+374 91 123456"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+
+            {/* Employee type */}
+            <div className="space-y-1.5">
+              <Label>{t('employees.employeeType')}</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['staff', 'contractor'] as const).map((empType) => (
+                  <button
+                    key={empType}
+                    type="button"
+                    onClick={() => setType(empType)}
+                    className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                      type === empType
+                        ? 'border-(--primary) bg-(--primary)/10 text-(--text-primary)'
+                        : 'border-(--border) text-(--text-muted) hover:border-(--border-subtle)'
+                    }`}
+                  >
+                    {t(`employees.${empType}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Travel allowance preview */}
+            <motion.div
+              key={allowance}
+              initial={{ scale: 0.97 }}
+              animate={{ scale: 1 }}
+              className="rounded-lg bg-(--background-subtle) border border-(--border) p-3 flex items-center justify-between"
+            >
+              <div>
+                <p className="text-xs text-(--text-muted)">{t('employees.travelAllowance')}</p>
+                <p className="text-xs text-(--text-muted) mt-0.5">
+                  {type === 'contractor' ? t('employeeTypes.contractor') : t('employeeTypes.staff')}{' '}
+                  type
+                </p>
+              </div>
+              <p className="text-lg font-bold text-(--text-primary)">{formatCurrency(allowance)}</p>
+            </motion.div>
+
+            <DialogFooter className="gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? t('employees.adding') : t('employees.addEmployee')}
+              </Button>
+            </DialogFooter>
+          </form>{' '}
+        </div>{' '}
+      </DialogContent>
     </Dialog>
   );
 }

@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
 async function convexQuery(path: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path, args }),
   });
   const data = await res.json();
-  if (data.status === "error") return null;
+  if (data.status === 'error') return null;
   return data.value;
 }
 
@@ -23,15 +23,15 @@ export async function POST(req: NextRequest) {
     const { userId, descriptor } = await req.json();
 
     if (!userId || !descriptor) {
-      return NextResponse.json({ error: "Missing userId or descriptor" }, { status: 400 });
+      return NextResponse.json({ error: 'Missing userId or descriptor' }, { status: 400 });
     }
 
     // Get stored face descriptor
-    const profile = await convexQuery("faceRecognition:getFaceDescriptor", { userId });
+    const profile = await convexQuery('faceRecognition:getFaceDescriptor', { userId });
 
     if (!profile?.faceDescriptor) {
       // No face registered → skip verification (allow)
-      return NextResponse.json({ match: true, reason: "no_face_registered" });
+      return NextResponse.json({ match: true, reason: 'no_face_registered' });
     }
 
     const distance = euclideanDistance(descriptor, profile.faceDescriptor);

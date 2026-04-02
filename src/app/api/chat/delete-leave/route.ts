@@ -18,7 +18,9 @@ export async function POST(req: Request) {
     }
 
     // Fetch all data
-    const allLeaves = await fetchQuery(api.leaves.getAllLeaves, { requesterId: requesterId as any });
+    const allLeaves = await fetchQuery(api.leaves.getAllLeaves, {
+      requesterId: requesterId as any,
+    });
     const allUsers = await fetchQuery(api.users.getAllUsers, { requesterId: requesterId as any });
 
     // Find leave by ID first
@@ -39,10 +41,13 @@ export async function POST(req: Request) {
     }
 
     if (!targetLeave) {
-      const preview = (allLeaves as any[]).slice(0, 5).map((l: any) => {
-        const u = (allUsers as any[]).find((u: any) => u._id === l.userId);
-        return `${u?.name ?? '?'}: ${l.type} ${l.startDate}→${l.endDate} [${l._id}]`;
-      }).join(', ');
+      const preview = (allLeaves as any[])
+        .slice(0, 5)
+        .map((l: any) => {
+          const u = (allUsers as any[]).find((u: any) => u._id === l.userId);
+          return `${u?.name ?? '?'}: ${l.type} ${l.startDate}→${l.endDate} [${l._id}]`;
+        })
+        .join(', ');
       return NextResponse.json({
         success: false,
         message: `Leave not found. Available: ${preview}`,
@@ -61,7 +66,7 @@ export async function POST(req: Request) {
     if (!isAdmin && !isOwner) {
       return NextResponse.json({
         success: false,
-        message: "❌ You can only delete your own leave requests.",
+        message: '❌ You can only delete your own leave requests.',
       });
     }
 

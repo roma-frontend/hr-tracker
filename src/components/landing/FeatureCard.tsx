@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -13,8 +13,8 @@ interface FeatureCardProps {
   badge?: string;
 }
 
-export default function FeatureCard({ 
-icon,
+export default function FeatureCard({
+  icon,
   title,
   description,
   gradient,
@@ -30,8 +30,13 @@ icon,
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold: 0.1, rootMargin: '-40px' }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '-40px' },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -58,16 +63,19 @@ icon,
       {/* Glass card */}
       <div
         className="relative rounded-3xl border backdrop-blur-2xl overflow-hidden h-full"
-        style={{ 
+        style={{
           transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1)',
           borderColor: 'var(--landing-card-border)',
-          backgroundColor: 'var(--landing-card-bg)'
+          backgroundColor: 'var(--landing-card-bg)',
         }}
       >
         {/* Top shimmer border */}
         <div
           className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`, opacity: 0.6 }}
+          style={{
+            background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
+            opacity: 0.6,
+          }}
           aria-hidden="true"
         />
 
@@ -104,10 +112,16 @@ icon,
 
           {/* Text */}
           <div>
-            <h3 className="text-xl font-bold mb-2 transition-colors" style={{ color: 'var(--landing-text-primary)' }}>
+            <h3
+              className="text-xl font-bold mb-2 transition-colors"
+              style={{ color: 'var(--landing-text-primary)' }}
+            >
               {title}
             </h3>
-            <p className="text-sm leading-relaxed transition-colors" style={{ color: 'var(--landing-text-secondary)', opacity: 0.8 }}>
+            <p
+              className="text-sm leading-relaxed transition-colors"
+              style={{ color: 'var(--landing-text-secondary)', opacity: 0.8 }}
+            >
               {description}
             </p>
           </div>

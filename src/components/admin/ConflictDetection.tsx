@@ -1,17 +1,16 @@
-﻿"use client";
+﻿'use client';
 
-import { useTranslation } from "react-i18next";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Users } from "lucide-react";
-import { ShieldLoader } from "@/components/ui/ShieldLoader";
+import { useTranslation } from 'react-i18next';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, Users } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function ConflictDetection() {
-  
   const { t } = useTranslation();
-const conflicts = useQuery(api.admin.detectConflicts);
+  const conflicts = useQuery(api.admin.detectConflicts);
 
   if (!conflicts) {
     return (
@@ -23,8 +22,8 @@ const conflicts = useQuery(api.admin.detectConflicts);
     );
   }
 
-  const criticalCount = conflicts.filter(c => c.severity === "critical").length;
-  const warningCount = conflicts.filter(c => c.severity === "warning").length;
+  const criticalCount = conflicts.filter((c) => c.severity === 'critical').length;
+  const warningCount = conflicts.filter((c) => c.severity === 'warning').length;
 
   return (
     <Card className="border-[var(--border)]">
@@ -36,10 +35,14 @@ const conflicts = useQuery(api.admin.detectConflicts);
           </CardTitle>
           <div className="flex gap-2">
             {criticalCount > 0 && (
-              <Badge variant="destructive">{criticalCount} {t("conflicts.critical")}</Badge>
+              <Badge variant="destructive">
+                {criticalCount} {t('conflicts.critical')}
+              </Badge>
             )}
             {warningCount > 0 && (
-              <Badge variant="secondary">{warningCount} {t("conflicts.warnings")}</Badge>
+              <Badge variant="secondary">
+                {warningCount} {t('conflicts.warnings')}
+              </Badge>
             )}
           </div>
         </div>
@@ -48,10 +51,10 @@ const conflicts = useQuery(api.admin.detectConflicts);
         {conflicts.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
             <Users className="mb-3 h-12 w-12 text-green-500 opacity-50" />
-            <p className="text-sm font-medium text-[var(--text-primary)]">{t("conflicts.noConflicts")}</p>
-            <p className="text-xs text-[var(--text-secondary)]">
-              {t("conflicts.balanced")}
+            <p className="text-sm font-medium text-[var(--text-primary)]">
+              {t('conflicts.noConflicts')}
             </p>
+            <p className="text-xs text-[var(--text-secondary)]">{t('conflicts.balanced')}</p>
           </div>
         ) : (
           <div className="max-h-[400px] space-y-3 overflow-y-auto">
@@ -59,38 +62,32 @@ const conflicts = useQuery(api.admin.detectConflicts);
               <div
                 key={conflict.id}
                 className={`rounded-lg border p-3 ${
-                  conflict.severity === "critical"
-                    ? "border-red-500/30 bg-red-500/5"
-                    : "border-orange-500/30 bg-orange-500/5"
+                  conflict.severity === 'critical'
+                    ? 'border-red-500/30 bg-red-500/5'
+                    : 'border-orange-500/30 bg-orange-500/5'
                 }`}
               >
                 <div className="mb-2 flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-[var(--text-primary)]">
-                      {conflict.department}
-                    </p>
+                    <p className="font-medium text-[var(--text-primary)]">{conflict.department}</p>
                     <p className="text-xs text-[var(--text-secondary)]">
-                      {new Date(conflict.date).toLocaleDateString('en-US', { 
-                        weekday: 'short', 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
+                      {new Date(conflict.date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
                       })}
                     </p>
                   </div>
-                  <Badge
-                    variant={conflict.severity === "critical" ? "destructive" : "secondary"}
-                  >
+                  <Badge variant={conflict.severity === 'critical' ? 'destructive' : 'secondary'}>
                     {conflict.severity}
                   </Badge>
                 </div>
-                
-                <p className="mb-2 text-sm text-[var(--text-primary)]">
-                  {conflict.recommendation}
-                </p>
-                
+
+                <p className="mb-2 text-sm text-[var(--text-primary)]">{conflict.recommendation}</p>
+
                 <div className="text-xs text-[var(--text-secondary)]">
-                  <p className="mb-1 font-medium">{t("conflicts.employeesOut")}</p>
+                  <p className="mb-1 font-medium">{t('conflicts.employeesOut')}</p>
                   <div className="flex flex-wrap gap-1">
                     {conflict.employeesOut.map((name: any, idx: any) => (
                       <Badge key={idx} variant="outline" className="text-xs">
@@ -107,4 +104,3 @@ const conflicts = useQuery(api.admin.detectConflicts);
     </Card>
   );
 }
-
