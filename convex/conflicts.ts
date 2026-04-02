@@ -2,35 +2,35 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * CONFLICT SERVICE — Единая система обнаружения конфликтов
  * ─────────────────────────────────────────────────────────────────────────────
- * 
+ *
  * Централизованный сервис для обнаружения всех типов конфликтов:
  * - Отпуска ↔ Мероприятия
  * - Отпуска ↔ Отпуска (department overlap)
  * - Водители ↔ Поездки
  * - Задачи ↔ Дедлайны/Отпуска
  * - Мероприятия ↔ Праздники
- * 
+ *
  * Используется AI Ассистентом для умных предупреждений
  */
 
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ConflictType =
-  | "leave_event"           // Отпуск пересекается с мероприятием
-  | "leave_department"      // Слишком много людей из отдела в отпуске
-  | "driver_schedule"       // Водитель уже забронирован
-  | "task_deadline"         // Дедлайн задачи во время отпуска
-  | "task_assignment"       // Задача назначена человеку в отпуске
-  | "holiday_conflict"      // Мероприятие в праздник
-  | "blackout_period";      // Запрос в запретный период
+  | 'leave_event' // Отпуск пересекается с мероприятием
+  | 'leave_department' // Слишком много людей из отдела в отпуске
+  | 'driver_schedule' // Водитель уже забронирован
+  | 'task_deadline' // Дедлайн задачи во время отпуска
+  | 'task_assignment' // Задача назначена человеку в отпуске
+  | 'holiday_conflict' // Мероприятие в праздник
+  | 'blackout_period'; // Запрос в запретный период
 
-export type ConflictSeverity = "critical" | "warning" | "info";
+export type ConflictSeverity = 'critical' | 'warning' | 'info';
 
 export interface Conflict {
   id: string;
@@ -40,11 +40,11 @@ export interface Conflict {
   message: string;
   suggestion: string;
   date: string;
-  affectedUsers: Id<"users">[];
+  affectedUsers: Id<'users'>[];
   affectedDepartments?: string[];
-  relatedEventId?: Id<"companyEvents">;
-  relatedTaskId?: Id<"tasks">;
-  relatedRequestId?: Id<"driverRequests">;
+  relatedEventId?: Id<'companyEvents'>;
+  relatedTaskId?: Id<'tasks'>;
+  relatedRequestId?: Id<'driverRequests'>;
   metadata?: Record<string, any>;
 }
 
@@ -53,9 +53,9 @@ export interface Conflict {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const THRESHOLDS = {
-  DEPARTMENT_CRITICAL: 0.5,  // 50% отдела — критический уровень
-  DEPARTMENT_WARNING: 0.3,   // 30% отдела — предупреждение
-  CHECK_DAYS_BEFORE: 14,     // Проверять конфликты за 2 недели
+  DEPARTMENT_CRITICAL: 0.5, // 50% отдела — критический уровень
+  DEPARTMENT_WARNING: 0.3, // 30% отдела — предупреждение
+  CHECK_DAYS_BEFORE: 14, // Проверять конфликты за 2 недели
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -68,10 +68,10 @@ const THRESHOLDS = {
  */
 export const detectAllConflicts = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
     startDate: v.number(),
     endDate: v.number(),
-    userId: v.optional(v.id("users")),
+    userId: v.optional(v.id('users')),
     conflictTypes: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
@@ -79,41 +79,41 @@ export const detectAllConflicts = query({
 
     // Определяем, какие типы конфликтов проверять
     const typesToCheck = args.conflictTypes || [
-      "leave_event",
-      "leave_department",
-      "driver_schedule",
-      "task_deadline",
-      "task_assignment",
+      'leave_event',
+      'leave_department',
+      'driver_schedule',
+      'task_deadline',
+      'task_assignment',
     ];
 
     // 1. Leave-Event конфликты
-    if (typesToCheck.includes("leave_event")) {
+    if (typesToCheck.includes('leave_event')) {
       const leaveEventConflicts = await detectLeaveEventConflicts(ctx, args);
       conflicts.push(...leaveEventConflicts);
     }
 
     // 2. Department overlap конфликты
-    if (typesToCheck.includes("leave_department")) {
+    if (typesToCheck.includes('leave_department')) {
       const deptConflicts = await detectDepartmentConflicts(ctx, args);
       conflicts.push(...deptConflicts);
     }
 
     // 3. Driver schedule конфликты
-    if (typesToCheck.includes("driver_schedule")) {
+    if (typesToCheck.includes('driver_schedule')) {
       const driverConflicts = await detectDriverConflicts(ctx, args);
       conflicts.push(...driverConflicts);
     }
 
     // 4. Task conflicts
-    if (typesToCheck.includes("task_deadline") || typesToCheck.includes("task_assignment")) {
+    if (typesToCheck.includes('task_deadline') || typesToCheck.includes('task_assignment')) {
       const taskConflicts = await detectTaskConflicts(ctx, args);
       conflicts.push(...taskConflicts);
     }
 
     // Сортируем: критические сначала, затем по дате
     return conflicts.sort((a, b) => {
-      if (a.severity === "critical" && b.severity !== "critical") return -1;
-      if (b.severity === "critical" && a.severity !== "critical") return 1;
+      if (a.severity === 'critical' && b.severity !== 'critical') return -1;
+      if (b.severity === 'critical' && a.severity !== 'critical') return 1;
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
   },
@@ -125,14 +125,14 @@ export const detectAllConflicts = query({
  */
 export const checkConflictsForRequest = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
     requestType: v.union(
-      v.literal("leave"),
-      v.literal("driver"),
-      v.literal("task"),
-      v.literal("event")
+      v.literal('leave'),
+      v.literal('driver'),
+      v.literal('task'),
+      v.literal('event'),
     ),
-    userId: v.id("users"),
+    userId: v.id('users'),
     startDate: v.number(),
     endDate: v.number(),
     metadata: v.optional(v.any()),
@@ -140,44 +140,41 @@ export const checkConflictsForRequest = query({
   handler: async (ctx, args) => {
     const conflicts: Conflict[] = [];
 
-    if (args.requestType === "leave") {
+    if (args.requestType === 'leave') {
       // Проверка конфликтов отпуска
       const user = await ctx.db.get(args.userId);
       if (!user) return { conflicts: [], hasCritical: false };
 
-      const userDepartment = user.department || "";
+      const userDepartment = user.department || '';
 
       // 1. Проверка мероприятий
       const events = await ctx.db
-        .query("companyEvents")
-        .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+        .query('companyEvents')
+        .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
         .collect();
 
       for (const event of events) {
-        const overlaps = (
-          args.startDate <= event.endDate && 
-          args.endDate >= event.startDate
-        );
+        const overlaps = args.startDate <= event.endDate && args.endDate >= event.startDate;
 
         if (!overlaps) continue;
 
         const isRequiredDept = event.requiredDepartments.some(
-          dept => dept.toLowerCase() === userDepartment.toLowerCase()
+          (dept) => dept.toLowerCase() === userDepartment.toLowerCase(),
         );
         const isRequiredEmployee = event.requiredEmployeeIds?.includes(args.userId);
 
         if (isRequiredDept || isRequiredEmployee) {
           conflicts.push({
             id: `leave-event-${event._id}`,
-            type: "leave_event",
-            severity: event.priority === "high" ? "critical" : "warning",
-            title: isRequiredEmployee 
-              ? "Вы лично требуется на мероприятии" 
+            type: 'leave_event',
+            severity: event.priority === 'high' ? 'critical' : 'warning',
+            title: isRequiredEmployee
+              ? 'Вы лично требуется на мероприятии'
               : `Ваш отдел "${userDepartment}" требуется на мероприятии`,
             message: `Мероприятие "${event.name}" (${new Date(event.startDate).toLocaleDateString()}) требует вашего присутствия или присутствия сотрудников вашего отдела.`,
             suggestion: isRequiredEmployee
-              ? "Рекомендуем перенести отпуск или обсудить с руководителем возможность отсутствия."
-              : "Обсудите с командой, кто может представлять отдел на мероприятии.",
+              ? 'Рекомендуем перенести отпуск или обсудить с руководителем возможность отсутствия.'
+              : 'Обсудите с командой, кто может представлять отдел на мероприятии.',
             date: new Date(event.startDate).toISOString(),
             affectedUsers: [args.userId],
             affectedDepartments: [userDepartment],
@@ -200,30 +197,27 @@ export const checkConflictsForRequest = query({
       conflicts.push(...deptConflicts);
     }
 
-    if (args.requestType === "driver") {
+    if (args.requestType === 'driver') {
       // Проверка конфликтов водителя
-      const driverId = args.metadata?.driverId as Id<"drivers"> | undefined;
-      
+      const driverId = args.metadata?.driverId as Id<'drivers'> | undefined;
+
       if (driverId) {
         const existingTrips = await ctx.db
-          .query("driverSchedules")
-          .withIndex("by_driver", (q) => q.eq("driverId", driverId))
+          .query('driverSchedules')
+          .withIndex('by_driver', (q) => q.eq('driverId', driverId))
           .collect();
 
         for (const trip of existingTrips) {
-          const overlaps = (
-            args.startDate <= trip.endTime && 
-            args.endDate >= trip.startTime
-          );
+          const overlaps = args.startDate <= trip.endTime && args.endDate >= trip.startTime;
 
-          if (overlaps && trip.status !== "cancelled") {
+          if (overlaps && trip.status !== 'cancelled') {
             conflicts.push({
               id: `driver-schedule-${trip._id}`,
-              type: "driver_schedule",
-              severity: "critical",
-              title: "Водитель уже забронирован",
-              message: `Водитель уже забронирован на это время: ${trip.tripInfo?.purpose || "Поездка"}`,
-              suggestion: "Выберите другого водителя или измените время поездки.",
+              type: 'driver_schedule',
+              severity: 'critical',
+              title: 'Водитель уже забронирован',
+              message: `Водитель уже забронирован на это время: ${trip.tripInfo?.purpose || 'Поездка'}`,
+              suggestion: 'Выберите другого водителя или измените время поездки.',
               date: new Date(trip.startTime).toISOString(),
               affectedUsers: [],
               metadata: {
@@ -236,31 +230,31 @@ export const checkConflictsForRequest = query({
       }
     }
 
-    if (args.requestType === "task") {
+    if (args.requestType === 'task') {
       // Проверка конфликтов задач
-      const assigneeId = args.metadata?.assigneeId as Id<"users"> | undefined;
-      
+      const assigneeId = args.metadata?.assigneeId as Id<'users'> | undefined;
+
       if (assigneeId) {
         // Проверяем, не в отпуске ли исполнитель
         const leaveRequests = await ctx.db
-          .query("leaveRequests")
-          .withIndex("by_user", (q) => q.eq("userId", assigneeId))
+          .query('leaveRequests')
+          .withIndex('by_user', (q) => q.eq('userId', assigneeId))
           .collect();
 
         for (const leave of leaveRequests) {
-          const overlaps = (
-            args.startDate <= new Date(leave.endDate).getTime() && 
-            args.endDate >= new Date(leave.startDate).getTime()
-          );
+          const overlaps =
+            args.startDate <= new Date(leave.endDate).getTime() &&
+            args.endDate >= new Date(leave.startDate).getTime();
 
-          if (overlaps && leave.status === "approved") {
+          if (overlaps && leave.status === 'approved') {
             conflicts.push({
               id: `task-leave-${leave._id}`,
-              type: "task_assignment",
-              severity: "warning",
-              title: "Исполнитель в отпуске",
+              type: 'task_assignment',
+              severity: 'warning',
+              title: 'Исполнитель в отпуске',
               message: `Назначенный исполнитель будет в отпуске (${leave.type}) в период выполнения задачи.`,
-              suggestion: "Переназначьте задачу на другого сотрудника или измените срок выполнения.",
+              suggestion:
+                'Переназначьте задачу на другого сотрудника или измените срок выполнения.',
               date: leave.startDate,
               affectedUsers: [assigneeId],
               relatedTaskId: args.metadata?.taskId,
@@ -276,9 +270,9 @@ export const checkConflictsForRequest = query({
       }
     }
 
-    return { 
-      conflicts, 
-      hasCritical: conflicts.some(c => c.severity === "critical"),
+    return {
+      conflicts,
+      hasCritical: conflicts.some((c) => c.severity === 'critical'),
     };
   },
 });
@@ -289,52 +283,51 @@ export const checkConflictsForRequest = query({
 
 async function detectLeaveEventConflicts(
   ctx: any,
-  args: { organizationId: Id<"organizations">; startDate: number; endDate: number }
+  args: { organizationId: Id<'organizations'>; startDate: number; endDate: number },
 ): Promise<Conflict[]> {
   const conflicts: Conflict[] = [];
 
   // Получаем все мероприятия в периоде
   const events = await ctx.db
-    .query("companyEvents")
-    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
+    .query('companyEvents')
+    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .collect();
 
   // Получаем все одобренные отпуска в периоде
   const leaves = await ctx.db
-    .query("leaveRequests")
-    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
+    .query('leaveRequests')
+    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .collect();
 
-  const approvedLeaves = leaves.filter((l: any) => l.status === "approved");
+  const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
   for (const event of events) {
     for (const leave of approvedLeaves) {
-      const overlaps = (
-        new Date(leave.startDate).getTime() <= event.endDate && 
-        new Date(leave.endDate).getTime() >= event.startDate
-      );
+      const overlaps =
+        new Date(leave.startDate).getTime() <= event.endDate &&
+        new Date(leave.endDate).getTime() >= event.startDate;
 
       if (!overlaps) continue;
 
       const user = await ctx.db.get(leave.userId);
       if (!user) continue;
 
-      const userDepartment = user.department || "";
+      const userDepartment = user.department || '';
       const isRequiredDept = event.requiredDepartments.some(
-        (dept: string) => dept.toLowerCase() === userDepartment.toLowerCase()
+        (dept: string) => dept.toLowerCase() === userDepartment.toLowerCase(),
       );
       const isRequiredEmployee = event.requiredEmployeeIds?.includes(leave.userId);
 
       if (isRequiredDept || isRequiredEmployee) {
         conflicts.push({
           id: `leave-event-${event._id}-${leave._id}`,
-          type: "leave_event",
-          severity: event.priority === "high" ? "critical" : "warning",
-          title: isRequiredEmployee 
-            ? `${user.name} лично требуется на мероприятии` 
+          type: 'leave_event',
+          severity: event.priority === 'high' ? 'critical' : 'warning',
+          title: isRequiredEmployee
+            ? `${user.name} лично требуется на мероприятии`
             : `Сотрудник из "${userDepartment}" требуется на мероприятии`,
           message: `${user.name} в отпуске (${leave.type}) во время мероприятия "${event.name}".`,
-          suggestion: "Рассмотрите возможность переноса отпуска или найдите замену сотруднику.",
+          suggestion: 'Рассмотрите возможность переноса отпуска или найдите замену сотруднику.',
           date: new Date(event.startDate).toISOString(),
           affectedUsers: [leave.userId],
           affectedDepartments: [userDepartment],
@@ -358,35 +351,35 @@ async function detectLeaveEventConflicts(
 
 async function detectDepartmentConflicts(
   ctx: any,
-  args: { 
-    organizationId: Id<"organizations">; 
-    startDate: number; 
+  args: {
+    organizationId: Id<'organizations'>;
+    startDate: number;
     endDate: number;
-    userId?: Id<"users">;
-  }
+    userId?: Id<'users'>;
+  },
 ): Promise<Conflict[]> {
   const conflicts: Conflict[] = [];
 
   // Получаем всех пользователей
   const users = await ctx.db
-    .query("users")
-    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
+    .query('users')
+    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .collect();
 
   // Получаем все одобренные отпуска
   const leaves = await ctx.db
-    .query("leaveRequests")
-    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
+    .query('leaveRequests')
+    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .collect();
 
-  const approvedLeaves = leaves.filter((l: any) => l.status === "approved");
+  const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
   // Группируем по отделам
   const deptUsers = new Map<string, typeof users>();
   const deptLeaves = new Map<string, typeof approvedLeaves>();
 
   for (const user of users) {
-    const dept = user.department || "Unknown";
+    const dept = user.department || 'Unknown';
     if (!deptUsers.has(dept)) deptUsers.set(dept, []);
     deptUsers.get(dept)!.push(user);
   }
@@ -394,8 +387,8 @@ async function detectDepartmentConflicts(
   for (const leave of approvedLeaves) {
     const user = users.find((u: any) => u._id === leave.userId);
     if (!user) continue;
-    
-    const dept = user.department || "Unknown";
+
+    const dept = user.department || 'Unknown';
     if (!deptLeaves.has(dept)) deptLeaves.set(dept, []);
     deptLeaves.get(dept)!.push(leave);
   }
@@ -406,6 +399,8 @@ async function detectDepartmentConflicts(
 
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     const dateStr = d.toISOString().split('T')[0];
+    if (!dateStr) continue;
+
     const timestamp = d.getTime();
 
     for (const [dept, deptUserList] of deptUsers.entries()) {
@@ -413,11 +408,12 @@ async function detectDepartmentConflicts(
       if (deptSize === 0) continue;
 
       // Считаем, кто в отпуске в этот день
-      const leavesOnThisDay = deptLeaves.get(dept)?.filter((leave: any) => {
-        const leaveStart = new Date(leave.startDate).getTime();
-        const leaveEnd = new Date(leave.endDate).getTime();
-        return timestamp >= leaveStart && timestamp <= leaveEnd;
-      }) || [];
+      const leavesOnThisDay =
+        deptLeaves.get(dept)?.filter((leave: any) => {
+          const leaveStart = new Date(leave.startDate).getTime();
+          const leaveEnd = new Date(leave.endDate).getTime();
+          return timestamp >= leaveStart && timestamp <= leaveEnd;
+        }) || [];
 
       const outCount = leavesOnThisDay.length;
       const percentage = outCount / deptSize;
@@ -431,11 +427,11 @@ async function detectDepartmentConflicts(
       if (percentage >= THRESHOLDS.DEPARTMENT_CRITICAL) {
         conflicts.push({
           id: `dept-critical-${dept}-${dateStr}`,
-          type: "leave_department",
-          severity: "critical",
+          type: 'leave_department',
+          severity: 'critical',
           title: `Критическая нехватка сотрудников в "${dept}"`,
           message: `${outCount}/${deptSize} сотрудников (${(percentage * 100).toFixed(0)}%) в отпуске. Работа отдела может быть парализована.`,
-          suggestion: "Рекомендуем отозвать кого-то из отпуска или перераспределить задачи.",
+          suggestion: 'Рекомендуем отозвать кого-то из отпуска или перераспределить задачи.',
           date: dateStr,
           affectedUsers: leavesOnThisDay.map((l: any) => l.userId),
           affectedDepartments: [dept],
@@ -447,11 +443,11 @@ async function detectDepartmentConflicts(
       } else if (percentage >= THRESHOLDS.DEPARTMENT_WARNING) {
         conflicts.push({
           id: `dept-warning-${dept}-${dateStr}`,
-          type: "leave_department",
-          severity: "warning",
+          type: 'leave_department',
+          severity: 'warning',
           title: `Внимание: ${outCount} сотрудников из "${dept}" в отпуске`,
           message: `${outCount}/${deptSize} сотрудников (${(percentage * 100).toFixed(0)}%) отсутствуют. Возможны задержки.`,
-          suggestion: "Планируйте нагрузку с учётом отсутствия сотрудников.",
+          suggestion: 'Планируйте нагрузку с учётом отсутствия сотрудников.',
           date: dateStr,
           affectedUsers: leavesOnThisDay.map((l: any) => l.userId),
           affectedDepartments: [dept],
@@ -473,22 +469,22 @@ async function detectDepartmentConflicts(
 
 async function detectDriverConflicts(
   ctx: any,
-  args: { organizationId: Id<"organizations">; startDate: number; endDate: number }
+  args: { organizationId: Id<'organizations'>; startDate: number; endDate: number },
 ): Promise<Conflict[]> {
   const conflicts: Conflict[] = [];
 
   // Получаем все поездки в периоде
   const schedules = await ctx.db
-    .query("driverSchedules")
-    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
+    .query('driverSchedules')
+    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .collect();
 
-  const activeSchedules = schedules.filter((s: any) =>
-    s.status === "approved" || s.status === "pending"
+  const activeSchedules = schedules.filter(
+    (s: any) => s.status === 'approved' || s.status === 'pending',
   );
 
   // Группируем по водителям и проверяем пересечения
-  const driverTrips = new Map<Id<"drivers">, typeof activeSchedules>();
+  const driverTrips = new Map<Id<'drivers'>, typeof activeSchedules>();
 
   for (const schedule of activeSchedules) {
     if (!driverTrips.has(schedule.driverId)) {
@@ -504,19 +500,16 @@ async function detectDriverConflicts(
         const trip1 = trips[i];
         const trip2 = trips[j];
 
-        const overlaps = (
-          trip1.startTime <= trip2.endTime && 
-          trip1.endTime >= trip2.startTime
-        );
+        const overlaps = trip1.startTime <= trip2.endTime && trip1.endTime >= trip2.startTime;
 
         if (overlaps) {
           conflicts.push({
             id: `driver-overlap-${trip1._id}-${trip2._id}`,
-            type: "driver_schedule",
-            severity: "critical",
-            title: "Двойная бронь водителя",
+            type: 'driver_schedule',
+            severity: 'critical',
+            title: 'Двойная бронь водителя',
             message: `Водитель забронирован одновременно на две поездки: "${trip1.tripInfo.purpose}" и "${trip2.tripInfo.purpose}".`,
-            suggestion: "Переназначьте одну из поездок на другого водителя.",
+            suggestion: 'Переназначьте одну из поездок на другого водителя.',
             date: new Date(trip1.startTime).toISOString(),
             affectedUsers: [trip1.requestedBy, trip2.requestedBy],
             metadata: {
@@ -539,27 +532,27 @@ async function detectDriverConflicts(
 
 async function detectTaskConflicts(
   ctx: any,
-  args: { organizationId: Id<"organizations">; startDate: number; endDate: number }
+  args: { organizationId: Id<'organizations'>; startDate: number; endDate: number },
 ): Promise<Conflict[]> {
   const conflicts: Conflict[] = [];
 
   // Получаем все задачи
   const tasks = await ctx.db
-    .query("tasks")
-    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
+    .query('tasks')
+    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .collect();
 
-  const activeTasks = tasks.filter((t: any) =>
-    t.status !== "completed" && t.status !== "cancelled"
+  const activeTasks = tasks.filter(
+    (t: any) => t.status !== 'completed' && t.status !== 'cancelled',
   );
 
   // Получаем все отпуска
   const leaves = await ctx.db
-    .query("leaveRequests")
-    .withIndex("by_org", (q: any) => q.eq("organizationId", args.organizationId))
+    .query('leaveRequests')
+    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .collect();
 
-  const approvedLeaves = leaves.filter((l: any) => l.status === "approved");
+  const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
   // Проверяем каждую задачу
   for (const task of activeTasks) {
@@ -567,7 +560,7 @@ async function detectTaskConflicts(
     if (!assignee) continue;
 
     const taskDeadline = task.dueDate ? new Date(task.dueDate).getTime() : null;
-    
+
     // Проверяем, не попадает ли дедлайн в период отпусков
     if (taskDeadline) {
       for (const leave of approvedLeaves) {
@@ -579,11 +572,11 @@ async function detectTaskConflicts(
         if (taskDeadline >= leaveStart && taskDeadline <= leaveEnd) {
           conflicts.push({
             id: `task-deadline-${task._id}-${leave._id}`,
-            type: "task_deadline",
-            severity: "warning",
-            title: "Дедлайн задачи во время отпуска",
+            type: 'task_deadline',
+            severity: 'warning',
+            title: 'Дедлайн задачи во время отпуска',
             message: `Дедлайн задачи "${task.title}" попадает на период отпуска исполнителя.`,
-            suggestion: "Перенесите дедлайн или переназначьте задачу.",
+            suggestion: 'Перенесите дедлайн или переназначьте задачу.',
             date: new Date(taskDeadline).toISOString(),
             affectedUsers: [task.assigneeId],
             relatedTaskId: task._id,
@@ -611,21 +604,21 @@ async function detectTaskConflicts(
  */
 export const getConflictSummaryForAI = query({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.optional(v.id("users")),
+    organizationId: v.id('organizations'),
+    userId: v.optional(v.id('users')),
     startDate: v.number(),
     endDate: v.number(),
   },
   handler: async (ctx, args) => {
-    const conflicts = await ctx.runQuery("conflicts:detectAllConflicts" as any, {
+    const conflicts = await ctx.runQuery('conflicts:detectAllConflicts' as any, {
       organizationId: args.organizationId,
       startDate: args.startDate,
       endDate: args.endDate,
       userId: args.userId,
     });
 
-    const critical = conflicts.filter((c: any) => c.severity === "critical");
-    const warnings = conflicts.filter((c: any) => c.severity === "warning");
+    const critical = conflicts.filter((c: any) => c.severity === 'critical');
+    const warnings = conflicts.filter((c: any) => c.severity === 'warning');
 
     return {
       total: conflicts.length,

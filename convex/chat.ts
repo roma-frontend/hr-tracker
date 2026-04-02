@@ -341,7 +341,7 @@ export const getConversationMembers = query({
       .collect();
 
     // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0] || '';
 
     return Promise.all(
       members.map(async (m) => {
@@ -349,7 +349,7 @@ export const getConversationMembers = query({
         let effectivePresenceStatus = user?.presenceStatus ?? 'available';
 
         // Check if user has an approved leave today
-        if (user) {
+        if (user && today) {
           const approvedLeaves = await ctx.db
             .query('leaveRequests')
             .withIndex('by_user', (q) => q.eq('userId', user._id))
@@ -1718,7 +1718,7 @@ export const getOrgUsers = query({
       .collect();
 
     // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0] || '';
 
     return await Promise.all(
       users
