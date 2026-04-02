@@ -11,12 +11,10 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
-  productionBrowserSourceMaps: false, // Disable for production (use hidden-source-map instead)
+  productionBrowserSourceMaps: false,
 
-  // Ignore TS errors during build (for deployment)
-  // NOTE: This should be false to catch type errors early.
-  // Temporarily enabled for TS migration in convex files.
-  typescript: { ignoreBuildErrors: true },
+  // TypeScript: DO NOT ignore build errors — catch type issues early
+  typescript: { ignoreBuildErrors: false },
 
   // Transpile Radix UI icons
   transpilePackages: ['@radix-ui/react-icons', 'face-api.js'],
@@ -52,8 +50,11 @@ const nextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
-      // Faster action responses
-      allowedOrigins: ['*'],
+      // SECURITY: restrict to your actual domain(s)
+      allowedOrigins: [
+        process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project.vercel.app',
+        'https://hr-project.vercel.app',
+      ],
     },
     // Aggressive package imports optimization
     optimizePackageImports: [
@@ -76,9 +77,6 @@ const nextConfig = {
       'react-i18next',
       'convex',
     ],
-    // Enable Partial Prerendering via cacheComponents (Next.js 16+)
-    // Disabled: conflicts with API routes using cookies/request.url
-    // cacheComponents: true,
     optimizeCss: true,
     scrollRestoration: true,
   },
@@ -93,11 +91,9 @@ const nextConfig = {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
-        // Module concatenation for smaller bundle
         concatenateModules: !dev,
         usedExports: true,
         sideEffects: true,
-        // Better chunk splitting
         splitChunks: {
           chunks: 'all',
           minSize: 20000,
@@ -106,7 +102,6 @@ const nextConfig = {
           maxInitialRequests: 25,
           minChunks: 1,
           cacheGroups: {
-            // React + Next — highest priority, always loaded
             framework: {
               name: 'framework',
               test: /[\\/]node_modules[\\/](react|react-dom|next|scheduler|next-server)[\\/]/,
@@ -115,7 +110,6 @@ const nextConfig = {
               enforce: true,
               reuseExistingChunk: true,
             },
-            // UI: Radix + Lucide + CVA + TailwindMerge
             ui: {
               name: 'ui-vendor',
               test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|class-variance-authority|tailwind-merge|clsx)[\\/]/,
@@ -124,7 +118,6 @@ const nextConfig = {
               enforce: true,
               reuseExistingChunk: true,
             },
-            // Framer Motion — async (only when animated components load)
             framerMotion: {
               name: 'framer-motion',
               test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
@@ -132,7 +125,6 @@ const nextConfig = {
               chunks: 'async',
               reuseExistingChunk: true,
             },
-            // Charts — async (only on analytics/reports pages)
             charts: {
               name: 'recharts',
               test: /[\\/]node_modules[\\/](recharts|d3-)[\\/]/,
@@ -140,7 +132,6 @@ const nextConfig = {
               chunks: 'async',
               reuseExistingChunk: true,
             },
-            // AI SDK — async (only on chat routes)
             aiSdk: {
               name: 'ai-sdk',
               test: /[\\/]node_modules[\\/](@ai-sdk|ai|openai)[\\/]/,
@@ -148,7 +139,6 @@ const nextConfig = {
               chunks: 'async',
               reuseExistingChunk: true,
             },
-            // Convex realtime client
             convex: {
               name: 'convex',
               test: /[\\/]node_modules[\\/]convex[\\/]/,
@@ -156,7 +146,6 @@ const nextConfig = {
               chunks: 'all',
               reuseExistingChunk: true,
             },
-            // i18n — load early
             i18n: {
               name: 'i18n',
               test: /[\\/]node_modules[\\/](react-i18next|i18next)[\\/]/,
@@ -164,7 +153,6 @@ const nextConfig = {
               chunks: 'all',
               reuseExistingChunk: true,
             },
-            // General vendor fallback
             vendors: {
               name: 'vendors',
               test: /[\\/]node_modules[\\/]/,
@@ -172,7 +160,6 @@ const nextConfig = {
               chunks: 'all',
               reuseExistingChunk: true,
             },
-            // Common code shared between pages
             common: {
               name: 'common',
               minChunks: 2,
@@ -182,25 +169,21 @@ const nextConfig = {
             },
           },
         },
-        // Better minification
         minimizer: config.optimization.minimizer,
-        // Remove unused code
-        usedExports: true,
-        // Tree shaking
-        sideEffects: true,
       };
     }
-    
-    // Reduce source map size - use hidden-source-map for production
+
     if (!dev) {
       config.devtool = 'hidden-source-map';
     }
-    
+
     return config;
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // SECURITY + CACHE HEADERS — OPTIMIZED
+  // CACHE HEADERS
+  // NOTE: Security headers (CSP, HSTS, X-Frame-Options, etc.)
+  //       are set ONLY in src/middleware.ts to avoid conflicts.
   // ═══════════════════════════════════════════════════════════════
   async headers() {
     return [
@@ -208,16 +191,6 @@ const nextConfig = {
         source: '/:path*',
         headers: [
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'X-XSS-Protection', value: '1; mode=block' },
-          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=()' },
-          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel.app https://*.vercel-scripts.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob: https://*.tile.openstreetmap.org https://unpkg.com; connect-src 'self' https://*.convex.cloud https://*.googleapis.com https://api.groq.com https://api.openai.com https://api.stripe.com https://sentry.io https://*.sentry.io https://*.ingest.sentry.io https://*.vercel.app https://*.vercel-scripts.com wss://*.convex.cloud https://*.metered.live https://*.metered.ca https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org https://unpkg.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:; manifest-src 'self';",
-          },
         ],
       },
       // Face recognition models — immutable cache

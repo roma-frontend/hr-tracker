@@ -40,9 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# build/lint output logs — DO NOT commit
 build-log.txt
-
 build-output.txt
+lint-output.txt
+dev-output.txt
+*.log
 
 # Stripe transaction exports
 stripe-transactions-*.xlsx

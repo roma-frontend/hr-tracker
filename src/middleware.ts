@@ -54,7 +54,12 @@ function isSuspiciousPath(pathname: string): boolean {
   );
 }
 
+/**
+ * SINGLE SOURCE OF TRUTH for all security headers.
+ * These are NOT duplicated in next.config.js headers().
+ */
 function addSecurityHeaders(response: NextResponse): NextResponse {
+  // Content-Security-Policy — comprehensive policy
   response.headers.set(
     'Content-Security-Policy',
     [
@@ -73,18 +78,33 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
       "manifest-src 'self'",
     ].join('; ')
   );
-  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+
+  // Transport security
+  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+
+  // Prevent clickjacking — DENY (not SAMEORIGIN)
   response.headers.set('X-Frame-Options', 'DENY');
+
+  // Prevent MIME type sniffing
   response.headers.set('X-Content-Type-Options', 'nosniff');
+
+  // XSS Protection (legacy but still useful)
   response.headers.set('X-XSS-Protection', '1; mode=block');
+
+  // Referrer policy
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Permissions policy
   response.headers.set('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=(), interest-cohort=()');
+
+  // Remove X-Powered-By
   response.headers.delete('X-Powered-By');
+
   return response;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MAIN PROXY FUNCTION
+// MAIN MIDDLEWARE
 // ═══════════════════════════════════════════════════════════════
 
 export async function middleware(request: NextRequest) {
@@ -101,7 +121,7 @@ export async function middleware(request: NextRequest) {
   if (isSuspiciousPath(pathname)) {
     try {
       await blockKey(`ip:${ip}`, 24 * 60 * 60 * 1000, 'Suspicious path access attempt');
-    } catch (error) {
+    } catch (_error) {
       // Redis error - continue without blocking
     }
     return new NextResponse('Not Found', { status: 404 });
@@ -111,7 +131,7 @@ export async function middleware(request: NextRequest) {
   let rateLimitResult;
   try {
     rateLimitResult = await checkRateLimit(ip, SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS, SECURITY_CONFIG.RATE_LIMIT_WINDOW);
-  } catch (error) {
+  } catch (_error) {
     // Fallback: allow request if Redis is unavailable
     rateLimitResult = { allowed: true, remaining: 100, resetAt: Date.now() };
   }
@@ -130,7 +150,7 @@ export async function middleware(request: NextRequest) {
   if (rateLimitResult.remaining < SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS - SECURITY_CONFIG.DDOS_THRESHOLD) {
     try {
       await blockKey(`ip:${ip}`, 60 * 60 * 1000, 'Potential DDoS attack');
-    } catch (error) {
+    } catch (_error) {
       // Redis error - continue without blocking
     }
     return new NextResponse('Too Many Requests', { status: 429 });
@@ -149,7 +169,7 @@ export async function middleware(request: NextRequest) {
           { status: 429, headers: { 'Content-Type': 'application/json' } }
         );
       }
-    } catch (error) {
+    } catch (_error) {
       // Continue without blocking if Redis is unavailable
     }
   }
@@ -166,7 +186,7 @@ export async function middleware(request: NextRequest) {
       if (suspiciousPatterns.some(pattern => pattern.test(value))) {
         try {
           await blockKey(`ip:${ip}`, 24 * 60 * 60 * 1000, 'SQL/XSS injection attempt');
-        } catch (error) {
+        } catch (_error) {
           // Redis error - continue without blocking
         }
         return new NextResponse('Bad Request', { status: 400 });
@@ -183,39 +203,31 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`));
 
-  // Если пользователь уже авторизован и заходит на auth routes (/login, /register)
+  // If user is authenticated and visits auth routes (/login, /register)
   if (isAuthRoute && (token || nextAuthToken)) {
-    // Получаем URL откуда пришли
     const url = new URL(request.url);
     const from = url.searchParams.get('from');
 
-    // Если есть параметр from и это защищенный маршрут, редиректим туда
     if (from && from.startsWith('/') && !from.startsWith('/login') && !from.startsWith('/register')) {
       return NextResponse.redirect(new URL(from, request.url));
     }
 
-    // Для всех остальных случаев — просто пропускаем на запрашиваемую страницу
-    // Это позволяет обновлять страницу без редиректа на /dashboard
     return NextResponse.next();
   }
 
-  // Если пользователь авторизован и заходит на публичную страницу — пропускаем (без редиректа)
+  // If user is authenticated and visits public page — allow (no redirect)
   if (isPublicRoute && (token || nextAuthToken)) {
     return NextResponse.next();
   }
 
-  // Блокируем доступ к защищенным маршрутам без авторизации
+  // Block access to protected routes without authentication
   if (isProtectedRoute && !token && !nextAuthToken) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Onboarding flow is handled CLIENT-SIDE by AuthContext
-  // Middleware only handles authentication gating, NOT authorization or onboarding state
-
   // 8. Role-based access control is handled CLIENT-SIDE by each page component
-  // (e.g. superadmin/organizations checks user.role === 'superadmin' || user.email === SUPERADMIN_EMAIL)
   // The middleware only handles authentication gating (step 7 above), NOT authorization.
 
   // 9. Add security headers and return

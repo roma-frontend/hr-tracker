@@ -5,7 +5,6 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
@@ -35,8 +34,8 @@ const eslintConfig = defineConfig([
       },
     },
     rules: {
-      // Strict: don't allow explicit any
-      "@typescript-eslint/no-explicit-any": "off",
+      // Warn on explicit any — gradually migrate to strict types
+      "@typescript-eslint/no-explicit-any": "warn",
 
       // Warning for unsafe operations (can be fixed gradually)
       "@typescript-eslint/no-unsafe-assignment": "off",
@@ -45,19 +44,23 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unsafe-argument": "off",
 
-      // Catch unused variables
-      "@typescript-eslint/no-unused-vars": "off",
+      // Catch unused variables (allow _ prefix for intentionally unused)
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      }],
 
-      // Disallow console in production (only in src, allow in convex)
-      "no-console": "off",
+      // Warn on console usage (error/warn are allowed)
+      "no-console": ["warn", { allow: ["warn", "error"] }],
 
       // Allow anonymous default exports for Next.js pages
       "import/no-anonymous-default-export": "off",
 
-      // React rules
+      // React rules — CRITICAL: rules-of-hooks must be error!
       "react/no-unescaped-entities": "off",
-      "react-hooks/rules-of-hooks": "off",
-      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/purity": "warn",
       "react-hooks/use-memo": "off",
@@ -65,7 +68,7 @@ const eslintConfig = defineConfig([
       "react-hooks/refs": "warn",
 
       // TypeScript rules
-      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/ban-ts-comment": "warn",
       "@typescript-eslint/no-empty-object-type": "off",
     }
   }
