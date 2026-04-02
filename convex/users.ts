@@ -142,23 +142,19 @@ export const getCurrentUser = query({
     userId: v.optional(v.id("users")),
   },
   handler: async (ctx, { email, userId }) => {
-    console.log("[getCurrentUser] Called with:", { email, userId });
 
     // Try to get identity from Convex auth first
     const identity = await ctx.auth.getUserIdentity();
-    console.log("[getCurrentUser] Identity:", identity);
 
     const userEmail = identity?.email || email;
 
     // If userId provided, get user directly
     if (userId) {
       const user = await ctx.db.get(userId);
-      console.log("[getCurrentUser] Found user by ID:", user);
       return user;
     }
 
     if (!userEmail) {
-      console.log("[getCurrentUser] No identity or email");
       return null;
     }
 
@@ -167,7 +163,6 @@ export const getCurrentUser = query({
       .withIndex("by_email", (q) => q.eq("email", userEmail.toLowerCase()))
       .first();
 
-    console.log("[getCurrentUser] Found user:", user);
     return user;
   },
 });
@@ -182,7 +177,6 @@ export const createOAuthUser = mutation({
     avatarUrl: v.optional(v.string()),
   },
   handler: async (ctx, { email, name, avatarUrl }) => {
-    console.log("[createOAuthUser] 🔐 Called with:", { email, name, avatarUrl });
     const emailLower = email.toLowerCase().trim();
     
     // Ensure name is never empty
@@ -194,15 +188,7 @@ export const createOAuthUser = mutation({
       .withIndex("by_email", (q) => q.eq("email", emailLower))
       .first();
 
-    console.log("[createOAuthUser] 🔍 Existing user:", existing ? {
-      id: existing._id,
-      name: existing.name,
-      email: existing.email,
-      role: existing.role,
-    } : "NOT_FOUND");
-
     if (existing) {
-      console.log("[createOAuthUser] ✅ User exists, updating avatar and name if needed");
       const updates: Partial<Pick<typeof existing, 'avatarUrl' | 'name'>> = {};
 
       // Update avatar if provided
@@ -223,29 +209,19 @@ export const createOAuthUser = mutation({
       );
       
       if (shouldUpdateName) {
-        console.log("[createOAuthUser] 📝 Updating name from", existing.name, "to", finalName, {
-          existingNameTrimmed,
-          isPlaceholderName,
-          isBetterName,
-        });
         updates.name = finalName;
       }
 
       // Apply updates if any
       if (Object.keys(updates).length > 0) {
         await ctx.db.patch(existing._id, updates);
-        console.log("[createOAuthUser] ✏️  Updated user with:", updates);
-      } else {
-        console.log("[createOAuthUser] ℹ️  No updates needed");
       }
 
-      console.log("[createOAuthUser] ✅ Returning existing user ID:", existing._id);
       return existing._id;
     }
 
     // For new OAuth users, check if they are superadmin
     const isSuperAdmin = emailLower === SUPERADMIN_EMAIL;
-    console.log("[createOAuthUser] 📋 isSuperAdmin:", isSuperAdmin, "email:", emailLower, "SUPERADMIN_EMAIL:", SUPERADMIN_EMAIL);
 
     // Get first organization or create error
     const allOrgs = await ctx.db.query("organizations").collect();
@@ -255,7 +231,6 @@ export const createOAuthUser = mutation({
     }
 
     const organizationId = isSuperAdmin ? allOrgs[0]._id : undefined;
-    console.log("[createOAuthUser] 🏢 organizationId:", organizationId, isSuperAdmin ? "(superadmin)" : "(undefined - needs onboarding)");
 
     // Check if user is first member of the org (becomes admin) - only for superadmin
     const orgMembers = isSuperAdmin ? await ctx.db
@@ -266,20 +241,9 @@ export const createOAuthUser = mutation({
     const isFirstMember = orgMembers.length === 0;
     const role = isSuperAdmin ? "superadmin" : "employee";
 
-    console.log("[createOAuthUser] 🎯 role:", role, "isSuperAdmin:", isSuperAdmin);
 
     // Superadmin is auto-approved, regular users need onboarding (isApproved: false)
     const isApproved = isSuperAdmin;
-
-    // Create new OAuth user
-    console.log("[createOAuthUser] 🔨 Creating new user with:", {
-      organizationId,
-      name: finalName,
-      email: emailLower,
-      role,
-      isSuperAdmin,
-      isApproved,
-    });
 
     const userId = await ctx.db.insert("users", {
       organizationId, // undefined for regular users (needs onboarding)
@@ -301,9 +265,7 @@ export const createOAuthUser = mutation({
       avatarUrl,
     });
 
-    console.log("[createOAuthUser] ✅ NEW USER CREATED with ID:", userId, "name:", finalName, "role:", role);
 
-    console.log("[createOAuthUser] ✅ User created with ID:", userId);
     return userId;
   },
 });
@@ -425,14 +387,6 @@ export const createUser = mutation({
 
     const travelAllowance = args.employeeType === "contractor" ? 12000 : 20000;
 
-    console.log("[createUser] 👥 Creating new employee:", {
-      email,
-      name: args.name,
-      department: args.department,
-      position: args.position,
-      role: args.role,
-    });
-
     const userId = await ctx.db.insert("users", {
       organizationId: targetOrgId, // ← use targetOrgId instead of admin's org
       name: args.name,
@@ -475,13 +429,6 @@ export const createUser = mutation({
         createdAt: Date.now(),
       });
     }
-
-    console.log("[createUser] ✅ Employee created successfully:", {
-      userId,
-      email,
-      name: args.name,
-      role: args.role,
-    });
 
     return userId;
   },

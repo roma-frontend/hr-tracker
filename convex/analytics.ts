@@ -1,5 +1,6 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
+import { isSuperadminEmail } from "./lib/auth";
 
 // ── Get analytics overview ─────────────────────────────────────────────────
 export const getAnalyticsOverview = query({
@@ -8,7 +9,6 @@ export const getAnalyticsOverview = query({
     let users, leaves;
 
     if (organizationId) {
-      // Get organization-specific data
       users = await ctx.db
         .query("users")
         .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
@@ -19,12 +19,11 @@ export const getAnalyticsOverview = query({
         .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
         .collect();
     } else {
-      // Get all data
       users = await ctx.db.query("users").collect();
       leaves = await ctx.db.query("leaveRequests").collect();
     }
 
-    // Exclude superadmin from employee count (superadmin is not part of any organization)
+    // Exclude superadmin from employee count
     const filteredUsers = users.filter(u => u.role !== "superadmin");
 
     const totalEmployees = filteredUsers.filter(u => u.isActive).length;
@@ -34,7 +33,7 @@ export const getAnalyticsOverview = query({
     const pendingLeaves = leaves.filter(l => l.status === "pending").length;
     const approvedLeaves = leaves.filter(l => l.status === "approved").length;
 
-    // Calculate average approval time (in hours)
+    // Calculate average approval time (in hours) — guarded against division by zero
     const approvedWithTime = leaves.filter(l =>
       l.status === "approved" && l.reviewedAt && l.createdAt
     );
@@ -69,19 +68,13 @@ export const getAnalyticsOverview = query({
 export const getDepartmentStats = query({
   args: { requesterId: v.optional(v.id("users")) },
   handler: async (ctx, { requesterId }) => {
-    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
-
     let users = await ctx.db.query("users").collect();
 
-    // Filter by requester's organization if provided
     if (requesterId) {
       const requester = await ctx.db.get(requesterId);
       if (!requester) throw new Error("Requester not found");
 
-      const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-
-      // If not superadmin, filter by organization
-      if (!isSuperadmin) {
+      if (!isSuperadminEmail(requester.email)) {
         if (!requester.organizationId) {
           throw new Error("User does not belong to an organization");
         }
@@ -89,7 +82,7 @@ export const getDepartmentStats = query({
       }
     }
 
-    // Exclude superadmin from employee count (superadmin is not part of any organization)
+    // Exclude superadmin from employee count
     users = users.filter(u => u.role !== "superadmin");
 
     const stats = users.reduce((acc, user) => {
@@ -122,11 +115,12 @@ export const getDepartmentStats = query({
       avgFamilyLeave: number;
     }>);
 
-    // Calculate averages
+    // Calculate averages — division-by-zero guard
     Object.values(stats).forEach((dept) => {
-      dept.avgPaidLeave = Math.round(dept.totalPaidLeave / dept.employees);
-      dept.avgSickLeave = Math.round(dept.totalSickLeave / dept.employees);
-      dept.avgFamilyLeave = Math.round(dept.totalFamilyLeave / dept.employees);
+      const count = dept.employees;
+      dept.avgPaidLeave = count > 0 ? Math.round(dept.totalPaidLeave / count) : 0;
+      dept.avgSickLeave = count > 0 ? Math.round(dept.totalSickLeave / count) : 0;
+      dept.avgFamilyLeave = count > 0 ? Math.round(dept.totalFamilyLeave / count) : 0;
     });
 
     return Object.values(stats);
@@ -137,19 +131,13 @@ export const getDepartmentStats = query({
 export const getLeaveTrends = query({
   args: { requesterId: v.optional(v.id("users")) },
   handler: async (ctx, { requesterId }) => {
-    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
-
     let leaves = await ctx.db.query("leaveRequests").collect();
 
-    // Filter by requester's organization if provided
     if (requesterId) {
       const requester = await ctx.db.get(requesterId);
       if (!requester) throw new Error("Requester not found");
 
-      const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-
-      // If not superadmin, filter by organization
-      if (!isSuperadmin) {
+      if (!isSuperadminEmail(requester.email)) {
         if (!requester.organizationId) {
           throw new Error("User does not belong to an organization");
         }
@@ -210,22 +198,16 @@ export const getUserAnalytics = query({
 export const getTeamCalendar = query({
   args: { requesterId: v.optional(v.id("users")) },
   handler: async (ctx, { requesterId }) => {
-    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
-
     let leaves = await ctx.db
       .query("leaveRequests")
       .filter(q => q.eq(q.field("status"), "approved"))
       .collect();
 
-    // Filter by requester's organization if provided
     if (requesterId) {
       const requester = await ctx.db.get(requesterId);
       if (!requester) throw new Error("Requester not found");
 
-      const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-
-      // If not superadmin, filter by organization
-      if (!isSuperadmin) {
+      if (!isSuperadminEmail(requester.email)) {
         if (!requester.organizationId) {
           throw new Error("User does not belong to an organization");
         }
@@ -236,7 +218,6 @@ export const getTeamCalendar = query({
     const now = Date.now();
     const thirtyDaysFromNow = now + (30 * 24 * 60 * 60 * 1000);
 
-    // Get leaves in the next 30 days
     const upcomingLeaves = leaves.filter(l => {
       const startDate = new Date(l.startDate).getTime();
       const endDate = new Date(l.endDate).getTime();

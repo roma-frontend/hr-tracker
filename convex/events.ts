@@ -268,7 +268,6 @@ export const checkLeaveConflictsManual = mutation({
       .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
       .collect();
 
-    console.log(`[Conflict Check] Found ${events.length} events`);
 
     const overlappingEvents = events.filter(event => {
       // Check if leave overlaps with event
@@ -277,7 +276,6 @@ export const checkLeaveConflictsManual = mutation({
       );
     });
 
-    console.log(`[Conflict Check] ${overlappingEvents.length} overlapping events`);
 
     let conflictsCreated = 0;
 
@@ -289,7 +287,6 @@ export const checkLeaveConflictsManual = mutation({
       );
       const isRequiredEmployee = event.requiredEmployeeIds?.includes(userId);
       
-      console.log(`[Conflict Check] Event: ${event.name}, Required Depts: ${event.requiredDepartments.join(', ')}, Is Required: ${isRequiredDept}`);
       
       if (isRequiredDept || isRequiredEmployee) {
         // Check if alert already exists
@@ -316,7 +313,6 @@ export const checkLeaveConflictsManual = mutation({
       }
     }
 
-    console.log(`[Conflict Check] Created ${conflictsCreated} conflicts`);
     return { conflictsFound: conflictsCreated };
   },
 });

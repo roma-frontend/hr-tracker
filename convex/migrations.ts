@@ -28,7 +28,6 @@ export const fixDuplicateUsers = mutation({
     for (const [email, users] of emailMap.entries()) {
       if (users.length <= 1) continue;
       
-      console.log(`[fixDuplicateUsers] Found ${users.length} users with email ${email}`);
       
       // Find the approved user (prefer approved over non-approved)
       const approvedUser = users.find(u => u.isApproved);
@@ -37,11 +36,9 @@ export const fixDuplicateUsers = mutation({
       if (approvedUser && nonApprovedUsers.length > 0) {
         // Delete non-approved duplicates
         for (const dupUser of nonApprovedUsers) {
-          console.log(`[fixDuplicateUsers] Deleting duplicate user ${dupUser._id}`);
           await ctx.db.delete(dupUser._id);
           fixedCount++;
         }
-        console.log(`[fixDuplicateUsers] Kept approved user ${approvedUser._id}`);
       } else {
         // No approved user — keep the one with organizationId
         const userWithOrg = users.find(u => u.organizationId);
@@ -49,7 +46,6 @@ export const fixDuplicateUsers = mutation({
         
         if (userWithOrg && usersWithoutOrg.length > 0) {
           for (const dupUser of usersWithoutOrg) {
-            console.log(`[fixDuplicateUsers] Deleting duplicate user ${dupUser._id}`);
             await ctx.db.delete(dupUser._id);
             fixedCount++;
           }
@@ -57,7 +53,6 @@ export const fixDuplicateUsers = mutation({
       }
     }
     
-    console.log(`[fixDuplicateUsers] Fixed ${fixedCount} duplicate users`);
     return { fixed: fixedCount };
   },
 });

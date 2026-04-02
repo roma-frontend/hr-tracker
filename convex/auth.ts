@@ -28,6 +28,37 @@ function wrapConvexError<T>(fn: () => T, operation: string): T {
 // ── Constants ────────────────────────────────────────────────────────────────
 const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
+/**
+ * Check if a user is a superadmin.
+ * Primary check: user.role === "superadmin"
+ * Fallback: email match (for legacy compatibility)
+ */
+export function isSuperadmin(user: {
+  role?: string;
+  email?: string;
+} | null | undefined): boolean {
+  if (!user) return false;
+  return (
+    user.role === "superadmin" ||
+    user.email?.toLowerCase() === SUPERADMIN_EMAIL
+  );
+}
+
+/**
+ * Assert that a user is a superadmin, throw otherwise.
+ */
+export function assertSuperadmin(user: {
+  role?: string;
+  email?: string;
+} | null | undefined, action: string = "perform this action"): void {
+  if (!isSuperadmin(user)) {
+    throw new Error(`Only superadmin can ${action}`);
+  }
+}
+
+
+
+
 // ── Helper: build safe user return object ────────────────────────────────────
 function safeUser(user: {
   _id: string;

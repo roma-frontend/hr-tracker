@@ -431,7 +431,6 @@ export const requestToJoinOrganization = mutation({
       createdAt: Date.now(),
     });
 
-    console.log(`[requestToJoinOrganization] Created invite for org=${args.organizationId}, email=${args.requestedByEmail}`);
 
     // Notify all org admins
     const admins = await ctx.db
@@ -477,13 +476,11 @@ export const getJoinRequests = query({
     // For admin: must have organizationId
     // For superadmin: can view all if no organizationId is set
     if (!admin.organizationId && admin.role === "admin") {
-      console.log(`[getJoinRequests] Admin ${admin.email} has no organizationId assigned`);
       return [];
     }
 
     const orgId = admin.organizationId;
 
-    console.log(`[getJoinRequests] ${isSuperadmin ? "Superadmin" : "Admin"} ${admin.email} querying org=${orgId}, status=${status}`);
 
     let invites;
 
@@ -514,7 +511,6 @@ export const getJoinRequests = query({
       }
     }
 
-    console.log(`[getJoinRequests] Retrieved ${invites.length} invites`, invites.map(inv => ({ email: inv.requestedByEmail, status: inv.status, org: inv.organizationId })));
     return invites;
   },
 });

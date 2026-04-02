@@ -340,18 +340,12 @@ export const sendServiceBroadcast = mutation({
     scheduledFor: v.optional(v.number()), // optional timestamp for scheduling
   },
   handler: async (ctx, args) => {
-    console.warn(
-      `\n[sendServiceBroadcast] ===== STARTING BROADCAST FOR ORG: ${args.organizationId} =====\n`,
-    );
 
     // Verify user is superadmin
     const user = await ctx.db.get(args.userId);
     if (!user || user.role !== 'superadmin') {
       throw new Error('Only superadmin can send service broadcasts');
     }
-
-    console.warn(`[sendServiceBroadcast] Superadmin: ${user.name} (${user.email})`);
-
     // Get or create the "System Announcements" group chat for this organization
     let announcementConv = await ctx.db
       .query('chatConversations')

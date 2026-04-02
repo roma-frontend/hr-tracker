@@ -17,6 +17,6 @@ yarn.lock
 # Coverage
 coverage/
 
-# Public assets (binary files don't need formatting)
+# Public assets (no need to format binaries)
 public/models/
 public/*.png
