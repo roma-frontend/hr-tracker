@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import type { Id } from './_generated/dataModel';
+import type { Id, DataModel, Doc } from './_generated/dataModel';
 
 /**
  * Helper to batch-load users and their leave status
@@ -9,20 +9,8 @@ import type { Id } from './_generated/dataModel';
 async function getUsersWithLeaveStatus(
   ctx: {
     db: {
-      get: (id: Id<'users'>) => Promise<{
-        _id: Id<'users'>;
-        presenceStatus?: string;
-      } | null>;
-      query: (table: string) => {
-        collect: () => Promise<
-          Array<{
-            userId: Id<'users'>;
-            status: string;
-            startDate: string;
-            endDate: string;
-          }>
-        >;
-      };
+      get: (id: Id<'users'>) => Promise<Doc<'users'> | null>;
+      query: (table: 'leaveRequests') => { collect: () => Promise<Doc<'leaveRequests'>[]> };
     };
   },
   userIds: Id<'users'>[],
