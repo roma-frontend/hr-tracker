@@ -1,11 +1,11 @@
-import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { v } from 'convex/values';
+import { query, mutation } from './_generated/server';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET TODAY'S STATS FOR USER
 // ─────────────────────────────────────────────────────────────────────────────
 export const getTodayStats = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     const now = Date.now();
     const todayStart = new Date();
@@ -19,14 +19,11 @@ export const getTodayStats = query({
 
     // Get today's time tracking
     const todayTracking = await ctx.db
-      .query("timeTracking")
-      .filter((q) => 
-        q.and(
-          q.eq(q.field("userId"), userId),
-          q.gte(q.field("checkInTime"), todayStartMs)
-        )
+      .query('timeTracking')
+      .filter((q) =>
+        q.and(q.eq(q.field('userId'), userId), q.gte(q.field('checkInTime'), todayStartMs)),
       )
-      .order("desc")
+      .order('desc')
       .first();
 
     // Calculate hours worked today
@@ -37,12 +34,9 @@ export const getTodayStats = query({
 
     // Get week's time tracking for weekly hours
     const weekTracking = await ctx.db
-      .query("timeTracking")
+      .query('timeTracking')
       .filter((q) =>
-        q.and(
-          q.eq(q.field("userId"), userId),
-          q.gte(q.field("checkInTime"), weekStartMs)
-        )
+        q.and(q.eq(q.field('userId'), userId), q.gte(q.field('checkInTime'), weekStartMs)),
       )
       .collect();
 
@@ -55,30 +49,28 @@ export const getTodayStats = query({
 
     // Get tasks
     const allTasks = await ctx.db
-      .query("tasks")
-      .filter((q) => q.eq(q.field("assignedTo"), userId))
+      .query('tasks')
+      .filter((q) => q.eq(q.field('assignedTo'), userId))
       .collect();
 
     const completedTasksToday = allTasks.filter(
-      (t) => t.status === "completed" && t.updatedAt && t.updatedAt >= todayStartMs
+      (t) => t.status === 'completed' && t.updatedAt && t.updatedAt >= todayStartMs,
     ).length;
 
     const completedTasksWeek = allTasks.filter(
-      (t) => t.status === "completed" && t.updatedAt && t.updatedAt >= weekStartMs
+      (t) => t.status === 'completed' && t.updatedAt && t.updatedAt >= weekStartMs,
     ).length;
 
-    const totalTasksWeek = allTasks.filter(
-      (t) => t.createdAt && t.createdAt >= weekStartMs
-    ).length;
+    const totalTasksWeek = allTasks.filter((t) => t.createdAt && t.createdAt >= weekStartMs).length;
 
     // Get today's deadlines
     const todayEnd = todayStart.getTime() + 24 * 60 * 60 * 1000;
     const todayDeadlines = allTasks.filter(
-      (t) => 
-        t.deadline && 
-        t.deadline >= todayStartMs && 
+      (t) =>
+        t.deadline &&
+        t.deadline >= todayStartMs &&
         t.deadline < todayEnd &&
-        t.status !== "completed"
+        t.status !== 'completed',
     ).length;
 
     // Weekly goal progress (target: 40 hours)
@@ -93,7 +85,7 @@ export const getTodayStats = query({
       totalTasksWeek,
       todayDeadlines,
       weeklyGoalProgress: Math.round(weeklyGoalProgress),
-      isClockedIn: !!todayTracking && todayTracking.status === "checked_in",
+      isClockedIn: !!todayTracking && todayTracking.status === 'checked_in',
     };
   },
 });
@@ -102,15 +94,12 @@ export const getTodayStats = query({
 // GET TODAY'S PRIORITY TASKS (Top 3)
 // ─────────────────────────────────────────────────────────────────────────────
 export const getTodayTasks = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     const tasks = await ctx.db
-      .query("tasks")
-      .filter((q) => 
-        q.and(
-          q.eq(q.field("assignedTo"), userId),
-          q.neq(q.field("status"), "completed")
-        )
+      .query('tasks')
+      .filter((q) =>
+        q.and(q.eq(q.field('assignedTo'), userId), q.neq(q.field('status'), 'completed')),
       )
       .collect();
 
@@ -119,7 +108,7 @@ export const getTodayTasks = query({
     const sorted = tasks.sort((a, b) => {
       const priorityDiff = (priorityMap[b.priority] || 0) - (priorityMap[a.priority] || 0);
       if (priorityDiff !== 0) return priorityDiff;
-      
+
       if (a.deadline && b.deadline) return a.deadline - b.deadline;
       if (a.deadline) return -1;
       if (b.deadline) return 1;
@@ -134,39 +123,39 @@ export const getTodayTasks = query({
 // GET TEAM PRESENCE (who's online)
 // ─────────────────────────────────────────────────────────────────────────────
 export const getTeamPresence = query({
-  args: { requesterId: v.id("users") },
+  args: { requesterId: v.id('users') },
   handler: async (ctx, { requesterId }) => {
     const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error("Requester not found");
+    if (!requester) throw new Error('Requester not found');
 
-    const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+    const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
     const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
 
-    let users = await ctx.db.query("users").collect();
-    
+    let users = await ctx.db.query('users').collect();
+
     // Filter by organization if not superadmin
     if (!isSuperadmin) {
       if (!requester.organizationId) {
-        throw new Error("User does not belong to an organization");
+        throw new Error('User does not belong to an organization');
       }
-      users = users.filter(u => u.organizationId === requester.organizationId);
+      users = users.filter((u) => u.organizationId === requester.organizationId);
     }
 
     // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0] || '';
 
     // Get only active users with presence status
     const onlineUsers = await Promise.all(
       users
-        .filter(u => u.isActive && u.presenceStatus)
+        .filter((u) => u.isActive && u.presenceStatus)
         .map(async (u) => {
           // Check if user has an approved leave today
           let effectivePresenceStatus = u.presenceStatus!;
 
           const approvedLeaves = await ctx.db
-            .query("leaveRequests")
-            .withIndex("by_user", (q) => q.eq("userId", u._id))
-            .filter((q) => q.eq(q.field("status"), "approved"))
+            .query('leaveRequests')
+            .withIndex('by_user', (q) => q.eq('userId', u._id))
+            .filter((q) => q.eq(q.field('status'), 'approved'))
             .collect();
 
           const hasActiveLeave = approvedLeaves.some((leave) => {
@@ -174,7 +163,7 @@ export const getTeamPresence = query({
           });
 
           if (hasActiveLeave) {
-            effectivePresenceStatus = "out_of_office";
+            effectivePresenceStatus = 'out_of_office';
           }
 
           return {
@@ -185,7 +174,7 @@ export const getTeamPresence = query({
             department: u.department,
             role: u.role,
           };
-        })
+        }),
     );
 
     return onlineUsers.slice(0, 10); // Limit to 10 for performance
@@ -197,12 +186,12 @@ export const getTeamPresence = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const startPomodoroSession = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     duration: v.number(), // in minutes
-    taskId: v.optional(v.id("tasks")),
+    taskId: v.optional(v.id('tasks')),
   },
   handler: async (ctx, { userId, duration, taskId }) => {
-    const sessionId = await ctx.db.insert("pomodoroSessions", {
+    const sessionId = await ctx.db.insert('pomodoroSessions', {
       userId,
       taskId,
       startTime: Date.now(),
@@ -217,7 +206,7 @@ export const startPomodoroSession = mutation({
 });
 
 export const completePomodoroSession = mutation({
-  args: { sessionId: v.id("pomodoroSessions") },
+  args: { sessionId: v.id('pomodoroSessions') },
   handler: async (ctx, { sessionId }) => {
     await ctx.db.patch(sessionId, {
       completed: true,
@@ -227,7 +216,7 @@ export const completePomodoroSession = mutation({
 });
 
 export const interruptPomodoroSession = mutation({
-  args: { sessionId: v.id("pomodoroSessions") },
+  args: { sessionId: v.id('pomodoroSessions') },
   handler: async (ctx, { sessionId }) => {
     await ctx.db.patch(sessionId, {
       interrupted: true,
@@ -237,18 +226,18 @@ export const interruptPomodoroSession = mutation({
 });
 
 export const getActivePomodoroSession = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     const session = await ctx.db
-      .query("pomodoroSessions")
+      .query('pomodoroSessions')
       .filter((q) =>
         q.and(
-          q.eq(q.field("userId"), userId),
-          q.eq(q.field("completed"), false),
-          q.eq(q.field("interrupted"), false)
-        )
+          q.eq(q.field('userId'), userId),
+          q.eq(q.field('completed'), false),
+          q.eq(q.field('interrupted'), false),
+        ),
       )
-      .order("desc")
+      .order('desc')
       .first();
 
     return session;
