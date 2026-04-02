@@ -32,6 +32,8 @@ import type * as events from "../events.js";
 import type * as faceRecognition from "../faceRecognition.js";
 import type * as http from "../http.js";
 import type * as leaves from "../leaves.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_date from "../lib/date.js";
 import type * as messenger from "../messenger.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
@@ -92,6 +94,8 @@ declare const fullApi: ApiFromModules<{
   faceRecognition: typeof faceRecognition;
   http: typeof http;
   leaves: typeof leaves;
+  "lib/auth": typeof lib_auth;
+  "lib/date": typeof lib_date;
   messenger: typeof messenger;
   migrations: typeof migrations;
   notifications: typeof notifications;

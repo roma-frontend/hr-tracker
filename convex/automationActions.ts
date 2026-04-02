@@ -2,16 +2,21 @@
  * Automation - Actions (for operations with delays, external APIs, etc.)
  */
 
-import { action } from "./_generated/server";
-import { internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
+import { action } from './_generated/server';
+import { internal } from './_generated/api';
+import type { Id } from './_generated/dataModel';
+
+interface RunAutomationResult {
+  success: boolean;
+  taskId: string;
+}
 
 export const runAutomation = action({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<RunAutomationResult> => {
     // Create a new automation task via internal mutation
     const taskId = await ctx.runMutation(internal.automationMutations.createAutomationTask, {
-      name: "Manual automation run",
+      name: 'Manual automation run',
     });
 
     // Simulate automation execution with delay
@@ -19,7 +24,7 @@ export const runAutomation = action({
 
     // Update task status via internal mutation
     await ctx.runMutation(internal.automationMutations.completeAutomationTask, {
-      taskId: taskId as Id<"automationTasks">,
+      taskId: taskId as Id<'automationTasks'>,
     });
 
     return { success: true, taskId };
