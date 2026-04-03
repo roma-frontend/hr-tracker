@@ -5128,5 +5128,27 @@
     "cannotChangePassword": "Cannot change password or email",
     "cancel": "Cancel",
     "startSession": "Start Session"
+  },
+  "driverCalendar": {
+    "noTrips": "No trips",
+    "noTripsScheduled": "No trips scheduled",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "scheduled": "Scheduled",
+    "timeOff": "Time Off",
+    "maintenance": "Maintenance",
+    "blockTime": "Block Time",
+    "type": "Type",
+    "selectType": "Select type",
+    "vacation": "🏖 Vacation",
+    "sickLeave": "🤒 Sick Leave",
+    "personal": "📅 Personal",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "reason": "Reason",
+    "enterReason": "Enter reason...",
+    "blockTimeBtn": "Block Time",
+    "completeTrip": "✓ Complete Trip",
+    "complete": "✓ Complete"
   }
 }

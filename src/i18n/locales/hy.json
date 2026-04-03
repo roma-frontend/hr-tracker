@@ -4871,5 +4871,27 @@
     "cannotChangePassword": "Հնարավոր չէ փոխել գաղտնաբառը կամ էլ. փոստը",
     "cancel": "Չեղարկել",
     "startSession": "Սկսել նիստը"
+  },
+  "driverCalendar": {
+    "noTrips": "Ուղևորություններ չկան",
+    "noTripsScheduled": "Ուղևորություններ չեն նախատեսված",
+    "completed": "Ավարտված",
+    "inProgress": "Ընթացքում",
+    "scheduled": "Նախատեսված",
+    "timeOff": "Հանգստի օր",
+    "maintenance": "Սպասարկում",
+    "blockTime": "Արգելափակել ժամանակը",
+    "type": "Տեսակ",
+    "selectType": "Ընտրեք տեսակը",
+    "vacation": "🏖 Արձակուրդ",
+    "sickLeave": "🤒 Հիվանդության թերթիկ",
+    "personal": "📅 Անձնական",
+    "startTime": "Սկսի ժամանակը",
+    "endTime": "Ավարտի ժամանակը",
+    "reason": "Պատճառ",
+    "enterReason": "Նշեք պատճառը...",
+    "blockTimeBtn": "Արգելափակել",
+    "completeTrip": "✓ Ավարտել ուղևորությունը",
+    "complete": "✓ Ավարտել"
   }
 }

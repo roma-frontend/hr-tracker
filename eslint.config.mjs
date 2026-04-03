@@ -37,12 +37,12 @@ const eslintConfig = defineConfig([
       // Warn on explicit any — gradually migrate to strict types
       "@typescript-eslint/no-explicit-any": "warn",
 
-      // Warning for unsafe operations (can be fixed gradually)
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
+      // Warning for unsafe operations (migrate to strict types gradually)
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-call": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
+      "@typescript-eslint/no-unsafe-argument": "warn",
 
       // Catch unused variables (allow _ prefix for intentionally unused)
       "@typescript-eslint/no-unused-vars": ["warn", {

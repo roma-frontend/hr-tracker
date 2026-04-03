@@ -5099,5 +5099,27 @@
     "cannotChangePassword": "Нельзя изменить пароль или email",
     "cancel": "Отмена",
     "startSession": "Начать сессию"
+  },
+  "driverCalendar": {
+    "noTrips": "Нет поездок",
+    "noTripsScheduled": "Поездки не запланированы",
+    "completed": "Завершено",
+    "inProgress": "В процессе",
+    "scheduled": "Запланировано",
+    "timeOff": "Выходной",
+    "maintenance": "Обслуживание",
+    "blockTime": "Заблокировать время",
+    "type": "Тип",
+    "selectType": "Выберите тип",
+    "vacation": "🏖 Отпуск",
+    "sickLeave": "🤒 Больничный",
+    "personal": "📅 Личное",
+    "startTime": "Время начала",
+    "endTime": "Время окончания",
+    "reason": "Причина",
+    "enterReason": "Укажите причину...",
+    "blockTimeBtn": "Заблокировать",
+    "completeTrip": "✓ Завершить поездку",
+    "complete": "✓ Завершить"
   }
 }

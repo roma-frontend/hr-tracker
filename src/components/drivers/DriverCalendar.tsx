@@ -302,7 +302,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                               className="h-6 text-[10px] w-full mt-2 bg-white/50 hover:bg-white dark:bg-transparent"
                               onClick={() => handleUpdateTripStatus(s._id, 'completed')}
                             >
-                              ✓ Complete
+                              {t('driverCalendar.complete')}
                             </Button>
                           )}
                         </div>
@@ -310,7 +310,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                   ) : (
                     <div className="text-center text-xs text-muted-foreground py-12">
                       <CalendarIcon className="w-6 h-6 mx-auto mb-1 opacity-20" />
-                      <span>No trips</span>
+                      <span>{t('driverCalendar.noTrips')}</span>
                     </div>
                   )}
                 </CardContent>
@@ -430,7 +430,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                         className="w-full mt-3 h-8 text-xs bg-white/50 hover:bg-white dark:bg-transparent"
                         onClick={() => handleUpdateTripStatus(s._id, 'completed')}
                       >
-                        ✓ Complete Trip
+                        {t('driverCalendar.completeTrip')}
                       </Button>
                     )}
                   </div>
@@ -438,8 +438,10 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
             ) : (
               <div className="text-center text-muted-foreground py-16">
                 <CalendarIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                <p className="text-sm">No trips scheduled</p>
-                <p className="text-xs mt-1">{format(weekDays[mobileViewDay] ?? new Date(), 'EEEE, MMM d')}</p>
+                <p className="text-sm">{t('driverCalendar.noTripsScheduled')}</p>
+                <p className="text-xs mt-1">
+                  {format(weekDays[mobileViewDay] ?? new Date(), 'EEEE, MMM d')}
+                </p>
               </div>
             )}
           </CardContent>
@@ -450,23 +452,23 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
       <div className="flex flex-wrap gap-3 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700" />
-          <span className="text-muted-foreground">Completed</span>
+          <span className="text-muted-foreground">{t('driverCalendar.completed')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3.5 h-3.5 rounded bg-blue-100 border border-blue-300 dark:bg-blue-900/30 dark:border-blue-700" />
-          <span className="text-muted-foreground">In Progress</span>
+          <span className="text-muted-foreground">{t('driverCalendar.inProgress')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3.5 h-3.5 rounded bg-gray-100 border border-gray-300 dark:bg-gray-900/30 dark:border-gray-700" />
-          <span className="text-muted-foreground">Scheduled</span>
+          <span className="text-muted-foreground">{t('driverCalendar.scheduled')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3.5 h-3.5 rounded bg-purple-100 border border-purple-300 dark:bg-purple-900/30 dark:border-purple-700" />
-          <span className="text-muted-foreground">Time Off</span>
+          <span className="text-muted-foreground">{t('driverCalendar.timeOff')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3.5 h-3.5 rounded bg-orange-100 border border-orange-300 dark:bg-orange-900/30 dark:border-orange-700" />
-          <span className="text-muted-foreground">Maintenance</span>
+          <span className="text-muted-foreground">{t('driverCalendar.maintenance')}</span>
         </div>
       </div>
 
@@ -474,25 +476,25 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
       <Dialog open={showBlockModal} onOpenChange={setShowBlockModal}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-lg">Block Time</DialogTitle>
+            <DialogTitle className="text-lg">{t('driverCalendar.blockTime')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div>
-              <Label>Type</Label>
+              <Label>{t('driverCalendar.type')}</Label>
               <Select value={blockType} onValueChange={(v) => setBlockType(v as any)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t('driverCalendar.selectType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="vacation">🏖 Vacation</SelectItem>
-                  <SelectItem value="sick_leave">🤒 Sick Leave</SelectItem>
-                  <SelectItem value="personal">📅 Personal</SelectItem>
+                  <SelectItem value="vacation">{t('driverCalendar.vacation')}</SelectItem>
+                  <SelectItem value="sick_leave">{t('driverCalendar.sickLeave')}</SelectItem>
+                  <SelectItem value="personal">{t('driverCalendar.personal')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label>Start Time</Label>
+                <Label>{t('driverCalendar.startTime')}</Label>
                 <Input
                   type="datetime-local"
                   value={blockStartTime}
@@ -500,7 +502,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                 />
               </div>
               <div>
-                <Label>End Time</Label>
+                <Label>{t('driverCalendar.endTime')}</Label>
                 <Input
                   type="datetime-local"
                   value={blockEndTime}
@@ -509,16 +511,16 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
               </div>
             </div>
             <div>
-              <Label>Reason</Label>
+              <Label>{t('driverCalendar.reason')}</Label>
               <Textarea
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
-                placeholder="Enter reason..."
+                placeholder={t('driverCalendar.enterReason')}
                 rows={3}
               />
             </div>
             <Button onClick={handleBlockTime} className="w-full">
-              Block Time
+              {t('driverCalendar.blockTimeBtn')}
             </Button>
           </div>
         </DialogContent>
