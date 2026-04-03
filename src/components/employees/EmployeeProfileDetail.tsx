@@ -385,7 +385,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
       {ratingHistory && ratingHistory.length > 1 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Rating History</CardTitle>
+            <CardTitle className="text-lg">{t('employeeProfile.ratingHistory')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -421,14 +421,14 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         <Card className="border-dashed">
           <CardContent className="p-6 text-center">
             <Star className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-            <p className="text-sm text-[var(--text-muted)]">No performance rating yet</p>
+            <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.noRatingYet')}</p>
             <Button
               size="sm"
               className="mt-3 bg-gradient-to-r from-blue-600 to-sky-700 text-white"
               onClick={() => setShowRatingForm(true)}
             >
               <Plus className="w-4 h-4 mr-1" />
-              Add First Rating
+              {t('employeeProfile.addFirstRating')}
             </Button>
           </CardContent>
         </Card>
@@ -437,20 +437,26 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
       {/* Leave Balances */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Leave Balances</CardTitle>
+          <CardTitle className="text-lg">{t('employeeProfile.leaveBalances')}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <p className="text-2xl font-bold text-[#2563eb]">{employee.paidLeaveBalance}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Paid Leave</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              {t('employeeProfile.paidLeave')}
+            </p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-[#ef4444]">{employee.sickLeaveBalance}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Sick Leave</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              {t('employeeProfile.sickLeave')}
+            </p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-[#10b981]">{employee.familyLeaveBalance}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Family Leave</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              {t('employeeProfile.familyLeave')}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -461,30 +467,32 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Target className="w-5 h-5 text-[var(--primary)]" />
-              Performance Breakdown
+              {t('employeeProfile.performance')} {t('common.breakdown', 'Breakdown')}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">Performance</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.performance')}</p>
               <p className="text-2xl font-bold text-[var(--primary)]">
                 {score.breakdown.performance}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-[var(--text-muted)]">Attendance</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.attendance')}</p>
               <p className="text-2xl font-bold text-[var(--primary)]">
                 {score.breakdown.attendance}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-[var(--text-muted)]">Behavior</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.behavior')}</p>
               <p className="text-2xl font-bold text-[var(--primary)]">
                 {score.breakdown.behavior}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-[var(--text-muted)]">Leave History</p>
+              <p className="text-sm text-[var(--text-muted)]">
+                {t('employeeProfile.leaveHistory')}
+              </p>
               <p className="text-2xl font-bold text-[var(--primary)]">
                 {score.breakdown.leaveHistory}%
               </p>
@@ -497,12 +505,12 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
       {profile?.profile?.biography && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Biography</CardTitle>
+            <CardTitle className="text-lg">{t('employeeProfile.biography')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {profile.profile.biography.skills && profile.profile.biography.skills.length > 0 && (
               <div>
-                <p className="text-sm font-medium mb-2">Skills</p>
+                <p className="text-sm font-medium mb-2">{t('employeeProfile.skills')}</p>
                 <div className="flex flex-wrap gap-2">
                   {profile.profile.biography.skills.map((skill: any, i: any) => (
                     <Badge key={i} variant="secondary">
@@ -515,7 +523,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             {profile.profile.biography.languages &&
               profile.profile.biography.languages.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium mb-2">Languages</p>
+                  <p className="text-sm font-medium mb-2">{t('employeeProfile.languages')}</p>
                   <div className="flex flex-wrap gap-2">
                     {profile.profile.biography.languages.map((lang: any, i: any) => (
                       <Badge key={i} variant="outline">
@@ -533,7 +541,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
       {profile?.documents && profile.documents.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Documents</CardTitle>
+            <CardTitle className="text-lg">{t('employeeProfile.documents')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

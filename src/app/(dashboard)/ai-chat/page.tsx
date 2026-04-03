@@ -950,7 +950,7 @@ export default function AIChatPage() {
 
         {/* Input */}
         <div className="p-4 border-t border-[var(--border)] bg-[var(--card)]/50 backdrop-blur flex-shrink-0">
-          <div className="flex gap-3 max-w-4xl mx-auto">
+          <div className="relative max-w-4xl mx-auto">
             <textarea
               ref={textareaRef}
               value={input}
@@ -966,14 +966,14 @@ export default function AIChatPage() {
                   ? t('chatWidget.listening')
                   : t('aiChat.inputPlaceholder') || 'Ask anything...'
               }
-              className="flex-1 resize-none bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 min-h-[56px] max-h-[200px]"
+              className="flex-1 resize-none bg-[var(--background)] border border-[var(--border)] rounded-xl py-4 pl-4 pr-14 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 min-h-[56px] max-h-[200px] w-full"
               rows={1}
             />
             <Button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="px-6 rounded-xl flex-shrink-0"
-              size="lg"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg p-0"
+              size="sm"
             >
               <Send className="w-4 h-4" />
             </Button>

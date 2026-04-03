@@ -131,14 +131,14 @@ export function LocalizationSettings({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">🇺🇸 English</SelectItem>
-                  <SelectItem value="ru">🇷🇺 Русский</SelectItem>
-                  <SelectItem value="es">🇪🇸 Español</SelectItem>
-                  <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                  <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
-                  <SelectItem value="zh">🇨🇳 中文</SelectItem>
-                  <SelectItem value="ja">🇯🇵 日本語</SelectItem>
-                  <SelectItem value="ar">🇸🇦 العربية</SelectItem>
+                  <SelectItem value="en">{t('localizationSettings.english')}</SelectItem>
+                  <SelectItem value="ru">{t('localizationSettings.russian')}</SelectItem>
+                  <SelectItem value="es">{t('localizationSettings.spanish')}</SelectItem>
+                  <SelectItem value="fr">{t('localizationSettings.french')}</SelectItem>
+                  <SelectItem value="de">{t('localizationSettings.german')}</SelectItem>
+                  <SelectItem value="zh">{t('localizationSettings.chinese')}</SelectItem>
+                  <SelectItem value="ja">{t('localizationSettings.japanese')}</SelectItem>
+                  <SelectItem value="ar">{t('localizationSettings.arabic')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -150,18 +150,26 @@ export function LocalizationSettings({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="UTC">UTC (GMT+0)</SelectItem>
-                  <SelectItem value="America/New_York">Eastern Time (GMT-5)</SelectItem>
-                  <SelectItem value="America/Chicago">Central Time (GMT-6)</SelectItem>
-                  <SelectItem value="America/Los_Angeles">Pacific Time (GMT-8)</SelectItem>
-                  <SelectItem value="Europe/London">London (GMT+0)</SelectItem>
-                  <SelectItem value="Europe/Paris">Paris (GMT+1)</SelectItem>
-                  <SelectItem value="Europe/Moscow">Moscow (GMT+3)</SelectItem>
-                  <SelectItem value="Asia/Dubai">Dubai (GMT+4)</SelectItem>
-                  <SelectItem value="Asia/Kolkata">India (GMT+5:30)</SelectItem>
-                  <SelectItem value="Asia/Shanghai">China (GMT+8)</SelectItem>
-                  <SelectItem value="Asia/Tokyo">Tokyo (GMT+9)</SelectItem>
-                  <SelectItem value="Australia/Sydney">Sydney (GMT+11)</SelectItem>
+                  <SelectItem value="UTC">{t('localizationSettings.utc')}</SelectItem>
+                  <SelectItem value="America/New_York">
+                    {t('localizationSettings.eastern')}
+                  </SelectItem>
+                  <SelectItem value="America/Chicago">
+                    {t('localizationSettings.central')}
+                  </SelectItem>
+                  <SelectItem value="America/Los_Angeles">
+                    {t('localizationSettings.pacific')}
+                  </SelectItem>
+                  <SelectItem value="Europe/London">{t('localizationSettings.london')}</SelectItem>
+                  <SelectItem value="Europe/Paris">{t('localizationSettings.paris')}</SelectItem>
+                  <SelectItem value="Europe/Moscow">{t('localizationSettings.moscow')}</SelectItem>
+                  <SelectItem value="Asia/Dubai">{t('localizationSettings.dubai')}</SelectItem>
+                  <SelectItem value="Asia/Kolkata">{t('localizationSettings.india')}</SelectItem>
+                  <SelectItem value="Asia/Shanghai">{t('localizationSettings.china')}</SelectItem>
+                  <SelectItem value="Asia/Tokyo">{t('localizationSettings.tokyo')}</SelectItem>
+                  <SelectItem value="Australia/Sydney">
+                    {t('localizationSettings.sydney')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -187,10 +195,18 @@ export function LocalizationSettings({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (25/12/2024)</SelectItem>
-                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (12/25/2024)</SelectItem>
-                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (2024-12-25)</SelectItem>
-                  <SelectItem value="DD.MM.YYYY">DD.MM.YYYY (25.12.2024)</SelectItem>
+                  <SelectItem value="DD/MM/YYYY">
+                    {t('localizationSettings.dateFormatDDMM')}
+                  </SelectItem>
+                  <SelectItem value="MM/DD/YYYY">
+                    {t('localizationSettings.dateFormatMMDD')}
+                  </SelectItem>
+                  <SelectItem value="YYYY-MM-DD">
+                    {t('localizationSettings.dateFormatYYYY')}
+                  </SelectItem>
+                  <SelectItem value="DD.MM.YYYY">
+                    {t('localizationSettings.dateFormatDDMMYY')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-[var(--text-muted)]">
@@ -246,7 +262,7 @@ export function LocalizationSettings({
               <span className="text-2xl">📅</span>
               <div>
                 <p className="text-sm font-medium text-[var(--text-primary)]">
-                  Week starts on {firstDayOfWeek}
+                  {t('localizationSettings.weekStartsOn')} {firstDayOfWeek}
                 </p>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
                   {t('settingsLocalization.weekStartNote')}

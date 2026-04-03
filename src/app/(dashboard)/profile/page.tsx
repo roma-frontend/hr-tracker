@@ -452,7 +452,7 @@ export default function ProfilePage() {
             toast.info(t('toasts.changesDiscarded'));
           }}
         >
-          Discard Changes
+          {t('ui.discardChanges')}
         </Button>
         <Button onClick={handleSave} disabled={saving}>
           <Save className="w-4 h-4 mr-2" />

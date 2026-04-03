@@ -62,3 +62,6 @@ ts-errors.txt
 final-check.txt
 build-errors.txt
 build-errors.log
+
+# Scripts directory
+scripts/

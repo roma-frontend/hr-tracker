@@ -306,95 +306,10 @@ export function ChatWidget() {
   }, []);
 
   // ── Wake word listener: "Hey HR" (DISABLED - only manual mic button) ─
+
   useEffect(() => {
-    // Disabled auto wake word detection
     return;
-
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
-
-    // All wake phrases — EN recognizer will also pick up some RU-like phonetics
-    const ALL_PHRASES = [
-      // English
-      'hey hr',
-      'hi hr',
-      'hey h r',
-      'hi h r',
-      'hey age are',
-      'hey aitch ar',
-      // Russian phonetics as heard by en-US engine
-      'привет',
-      'эй hr',
-    ];
-
-    let stopped = false;
-
-    const createRecognizer = (lang: string) => {
-      const rec = new SR();
-      rec.continuous = true;
-      rec.interimResults = false;
-      rec.lang = lang;
-
-      rec.onresult = (e: SpeechRecognitionEvent) => {
-        const last = e.results[e.results.length - 1];
-        const transcript = last?.[0]?.transcript.toLowerCase().trim() || '';
-        const matched = ALL_PHRASES.some((p) => transcript.includes(p));
-        if (matched) {
-          setIsOpen((prev) => {
-            if (!prev) {
-              setWakeWordActive(true);
-              setTimeout(() => setWakeWordActive(false), 2500);
-              setTimeout(() => speakGreeting(), 400);
-            }
-            return true;
-          });
-        }
-      };
-
-      rec.onend = () => {
-        if (!stopped) {
-          try {
-            rec.start();
-          } catch {
-            /* ignore */
-          }
-        }
-      };
-
-      try {
-        rec.start();
-      } catch {
-        /* browser may block */
-      }
-      return rec;
-    };
-
-    // Primary EN recognizer — works in all Chrome browsers
-    const enRec = createRecognizer('en-US');
-    wakeRecogRef.current = [enRec];
-
-    // Try RU recognizer only if browser allows multiple (non-Chrome may support it)
-    let ruRec: SpeechRecognition | null = null;
-    try {
-      ruRec = createRecognizer('ru-RU');
-      wakeRecogRef.current = [enRec, ...(ruRec ? [ruRec] : [])] as SpeechRecognition[];
-    } catch {
-      // Browser doesn't allow second recognizer — OK, en-US handles it
-    }
-
-    return () => {
-      stopped = true;
-      wakeRecogRef.current.forEach((rec) => {
-        rec.onend = null;
-        try {
-          rec.stop();
-        } catch {
-          /* ignore */
-        }
-      });
-      wakeRecogRef.current = [];
-    };
-  }, [speakGreeting]);
+  }, []);
 
   // ── Voice input: mic button ───────────────────────────────────────
   const startVoiceInput = useCallback(() => {

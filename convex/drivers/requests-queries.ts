@@ -375,7 +375,7 @@ export const getShiftStatistics = query({
 
     const totalShifts = shifts.length;
     const completedShifts = shifts.filter((s) => s.status === 'completed').length;
-    const totalTrips = shifts.reduce((sum, s) => sum + (s.tripCount ?? 0), 0);
+    const totalTrips = shifts.reduce((sum, s) => sum + (s.tripsCompleted ?? 0), 0);
 
     return {
       totalShifts,

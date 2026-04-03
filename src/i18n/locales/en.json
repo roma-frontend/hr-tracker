@@ -2100,7 +2100,11 @@
     "comprehensiveAnalysis": "Comprehensive Analysis",
     "memberSince": "Member Since",
     "activityStats": "Activity Stats",
-    "emergencyDashboard": "Emergency Dashboard"
+    "emergencyDashboard": "Emergency Dashboard",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "saveAllChanges": "Save All Changes",
+    "discardChanges": "Discard Changes"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Reports & Analytics",
@@ -5172,5 +5176,32 @@
     "skills": "Skills",
     "languages": "Languages",
     "documents": "Documents"
+  },
+  "localizationSettings": {
+    "english": "🇺🇸 English",
+    "russian": "🇷 Русский",
+    "spanish": "🇪🇸 Español",
+    "french": "🇫🇷 Français",
+    "german": "🇩🇪 Deutsch",
+    "chinese": "🇨🇳 中文",
+    "japanese": "🇯🇵 日本語",
+    "arabic": "🇸🇦 العربية",
+    "utc": "UTC (GMT+0)",
+    "eastern": "Eastern Time (GMT-5)",
+    "central": "Central Time (GMT-6)",
+    "pacific": "Pacific Time (GMT-8)",
+    "london": "London (GMT+0)",
+    "paris": "Paris (GMT+1)",
+    "moscow": "Moscow (GMT+3)",
+    "dubai": "Dubai (GMT+4)",
+    "india": "India (GMT+5:30)",
+    "china": "China (GMT+8)",
+    "tokyo": "Tokyo (GMT+9)",
+    "sydney": "Sydney (GMT+11)",
+    "dateFormatDDMM": "DD/MM/YYYY (25/12/2024)",
+    "dateFormatMMDD": "MM/DD/YYYY (12/25/2024)",
+    "dateFormatYYYY": "YYYY-MM-DD (2024-12-25)",
+    "dateFormatDDMMYY": "DD.MM.YYYY (25.12.2024)",
+    "weekStartsOn": "Week starts on"
   }
 }

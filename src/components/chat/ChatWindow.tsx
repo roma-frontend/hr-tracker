@@ -145,7 +145,8 @@ export const ChatWindow = React.memo(function ChatWindow({
 
   const conv = conversation?.find((c) => c != null && c._id === conversationId) ?? null;
   const otherUser = conv?.type === 'direct' ? (conv as any).otherUser : null;
-  const displayName = conv?.type === 'group' ? ((conv as any).name ?? 'Group') : (otherUser?.name ?? 'Chat');
+  const displayName =
+    conv?.type === 'group' ? ((conv as any).name ?? 'Group') : (otherUser?.name ?? 'Chat');
   const otherMembers = members?.filter((m) => m.userId !== currentUserId) ?? [];
   const otherMemberIds = otherMembers.map((m: any) => m.userId as Id<'users'>);
 
@@ -166,6 +167,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     isFirstLoadRef.current = true;
     initialLoadDoneRef.current = false;
     lastPlayedMsgIdRef.current = null;
+    return;
   }, [conversationId, markAsRead, currentUserId]);
 
   useEffect(() => {

@@ -1,11 +1,10 @@
 /**
  * Driver Management System - Modular Structure
  *
- * This module re-exports all driver-related functions from submodules.
- * The monolithic drivers.ts file has been split into logical modules.
+ * Core queries exported. Remaining functions stay in parent drivers.ts file.
  */
 
-// Base queries
+// Re-export queries
 export {
   getAvailableDrivers,
   getDriverById,
@@ -18,7 +17,7 @@ export {
   getFilteredDrivers,
 } from './queries';
 
-// Request queries
+// Re-export request queries
 export {
   getDriverRequests,
   getMyRequests,
@@ -33,14 +32,14 @@ export {
   getShiftStatistics,
 } from './requests-queries';
 
-// Calendar queries
+// Re-export calendar queries
 export {
   checkCalendarAccess,
   getCalendarAccessList,
   getDriverCalendarForViewer,
 } from './calendar-queries';
 
-// Request mutations
+// Re-export request mutations
 export {
   requestDriver,
   respondToDriverRequest,
@@ -50,48 +49,9 @@ export {
   reassignDriverRequest,
 } from './requests-mutations';
 
-// Calendar mutations
+// Re-export calendar mutations
 export {
   grantCalendarAccess,
   revokeCalendarAccess,
   requestCalendarAccess,
 } from './calendar-mutations';
-
-// Management mutations
-export {
-  registerAsDriver,
-  updateDriverAvailability,
-  blockTimeSlot,
-  blockTimeOff,
-  calculateRoute,
-} from './management-mutations';
-
-// Trip execution mutations
-export {
-  updateTripStatus,
-  submitDriverFeedback,
-  submitPassengerRating,
-  addDriverNotes,
-  markDriverArrived,
-  markPassengerPickedUp,
-  updateETA,
-} from './trip-execution';
-
-// Recurring trips
-export {
-  createRecurringTrip,
-  toggleRecurringTrip,
-  deleteRecurringTrip,
-  generateRecurringRequests,
-  addFavoriteDriver,
-  removeFavoriteDriver,
-} from './recurring-trips';
-
-// Shift mutations
-export {
-  startShift,
-  endShift,
-  pauseShift,
-  resumeShift,
-  updateShiftTripCount,
-} from './shifts-mutations';

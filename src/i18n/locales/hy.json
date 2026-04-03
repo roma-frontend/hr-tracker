@@ -2100,7 +2100,11 @@
     "comprehensiveAnalysis": "Համապարփակ վերլուծություն",
     "memberSince": "Անդամ է սկսած",
     "activityStats": "Ակտիվության վիճակագրություն",
-    "emergencyDashboard": "Արտակարգ իրավիճակների վահանակ"
+    "emergencyDashboard": "Արտակարգ իրավիճակների վահանակ",
+    "saving": "Պահպանում...",
+    "saveChanges": "Պահպանել փոփոխությունները",
+    "saveAllChanges": "Պահպանել բոլոր փոփոխությունները",
+    "discardChanges": "Հրաժարվել փոփոխություններից"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Հաշվետվություններ և վերլուծություն",
@@ -4915,5 +4919,32 @@
     "skills": "Հմտություններ",
     "languages": "Լեզուներ",
     "documents": "Փաստաթղթեր"
+  },
+  "localizationSettings": {
+    "english": "🇺🇸 English",
+    "russian": "🇷🇺 Русский",
+    "spanish": "🇪🇸 Español",
+    "french": "🇫🇷 Français",
+    "german": "🇩🇪 Deutsch",
+    "chinese": "🇨 中文",
+    "japanese": "🇯 日本語",
+    "arabic": "🇸 العربية",
+    "utc": "UTC (GMT+0)",
+    "eastern": "Արևելյան ժամ (GMT-5)",
+    "central": "Կենտրոնական ժամ (GMT-6)",
+    "pacific": "Խաղաղօվկիանոսյան ժամ (GMT-8)",
+    "london": "Լոնդոն (GMT+0)",
+    "paris": "Փարիզ (GMT+1)",
+    "moscow": "Մոսկվա (GMT+3)",
+    "dubai": "Դուբայ (GMT+4)",
+    "india": "Հնդկաստան (GMT+5:30)",
+    "china": "Չինաստան (GMT+8)",
+    "tokyo": "Տոկիո (GMT+9)",
+    "sydney": "Սիդնեյ (GMT+11)",
+    "dateFormatDDMM": "DD/MM/YYYY (25/12/2024)",
+    "dateFormatMMDD": "MM/DD/YYYY (12/25/2024)",
+    "dateFormatYYYY": "YYYY-MM-DD (2024-12-25)",
+    "dateFormatDDMMYY": "DD.MM.YYYY (25.12.2024)",
+    "weekStartsOn": "Շաբաթը սկսվում է"
   }
 }

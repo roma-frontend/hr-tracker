@@ -2096,7 +2096,11 @@
     "userId": "ID пользователя",
     "activityStats": "Статистика активности",
     "emergencyDashboard": "Панель чрезвычайных ситуаций",
-    "roleManagedByAdmin": "Ваша роль и отдел управляются администратором. Обратитесь к ним для внесения изменений."
+    "roleManagedByAdmin": "Ваша роль и отдел управляются администратором. Обратитесь к ним для внесения изменений.",
+    "saving": "Сохранение...",
+    "saveChanges": "Сохранить изменения",
+    "saveAllChanges": "Сохранить все изменения",
+    "discardChanges": "Отменить изменения"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Отчеты и аналитика",
@@ -5143,5 +5147,32 @@
     "skills": "Навыки",
     "languages": "Языки",
     "documents": "Документы"
+  },
+  "localizationSettings": {
+    "english": "🇺🇸 English",
+    "russian": "🇷🇺 Русский",
+    "spanish": "🇪 Español",
+    "french": "🇫🇷 Français",
+    "german": "🇩🇪 Deutsch",
+    "chinese": "🇨🇳 中文",
+    "japanese": "🇯🇵 日本語",
+    "arabic": "🇸🇦 العربية",
+    "utc": "UTC (GMT+0)",
+    "eastern": "Восточное время (GMT-5)",
+    "central": "Центральное время (GMT-6)",
+    "pacific": "Тихоокеанское время (GMT-8)",
+    "london": "Лондон (GMT+0)",
+    "paris": "Париж (GMT+1)",
+    "moscow": "Москва (GMT+3)",
+    "dubai": "Дубай (GMT+4)",
+    "india": "Индия (GMT+5:30)",
+    "china": "Китай (GMT+8)",
+    "tokyo": "Токио (GMT+9)",
+    "sydney": "Сидней (GMT+11)",
+    "dateFormatDDMM": "ДД/ММ/ГГГГ (25/12/2024)",
+    "dateFormatMMDD": "ММ/ДД/ГГГГ (12/25/2024)",
+    "dateFormatYYYY": "ГГГГ-ММ-ДД (2024-12-25)",
+    "dateFormatDDMMYY": "ДД.ММ.ГГГГ (25.12.2024)",
+    "weekStartsOn": "Неделя начинается с"
   }
 }
