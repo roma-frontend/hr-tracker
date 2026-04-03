@@ -20,34 +20,42 @@ export default internalMutation({
     }
 
     // Create a test ticket
-    const ticketId = await ctx.db.insert("helpTickets", {
-      userId: superadmin._id,
+    const ticketId = await ctx.db.insert("supportTickets", {
+      createdBy: superadmin._id,
       organizationId: superadmin.organizationId,
+      ticketNumber: `#TEST-${Date.now()}`,
       title: "Тестовый тикет - Проблема с автоматизацией",
       description: "Это тестовый тикет для проверки работы системы тикетов.\n\nПроблема: Суперадмин хочет увидеть как выглядит тикет в системе.\n\nОжидаемое поведение: Тикет должен отображаться в списке тикетов суперадмина.",
       priority: "medium",
       category: "technical",
       status: "open",
-      type: "bug",
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      isRead: false,
       assignedTo: undefined,
       resolvedAt: undefined,
       resolvedBy: undefined,
+      relatedLeaveId: undefined,
+      relatedDriverRequestId: undefined,
+      relatedTaskId: undefined,
+      resolution: undefined,
+      slaDeadline: undefined,
+      firstResponseAt: undefined,
     });
 
     // Create initial comment
-    await ctx.db.insert("helpTicketComments", {
-      ticketId: ticketId as any,
-      userId: superadmin._id,
-      content: "Это первый комментарий в тестовом тикете. Создан автоматически для тестирования.",
+    await ctx.db.insert("ticketComments", {
+      ticketId: ticketId,
+      organizationId: superadmin.organizationId,
+      authorId: superadmin._id,
+      message: "Это первый комментарий в тестовом тикете. Создан автоматически для тестирования.",
       createdAt: Date.now(),
+      updatedAt: Date.now(),
       isInternal: false,
+      attachments: undefined,
     });
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       ticketId,
       message: "Тестовый тикет создан!",
       superadminEmail: superadmin.email

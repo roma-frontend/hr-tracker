@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   Activity,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 // ── Feature metadata ──────────────────────────────────────────────────────────
 const FEATURES = [
@@ -246,8 +247,8 @@ export default function SecurityDashboard() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-96" style={{ color: 'var(--text-muted)' }}>
-        <RefreshCw className="w-8 h-8 mr-3 animate-spin" style={{ color: 'var(--primary)' }} />
-        {t('superadmin.security.loadingDashboard')}
+        <ShieldLoader size="sm" variant="inline" />
+        <span className="ml-2">{t('superadmin.security.loadingDashboard')}</span>
       </div>
     );
   }
@@ -449,7 +450,7 @@ export default function SecurityDashboard() {
           </p>
           {FEATURES.map((feature: any) => {
             const enabled = getSettingEnabled(feature.key);
-            const colors = COLOR_MAP[feature.color];
+            const colors = COLOR_MAP[feature.color] || { accentBg: 'var(--card)', iconColor: 'var(--text-muted)' };
             const Icon = feature.icon;
             const isLoading = toggling[feature.key];
             const savedAt = settings?.find((s) => s.key === feature.key)?.updatedAt;

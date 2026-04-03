@@ -255,22 +255,27 @@ export function generateSecurePassword(length: number = 16): string {
   let password = '';
 
   // Гарантируем наличие каждого типа символов (crypto-safe)
-  password += lowercase[crypto.getRandomValues(new Uint8Array(1))[0] % lowercase.length];
-  password += uppercase[crypto.getRandomValues(new Uint8Array(1))[0] % uppercase.length];
-  password += numbers[crypto.getRandomValues(new Uint8Array(1))[0] % numbers.length];
-  password += special[crypto.getRandomValues(new Uint8Array(1))[0] % special.length];
+  const rand1 = crypto.getRandomValues(new Uint8Array(1))[0] ?? 0;
+  const rand2 = crypto.getRandomValues(new Uint8Array(1))[0] ?? 0;
+  const rand3 = crypto.getRandomValues(new Uint8Array(1))[0] ?? 0;
+  const rand4 = crypto.getRandomValues(new Uint8Array(1))[0] ?? 0;
+  
+  password += lowercase[rand1 % lowercase.length];
+  password += uppercase[rand2 % uppercase.length];
+  password += numbers[rand3 % numbers.length];
+  password += special[rand4 % special.length];
 
   // Заполняем остальное
   for (let i = password.length; i < length; i++) {
-    const randomIndex = crypto.getRandomValues(new Uint8Array(1))[0] % allChars.length;
+    const randomIndex = (crypto.getRandomValues(new Uint8Array(1))[0] ?? 0) % allChars.length;
     password += allChars[randomIndex];
   }
 
   // Перемешиваем с Fisher-Yates (crypto-safe)
   const arr = password.split('');
   for (let i = arr.length - 1; i > 0; i--) {
-    const j = crypto.getRandomValues(new Uint8Array(1))[0] % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    const j = (crypto.getRandomValues(new Uint8Array(1))[0] ?? 0) % (i + 1);
+    [arr[i], arr[j]] = [arr[j] ?? '', arr[i] ?? ''];
   }
   return arr.join('');
 }

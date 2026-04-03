@@ -15,7 +15,7 @@ async function convexQuery(path: string, args: Record<string, unknown>) {
 
 function euclideanDistance(a: number[], b: number[]): number {
   if (a.length !== b.length) return 999;
-  return Math.sqrt(a.reduce((sum, v, i) => sum + (v - b[i]) ** 2, 0));
+  return Math.sqrt(a.reduce((sum, v, i) => sum + (v - (b[i] ?? 0)) ** 2, 0));
 }
 
 export async function POST(req: NextRequest) {

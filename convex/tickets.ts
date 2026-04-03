@@ -29,9 +29,9 @@ export const createTicket = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     // Generate ticket number: SUP-YYYYMMDD-XXXX
-    const datePart = new Date(now).toISOString().split('T')[0].replace(/-/g, '');
+    const datePart = (new Date(now).toISOString().split('T')[0] || '').replace(/-/g, '');
     const ticketsToday = await ctx.db
       .query("supportTickets")
       .withIndex("by_created")

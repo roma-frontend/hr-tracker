@@ -147,7 +147,7 @@ function formatRemaining(ms: number): string {
 
 function parseDuration(duration: string): number {
   const match = duration.match(/(\d+)/);
-  const amount = match ? parseInt(match[1]) : 1;
+  const amount = match ? parseInt(match[1] || '1') : 1;
   if (duration.includes('hour') || duration.includes('час')) return amount * 3600000;
   if (duration.includes('minute') || duration.includes('мин')) return amount * 60000;
   return amount * 3600000;

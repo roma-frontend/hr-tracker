@@ -923,28 +923,34 @@ export const getLeavesPagederated = query({
 
     // Get user's leaves based on role
     const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
-    let query = ctx.db.query('leaveRequests');
+    let items: any[] = [];
 
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
       // Superadmin sees all
-      query = query;
+      const query = ctx.db.query('leaveRequests').order('desc');
+      if (cursor) {
+        const cursorData = decodeCursor(cursor);
+        items = await query
+          .filter((q) => q.lt(q.field('_creationTime'), cursorData._creationTime))
+          .take(normalizedPageSize + 1);
+      } else {
+        items = await query.take(normalizedPageSize + 1);
+      }
     } else {
       // Regular user - org scoped
       if (!requester.organizationId) return { items: [], hasMore: false };
-      query = query.withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId));
-    }
-
-    query = query.order('desc');
-
-    // Apply cursor if provided
-    let items: any[] = [];
-    if (cursor) {
-      const cursorData = decodeCursor(cursor);
-      items = await query
-        .filter((q) => q.lt(q.field('_creationTime'), cursorData._creationTime))
-        .take(normalizedPageSize + 1);
-    } else {
-      items = await query.take(normalizedPageSize + 1);
+      const query = ctx.db
+        .query('leaveRequests')
+        .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
+        .order('desc');
+      if (cursor) {
+        const cursorData = decodeCursor(cursor);
+        items = await query
+          .filter((q) => q.lt(q.field('_creationTime'), cursorData._creationTime))
+          .take(normalizedPageSize + 1);
+      } else {
+        items = await query.take(normalizedPageSize + 1);
+      }
     }
 
     const hasMore = items.length > normalizedPageSize;

@@ -15,7 +15,7 @@ import {
   CardSelectionStep,
 } from '@/components/ui/wizard-step-components';
 import { Calendar, Clock, Users, MapPin } from 'lucide-react';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { toast } from 'sonner';
 
@@ -27,6 +27,7 @@ interface CreateEventWizardProps {
 export function CreateEventWizard({ onComplete, onCancel }: CreateEventWizardProps) {
   const { t } = useTranslation();
   const createEvent = useMutation(api.events.createCompanyEvent);
+  const user = useQuery(api.users.getCurrentUser, {});
 
   const steps: WizardStep[] = [
     {
@@ -141,13 +142,17 @@ export function CreateEventWizard({ onComplete, onCancel }: CreateEventWizardPro
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
       const dateTime = new Date(`${String(data.date)}T${String(data.time)}`);
+      const endDate = new Date(dateTime.getTime() + 2 * 60 * 60 * 1000); // +2 hours
 
       await createEvent({
-        title: String(data.title),
+        organizationId: user?.organizationId as any,
+        userId: user?._id as any,
+        name: String(data.title),
         description: String(data.description) || '',
-        type: String(data.type) as 'meeting' | 'holiday' | 'training' | 'conference',
-        date: dateTime.getTime(),
-        location: String(data.location) || undefined,
+        eventType: String(data.type) as 'meeting' | 'holiday' | 'training' | 'conference',
+        startDate: dateTime.getTime(),
+        endDate: endDate.getTime(),
+        requiredDepartments: [],
       });
 
       toast.success(t('eventWizard.toast.success'));

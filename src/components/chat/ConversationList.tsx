@@ -24,12 +24,12 @@ import {
   RotateCcw,
   Volume2,
   VolumeX,
-  Loader2,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface Conversation {
   _id: Id<'chatConversations'>;
@@ -239,12 +239,7 @@ export function ConversationList({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('chat.searchConversations')}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border outline-none transition-all"
-            style={{
-              background: 'var(--background-subtle)',
-              borderColor: 'var(--border)',
-              color: 'var(--text-primary)',
-            }}
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none transition-all"
             onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
             onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
           />
@@ -434,10 +429,9 @@ export function ConversationList({
                   }}
                 >
                   {isLoading && (
-                    <Loader2
-                      className="absolute top-3 left-3 w-5 h-5 animate-spin"
-                      style={{ color: 'var(--primary)' }}
-                    />
+                    <div className="absolute top-3 left-3">
+                      <ShieldLoader size="xs" variant="inline" />
+                    </div>
                   )}
 
                   {/* Conversation avatar */}

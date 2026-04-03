@@ -18,6 +18,7 @@ import {
   Plus,
   X,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -170,7 +171,11 @@ export default function EmergencyDashboardPage() {
                 disabled={isRefreshing}
                 className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)]"
               >
-                <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
+                {isRefreshing ? (
+                  <ShieldLoader size="xs" variant="inline" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
               </Button>
               <Button
                 onClick={() => setCreateIncidentOpen(true)}

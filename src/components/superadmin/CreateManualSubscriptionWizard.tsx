@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Wizard, WizardStep } from '@/components/ui/wizard';
 import {
   TextInputStep,
+  TextareaStep,
   SelectStep,
   CardSelectionStep,
 } from '@/components/ui/wizard-step-components';
@@ -32,7 +33,7 @@ export function CreateManualSubscriptionWizard({
   const createManual = useMutation(api.subscriptions_admin.createManualSubscription);
 
   // Загрузка организаций
-  const allOrganizations = useQuery(api.organizations.getAllOrganizations) || [];
+  const allOrganizations = useQuery(api.organizations.getAllOrganizations, {}) || [];
 
   const steps: WizardStep[] = [
     {
@@ -105,13 +106,13 @@ export function CreateManualSubscriptionWizard({
           <TextInputStep
             stepData={{}}
             updateStepData={() => {}}
-            field="price"
+            field="customPrice"
             label={t('subscriptionWizard.steps.pricing.priceLabel')}
             type="number"
             placeholder="0"
             description={t('subscriptionWizard.steps.pricing.priceDescription')}
           />
-          <TextInputStep
+          <TextareaStep
             stepData={{}}
             updateStepData={() => {}}
             field="notes"
@@ -129,7 +130,7 @@ export function CreateManualSubscriptionWizard({
       await createManual({
         organizationId: String(data.organizationId) as Id<'organizations'>,
         plan: String(data.plan) as 'starter' | 'professional' | 'enterprise',
-        price: data.price ? parseFloat(String(data.price)) : undefined,
+        customPrice: data.customPrice ? parseFloat(String(data.customPrice)) : undefined,
         notes: data.notes ? String(data.notes) : undefined,
       });
 

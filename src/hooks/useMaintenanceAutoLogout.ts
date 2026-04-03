@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export function useMaintenanceAutoLogout() {
@@ -11,7 +12,7 @@ export function useMaintenanceAutoLogout() {
 
   const maintenance = useQuery(
     api.admin.getMaintenanceMode,
-    organizationId ? { organizationId } : 'skip',
+    organizationId ? { organizationId: organizationId as Id<'organizations'> } : 'skip',
   );
 
   const performLogout = useCallback(async () => {

@@ -28,6 +28,7 @@ import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from '@/lib/types
 import dynamic from 'next/dynamic';
 import { playNotificationSound, sendBrowserNotification } from '@/lib/notificationSound';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import { ShieldLoader } from '../ui/ShieldLoader';
 
 const AILeaveAssistant = dynamic(() => import('@/components/leaves/AILeaveAssistant'), {
   ssr: false,
@@ -305,7 +306,7 @@ export function LeavesClient() {
               {isAdmin && (
                 <CardTitle className="text-sm font-semibold text-(--text-muted) uppercase tracking-wider">
                   {isLoading
-                    ? t('common.loading')
+                    ? <ShieldLoader />
                     : `${filtered.length} request${filtered.length !== 1 ? 's' : ''}`}
                 </CardTitle>
               )}

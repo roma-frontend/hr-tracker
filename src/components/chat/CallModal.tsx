@@ -235,12 +235,12 @@ export function CallModal({
       pc.ontrack = (event) => {
         const stream = event.streams[0];
         // Set remote stream on hidden audio element (ensures audio always plays)
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = stream;
+        if (remoteVideoRef.current && stream) {
+          remoteVideoRef.current.srcObject = stream as unknown as MediaProvider;
         }
         // Set remote stream on visible video element (for video calls)
-        if (remoteVideoDisplayRef.current) {
-          remoteVideoDisplayRef.current.srcObject = stream;
+        if (remoteVideoDisplayRef.current && stream) {
+          remoteVideoDisplayRef.current.srcObject = stream as unknown as MediaProvider;
         }
         setPeerConnected(true);
         setCallStatus('active');

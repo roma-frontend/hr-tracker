@@ -142,6 +142,7 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
             };
 
             const widget = widgetLabels[key];
+            if (!widget) return null;
 
             return (
               <div key={key}>

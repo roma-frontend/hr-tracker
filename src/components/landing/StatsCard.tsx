@@ -36,7 +36,7 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setVisible(true);
           observer.disconnect();
         }
@@ -48,7 +48,7 @@ export default function StatsCard({ value, label, icon, color, delay = 0 }: Stat
   }, []);
 
   const numericMatch = value.match(/^(\d+)/);
-  const numericTarget = numericMatch ? parseInt(numericMatch[1]) : 0;
+  const numericTarget = numericMatch ? parseInt(numericMatch[1] || '0') : 0;
   const suffix = value.replace(/^\d+/, '');
   const count = useCountUp(numericTarget, 2000, visible);
 

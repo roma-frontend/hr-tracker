@@ -62,6 +62,7 @@ export async function detectFace(videoElement: HTMLVideoElement) {
   }
 
   try {
+    if (!faceapi) throw new Error('faceapi not loaded');
     const detection = await faceapi
       .detectSingleFace(videoElement, new api.SsdMobilenetv1Options({ minConfidence: 0.5 }))
       .withFaceLandmarks()
@@ -105,17 +106,17 @@ export async function findBestMatch(
   if (knownDescriptors.length === 0) return null;
 
   let bestMatch = {
-    userId: knownDescriptors[0].userId,
-    name: knownDescriptors[0].name,
-    distance: await compareFaces(inputDescriptor, knownDescriptors[0].descriptor),
+    userId: knownDescriptors[0]!.userId,
+    name: knownDescriptors[0]!.name,
+    distance: await compareFaces(inputDescriptor, knownDescriptors[0]!.descriptor),
   };
 
   for (let i = 1; i < knownDescriptors.length; i++) {
-    const distance = await compareFaces(inputDescriptor, knownDescriptors[i].descriptor);
+    const distance = await compareFaces(inputDescriptor, knownDescriptors[i]!.descriptor);
     if (distance < bestMatch.distance) {
       bestMatch = {
-        userId: knownDescriptors[i].userId,
-        name: knownDescriptors[i].name,
+        userId: knownDescriptors[i]!.userId,
+        name: knownDescriptors[i]!.name,
         distance,
       };
     }

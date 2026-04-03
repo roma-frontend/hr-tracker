@@ -166,7 +166,6 @@ export function CreateSupportTicketWizard({
           | 'feature_request'
           | 'bug'
           | 'other',
-        type: String(data.type) as 'question' | 'issue' | 'bug' | 'feature',
       });
 
       toast.success(t('supportWizard.toast.success'));

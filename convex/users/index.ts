@@ -12,20 +12,10 @@ export {
   getUserById,
   searchUsers,
   getSupervisors,
-  getMyEmployees,
-  getUsersForAssignment,
-  getPendingUsers,
-  getUserCount,
 } from "./queries";
 
 // Mutations
 export {
   createOAuthUser,
   createUser,
-  updateUser,
-  deleteUser,
-  approveUser,
-  rejectUser,
-  assignSupervisor,
-  updatePresenceStatus,
 } from "./mutations";

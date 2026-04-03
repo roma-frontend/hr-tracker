@@ -54,11 +54,6 @@ export default function OrganizationsPage() {
   const [planFilter, setPlanFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Debug user object
-  console.log('🔍 [Organizations] Full user object:', user);
-  console.log('🔍 [Organizations] user.id:', user?.id);
-  console.log('🔍 [Organizations] typeof user.id:', typeof user?.id);
-
   const organizations = useQuery(
     api.organizations.getAllOrganizations,
     user?.id ? { superadminUserId: user.id as any } : 'skip',
@@ -84,9 +79,6 @@ export default function OrganizationsPage() {
 
   // Debug logging
   useEffect(() => {
-    console.log('🔍 [Organizations] useEffect triggered');
-    console.log('🔍 [Organizations] user:', user);
-    console.log('🔍 [Organizations] isSuperadmin:', isSuperadmin);
 
     if (user) {
       console.log('🔍 Organizations page - User data:', {
@@ -113,15 +105,6 @@ export default function OrganizationsPage() {
       </div>
     );
   }
-
-  console.log(
-    '🔍 Final check - isSuperadmin:',
-    isSuperadmin,
-    'user.role:',
-    user.role,
-    'user.email:',
-    user.email,
-  );
 
   if (!isSuperadmin) {
     return (

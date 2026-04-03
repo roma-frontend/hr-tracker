@@ -84,7 +84,7 @@ export const listAllWithUsers = query({
 
     const withOrganizations = await Promise.all(
       subscriptions.map(async (sub) => {
-        const org = await ctx.db.get(sub.organizationId);
+        const org = sub.organizationId ? await ctx.db.get(sub.organizationId) : null;
         return { ...sub, organization: org };
       })
     );

@@ -734,7 +734,7 @@ export function EmployeesClient() {
                     color: 'var(--text-primary)',
                   }}
                 >
-                  {isLoadingMore ? t('common.loading') : t('common.loadMore')}
+                  {isLoadingMore ? <ShieldLoader /> : t('common.loadMore')}
                 </button>
               </div>
             )}

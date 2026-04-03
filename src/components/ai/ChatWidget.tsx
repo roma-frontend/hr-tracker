@@ -135,8 +135,11 @@ function parseActions(content: string): { cleanContent: string; actions: AnyActi
   const actions: AnyAction[] = [];
   for (const match of actionMatches) {
     try {
-      const action = JSON.parse(match[1].trim()) as AnyAction;
-      actions.push(action);
+      const actionStr = match[1]?.trim();
+      if (actionStr) {
+        const action = JSON.parse(actionStr) as AnyAction;
+        actions.push(action);
+      }
     } catch {
       // skip invalid JSON
     }
@@ -334,7 +337,7 @@ export function ChatWidget() {
 
       rec.onresult = (e: SpeechRecognitionEvent) => {
         const last = e.results[e.results.length - 1];
-        const transcript = last[0].transcript.toLowerCase().trim();
+        const transcript = last?.[0]?.transcript.toLowerCase().trim() || '';
         const matched = ALL_PHRASES.some((p) => transcript.includes(p));
         if (matched) {
           setIsOpen((prev) => {
@@ -418,8 +421,8 @@ export function ChatWidget() {
       let interim = '';
       let final = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t;
+        const t = e.results[i]?.[0]?.transcript || '';
+        if (e.results[i]?.isFinal) final += t;
         else interim += t;
       }
       const text = final || interim;
@@ -1349,7 +1352,7 @@ export function ChatWidget() {
                     placeholder={
                       isListening ? t('chatWidget.listening') : t('chatWidget.placeholder')
                     }
-                    className={`w-full px-4 py-2 pr-10 bg-[var(--background-subtle)] border rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-sm transition-colors ${
+                    className={`w-full px-4 py-2 pr-10 bg-[var(--input)] border rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-sm transition-colors ${
                       isListening
                         ? 'border-[#2563eb] ring-2 ring-[#2563eb]/30'
                         : 'border-[var(--border)]'

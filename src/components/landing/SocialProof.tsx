@@ -26,7 +26,7 @@ function MetricItem({
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) {
+        if (e?.isIntersecting) {
           setVisible(true);
           obs.disconnect();
         }

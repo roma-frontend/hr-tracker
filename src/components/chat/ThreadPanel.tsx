@@ -7,6 +7,7 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { X, Send } from 'lucide-react';
 import { format } from 'date-fns';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface Props {
   parentMessageId: Id<'chatMessages'>;
@@ -108,10 +109,7 @@ export function ThreadPanel({
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
         {replies === undefined && (
           <div className="flex items-center justify-center py-8">
-            <span
-              className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"
-              style={{ color: 'var(--primary)' }}
-            />
+            <ShieldLoader size="xs" variant="inline" />
           </div>
         )}
         {replies?.map((r: any) => {

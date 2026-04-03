@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { Globe, Calendar, Clock, CheckCircle2 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import {
@@ -261,7 +262,7 @@ export function LocalizationSettings({
         <Button onClick={handleSave} disabled={isSaving} className="gap-2">
           {isSaving ? (
             <>
-              <div className="w-4 h-4 border-2 rounded-full animate-spin border-white/30 border-t-white" />
+              <ShieldLoader size="xs" variant="inline" />
               {t('buttons.saving')}
             </>
           ) : (

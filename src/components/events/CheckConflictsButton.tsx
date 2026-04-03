@@ -11,6 +11,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,7 +62,7 @@ export function CheckConflictsButton({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" disabled={isChecking} className="gap-2">
           {isChecking ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
+            <ShieldLoader size="xs" variant="inline" />
           ) : (
             <AlertCircle className="w-4 h-4" />
           )}

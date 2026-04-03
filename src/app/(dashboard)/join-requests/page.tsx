@@ -325,10 +325,10 @@ export default function JoinRequestsPage() {
                         <Badge
                           variant={
                             req.status === 'approved'
-                              ? 'success'
+                              ? 'default'
                               : req.status === 'rejected'
-                                ? t('common.destructive')
-                                : 'warning'
+                                ? 'destructive'
+                                : 'secondary'
                           }
                         >
                           {req.status}

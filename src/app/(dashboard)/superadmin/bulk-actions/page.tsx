@@ -140,7 +140,7 @@ export default function BulkActionsPage() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-6">
             <div>
               <h1
                 className="text-3xl md:text-4xl font-bold mb-2"

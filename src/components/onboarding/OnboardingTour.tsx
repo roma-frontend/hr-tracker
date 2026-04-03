@@ -363,7 +363,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     ];
 
     const anim = animations[stepIndex % animations.length];
-    return phase === 'initial' ? anim.initial : anim.exit;
+    return phase === 'initial' ? anim?.initial : anim?.exit;
   };
 
   if (!isVisible) return null;
@@ -388,7 +388,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
               <defs>
                 <mask id="spotlight-mask">
                   <rect width="100%" height="100%" fill="white" />
-                  {targetRect && step.highlight !== false && (
+                  {targetRect && step?.highlight !== false && (
                     <motion.rect
                       initial={{ opacity: 0 }}
                       animate={{
@@ -414,7 +414,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
             </svg>
 
             {/* Highlight ring around target */}
-            {targetRect && step.highlight !== false && (
+            {targetRect && step?.highlight !== false && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -465,7 +465,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
                     className="text-base font-bold mb-0.5"
                     style={{ color: 'var(--text-primary)' }}
                   >
-                    {step.title}
+                    {step?.title}
                   </h3>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     {currentStep + 1}/{steps.length}
@@ -485,7 +485,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
                 className="text-xs mb-4 leading-relaxed"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                {step.description}
+                {step?.description}
               </p>
 
               {/* Actions */}

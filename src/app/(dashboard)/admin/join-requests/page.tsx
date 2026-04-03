@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle2, XCircle, Clock, Users, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function JoinRequestsPage() {
   const { t } = useTranslation();
@@ -74,7 +75,7 @@ export default function JoinRequestsPage() {
   if (!requests) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <ShieldLoader size="md" variant="inline" />
       </div>
     );
   }
@@ -168,7 +169,7 @@ export default function JoinRequestsPage() {
                               ? 'secondary'
                               : request.status === 'approved'
                                 ? 'default'
-                                : t('common.destructive')
+                                : 'destructive'
                           }
                         >
                           {request.status}

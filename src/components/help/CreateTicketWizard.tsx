@@ -167,12 +167,11 @@ export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicke
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
       await createTicket({
-        userId,
+        createdBy: userId as any,
         title: String(data.title),
         description: String(data.description),
-        type: String(data.type) as 'question' | 'issue' | 'bug' | 'feature',
+        category: (String(data.category) || 'other') as 'technical' | 'billing' | 'access' | 'feature_request' | 'bug' | 'other',
         priority: (String(data.priority) || 'medium') as 'low' | 'medium' | 'high' | 'critical',
-        category: String(data.category) || 'other',
       });
 
       toast.success(t('help.alerts.ticketCreated'));

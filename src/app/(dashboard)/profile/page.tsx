@@ -532,7 +532,7 @@ export default function ProfilePage() {
             >
               {deleting ? (
                 <>
-                  <span className="animate-spin mr-2">⏳</span>
+                  <ShieldLoader size="xs" variant="inline" />
                   {t('ui.deleting') || 'Deleting...'}
                 </>
               ) : (

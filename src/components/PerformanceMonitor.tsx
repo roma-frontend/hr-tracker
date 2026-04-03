@@ -49,18 +49,20 @@ export default function PerformanceMonitor() {
         const lcpObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
           const lastEntry = entries[entries.length - 1];
-          reportWebVitals({
-            name: 'LCP',
-            value: lastEntry.startTime,
-            rating:
-              lastEntry.startTime < 2500
-                ? 'good'
-                : lastEntry.startTime < 4000
-                  ? 'needs-improvement'
-                  : 'poor',
-            delta: lastEntry.startTime,
-            id: 'lcp',
-          });
+          if (lastEntry) {
+            reportWebVitals({
+              name: 'LCP',
+              value: lastEntry.startTime,
+              rating:
+                lastEntry.startTime < 2500
+                  ? 'good'
+                  : lastEntry.startTime < 4000
+                    ? 'needs-improvement'
+                    : 'poor',
+              delta: lastEntry.startTime,
+              id: 'lcp',
+            });
+          }
         });
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
 

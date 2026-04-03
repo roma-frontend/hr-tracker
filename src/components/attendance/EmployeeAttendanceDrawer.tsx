@@ -21,6 +21,7 @@ import {
   UserCog,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface EmployeeInfo {
   _id: Id<'users'>;
@@ -76,7 +77,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
   );
 
   const [year, month] = selectedMonth.split('-').map(Number);
-  const monthLabel = `${MONTHS[month - 1]} ${year}`;
+  const monthLabel = `${MONTHS[(month ?? 1) - 1]} ${year ?? new Date().getFullYear()}`;
 
   // Generate last 12 months for selector
   const monthOptions = Array.from({ length: 12 }, (_, i) => {
@@ -192,7 +193,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                     const [y, mo] = m.split('-').map(Number);
                     return (
                       <option key={m} value={m}>
-                        {MONTHS[mo - 1]} {y}
+                        {MONTHS[(mo ?? 1) - 1]} {y ?? new Date().getFullYear()}
                       </option>
                     );
                   })}
@@ -246,7 +247,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             <div className="flex-1 overflow-y-auto">
               {history === undefined ? (
                 <div className="flex items-center justify-center h-40">
-                  <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                  <ShieldLoader size="sm" variant="inline" />
                 </div>
               ) : history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">

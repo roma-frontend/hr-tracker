@@ -1,19 +1,19 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Loader2 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 /**
  * Lazy-loaded Three.js/R3F component.
  * three.js + @react-three/fiber load ONLY when needed.
  */
 const ThreeScene = dynamic(
-  () => import('@/components/three/ThreeScene').then((mod) => mod.default || mod),
+  () => import('@/components/landing/SphereMesh').then((mod) => ({ default: mod.SphereMesh })),
   {
     ssr: false,
     loading: () => (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <ShieldLoader size="sm" variant="inline" />
       </div>
     ),
   },

@@ -13,7 +13,7 @@ import {
   TextInputStep,
   TextareaStep,
 } from '@/components/ui/wizard-step-components';
-import { Calendar, Sun, Heart, Users, Briefcase } from 'lucide-react';
+import { Calendar, Sun, Heart, Users, Briefcase, CheckCircle } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
@@ -34,7 +34,7 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
   const user = useQuery(api.users.getUserById, { userId });
   const userOrg = useQuery(
     api.organizations.getMyOrganization,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
+    user?._id ? { userId: user._id as Id<'users'> } : 'skip',
   );
 
   const steps: WizardStep[] = [

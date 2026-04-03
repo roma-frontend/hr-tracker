@@ -20,6 +20,7 @@ import {
   Globe,
   Clock,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import Navbar from '@/components/layout/Navbar';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -316,7 +317,7 @@ export default function ContactPage() {
                       }}
                     >
                       {loading ? (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <ShieldLoader size="xs" variant="inline" />
                       ) : (
                         <>
                           <MessageSquare size={16} />

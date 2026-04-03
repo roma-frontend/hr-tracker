@@ -8,7 +8,6 @@ import {
   Download,
   Cloud,
   Check,
-  Loader2,
   Clock,
   Users,
   RefreshCw,
@@ -21,6 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { getGoogleCalendarAuthUrl } from '@/lib/calendar-sync';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export function IntegrationSettings() {
   const { t } = useTranslation();
@@ -214,7 +214,7 @@ export function IntegrationSettings() {
               </div>
             </div>
             {googleLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
+              <ShieldLoader size="xs" variant="inline" />
             ) : googleConnected ? (
               <Button
                 variant="outline"
@@ -222,7 +222,9 @@ export function IntegrationSettings() {
                 onClick={handleGoogleDisconnect}
                 disabled={disconnecting}
               >
-                {disconnecting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                {disconnecting ? (
+                  <ShieldLoader size="xs" variant="inline" />
+                ) : null}
                 {t('settingsIntegration.disconnect')}
               </Button>
             ) : (
@@ -299,7 +301,7 @@ export function IntegrationSettings() {
             </div>
             <div className="flex items-center gap-2">
               {sharepointLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
+                <ShieldLoader size="xs" variant="inline" />
               ) : sharepointConnected ? (
                 <>
                   <Button
@@ -309,7 +311,7 @@ export function IntegrationSettings() {
                     disabled={sharepointSyncing}
                   >
                     {sharepointSyncing ? (
-                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                      <ShieldLoader size="xs" variant="inline" />
                     ) : (
                       <RefreshCw className="w-3 h-3 mr-1" />
                     )}
@@ -322,7 +324,7 @@ export function IntegrationSettings() {
                     disabled={sharepointDisconnecting}
                   >
                     {sharepointDisconnecting ? (
-                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                      <ShieldLoader size="xs" variant="inline" />
                     ) : null}
                     {t('settingsIntegration.disconnect')}
                   </Button>

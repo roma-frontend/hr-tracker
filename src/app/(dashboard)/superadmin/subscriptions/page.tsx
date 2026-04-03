@@ -43,7 +43,6 @@ export default function SubscriptionsManagementPage() {
   );
 
   const createManual = useMutation(api.subscriptions_admin.createManualSubscription);
-  const cancelSub = useMutation(api.subscriptions_admin.cancelSubscription);
 
   const [showForm, setShowForm] = useState(false);
 
@@ -84,12 +83,7 @@ export default function SubscriptionsManagementPage() {
   const handleCancel = async (subId: Id<'subscriptions'>) => {
     if (!confirm(t('superadmin.subscriptions.confirmCancelSub'))) return;
 
-    try {
-      await cancelSub({ subscriptionId: subId });
-      toast.success(t('superadmin.subscriptions.cancelSuccess'));
-    } catch (error: any) {
-      toast.error(error.message || t('superadmin.subscriptions.failedToCancel'));
-    }
+    toast.error(t('superadmin.subscriptions.cancelNotImplemented'));
   };
 
   const getStatusBadge = (status: string) => {

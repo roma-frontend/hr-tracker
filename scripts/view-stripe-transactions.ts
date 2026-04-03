@@ -98,9 +98,6 @@ function formatPlan(plan: string): string {
 }
 
 function printHeader() {
-  console.log('\n' + colors.bright + colors.cyan + '╔═══════════════════════════════════════════════════════════════════════════════╗');
-  console.log('║                    💳 STRIPE TRANSACTIONS DASHBOARD 💳                        ║');
-  console.log('╚═══════════════════════════════════════════════════════════════════════════════╝' + colors.reset + '\n');
 }
 
 function printSeparator() {
@@ -113,12 +110,6 @@ async function printSubscription(sub: any, index: number, stripe: Stripe) {
   const created = formatDate(sub.createdAt);
   const updated = formatDate(sub.updatedAt);
 
-  console.log(`\n${colors.bright}${colors.white}#${index + 1}${colors.reset}`);
-  console.log(`${colors.bright}Plan:${colors.reset}                ${formatPlan(sub.plan)}`);
-  console.log(`${colors.bright}Status:${colors.reset}              ${formatStatus(sub.status)}`);
-  console.log(`${colors.bright}Email:${colors.reset}               ${colors.cyan}${sub.email || 'N/A'}${colors.reset}`);
-  console.log(`${colors.bright}Stripe Customer ID:${colors.reset}  ${colors.yellow}${sub.stripeCustomerId}${colors.reset}`);
-  console.log(`${colors.bright}Subscription ID:${colors.reset}     ${colors.yellow}${sub.stripeSubscriptionId}${colors.reset}`);
 
   // Get payment method info from Stripe
   try {
@@ -140,23 +131,9 @@ async function printSubscription(sub: any, index: number, stripe: Stripe) {
     // Если не удалось получить данные карты, просто пропускаем
   }
 
-  if (sub.stripeSessionId) {
-    console.log(`${colors.bright}Session ID:${colors.reset}          ${colors.yellow}${sub.stripeSessionId}${colors.reset}`);
-  }
-
-  if (sub.organizationId) {
-    console.log(`${colors.bright}Organization ID:${colors.reset}     ${colors.magenta}${sub.organizationId}${colors.reset}`);
-  }
-
-  if (sub.userId) {
-    console.log(`${colors.bright}User ID:${colors.reset}             ${colors.magenta}${sub.userId}${colors.reset}`);
-  }
-
-  console.log(`${colors.bright}Current Period:${colors.reset}      ${colors.green}${periodStart}${colors.reset} → ${colors.green}${periodEnd}${colors.reset}`);
 
   if (sub.trialEnd) {
     const trialEnd = formatDate(sub.trialEnd);
-    console.log(`${colors.bright}Trial End:${colors.reset}           ${colors.cyan}${trialEnd}${colors.reset}`);
   }
 
   if (sub.cancelAtPeriodEnd) {
@@ -217,14 +194,10 @@ async function main() {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
     if (!deploymentUrl) {
-      console.error(`${colors.red}❌ Error: CONVEX_URL not found in environment variables${colors.reset}`);
-      console.log(`\n${colors.yellow}Please set NEXT_PUBLIC_CONVEX_URL or CONVEX_URL in your .env.local file${colors.reset}\n`);
       process.exit(1);
     }
 
     if (!stripeSecretKey) {
-      console.error(`${colors.red}❌ Error: STRIPE_SECRET_KEY not found in environment variables${colors.reset}`);
-      console.log(`\n${colors.yellow}Please set STRIPE_SECRET_KEY in your .env.local file${colors.reset}\n`);
       process.exit(1);
     }
 
@@ -233,7 +206,6 @@ async function main() {
     const client = new ConvexHttpClient(deploymentUrl);
     const stripe = new Stripe(stripeSecretKey);
 
-    console.log(`${colors.cyan}📡 Fetching subscriptions...${colors.reset}\n`);
 
     // Get all subscriptions
     const subscriptions = await client.query(api.subscriptions.listAll as any) as any[];

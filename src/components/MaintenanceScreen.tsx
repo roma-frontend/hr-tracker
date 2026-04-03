@@ -387,7 +387,7 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
 function calculateDuration(duration: string | undefined): number {
   if (!duration) return 3600000;
   const match = duration.match(/(\d+)/);
-  const amount = match ? parseInt(match[1]) : 1;
+  const amount = match ? parseInt(match[1] || '1') : 1;
   if (duration.includes('hour')) return amount * 3600000;
   if (duration.includes('minute')) return amount * 60000;
   return 3600000;

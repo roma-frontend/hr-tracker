@@ -69,8 +69,11 @@ function parseActions(content: string): { cleanContent: string; actions: AnyActi
   const actions: AnyAction[] = [];
   for (const match of actionMatches) {
     try {
-      const action = JSON.parse(match[1].trim()) as AnyAction;
-      actions.push(action);
+      const actionStr = match[1]?.trim();
+      if (actionStr) {
+        const action = JSON.parse(actionStr) as AnyAction;
+        actions.push(action);
+      }
     } catch {
       // skip invalid JSON
     }
@@ -240,7 +243,7 @@ export default function AIChatPage() {
 
       // Auto-select first conversation if none selected
       if (convs.length > 0 && !activeConversationId) {
-        setActiveConversationId(convs[0]._id);
+        setActiveConversationId(convs[0]!._id);
       }
     }
   }, [savedConversations]);

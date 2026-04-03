@@ -98,7 +98,11 @@ export default function WeeklyDigestWidget() {
                       className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors disabled:opacity-50"
                       title={t('titles.regenerate')}
                     >
-                      <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                      {loading ? (
+                        <ShieldLoader size="xs" variant="inline" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4" />
+                      )}
                     </button>
                     <button
                       onClick={() => setIsOpen(false)}

@@ -62,6 +62,7 @@ export function StatusIndicator({
   };
 
   const config = statusConfig[status] || statusConfig.available;
+  if (!config) return null;
 
   const sizeClasses = {
     sm: 'w-5 h-5',

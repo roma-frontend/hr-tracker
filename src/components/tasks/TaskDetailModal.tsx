@@ -454,7 +454,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder={t('placeholders.addAComment')}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-[var(--text-muted)]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-[var(--text-muted)]"
                 />
                 <button
                   type="submit"

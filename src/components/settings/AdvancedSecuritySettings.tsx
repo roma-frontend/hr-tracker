@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   Copy,
   Check,
-  Loader2,
   X,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -21,6 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 type SetupStep = 'idle' | 'loading' | 'qr' | 'verify' | 'backup' | 'done';
 
@@ -278,7 +278,8 @@ export function AdvancedSecuritySettings() {
                 </Button>
               ) : (
                 <Button variant="default" size="sm" onClick={handleStartSetup} disabled={loading}>
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enable'}
+                  {loading && <ShieldLoader size="xs" variant="inline" />}
+                  {!loading && 'Enable'}
                 </Button>
               )}
             </div>
@@ -287,7 +288,7 @@ export function AdvancedSecuritySettings() {
           {/* Loading */}
           {setupStep === 'loading' && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-[var(--primary)]" />
+              <ShieldLoader size="sm" variant="inline" />
               <span className="ml-2 text-sm text-[var(--text-muted)]">Setting up 2FA...</span>
             </div>
           )}
@@ -504,8 +505,8 @@ export function AdvancedSecuritySettings() {
                   onClick={handleDisable}
                   disabled={!disablePassword || disableLoading}
                 >
-                  {disableLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                  Disable 2FA
+                  {disableLoading && <ShieldLoader size="xs" variant="inline" />}
+                  {!disableLoading && 'Disable 2FA'}
                 </Button>
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface Location {
   lat: number;
@@ -437,7 +438,7 @@ export function DriverMap({
     >
       {!ready ? (
         <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+          <ShieldLoader size="sm" variant="inline" />
         </div>
       ) : (
         <div

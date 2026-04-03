@@ -238,7 +238,8 @@ export default function StripeDashboardPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing && <ShieldLoader size="xs" variant="inline" />}
+            {!refreshing && <RefreshCw className="w-4 h-4 mr-2" />}
             Refresh
           </Button>
         </div>
@@ -322,7 +323,7 @@ export default function StripeDashboardPage() {
                 Display all Stripe transactions
               </p>
               {runningScript === 'stripe:view' && (
-                <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+                <ShieldLoader size="xs" variant="inline" />
               )}
             </Button>
 
@@ -340,7 +341,7 @@ export default function StripeDashboardPage() {
                 {t('stripe.exportDataXlsx')}
               </p>
               {runningScript === 'stripe:export' && (
-                <RefreshCw className="w-4 h-4 animate-spin text-green-600" />
+                <ShieldLoader size="xs" variant="inline" />
               )}
             </Button>
 
@@ -356,7 +357,7 @@ export default function StripeDashboardPage() {
               </div>
               <p className="text-xs text-muted-foreground text-left">{t('stripe.exportDataPdf')}</p>
               {runningScript === 'stripe:export-pdf' && (
-                <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
+                <ShieldLoader size="xs" variant="inline" />
               )}
             </Button>
 
@@ -374,7 +375,7 @@ export default function StripeDashboardPage() {
                 Generate growth visualization
               </p>
               {runningScript === 'stripe:growth-chart' && (
-                <RefreshCw className="w-4 h-4 animate-spin text-purple-600" />
+                <ShieldLoader size="xs" variant="inline" />
               )}
             </Button>
 
@@ -390,7 +391,7 @@ export default function StripeDashboardPage() {
               </div>
               <p className="text-xs text-muted-foreground text-left">Sync with Stripe API</p>
               {runningScript === 'stripe:sync' && (
-                <RefreshCw className="w-4 h-4 animate-spin text-orange-600" />
+                <ShieldLoader size="xs" variant="inline" />
               )}
             </Button>
 
@@ -406,7 +407,7 @@ export default function StripeDashboardPage() {
               </div>
               <p className="text-xs text-muted-foreground text-left">Check trial reminders</p>
               {runningScript === 'stripe:check-trials' && (
-                <RefreshCw className="w-4 h-4 animate-spin text-yellow-600" />
+                <ShieldLoader size="xs" variant="inline" />
               )}
             </Button>
 
@@ -422,7 +423,7 @@ export default function StripeDashboardPage() {
               </div>
               <p className="text-xs text-muted-foreground text-left">Add sample subscriptions</p>
               {runningScript === 'stripe:add-test-data' && (
-                <RefreshCw className="w-4 h-4 animate-spin text-pink-600" />
+                <ShieldLoader size="xs" variant="inline" />
               )}
             </Button>
           </div>

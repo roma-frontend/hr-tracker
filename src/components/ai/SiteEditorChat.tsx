@@ -99,7 +99,6 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
 
   const usage = useQuery(api.aiSiteEditor.getCurrentMonthUsage, {
     userId: userId as any,
-    organizationId: organizationId as any,
   });
 
   const history = useQuery(api.aiSiteEditor.getHistory, {

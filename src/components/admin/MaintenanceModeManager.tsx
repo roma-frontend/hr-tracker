@@ -6,8 +6,9 @@ import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Power, PowerOff, Loader2 } from 'lucide-react';
+import { AlertTriangle, Power, PowerOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface MaintenanceModeManagerProps {
   organizationId?: Id<'organizations'> | string;
@@ -104,7 +105,7 @@ export function MaintenanceModeManager({ organizationId, userId }: MaintenanceMo
         >
           {disabling ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <ShieldLoader size="xs" variant="inline" />
               Включение сайта...
             </>
           ) : (

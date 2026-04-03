@@ -708,7 +708,7 @@ function StatsSection() {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) {
+        if (e?.isIntersecting) {
           setVisible(true);
           obs.disconnect();
         }
@@ -759,7 +759,7 @@ function FeaturesSection() {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) {
+        if (e?.isIntersecting) {
           setVisible(true);
           obs.disconnect();
         }

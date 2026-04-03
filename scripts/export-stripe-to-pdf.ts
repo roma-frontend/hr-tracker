@@ -85,7 +85,6 @@ function getPlanPrice(plan: string): number {
 }
 
 async function exportToPDF() {
-  console.log(`${colors.bright}${colors.cyan}📄 Экспорт Stripe транзакций в PDF${colors.reset}\n`);
 
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
 
@@ -94,20 +93,14 @@ async function exportToPDF() {
     process.exit(1);
   }
 
-  console.log(`${colors.cyan}📡 Подключение к Convex...${colors.reset}`);
   const client = new ConvexHttpClient(convexUrl);
 
-  console.log(`${colors.cyan}📥 Получение данных...${colors.reset}`);
   const subscriptions = await client.query(api.subscriptions.listAll) as unknown as Subscription[];
 
   if (!subscriptions || subscriptions.length === 0) {
-    console.log(`${colors.yellow}⚠️  No subscriptions found${colors.reset}`);
-    console.log(`${colors.cyan}💡 Try: npm run stripe:add-test-data${colors.reset}`);
     process.exit(0);
   }
 
-  console.log(`${colors.green}✅ Найдено ${subscriptions.length} подписок${colors.reset}`);
-  console.log(`${colors.cyan}💾 Создание PDF файла...${colors.reset}\n`);
 
   // Calculate statistics
   const stats = {
@@ -242,16 +235,6 @@ async function exportToPDF() {
 
   // Wait for file to be written
   await new Promise<void>((resolve) => stream.on('finish', () => resolve()));
-
-  console.log(`${colors.green}${colors.bright}✅ PDF создан успешно!${colors.reset}`);
-  console.log(`${colors.cyan}📁 Файл сохранён: ${colors.yellow}${filename}${colors.reset}`);
-  console.log(`${colors.cyan}📂 Полный путь: ${colors.yellow}${path.resolve(filename)}${colors.reset}\n`);
-
-  console.log(`${colors.bright}${colors.cyan}📈 Быстрая статистика:${colors.reset}`);
-  console.log(`   ${colors.green}✅ Активные подписки: ${stats.byStatus.active || 0} из ${stats.total}${colors.reset}`);
-  console.log(`   ${colors.green}💰 MRR (месячный доход): $${stats.mrr}${colors.reset}\n`);
-
-  console.log(`${colors.green}✨ Done!${colors.reset}`);
 }
 
 exportToPDF().catch(console.error);

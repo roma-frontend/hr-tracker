@@ -21,8 +21,8 @@ export async function GET(req: NextRequest) {
     weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Monday
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6); // Sunday
-    const weekStartStr = weekStart.toISOString().split('T')[0];
-    const weekEndStr = weekEnd.toISOString().split('T')[0];
+    const weekStartStr = weekStart.toISOString().split('T')[0] || '';
+    const weekEndStr = weekEnd.toISOString().split('T')[0] || '';
 
     // Fetch all data in parallel
     const [allLeaves, allUsers, attendanceSummary] = await Promise.all([

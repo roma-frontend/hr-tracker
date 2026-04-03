@@ -372,7 +372,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
             </ScrollArea>
           </CardHeader>
           <CardContent className="p-3 space-y-2 max-h-[240px] overflow-y-auto">
-            {getScheduleForDay(weekDays[mobileViewDay]).length > 0 ? (
+            {weekDays[mobileViewDay] && getScheduleForDay(weekDays[mobileViewDay]).length > 0 ? (
               getScheduleForDay(weekDays[mobileViewDay])
                 .sort((a, b) => a.startTime - b.startTime)
                 .map((s: any) => (
@@ -439,7 +439,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
               <div className="text-center text-muted-foreground py-16">
                 <CalendarIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
                 <p className="text-sm">No trips scheduled</p>
-                <p className="text-xs mt-1">{format(weekDays[mobileViewDay], 'EEEE, MMM d')}</p>
+                <p className="text-xs mt-1">{format(weekDays[mobileViewDay] ?? new Date(), 'EEEE, MMM d')}</p>
               </div>
             )}
           </CardContent>

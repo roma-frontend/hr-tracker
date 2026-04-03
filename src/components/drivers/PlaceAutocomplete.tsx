@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MapPin, Loader2, X } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface PlaceSuggestion {
   display_name: string;
@@ -136,7 +137,7 @@ export function PlaceAutocomplete({
       setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
     } else if (e.key === 'Enter' && highlightedIndex >= 0) {
       e.preventDefault();
-      handleSelect(suggestions[highlightedIndex]);
+      handleSelect(suggestions[highlightedIndex]!);
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
@@ -191,7 +192,7 @@ export function PlaceAutocomplete({
         />
         {isLoading ? (
           <div className="absolute right-0 top-0 bottom-0 flex items-center pr-2.5 pl-3 bg-gradient-to-l from-[var(--input)] via-[var(--input)] to-transparent pointer-events-none">
-            <Loader2 className="h-4 w-4 animate-spin text-[var(--text-muted)]" />
+            <ShieldLoader size="xs" variant="inline" />
           </div>
         ) : value ? (
           <div className="absolute right-0 top-0 bottom-0 flex items-center pr-1.5 pl-4 bg-gradient-to-l from-[var(--input)] from-60% to-transparent">

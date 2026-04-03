@@ -69,7 +69,9 @@ export function DashboardBanners({
       const sessionCookie = cookieStr.split('; ').find((c) => c.startsWith('session_expiry='));
 
       if (sessionCookie) {
-        const expiry = parseInt(sessionCookie.split('=')[1], 10);
+        const expiryStr = sessionCookie.split('=')[1];
+        if (!expiryStr) return;
+        const expiry = parseInt(expiryStr, 10);
         const remaining = expiry - Date.now();
         const minutesLeft = Math.ceil(remaining / 60000);
 

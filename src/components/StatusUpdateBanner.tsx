@@ -73,6 +73,7 @@ export function StatusUpdateBanner() {
   if (!notification) return null;
 
   const config = statusConfig[notification.statusKey] || defaultConfig;
+  if (!config) return null;
   const Icon = config.icon;
   const hint = t(`status.${notification.statusKey}.notification`, '');
 

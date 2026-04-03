@@ -97,12 +97,12 @@ export function SupervisorRatingForm({
       await createRating({
         employeeId,
         supervisorId: user.id as any,
-        qualityOfWork: ratings.qualityOfWork,
-        efficiency: ratings.efficiency,
-        teamwork: ratings.teamwork,
-        initiative: ratings.initiative,
-        communication: ratings.communication,
-        reliability: ratings.reliability,
+        qualityOfWork: ratings.qualityOfWork ?? 3,
+        efficiency: ratings.efficiency ?? 3,
+        teamwork: ratings.teamwork ?? 3,
+        initiative: ratings.initiative ?? 3,
+        communication: ratings.communication ?? 3,
+        reliability: ratings.reliability ?? 3,
         strengths: strengths || undefined,
         areasForImprovement: areasForImprovement || undefined,
         generalComments: generalComments || undefined,
@@ -167,7 +167,7 @@ export function SupervisorRatingForm({
                     >
                       <Star
                         className={`w-6 h-6 ${
-                          value <= ratings[category.key]
+                          value <= (ratings[category.key] ?? 0)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-300'
                         }`}
@@ -178,7 +178,7 @@ export function SupervisorRatingForm({
                     className="ml-2 text-lg font-semibold w-8 text-center"
                     style={{ color: 'var(--text-primary)' }}
                   >
-                    {ratings[category.key]}
+                    {ratings[category.key] ?? 0}
                   </span>
                 </div>
               </div>

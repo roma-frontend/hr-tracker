@@ -5,6 +5,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from '@/lib/cssMotion';
 import { UserCheck, UserX, Clock, Mail, Calendar, CheckCircle } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -96,8 +97,7 @@ export default function ApprovalsPage() {
       {isLoading ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <Clock className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 animate-spin" />
-            <p className="text-sm text-[var(--text-muted)]">{t('common.loading')}</p>
+            <ShieldLoader size="sm" variant="inline" />
           </CardContent>
         </Card>
       ) : pendingUsers && pendingUsers.length === 0 ? (

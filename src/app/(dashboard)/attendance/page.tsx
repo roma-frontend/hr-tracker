@@ -14,6 +14,7 @@ import { AttendanceDetailModal } from '@/components/attendance/AttendanceDetailM
 import { EmployeeAttendanceDrawer } from '@/components/attendance/EmployeeAttendanceDrawer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';
 import { Clock, Users, Star, UserCheck, BarChart2, Search } from 'lucide-react';
 import type { Id } from '../../../../convex/_generated/dataModel';
@@ -384,7 +385,7 @@ export default function AttendancePage() {
             <CardContent>
               {allEmployeesOverview === undefined ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                  <ShieldLoader size="sm" variant="inline" />
                 </div>
               ) : filteredEmployees.length === 0 ? (
                 <div className="text-center py-10" style={{ color: 'var(--text-muted)' }}>

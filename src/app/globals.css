@@ -76,7 +76,7 @@ html.light {
   /* Border */
   --border: #c7d9f5;
   --border-subtle: #e8f0fe;
-  --input: #ffffff;
+  --input: #f8fafc;
   --input-border: #93bef7;
   --ring: #2563eb;
 
@@ -187,7 +187,7 @@ html.light {
   /* Border */
   --border: #1a3460;
   --border-subtle: #0d1e38;
-  --input: #0d1e38;
+  --input: #0f2447;
   --input-border: #2563eb;
   --ring: #60a5fa;
 

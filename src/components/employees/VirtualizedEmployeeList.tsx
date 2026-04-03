@@ -117,9 +117,9 @@ export function VirtualizedEmployeeList({
         >
           {virtualItems.map((virtualRow) => {
             const emp = employees[virtualRow.index];
-            const roleConf = roleConfig[emp.role];
-            const typeConf =
-              typeConfig[(emp as any).employeeType as keyof typeof typeConfig] || typeConfig.staff;
+            if (!emp) return null;
+            const roleConf = (roleConfig[emp.role] || roleConfig.employee) as RoleConfig;
+            const typeConf = (typeConfig[(emp as any).employeeType as keyof typeof typeConfig] || typeConfig.staff) as TypeConfig;
             const presence = getPresenceBadge((emp as any).presenceStatus);
 
             return (
@@ -169,9 +169,9 @@ export function VirtualizedEmployeeList({
       <div style={{ height: `${totalHeight}px`, position: 'relative' }}>
         {virtualItems.map((virtualRow) => {
           const emp = employees[virtualRow.index];
-          const roleConf = roleConfig[emp.role];
-          const typeConf =
-            typeConfig[(emp as any).employeeType as keyof typeof typeConfig] || typeConfig.staff;
+          if (!emp) return null;
+          const roleConf = (roleConfig[emp.role] || roleConfig.employee) as RoleConfig;
+          const typeConf = (typeConfig[(emp as any).employeeType as keyof typeof typeConfig] || typeConfig.staff) as TypeConfig;
           const presence = getPresenceBadge((emp as any).presenceStatus);
 
           return (

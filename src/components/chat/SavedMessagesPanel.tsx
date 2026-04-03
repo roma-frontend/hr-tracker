@@ -8,6 +8,7 @@ import { X, Bookmark, MessageCircle } from 'lucide-react';
 import { MessageBubble } from './MessageBubble';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface Props {
   userId: Id<'users'>;
@@ -70,7 +71,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {savedMessages === undefined ? (
             <div className="flex items-center justify-center h-40">
-              <div className="w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+              <ShieldLoader size="xs" variant="inline" />
             </div>
           ) : savedMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 gap-3">

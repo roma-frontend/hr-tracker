@@ -23,6 +23,7 @@ import {
   Edit2,
   Trash2,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { format } from 'date-fns';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -582,7 +583,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                   {deleting ? (
                     <>
-                      <Clock className="w-4 h-4 mr-2 animate-spin" />
+                      <ShieldLoader size="xs" variant="inline" />
                       {t('common.deleting', 'Deleting...')}
                     </>
                   ) : (

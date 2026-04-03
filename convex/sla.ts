@@ -368,20 +368,21 @@ export const getSLATrend = query({
     
     // Group by day
     const dailyData: Record<string, { date: string; onTime: number; breached: number; avgResponseTime: number; count: number }> = {};
-    
+
     metrics.forEach((metric) => {
-      const date = new Date(metric.submittedAt).toISOString().split("T")[0];
-      
+      const date = new Date(metric.submittedAt).toISOString().split("T")[0] || "";
+      if (!date) return;
+
       if (!dailyData[date]) {
         dailyData[date] = { date, onTime: 0, breached: 0, avgResponseTime: 0, count: 0 };
       }
-      
+
       if (metric.status === "on_time") {
         dailyData[date].onTime++;
       } else if (metric.status === "breached") {
         dailyData[date].breached++;
       }
-      
+
       if (metric.responseTimeHours !== undefined) {
         dailyData[date].avgResponseTime += metric.responseTimeHours;
         dailyData[date].count++;

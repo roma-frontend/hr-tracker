@@ -340,7 +340,7 @@ export function QuickActionsPalette() {
                     setSearchQuery(e.target.value);
                     setSelectedIndex(-1);
                   }}
-                  className="pl-9 pr-12 h-11 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted-foreground)]"
+                  className="pl-9 pr-12 h-11 bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)]"
                 />
                 {searchQuery && (
                   <button

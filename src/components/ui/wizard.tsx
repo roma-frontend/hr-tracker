@@ -12,8 +12,8 @@ import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface StepContent {
-  stepData?: Record<string, string | number | boolean | null>;
-  updateStepData?: (key: string, value: unknown) => void;
+  stepData: Record<string, string | number | boolean | null>;
+  updateStepData: (key: string, value: unknown) => void;
 }
 
 export interface WizardStep {
@@ -21,7 +21,7 @@ export interface WizardStep {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  content: React.ReactElement<StepContent>;
+  content: React.ReactElement;
   validation?: (data: Record<string, string | number | boolean | null>) => boolean;
 }
 
@@ -45,7 +45,7 @@ export function Wizard({
   showStepper = true,
   className,
   defaultStepData = {},
-}: WizardProps) {
+}: WizardProps): React.ReactElement {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] =
     useState<Record<string, string | number | boolean | null>>(defaultStepData);
@@ -54,7 +54,7 @@ export function Wizard({
   const currentStepData = steps[currentStep];
 
   const canGoNext = useCallback(() => {
-    if (!currentStepData.validation) return true;
+    if (!currentStepData?.validation) return true;
     return currentStepData.validation(stepData);
   }, [currentStepData, stepData]);
 
@@ -91,7 +91,7 @@ export function Wizard({
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className={cn('w-full p-3 md:p-6', className)}>
+    <div className={cn('', className)}>
       {/* Stepper */}
       {showStepper && (
         <div className="mb-6 md:mb-8">
@@ -183,20 +183,20 @@ export function Wizard({
           >
             <div className="mb-4 md:mb-6">
               <h2 className="text-base md:text-xl font-bold text-(--text-primary) mb-1 md:mb-2">
-                {currentStepData.title}
+                {currentStepData?.title}
               </h2>
-              {currentStepData.description && (
+              {currentStepData?.description && (
                 <p className="text-xs md:text-sm text-(--text-muted)">
-                  {currentStepData.description}
+                  {currentStepData?.description}
                 </p>
               )}
             </div>
 
             <div className="space-y-3 md:space-y-4">
               {React.cloneElement(
-                currentStepData.content as React.ReactElement<{
-                  stepData?: Record<string, string | number | boolean | null>;
-                  updateStepData?: (key: string, value: string | number | boolean | null) => void;
+                currentStepData?.content as React.ReactElement<{
+                  stepData: Record<string, string | number | boolean | null>;
+                  updateStepData: (key: string, value: string | number | boolean | null) => void;
                 }>,
                 {
                   stepData,

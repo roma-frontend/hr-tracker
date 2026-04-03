@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Mail,
@@ -40,6 +41,8 @@ export default function UserProfile360Page() {
   const userId = params.userId as Id<'users'>;
 
   const data = useQuery(api.superadmin.getUser360, userId ? { userId } : 'skip');
+
+  const { t } = useTranslation();
 
   if (!data) {
     return (

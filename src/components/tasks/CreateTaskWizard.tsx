@@ -24,10 +24,10 @@ interface CreateTaskWizardProps {
 export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTaskWizardProps) {
   const { t } = useTranslation();
   const createTask = useMutation(api.tasks.createTask);
-  const user = useQuery(api.users.getCurrentUser);
+  const user = useQuery(api.users.getCurrentUser, {});
 
   // Получаем список сотрудников для назначения
-  const employees = useQuery(api.users.getAllUsers) || [];
+  const employees = useQuery(api.users.getAllUsers, user?._id ? { requesterId: user._id } : 'skip') || [];
 
   const steps: WizardStep[] = [
     {
@@ -99,14 +99,14 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
           field="assigneeId"
           label={t('taskWizard.steps.assignee.assigneeLabel')}
           options={employees
-            .filter((e: any) => e.id !== user?.id)
+            .filter((e: any) => e._id !== user?._id)
             .map((e: any) => ({
               value: e._id,
               label: e.name,
               description: e.email,
             }))}
           placeholder={t('taskWizard.steps.assignee.assigneePlaceholder')}
-          defaultValue={assigneeId || user?.id}
+          defaultValue={assigneeId || user?._id}
           required
         />
       ),
@@ -116,9 +116,8 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
       await createTask({
-        assigneeId: String(data.assigneeId) as Id<'users'>,
-        assignerId: user?.id as Id<'users'>,
-        organizationId: user?.organizationId as Id<'organizations'>,
+        assignedTo: String(data.assigneeId) as Id<'users'>,
+        assignedBy: user?._id as Id<'users'>,
         title: String(data.title),
         description: String(data.description) || '',
         priority: (String(data.priority) || 'medium') as 'low' | 'medium' | 'high' | 'urgent',

@@ -18,6 +18,7 @@ import {
   Play,
   Pause,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +31,7 @@ export default function AutomationPage() {
 
   // Fetch automation stats
   const stats = useQuery(api.automation.getStats);
-  const recentTasks = useQuery(api.automation.getRecentTasks);
+  const recentTasks = useQuery(api.automation.getRecentTasks, {});
   const activeWorkflows = useQuery(api.automation.getActiveWorkflows);
 
   // Mutations
@@ -68,16 +69,11 @@ export default function AutomationPage() {
         </div>
         <Button onClick={handleRunAutomation} disabled={isRunning} className="gap-2">
           {isRunning ? (
-            <>
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              {t('automation.running') || 'Running...'}
-            </>
+            <ShieldLoader size="xs" variant="inline" />
           ) : (
-            <>
-              <Play className="w-4 h-4" />
-              {t('automation.runNow') || 'Run Now'}
-            </>
+            <Play className="w-4 h-4" />
           )}
+          {isRunning ? (t('automation.running') || 'Running...') : (t('automation.runNow') || 'Run Now')}
         </Button>
       </div>
 

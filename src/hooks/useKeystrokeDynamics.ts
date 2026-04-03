@@ -51,7 +51,7 @@ export function useKeystrokeDynamics() {
     // Flight times (time between consecutive keydowns)
     const flights: number[] = [];
     for (let i = 1; i < evs.length; i++) {
-      const flight = evs[i].downAt - evs[i - 1].downAt;
+      const flight = (evs[i]?.downAt ?? 0) - (evs[i - 1]?.downAt ?? 0);
       if (flight > 0 && flight < 2000) flights.push(flight);
     }
 

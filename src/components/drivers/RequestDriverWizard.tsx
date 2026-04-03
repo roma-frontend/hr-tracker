@@ -30,7 +30,7 @@ interface RequestDriverWizardProps {
 export function RequestDriverWizard({ userId, onComplete, onCancel }: RequestDriverWizardProps) {
   const { t } = useTranslation();
   const requestDriver = useMutation(api.drivers.requestDriver);
-  const user = useQuery(api['users/queries'].getCurrentUser, {});
+  const user = useQuery(api.users.getCurrentUser, {});
   const drivers = useQuery(
     api.drivers.getAvailableDrivers,
     user?.organizationId ? { organizationId: user.organizationId } : 'skip',
@@ -107,17 +107,14 @@ export function RequestDriverWizard({ userId, onComplete, onCancel }: RequestDri
             placeholder={t('driverWizard.steps.route.toPlaceholder')}
             required
           />
-          <div className="space-y-2">
-            <Label htmlFor="purpose">{t('driverWizard.steps.route.purposeLabel')}</Label>
-            <TextInputStep
-              stepData={wizardData}
-              updateStepData={updateStepData}
-              field="purpose"
-              label={t('driverWizard.steps.route.purposeLabel')}
-              placeholder={t('driverWizard.steps.route.purposePlaceholder')}
-              required
-            />
-          </div>
+          <TextInputStep
+            stepData={wizardData}
+            updateStepData={updateStepData}
+            field="purpose"
+            label={t('driverWizard.steps.route.purposeLabel')}
+            placeholder={t('driverWizard.steps.route.purposePlaceholder')}
+            required
+          />
           <div className="space-y-2">
             <Label htmlFor="passengerCount">
               {t('driverWizard.steps.route.passengerCountLabel')}

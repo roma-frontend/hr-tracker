@@ -109,8 +109,8 @@ export async function GET(req: NextRequest) {
     const teamConflicts: string[] = [];
     const next60Days = new Date(today);
     next60Days.setDate(next60Days.getDate() + 60);
-    const todayStr = today.toISOString().split('T')[0];
-    const next60Str = next60Days.toISOString().split('T')[0];
+    const todayStr = today.toISOString().split('T')[0] || '';
+    const next60Str = next60Days.toISOString().split('T')[0] || '';
 
     const upcomingTeamLeaves = allLeaves.filter((l: any) => {
       return (
@@ -135,14 +135,14 @@ export async function GET(req: NextRequest) {
 
     let foundGoodWeeks = 0;
     for (let i = 0; i < 90 && foundGoodWeeks < 4; i++) {
-      const dateStr = checkDate.toISOString().split('T')[0];
+      const dateStr = checkDate.toISOString().split('T')[0] || '';
       const dayOfWeek = checkDate.getDay();
 
       // Only suggest Monday starts
       if (dayOfWeek === 1) {
         const weekEnd = new Date(checkDate);
         weekEnd.setDate(weekEnd.getDate() + 4); // Friday
-        const weekEndStr = weekEnd.toISOString().split('T')[0];
+        const weekEndStr = weekEnd.toISOString().split('T')[0] || '';
 
         // Check if anyone from team is on leave that week
         const conflict = upcomingTeamLeaves.some((l: any) => {

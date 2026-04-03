@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       const pendingLeaves = userLeaves.filter((l: any) => l.status === 'pending');
 
       // Current/upcoming leaves
-      const now = new Date().toISOString().split('T')[0];
+      const now = new Date().toISOString().split('T')[0] || '';
       const activeLeave = approvedLeaves.find((l: any) => l.startDate <= now && l.endDate >= now);
       const upcomingLeaves = approvedLeaves
         .filter((l: any) => l.startDate > now)
@@ -130,8 +130,8 @@ export async function GET(req: NextRequest) {
     });
 
     // Calendar events — all approved leaves next 90 days
-    const now = new Date().toISOString().split('T')[0];
-    const in90Days = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const now = new Date().toISOString().split('T')[0] || '';
+    const in90Days = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || '';
     const calendarEvents = (leaves as any[])
       .filter((l: any) => l.status === 'approved' && l.endDate >= now && l.startDate <= in90Days)
       .map((l: any) => {

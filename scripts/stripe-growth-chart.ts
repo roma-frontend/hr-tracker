@@ -43,7 +43,6 @@ interface Subscription {
 }
 
 async function generateGrowthChart() {
-  console.log(`${colors.bright}${colors.cyan}📈 Stripe Growth Chart Generator${colors.reset}\n`);
 
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
 

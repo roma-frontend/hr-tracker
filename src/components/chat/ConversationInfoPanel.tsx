@@ -278,12 +278,7 @@ export function ConversationInfoPanel({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('chat.searchUsers')}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border outline-none"
-                  style={{
-                    background: 'var(--background)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)',
-                  }}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
                 />
               </div>
 

@@ -303,9 +303,9 @@ function parseAIResponseForFileChanges(
   const fileBlockPattern = /FILE:\s*([^\n]+)\n```(?:tsx?|jsx?|json|js)?\n([\s\S]*?)```/g;
   let match;
   while ((match = fileBlockPattern.exec(response)) !== null) {
-    const filePath = match[1].trim();
+    const filePath = match[1]?.trim();
     const content = match[2];
-    if (isPathAllowed(filePath) && !isTruncated(content)) {
+    if (filePath && content && isPathAllowed(filePath) && !isTruncated(content)) {
       changes.push({ filePath, content, description: 'AI Site Editor: Auto-applied changes' });
     }
   }
@@ -315,9 +315,9 @@ function parseAIResponseForFileChanges(
     const pathThenBlock =
       /(src\/[\w\-/.()]+\.(tsx?|jsx?|json))\s*\n```(?:tsx?|jsx?|json|js)?\n([\s\S]*?)```/g;
     while ((match = pathThenBlock.exec(response)) !== null) {
-      const filePath = match[1].trim();
+      const filePath = match[1]?.trim();
       const content = match[3];
-      if (isPathAllowed(filePath) && !isTruncated(content)) {
+      if (filePath && content && isPathAllowed(filePath) && !isTruncated(content)) {
         changes.push({ filePath, content, description: 'AI Site Editor: Auto-applied changes' });
       }
     }
@@ -329,9 +329,9 @@ function parseAIResponseForFileChanges(
     while ((match = bareBlock.exec(response)) !== null) {
       const content = match[1];
       // Safety: reject truncated content
-      if (content.includes('... [TRUNCATED]') || content.includes('[TRUNCATED]')) continue;
+      if (!content || content.includes('... [TRUNCATED]') || content.includes('[TRUNCATED]')) continue;
       const filePath = fallbackFiles[0];
-      if (isPathAllowed(filePath)) {
+      if (filePath && isPathAllowed(filePath)) {
         changes.push({ filePath, content, description: 'AI Site Editor: Auto-applied changes' });
       }
     }
@@ -381,10 +381,10 @@ function parseCSSPatches(response: string): Array<{
     /PATCH:\s*([^\n]+)\s*\nOLD:\s*["']([^"'\n]+)["']\s*\nNEW:\s*["']([^"'\n]+)["']/g;
   let match;
   while ((match = patchPattern.exec(response)) !== null) {
-    const filePath = match[1].trim();
-    const oldClass = match[2].trim();
-    const newClass = match[3].trim();
-    if (isPathAllowed(filePath)) {
+    const filePath = match[1]?.trim();
+    const oldClass = match[2]?.trim();
+    const newClass = match[3]?.trim();
+    if (filePath && oldClass && newClass && isPathAllowed(filePath)) {
       patches.push({ filePath, oldClass, newClass });
     }
   }
@@ -393,10 +393,10 @@ function parseCSSPatches(response: string): Array<{
   if (patches.length === 0) {
     const multiPattern = /PATCH:\s*([^\n]+)\s*\nOLD:\s*`([^`]+)`\s*\nNEW:\s*`([^`]+)`/g;
     while ((match = multiPattern.exec(response)) !== null) {
-      const filePath = match[1].trim();
-      const oldClass = match[2].trim();
-      const newClass = match[3].trim();
-      if (isPathAllowed(filePath)) {
+      const filePath = match[1]?.trim();
+      const oldClass = match[2]?.trim();
+      const newClass = match[3]?.trim();
+      if (filePath && oldClass && newClass && isPathAllowed(filePath)) {
         patches.push({ filePath, oldClass, newClass });
       }
     }

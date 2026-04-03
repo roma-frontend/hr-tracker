@@ -137,6 +137,8 @@ export function NewConversationModal({
         const dmOrgId =
           isAllOrgs && targetUser?.organizationId ? targetUser.organizationId : effectiveOrgId;
 
+        if (!targetId) return;
+        
         const convId = await getOrCreateDM({
           organizationId: dmOrgId,
           currentUserId,
@@ -160,12 +162,12 @@ export function NewConversationModal({
             ),
           );
           if (orgIds.length === 1) {
-            groupOrgId = orgIds[0];
+            groupOrgId = orgIds[0]!;
           } else if (orgIds.length > 1) {
             console.warn(
               "[NewConversationModal] Cross-organization groups are not fully supported yet; using first organization's ID for the group.",
             );
-            groupOrgId = orgIds[0];
+            groupOrgId = orgIds[0]!;
           }
         }
 
@@ -313,12 +315,7 @@ export function NewConversationModal({
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder={t('chat.groupName')}
-              className="w-full px-3 py-2 text-sm rounded-xl border outline-none"
-              style={{
-                background: 'var(--background-subtle)',
-                borderColor: 'var(--border)',
-                color: 'var(--text-primary)',
-              }}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
               onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
               onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
             />

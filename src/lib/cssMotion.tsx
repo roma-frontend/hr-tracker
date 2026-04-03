@@ -13,6 +13,10 @@ interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   className?: string;
   layout?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  fill?: string;
+  rx?: string;
   initial?:
     | {
         opacity?: number;
@@ -33,6 +37,7 @@ interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
         width?: number | string;
         height?: number | string;
         rotate?: number;
+        background?: string | string[];
       }
     | string;
   exit?:
@@ -49,7 +54,11 @@ interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
   transition?: {
     duration?: number;
     delay?: number;
-    ease?: 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | string;
+    ease?: 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | string | number[];
+    type?: 'spring' | 'tween';
+    stiffness?: number;
+    damping?: number;
+    repeat?: number;
   };
   whileHover?: {
     scale?: number;
@@ -58,6 +67,7 @@ interface MotionProps extends React.HTMLAttributes<HTMLDivElement> {
     rotate?: number;
     background?: string;
     opacity?: number;
+    transition?: { duration?: number; ease?: string };
   };
   whileTap?: {
     scale?: number;
@@ -328,6 +338,7 @@ export const motion = {
   img: MotionDiv,
   svg: MotionDiv,
   path: MotionDiv,
+  rect: MotionDiv,
   label: MotionDiv,
   strong: MotionDiv,
   em: MotionDiv,

@@ -23,6 +23,7 @@ import {
   FileText,
   ChevronRight,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Dialog,
   DialogContent,
@@ -105,7 +106,7 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
   if (!alerts || !reviewedAlerts) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Clock className="w-6 h-6 animate-spin" />
+        <ShieldLoader size="sm" variant="inline" />
       </div>
     );
   }

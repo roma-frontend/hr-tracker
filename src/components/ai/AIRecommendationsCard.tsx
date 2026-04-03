@@ -88,9 +88,11 @@ export default function AIRecommendationsCard() {
               className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors disabled:opacity-50"
               title={t('titles.refresh')}
             >
-              <RefreshCw
-                className={`w-3.5 h-3.5 text-[var(--text-muted)] ${loading ? 'animate-spin' : ''}`}
-              />
+              {loading ? (
+                <ShieldLoader size="xs" variant="inline" />
+              ) : (
+                <RefreshCw className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              )}
             </button>
             <button
               onClick={() => setExpanded(!expanded)}

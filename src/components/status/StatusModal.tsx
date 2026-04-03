@@ -200,7 +200,7 @@ export function StatusModal({
                     'status.outOfOfficePlaceholder',
                     "Tell your team when you'll be back...",
                   )}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-none"
                   rows={3}
                 />
               </div>

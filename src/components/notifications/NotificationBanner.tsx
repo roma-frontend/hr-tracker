@@ -58,11 +58,13 @@ export function NotificationBanner() {
         playNotificationSound('new_request');
       }
 
-      setNewNotification({
-        title: latest.title,
-        message: latest.message,
-        type: latest.type,
-      });
+      if (latest) {
+        setNewNotification({
+          title: latest.title,
+          message: latest.message,
+          type: latest.type,
+        });
+      }
     }
 
     setLastSeenCount(currentCount);

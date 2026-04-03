@@ -13,6 +13,7 @@ import {
   Star,
   CheckCircle2,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -110,7 +111,7 @@ function useReveal(delay = '0s') {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) {
+        if (e?.isIntersecting) {
           setVisible(true);
           obs.disconnect();
         }
@@ -350,10 +351,7 @@ function PricingCard({
               />
             )}
             {loading ? (
-              <div
-                className="w-5 h-5 border-2 rounded-full animate-spin"
-                style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }}
-              />
+              <ShieldLoader size="xs" variant="inline" />
             ) : isCurrentPlan ? (
               <>
                 <CheckCircle2 size={15} />

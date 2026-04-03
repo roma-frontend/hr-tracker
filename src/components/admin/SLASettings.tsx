@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Settings, Save, AlertCircle } from 'lucide-react';
 import { motion } from '@/lib/cssMotion';
 import { useAuthStore } from '@/store/useAuthStore';
+import { ShieldLoader } from '../ui/ShieldLoader';
 
 function SLASettings() {
   const { t } = useTranslation();
@@ -162,7 +163,7 @@ function SLASettings() {
             className="bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? t('common.loading') : t('sla.saveConfig')}
+            {isSaving ? <ShieldLoader /> : t('sla.saveConfig')}
           </Button>
         </div>
       </CardContent>

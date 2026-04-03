@@ -5,6 +5,7 @@ import { motion } from '@/lib/cssMotion';
 import { Fingerprint } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface WebAuthnButtonProps {
   mode: 'register' | 'login';
@@ -14,6 +15,7 @@ interface WebAuthnButtonProps {
 }
 
 export function WebAuthnButton({ mode, userId, onSuccess, disabled }: WebAuthnButtonProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const isSupported = () => {

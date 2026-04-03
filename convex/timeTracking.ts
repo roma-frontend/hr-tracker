@@ -9,7 +9,7 @@ const ARMENIA_OFFSET_MS = 4 * 60 * 60 * 1000;
 function getTodayDate() {
   const now = new Date();
   const armeniaTime = new Date(now.getTime() + ARMENIA_OFFSET_MS);
-  return armeniaTime.toISOString().split("T")[0];
+  return armeniaTime.toISOString().split("T")[0] || "";
 }
 
 // Helper: get scheduled start/end timestamps in Armenia timezone (UTC+4)
@@ -28,10 +28,10 @@ function getScheduledTimestamps(dateStr: string, startTime: string, endTime: str
   // But since Date.now() returns UTC, we compare directly:
   // Armenia 09:00 as UTC ms = Date.UTC(year, month-1, day) - ARMENIA_OFFSET_MS + 9*3600*1000
 
-  const armeniaDayStartUTC = Date.UTC(year, month - 1, day) - ARMENIA_OFFSET_MS;
+  const armeniaDayStartUTC = Date.UTC(year ?? 0, (month ?? 1) - 1, day ?? 1) - ARMENIA_OFFSET_MS;
 
-  const scheduledStart = armeniaDayStartUTC + (startHour * 60 + startMin) * 60 * 1000;
-  const scheduledEnd   = armeniaDayStartUTC + (endHour   * 60 + endMin  ) * 60 * 1000;
+  const scheduledStart = armeniaDayStartUTC + ((startHour ?? 0) * 60 + (startMin ?? 0)) * 60 * 1000;
+  const scheduledEnd   = armeniaDayStartUTC + ((endHour ?? 0) * 60 + (endMin ?? 0)) * 60 * 1000;
 
   return { scheduledStart, scheduledEnd };
 }

@@ -157,7 +157,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('task.titlePlaceholder')}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
             />
           </div>
 
@@ -171,7 +171,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('task.descriptionPlaceholder')}
               rows={3}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none placeholder:text-[var(--text-muted)]"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none placeholder:text-[var(--text-muted)]"
             />
           </div>
 
@@ -245,7 +245,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder={t('task.tagsPlaceholder')}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
             />
           </div>
 

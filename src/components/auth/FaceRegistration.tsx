@@ -47,7 +47,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
         console.log('Available cameras:', videoDevices);
         setCameras(videoDevices);
         if (videoDevices.length > 0) {
-          setSelectedCamera(videoDevices[0].deviceId);
+          setSelectedCamera(videoDevices[0]!.deviceId);
         }
       } catch (err) {
         console.error('Failed to enumerate devices:', err);

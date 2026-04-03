@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface Props {
   message: string;
@@ -35,11 +36,11 @@ export function SmartReply({ message, context, onSelect, lang = 'en' }: Props) {
     } catch {
       const fallbacks: Record<string, string[]> = {
         ru: ['👍 Понял!', 'Можете уточнить?', 'Сделаю позже'],
-        hy: ['👍 Հասկացա!', 'Կարո՞ղ եք պարզաբանել:', 'Կանեմ ավելի ուշ'],
+        hy: ['👍 Հասկացա!', 'Կարող եք պարզաբանել:', 'Կանեմ ավելի ուշ'],
         en: ['👍 Got it!', 'Can you clarify?', "I'll do it later"],
       };
       const key = lang.startsWith('ru') ? 'ru' : lang.startsWith('hy') ? 'hy' : 'en';
-      setReplies(fallbacks[key]);
+      setReplies(fallbacks[key]!);
       setFetched(true);
     } finally {
       setLoading(false);
@@ -67,7 +68,7 @@ export function SmartReply({ message, context, onSelect, lang = 'en' }: Props) {
           className="flex items-center gap-1.5 sm:px-2 px-3 sm:py-0.5 py-1.5 rounded-full sm:text-[10px] text-xs min-h-[36px] sm:min-h-auto"
           style={{ color: 'var(--text-muted)' }}
         >
-          <span className="sm:w-2.5 w-3.5 sm:h-2.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
+          <ShieldLoader size="xs" variant="inline" />
           Thinking…
         </div>
       )}

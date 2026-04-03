@@ -5,6 +5,7 @@ import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -14,7 +15,7 @@ function useReveal() {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) {
+        if (e?.isIntersecting) {
           setVisible(true);
           obs.disconnect();
         }
@@ -125,10 +126,7 @@ export default function NewsletterSection() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div
-                    className="w-5 h-5 border-2 rounded-full animate-spin"
-                    style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }}
-                  />
+                  <ShieldLoader size="xs" variant="inline" />
                 ) : (
                   <>
                     <span>{t('newsletter.subscribe')}</span>

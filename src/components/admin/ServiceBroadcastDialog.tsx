@@ -14,8 +14,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, AlertCircle, CheckCircle, Clock, Power } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface ServiceBroadcastDialogProps {
   open: boolean;
@@ -445,7 +446,7 @@ export function ServiceBroadcastDialog({
                 color: 'white',
               }}
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading && <ShieldLoader size="xs" variant="inline" />}
               {loading
                 ? 'Отправка...'
                 : scheduleMaintenance

@@ -6,6 +6,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
 // ─── USER 360 PROFILE ────────────────────────────────────────────────────────
 /**
@@ -101,10 +102,10 @@ export const getUser360 = query({
       })
     );
 
-    // Enrich tasks with creator info
+    // Enrich tasks with creator info (using assignedBy as creator)
     const enrichedTasks = await Promise.all(
       tasks.map(async (task) => {
-        const creator = task.createdBy ? await ctx.db.get(task.createdBy) : null;
+        const creator = await ctx.db.get(task.assignedBy);
         return {
           ...task,
           creatorName: creator?.name || null,
@@ -116,10 +117,11 @@ export const getUser360 = query({
     const enrichedDriverRequests = await Promise.all(
       driverRequests.map(async (req) => {
         const driver = await ctx.db.get(req.driverId);
+        const driverUser = driver ? await ctx.db.get(driver.userId) : null;
         return {
           ...req,
-          driverName: driver?.name || null,
-          driverPhone: driver?.phone || null,
+          driverName: driverUser?.name || null,
+          driverPhone: driverUser?.phone || null,
         };
       })
     );
@@ -266,7 +268,7 @@ export const getEmergencyDashboard = query({
 
     // Analyze failed logins for potential attacks
     const failedLoginsByIP = failedLogins.reduce((acc, attempt) => {
-      const ip = attempt.ipAddress || "unknown";
+      const ip = attempt.ip || "unknown";
       if (!acc[ip]) acc[ip] = [];
       acc[ip].push(attempt);
       return acc;
@@ -530,7 +532,6 @@ export const endImpersonation = mutation({
     await ctx.db.patch(args.sessionId, {
       isActive: false,
       endedAt: now,
-      updatedAt: now,
     });
 
     // Audit log
@@ -564,7 +565,7 @@ export const getActiveImpersonation = query({
 
     if (sessions.length === 0) return null;
 
-    const session = sessions[0];
+    const session = sessions[0]!;
     const superadmin = await ctx.db.get(session.superadminId);
     const targetUser = await ctx.db.get(session.targetUserId);
 
@@ -746,11 +747,12 @@ export const globalSearch = query({
         .map(async (request) => {
           const requester = await ctx.db.get(request.requesterId);
           const driver = await ctx.db.get(request.driverId);
+          const driverUser = driver ? await ctx.db.get(driver.userId) : null;
           return {
             ...request,
             requesterName: requester?.name || "Unknown",
             requesterEmail: requester?.email || "",
-            driverName: driver?.name || "Unknown",
+            driverName: driverUser?.name || "Unknown",
           };
         })
     );
@@ -765,7 +767,7 @@ export const globalSearch = query({
         .slice(0, limit)
         .map(async (task) => {
           const assignee = task.assignedTo ? await ctx.db.get(task.assignedTo) : null;
-          const creator = task.createdBy ? await ctx.db.get(task.createdBy) : null;
+          const creator = await ctx.db.get(task.assignedBy);
           return {
             ...task,
             assigneeName: assignee?.name || "Unknown",
@@ -819,8 +821,8 @@ export const globalSearch = query({
  */
 export const quickSearch = query({
   args: { query: v.string() },
-  handler: async (ctx, args) => {
-    const fullResults = await globalSearch(ctx, { query: args.query, limit: 5 });
+  handler: async (ctx, args): Promise<any> => {
+    const fullResults = await ctx.runQuery(api.superadmin.globalSearch, { query: args.query, limit: 5 });
     
     // Format for quick display
     return {

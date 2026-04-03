@@ -9,6 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PLAN_LABELS, type PlanType } from '@/hooks/usePlanFeatures';
 
@@ -248,7 +249,7 @@ function PlanCard({
           }
         >
           {loading ? (
-            <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <ShieldLoader size="xs" variant="inline" />
           ) : isCurrent ? (
             <>
               <Check size={12} />

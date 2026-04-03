@@ -33,7 +33,7 @@ interface TextInputStepProps {
   placeholder?: string;
   description?: string;
   required?: boolean;
-  type?: 'text' | 'email' | 'number' | 'password';
+  type?: 'text' | 'email' | 'number' | 'password' | 'date' | 'time';
 }
 
 export function TextInputStep({
@@ -46,6 +46,7 @@ export function TextInputStep({
   required = false,
   type = 'text',
 }: TextInputStepProps) {
+  const value = stepData[field] as string | number | undefined;
   return (
     <div className="space-y-2">
       <Label htmlFor={field} className="text-[var(--text-primary)]">
@@ -55,10 +56,10 @@ export function TextInputStep({
         id={field}
         name={field}
         type={type}
-        value={stepData[field] || ''}
+        value={value ?? ''}
         onChange={(e) => updateStepData(field, e.target.value)}
         placeholder={placeholder}
-        className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+        className="bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)]"
         required={required}
       />
       {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
@@ -90,6 +91,7 @@ export function TextareaStep({
   required = false,
   rows = 4,
 }: TextareaStepProps) {
+  const value = stepData[field] as string | number | undefined;
   return (
     <div className="space-y-2">
       <Label htmlFor={field} className="text-[var(--text-primary)]">
@@ -98,11 +100,11 @@ export function TextareaStep({
       <Textarea
         id={field}
         name={field}
-        value={stepData[field] || ''}
+        value={value ?? ''}
         onChange={(e) => updateStepData(field, e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none"
+        className="bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none"
         required={required}
       />
       {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
@@ -135,17 +137,18 @@ export function SelectStep({
   description,
   required = false,
 }: SelectStepProps) {
+  const value = stepData[field] as string | undefined;
   return (
     <div className="space-y-2">
       <Label htmlFor={field} className="text-[var(--text-primary)]">
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Select
-        value={stepData[field] || ''}
+        value={value ?? ''}
         onValueChange={(value) => updateStepData(field, value)}
         required={required}
       >
-        <SelectTrigger className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)]">
+        <SelectTrigger className="bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)]">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -231,7 +234,7 @@ export function CardSelectionStep({
               )}
               onClick={() => updateStepData(field, option.value)}
             >
-              <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
+              <CardContent className="p-5 flex flex-col items-center text-center gap-3">
                 <div
                   className={cn(
                     'p-3 rounded-full transition-colors',
@@ -240,20 +243,20 @@ export function CardSelectionStep({
                       : option.color || 'bg-[var(--background-subtle)] text-[var(--text-muted)]',
                   )}
                 >
-                  {option.icon}
+                  {React.isValidElement(option.icon) ? React.cloneElement(option.icon as React.ReactElement<any>, { className: 'w-6 h-6' }) : option.icon}
                 </div>
-                <div>
+                <div className="space-y-1.5">
                   <p
                     className={cn(
-                      'font-medium text-sm',
+                      'font-semibold text-sm leading-tight',
                       isSelected ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]',
                     )}
                   >
                     {option.title}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{option.description}</p>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed line-clamp-2">{option.description}</p>
                 </div>
-                {isSelected && <Badge className="bg-[var(--primary)] text-white">Selected</Badge>}
+                {isSelected && <Badge className="bg-[var(--primary)] text-white text-xs px-2 py-0.5">✓ Выбрано</Badge>}
               </CardContent>
             </Card>
           );
@@ -285,6 +288,7 @@ export function RadioGroupStep({
   description,
   required = false,
 }: RadioGroupStepProps) {
+  const value = stepData[field] as string | undefined;
   return (
     <div className="space-y-3">
       <div>
@@ -295,7 +299,7 @@ export function RadioGroupStep({
       </div>
 
       <RadioGroup
-        value={stepData[field] || ''}
+        value={value ?? ''}
         onValueChange={(value) => updateStepData(field, value)}
         className="space-y-2"
       >
@@ -343,7 +347,7 @@ export function CheckboxStep({
   options,
   description,
 }: CheckboxStepProps) {
-  const values = stepData[field] || [];
+  const values = (stepData[field] as string[] | undefined) || [];
 
   const toggleValue = (value: string) => {
     const newValues = values.includes(value)

@@ -23,6 +23,7 @@ import {
   BarChart2,
   Mic,
 } from 'lucide-react';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import Link from 'next/link';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ThreadPanel } from './ThreadPanel';
@@ -144,7 +145,7 @@ export const ChatWindow = React.memo(function ChatWindow({
 
   const conv = conversation?.find((c) => c != null && c._id === conversationId) ?? null;
   const otherUser = conv?.type === 'direct' ? (conv as any).otherUser : null;
-  const displayName = conv?.type === 'group' ? (conv.name ?? 'Group') : (otherUser?.name ?? 'Chat');
+  const displayName = conv?.type === 'group' ? ((conv as any).name ?? 'Group') : (otherUser?.name ?? 'Chat');
   const otherMembers = members?.filter((m) => m.userId !== currentUserId) ?? [];
   const otherMemberIds = otherMembers.map((m: any) => m.userId as Id<'users'>);
 
@@ -210,7 +211,7 @@ export const ChatWindow = React.memo(function ChatWindow({
   const removePendingFile = (idx: number) => {
     setPendingFiles((prev) => {
       const updated = [...prev];
-      if (updated[idx].previewUrl) URL.revokeObjectURL(updated[idx].previewUrl!);
+      if (updated[idx]?.previewUrl) URL.revokeObjectURL(updated[idx].previewUrl!);
       updated.splice(idx, 1);
       return updated;
     });
@@ -279,7 +280,7 @@ export const ChatWindow = React.memo(function ChatWindow({
       // Determine message type
       const msgType =
         uploadedAttachments.length > 0
-          ? uploadedAttachments[0].type.startsWith('image/')
+          ? uploadedAttachments[0]?.type.startsWith('image/')
             ? 'image'
             : 'file'
           : 'text';
@@ -290,7 +291,8 @@ export const ChatWindow = React.memo(function ChatWindow({
       const mentionedIds: Id<'users'>[] = [];
       let match;
       while ((match = mentionRegex.exec(text)) !== null) {
-        const mentionName = match[1].toLowerCase();
+        const mentionName = match[1]?.toLowerCase();
+        if (!mentionName) continue;
         const member = members?.find((m) => m.user?.name.toLowerCase().includes(mentionName));
         if (member) mentionedIds.push(member.userId as Id<'users'>);
       }
@@ -456,7 +458,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     const textBeforeCursor = value.slice(0, cursorPos);
     const atIdx = textBeforeCursor.lastIndexOf('@');
     if (atIdx >= 0) {
-      const charBeforeAt = atIdx > 0 ? textBeforeCursor[atIdx - 1] : ' ';
+      const charBeforeAt = atIdx > 0 ? (textBeforeCursor[atIdx - 1] ?? ' ') : ' ';
       // Only trigger if @ is at start or preceded by whitespace
       if (atIdx === 0 || /\s/.test(charBeforeAt)) {
         const query = textBeforeCursor.slice(atIdx + 1);
@@ -563,7 +565,7 @@ export const ChatWindow = React.memo(function ChatWindow({
   const canSend = (input.trim().length > 0 || pendingFiles.length > 0) && !sending;
 
   // Check if current user can send messages (not blocked from System Announcements)
-  const isSystemAnnouncementsChannel = conv?.name === 'System Announcements';
+  const isSystemAnnouncementsChannel = (conv as any)?.name === 'System Announcements';
   const canUserSendMessage = !isSystemAnnouncementsChannel || currentUser?.role === 'superadmin';
 
   return (
@@ -637,7 +639,7 @@ export const ChatWindow = React.memo(function ChatWindow({
 
           <div className="flex items-center gap-1">
             {/* Disable calls for System Announcements channel */}
-            {conv?.name !== 'System Announcements' && (
+            {(conv as any)?.name !== 'System Announcements' && (
               <>
                 <button
                   onClick={() => handleStartCall('audio')}
@@ -726,12 +728,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('chat.searchInConversation')}
-              className="w-full px-3 py-1.5 text-sm rounded-lg border outline-none"
-              style={{
-                background: 'var(--background)',
-                borderColor: 'var(--border)',
-                color: 'var(--text-primary)',
-              }}
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
             />
             {searchResults && searchResults.length > 0 && (
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
@@ -801,7 +798,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                 const prevMsg = messages[virtualRow.index - 1];
                 const isFirstOfStreak =
                   virtualRow.index === 0 || prevMsg?.senderId !== msg.senderId;
-                const isSystemAnnouncements = conv?.name === 'System Announcements';
+                const isSystemAnnouncements = (conv as any)?.name === 'System Announcements';
                 const showAvatar = isFirstOfStreak && !isSystemAnnouncements;
                 const showName = isSystemAnnouncements
                   ? false
@@ -994,12 +991,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               value={pollQuestion}
               onChange={(e) => setPollQuestion(e.target.value)}
               placeholder={t('chat.pollQuestion')}
-              className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border outline-none mb-2"
-              style={{
-                background: 'var(--background)',
-                borderColor: 'var(--border)',
-                color: 'var(--text-primary)',
-              }}
+              className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none mb-2"
             />
             {pollOptions.map((opt: any, i: any) => (
               <div key={i} className="flex items-center gap-1 mb-1">
@@ -1011,12 +1003,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                     setPollOptions(o);
                   }}
                   placeholder={`${t('chat.option')} ${i + 1}`}
-                  className="flex-1 px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border outline-none"
-                  style={{
-                    background: 'var(--background)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)',
-                  }}
+                  className="flex-1 px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
                 />
                 {pollOptions.length > 2 && (
                   <button
@@ -1281,7 +1268,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                 }}
               >
                 {sending ? (
-                  <span className="w-3 xs:w-3.5 h-3 xs:h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <ShieldLoader size="xs" variant="inline" />
                 ) : scheduledFor ? (
                   <Clock className="w-3 xs:w-3.5 h-3 xs:h-3.5 text-white" />
                 ) : (

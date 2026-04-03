@@ -31,7 +31,7 @@ export interface User {
 }
 
 export interface Leave {
-  _id: Id<'leaves'>;
+  _id: Id<'leaveRequests'>;
   _creationTime: number;
   organizationId: Id<'organizations'>;
   userId: Id<'users'>;
@@ -75,7 +75,7 @@ export interface Organization {
 }
 
 export interface Event {
-  _id: Id<'events'>;
+  _id: Id<'companyEvents'>;
   _creationTime: number;
   organizationId: Id<'organizations'>;
   title: string;
@@ -89,7 +89,7 @@ export interface Event {
 }
 
 export interface MaintenanceMode {
-  _id: Id<'admin'>;
+  _id: Id<'maintenanceMode'>;
   _creationTime: number;
   organizationId?: Id<'organizations'>;
   isActive: boolean;
@@ -100,11 +100,11 @@ export interface MaintenanceMode {
   updatedAt: number;
 }
 
-export interface LeaveEnriched extends Leave {
+export interface LeaveEnriched extends Omit<Leave, 'userEmployeeType'> {
   userName: string;
   userEmail: string;
   userDepartment: string;
-  userEmployeeType: string;
+  userEmployeeType?: string;
   userAvatarUrl?: string;
   reviewerName?: string;
 }

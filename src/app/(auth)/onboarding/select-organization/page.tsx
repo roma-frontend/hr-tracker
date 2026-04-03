@@ -15,9 +15,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Building2, Search, CheckCircle2 } from 'lucide-react';
+import { Building2, Search, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function SelectOrganizationPage() {
   const { t } = useTranslation();
@@ -166,7 +167,7 @@ export default function SelectOrganizationPage() {
         <div className="space-y-3">
           {!organizations ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <ShieldLoader size="md" variant="inline" />
             </div>
           ) : filteredOrgs?.length === 0 ? (
             <Card>
@@ -234,11 +235,11 @@ export default function SelectOrganizationPage() {
                     >
                       {isRequesting === org._id ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          <ShieldLoader size="xs" variant="inline" />
                           {t('onboarding.sending', 'Sending...')}
                         </>
                       ) : !user?.id ? (
-                        'Loading...'
+                        <ShieldLoader size="xs" variant="inline" />
                       ) : (
                         <>
                           <CheckCircle2 className="w-4 h-4 mr-2" />

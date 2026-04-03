@@ -10,7 +10,7 @@ const PLAN_EMPLOYEE_LIMITS: Record<string, number> = {
   starter: 10,
   professional: 50,
   enterprise: 999999,
-};
+} as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SUPERADMIN: Create a new organization
@@ -52,7 +52,7 @@ export const createOrganization = mutation({
       timezone: args.timezone ?? "UTC",
       country: args.country,
       industry: args.industry,
-      employeeLimit: PLAN_EMPLOYEE_LIMITS[args.plan],
+      employeeLimit: PLAN_EMPLOYEE_LIMITS[args.plan]!,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });

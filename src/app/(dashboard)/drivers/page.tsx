@@ -2197,7 +2197,7 @@ export default function DriversPage() {
                                   request.status === 'approved'
                                     ? 'default'
                                     : request.status === 'declined'
-                                      ? t('common.destructive')
+                                      ? 'destructive'
                                       : 'secondary'
                                 }
                               >

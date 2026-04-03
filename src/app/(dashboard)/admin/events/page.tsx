@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Badge } from '@/components/ui/badge';
 import {
   Calendar,
@@ -200,7 +201,7 @@ export default function CompanyEventsPage() {
           <CardContent>
             {!events ? (
               <div className="flex items-center justify-center py-12">
-                <Calendar className="w-6 h-6 animate-spin" />
+                <ShieldLoader size="sm" variant="inline" />
               </div>
             ) : events.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">

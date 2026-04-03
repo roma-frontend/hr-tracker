@@ -230,7 +230,7 @@ export const createOAuthUser = mutation({
       throw new Error("No organization found. Please create an organization first.");
     }
 
-    const organizationId = isSuperAdmin ? allOrgs[0]._id : undefined;
+    const organizationId = isSuperAdmin ? allOrgs[0]?._id : undefined;
 
     // Check if user is first member of the org (becomes admin) - only for superadmin
     const orgMembers = isSuperAdmin ? await ctx.db
@@ -759,7 +759,7 @@ export const getEffectivePresenceStatus = query({
       .collect();
 
     // Check if any leave is active today
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0] || "";
     const hasActiveLeave = approvedLeaves.some((leave) => {
       const startDate = leave.startDate;
       const endDate = leave.endDate;

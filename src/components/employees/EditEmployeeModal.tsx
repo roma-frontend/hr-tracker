@@ -422,14 +422,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                     value={form.position}
                     onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
                     placeholder="e.g. Engineer"
-                    className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
-                    style={{
-                      background: 'var(--input)',
-                      borderColor: 'var(--border)',
-                      color: 'var(--text-primary)',
-                    }}
-                    onFocus={(e) => (e.target.style.borderColor = '#2563eb')}
-                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm outline-none transition-all focus:border-[var(--primary)]"
                   />
                 </div>
               </div>

@@ -7,7 +7,6 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { Building2, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Id } from '@/convex/_generated/dataModel';
 
 interface OrgSelectorProps {
   collapsed?: boolean;
