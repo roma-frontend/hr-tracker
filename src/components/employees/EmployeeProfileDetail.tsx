@@ -158,7 +158,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="flex flex-col items-end gap-2">
               {score && (
                 <div className="text-right">
-                  <p className="text-xs text-[var(--text-muted)]">AI Score</p>
+                  <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.aiScore')}</p>
                   <p className="text-3xl font-bold text-[var(--primary)]">
                     {score.overallScore}/100
                   </p>
@@ -192,7 +192,9 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                     className="bg-gradient-to-r from-blue-600 to-sky-700 hover:from-blue-700 hover:to-sky-800 text-white"
                   >
                     <Star className="w-4 h-4 mr-1" />
-                    {showRatingForm ? 'Cancel Rating' : 'Rate Performance'}
+                    {showRatingForm
+                      ? t('employeeProfile.cancelRating')
+                      : t('employeeProfile.ratePerformance')}
                   </Button>
                 )}
               </div>
@@ -203,7 +205,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-[var(--text-muted)]" />
             <div>
-              <p className="text-xs text-[var(--text-muted)]">Email</p>
+              <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.email')}</p>
               <p className="text-sm font-medium">{employee.email}</p>
             </div>
           </div>
@@ -211,7 +213,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="flex items-center gap-3">
               <Phone className="w-5 h-5 text-[var(--text-muted)]" />
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Phone</p>
+                <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.phone')}</p>
                 <p className="text-sm font-medium">{employee.phone}</p>
               </div>
             </div>
@@ -220,7 +222,9 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="flex items-center gap-3">
               <Building2 className="w-5 h-5 text-[var(--text-muted)]" />
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Department</p>
+                <p className="text-xs text-[var(--text-muted)]">
+                  {t('employeeProfile.department')}
+                </p>
                 <p className="text-sm font-medium">{employee.department}</p>
               </div>
             </div>
@@ -228,7 +232,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           <div className="flex items-center gap-3">
             <Calendar className="w-5 h-5 text-[var(--text-muted)]" />
             <div>
-              <p className="text-xs text-[var(--text-muted)]">Joined</p>
+              <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.joined')}</p>
               <p className="text-sm font-medium">
                 {format(new Date(employee.createdAt), 'MMM d, yyyy')}
               </p>

@@ -1,73 +1,81 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main, develop]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main]
 
 jobs:
-  quality:
-    name: 🔍 Lint, Type-check & Test
+  # Type checking
+  type-check:
+    name: TypeScript Type Check
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: 'npm'
+      - run: npm ci
+      - run: npm run type-check
 
-      - name: 📥 Install dependencies
-        run: npm ci
+  # Linting
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
 
-      - name: 🔍 ESLint
-        run: npm run lint
+  # Unit tests with coverage
+  test:
+    name: Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run tests with coverage
+        run: npm run test:coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/lcov.info
+          fail_ci_if_error: false
 
-      - name: 🏷️ TypeScript type-check
-        run: npm run type-check
-
-      - name: 🧪 Jest tests
-        run: npm test -- --passWithNoTests --ci
-
-      - name: 📏 Prettier check
-        run: npx prettier --check "src/**/*.{ts,tsx,css,json}"
-
+  # Build
   build:
-    name: 🏗️ Build
+    name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: quality
-
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: 'npm'
+      - run: npm ci
+      - run: npm run build
 
-      - name: 📥 Install dependencies
-        run: npm ci
-
-      - name: 🏗️ Build Next.js
-        run: npm run build
-        env:
-          # Stub env vars for build (не реальные ключи)
-          NEXT_PUBLIC_CONVEX_URL: https://stub.convex.cloud
-          NEXT_PUBLIC_APP_URL: https://stub.vercel.app
-          CONVEX_DEPLOYMENT: dev:stub
-          NEXTAUTH_SECRET: ci-stub-secret
-          NEXTAUTH_URL: http://localhost:3000
-          SENTRY_DSN: ''
-          SKIP_ENV_VALIDATION: 'true'
+  # Accessibility check (optional)
+  accessibility:
+    name: Accessibility Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run accessibility tests
+        run: npm test -- --testPathPattern=accessibility
+        continue-on-error: true

@@ -14,11 +14,32 @@ module.exports = {
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/__tests__/**',
+    // Exclude generated files
+    '!src/**/_generated/**',
+    // Exclude story files
+    '!src/**/*.stories.tsx',
   ],
+  coverageDirectory: '<rootDir>/coverage',
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  coverageThreshold: {
+    global: {
+      branches: 30,
+      functions: 30,
+      lines: 30,
+      statements: 30,
+    },
+  },
   setupFilesAfterEnv: [],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/.next/',
     '/out/',
+  ],
+  // Coverage exclusions для gradual improvement
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/',
+    '/_generated/',
+    '/.next/',
   ],
 };
