@@ -4839,5 +4839,37 @@
       "noChatMessages": "Հաղորդագրություններ չգտնվեցին",
       "loading": "Բեռնում..."
     }
+  },
+  "impersonate": {
+    "exit": "Ելք",
+    "loginAs": "Մուտք որպես",
+    "usersNotFound": "Օգտատերեր չգտնվեցին",
+    "history": "Իմպերսոնացիաների պատմություն",
+    "historyDesc": "Վերջին 20 նիստերը",
+    "historyEmpty": "Պատմությունը դատարկ է",
+    "active": "Ակտիվ",
+    "completed": "Ավարտված",
+    "now": "Հիմա",
+    "superadmin": "Սուպեր-ադմին՝",
+    "user": "Օգտատեր՝",
+    "email": "Էլ. փոստ՝",
+    "organization": "Կազմակերպություն՝",
+    "reason": "Պատճառ՝",
+    "started": "Սկսվել է՝",
+    "duration": "Տևողություն՝",
+    "min": "րոպե",
+    "loginAsUser": "Մուտք որպես օգտատեր",
+    "fullAccessDesc": "Դուք կստանաք օգտատիրոջ հաշվի լիարժեք մուտք",
+    "role": "Դեր՝",
+    "reasonRequired": "Պատճառ (պարտադիր) *",
+    "reasonPlaceholder": "Օր․՝ Մուտքի խնդրի կարգավորում...",
+    "auditLogWarning": "⚠️ Բոլոր գործողությունները կգրանցվեն audit log-ում",
+    "important": "Կարևոր՝",
+    "sessionExpires": "Նիստը լրանում է 1 ժամից",
+    "userNotified": "Օգտատերը կստանա ծանուցում",
+    "actionsLogged": "Բոլոր գործողությունները գրանցվում են audit log-ում",
+    "cannotChangePassword": "Հնարավոր չէ փոխել գաղտնաբառը կամ էլ. փոստը",
+    "cancel": "Չեղարկել",
+    "startSession": "Սկսել նիստը"
   }
 }

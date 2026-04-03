@@ -245,7 +245,7 @@ export default function ImpersonationPage() {
                         setStartDialogOpen(true);
                       }}
                     >
-                      Войти как
+                      {t('impersonate.loginAs')}
                     </Button>
                   </div>
                 ))}
@@ -255,7 +255,7 @@ export default function ImpersonationPage() {
             {searchQuery.length >= 2 && (!searchResults || searchResults.length === 0) && (
               <div className="mt-4 text-center py-8 text-muted-foreground">
                 <User className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Пользователи не найдены</p>
+                <p>{t('impersonate.usersNotFound')}</p>
               </div>
             )}
           </CardContent>
@@ -266,17 +266,19 @@ export default function ImpersonationPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <History className="w-5 h-5" />
-              История имперсонаций
+              {t('impersonate.history')}
             </CardTitle>
-            <CardDescription>Последние 20 сессий</CardDescription>
+            <CardDescription>{t('impersonate.historyDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             {impersonationHistory === undefined ? (
-              <div className="text-center py-8 text-muted-foreground">Загрузка...</div>
+              <div className="text-center py-8 text-muted-foreground">
+                {t('impersonate.loading')}
+              </div>
             ) : impersonationHistory.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <History className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>История пуста</p>
+                <p>{t('impersonate.historyEmpty')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -293,35 +295,41 @@ export default function ImpersonationPage() {
                             variant={session.isActive ? 'default' : 'outline'}
                             className="text-xs"
                           >
-                            {session.isActive ? 'Активно' : 'Завершено'}
+                            {session.isActive
+                              ? t('impersonate.active')
+                              : t('impersonate.completed')}
                           </Badge>
                           {session.isActive && (
                             <Badge variant="destructive" className="text-xs">
-                              Сейчас
+                              {t('impersonate.now')}
                             </Badge>
                           )}
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
                           <div>
-                            <span className="text-muted-foreground">Супер-админ:</span>{' '}
+                            <span className="text-muted-foreground">
+                              {t('impersonate.superadmin')}
+                            </span>{' '}
                             <span className="font-medium truncate block">
                               {session.superadminName}
                             </span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Пользователь:</span>{' '}
+                            <span className="text-muted-foreground">{t('impersonate.user')}</span>{' '}
                             <span className="font-medium truncate block">
                               {session.targetUserName}
                             </span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Email:</span>{' '}
+                            <span className="text-muted-foreground">{t('impersonate.email')}</span>{' '}
                             <span className="font-mono text-xs truncate block">
                               {session.targetUserEmail}
                             </span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Организация:</span>{' '}
+                            <span className="text-muted-foreground">
+                              {t('impersonate.organization')}
+                            </span>{' '}
                             <span className="font-medium truncate block">
                               {session.organizationName}
                             </span>
@@ -329,17 +337,21 @@ export default function ImpersonationPage() {
                         </div>
                         <div className="mt-3 p-2 sm:p-3 rounded bg-muted">
                           <p className="text-[10px] sm:text-xs text-muted-foreground mb-1">
-                            Причина:
+                            {t('impersonate.reason')}
                           </p>
                           <p className="text-xs sm:text-sm">{session.reason}</p>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-[10px] sm:text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3 flex-shrink-0" />
-                            Начато: {new Date(session.startedAt).toLocaleString()}
+                            {t('impersonate.started')}{' '}
+                            {new Date(session.startedAt).toLocaleString()}
                           </span>
                           {session.endedAt && (
-                            <span>Длительность: {Math.round(session.duration / 60000)} мин</span>
+                            <span>
+                              {t('impersonate.duration')} {Math.round(session.duration / 60000)}{' '}
+                              {t('impersonate.min')}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -358,9 +370,9 @@ export default function ImpersonationPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              Войти как пользователь
+              {t('impersonate.loginAsUser')}
             </DialogTitle>
-            <DialogDescription>Вы получите полный доступ к аккаунту пользователя</DialogDescription>
+            <DialogDescription>{t('impersonate.fullAccessDesc')}</DialogDescription>
           </DialogHeader>
 
           {selectedUser && (
@@ -379,22 +391,24 @@ export default function ImpersonationPage() {
                 <div>
                   <p className="font-semibold">{selectedUser.name}</p>
                   <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Роль: {selectedUser.role}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t('impersonate.role')} {selectedUser.role}
+                  </p>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="reason">Причина (обязательно) *</Label>
+                <Label htmlFor="reason">{t('impersonate.reasonRequired')}</Label>
                 <Textarea
                   id="reason"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Например: отладка проблемы с доступом..."
+                  placeholder={t('impersonate.reasonPlaceholder')}
                   rows={4}
                   className="mt-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  ⚠️ Все действия будут залогированы в audit log
+                  {t('impersonate.auditLogWarning')}
                 </p>
               </div>
 
@@ -402,12 +416,12 @@ export default function ImpersonationPage() {
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5" />
                   <div className="text-xs text-yellow-700">
-                    <p className="font-semibold mb-1">Важно:</p>
+                    <p className="font-semibold mb-1">{t('impersonate.important')}</p>
                     <ul className="list-disc list-inside space-y-1">
-                      <li>Сессия истекает через 1 час</li>
-                      <li>Пользователь получит уведомление</li>
-                      <li>Все действия записываются в audit log</li>
-                      <li>Нельзя изменить пароль или email</li>
+                      <li>{t('impersonate.sessionExpires')}</li>
+                      <li>{t('impersonate.userNotified')}</li>
+                      <li>{t('impersonate.actionsLogged')}</li>
+                      <li>{t('impersonate.cannotChangePassword')}</li>
                     </ul>
                   </div>
                 </div>
@@ -424,11 +438,11 @@ export default function ImpersonationPage() {
                 setReason('');
               }}
             >
-              Отмена
+              {t('impersonate.cancel')}
             </Button>
             <Button onClick={handleStartImpersonation} disabled={!reason.trim()}>
               <Shield className="w-4 h-4 mr-2" />
-              Начать сессию
+              {t('impersonate.startSession')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -5096,5 +5096,37 @@
       "noChatMessages": "No messages found",
       "loading": "Loading..."
     }
+  },
+  "impersonate": {
+    "exit": "Exit",
+    "loginAs": "Login as",
+    "usersNotFound": "No users found",
+    "history": "Impersonation History",
+    "historyDesc": "Last 20 sessions",
+    "historyEmpty": "History is empty",
+    "active": "Active",
+    "completed": "Completed",
+    "now": "Now",
+    "superadmin": "Super-admin:",
+    "user": "User:",
+    "email": "Email:",
+    "organization": "Organization:",
+    "reason": "Reason:",
+    "started": "Started:",
+    "duration": "Duration:",
+    "min": "min",
+    "loginAsUser": "Login as User",
+    "fullAccessDesc": "You will get full access to the user's account",
+    "role": "Role:",
+    "reasonRequired": "Reason (required) *",
+    "reasonPlaceholder": "e.g., Debugging access issue...",
+    "auditLogWarning": "⚠️ All actions will be logged in audit log",
+    "important": "Important:",
+    "sessionExpires": "Session expires in 1 hour",
+    "userNotified": "User will receive a notification",
+    "actionsLogged": "All actions are recorded in audit log",
+    "cannotChangePassword": "Cannot change password or email",
+    "cancel": "Cancel",
+    "startSession": "Start Session"
   }
 }

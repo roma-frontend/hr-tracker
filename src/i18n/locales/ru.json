@@ -5067,5 +5067,37 @@
       "noChatMessages": "Сообщений не найдено",
       "loading": "Загрузка..."
     }
+  },
+  "impersonate": {
+    "exit": "Выход",
+    "loginAs": "Войти как",
+    "usersNotFound": "Пользователи не найдены",
+    "history": "История имперсонаций",
+    "historyDesc": "Последние 20 сессий",
+    "historyEmpty": "История пуста",
+    "active": "Активно",
+    "completed": "Завершено",
+    "now": "Сейчас",
+    "superadmin": "Супер-админ:",
+    "user": "Пользователь:",
+    "email": "Email:",
+    "organization": "Организация:",
+    "reason": "Причина:",
+    "started": "Начато:",
+    "duration": "Длительность:",
+    "min": "мин",
+    "loginAsUser": "Войти как пользователь",
+    "fullAccessDesc": "Вы получите полный доступ к аккаунту пользователя",
+    "role": "Роль:",
+    "reasonRequired": "Причина (обязательно) *",
+    "reasonPlaceholder": "Например: отладка проблемы с доступом...",
+    "auditLogWarning": "⚠️ Все действия будут залогированы в audit log",
+    "important": "Важно:",
+    "sessionExpires": "Сессия истекает через 1 час",
+    "userNotified": "Пользователь получит уведомление",
+    "actionsLogged": "Все действия записываются в audit log",
+    "cannotChangePassword": "Нельзя изменить пароль или email",
+    "cancel": "Отмена",
+    "startSession": "Начать сессию"
   }
 }
