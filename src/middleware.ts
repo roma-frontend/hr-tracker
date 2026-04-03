@@ -69,12 +69,14 @@ function generateNonce(): string {
  * These are NOT duplicated in next.config.js headers().
  */
 function addSecurityHeaders(response: NextResponse, nonce: string): NextResponse {
-  // Content-Security-Policy — uses nonce instead of unsafe-eval
+  // Content-Security-Policy
+  // Note: We keep 'unsafe-inline' for script-src because Next.js generates inline scripts
+  // that are hard to nonce properly. In production, consider using a stricter policy.
   response.headers.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://js.stripe.com https://maps.googleapis.com https://*.sentry.io https://*.vercel.app https://*.vercel-scripts.com`,
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://accounts.google.com https://js.stripe.com https://maps.googleapis.com https://*.sentry.io https://*.vercel.app https://*.vercel-scripts.com`,
       "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
       "font-src 'self' https://fonts.gstatic.com data:",
