@@ -97,14 +97,14 @@ export default function CompanyEventsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('events.title', 'Company Events')}</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('events.title', 'Company Events')}</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             {t('events.subtitle', 'Manage events and review leave conflicts')}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
           <Button
             variant="outline"
             onClick={async () => {
@@ -148,14 +148,18 @@ export default function CompanyEventsPage() {
               }
               setActiveTab('conflicts');
             }}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <RefreshCw className="w-4 h-4" />
-            {t('events.checkConflicts', 'Check Conflicts')}
+            <span className="hidden sm:inline">
+              {t('events.checkConflicts', 'Check Conflicts')}
+            </span>
+            <span className="sm:hidden">Conflicts</span>
           </Button>
-          <Button onClick={() => setShowCreateModal(true)}>
+          <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
-            {t('events.createEvent', 'Create Event')}
+            <span className="hidden sm:inline">{t('events.createEvent', 'Create Event')}</span>
+            <span className="sm:hidden">Create</span>
           </Button>
         </div>
       </div>
@@ -218,10 +222,12 @@ export default function CompanyEventsPage() {
                     key={event._id}
                     className="p-4 border rounded-lg hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-lg">{event.name}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-base sm:text-lg truncate">
+                            {event.name}
+                          </h3>
                           <Badge
                             variant={
                               event.priority === 'high'
@@ -230,6 +236,7 @@ export default function CompanyEventsPage() {
                                   ? 'default'
                                   : 'secondary'
                             }
+                            className="flex-shrink-0"
                           >
                             {(() => {
                               const priority = event.priority || 'medium';
@@ -239,22 +246,24 @@ export default function CompanyEventsPage() {
                             })()}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                           {event.description || t('events.noDescription', 'No description')}
                         </p>
-                        <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {new Date(event.startDate).toLocaleDateString()} -{' '}
-                            {new Date(event.endDate).toLocaleDateString()}
+                            <Calendar className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">
+                              {new Date(event.startDate).toLocaleDateString()} -{' '}
+                              {new Date(event.endDate).toLocaleDateString()}
+                            </span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {event.requiredDepartments.join(', ')}
+                            <Users className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{event.requiredDepartments.join(', ')}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0 sm:self-start">
                         <Badge variant="outline" className="capitalize">
                           {String(t(`events.type.${event.eventType}`, event.eventType))}
                         </Badge>

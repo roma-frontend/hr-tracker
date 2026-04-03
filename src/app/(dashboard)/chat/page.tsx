@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import { useAuthStore } from '@/store/useAuthStore';
-import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 const ChatClient = dynamic(() => import('@/components/chat/ChatClient'), {
   ssr: false,
@@ -11,7 +10,7 @@ const ChatClient = dynamic(() => import('@/components/chat/ChatClient'), {
       className="flex h-full items-center justify-center"
       style={{ background: 'var(--background)' }}
     >
-      <ShieldLoader size="lg" />
+      <div className="w-12 h-12 border-4 border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin" />
     </div>
   ),
 });

@@ -117,20 +117,23 @@ export default function SupportTicketsPage() {
     <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <h1
-                className="text-3xl md:text-4xl font-bold mb-2"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {t('superadmin.support.title')}
               </h1>
-              <p className="text-muted-foreground">{t('superadmin.support.subtitle')}</p>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                {t('superadmin.support.subtitle')}
+              </p>
             </div>
-            <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
+            <Button onClick={() => setCreateDialogOpen(true)} className="gap-2 w-full sm:w-auto">
               <Plus className="w-4 h-4" />
-              {t('superadmin.support.createTicket')}
+              <span className="hidden sm:inline">{t('superadmin.support.createTicket')}</span>
+              <span className="sm:hidden">Create</span>
             </Button>
           </div>
         </div>
@@ -345,48 +348,78 @@ function TicketRow({
   return (
     <div
       onClick={onClick}
-      className="p-4 rounded-lg border hover:border-primary/50 transition-colors cursor-pointer"
-      style={{ background: 'var(--background-subtle)' }}
+      className="p-3 sm:p-4 rounded-lg border hover:border-primary/50 transition-colors cursor-pointer active:bg-[var(--background-subtle)]"
+      style={{ background: 'var(--card)' }}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+          <div className="flex flex-wrap items-center gap-1.5 mb-2">
+            <span
+              className="font-semibold text-sm sm:text-base"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {ticket.ticketNumber}
             </span>
-            <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
-            <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+            <Badge className={`${getStatusColor(ticket.status)} text-xs`}>
+              <span className="hidden sm:inline">{ticket.status}</span>
+              <span className="sm:hidden">
+                {ticket.status === 'open'
+                  ? 'Open'
+                  : ticket.status === 'in_progress'
+                    ? 'In Progress'
+                    : ticket.status === 'waiting_customer'
+                      ? 'Waiting'
+                      : ticket.status === 'resolved'
+                        ? 'Resolved'
+                        : ticket.status}
+              </span>
+            </Badge>
+            <Badge className={`${getPriorityColor(ticket.priority)} text-xs`}>
+              <span className="hidden sm:inline">{ticket.priority}</span>
+              <span className="sm:hidden">
+                {ticket.priority === 'critical'
+                  ? 'Crit'
+                  : ticket.priority === 'high'
+                    ? 'High'
+                    : ticket.priority === 'medium'
+                      ? 'Med'
+                      : ticket.priority}
+              </span>
+            </Badge>
             {ticket.isOverdue && (
-              <Badge variant="destructive" className="animate-pulse">
+              <Badge variant="destructive" className="animate-pulse text-xs">
                 Просрочен
               </Badge>
             )}
           </div>
-          <p className="text-sm truncate mb-1" style={{ color: 'var(--text-primary)' }}>
+          <p
+            className="text-sm sm:text-base truncate mb-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
             {ticket.title}
           </p>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <User className="w-3 h-3" />
-              {ticket.creatorName}
+              <User className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate">{ticket.creatorName}</span>
             </span>
             {ticket.organizationName && (
               <span className="flex items-center gap-1">
-                <Building2 className="w-3 h-3" />
-                {ticket.organizationName}
+                <Building2 className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">{ticket.organizationName}</span>
               </span>
             )}
             <span className="flex items-center gap-1">
-              <MessageSquare className="w-3 h-3" />
+              <MessageSquare className="w-3 h-3 flex-shrink-0" />
               {ticket.commentCount}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
+        <div className="flex items-center gap-2 sm:self-start flex-shrink-0">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <Eye className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <MoreHorizontal className="w-4 h-4" />
           </Button>
         </div>

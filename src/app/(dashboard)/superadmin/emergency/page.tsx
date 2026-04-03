@@ -144,32 +144,46 @@ export default function EmergencyDashboardPage() {
     <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                 <h1
-                  className="text-3xl md:text-4xl font-bold"
+                  className="text-2xl sm:text-3xl md:text-4xl font-bold"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   {t('superadmin.emergency.title')}
                 </h1>
-                <Badge className={`${getPriorityColor(priorityLevel)} text-lg px-4 py-1`}>
+                <Badge
+                  className={`${getPriorityColor(priorityLevel)} text-sm sm:text-base px-3 sm:px-4 py-1`}
+                >
                   {priorityLevel === 'critical' && '🔴'}
                   {priorityLevel === 'high' && '🟠'}
                   {priorityLevel === 'medium' && '🟡'}
-                  {priorityLevel === 'low' && '🟢'} {priorityLevel.toUpperCase()}
+                  {priorityLevel === 'low' && '🟢'}{' '}
+                  <span className="hidden sm:inline">{priorityLevel.toUpperCase()}</span>
+                  <span className="sm:hidden">
+                    {priorityLevel === 'critical'
+                      ? 'CRIT'
+                      : priorityLevel === 'high'
+                        ? 'HIGH'
+                        : priorityLevel === 'medium'
+                          ? 'MED'
+                          : 'LOW'}
+                  </span>
                 </Badge>
               </div>
-              <p className="text-muted-foreground">{t('superadmin.emergency.subtitle')}</p>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                {t('superadmin.emergency.subtitle')}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto flex-col sm:flex-row">
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)]"
+                className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)] w-full sm:w-auto"
               >
                 {isRefreshing ? (
                   <ShieldLoader size="xs" variant="inline" />
@@ -179,10 +193,11 @@ export default function EmergencyDashboardPage() {
               </Button>
               <Button
                 onClick={() => setCreateIncidentOpen(true)}
-                className="gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white"
+                className="gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
-                {t('superadmin.emergency.createIncident')}
+                <span className="hidden sm:inline">{t('superadmin.emergency.createIncident')}</span>
+                <span className="sm:hidden">Create</span>
               </Button>
             </div>
           </div>
@@ -277,34 +292,37 @@ export default function EmergencyDashboardPage() {
                 {criticalTickets.map((ticket: Ticket) => (
                   <div
                     key={ticket._id}
-                    className="p-4 rounded-lg border border-red-500/30 bg-red-500/5"
+                    className="p-3 sm:p-4 rounded-lg border border-red-500/30 bg-red-500/5"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-mono text-sm">{ticket.ticketNumber}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className="font-mono text-xs sm:text-sm">
+                            {ticket.ticketNumber}
+                          </span>
                           <Badge
                             variant="default"
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
+                            className="bg-red-600 hover:bg-red-700 text-white shadow-sm text-xs"
                           >
                             CRITICAL
                           </Badge>
                           <Badge
                             variant="outline"
-                            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]"
+                            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-xs"
                           >
                             {ticket.status}
                           </Badge>
                         </div>
-                        <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+                        <p
+                          className="font-semibold text-sm sm:text-base mb-2"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
                           {ticket.title}
                         </p>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                           <span>👤 {ticket.creatorName}</span>
-                          {ticket.organizationName && (
-                            <span className="ml-3">🏢 {ticket.organizationName}</span>
-                          )}
-                          <span className="ml-3">
+                          {ticket.organizationName && <span>🏢 {ticket.organizationName}</span>}
+                          <span>
                             ⏱️ {ticket.minutesOpen} {t('common.minutesAgo')}
                           </span>
                         </div>
@@ -315,7 +333,7 @@ export default function EmergencyDashboardPage() {
                         onClick={() =>
                           (window.location.href = `/superadmin/support?ticket=${ticket._id}`)
                         }
-                        className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)]"
+                        className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)] flex-shrink-0 self-start"
                       >
                         {t('superadmin.emergency.actions.open')}
                       </Button>
@@ -342,11 +360,11 @@ export default function EmergencyDashboardPage() {
                 {activeIncidents.map((incident: Incident) => (
                   <div
                     key={incident._id}
-                    className="p-4 rounded-lg border border-orange-500/30 bg-orange-500/5"
+                    className="p-3 sm:p-4 rounded-lg border border-orange-500/30 bg-orange-500/5"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
                           <Badge
                             variant={
                               incident.severity === 'critical'
@@ -357,50 +375,55 @@ export default function EmergencyDashboardPage() {
                             }
                             className={
                               incident.severity === 'critical'
-                                ? 'bg-red-600 hover:bg-red-700 text-white shadow-sm'
+                                ? 'bg-red-600 hover:bg-red-700 text-white shadow-sm text-xs'
                                 : incident.severity === 'high'
-                                  ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-sm'
-                                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800 shadow-sm'
+                                  ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-sm text-xs'
+                                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800 shadow-sm text-xs'
                             }
                           >
                             {incident.severity}
                           </Badge>
                           <Badge
                             variant="outline"
-                            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]"
+                            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-xs"
                           >
                             {incident.status}
                           </Badge>
                         </div>
-                        <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+                        <p
+                          className="font-semibold text-sm sm:text-base mb-1"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
                           {incident.title}
                         </p>
-                        <p className="text-sm text-muted-foreground mb-2">{incident.description}</p>
-                        <div className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
+                          {incident.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                           <span>
                             👥 {incident.affectedUsers} {t('superadmin.emergency.usersAffected')}
                           </span>
-                          <span className="ml-3">
+                          <span>
                             🏢 {incident.affectedOrgs} {t('superadmin.emergency.organizations')}
                           </span>
-                          <span className="ml-3">
+                          <span>
                             ⏱️ {incident.minutesActive} {t('common.minutesActive')}
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0 sm:self-start">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleResolveIncident(incident._id)}
-                          className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)]"
+                          className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)] text-xs"
                         >
                           {t('superadmin.emergency.actions.resolve')}
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="hover:bg-[var(--background-subtle)] text-[var(--muted-foreground)]"
+                          className="hover:bg-[var(--background-subtle)] text-[var(--muted-foreground)] h-8 w-8"
                         >
                           <X className="w-4 h-4" />
                         </Button>

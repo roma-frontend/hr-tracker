@@ -139,6 +139,7 @@ function Avatar({
 
 // ── Deadline badge ─────────────────────────────────────────────────────────
 function DeadlineBadge({ deadline, status }: { deadline?: number; status: Status }) {
+  const { t } = useTranslation();
   if (!deadline) return null;
   const now = Date.now();
   const diff = deadline - now;
@@ -150,7 +151,6 @@ function DeadlineBadge({ deadline, status }: { deadline?: number; status: Status
     month: 'short',
   });
 
-  const { t } = useTranslation();
   if (overdue)
     return (
       <span className="text-xs font-medium text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full">
@@ -351,51 +351,97 @@ function TaskRow({ task, onOpen }: { task: any; onOpen: () => void }) {
   const priorityCfg = PRIORITY_CONFIG[task.priority as Priority];
 
   return (
-    <tr
-      onClick={onOpen}
-      className="group hover:bg-[var(--background-subtle)] cursor-pointer transition-colors border-b border-[var(--border)] last:border-0"
-    >
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
-          <span className="font-medium text-[var(--text-primary)] text-sm group-hover:text-blue-400 transition-colors line-clamp-1">
-            {task.title}
+    <>
+      {/* Desktop table row */}
+      <tr
+        onClick={onOpen}
+        className="group hidden sm:table-row hover:bg-[var(--background-subtle)] cursor-pointer transition-colors border-b border-[var(--border)] last:border-0"
+      >
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
+            <span className="font-medium text-[var(--text-primary)] text-sm group-hover:text-blue-400 transition-colors line-clamp-1">
+              {task.title}
+            </span>
+          </div>
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Avatar
+              name={task.assignedToUser?.name ?? '?'}
+              url={task.assignedToUser?.avatarUrl}
+              size="sm"
+            />
+            <span className="text-sm text-[var(--text-secondary)]">
+              {task.assignedToUser?.name ?? '—'}
+            </span>
+          </div>
+        </td>
+        <td className="px-4 py-3">
+          <span
+            className={`text-xs font-semibold px-2 py-1 rounded-full ${priorityCfg.bg} ${priorityCfg.color}`}
+          >
+            {priorityCfg.icon} {t(priorityCfg.labelKey)}
           </span>
-        </div>
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
+        </td>
+        <td className="px-4 py-3">
+          <span
+            className={`text-xs font-medium px-2 py-1 rounded-full ${statusCfg.bg} ${statusCfg.color}`}
+          >
+            {t(statusCfg.labelKey)}
+          </span>
+        </td>
+        <td className="px-4 py-3">
+          <DeadlineBadge deadline={task.deadline} status={task.status as Status} />
+        </td>
+        <td className="px-4 py-3 text-xs text-[var(--text-muted)]">
+          {task.commentCount > 0 && `💬 ${task.commentCount}`}
+        </td>
+      </tr>
+
+      {/* Mobile card */}
+      <div
+        onClick={onOpen}
+        className="sm:hidden p-4 border-b border-[var(--border)] last:border-0 bg-[var(--card)] active:bg-[var(--background-subtle)]"
+      >
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
+              <span className={`font-semibold text-sm text-[var(--text-primary)] line-clamp-2`}>
+                {task.title}
+              </span>
+            </div>
+            {task.description && (
+              <p className="text-xs text-[var(--text-muted)] line-clamp-2 mb-2">
+                {task.description}
+              </p>
+            )}
+          </div>
           <Avatar
             name={task.assignedToUser?.name ?? '?'}
             url={task.assignedToUser?.avatarUrl}
             size="sm"
           />
-          <span className="text-sm text-[var(--text-secondary)]">
-            {task.assignedToUser?.name ?? '—'}
-          </span>
         </div>
-      </td>
-      <td className="px-4 py-3">
-        <span
-          className={`text-xs font-semibold px-2 py-1 rounded-full ${priorityCfg.bg} ${priorityCfg.color}`}
-        >
-          {priorityCfg.icon} {t(priorityCfg.labelKey)}
-        </span>
-      </td>
-      <td className="px-4 py-3">
-        <span
-          className={`text-xs font-medium px-2 py-1 rounded-full ${statusCfg.bg} ${statusCfg.color}`}
-        >
-          {t(statusCfg.labelKey)}
-        </span>
-      </td>
-      <td className="px-4 py-3">
-        <DeadlineBadge deadline={task.deadline} status={task.status as Status} />
-      </td>
-      <td className="px-4 py-3 text-xs text-[var(--text-muted)]">
-        {task.commentCount > 0 && `💬 ${task.commentCount}`}
-      </td>
-    </tr>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${priorityCfg.bg} ${priorityCfg.color}`}
+          >
+            {priorityCfg.icon} {t(priorityCfg.labelKey)}
+          </span>
+          <span
+            className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusCfg.bg} ${statusCfg.color}`}
+          >
+            {t(statusCfg.labelKey)}
+          </span>
+          <DeadlineBadge deadline={task.deadline} status={task.status as Status} />
+          {task.commentCount > 0 && (
+            <span className="text-xs text-[var(--text-muted)]">💬 {task.commentCount}</span>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -502,25 +548,25 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
   return (
     <div className="min-h-screen p-3 sm:p-6">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
               {userRole === 'employee' || userRole === 'driver'
                 ? t('tasksClient.myTasks')
                 : t('tasksClient.taskManager')}
             </h1>
-            <p className="mt-1" style={{ color: 'var(--text-muted)' }}>
+            <p className="mt-1 text-sm sm:text-base" style={{ color: 'var(--text-muted)' }}>
               {userRole === 'employee' || userRole === 'driver'
                 ? t('tasksClient.trackAssignments')
                 : t('tasksClient.assignMonitor')}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-col sm:flex-row">
             {userRole === 'admin' && (
               <button
                 onClick={() => setShowAssign(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--background-subtle)] transition-colors font-medium text-sm"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--background-subtle)] transition-colors font-medium text-sm w-full sm:w-auto"
               >
                 {t('tasksClient.assignSupervisor')}
               </button>
@@ -528,7 +574,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
             {canManage && (
               <button
                 onClick={() => setShowCreate(true)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-700 text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-700 text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all w-full sm:w-auto"
               >
                 {t('tasksClient.newTask')}
               </button>
@@ -536,8 +582,8 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
+        {/* Stats row - scrollable on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mt-4 sm:mt-6">
           {[
             {
               label: t('tasksClient.total'),
@@ -572,31 +618,31 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           ].map((s) => (
             <div
               key={s.label}
-              className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm p-4 text-center"
+              className="bg-[var(--card)] rounded-xl sm:rounded-2xl border border-[var(--border)] shadow-sm p-3 sm:p-4 text-center"
             >
               <p
-                className={`text-2xl font-bold bg-gradient-to-r ${s.color} bg-clip-text text-transparent`}
+                className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${s.color} bg-clip-text text-transparent`}
               >
                 {s.value}
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">{s.label}</p>
+              <p className="text-[10px] sm:text-xs text-[var(--text-muted)] mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
         {/* Search */}
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+        <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm">
             🔍
           </span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('placeholders.searchTasks')}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
+            className="w-full pl-9 pr-4 py-2 sm:py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
           />
         </div>
 
@@ -604,7 +650,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         <select
           value={filterPriority}
           onChange={(e) => setFilterPriority(e.target.value as any)}
-          className="px-3 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 flex-shrink-0"
         >
           <option value="all">{t('tasksClient.allPriorities')}</option>
           <option value="urgent">{t('tasksClient.urgent')}</option>
@@ -617,7 +663,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as any)}
-          className="px-3 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 flex-shrink-0"
         >
           <option value="all">{t('tasksClient.allStatuses')}</option>
           <option value="pending">{t('statuses.pending')}</option>
@@ -628,16 +674,16 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         </select>
 
         {/* View toggle */}
-        <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-xl p-1 ml-auto">
+        <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-xl p-1 ml-auto flex-shrink-0">
           <button
             onClick={() => setViewMode('kanban')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'kanban' ? 'bg-blue-600 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'kanban' ? 'bg-blue-600 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
           >
             {t('tasksClient.kanban')}
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
           >
             {t('tasksClient.list')}
           </button>

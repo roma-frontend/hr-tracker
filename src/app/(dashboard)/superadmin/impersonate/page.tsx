@@ -120,21 +120,28 @@ export default function ImpersonationPage() {
     <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <h1
-                className="text-3xl md:text-4xl font-bold mb-2"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {t('superadmin.impersonate.title')}
               </h1>
-              <p className="text-muted-foreground">{t('superadmin.impersonate.subtitle')}</p>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                {t('superadmin.impersonate.subtitle')}
+              </p>
             </div>
             {activeSession && (
-              <Button variant="destructive" onClick={handleEndImpersonation} className="gap-2">
+              <Button
+                variant="destructive"
+                onClick={handleEndImpersonation}
+                className="gap-2 w-full sm:w-auto"
+              >
                 <LogOut className="w-4 h-4" />
-                {t('superadmin.impersonate.exitMode')}
+                <span className="hidden sm:inline">{t('superadmin.impersonate.exitMode')}</span>
+                <span className="sm:hidden">Exit</span>
               </Button>
             )}
           </div>
@@ -276,42 +283,59 @@ export default function ImpersonationPage() {
                 {impersonationHistory.map((session: any) => (
                   <div
                     key={session._id}
-                    className="p-4 rounded-lg border"
+                    className="p-3 sm:p-4 rounded-lg border"
                     style={{ background: 'var(--background-subtle)' }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant={session.isActive ? 'default' : 'outline'}>
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <Badge
+                            variant={session.isActive ? 'default' : 'outline'}
+                            className="text-xs"
+                          >
                             {session.isActive ? 'Активно' : 'Завершено'}
                           </Badge>
-                          {session.isActive && <Badge variant="destructive">Сейчас</Badge>}
+                          {session.isActive && (
+                            <Badge variant="destructive" className="text-xs">
+                              Сейчас
+                            </Badge>
+                          )}
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
                           <div>
                             <span className="text-muted-foreground">Супер-админ:</span>{' '}
-                            <span className="font-medium">{session.superadminName}</span>
+                            <span className="font-medium truncate block">
+                              {session.superadminName}
+                            </span>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Пользователь:</span>{' '}
-                            <span className="font-medium">{session.targetUserName}</span>
+                            <span className="font-medium truncate block">
+                              {session.targetUserName}
+                            </span>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Email:</span>{' '}
-                            <span className="font-mono">{session.targetUserEmail}</span>
+                            <span className="font-mono text-xs truncate block">
+                              {session.targetUserEmail}
+                            </span>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Организация:</span>{' '}
-                            <span className="font-medium">{session.organizationName}</span>
+                            <span className="font-medium truncate block">
+                              {session.organizationName}
+                            </span>
                           </div>
                         </div>
-                        <div className="mt-3 p-3 rounded bg-muted">
-                          <p className="text-xs text-muted-foreground mb-1">Причина:</p>
-                          <p className="text-sm">{session.reason}</p>
+                        <div className="mt-3 p-2 sm:p-3 rounded bg-muted">
+                          <p className="text-[10px] sm:text-xs text-muted-foreground mb-1">
+                            Причина:
+                          </p>
+                          <p className="text-xs sm:text-sm">{session.reason}</p>
                         </div>
-                        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-[10px] sm:text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                            <Clock className="w-3 h-3 flex-shrink-0" />
                             Начато: {new Date(session.startedAt).toLocaleString()}
                           </span>
                           {session.endedAt && (

@@ -30,7 +30,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 import { AvatarUpload } from '@/components/ui/avatar-upload';
@@ -437,7 +436,7 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="flex items-center justify-center py-8">
-              <ShieldLoader size="md" />
+              <div className="w-8 h-8 border-3 border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin" />
             </div>
           )}
         </CardContent>
@@ -532,7 +531,7 @@ export default function ProfilePage() {
             >
               {deleting ? (
                 <>
-                  <ShieldLoader size="xs" variant="inline" />
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   {t('ui.deleting') || 'Deleting...'}
                 </>
               ) : (

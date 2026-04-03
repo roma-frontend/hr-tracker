@@ -1993,13 +1993,37 @@
     "createFirstOrg": "Создайте свою первую организацию для начала",
     "creatingOrganization": "Создание организации...",
     "createOrganization": "Создать организацию",
-    "rejectionReason": "Причина отклонения"
+    "rejectionReason": "Причина отклонения",
+    "editPageTitle": "Редактировать организацию",
+    "slugLabel": "Slug",
+    "nameLabel": "Название организации",
+    "planLabel": "План",
+    "statusLabel": "Организация активна",
+    "statusActiveDesc": "Неактивные организации недоступны для пользователей",
+    "timezoneLabel": "Часовой пояс",
+    "countryLabel": "Страна",
+    "industryLabel": "Отрасль",
+    "statsTitle": "Статистика организации",
+    "planStarter": "Starter (10 сотрудников)",
+    "planProfessional": "Professional (50 сотрудников)",
+    "planEnterprise": "Enterprise (100+)",
+    "timezoneUTC": "UTC",
+    "timezoneET": "Восточное время (ET)",
+    "timezoneCT": "Центральное время (CT)",
+    "timezoneMT": "Горное время (MT)",
+    "timezonePT": "Тихоокеанское время (PT)",
+    "timezoneGMT": "Лондон (GMT)",
+    "timezoneCET": "Париж (CET)",
+    "timezoneGST": "Дубай (GST)",
+    "timezoneJST": "Токио (JST)",
+    "timezoneAEST": "Сидней (AEST)"
   },
   "ui": {
     "accessDenied": "Доступ запрещен",
     "onlySuperadminCanAccess": "Только супер-админы могут получить доступ к этой странице",
     "onlyAdminsCanAccess": "Только администраторы могут получить доступ к этой странице",
     "backToHome": "Вернуться на главную",
+    "backToOrganizations": "Вернуться к организациям",
     "yourEmail": "Ваш email",
     "role": "Роль",
     "onlySuperadminAccess": "Только супер-админы могут получить доступ",
@@ -4948,6 +4972,7 @@
     "reportExportedDesc": "CSV файл загружен",
     "provideReasonForSuspension": "Пожалуйста, укажите причину приостановки",
     "userUnsuspended": "Пользователь успешно разблокирован",
-    "orgUpdated": "Организация успешно обновлена!"
+    "orgUpdated": "Организация успешно обновлена!",
+    "orgUpdateFailed": "Не удалось обновить организацию"
   }
 }

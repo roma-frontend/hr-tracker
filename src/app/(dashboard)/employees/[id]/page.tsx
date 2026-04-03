@@ -8,7 +8,6 @@ import { Id } from '../../../../../convex/_generated/dataModel';
 import EmployeeProfileDetail from '@/components/employees/EmployeeProfileDetail';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
-import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { motion } from '@/lib/cssMotion';
@@ -27,7 +26,7 @@ export default function EmployeeProfilePage() {
   if (employee === undefined) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <ShieldLoader size="lg" message="" />
+        <div className="w-12 h-12 border-4 border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin" />
       </div>
     );
   }

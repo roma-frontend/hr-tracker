@@ -8,7 +8,6 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Sparkles,
   Code2,
@@ -47,11 +46,7 @@ export default function AISiteEditorPage() {
   }, [user, router]);
 
   if (!user || !currentUser) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <ShieldLoader size="lg" />
-      </div>
-    );
+    return null; // Providers.tsx will show ShieldLoader during loading
   }
 
   // Show Coming Soon for non-superadmin users

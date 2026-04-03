@@ -174,7 +174,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
 
   return (
     <>
-      {/* Кнопка сворачивания/разворачивания панели - вверху справа */}
+      {/* Кнопка сворачивания/разворачивания панели */}
       <motion.button
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -186,282 +186,319 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
           setIsPanelCollapsed(newCollapsedState);
           onToggle?.(!newCollapsedState);
         }}
-        className="fixed top-8 right-6 z-50 w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-colors"
+        className="fixed top-20 sm:top-8 right-3 sm:right-6 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-colors"
         style={{
           background: 'var(--primary)',
           color: 'var(--primary-foreground)',
         }}
       >
         {isPanelCollapsed ? (
-          <PanelRightOpen className="w-5 h-5" />
+          <PanelRightOpen className="w-4 h-4 sm:w-5 sm:h-5" />
         ) : (
-          <PanelRightClose className="w-5 h-5" />
+          <PanelRightClose className="w-4 h-4 sm:w-5 sm:h-5" />
         )}
       </motion.button>
+
+      {/* Backdrop для мобильных - закрывает по клику */}
+      <AnimatePresence>
+        {!isPanelCollapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              setIsPanelCollapsed(true);
+              onToggle?.(false);
+            }}
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            style={{ backdropFilter: 'blur(4px)' }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Боковая панель */}
       <AnimatePresence>
         {!isPanelCollapsed && (
           <motion.aside
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
+            exit={{ opacity: 0, x: 100 }}
             transition={{
-              duration: 0.6,
+              duration: 0.4,
               ease: [0.34, 1.56, 0.64, 1],
             }}
-            className="fixed top-24 right-6 z-40 w-64 max-h-[calc(100vh-180px)] overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent"
+            className="fixed top-16 sm:top-24 right-0 sm:right-6 z-40 w-full sm:w-64 max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-180px)] overflow-y-auto space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent lg:shadow-lg"
             style={{
               willChange: 'transform, opacity',
+              background: 'var(--card)',
             }}
           >
-            {/* Team Overview */}
-            <CollapsibleSection
-              title={overviewTitle}
-              isCollapsed={collapsedSections.overview}
-              onToggle={() => toggleSection('overview')}
-              defaultIcon={<Users className="w-4 h-4" />}
-            >
-              <div className="grid grid-cols-2 gap-3">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    delay: 0.05,
-                    duration: 0.4,
-                    ease: [0.34, 1.56, 0.64, 1],
-                  }}
-                  className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <UserCheck className="w-3.5 h-3.5 text-blue-500" />
-                    <span className="text-xs text-blue-600 font-medium">
-                      {t('employees.active')}
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    delay: 0.1,
-                    duration: 0.4,
-                    ease: [0.34, 1.56, 0.64, 1],
-                  }}
-                  className="p-3 rounded-xl bg-gray-500/10 border border-gray-500/20"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <UserX className="w-3.5 h-3.5 text-gray-500" />
-                    <span className="text-xs text-gray-600 font-medium">
-                      {t('employees.inactive')}
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-gray-600">{stats.inactive}</p>
-                </motion.div>
-              </div>
+            {/* Кнопка закрытия для мобильных */}
+            <div className="sticky top-0 z-10 flex items-center justify-between p-3 sm:p-0 sm:hidden border-b border-[var(--border)] bg-[var(--card)]">
+              <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {t('employees.teamOverview')}
+              </span>
+              <button
+                onClick={() => {
+                  setIsPanelCollapsed(true);
+                  onToggle?.(false);
+                }}
+                className="p-2 rounded-lg hover:bg-[var(--background-subtle)]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              <div className="space-y-2 pt-2 border-t border-[var(--border)]">
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex items-center justify-between text-xs"
-                >
-                  <span className="text-[var(--text-muted)] flex items-center gap-1.5">
-                    <Award className="w-3 h-3" /> {t('roles.admin')}
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-purple-500/20 text-purple-600 border-purple-500/30"
+            <div className="p-3 sm:p-0">
+              {/* Team Overview */}
+              <CollapsibleSection
+                title={overviewTitle}
+                isCollapsed={collapsedSections.overview}
+                onToggle={() => toggleSection('overview')}
+                defaultIcon={<Users className="w-4 h-4" />}
+              >
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      delay: 0.05,
+                      duration: 0.4,
+                      ease: [0.34, 1.56, 0.64, 1],
+                    }}
+                    className="p-2 sm:p-3 rounded-xl bg-blue-500/10 border border-blue-500/20"
                   >
-                    {stats.admins}
-                  </Badge>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex items-center justify-between text-xs"
-                >
-                  <span className="text-[var(--text-muted)] flex items-center gap-1.5">
-                    <Star className="w-3 h-3" /> {t('roles.supervisor')}
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-amber-500/20 text-amber-600 border-amber-500/30"
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                      <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500" />
+                      <span className="text-[10px] sm:text-xs text-blue-600 font-medium">
+                        {t('employees.active')}
+                      </span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.total}</p>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      delay: 0.1,
+                      duration: 0.4,
+                      ease: [0.34, 1.56, 0.64, 1],
+                    }}
+                    className="p-2 sm:p-3 rounded-xl bg-gray-500/10 border border-gray-500/20"
                   >
-                    {stats.supervisors}
-                  </Badge>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex items-center justify-between text-xs"
-                >
-                  <span className="text-[var(--text-muted)] flex items-center gap-1.5">
-                    <UserCheck className="w-3 h-3" /> {t('roles.employee')}
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-500/20 text-green-600 border-green-500/30"
-                  >
-                    {stats.employees}
-                  </Badge>
-                </motion.div>
-                {stats.drivers > 0 && (
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                      <UserX className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500" />
+                      <span className="text-[10px] sm:text-xs text-gray-600 font-medium">
+                        {t('employees.inactive')}
+                      </span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-600">{stats.inactive}</p>
+                  </motion.div>
+                </div>
+
+                <div className="space-y-1.5 sm:space-y-2 pt-2 border-t border-[var(--border)]">
                   <motion.div
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="flex items-center justify-between text-xs"
+                    transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
                   >
-                    <span className="text-[var(--text-muted)] flex items-center gap-1.5">
-                      <Zap className="w-3 h-3" /> {t('roles.driver')}
+                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                      <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.admin')}
                     </span>
                     <Badge
                       variant="secondary"
-                      className="bg-cyan-500/20 text-cyan-600 border-cyan-500/30"
+                      className="bg-purple-500/20 text-purple-600 border-purple-500/30 text-[10px] sm:text-xs"
                     >
-                      {stats.drivers}
+                      {stats.admins}
                     </Badge>
                   </motion.div>
-                )}
-              </div>
-
-              <div className="pt-2 border-t border-[var(--border)]">
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex items-center justify-between text-xs"
-                >
-                  <span className="text-[var(--text-muted)] flex items-center gap-1.5">
-                    <Briefcase className="w-3 h-3" /> {t('employeeTypes.staff')}
-                  </span>
-                  <span className="font-semibold text-[var(--text-primary)]">{stats.staff}</span>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex items-center justify-between text-xs mt-1.5"
-                >
-                  <span className="text-[var(--text-muted)] flex items-center gap-1.5">
-                    <Clock className="w-3 h-3" /> {t('employeeTypes.contractor')}
-                  </span>
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {stats.contractors}
-                  </span>
-                </motion.div>
-              </div>
-            </CollapsibleSection>
-
-            {/* Recent Members */}
-            {recentEmployees.length > 0 && (
-              <CollapsibleSection
-                title={recentTitle}
-                isCollapsed={collapsedSections.recent}
-                onToggle={() => toggleSection('recent')}
-                defaultIcon={<TrendingUp className="w-4 h-4" />}
-              >
-                <div className="space-y-2">
-                  {recentEmployees.map((emp: any, index) => (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
+                  >
+                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                      <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.supervisor')}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className="bg-amber-500/20 text-amber-600 border-amber-500/30 text-[10px] sm:text-xs"
+                    >
+                      {stats.supervisors}
+                    </Badge>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.25, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
+                  >
+                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                      <UserCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.employee')}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-500/20 text-green-600 border-green-500/30 text-[10px] sm:text-xs"
+                    >
+                      {stats.employees}
+                    </Badge>
+                  </motion.div>
+                  {stats.drivers > 0 && (
                     <motion.div
-                      key={emp._id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        delay: index * 0.05,
-                        duration: 0.4,
-                        ease: [0.34, 1.56, 0.64, 1],
-                      }}
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                      transition={{ delay: 0.3, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                      className="flex items-center justify-between text-[10px] sm:text-xs"
                     >
-                      <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white text-xs bg-gradient-to-br from-blue-500 to-sky-500">
-                        {emp.avatarUrl ? (
-                          <img
-                            src={emp.avatarUrl}
-                            alt={emp.name}
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          emp.name
-                            .split(' ')
-                            .map((n: any[]) => n[0])
-                            .join('')
-                            .toUpperCase()
-                            .slice(0, 2)
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-[var(--text-primary)] truncate">
-                          {emp.name}
-                        </p>
-                        <p className="text-[10px] text-[var(--text-muted)]">
-                          {emp.position || t('common.noPosition')}
-                        </p>
-                      </div>
+                      <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                        <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.driver')}
+                      </span>
                       <Badge
                         variant="secondary"
-                        className="text-[10px] bg-green-500/20 text-green-600 border-green-500/30"
+                        className="bg-cyan-500/20 text-cyan-600 border-cyan-500/30 text-[10px] sm:text-xs"
                       >
-                        New
+                        {stats.drivers}
                       </Badge>
                     </motion.div>
-                  ))}
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-[var(--border)]">
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.35, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
+                  >
+                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                      <Briefcase className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('employeeTypes.staff')}
+                    </span>
+                    <span className="font-semibold text-[var(--text-primary)]">{stats.staff}</span>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="flex items-center justify-between text-[10px] sm:text-xs mt-1 sm:mt-1.5"
+                  >
+                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{' '}
+                      {t('employeeTypes.contractor')}
+                    </span>
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      {stats.contractors}
+                    </span>
+                  </motion.div>
                 </div>
               </CollapsibleSection>
-            )}
 
-            {/* Quick Stats */}
-            <CollapsibleSection
-              title={quickStatsTitle}
-              isCollapsed={collapsedSections.quickStats}
-              onToggle={() => toggleSection('quickStats')}
-              defaultIcon={<Award className="w-4 h-4" />}
-            >
-              <div className="space-y-3">
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex items-center justify-between"
+              {/* Recent Members */}
+              {recentEmployees.length > 0 && (
+                <CollapsibleSection
+                  title={recentTitle}
+                  isCollapsed={collapsedSections.recent}
+                  onToggle={() => toggleSection('recent')}
+                  defaultIcon={<TrendingUp className="w-4 h-4" />}
                 >
-                  <span className="text-xs text-[var(--success)]">
-                    {t('employees.supervisors')}
-                  </span>
-                  <span className="text-sm font-bold text-[var(--success)]">
-                    {stats.supervisors}
-                  </span>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex items-center justify-between"
-                >
-                  <span className="text-xs text-[var(--success)]">
-                    {t('employees.contractors')}
-                  </span>
-                  <span className="text-sm font-bold text-[var(--success)]">
-                    {stats.contractors}
-                  </span>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="pt-2 border-t border-[var(--border)]"
-                >
-                  <p className="text-[10px] text-[var(--text-muted)] text-center">
-                    💡 {t('employees.teamHealthGood')}
-                  </p>
-                </motion.div>
-              </div>
-            </CollapsibleSection>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    {recentEmployees.map((emp: any, index) => (
+                      <motion.div
+                        key={emp._id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{
+                          delay: index * 0.05,
+                          duration: 0.4,
+                          ease: [0.34, 1.56, 0.64, 1],
+                        }}
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                      >
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white text-[10px] sm:text-xs bg-gradient-to-br from-blue-500 to-sky-500">
+                          {emp.avatarUrl ? (
+                            <img
+                              src={emp.avatarUrl}
+                              alt={emp.name}
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            emp.name
+                              .split(' ')
+                              .map((n: any[]) => n[0])
+                              .join('')
+                              .toUpperCase()
+                              .slice(0, 2)
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] sm:text-xs font-medium text-[var(--text-primary)] truncate">
+                            {emp.name}
+                          </p>
+                          <p className="text-[9px] sm:text-[10px] text-[var(--text-muted)]">
+                            {emp.position || t('common.noPosition')}
+                          </p>
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className="text-[9px] sm:text-[10px] bg-green-500/20 text-green-600 border-green-500/30"
+                        >
+                          New
+                        </Badge>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* Quick Stats */}
+              <CollapsibleSection
+                title={quickStatsTitle}
+                isCollapsed={collapsedSections.quickStats}
+                onToggle={() => toggleSection('quickStats')}
+                defaultIcon={<Award className="w-4 h-4" />}
+              >
+                <div className="space-y-2 sm:space-y-3">
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.05, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-[10px] sm:text-xs text-[var(--success)]">
+                      {t('employees.supervisors')}
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-[var(--success)]">
+                      {stats.supervisors}
+                    </span>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-[10px] sm:text-xs text-[var(--success)]">
+                      {t('employees.contractors')}
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-[var(--success)]">
+                      {stats.contractors}
+                    </span>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    className="pt-2 border-t border-[var(--border)]"
+                  >
+                    <p className="text-[9px] sm:text-[10px] text-[var(--text-muted)] text-center">
+                      💡 {t('employees.teamHealthGood')}
+                    </p>
+                  </motion.div>
+                </div>
+              </CollapsibleSection>
+            </div>
           </motion.aside>
         )}
       </AnimatePresence>

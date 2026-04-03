@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
-import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -162,7 +161,7 @@ export default function AdminPage() {
           >
             {isAssigning ? (
               <>
-                <ShieldLoader size="xs" variant="inline" />
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 {t('admin.assigning')}
               </>
             ) : (
@@ -186,7 +185,12 @@ export default function AdminPage() {
         <CardContent>
           {!organizations ? (
             <div className="flex items-center justify-center py-8">
-              <ShieldLoader size="md" message={t('admin.loadingOrganizations')} />
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 border-3 border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin" />
+                <span className="text-sm text-[var(--text-muted)]">
+                  {t('admin.loadingOrganizations')}
+                </span>
+              </div>
             </div>
           ) : organizations.length === 0 ? (
             <p className="text-[var(--text-muted)] text-center py-8">

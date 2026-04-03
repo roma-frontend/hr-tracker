@@ -82,7 +82,8 @@ export default function EditOrganizationPage() {
           <h1 className="text-2xl font-bold mb-2">{t('ui.accessDenied')}</h1>
           <p className="text-muted-foreground">You can only manage your own organization</p>
           <p className="text-xs text-muted-foreground mt-2">
-            Your role: {user.role} | Your org: {user.organizationId} | Requested: {orgId}
+            {t('common.superadmin')}: {user.role} | {t('common.organization')}:{' '}
+            {user.organizationId} | {t('common.requestedBy')}: {orgId}
           </p>
         </div>
       </div>
@@ -101,8 +102,8 @@ export default function EditOrganizationPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Organization Not Found</h1>
-          <p className="text-muted-foreground">The organization you're looking for doesn't exist</p>
+          <h1 className="text-2xl font-bold mb-2">{t('common.organization')} Not Found</h1>
+          <p className="text-muted-foreground">{t('common.noOrgFound')}</p>
           <button
             onClick={() => router.push('/superadmin/organizations')}
             className="mt-4 px-4 py-2 rounded-lg bg-primary text-white"
@@ -134,7 +135,7 @@ export default function EditOrganizationPage() {
       router.push('/superadmin/organizations');
     } catch (error) {
       console.error('Failed to update organization:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update organization');
+      toast.error(error instanceof Error ? error.message : t('toasts.orgUpdateFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -158,10 +159,11 @@ export default function EditOrganizationPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Edit Organization
+                {t('organization.editPageTitle')}
               </h1>
               <p className="text-sm text-muted-foreground">
-                Slug: <span className="font-mono">{organization.slug}</span>
+                {t('organization.slugLabel')}:{' '}
+                <span className="font-mono">{organization.slug}</span>
               </p>
             </div>
           </div>
@@ -179,7 +181,7 @@ export default function EditOrganizationPage() {
               className="block text-sm font-medium mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Organization Name *
+              {t('organization.nameLabel')} *
             </label>
             <input
               type="text"
@@ -202,7 +204,7 @@ export default function EditOrganizationPage() {
               className="block text-sm font-medium mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Plan *
+              {t('organization.planLabel')} *
             </label>
             <select
               required
@@ -215,9 +217,9 @@ export default function EditOrganizationPage() {
                 color: 'var(--text-primary)',
               }}
             >
-              <option value="starter">Starter (10 employees)</option>
-              <option value="professional">Professional (50 employees)</option>
-              <option value="enterprise">Enterprise (100+)</option>
+              <option value="starter">{t('organization.planStarter')}</option>
+              <option value="professional">{t('organization.planProfessional')}</option>
+              <option value="enterprise">{t('organization.planEnterprise')}</option>
             </select>
           </div>
 
@@ -232,10 +234,10 @@ export default function EditOrganizationPage() {
               />
               <div>
                 <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Organization is active
+                  {t('organization.statusLabel')}
                 </span>
                 <p className="text-xs text-muted-foreground">
-                  Inactive organizations cannot be accessed by users
+                  {t('organization.statusActiveDesc')}
                 </p>
               </div>
             </label>
@@ -247,7 +249,7 @@ export default function EditOrganizationPage() {
               className="block text-sm font-medium mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Timezone
+              {t('organization.timezoneLabel')}
             </label>
             <select
               value={formData.timezone}
@@ -259,16 +261,16 @@ export default function EditOrganizationPage() {
                 color: 'var(--text-primary)',
               }}
             >
-              <option value="UTC">UTC</option>
-              <option value="America/New_York">Eastern Time (ET)</option>
-              <option value="America/Chicago">Central Time (CT)</option>
-              <option value="America/Denver">Mountain Time (MT)</option>
-              <option value="America/Los_Angeles">Pacific Time (PT)</option>
-              <option value="Europe/London">London (GMT)</option>
-              <option value="Europe/Paris">Paris (CET)</option>
-              <option value="Asia/Dubai">Dubai (GST)</option>
-              <option value="Asia/Tokyo">Tokyo (JST)</option>
-              <option value="Australia/Sydney">Sydney (AEST)</option>
+              <option value="UTC">{t('organization.timezoneUTC')}</option>
+              <option value="America/New_York">{t('organization.timezoneET')}</option>
+              <option value="America/Chicago">{t('organization.timezoneCT')}</option>
+              <option value="America/Denver">{t('organization.timezoneMT')}</option>
+              <option value="America/Los_Angeles">{t('organization.timezonePT')}</option>
+              <option value="Europe/London">{t('organization.timezoneGMT')}</option>
+              <option value="Europe/Paris">{t('organization.timezoneCET')}</option>
+              <option value="Asia/Dubai">{t('organization.timezoneGST')}</option>
+              <option value="Asia/Tokyo">{t('organization.timezoneJST')}</option>
+              <option value="Australia/Sydney">{t('organization.timezoneAEST')}</option>
             </select>
           </div>
 
@@ -278,7 +280,7 @@ export default function EditOrganizationPage() {
               className="block text-sm font-medium mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Country
+              {t('organization.countryLabel')}
             </label>
             <input
               type="text"
@@ -300,7 +302,7 @@ export default function EditOrganizationPage() {
               className="block text-sm font-medium mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Industry
+              {t('organization.industryLabel')}
             </label>
             <input
               type="text"

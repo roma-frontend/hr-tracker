@@ -2023,13 +2023,37 @@
     "createFirstOrg": "Create your first organization to get started",
     "creatingOrganization": "Creating Organization...",
     "createOrganization": "Create Organization",
-    "rejectionReason": "Rejection Reason"
+    "rejectionReason": "Rejection Reason",
+    "editPageTitle": "Edit Organization",
+    "slugLabel": "Slug",
+    "nameLabel": "Organization Name",
+    "planLabel": "Plan",
+    "statusLabel": "Organization is active",
+    "statusActiveDesc": "Inactive organizations cannot be accessed by users",
+    "timezoneLabel": "Timezone",
+    "countryLabel": "Country",
+    "industryLabel": "Industry",
+    "statsTitle": "Organization Statistics",
+    "planStarter": "Starter (10 employees)",
+    "planProfessional": "Professional (50 employees)",
+    "planEnterprise": "Enterprise (100+)",
+    "timezoneUTC": "UTC",
+    "timezoneET": "Eastern Time (ET)",
+    "timezoneCT": "Central Time (CT)",
+    "timezoneMT": "Mountain Time (MT)",
+    "timezonePT": "Pacific Time (PT)",
+    "timezoneGMT": "London (GMT)",
+    "timezoneCET": "Paris (CET)",
+    "timezoneGST": "Dubai (GST)",
+    "timezoneJST": "Tokyo (JST)",
+    "timezoneAEST": "Sydney (AEST)"
   },
   "ui": {
     "accessDenied": "Access Denied",
     "onlySuperadminCanAccess": "Only superadmins can access this page",
     "onlyAdminsCanAccess": "Only admins can access this page",
     "backToHome": "Back to Home",
+    "backToOrganizations": "Back to Organizations",
     "yourEmail": "Your email",
     "role": "Role",
     "notCheckedInWarning": "You haven't checked in today",
@@ -4977,6 +5001,7 @@
     "reportExportedDesc": "CSV file downloaded",
     "provideReasonForSuspension": "Please provide a reason for suspension",
     "userUnsuspended": "User unsuspended successfully",
-    "orgUpdated": "Organization updated successfully!"
+    "orgUpdated": "Organization updated successfully!",
+    "orgUpdateFailed": "Failed to update organization"
   }
 }
