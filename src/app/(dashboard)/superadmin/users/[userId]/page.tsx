@@ -47,7 +47,7 @@ export default function UserProfile360Page() {
   if (!data) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center text-muted-foreground">Загрузка...</div>
+        <div className="text-center text-muted-foreground">{t('superadmin.users.loading')}</div>
       </div>
     );
   }
@@ -83,7 +83,7 @@ export default function UserProfile360Page() {
         <div className="mb-4">
           <Button variant="ghost" onClick={() => router.back()} className="gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Назад
+            {t('superadmin.users.back')}
           </Button>
         </div>
 
@@ -114,12 +114,12 @@ export default function UserProfile360Page() {
                     {user.isActive ? (
                       <Badge variant="outline" className="text-green-600 border-green-500/30">
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Активен
+                        {t('superadmin.users.active')}
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-red-600 border-red-500/30">
                         <XCircle className="w-3 h-3 mr-1" />
-                        Не активен
+                        {t('superadmin.users.inactive')}
                       </Badge>
                     )}
                   </div>
@@ -164,11 +164,11 @@ export default function UserProfile360Page() {
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="gap-2">
                   <MessageSquare className="w-4 h-4" />
-                  Написать
+                  {t('superadmin.users.writeMessage')}
                 </Button>
                 <Button variant="outline" size="sm" className="gap-2">
                   <Key className="w-4 h-4" />
-                  Войти как
+                  {t('superadmin.users.impersonate')}
                 </Button>
                 <Button
                   variant="outline"
@@ -176,7 +176,7 @@ export default function UserProfile360Page() {
                   className="gap-2 text-red-600 hover:text-red-700"
                 >
                   <Ban className="w-4 h-4" />
-                  Заблокировать
+                  {t('superadmin.users.blockUser')}
                 </Button>
                 <Button variant="ghost" size="icon">
                   <MoreVertical className="w-4 h-4" />
@@ -194,9 +194,14 @@ export default function UserProfile360Page() {
             icon={Calendar}
             color="blue"
           />
-          <StatCard title="Ожидают" value={stats.pendingLeaves} icon={Clock} color="orange" />
           <StatCard
-            title="Одобрено"
+            title={t('superadmin.users.pending')}
+            value={stats.pendingLeaves}
+            icon={Clock}
+            color="orange"
+          />
+          <StatCard
+            title={t('superadmin.users.approved')}
             value={stats.approvedLeaves}
             icon={CheckCircle}
             color="green"
@@ -208,7 +213,7 @@ export default function UserProfile360Page() {
             color="purple"
           />
           <StatCard
-            title="Выполнено"
+            title={t('superadmin.users.completed')}
             value={stats.completedTasks}
             icon={CheckCircle}
             color="green"
@@ -225,7 +230,12 @@ export default function UserProfile360Page() {
             icon={Ticket}
             color="purple"
           />
-          <StatCard title="Входы" value={stats.totalLoginAttempts} icon={LogIn} color="gray" />
+          <StatCard
+            title={t('superadmin.users.logins')}
+            value={stats.totalLoginAttempts}
+            icon={LogIn}
+            color="gray"
+          />
         </div>
 
         {/* Tabs */}
@@ -265,14 +275,16 @@ export default function UserProfile360Page() {
           <TabsContent value="leaves">
             <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
-                <CardTitle>Заявки на отпуск</CardTitle>
-                <CardDescription>{leaves.length} заявок найдено</CardDescription>
+                <CardTitle>{t('superadmin.users.leaveRequests')}</CardTitle>
+                <CardDescription>
+                  {t('superadmin.users.leaveRequestsFound', { count: leaves.length })}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {leaves.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p>Заявок не найдено</p>
+                    <p>{t('superadmin.users.noLeaveRequests')}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -311,7 +323,9 @@ export default function UserProfile360Page() {
                           <div className="text-right text-xs text-muted-foreground">
                             {new Date(leave.createdAt).toLocaleDateString()}
                             {leave.reviewerName && (
-                              <div className="mt-1">Проверил: {leave.reviewerName}</div>
+                              <div className="mt-1">
+                                {t('superadmin.users.reviewedBy', { name: leave.reviewerName })}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -327,14 +341,16 @@ export default function UserProfile360Page() {
           <TabsContent value="tasks">
             <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
-                <CardTitle>Задачи</CardTitle>
-                <CardDescription>{tasks.length} задач найдено</CardDescription>
+                <CardTitle>{t('superadmin.users.tasksTitle')}</CardTitle>
+                <CardDescription>
+                  {t('superadmin.users.tasksFound', { count: tasks.length })}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {tasks.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Briefcase className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p>Задач не найдено</p>
+                    <p>{t('superadmin.users.noTasksFound')}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -371,7 +387,10 @@ export default function UserProfile360Page() {
                             )}
                             {task.deadline && (
                               <p className="text-xs text-muted-foreground mt-2">
-                                ⏰ Дедлайн: {new Date(task.deadline).toLocaleDateString()}
+                                ⏰{' '}
+                                {t('superadmin.users.deadline', {
+                                  date: new Date(task.deadline).toLocaleDateString(),
+                                })}
                               </p>
                             )}
                           </div>
@@ -594,8 +613,8 @@ export default function UserProfile360Page() {
           <TabsContent value="chat">
             <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
-                <CardTitle>Сообщения в чате</CardTitle>
-                <CardDescription>Последние сообщения пользователя</CardDescription>
+                <CardTitle>{t('superadmin.users.chatMessages')}</CardTitle>
+                <CardDescription>{t('superadmin.users.chatDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -612,7 +631,7 @@ export default function UserProfile360Page() {
                           </p>
                           {msg.type === 'system' && (
                             <Badge variant="secondary" className="mt-1">
-                              Системное
+                              {t('superadmin.users.system')}
                             </Badge>
                           )}
                         </div>

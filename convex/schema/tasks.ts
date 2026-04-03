@@ -1,0 +1,57 @@
+import { defineTable } from 'convex/server';
+import { v } from 'convex/values';
+
+export const tasks = {
+  tasks: defineTable({
+    organizationId: v.optional(v.id('organizations')),
+    title: v.string(),
+    description: v.optional(v.string()),
+    assignedTo: v.id('users'),
+    assignedBy: v.id('users'),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('in_progress'),
+      v.literal('review'),
+      v.literal('completed'),
+      v.literal('cancelled'),
+    ),
+    priority: v.union(
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('urgent'),
+    ),
+    deadline: v.optional(v.number()),
+    completedAt: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
+    attachmentUrl: v.optional(v.string()),
+    attachments: v.optional(
+      v.array(
+        v.object({
+          url: v.string(),
+          name: v.string(),
+          type: v.string(),
+          size: v.number(),
+          uploadedBy: v.id('users'),
+          uploadedAt: v.number(),
+        }),
+      ),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_org', ['organizationId'])
+    .index('by_assigned_to', ['assignedTo'])
+    .index('by_assigned_by', ['assignedBy'])
+    .index('by_status', ['status'])
+    .index('by_deadline', ['deadline'])
+    .index('by_assigned_status', ['assignedTo', 'status'])
+    .index('by_org_deadline', ['organizationId', 'deadline']),
+
+  taskComments: defineTable({
+    taskId: v.id('tasks'),
+    authorId: v.id('users'),
+    content: v.string(),
+    createdAt: v.number(),
+  }).index('by_task', ['taskId']),
+};

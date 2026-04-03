@@ -1,0 +1,68 @@
+import { defineTable } from 'convex/server';
+import { v } from 'convex/values';
+
+export const organizations = {
+  organizations: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    plan: v.union(v.literal('starter'), v.literal('professional'), v.literal('enterprise')),
+    isActive: v.boolean(),
+    createdBySuperadmin: v.boolean(),
+    logoUrl: v.optional(v.string()),
+    primaryColor: v.optional(v.string()),
+    timezone: v.optional(v.string()),
+    country: v.optional(v.string()),
+    industry: v.optional(v.string()),
+    employeeLimit: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_slug', ['slug'])
+    .index('by_plan', ['plan'])
+    .index('by_active', ['isActive']),
+
+  organizationRequests: defineTable({
+    requestedName: v.string(),
+    requestedSlug: v.string(),
+    requesterName: v.string(),
+    requesterEmail: v.string(),
+    requesterPhone: v.optional(v.string()),
+    requesterPassword: v.string(),
+    requestedPlan: v.union(v.literal('professional'), v.literal('enterprise')),
+    industry: v.optional(v.string()),
+    country: v.optional(v.string()),
+    teamSize: v.optional(v.string()),
+    description: v.optional(v.string()),
+    status: v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected')),
+    reviewedBy: v.optional(v.id('users')),
+    reviewedAt: v.optional(v.number()),
+    rejectionReason: v.optional(v.string()),
+    organizationId: v.optional(v.id('organizations')),
+    userId: v.optional(v.id('users')),
+    createdAt: v.number(),
+  })
+    .index('by_status', ['status'])
+    .index('by_email', ['requesterEmail'])
+    .index('by_slug', ['requestedSlug']),
+
+  organizationInvites: defineTable({
+    organizationId: v.optional(v.id('organizations')),
+    requestedByEmail: v.string(),
+    requestedByName: v.string(),
+    requestedAt: v.number(),
+    status: v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected')),
+    reviewedBy: v.optional(v.id('users')),
+    reviewedAt: v.optional(v.number()),
+    rejectionReason: v.optional(v.string()),
+    userId: v.optional(v.id('users')),
+    inviteToken: v.optional(v.string()),
+    inviteEmail: v.optional(v.string()),
+    inviteExpiry: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_org', ['organizationId'])
+    .index('by_email', ['requestedByEmail'])
+    .index('by_status', ['status'])
+    .index('by_org_status', ['organizationId', 'status'])
+    .index('by_token', ['inviteToken']),
+};

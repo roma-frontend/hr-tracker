@@ -1,0 +1,119 @@
+import { defineTable } from 'convex/server';
+import { v } from 'convex/values';
+
+export const users = {
+  users: defineTable({
+    organizationId: v.optional(v.id('organizations')),
+    name: v.string(),
+    email: v.string(),
+    passwordHash: v.string(),
+    googleId: v.optional(v.string()),
+    clerkId: v.optional(v.string()),
+    role: v.union(
+      v.literal('superadmin'),
+      v.literal('admin'),
+      v.literal('supervisor'),
+      v.literal('employee'),
+      v.literal('driver'),
+    ),
+    employeeType: v.union(v.literal('staff'), v.literal('contractor')),
+    department: v.optional(v.string()),
+    position: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
+    presenceStatus: v.optional(
+      v.union(
+        v.literal('available'),
+        v.literal('in_meeting'),
+        v.literal('in_call'),
+        v.literal('out_of_office'),
+        v.literal('busy'),
+      ),
+    ),
+    supervisorId: v.optional(v.id('users')),
+    isActive: v.boolean(),
+    isApproved: v.boolean(),
+    approvedBy: v.optional(v.id('users')),
+    approvedAt: v.optional(v.number()),
+    travelAllowance: v.number(),
+    paidLeaveBalance: v.number(),
+    sickLeaveBalance: v.number(),
+    familyLeaveBalance: v.number(),
+    webauthnChallenge: v.optional(v.string()),
+    faceDescriptor: v.optional(v.array(v.number())),
+    faceImageUrl: v.optional(v.string()),
+    faceRegisteredAt: v.optional(v.number()),
+    faceIdBlocked: v.optional(v.boolean()),
+    faceIdBlockedAt: v.optional(v.number()),
+    faceIdFailedAttempts: v.optional(v.number()),
+    faceIdLastAttempt: v.optional(v.number()),
+    dateOfBirth: v.optional(v.string()),
+    language: v.optional(v.string()),
+    timezone: v.optional(v.string()),
+    dateFormat: v.optional(v.string()),
+    timeFormat: v.optional(v.string()),
+    firstDayOfWeek: v.optional(v.string()),
+    theme: v.optional(v.string()),
+    notificationsEnabled: v.optional(v.boolean()),
+    emailNotifications: v.optional(v.boolean()),
+    pushNotifications: v.optional(v.boolean()),
+    isSuspended: v.optional(v.boolean()),
+    suspendedUntil: v.optional(v.number()),
+    suspendedReason: v.optional(v.string()),
+    suspendedBy: v.optional(v.id('users')),
+    suspendedAt: v.optional(v.number()),
+    totpSecret: v.optional(v.string()),
+    totpEnabled: v.optional(v.boolean()),
+    backupCodes: v.optional(v.array(v.string())),
+    resetPasswordToken: v.optional(v.string()),
+    resetPasswordExpiry: v.optional(v.number()),
+    sessionToken: v.optional(v.string()),
+    sessionExpiry: v.optional(v.number()),
+    focusModeEnabled: v.optional(v.boolean()),
+    workHoursStart: v.optional(v.string()),
+    workHoursEnd: v.optional(v.string()),
+    breakRemindersEnabled: v.optional(v.boolean()),
+    breakInterval: v.optional(v.number()),
+    dailyTaskGoal: v.optional(v.number()),
+    defaultView: v.optional(v.string()),
+    dataRefreshRate: v.optional(v.string()),
+    compactMode: v.optional(v.boolean()),
+    dashboardWidgets: v.optional(
+      v.object({
+        quickStats: v.boolean(),
+        leaveCalendar: v.boolean(),
+        upcomingTasks: v.boolean(),
+        teamActivity: v.boolean(),
+        recentLeaves: v.boolean(),
+        analytics: v.boolean(),
+      }),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+    lastLoginAt: v.optional(v.number()),
+  })
+    .index('by_email', ['email'])
+    .index('by_org', ['organizationId'])
+    .index('by_org_role', ['organizationId', 'role'])
+    .index('by_org_active', ['organizationId', 'isActive'])
+    .index('by_org_approval', ['organizationId', 'isApproved'])
+    .index('by_role', ['role'])
+    .index('by_supervisor', ['supervisorId'])
+    .index('by_approval', ['isApproved'])
+    .index('by_clerk_id', ['clerkId'])
+    .index('by_org_email', ['organizationId', 'email'])
+    .index('by_org_created', ['organizationId', 'createdAt']),
+
+  webauthnCredentials: defineTable({
+    userId: v.id('users'),
+    credentialId: v.string(),
+    publicKey: v.string(),
+    counter: v.number(),
+    deviceName: v.optional(v.string()),
+    createdAt: v.number(),
+    lastUsedAt: v.optional(v.number()),
+  })
+    .index('by_user', ['userId'])
+    .index('by_credential_id', ['credentialId']),
+};

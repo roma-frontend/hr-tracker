@@ -26,6 +26,7 @@ import type * as conflicts from "../conflicts.js";
 import type * as corporate from "../corporate.js";
 import type * as driverAI from "../driverAI.js";
 import type * as drivers from "../drivers.js";
+import type * as drivers_queries from "../drivers/queries.js";
 import type * as employeeNotes from "../employeeNotes.js";
 import type * as employeeProfiles from "../employeeProfiles.js";
 import type * as events from "../events.js";
@@ -88,6 +89,7 @@ declare const fullApi: ApiFromModules<{
   corporate: typeof corporate;
   driverAI: typeof driverAI;
   drivers: typeof drivers;
+  "drivers/queries": typeof drivers_queries;
   employeeNotes: typeof employeeNotes;
   employeeProfiles: typeof employeeProfiles;
   events: typeof events;

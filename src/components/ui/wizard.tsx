@@ -91,7 +91,7 @@ export function Wizard({
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className={cn('', className)}>
+    <div className={cn('p-4 md:p-6', className)}>
       {/* Stepper */}
       {showStepper && (
         <div className="mb-6 md:mb-8">

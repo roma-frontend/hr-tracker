@@ -54,3 +54,11 @@ stripe-transactions-*.xlsx
 .env.sentry-build-plugin
 # Generated analysis files
 translation-analysis.json
+
+# Debug/error log files (generated during development)
+errors.txt
+check-errors.txt
+ts-errors.txt
+final-check.txt
+build-errors.txt
+build-errors.log

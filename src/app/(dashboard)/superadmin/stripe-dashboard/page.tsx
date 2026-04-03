@@ -128,15 +128,12 @@ export default function StripeDashboardPage() {
           <CardHeader>
             <div className="flex items-center gap-2 text-red-500">
               <ShieldAlert className="w-6 h-6" />
-              <CardTitle>Access Denied</CardTitle>
+              <CardTitle>{t('stripe.accessDenied')}</CardTitle>
             </div>
-            <CardDescription>This page is only accessible to the superadmin.</CardDescription>
+            <CardDescription>{t('stripe.accessDeniedDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Payment and subscription management features are restricted to authorized personnel
-              only.
-            </p>
+            <p className="text-sm text-muted-foreground">{t('stripe.restrictedAccess')}</p>
           </CardContent>
         </Card>
       </div>
@@ -229,18 +226,18 @@ export default function StripeDashboardPage() {
             onClick={() => window.history.back()}
             className="mb-4 -ml-2 text-sm"
           >
-            ← Back to Dashboard
+            {t('stripe.backToDashboard')}
           </Button>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">💳 Stripe Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">💳 {t('stripe.dashboard')}</h1>
           <p className="text-sm md:text-base text-muted-foreground mt-2">
-            Real-time subscription analytics and insights
+            {t('stripe.realTimeAnalytics')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
             {refreshing && <ShieldLoader size="xs" variant="inline" />}
             {!refreshing && <RefreshCw className="w-4 h-4 mr-2" />}
-            Refresh
+            {t('stripe.refresh')}
           </Button>
         </div>
       </div>
@@ -250,38 +247,40 @@ export default function StripeDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Subscriptions</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {t('stripe.totalSubscriptions')}
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.total}</div>
               <p className="text-xs text-muted-foreground">
-                {stats.active} active, {stats.trialing} trialing
+                {t('stripe.activeTrialing', { active: stats.active, trialing: stats.trialing })}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Revenue (MRR)</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('stripe.monthlyRevenue')}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">${stats.mrr}</div>
               <p className="text-xs text-muted-foreground">
-                From {stats.active} active subscriptions
+                {t('stripe.fromActiveSubs', { active: stats.active })}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Growth Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('stripe.growthRate')}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.growth}%</div>
-              <p className="text-xs text-muted-foreground">Last 30 days</p>
+              <p className="text-xs text-muted-foreground">{t('stripe.last30Days')}</p>
             </CardContent>
           </Card>
 
@@ -292,7 +291,7 @@ export default function StripeDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.trialEnding}</div>
-              <p className="text-xs text-muted-foreground">Within 7 days</p>
+              <p className="text-xs text-muted-foreground">{t('stripe.within7Days')}</p>
             </CardContent>
           </Card>
         </div>
@@ -303,9 +302,9 @@ export default function StripeDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Terminal className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            Stripe Commands
+            {t('stripe.stripeCommands')}
           </CardTitle>
-          <CardDescription>Execute Stripe operations directly from the dashboard</CardDescription>
+          <CardDescription>{t('stripe.executeOperations')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -317,14 +316,12 @@ export default function StripeDashboardPage() {
             >
               <div className="flex items-center gap-2 w-full">
                 <Terminal className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="font-semibold">View Transactions</span>
+                <span className="font-semibold">{t('stripe.viewTransactions')}</span>
               </div>
               <p className="text-xs text-muted-foreground text-left">
-                Display all Stripe transactions
+                {t('stripe.displayAllTransactions')}
               </p>
-              {runningScript === 'stripe:view' && (
-                <ShieldLoader size="xs" variant="inline" />
-              )}
+              {runningScript === 'stripe:view' && <ShieldLoader size="xs" variant="inline" />}
             </Button>
 
             <Button
@@ -340,9 +337,7 @@ export default function StripeDashboardPage() {
               <p className="text-xs text-muted-foreground text-left">
                 {t('stripe.exportDataXlsx')}
               </p>
-              {runningScript === 'stripe:export' && (
-                <ShieldLoader size="xs" variant="inline" />
-              )}
+              {runningScript === 'stripe:export' && <ShieldLoader size="xs" variant="inline" />}
             </Button>
 
             <Button
@@ -356,9 +351,7 @@ export default function StripeDashboardPage() {
                 <span className="font-semibold">{t('stripe.exportToPdf')}</span>
               </div>
               <p className="text-xs text-muted-foreground text-left">{t('stripe.exportDataPdf')}</p>
-              {runningScript === 'stripe:export-pdf' && (
-                <ShieldLoader size="xs" variant="inline" />
-              )}
+              {runningScript === 'stripe:export-pdf' && <ShieldLoader size="xs" variant="inline" />}
             </Button>
 
             <Button
@@ -369,10 +362,10 @@ export default function StripeDashboardPage() {
             >
               <div className="flex items-center gap-2 w-full">
                 <BarChart3 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                <span className="font-semibold">Growth Chart</span>
+                <span className="font-semibold">{t('stripe.growthChart')}</span>
               </div>
               <p className="text-xs text-muted-foreground text-left">
-                Generate growth visualization
+                {t('stripe.generateGrowthViz')}
               </p>
               {runningScript === 'stripe:growth-chart' && (
                 <ShieldLoader size="xs" variant="inline" />
@@ -387,12 +380,12 @@ export default function StripeDashboardPage() {
             >
               <div className="flex items-center gap-2 w-full">
                 <RefreshCcw className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                <span className="font-semibold">Sync Data</span>
+                <span className="font-semibold">{t('stripe.syncData')}</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">Sync with Stripe API</p>
-              {runningScript === 'stripe:sync' && (
-                <ShieldLoader size="xs" variant="inline" />
-              )}
+              <p className="text-xs text-muted-foreground text-left">
+                {t('stripe.syncWithStripe')}
+              </p>
+              {runningScript === 'stripe:sync' && <ShieldLoader size="xs" variant="inline" />}
             </Button>
 
             <Button
@@ -403,9 +396,11 @@ export default function StripeDashboardPage() {
             >
               <div className="flex items-center gap-2 w-full">
                 <Bell className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                <span className="font-semibold">Check Trials</span>
+                <span className="font-semibold">{t('stripe.checkTrials')}</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">Check trial reminders</p>
+              <p className="text-xs text-muted-foreground text-left">
+                {t('stripe.checkTrialReminders')}
+              </p>
               {runningScript === 'stripe:check-trials' && (
                 <ShieldLoader size="xs" variant="inline" />
               )}
@@ -419,9 +414,9 @@ export default function StripeDashboardPage() {
             >
               <div className="flex items-center gap-2 w-full">
                 <Play className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-                <span className="font-semibold">Add Test Data</span>
+                <span className="font-semibold">{t('stripe.addTestData')}</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left">Add sample subscriptions</p>
+              <p className="text-xs text-muted-foreground text-left">{t('stripe.addSampleSubs')}</p>
               {runningScript === 'stripe:add-test-data' && (
                 <ShieldLoader size="xs" variant="inline" />
               )}
@@ -433,7 +428,7 @@ export default function StripeDashboardPage() {
             <div className="mt-4 p-4 bg-slate-900 dark:bg-slate-950 rounded-lg border border-slate-700">
               <div className="flex items-center gap-2 mb-2">
                 <Terminal className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm font-semibold text-emerald-400">Output:</span>
+                <span className="text-sm font-semibold text-emerald-400">{t('stripe.output')}</span>
               </div>
               <pre className="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-x-auto">
                 {scriptOutput}
@@ -449,8 +444,8 @@ export default function StripeDashboardPage() {
         {stats && (
           <Card>
             <CardHeader>
-              <CardTitle>Subscriptions by Status</CardTitle>
-              <CardDescription>Current distribution of subscription statuses</CardDescription>
+              <CardTitle>{t('stripe.subscriptionsByStatus')}</CardTitle>
+              <CardDescription>{t('stripe.statusDistribution')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {Object.entries(stats.byStatus).map(([status, count]) => (
@@ -478,8 +473,8 @@ export default function StripeDashboardPage() {
         {stats && (
           <Card>
             <CardHeader>
-              <CardTitle>Subscriptions by Plan</CardTitle>
-              <CardDescription>Distribution across pricing tiers</CardDescription>
+              <CardTitle>{t('stripe.subscriptionsByPlan')}</CardTitle>
+              <CardDescription>{t('stripe.planDistribution')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {Object.entries(stats.byPlan).map(([plan, count]) => {
@@ -495,7 +490,9 @@ export default function StripeDashboardPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{getPlanEmoji(plan)}</span>
                       <span className="capitalize font-medium">{plan}</span>
-                      <span className="text-xs text-muted-foreground">${price}/mo</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t('stripe.perMonth', { price })}
+                      </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-32 bg-secondary rounded-full h-2">
@@ -517,19 +514,19 @@ export default function StripeDashboardPage() {
       {/* Recent Subscriptions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Subscriptions</CardTitle>
-          <CardDescription>Latest subscription activity</CardDescription>
+          <CardTitle>{t('stripe.recentSubscriptions')}</CardTitle>
+          <CardDescription>{t('stripe.latestActivity')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b text-left">
-                  <th className="pb-3 font-semibold">Customer</th>
-                  <th className="pb-3 font-semibold">Plan</th>
-                  <th className="pb-3 font-semibold">Status</th>
-                  <th className="pb-3 font-semibold">MRR</th>
-                  <th className="pb-3 font-semibold">Period End</th>
+                  <th className="pb-3 font-semibold">{t('stripe.customer')}</th>
+                  <th className="pb-3 font-semibold">{t('stripe.plan')}</th>
+                  <th className="pb-3 font-semibold">{t('stripe.status')}</th>
+                  <th className="pb-3 font-semibold">{t('stripe.mrr')}</th>
+                  <th className="pb-3 font-semibold">{t('stripe.periodEnd')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -546,7 +543,9 @@ export default function StripeDashboardPage() {
                       <td className="py-3">
                         <div className="flex items-center gap-2">
                           <CreditCard className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-medium">{sub.userEmail || 'No email'}</span>
+                          <span className="font-medium">
+                            {sub.userEmail || t('stripe.noEmail')}
+                          </span>
                         </div>
                       </td>
                       <td className="py-3">
