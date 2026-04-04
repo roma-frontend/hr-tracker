@@ -110,9 +110,7 @@ function BizierEasingCard({
   const bizier = [0.34, 1.56, 0.64, 1];
 
   // На мобильных только fade, без scale
-  const initial = isMobile
-    ? { opacity: 0 }
-    : { opacity: 0, scale: 0.9 };
+  const initial = isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.9 };
   const animate = isExpanded
     ? { opacity: 1, ...(isMobile ? {} : { scale: 1 }) }
     : { opacity: 0, ...(isMobile ? {} : { scale: 0.9 }) };
@@ -123,12 +121,7 @@ function BizierEasingCard({
   };
 
   return (
-    <motion.div
-      className={className}
-      initial={initial}
-      animate={animate}
-      transition={transition}
-    >
+    <motion.div className={className} initial={initial} animate={animate} transition={transition}>
       {children}
     </motion.div>
   );
@@ -149,7 +142,10 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
   };
 
   // Get all users for stats
-  const allUsers = useQuery(api.users.queries.getAllUsers, userId ? { requesterId: userId } : 'skip');
+  const allUsers = useQuery(
+    api.users.queries.getAllUsers,
+    userId ? { requesterId: userId } : 'skip',
+  );
 
   // Calculate stats
   const stats = allUsers?.reduce(
@@ -308,7 +304,12 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                 defaultIcon={<Users className="w-4 h-4" />}
               >
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  <BizierEasingCard index={0} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="p-2 sm:p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                  <BizierEasingCard
+                    index={0}
+                    isExpanded={!collapsedSections.overview}
+                    isMobile={isMobile}
+                    className="p-2 sm:p-3 rounded-xl bg-blue-500/10 border border-blue-500/20"
+                  >
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                       <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500" />
                       <span className="text-[10px] sm:text-xs text-blue-600 font-medium">
@@ -317,7 +318,12 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     </div>
                     <p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.total}</p>
                   </BizierEasingCard>
-                  <BizierEasingCard index={1} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="p-2 sm:p-3 rounded-xl bg-gray-500/10 border border-gray-500/20">
+                  <BizierEasingCard
+                    index={1}
+                    isExpanded={!collapsedSections.overview}
+                    isMobile={isMobile}
+                    className="p-2 sm:p-3 rounded-xl bg-gray-500/10 border border-gray-500/20"
+                  >
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                       <UserX className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500" />
                       <span className="text-[10px] sm:text-xs text-gray-600 font-medium">
@@ -329,7 +335,12 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2 pt-2 border-t border-[var(--border)]">
-                  <BizierEasingCard index={2} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
+                  <BizierEasingCard
+                    index={2}
+                    isExpanded={!collapsedSections.overview}
+                    isMobile={isMobile}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
+                  >
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.admin')}
                     </span>
@@ -340,7 +351,12 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                       {stats.admins}
                     </Badge>
                   </BizierEasingCard>
-                  <BizierEasingCard index={3} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
+                  <BizierEasingCard
+                    index={3}
+                    isExpanded={!collapsedSections.overview}
+                    isMobile={isMobile}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
+                  >
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.supervisor')}
                     </span>
@@ -351,7 +367,12 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                       {stats.supervisors}
                     </Badge>
                   </BizierEasingCard>
-                  <BizierEasingCard index={4} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
+                  <BizierEasingCard
+                    index={4}
+                    isExpanded={!collapsedSections.overview}
+                    isMobile={isMobile}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
+                  >
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <UserCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.employee')}
                     </span>
@@ -363,7 +384,12 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     </Badge>
                   </BizierEasingCard>
                   {stats.drivers > 0 && (
-                    <BizierEasingCard index={5} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
+                    <BizierEasingCard
+                      index={5}
+                      isExpanded={!collapsedSections.overview}
+                      isMobile={isMobile}
+                      className="flex items-center justify-between text-[10px] sm:text-xs"
+                    >
                       <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                         <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.driver')}
                       </span>
@@ -378,13 +404,23 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                 </div>
 
                 <div className="pt-2 border-t border-[var(--border)]">
-                  <BizierEasingCard index={6} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
+                  <BizierEasingCard
+                    index={6}
+                    isExpanded={!collapsedSections.overview}
+                    isMobile={isMobile}
+                    className="flex items-center justify-between text-[10px] sm:text-xs"
+                  >
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Briefcase className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('employeeTypes.staff')}
                     </span>
                     <span className="font-semibold text-[var(--text-primary)]">{stats.staff}</span>
                   </BizierEasingCard>
-                  <BizierEasingCard index={7} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs mt-1 sm:mt-1.5">
+                  <BizierEasingCard
+                    index={7}
+                    isExpanded={!collapsedSections.overview}
+                    isMobile={isMobile}
+                    className="flex items-center justify-between text-[10px] sm:text-xs mt-1 sm:mt-1.5"
+                  >
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{' '}
                       {t('employeeTypes.contractor')}

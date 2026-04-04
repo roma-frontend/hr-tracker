@@ -20,7 +20,7 @@ export const runAutomation = action({
       internal.automationMutations.createAutomationTask,
       {
         name: 'Manual automation run',
-      }
+      },
     );
 
     // Simulate automation execution with delay

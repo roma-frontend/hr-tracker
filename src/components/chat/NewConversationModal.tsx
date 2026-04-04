@@ -138,7 +138,7 @@ export function NewConversationModal({
           isAllOrgs && targetUser?.organizationId ? targetUser.organizationId : effectiveOrgId;
 
         if (!targetId) return;
-        
+
         const convId = await getOrCreateDM({
           organizationId: dmOrgId,
           currentUserId,

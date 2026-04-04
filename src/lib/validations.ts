@@ -47,15 +47,17 @@ export const loginSchema = z.object({
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
-export const registerSchema = z.object({
-  name: nameSchema,
-  email: emailSchema,
-  password: passwordSchema,
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+export const registerSchema = z
+  .object({
+    name: nameSchema,
+    email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -65,13 +67,15 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
-export const resetPasswordSchema = z.object({
-  password: passwordSchema,
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+export const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
@@ -79,19 +83,18 @@ export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 // LEAVE REQUEST FORMS
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const leaveRequestSchema = z.object({
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
-  leaveType: z.enum(['vacation', 'sick', 'personal', 'unpaid', 'other']),
-  reason: z.string().min(10, 'Reason must be at least 10 characters').max(500),
-  attachmentUrl: z.string().optional(),
-}).refine(
-  (data) => new Date(data.endDate) >= new Date(data.startDate),
-  {
+export const leaveRequestSchema = z
+  .object({
+    startDate: z.string().min(1, 'Start date is required'),
+    endDate: z.string().min(1, 'End date is required'),
+    leaveType: z.enum(['vacation', 'sick', 'personal', 'unpaid', 'other']),
+    reason: z.string().min(10, 'Reason must be at least 10 characters').max(500),
+    attachmentUrl: z.string().optional(),
+  })
+  .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
     message: 'End date must be after start date',
     path: ['endDate'],
-  }
-);
+  });
 
 export type LeaveRequestFormData = z.infer<typeof leaveRequestSchema>;
 
@@ -116,28 +119,30 @@ export type EmployeeFormData = z.infer<typeof employeeSchema>;
 // DRIVER REQUEST FORMS
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const driverRequestSchema = z.object({
-  driverId: z.string().min(1, 'Driver is required'),
-  startTime: z.string().min(1, 'Start time is required'),
-  endTime: z.string().min(1, 'End time is required'),
-  from: z.string().min(1, 'Pickup location is required'),
-  to: z.string().min(1, 'Destination is required'),
-  purpose: z.string().min(1, 'Purpose is required'),
-  passengerCount: z.coerce.number().min(1).max(10),
-  notes: z.string().max(500).optional(),
-  requiresApproval: z.boolean().default(false),
-}).refine(
-  (data) => {
-    if (data.startTime && data.endTime) {
-      return new Date(data.endTime) > new Date(data.startTime);
-    }
-    return true;
-  },
-  {
-    message: 'End time must be after start time',
-    path: ['endTime'],
-  }
-);
+export const driverRequestSchema = z
+  .object({
+    driverId: z.string().min(1, 'Driver is required'),
+    startTime: z.string().min(1, 'Start time is required'),
+    endTime: z.string().min(1, 'End time is required'),
+    from: z.string().min(1, 'Pickup location is required'),
+    to: z.string().min(1, 'Destination is required'),
+    purpose: z.string().min(1, 'Purpose is required'),
+    passengerCount: z.coerce.number().min(1).max(10),
+    notes: z.string().max(500).optional(),
+    requiresApproval: z.boolean().default(false),
+  })
+  .refine(
+    (data) => {
+      if (data.startTime && data.endTime) {
+        return new Date(data.endTime) > new Date(data.startTime);
+      }
+      return true;
+    },
+    {
+      message: 'End time must be after start time',
+      path: ['endTime'],
+    },
+  );
 
 export type DriverRequestFormData = z.infer<typeof driverRequestSchema>;
 
@@ -147,7 +152,10 @@ export type DriverRequestFormData = z.infer<typeof driverRequestSchema>;
 
 export const organizationSchema = z.object({
   name: nameSchema,
-  domain: z.string().min(1, 'Domain is required').regex(/^[a-zA-Z0-9.-]+$/, 'Invalid domain format'),
+  domain: z
+    .string()
+    .min(1, 'Domain is required')
+    .regex(/^[a-zA-Z0-9.-]+$/, 'Invalid domain format'),
   adminName: nameSchema,
   adminEmail: emailSchema,
 });

@@ -11,9 +11,9 @@ import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'ne
 function suppressJsxWarning() {
   if (typeof window === 'undefined') return;
 
-  // eslint-disable-next-line no-console
+   
   const originalError = console.error;
-  // eslint-disable-next-line no-console
+   
   console.error = function suppressedError(msg: unknown, ...args: unknown[]) {
     if (
       typeof msg === 'string' &&

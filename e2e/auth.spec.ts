@@ -19,9 +19,10 @@ test.describe('Authentication Flow', () => {
     expect(url.includes('login') || url.includes('auth') || url.includes('sign-in')).toBeTruthy();
 
     // Page should have login-related elements
-    const hasLoginForm = await page.locator('input[type="email"]').count() > 0 ||
-      await page.locator('input[type="text"]').count() > 0 ||
-      await page.locator('form').count() > 0;
+    const hasLoginForm =
+      (await page.locator('input[type="email"]').count()) > 0 ||
+      (await page.locator('input[type="text"]').count()) > 0 ||
+      (await page.locator('form').count()) > 0;
     expect(hasLoginForm).toBeTruthy();
   });
 
@@ -41,11 +42,12 @@ test.describe('Authentication Flow', () => {
     const passwordInput = page.locator('input[type="password"]').first();
     const submitButton = page.locator('button[type="submit"]').first();
 
-    if (await emailInput.isVisible() && await submitButton.isVisible()) {
+    if ((await emailInput.isVisible()) && (await submitButton.isVisible())) {
       await submitButton.click();
 
       // Should show validation errors
-      const hasErrors = await page.locator('[class*="error"], [class*="invalid"], text=required').count() > 0;
+      const hasErrors =
+        (await page.locator('[class*="error"], [class*="invalid"], text=required').count()) > 0;
       // Either validation errors shown or form not submitted
       expect(hasErrors || page.url().includes('login') || page.url().includes('auth')).toBeTruthy();
     }
@@ -54,7 +56,10 @@ test.describe('Authentication Flow', () => {
   test('should redirect to dashboard after successful authentication', async ({ page }) => {
     // This test requires valid test credentials
     // Skip in CI without proper env vars
-    test.skip(!process.env.TEST_USER_EMAIL || !process.env.TEST_USER_PASSWORD, 'No test credentials');
+    test.skip(
+      !process.env.TEST_USER_EMAIL || !process.env.TEST_USER_PASSWORD,
+      'No test credentials',
+    );
 
     await page.goto('/');
 
@@ -90,7 +95,8 @@ test.describe('Authentication Flow', () => {
 
       // Should show error message or stay on login page
       await page.waitForTimeout(2000);
-      const hasError = await page.locator('text=invalid, text=incorrect, text=error, text=wrong').count() > 0;
+      const hasError =
+        (await page.locator('text=invalid, text=incorrect, text=error, text=wrong').count()) > 0;
       const stillOnLogin = page.url().includes('login') || page.url().includes('auth');
       expect(hasError || stillOnLogin).toBeTruthy();
     }
@@ -125,7 +131,9 @@ test.describe('Authentication Flow', () => {
       await signUpLink.click();
       await page.waitForTimeout(1000);
       const url = page.url();
-      expect(url.includes('sign-up') || url.includes('register') || url.includes('onboarding')).toBeTruthy();
+      expect(
+        url.includes('sign-up') || url.includes('register') || url.includes('onboarding'),
+      ).toBeTruthy();
     }
   });
 });

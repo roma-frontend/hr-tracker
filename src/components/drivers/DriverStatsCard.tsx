@@ -182,7 +182,12 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
             <BarChart3 className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalTrips > 0 ? (stats.totalWorkedHours * 60 / stats.totalTrips).toFixed(0) : 0} min</div>
+            <div className="text-2xl font-bold">
+              {stats.totalTrips > 0
+                ? ((stats.totalWorkedHours * 60) / stats.totalTrips).toFixed(0)
+                : 0}{' '}
+              min
+            </div>
           </CardContent>
         </Card>
       </div>

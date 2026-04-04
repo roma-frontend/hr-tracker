@@ -156,7 +156,7 @@ export function DriverShiftControls({
                     {formatDuration(
                       currentShift.endTime
                         ? currentShift.endTime - currentShift.startTime
-                        : Date.now() - currentShift.startTime
+                        : Date.now() - currentShift.startTime,
                     )}
                   </p>
                 </div>

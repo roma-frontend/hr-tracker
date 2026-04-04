@@ -87,8 +87,12 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
   );
 
   // Mutations
-  const blockTimeOff = useMutation(api.drivers.driver_operations.blockTimeOff as FunctionReference<'mutation'>);
-  const updateTripStatus = useMutation(api.drivers.driver_operations.updateTripStatus as FunctionReference<'mutation'>);
+  const blockTimeOff = useMutation(
+    api.drivers.driver_operations.blockTimeOff as FunctionReference<'mutation'>,
+  );
+  const updateTripStatus = useMutation(
+    api.drivers.driver_operations.updateTripStatus as FunctionReference<'mutation'>,
+  );
 
   const handleBlockTime = async () => {
     if (!blockStartTime || !blockEndTime || !blockReason) {
@@ -482,7 +486,10 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
           <div className="space-y-4 pt-4">
             <div>
               <Label>{t('driverCalendar.type')}</Label>
-              <Select value={blockType} onValueChange={(v) => setBlockType(v as 'vacation' | 'sick' | 'personal')}>
+              <Select
+                value={blockType}
+                onValueChange={(v) => setBlockType(v as 'vacation' | 'sick' | 'personal')}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t('driverCalendar.selectType')} />
                 </SelectTrigger>

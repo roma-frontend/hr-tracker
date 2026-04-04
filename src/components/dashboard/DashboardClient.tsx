@@ -225,7 +225,12 @@ export default function DashboardClient() {
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      months[key] = { month: monthNames[d.getMonth()] ?? 'Unknown', approved: 0, pending: 0, rejected: 0 };
+      months[key] = {
+        month: monthNames[d.getMonth()] ?? 'Unknown',
+        approved: 0,
+        pending: 0,
+        rejected: 0,
+      };
     }
 
     leaves?.forEach((l) => {

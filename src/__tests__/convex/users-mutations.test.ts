@@ -42,7 +42,11 @@ describe('User Mutations Validation Rules', () => {
   describe('deleteUser', () => {
     it('should mark user as inactive/deleted', () => {
       const source = getSource('mutations.ts');
-      const hasDeleted = source.includes('isActive') || source.includes('deletedAt') || source.includes('removedAt') || source.includes('isDeleted');
+      const hasDeleted =
+        source.includes('isActive') ||
+        source.includes('deletedAt') ||
+        source.includes('removedAt') ||
+        source.includes('isDeleted');
       expect(hasDeleted).toBe(true);
     });
   });

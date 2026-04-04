@@ -253,9 +253,7 @@ export const addDriverNotes = mutation({
     if (!schedule) throw new Error('Schedule not found');
 
     await ctx.db.patch(scheduleId, {
-      driverNotes: schedule.driverNotes
-        ? `${schedule.driverNotes}\n${notes}`
-        : notes,
+      driverNotes: schedule.driverNotes ? `${schedule.driverNotes}\n${notes}` : notes,
       updatedAt: Date.now(),
     });
 

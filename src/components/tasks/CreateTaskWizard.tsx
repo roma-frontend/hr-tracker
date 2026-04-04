@@ -27,7 +27,8 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
   const user = useQuery(api.users.queries.getCurrentUser, {});
 
   // Получаем список сотрудников для назначения
-  const employees = useQuery(api.users.queries.getAllUsers, user?._id ? { requesterId: user._id } : 'skip') || [];
+  const employees =
+    useQuery(api.users.queries.getAllUsers, user?._id ? { requesterId: user._id } : 'skip') || [];
 
   const steps: WizardStep[] = [
     {

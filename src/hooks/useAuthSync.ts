@@ -16,7 +16,10 @@ export function useAuthSync() {
   const prevUserState = useRef<{ organizationId?: string | null; isApproved?: boolean }>({});
 
   // Get current user by email
-  const currentUser = useQuery(api.users.queries.getCurrentUser, userEmail ? { email: userEmail } : 'skip');
+  const currentUser = useQuery(
+    api.users.queries.getCurrentUser,
+    userEmail ? { email: userEmail } : 'skip',
+  );
 
   useEffect(() => {
     const syncAuth = async () => {

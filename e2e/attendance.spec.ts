@@ -23,9 +23,11 @@ test.describe('Attendance Tracking', () => {
 
   test('should display attendance controls', async ({ page }) => {
     // Check for clock in/out buttons or attendance controls
-    const hasClockIn = await page.locator('text=clock in, text=Clock In, text=start').count() > 0;
-    const hasClockOut = await page.locator('text=clock out, text=Clock Out, text=end').count() > 0;
-    const hasStatus = await page.locator('text=attendance, text=present, text=absent').count() > 0;
+    const hasClockIn = (await page.locator('text=clock in, text=Clock In, text=start').count()) > 0;
+    const hasClockOut =
+      (await page.locator('text=clock out, text=Clock Out, text=end').count()) > 0;
+    const hasStatus =
+      (await page.locator('text=attendance, text=present, text=absent').count()) > 0;
 
     expect(hasClockIn || hasClockOut || hasStatus).toBeTruthy();
   });
@@ -41,9 +43,9 @@ test.describe('Attendance Tracking', () => {
 
   test('should display attendance history or records', async ({ page }) => {
     // Check for table or list of attendance records
-    const hasTable = await page.locator('table').count() > 0;
-    const hasList = await page.locator('[class*="list"], [class*="record"]').count() > 0;
-    const hasCards = await page.locator('[class*="card"]').count() > 0;
+    const hasTable = (await page.locator('table').count()) > 0;
+    const hasList = (await page.locator('[class*="list"], [class*="record"]').count()) > 0;
+    const hasCards = (await page.locator('[class*="card"]').count()) > 0;
 
     expect(hasTable || hasList || hasCards).toBeTruthy();
   });
@@ -57,24 +59,30 @@ test.describe('Attendance Tracking', () => {
       await page.waitForTimeout(1000);
 
       // Either shows confirmation, updates status, or redirects to login
-      const hasResponse = page.url().includes('attendance') ||
-        await page.locator('text=success, text=started, text=clocked').count() > 0;
+      const hasResponse =
+        page.url().includes('attendance') ||
+        (await page.locator('text=success, text=started, text=clocked').count()) > 0;
       expect(hasResponse).toBeTruthy();
     }
   });
 
   test('should show date navigation or selector', async ({ page }) => {
     // Look for date picker or navigation
-    const hasDatePicker = await page.locator('input[type="date"], [class*="datepicker"], [class*="calendar"]').count() > 0;
-    const hasDateNav = await page.locator('text=today, text=yesterday, text=previous, text=next').count() > 0;
+    const hasDatePicker =
+      (await page
+        .locator('input[type="date"], [class*="datepicker"], [class*="calendar"]')
+        .count()) > 0;
+    const hasDateNav =
+      (await page.locator('text=today, text=yesterday, text=previous, text=next').count()) > 0;
 
     expect(hasDatePicker || hasDateNav).toBeTruthy();
   });
 
   test('attendance stats should be displayed', async ({ page }) => {
     // Look for statistics like hours worked, days present, etc.
-    const hasStats = await page.locator('text=hours, text=worked, text=present, text=days').count() > 0;
-    const hasNumbers = await page.locator('[class*="stat"], [class*="metric"]').count() > 0;
+    const hasStats =
+      (await page.locator('text=hours, text=worked, text=present, text=days').count()) > 0;
+    const hasNumbers = (await page.locator('[class*="stat"], [class*="metric"]').count()) > 0;
 
     expect(hasStats || hasNumbers).toBeTruthy();
   });
@@ -87,7 +95,7 @@ test.describe('Attendance Tracking', () => {
     // Should either redirect to login or show auth prompt
     const url = page.url();
     const isAuthPage = url.includes('login') || url.includes('auth') || url.includes('sign-in');
-    const hasAuthPrompt = await page.locator('text=login, text=sign in').count() > 0;
+    const hasAuthPrompt = (await page.locator('text=login, text=sign in').count()) > 0;
 
     expect(isAuthPage || hasAuthPrompt).toBeTruthy();
   });

@@ -113,7 +113,8 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
     const errs: Record<string, string> = {};
 
     if (isSuperadmin && currentStep === 0) {
-      if (!selectedOrgId) errs.organization = t('employees.organization') + ' ' + t('errors.required').toLowerCase();
+      if (!selectedOrgId)
+        errs.organization = t('employees.organization') + ' ' + t('errors.required').toLowerCase();
     }
 
     if (currentStep === (isSuperadmin ? 1 : 0)) {
@@ -123,8 +124,10 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
     }
 
     if (currentStep === (isSuperadmin ? 2 : 1)) {
-      if (!department) errs.department = t('employees.department') + ' ' + t('errors.required').toLowerCase();
-      if (!position.trim()) errs.position = t('employees.position') + ' ' + t('errors.required').toLowerCase();
+      if (!department)
+        errs.department = t('employees.department') + ' ' + t('errors.required').toLowerCase();
+      if (!position.trim())
+        errs.position = t('employees.position') + ' ' + t('errors.required').toLowerCase();
     }
 
     if (currentStep === (isSuperadmin ? 3 : 2)) {
@@ -201,9 +204,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
       <DialogContent className="max-w-lg max-h-[90vh] p-0">
         {/* Header with progress */}
         <div className="relative overflow-hidden">
-          <div
-            className="absolute inset-0 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70"
-          />
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70" />
           <DialogHeader className="relative z-10 px-6 pt-6 pb-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
@@ -238,9 +239,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
               <span className="text-xs text-white/60">
                 {t('common.step') || 'Step'} {step + 1} / {effectiveTotalSteps}
               </span>
-              <span className="text-xs text-white/80 font-medium">
-                {steps[step]?.label}
-              </span>
+              <span className="text-xs text-white/80 font-medium">{steps[step]?.label}</span>
             </div>
           </DialogHeader>
         </div>
@@ -272,7 +271,8 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                         {t('employees.selectOrganization')}
                       </h3>
                       <p className="text-sm text-[var(--text-muted)]">
-                        {t('employees.selectOrgDescription') || 'Choose which organization to add this employee to'}
+                        {t('employees.selectOrgDescription') ||
+                          'Choose which organization to add this employee to'}
                       </p>
                     </div>
                   </div>
@@ -280,7 +280,9 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                   <div className="space-y-1.5">
                     <Label>{t('employees.organization')} *</Label>
                     <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
-                      <SelectTrigger className={errors.organization ? 'border-(--destructive)' : ''}>
+                      <SelectTrigger
+                        className={errors.organization ? 'border-(--destructive)' : ''}
+                      >
                         <SelectValue placeholder={t('employees.selectOrganization')} />
                       </SelectTrigger>
                       <SelectContent>
@@ -348,7 +350,9 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       />
                     </div>
                     {errors.email && <p className="text-xs text-(--destructive)">{errors.email}</p>}
-                    <p className="text-xs text-[var(--text-muted)]">{t('employees.contractorHint')}</p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {t('employees.contractorHint')}
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -378,7 +382,9 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                     <div className="space-y-1.5">
                       <Label>{t('employees.department')} *</Label>
                       <Select value={department} onValueChange={setDepartment}>
-                        <SelectTrigger className={errors.department ? 'border-(--destructive)' : ''}>
+                        <SelectTrigger
+                          className={errors.department ? 'border-(--destructive)' : ''}
+                        >
                           <SelectValue placeholder={t('placeholders.selectEmployee')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -533,7 +539,9 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       ].map((item, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span className="text-[var(--text-muted)]">{item.label}</span>
-                          <span className="font-medium text-[var(--text-primary)]">{item.value || '—'}</span>
+                          <span className="font-medium text-[var(--text-primary)]">
+                            {item.value || '—'}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -551,10 +559,15 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                         {t('employees.travelAllowance')}
                       </p>
                       <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                        {type === 'contractor' ? t('employeeTypes.contractor') : t('employeeTypes.staff')} type
+                        {type === 'contractor'
+                          ? t('employeeTypes.contractor')
+                          : t('employeeTypes.staff')}{' '}
+                        type
                       </p>
                     </div>
-                    <p className="text-xl font-bold text-[var(--text-primary)]">{formatCurrency(allowance)}</p>
+                    <p className="text-xl font-bold text-[var(--text-primary)]">
+                      {formatCurrency(allowance)}
+                    </p>
                   </motion.div>
                 </motion.div>
               )}
@@ -581,11 +594,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
             )}
 
             {!isLastStep ? (
-              <Button
-                type="button"
-                onClick={nextStep}
-                className="flex items-center gap-1"
-              >
+              <Button type="button" onClick={nextStep} className="flex items-center gap-1">
                 {t('wizard.next') || 'Next'}
                 <ChevronRight className="w-4 h-4" />
               </Button>

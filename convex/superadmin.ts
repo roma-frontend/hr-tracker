@@ -3,10 +3,10 @@
  * Search across all tables: users, organizations, leaves, tasks, drivers, tickets
  */
 
-import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
-import { api } from "./_generated/api";
+import { v } from 'convex/values';
+import { query, mutation } from './_generated/server';
+import { Id } from './_generated/dataModel';
+import { api } from './_generated/api';
 
 // ─── USER 360 PROFILE ────────────────────────────────────────────────────────
 /**
@@ -14,10 +14,10 @@ import { api } from "./_generated/api";
  * All data related to a single user in one place
  */
 export const getUser360 = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
     // Parallel fetch all related data
     const [
@@ -33,60 +33,57 @@ export const getUser360 = query({
     ] = await Promise.all([
       // Leave requests
       ctx.db
-        .query("leaveRequests")
-        .withIndex("by_user", (q) => q.eq("userId", args.userId))
+        .query('leaveRequests')
+        .withIndex('by_user', (q) => q.eq('userId', args.userId))
         .collect(),
-      
+
       // Tasks (assigned to user)
       ctx.db
-        .query("tasks")
-        .filter((q) => q.eq(q.field("assignedTo"), args.userId))
+        .query('tasks')
+        .filter((q) => q.eq(q.field('assignedTo'), args.userId))
         .collect(),
-      
+
       // Driver requests
       ctx.db
-        .query("driverRequests")
-        .withIndex("by_requester", (q) => q.eq("requesterId", args.userId))
+        .query('driverRequests')
+        .withIndex('by_requester', (q) => q.eq('requesterId', args.userId))
         .collect(),
-      
+
       // Notifications (last 50)
       ctx.db
-        .query("notifications")
-        .withIndex("by_user", (q) => q.eq("userId", args.userId))
-        .order("desc")
+        .query('notifications')
+        .withIndex('by_user', (q) => q.eq('userId', args.userId))
+        .order('desc')
         .take(50),
-      
+
       // Login attempts (last 20)
       ctx.db
-        .query("loginAttempts")
-        .filter((q) => q.eq(q.field("userId"), args.userId))
-        .order("desc")
+        .query('loginAttempts')
+        .filter((q) => q.eq(q.field('userId'), args.userId))
+        .order('desc')
         .take(20),
-      
+
       // Support tickets (created or assigned)
       ctx.db
-        .query("supportTickets")
-        .filter((q) => 
-          q.or(
-            q.eq(q.field("createdBy"), args.userId),
-            q.eq(q.field("assignedTo"), args.userId)
-          )
+        .query('supportTickets')
+        .filter((q) =>
+          q.or(q.eq(q.field('createdBy'), args.userId), q.eq(q.field('assignedTo'), args.userId)),
         )
         .collect(),
-      
+
       // Ticket comments
       ctx.db
-        .query("ticketComments")
-        .filter((q) => q.eq(q.field("authorId"), args.userId))
+        .query('ticketComments')
+        .filter((q) => q.eq(q.field('authorId'), args.userId))
         .collect(),
-      
+
       // Chat messages (last 100)
       ctx.db
-        .query("chatMessages")
-        .filter((q) => q.eq(q.field("senderId"), args.userId))
-        .order("desc")
+        .query('chatMessages')
+        .filter((q) => q.eq(q.field('senderId'), args.userId))
+        .order('desc')
         .take(100),
-      
+
       // Organization
       user.organizationId ? ctx.db.get(user.organizationId) : null,
     ]);
@@ -99,7 +96,7 @@ export const getUser360 = query({
           ...leave,
           reviewerName: reviewer?.name || null,
         };
-      })
+      }),
     );
 
     // Enrich tasks with creator info (using assignedBy as creator)
@@ -110,7 +107,7 @@ export const getUser360 = query({
           ...task,
           creatorName: creator?.name || null,
         };
-      })
+      }),
     );
 
     // Enrich driver requests with driver info
@@ -123,7 +120,7 @@ export const getUser360 = query({
           driverName: driverUser?.name || null,
           driverPhone: driverUser?.phone || null,
         };
-      })
+      }),
     );
 
     // Enrich support tickets
@@ -134,19 +131,20 @@ export const getUser360 = query({
           ...ticket,
           assigneeName: assignee?.name || null,
         };
-      })
+      }),
     );
 
     // Calculate statistics
     const stats = {
       totalLeaves: leaves.length,
-      pendingLeaves: leaves.filter((l) => l.status === "pending").length,
-      approvedLeaves: leaves.filter((l) => l.status === "approved").length,
+      pendingLeaves: leaves.filter((l) => l.status === 'pending').length,
+      approvedLeaves: leaves.filter((l) => l.status === 'approved').length,
       totalTasks: tasks.length,
-      completedTasks: tasks.filter((t) => t.status === "completed").length,
+      completedTasks: tasks.filter((t) => t.status === 'completed').length,
       totalDriverRequests: driverRequests.length,
       totalTickets: supportTickets.length,
-      openTickets: supportTickets.filter((t) => t.status !== "closed" && t.status !== "resolved").length,
+      openTickets: supportTickets.filter((t) => t.status !== 'closed' && t.status !== 'resolved')
+        .length,
       totalLoginAttempts: loginAttempts.length,
       failedLoginAttempts: loginAttempts.filter((l) => !l.success).length,
     };
@@ -189,54 +187,51 @@ export const getEmergencyDashboard = query({
     ] = await Promise.all([
       // Critical tickets in last hour
       ctx.db
-        .query("supportTickets")
+        .query('supportTickets')
         .filter((q) =>
           q.and(
-            q.eq(q.field("priority"), "critical"),
-            q.neq(q.field("status"), "closed"),
-            q.gt(q.field("createdAt"), oneHourAgo)
-          )
+            q.eq(q.field('priority'), 'critical'),
+            q.neq(q.field('status'), 'closed'),
+            q.gt(q.field('createdAt'), oneHourAgo),
+          ),
         )
         .collect(),
-      
+
       // Active emergency incidents
       ctx.db
-        .query("emergencyIncidents")
-        .filter((q) => q.eq(q.field("status"), "investigating"))
+        .query('emergencyIncidents')
+        .filter((q) => q.eq(q.field('status'), 'investigating'))
         .collect(),
-      
+
       // SLA breaches in last 24h
       ctx.db
-        .query("slaMetrics")
+        .query('slaMetrics')
         .filter((q) =>
           q.and(
-            q.eq(q.field("status"), "breached"),
-            q.gt(q.field("createdAt"), twentyFourHoursAgo)
-          )
+            q.eq(q.field('status'), 'breached'),
+            q.gt(q.field('createdAt'), twentyFourHoursAgo),
+          ),
         )
         .collect(),
-      
+
       // Failed login attempts (potential attack)
       ctx.db
-        .query("loginAttempts")
+        .query('loginAttempts')
         .filter((q) =>
-          q.and(
-            q.eq(q.field("success"), false),
-            q.gt(q.field("createdAt"), oneHourAgo)
-          )
+          q.and(q.eq(q.field('success'), false), q.gt(q.field('createdAt'), oneHourAgo)),
         )
         .collect(),
-      
+
       // Organizations in maintenance mode
       ctx.db
-        .query("maintenanceMode")
-        .filter((q) => q.eq(q.field("isActive"), true))
+        .query('maintenanceMode')
+        .filter((q) => q.eq(q.field('isActive'), true))
         .collect(),
-      
+
       // Pending organization requests
       ctx.db
-        .query("organizationRequests")
-        .withIndex("by_status", (q) => q.eq("status", "pending"))
+        .query('organizationRequests')
+        .withIndex('by_status', (q) => q.eq('status', 'pending'))
         .collect(),
     ]);
 
@@ -247,11 +242,11 @@ export const getEmergencyDashboard = query({
         const org = ticket.organizationId ? await ctx.db.get(ticket.organizationId) : null;
         return {
           ...ticket,
-          creatorName: creator?.name || "Unknown",
+          creatorName: creator?.name || 'Unknown',
           organizationName: org?.name || null,
           minutesOpen: Math.round((now - ticket.createdAt) / 60000),
         };
-      })
+      }),
     );
 
     // Enrich incidents
@@ -260,19 +255,22 @@ export const getEmergencyDashboard = query({
         const creator = await ctx.db.get(incident.createdBy);
         return {
           ...incident,
-          creatorName: creator?.name || "Unknown",
+          creatorName: creator?.name || 'Unknown',
           minutesActive: Math.round((now - incident.startedAt) / 60000),
         };
-      })
+      }),
     );
 
     // Analyze failed logins for potential attacks
-    const failedLoginsByIP = failedLogins.reduce((acc, attempt) => {
-      const ip = attempt.ip || "unknown";
-      if (!acc[ip]) acc[ip] = [];
-      acc[ip].push(attempt);
-      return acc;
-    }, {} as Record<string, any[]>);
+    const failedLoginsByIP = failedLogins.reduce(
+      (acc, attempt) => {
+        const ip = attempt.ip || 'unknown';
+        if (!acc[ip]) acc[ip] = [];
+        acc[ip].push(attempt);
+        return acc;
+      },
+      {} as Record<string, any[]>,
+    );
 
     const suspiciousIPs = Object.entries(failedLoginsByIP)
       .filter(([_, attempts]) => attempts.length >= 5)
@@ -306,10 +304,10 @@ export const getEmergencyDashboard = query({
       issues.push(`${suspiciousIPs.length} подозрительных IP`);
     }
 
-    let priorityLevel: "low" | "medium" | "high" | "critical" = "low";
-    if (priorityScore >= 50) priorityLevel = "critical";
-    else if (priorityScore >= 30) priorityLevel = "high";
-    else if (priorityScore >= 10) priorityLevel = "medium";
+    let priorityLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
+    if (priorityScore >= 50) priorityLevel = 'critical';
+    else if (priorityScore >= 30) priorityLevel = 'high';
+    else if (priorityScore >= 10) priorityLevel = 'medium';
 
     return {
       criticalTickets: enrichedTickets,
@@ -329,27 +327,27 @@ export const getEmergencyDashboard = query({
 // ─── CREATE EMERGENCY INCIDENT ───────────────────────────────────────────────
 export const createIncident = mutation({
   args: {
-    createdBy: v.id("users"),
+    createdBy: v.id('users'),
     title: v.string(),
     description: v.string(),
     severity: v.union(
-      v.literal("low"),
-      v.literal("medium"),
-      v.literal("high"),
-      v.literal("critical")
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('critical'),
     ),
     affectedUsers: v.number(),
     affectedOrgs: v.number(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
-    const incidentId = await ctx.db.insert("emergencyIncidents", {
+
+    const incidentId = await ctx.db.insert('emergencyIncidents', {
       organizationId: undefined,
       title: args.title,
       description: args.description,
       severity: args.severity,
-      status: "investigating",
+      status: 'investigating',
       affectedUsers: args.affectedUsers,
       affectedOrgs: args.affectedOrgs,
       rootCause: undefined,
@@ -363,15 +361,15 @@ export const createIncident = mutation({
 
     // Notify all superadmins
     const superadmins = await ctx.db
-      .query("users")
-      .withIndex("by_role", (q) => q.eq("role", "superadmin"))
+      .query('users')
+      .withIndex('by_role', (q) => q.eq('role', 'superadmin'))
       .collect();
 
     for (const admin of superadmins) {
-      await ctx.db.insert("notifications", {
+      await ctx.db.insert('notifications', {
         organizationId: undefined,
         userId: admin._id,
-        type: "security_alert",
+        type: 'security_alert',
         title: `🚨 Чрезвычайная ситуация: ${args.severity}`,
         message: args.title,
         isRead: false,
@@ -387,20 +385,20 @@ export const createIncident = mutation({
 // ─── UPDATE INCIDENT STATUS ──────────────────────────────────────────────────
 export const updateIncidentStatus = mutation({
   args: {
-    incidentId: v.id("emergencyIncidents"),
+    incidentId: v.id('emergencyIncidents'),
     status: v.union(
-      v.literal("investigating"),
-      v.literal("identified"),
-      v.literal("monitoring"),
-      v.literal("resolved")
+      v.literal('investigating'),
+      v.literal('identified'),
+      v.literal('monitoring'),
+      v.literal('resolved'),
     ),
-    userId: v.id("users"),
+    userId: v.id('users'),
     rootCause: v.optional(v.string()),
     resolution: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     const updates: any = {
       status: args.status,
       updatedAt: now,
@@ -408,7 +406,7 @@ export const updateIncidentStatus = mutation({
 
     if (args.rootCause) updates.rootCause = args.rootCause;
     if (args.resolution) updates.resolution = args.resolution;
-    if (args.status === "resolved") {
+    if (args.status === 'resolved') {
       updates.resolvedAt = now;
     }
 
@@ -425,8 +423,8 @@ export const updateIncidentStatus = mutation({
  */
 export const startImpersonation = mutation({
   args: {
-    superadminId: v.id("users"),
-    targetUserId: v.id("users"),
+    superadminId: v.id('users'),
+    targetUserId: v.id('users'),
     reason: v.string(),
   },
   handler: async (ctx, args) => {
@@ -435,26 +433,26 @@ export const startImpersonation = mutation({
 
     // Verify superadmin
     const superadmin = await ctx.db.get(args.superadminId);
-    if (!superadmin || superadmin.role !== "superadmin") {
-      throw new Error("Only superadmin can impersonate users");
+    if (!superadmin || superadmin.role !== 'superadmin') {
+      throw new Error('Only superadmin can impersonate users');
     }
 
     // Get target user
     const targetUser = await ctx.db.get(args.targetUserId);
     if (!targetUser) {
-      throw new Error("Target user not found");
+      throw new Error('Target user not found');
     }
 
     // Get target user's organization
     if (!targetUser.organizationId) {
-      throw new Error("Target user has no organization");
+      throw new Error('Target user has no organization');
     }
 
     // Generate unique token
     const token = `imp_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     // Create impersonation session
-    const sessionId = await ctx.db.insert("impersonationSessions", {
+    const sessionId = await ctx.db.insert('impersonationSessions', {
       superadminId: args.superadminId,
       targetUserId: args.targetUserId,
       organizationId: targetUser.organizationId,
@@ -467,10 +465,10 @@ export const startImpersonation = mutation({
     });
 
     // Audit log
-    await ctx.db.insert("auditLogs", {
+    await ctx.db.insert('auditLogs', {
       organizationId: targetUser.organizationId,
       userId: args.superadminId,
-      action: "IMPERSONATE_USER",
+      action: 'IMPERSONATE_USER',
       target: args.targetUserId,
       details: JSON.stringify({
         reason: args.reason,
@@ -483,11 +481,11 @@ export const startImpersonation = mutation({
     });
 
     // Notify target user
-    await ctx.db.insert("notifications", {
+    await ctx.db.insert('notifications', {
       organizationId: targetUser.organizationId,
       userId: args.targetUserId,
-      type: "security_alert",
-      title: "👤 Superadmin impersonation",
+      type: 'security_alert',
+      title: '👤 Superadmin impersonation',
       message: `${superadmin.name} has started an impersonation session on your account. Reason: ${args.reason}`,
       isRead: false,
       relatedId: `impersonation:${sessionId}`,
@@ -514,17 +512,17 @@ export const startImpersonation = mutation({
  */
 export const endImpersonation = mutation({
   args: {
-    sessionId: v.id("impersonationSessions"),
-    userId: v.id("users"),
+    sessionId: v.id('impersonationSessions'),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId);
     if (!session) {
-      throw new Error("Session not found");
+      throw new Error('Session not found');
     }
 
     if (session.superadminId !== args.userId) {
-      throw new Error("Unauthorized");
+      throw new Error('Unauthorized');
     }
 
     const now = Date.now();
@@ -535,10 +533,10 @@ export const endImpersonation = mutation({
     });
 
     // Audit log
-    await ctx.db.insert("auditLogs", {
+    await ctx.db.insert('auditLogs', {
       organizationId: session.organizationId,
       userId: args.userId,
-      action: "END_IMPERSONATION",
+      action: 'END_IMPERSONATION',
       target: session.targetUserId,
       details: JSON.stringify({
         sessionId: args.sessionId,
@@ -555,12 +553,12 @@ export const endImpersonation = mutation({
  * Get active impersonation session for user
  */
 export const getActiveImpersonation = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, args) => {
     const sessions = await ctx.db
-      .query("impersonationSessions")
-      .withIndex("by_active", (q) => q.eq("isActive", true))
-      .filter((q) => q.eq(q.field("targetUserId"), args.userId))
+      .query('impersonationSessions')
+      .withIndex('by_active', (q) => q.eq('isActive', true))
+      .filter((q) => q.eq(q.field('targetUserId'), args.userId))
       .collect();
 
     if (sessions.length === 0) return null;
@@ -571,13 +569,15 @@ export const getActiveImpersonation = query({
 
     return {
       sessionId: session._id,
-      superadminName: superadmin?.name || "Unknown",
-      superadminEmail: superadmin?.email || "",
-      targetUser: targetUser ? {
-        id: targetUser._id,
-        name: targetUser.name,
-        email: targetUser.email,
-      } : null,
+      superadminName: superadmin?.name || 'Unknown',
+      superadminEmail: superadmin?.email || '',
+      targetUser: targetUser
+        ? {
+            id: targetUser._id,
+            name: targetUser.name,
+            email: targetUser.email,
+          }
+        : null,
       reason: session.reason,
       startedAt: session.startedAt,
       expiresAt: session.expiresAt,
@@ -590,14 +590,11 @@ export const getActiveImpersonation = query({
  */
 export const getImpersonationHistory = query({
   args: {
-    superadminId: v.optional(v.id("users")),
+    superadminId: v.optional(v.id('users')),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let sessions = await ctx.db
-      .query("impersonationSessions")
-      .order("desc")
-      .collect();
+    let sessions = await ctx.db.query('impersonationSessions').order('desc').collect();
 
     if (args.superadminId) {
       sessions = sessions.filter((s) => s.superadminId === args.superadminId);
@@ -616,14 +613,14 @@ export const getImpersonationHistory = query({
 
         return {
           ...session,
-          superadminName: superadmin?.name || "Unknown",
-          superadminEmail: superadmin?.email || "",
-          targetUserName: targetUser?.name || "Unknown",
-          targetUserEmail: targetUser?.email || "",
+          superadminName: superadmin?.name || 'Unknown',
+          superadminEmail: superadmin?.email || '',
+          targetUserName: targetUser?.name || 'Unknown',
+          targetUserEmail: targetUser?.email || '',
           organizationName: org?.name || null,
           duration: session.endedAt ? session.endedAt - session.startedAt : null,
         };
-      })
+      }),
     );
 
     return enrichedSessions;
@@ -632,7 +629,7 @@ export const getImpersonationHistory = query({
 
 // ─── GLOBAL SEARCH ───────────────────────────────────────────────────────────
 export const globalSearch = query({
-  args: { 
+  args: {
     query: v.string(),
     limit: v.optional(v.number()),
   },
@@ -653,64 +650,51 @@ export const globalSearch = query({
     }
 
     // Parallel search across all tables
-    const [
-      users,
-      organizations,
-      leaveRequests,
-      driverRequests,
-      tasks,
-      supportTickets,
-    ] = await Promise.all([
-      // Search users by email and name
-      ctx.db
-        .query("users")
-        .withIndex("by_email")
-        .filter((q) => q.eq(q.field("email"), searchQuery))
-        .collect(),
-      
-      // Search organizations by slug and name
-      ctx.db
-        .query("organizations")
-        .withIndex("by_slug")
-        .filter((q) => q.eq(q.field("slug"), searchQuery))
-        .collect(),
-      
-      // Search leave requests
-      ctx.db
-        .query("leaveRequests")
-        .withIndex("by_status")
-        .collect(),
-      
-      // Search driver requests
-      ctx.db
-        .query("driverRequests")
-        .collect(),
-      
-      // Search tasks
-      ctx.db
-        .query("tasks")
-        .collect(),
-      
-      // Search support tickets
-      ctx.db
-        .query("supportTickets")
-        .withIndex("by_ticket_number")
-        .filter((q) => q.eq(q.field("ticketNumber"), args.query))
-        .collect(),
-    ]);
+    const [users, organizations, leaveRequests, driverRequests, tasks, supportTickets] =
+      await Promise.all([
+        // Search users by email and name
+        ctx.db
+          .query('users')
+          .withIndex('by_email')
+          .filter((q) => q.eq(q.field('email'), searchQuery))
+          .collect(),
+
+        // Search organizations by slug and name
+        ctx.db
+          .query('organizations')
+          .withIndex('by_slug')
+          .filter((q) => q.eq(q.field('slug'), searchQuery))
+          .collect(),
+
+        // Search leave requests
+        ctx.db.query('leaveRequests').withIndex('by_status').collect(),
+
+        // Search driver requests
+        ctx.db.query('driverRequests').collect(),
+
+        // Search tasks
+        ctx.db.query('tasks').collect(),
+
+        // Search support tickets
+        ctx.db
+          .query('supportTickets')
+          .withIndex('by_ticket_number')
+          .filter((q) => q.eq(q.field('ticketNumber'), args.query))
+          .collect(),
+      ]);
 
     // Filter and enrich results
     const filteredUsers = users
-      .filter((u) => 
-        u.email.toLowerCase().includes(searchQuery) ||
-        u.name.toLowerCase().includes(searchQuery)
+      .filter(
+        (u) =>
+          u.email.toLowerCase().includes(searchQuery) || u.name.toLowerCase().includes(searchQuery),
       )
       .slice(0, limit);
 
     const filteredOrgs = organizations
-      .filter((o) => 
-        o.name.toLowerCase().includes(searchQuery) ||
-        o.slug.toLowerCase().includes(searchQuery)
+      .filter(
+        (o) =>
+          o.name.toLowerCase().includes(searchQuery) || o.slug.toLowerCase().includes(searchQuery),
       )
       .slice(0, limit);
 
@@ -727,11 +711,11 @@ export const globalSearch = query({
           const user = await ctx.db.get(leave.userId);
           return {
             ...leave,
-            userName: user?.name || "Unknown",
-            userEmail: user?.email || "",
+            userName: user?.name || 'Unknown',
+            userEmail: user?.email || '',
             userAvatar: user?.avatarUrl,
           };
-        })
+        }),
     );
 
     // Enrich driver requests
@@ -750,19 +734,20 @@ export const globalSearch = query({
           const driverUser = driver ? await ctx.db.get(driver.userId) : null;
           return {
             ...request,
-            requesterName: requester?.name || "Unknown",
-            requesterEmail: requester?.email || "",
-            driverName: driverUser?.name || "Unknown",
+            requesterName: requester?.name || 'Unknown',
+            requesterEmail: requester?.email || '',
+            driverName: driverUser?.name || 'Unknown',
           };
-        })
+        }),
     );
 
     // Enrich tasks
     const enrichedTasks = await Promise.all(
       tasks
-        .filter((t) => 
-          t.title.toLowerCase().includes(searchQuery) ||
-          t.description?.toLowerCase().includes(searchQuery)
+        .filter(
+          (t) =>
+            t.title.toLowerCase().includes(searchQuery) ||
+            t.description?.toLowerCase().includes(searchQuery),
         )
         .slice(0, limit)
         .map(async (task) => {
@@ -770,19 +755,20 @@ export const globalSearch = query({
           const creator = await ctx.db.get(task.assignedBy);
           return {
             ...task,
-            assigneeName: assignee?.name || "Unknown",
-            creatorName: creator?.name || "Unknown",
+            assigneeName: assignee?.name || 'Unknown',
+            creatorName: creator?.name || 'Unknown',
           };
-        })
+        }),
     );
 
     // Enrich tickets
     const enrichedTickets = await Promise.all(
       supportTickets
-        .filter((t) => 
-          t.title.toLowerCase().includes(searchQuery) ||
-          t.description.toLowerCase().includes(searchQuery) ||
-          t.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase())
+        .filter(
+          (t) =>
+            t.title.toLowerCase().includes(searchQuery) ||
+            t.description.toLowerCase().includes(searchQuery) ||
+            t.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()),
         )
         .slice(0, limit)
         .map(async (ticket) => {
@@ -790,11 +776,11 @@ export const globalSearch = query({
           const assignee = ticket.assignedTo ? await ctx.db.get(ticket.assignedTo) : null;
           return {
             ...ticket,
-            creatorName: creator?.name || "Unknown",
-            creatorEmail: creator?.email || "",
+            creatorName: creator?.name || 'Unknown',
+            creatorEmail: creator?.email || '',
             assigneeName: assignee?.name || null,
           };
-        })
+        }),
     );
 
     return {
@@ -823,45 +809,48 @@ export const quickSearch = query({
   args: { query: v.string() },
   handler: async (ctx, args): Promise<any> => {
     // @ts-ignore - Convex query types cause excessive instantiation depth in Next.js 16.2
-    const fullResults = await ctx.runQuery(api.superadmin.globalSearch, { query: args.query, limit: 5 });
-    
+    const fullResults = await ctx.runQuery(api.superadmin.globalSearch, {
+      query: args.query,
+      limit: 5,
+    });
+
     // Format for quick display
     return {
       users: fullResults.users.map((u: any) => ({
         id: u._id,
-        type: "user" as const,
+        type: 'user' as const,
         title: u.name,
         subtitle: u.email,
         organization: u.organizationId,
-        icon: "👤",
+        icon: '👤',
       })),
       organizations: fullResults.organizations.map((o: any) => ({
         id: o._id,
-        type: "organization" as const,
+        type: 'organization' as const,
         title: o.name,
         subtitle: `${o.plan} • ${o.slug}`,
-        icon: "🏢",
+        icon: '🏢',
       })),
       leaveRequests: fullResults.leaveRequests.map((l: any) => ({
         id: l._id,
-        type: "leave" as const,
+        type: 'leave' as const,
         title: `${l.userName} - ${l.type}`,
         subtitle: `${l.startDate} → ${l.endDate} • ${l.status}`,
-        icon: "📅",
+        icon: '📅',
       })),
       tasks: fullResults.tasks.map((t: any) => ({
         id: t._id,
-        type: "task" as const,
+        type: 'task' as const,
         title: t.title,
         subtitle: `${t.status} • ${t.priority}`,
-        icon: "✅",
+        icon: '✅',
       })),
       tickets: fullResults.supportTickets.map((t: any) => ({
         id: t._id,
-        type: "ticket" as const,
+        type: 'ticket' as const,
         title: t.ticketNumber,
         subtitle: t.title,
-        icon: "🎫",
+        icon: '🎫',
       })),
     };
   },
@@ -871,18 +860,21 @@ export const quickSearch = query({
  * Search users by email prefix (for typeahead)
  */
 export const searchUsersByPrefix = query({
-  args: { prefix: v.string(), organizationId: v.optional(v.id("organizations")) },
+  args: { prefix: v.string(), organizationId: v.optional(v.id('organizations')) },
   handler: async (ctx, args) => {
     const prefix = args.prefix.toLowerCase();
-    
+
     if (args.organizationId) {
       const users = await ctx.db
-        .query("users")
-        .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
         .collect();
-      
+
       return users
-        .filter((u) => u.email.toLowerCase().startsWith(prefix) || u.name.toLowerCase().startsWith(prefix))
+        .filter(
+          (u) =>
+            u.email.toLowerCase().startsWith(prefix) || u.name.toLowerCase().startsWith(prefix),
+        )
         .slice(0, 10)
         .map((u) => ({
           id: u._id,
@@ -893,10 +885,13 @@ export const searchUsersByPrefix = query({
         }));
     } else {
       // Global search for superadmin
-      const allUsers = await ctx.db.query("users").collect();
-      
+      const allUsers = await ctx.db.query('users').collect();
+
       return allUsers
-        .filter((u) => u.email.toLowerCase().startsWith(prefix) || u.name.toLowerCase().startsWith(prefix))
+        .filter(
+          (u) =>
+            u.email.toLowerCase().startsWith(prefix) || u.name.toLowerCase().startsWith(prefix),
+        )
         .slice(0, 10)
         .map((u) => ({
           id: u._id,

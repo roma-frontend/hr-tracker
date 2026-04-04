@@ -1,6 +1,6 @@
 /**
  * Form Field Components
- * 
+ *
  * Reusable form components with validation error display.
  * Designed to work with React Hook Form + Zod validation.
  */
@@ -33,9 +33,7 @@ export function FormField<T extends FieldValues>({
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
       </label>
-      {description && (
-        <p className="text-sm text-muted-foreground">{description}</p>
-      )}
+      {description && <p className="text-sm text-muted-foreground">{description}</p>}
       {children}
       {error && (
         <p className="text-sm text-destructive" role="alert">
@@ -199,12 +197,7 @@ interface SubmitButtonProps {
   className?: string;
 }
 
-export function SubmitButton({
-  children,
-  isLoading,
-  disabled,
-  className = '',
-}: SubmitButtonProps) {
+export function SubmitButton({ children, isLoading, disabled, className = '' }: SubmitButtonProps) {
   return (
     <button
       type="submit"

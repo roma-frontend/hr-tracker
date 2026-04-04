@@ -35,7 +35,8 @@ export function useOptimisticSendMessage(
   }, []);
 
   const sendMessage = useMutation(api.chat.mutations.sendMessage);
-  const messages = useQuery(api.chat.queries.getMessages, { conversationId, userId, limit: 60 }) ?? [];
+  const messages =
+    useQuery(api.chat.queries.getMessages, { conversationId, userId, limit: 60 }) ?? [];
 
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);

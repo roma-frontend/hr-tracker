@@ -16,7 +16,10 @@ interface TripData {
   status: string;
 }
 
-export async function exportTripsToExcel(trips: TripData[], filename: string = 'driver-trips.xlsx') {
+export async function exportTripsToExcel(
+  trips: TripData[],
+  filename: string = 'driver-trips.xlsx',
+) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Trips');
 
@@ -36,7 +39,10 @@ export async function exportTripsToExcel(trips: TripData[], filename: string = '
   // Set column headers
   worksheet.columns = headers.map((header) => ({
     header,
-    key: header.toLowerCase().replace(/\s\(.*\)/g, '').replace(/\s/g, '_'),
+    key: header
+      .toLowerCase()
+      .replace(/\s\(.*\)/g, '')
+      .replace(/\s/g, '_'),
     width: 20,
   }));
 

@@ -1408,7 +1408,10 @@ export default function DriversPage() {
   );
 
   // Get my driver requests
-  const myRequests = useQuery(api.drivers.requests_queries.getMyRequests, mounted && userId ? { userId } : 'skip');
+  const myRequests = useQuery(
+    api.drivers.requests_queries.getMyRequests,
+    mounted && userId ? { userId } : 'skip',
+  );
 
   // Calendar week range for selected driver
   const calendarWeekStart = useMemo(() => {

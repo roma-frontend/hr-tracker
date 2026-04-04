@@ -88,7 +88,10 @@ export function EmployeeDashboard() {
     api.leaves.getAllLeaves,
     user?.id && user.organizationId ? { requesterId: user.id as Id<'users'> } : 'skip',
   );
-  const userData = useQuery(api.users.queries.getUserById, user?.id ? { userId: user.id as any } : 'skip');
+  const userData = useQuery(
+    api.users.queries.getUserById,
+    user?.id ? { userId: user.id as any } : 'skip',
+  );
   const latestRating = useQuery(
     api.supervisorRatings.getLatestRating,
     user?.id ? { employeeId: user.id as any } : 'skip',
