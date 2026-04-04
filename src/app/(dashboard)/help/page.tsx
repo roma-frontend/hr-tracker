@@ -206,14 +206,17 @@ export default function HelpSupportPage() {
                   )}
                 </DialogContent>
               </Dialog>
-              <Button
-                variant="outline"
-                onClick={() => router.push('/superadmin/subscriptions')}
-                className="gap-2 w-full sm:w-auto"
-              >
-                <span className="hidden sm:inline">💎 {t('help.upgradePlan')}</span>
-                <span className="sm:hidden">💎</span>
-              </Button>
+              {/* Upgrade Plan button — only for admins and superadmins */}
+              {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/superadmin/subscriptions')}
+                  className="gap-2 w-full sm:w-auto"
+                >
+                  <span className="hidden sm:inline">💎 {t('help.upgradePlan')}</span>
+                  <span className="sm:hidden">💎</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>

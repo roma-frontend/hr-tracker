@@ -511,6 +511,14 @@
       "high": "High",
       "medium": "Medium",
       "low": "Low",
+      "categories": {
+        "technical": "Technical Issue",
+        "billing": "Billing & Payments",
+        "access": "Access & Permissions",
+        "feature": "Feature Request",
+        "bug": "Bug Report",
+        "other": "Other"
+      },
       "ticketCreated": "Ticket {{ticketNumber}} created",
       "createError": "Error creating ticket",
       "create": {
@@ -895,6 +903,13 @@
       "open": "Open",
       "resolved": "Resolved",
       "avgResponse": "Avg Response"
+    },
+    "categories": {
+      "technical": "Technical Issue",
+      "billing": "Billing & Payments",
+      "account": "Account & Access",
+      "feature": "Feature Request",
+      "other": "Other"
     },
     "tabs": {
       "open": "Open",
