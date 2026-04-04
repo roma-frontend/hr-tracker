@@ -1065,51 +1065,9 @@ body {
   }
 }
 
-/* ── Gradient Animation ─────────────────────────────────────────── */
-@keyframes gradient-shift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
 .animate-gradient {
   animation: gradient-shift 3s ease infinite;
 }
-
-/* ── Toast slide-in from right (replaces framer-motion spring) ─── */
-@keyframes toast-slide-in {
-  from {
-    opacity: 0;
-    transform: translateX(80px) scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-/* ── Toast progress bar shrink (replaces motion.div width) ─────── */
-@keyframes toast-progress {
-  from {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-
-  to {
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-}
-
-/* ── smooth scroll only for user-initiated anchor clicks ────────── */
-/* Applied via JS: document.documentElement.style.scrollBehavior = 'smooth' */
-/* NOT set globally — preserves bfcache restoration */
 
 /* ── Sonner Toast Custom Styling ────────────────────────────────── */
 [data-sonner-toast] {
@@ -1210,22 +1168,7 @@ body {
   color: var(--foreground) !important;
 }
 
-/* Animate toast entrance */
-[data-sonner-toast] {
-  animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-@keyframes toast-slide-in {
-  from {
-    opacity: 0;
-    transform: translateX(100%) scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
+/* Animate toast entrance — uses toast-slide-in defined above */
 
 /* Break Reminder Toast Specific Styling */
 .break-reminder-toast {
@@ -1339,7 +1282,7 @@ input[type='date']:focus {
   animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Slow spin animation for loader */
+/* Slow spin animation for loader — defined once */
 @keyframes spin-slow {
   from {
     transform: rotate(0deg);
@@ -1354,7 +1297,7 @@ input[type='date']:focus {
   animation: spin-slow 1.5s linear infinite;
 }
 
-/* Pulse dot animation for loader */
+/* Pulse dot animation for loader — defined once */
 @keyframes pulse-dot {
   0%,
   100% {
@@ -1372,66 +1315,10 @@ input[type='date']:focus {
   animation: pulse-dot 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* Chat message entrance animation */
-@keyframes msg-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.animate-msg-in {
-  animation: msg-in 0.2s ease-out both;
-}
-
-/* Slide up (menus, dialogs) */
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-slide-up {
-  animation: slide-up 0.18s ease-out both;
-}
-
-/* Conversation list item entrance */
-@keyframes conv-in {
-  from {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 /* ═══════════════════════════════════════════════════════════════
-   Framer Motion Replacement Animations
-   Replace motion.div with className="animate-..." utilities
+   Additional Animation Utilities
+   (All keyframes defined once above)
    ═══════════════════════════════════════════════════════════════ */
-
-/* Fade in */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
 
 /* Fade out */
 @keyframes fade-out {
@@ -1445,22 +1332,6 @@ input[type='date']:focus {
 
 .animate-fade-out {
   animation: fade-out 0.2s ease-in;
-}
-
-/* Slide up */
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
 }
 
 /* Slide down */
@@ -1586,33 +1457,6 @@ input[type='date']:focus {
 
 .animate-pulse-subtle {
   animation: pulse-subtle 2s ease-in-out infinite;
-}
-
-/* Spin */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Ping */
-@keyframes ping {
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 /* Hide scrollbar utility */

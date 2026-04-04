@@ -43,7 +43,7 @@ export default function AILeaveAssistant({
   // Проверяем конфликты через Conflict Service
   const conflicts = useQuery(
     api.conflicts.detectAllConflicts,
-    currentLeave
+    currentLeave?.organizationId
       ? {
           organizationId: currentLeave.organizationId,
           startDate: new Date(currentLeave.startDate).getTime(),

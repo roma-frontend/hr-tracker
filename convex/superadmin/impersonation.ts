@@ -1,0 +1,214 @@
+import { v } from 'convex/values';
+import { query, mutation } from '../_generated/server';
+import { Id } from '../_generated/dataModel';
+
+// ─── IMPERSONATION ───────────────────────────────────────────────────────────
+/**
+ * 👤 Start impersonation session
+ * Superadmin can temporarily act as another user
+ */
+export const startImpersonation = mutation({
+  args: {
+    superadminId: v.id('users'),
+    targetUserId: v.id('users'),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const expiresAt = now + 3600000; // 1 hour
+
+    // Verify superadmin
+    const superadmin = await ctx.db.get(args.superadminId);
+    if (!superadmin || superadmin.role !== 'superadmin') {
+      throw new Error('Only superadmin can impersonate users');
+    }
+
+    // Get target user
+    const targetUser = await ctx.db.get(args.targetUserId);
+    if (!targetUser) {
+      throw new Error('Target user not found');
+    }
+
+    // Get target user's organization
+    if (!targetUser.organizationId) {
+      throw new Error('Target user has no organization');
+    }
+
+    // Generate unique token
+    const token = `imp_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+
+    // Create impersonation session
+    const sessionId = await ctx.db.insert('impersonationSessions', {
+      superadminId: args.superadminId,
+      targetUserId: args.targetUserId,
+      organizationId: targetUser.organizationId,
+      reason: args.reason,
+      token,
+      expiresAt,
+      startedAt: now,
+      endedAt: undefined,
+      isActive: true,
+    });
+
+    // Audit log
+    await ctx.db.insert('auditLogs', {
+      organizationId: targetUser.organizationId,
+      userId: args.superadminId,
+      action: 'IMPERSONATE_USER',
+      target: args.targetUserId,
+      details: JSON.stringify({
+        reason: args.reason,
+        targetEmail: targetUser.email,
+        targetName: targetUser.name,
+        sessionId,
+        expiresAt,
+      }),
+      createdAt: now,
+    });
+
+    // Notify target user
+    await ctx.db.insert('notifications', {
+      organizationId: targetUser.organizationId,
+      userId: args.targetUserId,
+      type: 'security_alert',
+      title: '👤 Superadmin impersonation',
+      message: `${superadmin.name} has started an impersonation session on your account. Reason: ${args.reason}`,
+      isRead: false,
+      relatedId: `impersonation:${sessionId}`,
+      createdAt: now,
+    });
+
+    return {
+      sessionId,
+      token,
+      expiresAt,
+      targetUser: {
+        id: targetUser._id,
+        name: targetUser.name,
+        email: targetUser.email,
+        role: targetUser.role,
+        organizationId: targetUser.organizationId,
+      },
+    };
+  },
+});
+
+/**
+ * End impersonation session
+ */
+export const endImpersonation = mutation({
+  args: {
+    sessionId: v.id('impersonationSessions'),
+    userId: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) {
+      throw new Error('Session not found');
+    }
+
+    if (session.superadminId !== args.userId) {
+      throw new Error('Unauthorized');
+    }
+
+    const now = Date.now();
+
+    await ctx.db.patch(args.sessionId, {
+      isActive: false,
+      endedAt: now,
+    });
+
+    // Audit log
+    await ctx.db.insert('auditLogs', {
+      organizationId: session.organizationId,
+      userId: args.userId,
+      action: 'END_IMPERSONATION',
+      target: session.targetUserId,
+      details: JSON.stringify({
+        sessionId: args.sessionId,
+        duration: now - session.startedAt,
+      }),
+      createdAt: now,
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Get active impersonation session for user
+ */
+export const getActiveImpersonation = query({
+  args: { userId: v.id('users') },
+  handler: async (ctx, args) => {
+    const sessions = await ctx.db
+      .query('impersonationSessions')
+      .withIndex('by_active', (q) => q.eq('isActive', true))
+      .filter((q) => q.eq(q.field('targetUserId'), args.userId))
+      .collect();
+
+    if (sessions.length === 0) return null;
+
+    const session = sessions[0]!;
+    const superadmin = await ctx.db.get(session.superadminId);
+    const targetUser = await ctx.db.get(session.targetUserId);
+
+    return {
+      sessionId: session._id,
+      superadminName: superadmin?.name || 'Unknown',
+      superadminEmail: superadmin?.email || '',
+      targetUser: targetUser
+        ? {
+            id: targetUser._id,
+            name: targetUser.name,
+            email: targetUser.email,
+          }
+        : null,
+      reason: session.reason,
+      startedAt: session.startedAt,
+      expiresAt: session.expiresAt,
+    };
+  },
+});
+
+/**
+ * Get all impersonation sessions (for audit)
+ */
+export const getImpersonationHistory = query({
+  args: {
+    superadminId: v.optional(v.id('users')),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let sessions = await ctx.db.query('impersonationSessions').order('desc').collect();
+
+    if (args.superadminId) {
+      sessions = sessions.filter((s) => s.superadminId === args.superadminId);
+    }
+
+    if (args.limit) {
+      sessions = sessions.slice(0, args.limit);
+    }
+
+    // Enrich with user data
+    const enrichedSessions = await Promise.all(
+      sessions.map(async (session) => {
+        const superadmin = await ctx.db.get(session.superadminId);
+        const targetUser = await ctx.db.get(session.targetUserId);
+        const org = await ctx.db.get(session.organizationId);
+
+        return {
+          ...session,
+          superadminName: superadmin?.name || 'Unknown',
+          superadminEmail: superadmin?.email || '',
+          targetUserName: targetUser?.name || 'Unknown',
+          targetUserEmail: targetUser?.email || '',
+          organizationName: org?.name || null,
+          duration: session.endedAt ? session.endedAt - session.startedAt : null,
+        };
+      }),
+    );
+
+    return enrichedSessions;
+  },
+});
