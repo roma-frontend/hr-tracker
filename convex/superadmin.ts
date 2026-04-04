@@ -822,6 +822,7 @@ export const globalSearch = query({
 export const quickSearch = query({
   args: { query: v.string() },
   handler: async (ctx, args): Promise<any> => {
+    // @ts-ignore - Convex query types cause excessive instantiation depth in Next.js 16.2
     const fullResults = await ctx.runQuery(api.superadmin.globalSearch, { query: args.query, limit: 5 });
     
     // Format for quick display

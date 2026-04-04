@@ -39,8 +39,8 @@ export function ThreadPanel({
   const [sending, setSending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
-  const replies = useQuery(api.chat.getThreadReplies, { parentMessageId });
-  const sendReply = useMutation(api.chat.sendThreadReply);
+  const replies = useQuery(api.chat.queries.getThreadReplies, { parentMessageId });
+  const sendReply = useMutation(api.chat.mutations.sendThreadReply);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });

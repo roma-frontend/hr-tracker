@@ -156,10 +156,10 @@ export function Navbar() {
     ) ?? [];
   const markRead = useMutation(api.notifications.markAsRead);
   const markAllRead = useMutation(api.notifications.markAllAsRead);
-  const updatePresence = useMutation(api.users.updatePresenceStatus);
+  const updatePresence = useMutation(api.users.mutations.updatePresenceStatus);
   const { showNotification } = useStatusUpdate();
   const currentUserData = useQuery(
-    api.users.getUserById,
+    api.users.queries.getUserById,
     user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
   const userStats = useQuery(

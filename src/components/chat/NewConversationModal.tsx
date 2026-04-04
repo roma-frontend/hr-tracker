@@ -60,14 +60,14 @@ export function NewConversationModal({
 
   // For a specific organization we keep using the lightweight chat.getOrgUsers query.
   const orgScopedUsers = useQuery(
-    api.chat.getOrgUsers,
+    api.chat.queries.getOrgUsers,
     isAllOrgs ? 'skip' : { organizationId: effectiveOrgId, currentUserId },
   );
 
   // In "All orgs" mode we load users via users.getAllUsers which,
   // for superadmin, returns employees from every organization.
   const allOrgUsers = useQuery(
-    api.users.getAllUsers,
+    api.users.queries.getAllUsers,
     isAllOrgs ? { requesterId: currentUserId } : 'skip',
   );
 
@@ -99,8 +99,8 @@ export function NewConversationModal({
       organizationId?: Id<'organizations'>;
     }>;
   }, [isAllOrgs, allOrgUsers, orgScopedUsers, currentUserId]);
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const createGroup = useMutation(api.chat.createGroup);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const createGroup = useMutation(api.chat.mutations.createGroup);
 
   const filtered = useMemo(() => {
     if (!users) return [];

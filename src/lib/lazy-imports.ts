@@ -65,7 +65,7 @@ export const LazyCanvas = dynamic(
 
 // ===== FACE API (1.5 MB) =====
 export const lazyLoadFaceAPI = async () => {
-  return await import('face-api.js');
+  return await import('@vladmandic/face-api');
 };
 
 export default {

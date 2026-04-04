@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Reason is required for suspension' }, { status: 400 });
       }
 
-      result = await convex.mutation(api.users.suspendUser, {
+      result = await convex.mutation(api.users.admin.suspendUser, {
         adminId: adminId as Id<'users'>,
         userId: userId as Id<'users'>,
         reason,
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       });
     } else {
       // unsuspend
-      result = await convex.mutation(api.users.unsuspendUser, {
+      result = await convex.mutation(api.users.admin.unsuspendUser, {
         adminId: adminId as Id<'users'>,
         userId: userId as Id<'users'>,
       });

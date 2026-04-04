@@ -77,18 +77,18 @@ export default function ChatClient({
   }, [isOnline, offlineMessages.length]);
 
   const conversations = useQuery(
-    api.chat.getMyConversations,
+    api.chat.queries.getMyConversations,
     uid && effectiveOrgId ? { userId: uid, organizationId: effectiveOrgId } : 'skip',
   );
 
-  const initiateCallMutation = useMutation(api.chat.initiateCall);
+  const initiateCallMutation = useMutation(api.chat.calls.initiateCall);
 
   // Conversation management mutations
-  const togglePinMutation = useMutation(api.chat.togglePin);
-  const deleteConversationMutation = useMutation(api.chat.deleteConversation);
-  const restoreConversationMutation = useMutation(api.chat.restoreConversation);
-  const toggleArchiveMutation = useMutation(api.chat.toggleArchive);
-  const toggleMuteMutation = useMutation(api.chat.toggleMute);
+  const togglePinMutation = useMutation(api.chat.mutations.togglePin);
+  const deleteConversationMutation = useMutation(api.chat.mutations.deleteConversation);
+  const restoreConversationMutation = useMutation(api.chat.mutations.restoreConversation);
+  const toggleArchiveMutation = useMutation(api.chat.mutations.toggleArchive);
+  const toggleMuteMutation = useMutation(api.chat.mutations.toggleMute);
 
   const handleSelectConversation = useCallback((convId: Id<'chatConversations'>) => {
     setSelectedConvId(convId);

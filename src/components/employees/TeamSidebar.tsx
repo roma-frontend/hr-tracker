@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import {
   Users,
   UserCheck,
@@ -54,7 +55,7 @@ function CollapsibleSection({
   defaultIcon,
 }: CollapsibleSectionProps) {
   return (
-    <Card className="border-0 shadow-lg bg-gradient-to-br from-[var(--card)] to-[var(--background-subtle)] overflow-hidden">
+    <Card className="border-0 shadow-lg bg-gradient-to-br from-[var(--card)] to-[var(--background-subtle)] overflow-hidden px-3 sm:px-0">
       <CardHeader className="pb-0 cursor-pointer" onClick={onToggle}>
         <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider flex items-center justify-between gap-2 py-3">
           <div className="flex items-center gap-2">{title}</div>
@@ -88,8 +89,54 @@ function CollapsibleSection({
   );
 }
 
+/**
+ * BizierEasingCard — карточка с анимацией
+ * На десктопе: карточки с scale и bezier easing анимацией
+ * На мобильных: только простая fade анимация без движения
+ */
+function BizierEasingCard({
+  children,
+  index = 0,
+  isExpanded,
+  className = '',
+  isMobile = false,
+}: {
+  children: React.ReactNode;
+  index?: number;
+  isExpanded: boolean;
+  className?: string;
+  isMobile?: boolean;
+}) {
+  const bizier = [0.34, 1.56, 0.64, 1];
+
+  // На мобильных только fade, без scale
+  const initial = isMobile
+    ? { opacity: 0 }
+    : { opacity: 0, scale: 0.9 };
+  const animate = isExpanded
+    ? { opacity: 1, ...(isMobile ? {} : { scale: 1 }) }
+    : { opacity: 0, ...(isMobile ? {} : { scale: 0.9 }) };
+  const transition = {
+    delay: index * 0.06,
+    duration: isMobile ? 0.25 : 0.5,
+    ease: isMobile ? 'easeInOut' : bizier,
+  };
+
+  return (
+    <motion.div
+      className={className}
+      initial={initial}
+      animate={animate}
+      transition={transition}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
   const { t } = useTranslation();
+  const isMobile = useMediaQuery('(max-width: 640px)');
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(true); // Закрыт по умолчанию
   const [collapsedSections, setCollapsedSections] = useState({
     overview: true, // Свернут по умолчанию
@@ -102,7 +149,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
   };
 
   // Get all users for stats
-  const allUsers = useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : 'skip');
+  const allUsers = useQuery(api.users.queries.getAllUsers, userId ? { requesterId: userId } : 'skip');
 
   // Calculate stats
   const stats = allUsers?.reduce(
@@ -186,7 +233,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
           setIsPanelCollapsed(newCollapsedState);
           onToggle?.(!newCollapsedState);
         }}
-        className="fixed top-20 sm:top-8 right-3 sm:right-6 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-colors"
+        className="fixed top-20 sm:top-8 right-3 sm:right-6 z-[75] w-9 h-9 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-colors"
         style={{
           background: 'var(--primary)',
           color: 'var(--primary-foreground)',
@@ -206,12 +253,13 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={() => {
               setIsPanelCollapsed(true);
               onToggle?.(false);
             }}
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            style={{ backdropFilter: 'blur(4px)' }}
+            className="fixed inset-0 bg-black/60 z-[60] lg:hidden"
+            style={{ backdropFilter: 'blur(8px)' }}
           />
         )}
       </AnimatePresence>
@@ -224,17 +272,19 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 100 }}
             transition={{
-              duration: 0.4,
-              ease: [0.34, 1.56, 0.64, 1],
+              duration: isMobile ? 0.3 : 0.4,
+              ease: isMobile ? 'easeInOut' : [0.34, 1.56, 0.64, 1],
             }}
-            className="fixed top-16 sm:top-24 right-0 sm:right-6 z-40 w-full sm:w-64 max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-180px)] overflow-y-auto space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent lg:shadow-lg"
+            className="fixed top-16 sm:top-24 right-0 sm:right-6 z-[70] w-full sm:w-64 max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-180px)] overflow-y-auto space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent lg:shadow-lg rounded-xl"
             style={{
-              willChange: 'transform, opacity',
               background: 'var(--card)',
+              boxShadow: isMobile
+                ? '0 -10px 40px rgba(0, 0, 0, 0.3)'
+                : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             }}
           >
             {/* Кнопка закрытия для мобильных */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-3 sm:p-0 sm:hidden border-b border-[var(--border)] bg-[var(--card)]">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-3 sm:p-0 sm:hidden border-b border-[var(--border)] bg-[var(--card)]">
               <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {t('employees.teamOverview')}
               </span>
@@ -249,7 +299,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
               </button>
             </div>
 
-            <div className="p-3 sm:p-0">
+            <div className="sm:p-0">
               {/* Team Overview */}
               <CollapsibleSection
                 title={overviewTitle}
@@ -258,16 +308,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                 defaultIcon={<Users className="w-4 h-4" />}
               >
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      delay: 0.05,
-                      duration: 0.4,
-                      ease: [0.34, 1.56, 0.64, 1],
-                    }}
-                    className="p-2 sm:p-3 rounded-xl bg-blue-500/10 border border-blue-500/20"
-                  >
+                  <BizierEasingCard index={0} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="p-2 sm:p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                       <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500" />
                       <span className="text-[10px] sm:text-xs text-blue-600 font-medium">
@@ -275,17 +316,8 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                       </span>
                     </div>
                     <p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.total}</p>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      delay: 0.1,
-                      duration: 0.4,
-                      ease: [0.34, 1.56, 0.64, 1],
-                    }}
-                    className="p-2 sm:p-3 rounded-xl bg-gray-500/10 border border-gray-500/20"
-                  >
+                  </BizierEasingCard>
+                  <BizierEasingCard index={1} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="p-2 sm:p-3 rounded-xl bg-gray-500/10 border border-gray-500/20">
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                       <UserX className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500" />
                       <span className="text-[10px] sm:text-xs text-gray-600 font-medium">
@@ -293,16 +325,11 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                       </span>
                     </div>
                     <p className="text-xl sm:text-2xl font-bold text-gray-600">{stats.inactive}</p>
-                  </motion.div>
+                  </BizierEasingCard>
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2 pt-2 border-t border-[var(--border)]">
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="flex items-center justify-between text-[10px] sm:text-xs"
-                  >
+                  <BizierEasingCard index={2} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.admin')}
                     </span>
@@ -312,13 +339,8 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     >
                       {stats.admins}
                     </Badge>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="flex items-center justify-between text-[10px] sm:text-xs"
-                  >
+                  </BizierEasingCard>
+                  <BizierEasingCard index={3} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.supervisor')}
                     </span>
@@ -328,13 +350,8 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     >
                       {stats.supervisors}
                     </Badge>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.25, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="flex items-center justify-between text-[10px] sm:text-xs"
-                  >
+                  </BizierEasingCard>
+                  <BizierEasingCard index={4} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <UserCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.employee')}
                     </span>
@@ -344,14 +361,9 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     >
                       {stats.employees}
                     </Badge>
-                  </motion.div>
+                  </BizierEasingCard>
                   {stats.drivers > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                      className="flex items-center justify-between text-[10px] sm:text-xs"
-                    >
+                    <BizierEasingCard index={5} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
                       <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                         <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.driver')}
                       </span>
@@ -361,28 +373,18 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                       >
                         {stats.drivers}
                       </Badge>
-                    </motion.div>
+                    </BizierEasingCard>
                   )}
                 </div>
 
                 <div className="pt-2 border-t border-[var(--border)]">
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="flex items-center justify-between text-[10px] sm:text-xs"
-                  >
+                  <BizierEasingCard index={6} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs">
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Briefcase className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('employeeTypes.staff')}
                     </span>
                     <span className="font-semibold text-[var(--text-primary)]">{stats.staff}</span>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="flex items-center justify-between text-[10px] sm:text-xs mt-1 sm:mt-1.5"
-                  >
+                  </BizierEasingCard>
+                  <BizierEasingCard index={7} isExpanded={!collapsedSections.overview} isMobile={isMobile} className="flex items-center justify-between text-[10px] sm:text-xs mt-1 sm:mt-1.5">
                     <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
                       <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{' '}
                       {t('employeeTypes.contractor')}
@@ -390,7 +392,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     <span className="font-semibold text-[var(--text-primary)]">
                       {stats.contractors}
                     </span>
-                  </motion.div>
+                  </BizierEasingCard>
                 </div>
               </CollapsibleSection>
 

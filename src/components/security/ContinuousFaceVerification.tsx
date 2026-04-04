@@ -13,7 +13,7 @@ interface Props {
 /**
  * ContinuousFaceVerification
  * Periodically captures a frame from the camera and compares it
- * against the stored face descriptor using face-api.js (already loaded in the app).
+ * against the stored face descriptor using @vladmandic/face-api (already loaded in the app).
  * If verification fails 2× in a row → logs out the user.
  */
 export default function ContinuousFaceVerification({
@@ -43,7 +43,7 @@ export default function ContinuousFaceVerification({
 
     try {
       // Dynamically import face-api to avoid SSR issues
-      const faceapi = await import('face-api.js');
+      const faceapi = await import('@vladmandic/face-api');
 
       // Start camera
       const stream = await navigator.mediaDevices.getUserMedia({

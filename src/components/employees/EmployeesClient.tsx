@@ -46,6 +46,8 @@ import { toast } from 'sonner';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useRouter } from 'next/navigation';
 
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
 const ROLE_CONFIG = {
   superadmin: {
     labelKey: 'roles.superAdmin',
@@ -83,6 +85,7 @@ export function EmployeesClient() {
   const user = useAuthStore(useShallow((state: { user: UserType | null }) => state.user));
   const selectedOrgId = useSelectedOrganization();
   const router = useRouter();
+  const isMobile = useMediaQuery('(max-width: 640px)');
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
@@ -303,49 +306,39 @@ export function EmployeesClient() {
 
   return (
     <div
-      className="space-y-4 sm:space-y-6"
+      className="space-y-6"
       style={{
-        transition: 'padding-right 600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-        willChange: 'padding-right',
-        paddingRight: '0.75rem',
+        transition: isMobile ? 'none' : 'padding-inline 600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        willChange: isMobile ? 'auto' : 'padding-inline',
+        paddingInline: isMobile ? '.4rem' : isPanelOpen ? '19rem' : '5rem',
       }}
     >
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-3"
+        className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4"
       >
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <h1
-              className="text-xl sm:text-2xl md:text-3xl font-bold"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {t('nav.employees')}
-            </h1>
-            <p
-              className="text-xs sm:text-sm mt-0.5 sm:mt-1 truncate"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              {stats.total} {t('employees.total')} · {stats.staff} {t('employeeTypes.staff')} ·{' '}
-              {stats.contractors} {t('employeeTypes.contractors')}
-            </p>
-          </div>
-          {canManage && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
-            >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">{t('employees.addEmployee')}</span>
-              <span className="sm:hidden">+</span>
-            </motion.button>
-          )}
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            {t('nav.employees')}
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            {stats.total} {t('employees.total')} · {stats.staff} {t('employeeTypes.staff')} ·{' '}
+            {stats.contractors} {t('employeeTypes.contractors')}
+          </p>
         </div>
+        {canManage && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all"
+            style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
+          >
+            <Plus className="w-5 h-5" /> {t('employees.addEmployee')}
+          </motion.button>
+        )}
       </motion.div>
 
       {/* Info Banner for Admins */}
@@ -354,18 +347,18 @@ export function EmployeesClient() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 }}
-          className="p-3 sm:p-4 rounded-xl border flex items-start gap-2 sm:gap-3"
+          className="p-4 rounded-xl border flex items-start gap-3"
           style={{ background: 'rgba(37,99,235,0.08)', borderColor: 'rgba(37,99,235,0.2)' }}
         >
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-blue-500 bg-blue-500/10">
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-blue-500 bg-blue-500/10">
+            <Plus className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-xs sm:text-sm" style={{ color: '#2563eb' }}>
+            <h3 className="font-semibold text-sm" style={{ color: '#2563eb' }}>
               {t('employees.infoBannerTitle')}
             </h3>
             <p
-              className="text-[10px] sm:text-xs mt-0.5 sm:mt-1 line-clamp-3 sm:line-clamp-none"
+              className="text-xs mt-1"
               style={{ color: 'var(--text-muted)' }}
               dangerouslySetInnerHTML={{ __html: t('employees.infoBannerDesc') }}
             />
@@ -378,10 +371,9 @@ export function EmployeesClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="space-y-3"
+        className="grid xs:grid-cols-2 sm:grid-cols-3 gap-3"
       >
-        {/* Search - full width on mobile */}
-        <div className="relative">
+        <div className="relative flex-1">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
             style={{ color: 'var(--text-muted)' }}
@@ -413,9 +405,7 @@ export function EmployeesClient() {
             </button>
           )}
         </div>
-
-        {/* Filters row - scrollable on mobile */}
-        <div className="flex gap-2 items-center overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+        <div className="flex gap-2 items-center">
           {[
             {
               value: filterRole,
@@ -454,7 +444,7 @@ export function EmployeesClient() {
                 key={label}
                 value={value}
                 onChange={(e) => setter(e.target.value)}
-                className="px-3 py-2 rounded-xl border text-sm outline-none capitalize flex-shrink-0"
+                className="px-3 py-2 rounded-xl border text-sm outline-none capitalize"
                 style={{
                   background: 'var(--card)',
                   borderColor: 'var(--border)',
@@ -470,7 +460,7 @@ export function EmployeesClient() {
             );
           })}
           {/* View toggle */}
-          <div className="flex rounded-xl flex-shrink-0" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex rounded-xl" style={{ borderColor: 'var(--border)' }}>
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2.5 transition-colors ${viewMode === 'grid' ? 'text-white rounded-lg' : ''} rounded-lg`}
@@ -579,7 +569,7 @@ export function EmployeesClient() {
           <>
             {/* GRID VIEW */}
             {viewMode === 'grid' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <AnimatePresence>
                   {filtered.map((emp: any, i: any) => {
                     const roleConf = ROLE_CONFIG[emp.role as keyof typeof ROLE_CONFIG];
@@ -597,54 +587,51 @@ export function EmployeesClient() {
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ delay: i * 0.03 }}
                         onClick={() => router.push(`/employees/${emp._id}`)}
-                        className="relative p-3 sm:p-5 rounded-xl sm:rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
+                        className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
                         style={{
                           background: 'var(--card)',
                           borderColor: emp.isActive ? 'var(--border)' : 'rgba(239,68,68,0.2)',
                           opacity: emp.isActive ? 1 : 0.6,
                         }}
                       >
-                        <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
+                        <div className="flex items-start gap-3 mb-4">
                           <AvatarUpload
                             userId={emp._id}
                             currentUrl={emp.avatarUrl}
                             name={emp.name}
-                            size="sm"
+                            size="md"
                             readonly={!canManage && emp._id !== user?.id}
                           />
                           <div className="min-w-0 flex-1">
                             <h3
-                              className="font-semibold text-sm sm:text-base truncate cursor-pointer hover:text-blue-500 transition-colors"
+                              className="font-semibold truncate cursor-pointer hover:text-blue-500 transition-colors"
                               style={{ color: 'var(--text-primary)' }}
                             >
                               {emp.name}
                             </h3>
-                            <p
-                              className="text-[10px] sm:text-xs truncate"
-                              style={{ color: 'var(--text-muted)' }}
-                            >
+                            <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
                               {emp.position ?? t('employees.noPosition')}
                             </p>
                             <span
-                              className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium mt-1"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mt-1"
                               style={{ background: roleConf.bg, color: roleConf.color }}
                             >
-                              <RoleIcon className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                              <RoleIcon className="w-2.5 h-2.5" />
                               {t(roleConf.labelKey)}
                             </span>
                           </div>
                         </div>
-                        <div className="space-y-1 sm:space-y-1.5 text-[10px] sm:text-xs">
+                        <div className="space-y-1.5 text-xs">
                           <div
-                            className="flex items-center gap-1.5 sm:gap-2"
+                            className="flex items-center gap-2"
                             style={{ color: 'var(--text-muted)' }}
                           >
-                            <Mail className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
+                            <Mail className="w-3 h-3 flex-shrink-0" />
                             <span className="truncate">{emp.email}</span>
                           </div>
                           {(emp as any).phone && (
                             <div
-                              className="flex items-center gap-1.5 sm:gap-2"
+                              className="flex items-center gap-2"
                               style={{ color: 'var(--text-muted)' }}
                             >
                               <Phone className="w-3 h-3" />
@@ -671,27 +658,27 @@ export function EmployeesClient() {
                           )}
                         </div>
                         <div
-                          className="flex items-center justify-between mt-2 sm:mt-4 pt-2 sm:pt-3 border-t"
+                          className="flex items-center justify-between mt-4 pt-3 border-t"
                           style={{ borderColor: 'var(--border)' }}
                         >
-                          <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+                          <div className="flex gap-2">
                             <span
-                              className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium"
+                              className="text-xs px-2 py-0.5 rounded-full font-medium"
                               style={{ background: typeConf.bg, color: typeConf.color }}
                             >
                               {t(typeConf.labelKey)}
                             </span>
                             {(emp as any).supervisorId && (
-                              <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium bg-blue-500/10 text-blue-500 truncate max-w-[120px]">
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-500/10 text-blue-500">
                                 {supervisors?.find((s) => s._id === (emp as any).supervisorId)
                                   ?.name ?? t('employees.noSupervisor')}
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
+                          <div className="flex items-center gap-1">
                             {isAdmin ? (
                               <span
-                                className="text-[10px] sm:text-xs font-semibold"
+                                className="text-xs font-semibold"
                                 style={{ color: 'var(--text-muted)' }}
                               >
                                 {(emp as any).travelAllowance?.toLocaleString() ?? '0'}{' '}
@@ -699,7 +686,7 @@ export function EmployeesClient() {
                               </span>
                             ) : (
                               <span
-                                className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${presence?.cls ?? ''}`}
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${presence?.cls ?? ''}`}
                               >
                                 {t(presence?.labelKey ?? 'common.unknown')}
                               </span>
@@ -708,11 +695,11 @@ export function EmployeesClient() {
                         </div>
                         {!emp.isActive && (
                           <div
-                            className="absolute inset-0 rounded-xl sm:rounded-2xl flex items-center justify-center"
+                            className="absolute inset-0 rounded-2xl flex items-center justify-center"
                             style={{ background: 'rgba(0,0,0,0.05)' }}
                           >
                             <span
-                              className="text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"
+                              className="text-xs font-bold px-3 py-1 rounded-full"
                               style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
                             >
                               {t('employees.deactivatedBadge')}
@@ -724,9 +711,9 @@ export function EmployeesClient() {
                   })}
                 </AnimatePresence>
                 {filtered.length === 0 && (
-                  <div className="col-span-full flex flex-col items-center justify-center py-12 sm:py-20 gap-2 sm:gap-3">
+                  <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
                     <Users
-                      className="w-8 h-8 sm:w-12 sm:h-12 opacity-20"
+                      className="w-12 h-12 opacity-20"
                       style={{ color: 'var(--text-muted)' }}
                     />
                     <p className="text-sm" style={{ color: 'var(--text-muted)' }}>

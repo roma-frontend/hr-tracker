@@ -75,9 +75,9 @@ const ALL_ROLES_CONFIG = [
 export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModalProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const updateUser = useMutation(api.users.updateUser);
+  const updateUser = useMutation(api.users.mutations.updateUser);
   const supervisors = useQuery(
-    api.users.getSupervisors,
+    api.users.queries.getSupervisors,
     user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
   );
   const organizations = useQuery(

@@ -39,16 +39,16 @@ export function DriverShiftControls({
   const [driverNotes, setDriverNotes] = useState('');
 
   // Get current shift
-  const currentShift = useQuery(api.drivers.getCurrentShift, { driverId });
+  const currentShift = useQuery(api.drivers.requests_queries.getCurrentShift, { driverId });
 
   // Get driver info
-  const driver = useQuery(api.drivers.getDriverById, { driverId });
+  const driver = useQuery(api.drivers.queries.getDriverById, { driverId });
 
   // Mutations
-  const startShiftMutation = useMutation(api.drivers.startShift);
-  const endShiftMutation = useMutation(api.drivers.endShift);
-  const pauseShiftMutation = useMutation(api.drivers.pauseShift);
-  const resumeShiftMutation = useMutation(api.drivers.resumeShift);
+  const startShiftMutation = useMutation(api.drivers.shifts_mutations.startShift);
+  const endShiftMutation = useMutation(api.drivers.shifts_mutations.endShift);
+  const pauseShiftMutation = useMutation(api.drivers.shifts_mutations.pauseShift);
+  const resumeShiftMutation = useMutation(api.drivers.shifts_mutations.resumeShift);
 
   const handleStartShift = async () => {
     try {
@@ -153,7 +153,11 @@ export function DriverShiftControls({
                     {t('driver.shift.duration', 'Duration')}
                   </p>
                   <p className="text-2xl font-bold font-mono">
-                    {formatDuration(currentShift.currentDuration || 0)}
+                    {formatDuration(
+                      currentShift.endTime
+                        ? currentShift.endTime - currentShift.startTime
+                        : Date.now() - currentShift.startTime
+                    )}
                   </p>
                 </div>
                 <div className="text-right">
@@ -216,15 +220,6 @@ export function DriverShiftControls({
                   {t('driver.shift.end', 'End Shift')}
                 </Button>
               </div>
-
-              {currentShift.isOvertime && (
-                <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                  <p className="text-sm text-orange-600 font-medium flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
-                    {t('driver.shift.overtime', 'Overtime')}
-                  </p>
-                </div>
-              )}
             </div>
           ) : (
             <div className="text-center py-8">

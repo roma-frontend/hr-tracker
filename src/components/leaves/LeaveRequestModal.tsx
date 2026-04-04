@@ -59,7 +59,7 @@ export function LeaveRequestModal({ open, onClose }: LeaveRequestModalProps) {
 
   // Use organization-specific query if superadmin has selected an org
   const allUsers = useQuery(
-    useOrgFilter ? api.organizations.getOrgMembers : api.users.getAllUsers,
+    useOrgFilter ? api.organizations.getOrgMembers : api.users.queries.getAllUsers,
     mounted && user?.id
       ? useOrgFilter
         ? {

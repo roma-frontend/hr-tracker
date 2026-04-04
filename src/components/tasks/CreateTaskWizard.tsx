@@ -24,10 +24,10 @@ interface CreateTaskWizardProps {
 export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTaskWizardProps) {
   const { t } = useTranslation();
   const createTask = useMutation(api.tasks.createTask);
-  const user = useQuery(api.users.getCurrentUser, {});
+  const user = useQuery(api.users.queries.getCurrentUser, {});
 
   // Получаем список сотрудников для назначения
-  const employees = useQuery(api.users.getAllUsers, user?._id ? { requesterId: user._id } : 'skip') || [];
+  const employees = useQuery(api.users.queries.getAllUsers, user?._id ? { requesterId: user._id } : 'skip') || [];
 
   const steps: WizardStep[] = [
     {

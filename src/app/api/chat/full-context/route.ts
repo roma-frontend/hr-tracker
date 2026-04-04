@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch ALL system data in parallel
     const [users, leaves, todayAttendance, allTasks] = await Promise.all([
-      fetchQuery(api.users.getAllUsers, { requesterId: requesterId as any }),
+      fetchQuery(api.users.queries.getAllUsers, { requesterId: requesterId as any }),
       fetchQuery(api.leaves.getAllLeaves, { requesterId: requesterId as any }),
       fetchQuery(api.timeTracking.getTodayAllAttendance, { adminId: requesterId as any }),
       fetchQuery(api.tasks.getAllTasks, { requesterId: requesterId as any }),

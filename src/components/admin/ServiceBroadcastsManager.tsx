@@ -28,11 +28,11 @@ export function ServiceBroadcastsManager({
   organizationId,
   userId,
 }: ServiceBroadcastsManagerProps) {
-  const broadcasts = useQuery(api.chat.getServiceBroadcasts, {
+  const broadcasts = useQuery(api.chat.queries.getServiceBroadcasts, {
     organizationId,
   });
 
-  const deleteMessage = useMutation(api.chat.deleteMessage);
+  const deleteMessage = useMutation(api.chat.mutations.deleteMessage);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBroadcastId, setSelectedBroadcastId] = useState<Id<'chatMessages'> | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);

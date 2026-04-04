@@ -95,9 +95,9 @@ export function MessageTemplates({
   const [activeCall, setActiveCall] = useState<ActiveCall | null>(null);
   const [calling, setCalling] = useState(false);
 
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const sendChatMessage = useMutation(api.chat.sendMessage);
-  const initiateCallMutation = useMutation(api.chat.initiateCall);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.mutations.sendMessage);
+  const initiateCallMutation = useMutation(api.chat.calls.initiateCall);
 
   const canUseChat = !!(passengerUserId && driverUserId && organizationId);
 

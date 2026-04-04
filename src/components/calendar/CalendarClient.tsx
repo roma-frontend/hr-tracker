@@ -363,7 +363,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
   const monthEnd = useMemo(() => endOfMonth(currentMonth).getTime(), [currentMonth]);
 
   const driverSchedules = useQuery(
-    api.drivers.getOrgDriverSchedules,
+    api.drivers.queries.getOrgDriverSchedules,
     mounted && selectedOrgId
       ? {
           organizationId: selectedOrgId as Id<'organizations'>,

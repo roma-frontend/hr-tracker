@@ -63,13 +63,13 @@ export function CallModal({
   const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const endCallMutation = useMutation(api.chat.endCall);
-  const answerCallMutation = useMutation(api.chat.answerCall);
-  const updateOfferMutation = useMutation(api.chat.updateOffer);
-  const updateIceMutation = useMutation(api.chat.updateIceCandidates);
-  const setInCallStatusMutation = useMutation(api.users.setInCallStatus);
-  const resetCallStatusMutation = useMutation(api.users.resetFromCallStatus);
-  const callData = useQuery(api.chat.getActiveCall, { conversationId: call.conversationId });
+  const endCallMutation = useMutation(api.chat.calls.endCall);
+  const answerCallMutation = useMutation(api.chat.calls.answerCall);
+  const updateOfferMutation = useMutation(api.chat.calls.updateOffer);
+  const updateIceMutation = useMutation(api.chat.calls.updateIceCandidates);
+  const setInCallStatusMutation = useMutation(api.users.mutations.setInCallStatus);
+  const resetCallStatusMutation = useMutation(api.users.mutations.resetFromCallStatus);
+  const callData = useQuery(api.chat.calls.getActiveCall, { conversationId: call.conversationId });
   const addedIceCandidatesRef = useRef<Set<string>>(new Set());
 
   const FALLBACK_ICE_SERVERS: RTCIceServer[] = [

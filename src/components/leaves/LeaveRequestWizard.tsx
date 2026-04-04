@@ -51,7 +51,7 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
   const [comment, setComment] = useState<string>('');
 
   // Загрузка баланса пользователя
-  const user = useQuery(api.users.getUserById, { userId });
+  const user = useQuery(api.users.queries.getUserById, { userId });
   const createLeave = useMutation(api.leaves.createLeave);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

@@ -27,7 +27,7 @@ export function SuperadminBroadcastsPanel({
   const { t } = useTranslation();
   const [broadcastDialogOpen, setBroadcastDialogOpen] = useState(false);
 
-  const currentUser = useQuery(api.users.getCurrentUser, {});
+  const currentUser = useQuery(api.users.queries.getCurrentUser, {});
 
   const finalOrgId = organizationId || currentUser?.organizationId;
   const finalUserId = userId || currentUser?._id;

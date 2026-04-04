@@ -23,17 +23,17 @@ export function IncomingCallProvider() {
   const [incomingCall, setIncomingCall] = useState<ActiveCall | null>(null);
 
   const conversations = useQuery(
-    api.chat.getMyConversations,
+    api.chat.queries.getMyConversations,
     uid && effectiveOrgId ? { userId: uid, organizationId: effectiveOrgId } : 'skip',
   );
 
   const incomingCallData = useQuery(
-    api.chat.getIncomingCalls,
+    api.chat.calls.getIncomingCalls,
     uid && effectiveOrgId ? { userId: uid, organizationId: effectiveOrgId } : 'skip',
   );
 
-  const answerCallMutation = useMutation(api.chat.answerCall);
-  const declineCallMutation = useMutation(api.chat.declineCall);
+  const answerCallMutation = useMutation(api.chat.calls.answerCall);
+  const declineCallMutation = useMutation(api.chat.calls.declineCall);
 
   // Detect incoming calls globally
   useEffect(() => {

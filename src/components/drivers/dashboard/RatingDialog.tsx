@@ -37,7 +37,7 @@ export const RatingDialog = React.memo(function RatingDialog({
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const submitRating = useMutation(api.drivers.submitPassengerRating);
+  const submitRating = useMutation(api.drivers.driver_operations.submitPassengerRating);
 
   const handleSubmit = async () => {
     setSubmitting(true);

@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { motion } from '@/lib/cssMotion';
+import type { Id } from '../../../../convex/_generated/dataModel';
 import {
   Save,
   User as UserIcon,
@@ -36,12 +37,10 @@ import { AvatarUpload } from '@/components/ui/avatar-upload';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { Badge } from '@/components/ui/badge';
-import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const { t } = useTranslation();
   const { user, login } = useAuthStore();
-  const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -50,15 +49,15 @@ export default function ProfilePage() {
   const [phone, setPhone] = useState('');
   const [location, setLocation] = useState('');
 
-  const updateOwnProfile = useMutation(api.users.updateOwnProfile);
-  const deleteAvatar = useMutation(api.users.deleteAvatar);
+  const updateOwnProfile = useMutation(api.users.mutations.updateOwnProfile);
+  const deleteAvatar = useMutation(api.users.mutations.deleteAvatar);
   const userData = useQuery(
-    api.users.getUserById,
-    user?.id ? { userId: user.id as any, requesterId: user.id as any } : 'skip',
+    api.users.queries.getUserById,
+    user?.id ? { userId: user.id as Id<'users'>, requesterId: user.id as Id<'users'> } : 'skip',
   );
   const userStats = useQuery(
     api.userStats.getUserStats,
-    user?.id ? { userId: user.id as any } : 'skip',
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
   // Sync when user loads from store or DB

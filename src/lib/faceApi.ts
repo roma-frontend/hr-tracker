@@ -1,11 +1,11 @@
-// Lazy load face-api.js to reduce initial bundle size
-let faceapi: typeof import('face-api.js') | null = null;
+// Lazy load @vladmandic/face-api to reduce initial bundle size
+let faceapi: typeof import('@vladmandic/face-api') | null = null;
 let modelsLoaded = false;
 
-// Dynamically import face-api.js only when needed
+// Dynamically import @vladmandic/face-api only when needed
 async function loadFaceApiLibrary() {
   if (!faceapi) {
-    faceapi = await import('face-api.js');
+    faceapi = await import('@vladmandic/face-api');
   }
   return faceapi;
 }

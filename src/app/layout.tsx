@@ -6,7 +6,8 @@ import { ConvexClientProvider } from '@/lib/convex';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { AuthSyncProvider } from '@/components/providers/AuthSyncProvider';
 import { MonitoringProvider } from '@/components/providers/MonitoringProvider';
-import { ThemeProvider } from 'next-themes';
+import { JsonLdScript } from '@/components/JsonLdScript';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from 'sonner';
 import { I18nProvider } from '@/components/I18nProvider';
 import { StatusUpdateProvider } from '@/context/StatusUpdateContext';
@@ -170,79 +171,6 @@ export const metadata: Metadata = {
   },
 };
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'SoftwareApplication',
-      '@id': `${APP_URL}/#software`,
-      name: 'HR Office',
-      applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Web',
-      url: APP_URL,
-      description:
-        'All-in-one HR management platform with real-time attendance, leave management, tasks, and AI assistant.',
-      featureList: [
-        'Real-time attendance tracking with face recognition',
-        'Leave management with AI assistant',
-        'Task management with Kanban board',
-        'Employee performance analytics',
-        'Multi-role access control (Admin, Supervisor, Employee)',
-        'Real-time notifications',
-        'Calendar integration (Google, Outlook)',
-        'AI-powered HR assistant',
-      ],
-      offers: {
-        '@type': 'Offer',
-        price: '29',
-        priceCurrency: 'USD',
-        priceValidUntil: '2027-12-31',
-        availability: 'https://schema.org/InStock',
-      },
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '4.9',
-        bestRating: '5',
-        worstRating: '1',
-        ratingCount: '500',
-        reviewCount: '120',
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'HR Office',
-        url: APP_URL,
-      },
-    },
-    {
-      '@type': 'Organization',
-      '@id': `${APP_URL}/#organization`,
-      name: 'HR Office',
-      url: APP_URL,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${APP_URL}/icon.png`,
-      },
-      sameAs: [],
-    },
-    {
-      '@type': 'WebSite',
-      '@id': `${APP_URL}/#website`,
-      url: APP_URL,
-      name: 'HR Office',
-      description: 'All-in-one HR management platform',
-      publisher: { '@id': `${APP_URL}/#organization` },
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: `${APP_URL}/employees?search={search_term_string}`,
-        },
-        'query-input': 'required name=search_term_string',
-      },
-    },
-  ],
-};
-
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -267,12 +195,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
           as="style"
         />
-
-        {/* JSON-LD Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
       </head>
       <body
         className={`${ibmPlexSans.variable} ${montserrat.variable} ${workSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}
@@ -293,6 +215,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                         disableTransitionOnChange
                       >
                         {children}
+                        {/* JSON-LD Structured Data */}
+                        <JsonLdScript />
                         <Toaster
                           position="top-right"
                           closeButton

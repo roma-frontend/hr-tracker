@@ -34,7 +34,7 @@ export default function SecurityAlertDetailPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const suspiciousUser = useQuery(
-    api.users.getUserById,
+    api.users.queries.getUserById,
     user?.id ? { userId: userId as Id<'users'>, requesterId: user.id as Id<'users'> } : 'skip',
   );
 
@@ -43,8 +43,8 @@ export default function SecurityAlertDetailPage() {
     userId ? { userId: userId as Id<'users'>, limit: 10 } : 'skip',
   );
 
-  const suspendUserMutation = useMutation(api.users.suspendUser);
-  const unsuspendUserMutation = useMutation(api.users.unsuspendUser);
+  const suspendUserMutation = useMutation(api.users.admin.suspendUser);
+  const unsuspendUserMutation = useMutation(api.users.admin.unsuspendUser);
 
   // Guard clauses AFTER all hooks
   if (!user) {

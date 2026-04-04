@@ -39,7 +39,7 @@ export const LazyRevenueChart = dynamic(() => Promise.resolve({ default: () => n
   ssr: false,
 });
 
-// ===== FACE RECOGNITION (face-api.js - очень тяжелый) =====
+// ===== FACE RECOGNITION (@vladmandic/face-api - очень тяжелый) =====
 export const LazyFaceRecognition = dynamic(() => Promise.resolve({ default: () => null }), {
   loading: () => <LoadingSpinner />,
   ssr: false,

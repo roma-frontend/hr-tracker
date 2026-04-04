@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     // ═══════════════════════════════════════════════════════════════
     // CHECK LEAVE BALANCE
     // ═══════════════════════════════════════════════════════════════
-    const user = await convex.query(api.users.getUserById, { userId });
+    const user = await convex.query(api.users.queries.getUserById, { userId });
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }

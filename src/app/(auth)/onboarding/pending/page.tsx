@@ -22,7 +22,7 @@ export default function PendingApprovalPage() {
 
   // Get fresh user data from Convex to check if approved
   const freshUserData = useQuery(
-    api.users.getCurrentUser,
+    api.users.queries.getCurrentUser,
     user?.email ? { email: user.email } : 'skip',
   );
 

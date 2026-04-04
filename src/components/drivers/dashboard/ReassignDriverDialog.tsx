@@ -38,10 +38,10 @@ export const ReassignDriverDialog = React.memo(function ReassignDriverDialog({
   const [selectedNewDriver, setSelectedNewDriver] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const availableDrivers = useQuery(
-    api.drivers.getAvailableDrivers,
+    api.drivers.queries.getAvailableDrivers,
     organizationId ? { organizationId } : 'skip',
   );
-  const reassign = useMutation(api.drivers.reassignDriverRequest);
+  const reassign = useMutation(api.drivers.requests_mutations.reassignDriverRequest);
 
   const otherDrivers = availableDrivers?.filter((d) => d && d._id !== currentDriverId) ?? [];
 

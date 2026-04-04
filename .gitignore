@@ -65,3 +65,5 @@ build-errors.log
 
 # Scripts directory
 scripts/
+.vercel
+.env*.local

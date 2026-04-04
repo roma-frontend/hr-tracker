@@ -26,7 +26,7 @@ export default function SelectOrganizationPage() {
 
   // Get fresh user data from Convex (not just from auth store)
   const freshUserData = useQuery(
-    api.users.getCurrentUser,
+    api.users.queries.getCurrentUser,
     user?.email ? { email: user.email } : 'skip',
   );
 

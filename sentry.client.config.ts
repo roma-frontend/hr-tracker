@@ -11,10 +11,11 @@ export function initSentryClient() {
   }
 
   Sentry.init({
-    // Your actual Sentry DSN - get it from sentry.io
-    // For now using a placeholder - replace with your real DSN
-    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN || "https://example@sentry.io/1234567",
-    
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+    // Skip initialization if DSN is not set (e.g., in development without Sentry)
+    enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+
     // Set sample rates for performance monitoring
     tracesSampleRate: process.env.NODE_ENV === "production" ? 0.05 : 0.1, // Reduced for performance
     

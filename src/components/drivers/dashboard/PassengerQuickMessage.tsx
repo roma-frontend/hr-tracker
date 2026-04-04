@@ -29,8 +29,8 @@ export function PassengerQuickMessage({
 }: PassengerQuickMessageProps) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const sendChatMessage = useMutation(api.chat.sendMessage);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.mutations.sendMessage);
 
   const PASSENGER_TEMPLATES = [
     {

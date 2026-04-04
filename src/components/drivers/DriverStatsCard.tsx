@@ -26,7 +26,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
   const { t } = useTranslation();
   const [period, setPeriod] = React.useState<'week' | 'month' | 'year'>('month');
 
-  const stats = useQuery(api.drivers.getDriverStats, { driverId, period });
+  const stats = useQuery(api.drivers.requests_queries.getDriverStats, { driverId, period });
 
   // Calculate time range with useMemo to prevent infinite re-renders
   const timeRange = useMemo(() => {
@@ -39,7 +39,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
   }, [period]);
 
   const schedules = useQuery(
-    api.drivers.getDriverSchedule,
+    api.drivers.queries.getDriverSchedule,
     driverId
       ? {
           driverId,
@@ -90,8 +90,8 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
       trips,
       {
         totalTrips: stats.totalTrips,
-        totalDistance: stats.totalDistanceKm,
-        totalDuration: stats.totalDurationMinutes,
+        totalDistance: 0, // TODO: Add distance tracking to schema
+        totalDuration: stats.totalWorkedHours * 60,
         period:
           period === 'week'
             ? t('driver.lastWeek', 'Last Week')
@@ -163,7 +163,8 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
             <MapPin className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDistanceKm.toFixed(1)} km</div>
+            <div className="text-2xl font-bold">N/A</div>
+            <p className="text-xs text-muted-foreground mt-1">Distance tracking coming soon</p>
           </CardContent>
         </Card>
         <Card>
@@ -172,7 +173,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
             <Clock className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDurationMinutes} min</div>
+            <div className="text-2xl font-bold">{Math.round(stats.totalWorkedHours * 60)} min</div>
           </CardContent>
         </Card>
         <Card>
@@ -181,39 +182,12 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
             <BarChart3 className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageDistancePerTrip.toFixed(1)} km</div>
+            <div className="text-2xl font-bold">{stats.totalTrips > 0 ? (stats.totalWorkedHours * 60 / stats.totalTrips).toFixed(0) : 0} min</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Popular Routes */}
-      {stats.popularRoutes.length > 0 && (
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-semibold">{t('driver.popularRoutes', 'Popular Routes')}</h2>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {stats.popularRoutes.map((route: any, index: any) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 border rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                      {index + 1}
-                    </div>
-                    <span className="font-medium">{route.route}</span>
-                  </div>
-                  <Badge variant="secondary">
-                    {route.count} {t('driver.trips', 'trips')}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Popular Routes — coming soon */}
     </div>
   );
 }

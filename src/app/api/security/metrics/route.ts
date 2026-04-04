@@ -1,38 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-
-// Временное хранилище метрик (в продакшене используйте Redis/БД)
-let securityMetrics = {
-  blockedIPs: 0,
-  rateLimitHits: 0,
-  failedLogins: 0,
-  anomalyScore: 0,
-  lastIncident: null as { type: string; timestamp: number } | null,
-};
+import { auth } from '@/app/api/auth/[...nextauth]/route';
 
 export async function GET(request: NextRequest) {
-  // Проверка аутентификации
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  try {
+    const session = await auth();
 
-  if (!token) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    return NextResponse.json({
+      userId: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      role: (session.user as any).role,
+    });
+  } catch (error) {
+    console.error('[Metrics API] Error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  // Проверка прав доступа (только админы)
-  if (!['admin', 'superadmin'].includes(token.role as string)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  return NextResponse.json(securityMetrics);
-}
-
-// Функция для обновления метрик (вызывается из middleware)
-export function updateSecurityMetrics(update: Partial<typeof securityMetrics>) {
-  securityMetrics = {
-    ...securityMetrics,
-    ...update,
-  };
 }

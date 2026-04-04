@@ -19,7 +19,7 @@ export default function EmployeeProfilePage() {
   const employeeId = params.id as string;
 
   const employee = useQuery(
-    api.users.getUserById,
+    api.users.queries.getUserById,
     employeeId ? { userId: employeeId as Id<'users'> } : 'skip',
   );
 

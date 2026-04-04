@@ -5,7 +5,7 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 /**
  * Lazy-loaded face recognition component.
- * face-api.js (~2MB) loads ONLY when this component mounts.
+ * @vladmandic/face-api (~2MB) loads ONLY when this component mounts.
  */
 const FaceRecognitionInner = dynamic(
   () => import('@/components/auth/FaceLogin').then((mod) => ({ default: mod.FaceLogin })),

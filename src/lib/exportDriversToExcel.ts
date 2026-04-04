@@ -2,7 +2,7 @@
  * Export driver trips to Excel
  */
 
-import { writeXLSX } from 'xlsx';
+import ExcelJS from 'exceljs';
 
 interface TripData {
   date: string;
@@ -16,49 +16,59 @@ interface TripData {
   status: string;
 }
 
-export function exportTripsToExcel(trips: TripData[], filename: string = 'driver-trips.xlsx') {
-  // Prepare data for Excel
-  const data = trips.map((trip) => ({
-    Date: trip.date,
-    Driver: trip.driver,
-    Passenger: trip.passenger,
-    From: trip.from,
-    To: trip.to,
-    Purpose: trip.purpose,
-    'Distance (km)': trip.distanceKm,
-    'Duration (min)': trip.durationMin,
-    Status: trip.status,
+export async function exportTripsToExcel(trips: TripData[], filename: string = 'driver-trips.xlsx') {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Trips');
+
+  // Add headers with bold styling
+  const headers = [
+    'Date',
+    'Driver',
+    'Passenger',
+    'From',
+    'To',
+    'Purpose',
+    'Distance (km)',
+    'Duration (min)',
+    'Status',
+  ];
+
+  // Set column headers
+  worksheet.columns = headers.map((header) => ({
+    header,
+    key: header.toLowerCase().replace(/\s\(.*\)/g, '').replace(/\s/g, '_'),
+    width: 20,
   }));
 
-  // Create workbook and worksheet
-  const wb = {
-    Sheets: {
-      Trips: {
-        data: [
-          // Header row
-          [
-            { v: 'Date', s: { font: { bold: true } } },
-            { v: 'Driver', s: { font: { bold: true } } },
-            { v: 'Passenger', s: { font: { bold: true } } },
-            { v: 'From', s: { font: { bold: true } } },
-            { v: 'To', s: { font: { bold: true } } },
-            { v: 'Purpose', s: { font: { bold: true } } },
-            { v: 'Distance (km)', s: { font: { bold: true } } },
-            { v: 'Duration (min)', s: { font: { bold: true } } },
-            { v: 'Status', s: { font: { bold: true } } },
-          ],
-          ...data.map((row) => Object.values(row)),
-        ],
-      },
-    },
-    SheetNames: ['Trips'],
+  // Style header row
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { bold: true };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFE0E0E0' },
   };
 
-  // Write to file (in browser, this will trigger download)
-  const excelBuffer = writeXLSX(wb, { bookType: 'xlsx', type: 'buffer' });
+  // Add trip data
+  trips.forEach((trip) => {
+    worksheet.addRow({
+      date: trip.date,
+      driver: trip.driver,
+      passenger: trip.passenger,
+      from: trip.from,
+      to: trip.to,
+      purpose: trip.purpose,
+      distance_km: trip.distanceKm,
+      duration_min: trip.durationMin,
+      status: trip.status,
+    });
+  });
+
+  // Generate buffer and download
+  const buffer = await workbook.xlsx.writeBuffer();
 
   // Create blob and download
-  const blob = new Blob([excelBuffer], {
+  const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
   const url = window.URL.createObjectURL(blob);

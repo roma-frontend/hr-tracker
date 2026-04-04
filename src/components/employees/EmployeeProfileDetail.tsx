@@ -53,7 +53,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
   const [deleting, setDeleting] = useState(false);
   const { t } = useTranslation();
 
-  const employee = useQuery(api.users.getUserById, { userId: employeeId });
+  const employee = useQuery(api.users.queries.getUserById, { userId: employeeId });
   const profile = useQuery(api.employeeProfiles.getEmployeeProfile, { userId: employeeId });
   const score = useQuery(api.aiEvaluator.calculateEmployeeScore, { userId: employeeId });
   const latestRating = useQuery(api.supervisorRatings.getLatestRating, { employeeId });
@@ -66,7 +66,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
     limit: 3,
   });
 
-  const deleteUser = useMutation(api.users.deleteUser);
+  const deleteUser = useMutation(api.users.mutations.deleteUser);
 
   const isAdminOrSupervisor = currentUser?.role === 'admin' || currentUser?.role === 'supervisor';
   const isSuperadmin =

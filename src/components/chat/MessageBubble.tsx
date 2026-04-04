@@ -359,13 +359,13 @@ export const MessageBubble = React.memo(function MessageBubble({
   const actionBarRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const toggleReaction = useMutation(api.chat.toggleReaction);
-  const editMessage = useMutation(api.chat.editMessage);
-  const deleteMessage = useMutation(api.chat.deleteMessage);
-  const deleteMessageForMe = useMutation(api.chat.deleteMessageForMe);
-  const pinMessage = useMutation(api.chat.pinMessage);
-  const votePoll = useMutation(api.chat.votePoll);
-  const closePoll = useMutation(api.chat.closePoll);
+  const toggleReaction = useMutation(api.chat.mutations.toggleReaction);
+  const editMessage = useMutation(api.chat.mutations.editMessage);
+  const deleteMessage = useMutation(api.chat.mutations.deleteMessage);
+  const deleteMessageForMe = useMutation(api.chat.mutations.deleteMessageForMe);
+  const pinMessage = useMutation(api.chat.mutations.pinMessage);
+  const votePoll = useMutation(api.chat.mutations.votePoll);
+  const closePoll = useMutation(api.chat.mutations.closePoll);
 
   // Extract URL from content for link preview
   const urlInContent = message.content ? extractUrl(message.content) : null;

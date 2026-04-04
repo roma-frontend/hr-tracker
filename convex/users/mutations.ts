@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
-import type { Doc } from '../_generated/dataModel';
+import type { Doc, Id } from '../_generated/dataModel';
+import type { QueryCtx, MutationCtx } from '../_generated/server';
 
 const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
@@ -14,9 +15,6 @@ async function requireAdmin(ctx: QueryCtx, adminId: Id<'users'>) {
   }
   return admin;
 }
-
-import type { QueryCtx, MutationCtx } from '../_generated/server';
-import type { Id } from '../_generated/dataModel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CREATE USER (admin only) — auto-scoped to admin's org

@@ -38,9 +38,9 @@ export function FaceLogin() {
   const setUser = useAuthStore((state) => state.setUser);
   const allFaceDescriptors = useQuery(api.faceRecognition.getAllFaceDescriptors);
   const verifyFaceLogin = useMutation(api.faceRecognition.verifyFaceLogin);
-  const recordFaceIdAttempt = useMutation(api.users.recordFaceIdAttempt);
+  const recordFaceIdAttempt = useMutation(api.users.auth.recordFaceIdAttempt);
   const checkFaceIdStatus = useQuery(
-    api.users.checkFaceIdStatus,
+    api.users.queries.checkFaceIdStatus,
     matchedUser ? { email: matchedUser } : 'skip',
   );
 

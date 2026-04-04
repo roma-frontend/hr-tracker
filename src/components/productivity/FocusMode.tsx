@@ -19,7 +19,7 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [isFocusMode, setIsFocusMode] = useState(currentPresence === 'busy');
-  const updatePresence = useMutation(api.users.updatePresenceStatus);
+  const updatePresence = useMutation(api.users.mutations.updatePresenceStatus);
 
   const toggleFocusMode = async () => {
     if (!user?.id) return;

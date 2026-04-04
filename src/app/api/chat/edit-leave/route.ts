@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     // Get requester
-    const users = await fetchQuery(api.users.getAllUsers, { requesterId: requesterId as any });
+    const users = await fetchQuery(api.users.queries.getAllUsers, { requesterId: requesterId as any });
     const requester = (users as any[]).find((u: any) => u._id === requesterId);
 
     if (!requester) {

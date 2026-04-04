@@ -40,16 +40,16 @@ interface DriverRequestModalProps {
 
 export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverRequestModalProps) {
   const { t } = useTranslation();
-  const currentUser = useQuery(api.users.getCurrentUser, { email: undefined });
+  const currentUser = useQuery(api.users.queries.getCurrentUser, { email: undefined });
   const userId = currentUser?._id as Id<'users'> | undefined;
   const organizationId = currentUser?.organizationId as Id<'organizations'> | undefined;
 
   const availableDrivers = useQuery(
-    api.drivers.getAvailableDrivers,
+    api.drivers.queries.getAvailableDrivers,
     organizationId ? { organizationId } : 'skip',
   );
 
-  const requestDriver = useMutation(api.drivers.requestDriver);
+  const requestDriver = useMutation(api.drivers.requests_mutations.requestDriver);
 
   const [leaveWarning, setLeaveWarning] = useState<{
     type: string;
@@ -79,7 +79,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
 
   // Get alternative drivers when current driver is on leave
   const alternativeDrivers = useQuery(
-    api.drivers.getAlternativeDrivers,
+    api.drivers.queries.getAlternativeDrivers,
     selectedDriver && startTime && endTime && leaveWarning
       ? {
           organizationId: organizationId!,
@@ -242,7 +242,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
 
   // Check if driver is on leave when driver or time changes
   const isDriverOnLeave = useQuery(
-    api.drivers.isDriverOnLeave,
+    api.drivers.queries.isDriverOnLeave,
     selectedDriver && startTime && endTime
       ? {
           driverId: selectedDriver as Id<'drivers'>,

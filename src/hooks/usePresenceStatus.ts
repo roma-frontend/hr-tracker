@@ -9,9 +9,9 @@ type PresenceStatus = 'available' | 'in_meeting' | 'in_call' | 'out_of_office' |
 export function usePresenceStatus(userId?: Id<'users'>) {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
-  const currentUser = useQuery(api.users.getCurrentUser, userId ? {} : 'skip');
+  const currentUser = useQuery(api.users.queries.getCurrentUser, userId ? {} : 'skip');
 
-  const updateStatusMutation = useMutation(api.users.updatePresenceStatus);
+  const updateStatusMutation = useMutation(api.users.mutations.updatePresenceStatus);
 
   const openStatusModal = useCallback(() => {
     setIsStatusModalOpen(true);

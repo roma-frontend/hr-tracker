@@ -76,7 +76,7 @@ export function EmployeeHoverCard({
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const updatePresence = useMutation(api.users.updatePresenceStatus);
+  const updatePresence = useMutation(api.users.mutations.updatePresenceStatus);
 
   // Find supervisor from allUsers list — no extra query
   const supervisor = allUsers?.find((u: any) => u._id === employee.supervisorId);

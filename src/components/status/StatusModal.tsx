@@ -41,7 +41,7 @@ export function StatusModal({
   const [showConfirm, setShowConfirm] = useState(false);
   const [outOfOfficeMsg, setOutOfOfficeMsg] = useState('');
 
-  const updateStatusMutation = useMutation(api.users.updatePresenceStatus);
+  const updateStatusMutation = useMutation(api.users.mutations.updatePresenceStatus);
 
   const statusOptions: {
     [key in StatusType]: StatusOption;

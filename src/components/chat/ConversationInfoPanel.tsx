@@ -38,8 +38,8 @@ export function ConversationInfoPanel({
   const [selectedOrgId, setSelectedOrgId] = useState<Id<'organizations'>>(organizationId);
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
 
-  const members = useQuery(api.chat.getConversationMembers, { conversationId });
-  const conversations = useQuery(api.chat.getMyConversations, {
+  const members = useQuery(api.chat.queries.getConversationMembers, { conversationId });
+  const conversations = useQuery(api.chat.queries.getMyConversations, {
     userId: currentUserId,
     organizationId,
   });
@@ -49,12 +49,12 @@ export function ConversationInfoPanel({
   const allOrganizations = useQuery(api.organizations.getAllOrganizations, {});
 
   // Fetch users from the selected organization using getOrgUsers (no permission restrictions)
-  const orgUsers = useQuery(api.chat.getOrgUsers, {
+  const orgUsers = useQuery(api.chat.queries.getOrgUsers, {
     organizationId: selectedOrgId,
     currentUserId,
   });
 
-  const addMember = useMutation(api.chat.addMember);
+  const addMember = useMutation(api.chat.mutations.addMember);
 
   const isGroupConversation =
     conversation &&

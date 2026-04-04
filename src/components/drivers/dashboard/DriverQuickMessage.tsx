@@ -31,8 +31,8 @@ export function DriverQuickMessage({
 }: DriverQuickMessageProps) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const sendChatMessage = useMutation(api.chat.sendMessage);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.mutations.sendMessage);
 
   const DRIVER_TEMPLATES = [
     {

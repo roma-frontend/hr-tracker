@@ -221,7 +221,7 @@ export function Sidebar() {
 
   // Unread chat messages count
   const chatUnreadCount = useQuery(
-    api.chat.getTotalUnread,
+    api.chat.queries.getTotalUnread,
     mounted && user?.id && user?.organizationId
       ? {
           userId: user.id as Id<'users'>,
@@ -611,7 +611,7 @@ export function MobileSidebar() {
 
   // Mobile unread chat count
   const mobileChatUnreadCount = useQuery(
-    api.chat.getTotalUnread,
+    api.chat.queries.getTotalUnread,
     mounted && user?.id && user?.organizationId
       ? {
           userId: user.id as Id<'users'>,

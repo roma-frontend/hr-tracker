@@ -42,7 +42,7 @@ export function AvatarUpload({
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const updateAvatar = useMutation(api.users.updateAvatar);
+  const updateAvatar = useMutation(api.users.mutations.updateAvatar);
   const { user, setUser } = useAuthStore();
 
   const initials = name

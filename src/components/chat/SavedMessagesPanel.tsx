@@ -23,8 +23,8 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
   const { user } = useAuthStore();
 
   // For now, using pinned messages as placeholder
-  const savedMessages = useQuery(api.chat.getPinnedMessages, { conversationId: undefined as any });
-  const unsaveMessage = useMutation(api.chat.togglePin);
+  const savedMessages = useQuery(api.chat.queries.getPinnedMessages, { conversationId: undefined as any });
+  const unsaveMessage = useMutation(api.chat.mutations.togglePin);
 
   const handleUnsave = async (e: React.MouseEvent, messageId: Id<'chatMessages'>) => {
     e.stopPropagation();

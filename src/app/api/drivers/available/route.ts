@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get available drivers
-    const drivers = await convex.query(api.drivers.getAvailableDrivers, {
+    const drivers = await convex.query(api.drivers.queries.getAvailableDrivers, {
       organizationId: organizationId as Id<'organizations'>,
     });
 

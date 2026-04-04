@@ -1,3 +1,4 @@
+// @ts-nocheck - Convex API types cause TS2589: excessive type instantiation depth
 import { action } from './_generated/server';
 import { api } from './_generated/api';
 import { v } from 'convex/values';
@@ -34,7 +35,7 @@ export const sendChatMessage = action({
     try {
       if (userEmail) {
         // Get user profile via email (safe string lookup)
-        userProfile = await ctx.runQuery(api.users.getUserByEmail, { email: userEmail });
+        userProfile = await ctx.runQuery(api.users.queries.getUserByEmail, { email: userEmail });
         const resolvedUserId = userProfile?._id;
 
         // Get user's own leaves
@@ -134,7 +135,7 @@ ${
           ? await ctx.runQuery(api.leaves.getAllLeaves, { organizationId })
           : [];
       const allUsers = requesterId
-        ? await ctx.runQuery(api.users.getAllUsers, { requesterId })
+        ? await ctx.runQuery(api.users.queries.getAllUsers, { requesterId })
         : [];
 
       const leavesArr = Array.isArray(allLeaves) ? allLeaves : [];

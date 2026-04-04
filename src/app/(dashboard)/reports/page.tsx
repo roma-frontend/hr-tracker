@@ -54,7 +54,7 @@ export default function ReportsPage() {
     user?.id && leavesQueryParams !== 'skip' ? leavesQueryParams : 'skip',
   );
   const users = useQuery(
-    api.users.getAllUsers,
+    api.users.queries.getAllUsers,
     user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
   );
 

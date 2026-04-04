@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const allLeaves = await fetchQuery(api.leaves.getAllLeaves, {
       requesterId: requesterId as any,
     });
-    const allUsers = await fetchQuery(api.users.getAllUsers, { requesterId: requesterId as any });
+    const allUsers = await fetchQuery(api.users.queries.getAllUsers, { requesterId: requesterId as any });
 
     // Find leave by ID first
     let targetLeave = (allLeaves as any[]).find((l: any) => l._id === leaveId);

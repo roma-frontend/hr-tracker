@@ -105,7 +105,7 @@ export const ChatWindow = React.memo(function ChatWindow({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesParentRef = useRef<HTMLDivElement>(null);
 
-  const messages = useQuery(api.chat.getMessages, {
+  const messages = useQuery(api.chat.queries.getMessages, {
     conversationId,
     userId: currentUserId,
     limit: 200,
@@ -115,16 +115,16 @@ export const ChatWindow = React.memo(function ChatWindow({
   if (messages && messages.length > 0 && !messages[0]?.sender) {
     console.warn('[ChatWindow] Message without sender:', messages[0]);
   }
-  const members = useQuery(api.chat.getConversationMembers, { conversationId });
-  const typingUsers = useQuery(api.chat.getTypingUsers, { conversationId, currentUserId });
-  const conversation = useQuery(api.chat.getMyConversations, {
+  const members = useQuery(api.chat.queries.getConversationMembers, { conversationId });
+  const typingUsers = useQuery(api.chat.queries.getTypingUsers, { conversationId, currentUserId });
+  const conversation = useQuery(api.chat.queries.getMyConversations, {
     userId: currentUserId,
     organizationId,
   });
-  const pinnedMessages = useQuery(api.chat.getPinnedMessages, { conversationId });
-  const currentUser = useQuery(api.users.getUserById, { userId: currentUserId });
+  const pinnedMessages = useQuery(api.chat.queries.getPinnedMessages, { conversationId });
+  const currentUser = useQuery(api.users.queries.getUserById, { userId: currentUserId });
   const searchResults = useQuery(
-    api.chat.searchMessages,
+    api.chat.queries.searchMessages,
     showSearch && searchQuery.length > 1
       ? { conversationId, userId: currentUserId, query: searchQuery }
       : 'skip',
@@ -138,10 +138,10 @@ export const ChatWindow = React.memo(function ChatWindow({
     overscan: 5,
   });
 
-  const sendMessage = useMutation(api.chat.sendMessage);
-  const scheduleMessage = useMutation(api.chat.scheduleMessage);
-  const markAsRead = useMutation(api.chat.markAsRead);
-  const setTyping = useMutation(api.chat.setTyping);
+  const sendMessage = useMutation(api.chat.mutations.sendMessage);
+  const scheduleMessage = useMutation(api.chat.mutations.scheduleMessage);
+  const markAsRead = useMutation(api.chat.mutations.markAsRead);
+  const setTyping = useMutation(api.chat.mutations.setTyping);
 
   const conv = conversation?.find((c) => c != null && c._id === conversationId) ?? null;
   const otherUser = conv?.type === 'direct' ? (conv as any).otherUser : null;

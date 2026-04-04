@@ -15,9 +15,13 @@ export const runAutomation = action({
   args: {},
   handler: async (ctx): Promise<RunAutomationResult> => {
     // Create a new automation task via internal mutation
-    const taskId = await ctx.runMutation(internal.automationMutations.createAutomationTask, {
-      name: 'Manual automation run',
-    });
+    const taskId: string = await ctx.runMutation(
+      // @ts-ignore - Convex internal types cause excessive instantiation depth in Next.js 16.2
+      internal.automationMutations.createAutomationTask,
+      {
+        name: 'Manual automation run',
+      }
+    );
 
     // Simulate automation execution with delay
     await new Promise((resolve) => setTimeout(resolve, 2000));

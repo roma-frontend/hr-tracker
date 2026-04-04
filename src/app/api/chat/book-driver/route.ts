@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     // ═══════════════════════════════════════════════════════════════
     // CREATE DRIVER REQUEST
     // ═══════════════════════════════════════════════════════════════
-    const requestId = await convex.mutation(api.drivers.requestDriver, {
+    const requestId = await convex.mutation(api.drivers.requests_mutations.requestDriver, {
       organizationId: organizationId as Id<'organizations'>,
       requesterId: userId as Id<'users'>,
       driverId: driverId as Id<'drivers'>,

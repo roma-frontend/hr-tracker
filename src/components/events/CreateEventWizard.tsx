@@ -27,7 +27,7 @@ interface CreateEventWizardProps {
 export function CreateEventWizard({ onComplete, onCancel }: CreateEventWizardProps) {
   const { t } = useTranslation();
   const createEvent = useMutation(api.events.createCompanyEvent);
-  const user = useQuery(api.users.getCurrentUser, {});
+  const user = useQuery(api.users.queries.getCurrentUser, {});
 
   const steps: WizardStep[] = [
     {

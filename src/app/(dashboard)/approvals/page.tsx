@@ -34,11 +34,11 @@ export default function ApprovalsPage() {
   }, [user]);
 
   const pendingUsers = useQuery(
-    api.users.getPendingApprovalUsers,
+    api.users.queries.getPendingApprovalUsers,
     user?.id ? { adminId: user.id as Id<'users'> } : 'skip',
   );
-  const approveUser = useMutation(api.users.approveUser);
-  const rejectUser = useMutation(api.users.rejectUser);
+  const approveUser = useMutation(api.users.mutations.approveUser);
+  const rejectUser = useMutation(api.users.mutations.rejectUser);
 
   const handleApprove = async (userId: Id<'users'>, userName: string) => {
     if (!user?.id) {

@@ -33,8 +33,8 @@ export function InAppCallButton({
   const { t } = useTranslation();
   const [activeCall, setActiveCall] = React.useState<ActiveCall | null>(null);
   const [calling, setCalling] = React.useState(false);
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const initiateCallMutation = useMutation(api.chat.initiateCall);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const initiateCallMutation = useMutation(api.chat.calls.initiateCall);
 
   const handleCall = async () => {
     if (calling) return;

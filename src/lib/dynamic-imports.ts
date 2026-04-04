@@ -2,7 +2,7 @@
  * Dynamic imports for heavy libraries.
  * Use these instead of direct imports to reduce initial bundle size.
  *
- * face-api.js ≈ 2MB — should NEVER be in the initial bundle
+ * @vladmandic/face-api ≈ 2MB — should NEVER be in the initial bundle
  * three.js + @react-three/fiber — only needed on specific pages
  * recharts — only needed on analytics/reports pages
  * pdfmake — only needed when exporting PDFs
@@ -10,9 +10,9 @@
  */
 
 // ══════════════════════════════════════════════════════════════
-// FACE-API.JS (~2MB) — dynamic import
+// FACE-API (@vladmandic/face-api ~2MB) — dynamic import
 // ══════════════════════════════════════════════════════════════
-export const loadFaceApi = () => import('face-api.js').then((mod) => mod);
+export const loadFaceApi = () => import('@vladmandic/face-api').then((mod) => mod);
 
 // ══════════════════════════════════════════════════════════════
 // THREE.JS — dynamic import for 3D components

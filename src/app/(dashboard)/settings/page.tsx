@@ -134,8 +134,8 @@ export default function SettingsPage() {
     // Debug removed - breakInterval/breakRemindersEnabled not on User type
   }, [user]);
 
-  const updateOwnProfile = useMutation(api.users.updateOwnProfile);
-  const migrateFaceToAvatar = useMutation(api.users.migrateFaceToAvatar);
+  const updateOwnProfile = useMutation(api.users.mutations.updateOwnProfile);
+  const migrateFaceToAvatar = useMutation(api.users.admin.migrateFaceToAvatar);
 
   // Sync when user loads from store (async)
   useEffect(() => {

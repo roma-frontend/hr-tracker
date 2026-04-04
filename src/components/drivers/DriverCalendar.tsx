@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import type { FunctionReference } from 'convex/server';
 import {
   ChevronLeft,
   ChevronRight,
@@ -62,7 +63,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showBlockModal, setShowBlockModal] = useState(false);
-  const [blockType, setBlockType] = useState<'vacation' | 'sick_leave' | 'personal'>('vacation');
+  const [blockType, setBlockType] = useState<'vacation' | 'sick' | 'personal'>('vacation');
   const [blockReason, setBlockReason] = useState('');
   const [blockStartTime, setBlockStartTime] = useState('');
   const [blockEndTime, setBlockEndTime] = useState('');
@@ -81,13 +82,13 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
 
   // Get schedule for the week
   const schedule = useQuery(
-    api.drivers.getDriverSchedule,
+    api.drivers.queries.getDriverSchedule,
     driverId ? { driverId, startTime: weekStart, endTime: weekEnd } : 'skip',
   );
 
   // Mutations
-  const blockTimeOff = useMutation(api.drivers.blockTimeOff);
-  const updateTripStatus = useMutation(api.drivers.updateTripStatus);
+  const blockTimeOff = useMutation(api.drivers.driver_operations.blockTimeOff as FunctionReference<'mutation'>);
+  const updateTripStatus = useMutation(api.drivers.driver_operations.updateTripStatus as FunctionReference<'mutation'>);
 
   const handleBlockTime = async () => {
     if (!blockStartTime || !blockEndTime || !blockReason) {
@@ -481,13 +482,13 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
           <div className="space-y-4 pt-4">
             <div>
               <Label>{t('driverCalendar.type')}</Label>
-              <Select value={blockType} onValueChange={(v) => setBlockType(v as any)}>
+              <Select value={blockType} onValueChange={(v) => setBlockType(v as 'vacation' | 'sick' | 'personal')}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('driverCalendar.selectType')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="vacation">{t('driverCalendar.vacation')}</SelectItem>
-                  <SelectItem value="sick_leave">{t('driverCalendar.sickLeave')}</SelectItem>
+                  <SelectItem value="sick">{t('driverCalendar.sickLeave')}</SelectItem>
                   <SelectItem value="personal">{t('driverCalendar.personal')}</SelectItem>
                 </SelectContent>
               </Select>

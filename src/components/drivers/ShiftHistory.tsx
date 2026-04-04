@@ -16,7 +16,7 @@ interface ShiftHistoryProps {
 
 export function ShiftHistory({ driverId }: ShiftHistoryProps) {
   const { t } = useTranslation();
-  const shifts = useQuery(api.drivers.getShiftHistory, { driverId, limit: 10 });
+  const shifts = useQuery(api.drivers.shifts_mutations.getShiftHistory, { driverId, limit: 10 });
 
   if (!shifts) return null;
 

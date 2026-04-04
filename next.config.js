@@ -17,7 +17,7 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: false },
 
   // Transpile Radix UI icons
-  transpilePackages: ['@radix-ui/react-icons', 'face-api.js'],
+  transpilePackages: ['@radix-ui/react-icons', '@vladmandic/face-api'],
 
   // ═══════════════════════════════════════════════════════════════
   // IMAGES — OPTIMIZED

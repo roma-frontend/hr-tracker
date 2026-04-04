@@ -34,8 +34,8 @@ export function useOptimisticSendMessage(
     setOptimisticMessages((prev) => [...prev, newMessage]);
   }, []);
 
-  const sendMessage = useMutation(api.chat.sendMessage);
-  const messages = useQuery(api.chat.getMessages, { conversationId, userId, limit: 60 }) ?? [];
+  const sendMessage = useMutation(api.chat.mutations.sendMessage);
+  const messages = useQuery(api.chat.queries.getMessages, { conversationId, userId, limit: 60 }) ?? [];
 
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +114,7 @@ export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<
     setOptimisticReactions((prev) => [...prev, reaction]);
   }, []);
 
-  const toggleReaction = useMutation(api.chat.toggleReaction);
+  const toggleReaction = useMutation(api.chat.mutations.toggleReaction);
   const [isToggling, setIsToggling] = useState(false);
 
   const toggleOptimistic = useCallback(

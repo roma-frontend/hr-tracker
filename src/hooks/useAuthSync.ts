@@ -9,14 +9,14 @@ import { api } from '@/convex/_generated/api';
 export function useAuthSync() {
   const { data: session, status } = useSession();
   const { login, logout, isAuthenticated } = useAuthStore();
-  const createOAuthUser = useMutation(api.users.createOAuthUser);
+  const createOAuthUser = useMutation(api.users.auth.createOAuthUser);
   const sessionCreated = useRef(false);
   const lastSyncedUserRef = useRef<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const prevUserState = useRef<{ organizationId?: string | null; isApproved?: boolean }>({});
 
   // Get current user by email
-  const currentUser = useQuery(api.users.getCurrentUser, userEmail ? { email: userEmail } : 'skip');
+  const currentUser = useQuery(api.users.queries.getCurrentUser, userEmail ? { email: userEmail } : 'skip');
 
   useEffect(() => {
     const syncAuth = async () => {

@@ -147,7 +147,7 @@ export default function DashboardClient() {
   const userId = user?.id as Id<'users'> | undefined;
   const leaves = useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : 'skip') ?? [];
   const usersFromConvex =
-    useQuery(api.users.getAllUsers, userId ? { requesterId: userId } : 'skip') ?? [];
+    useQuery(api.users.queries.getAllUsers, userId ? { requesterId: userId } : 'skip') ?? [];
   // Convert Convex _id to id for User type compatibility
   const users = usersFromConvex.map((u) => ({ ...u, id: u._id })) as unknown as User[];
   const organization = useQuery(

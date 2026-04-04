@@ -34,7 +34,7 @@ export default function AISiteEditorPage() {
 
   // Get user details from Convex
   const currentUser = useQuery(
-    api.users.getUserById,
+    api.users.queries.getUserById,
     user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 

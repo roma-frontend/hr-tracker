@@ -23,7 +23,7 @@ export default React.memo(
   function LeaveStats({ userId }: LeaveStatsProps) {
     const { t } = useTranslation();
     const analytics = useQuery(api.analytics.getUserAnalytics, { userId });
-    const user = useQuery(api.users.getUserById, { userId });
+    const user = useQuery(api.users.queries.getUserById, { userId });
 
     // ═══════════════════════════════════════════════════════════════
     // Extract data BEFORE hooks (non-hook values)

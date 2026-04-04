@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json(null);
 
     const [user, userLeaves, allLeaves, timeHistory] = await Promise.all([
-      convex.query(api.users.getUserById, { userId: userId as any }),
+      convex.query(api.users.queries.getUserById, { userId: userId as any }),
       convex.query(api.leaves.getUserLeaves, { userId: userId as any }),
       convex.query(api.leaves.getAllLeaves, { requesterId: userId as any }),
       convex.query(api.timeTracking.getUserHistory, { userId: userId as any, limit: 60 }),

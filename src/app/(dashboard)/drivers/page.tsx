@@ -122,11 +122,11 @@ function DriverDashboard({
   const { t } = useTranslation();
 
   // Get driver record for this user
-  const driver = useQuery(api.drivers.getDriverByUserId, { userId });
+  const driver = useQuery(api.drivers.queries.getDriverByUserId, { userId });
 
   // Get pending requests
   const pendingRequests = useQuery(
-    api.drivers.getDriverRequests,
+    api.drivers.requests_queries.getDriverRequests,
     driver ? { driverId: driver._id, status: 'pending' as const } : 'skip',
   );
 
@@ -143,17 +143,17 @@ function DriverDashboard({
   }, []);
 
   const todaySchedule = useQuery(
-    api.drivers.getDriverSchedule,
+    api.drivers.queries.getDriverSchedule,
     driver ? { driverId: driver._id, startTime: todayStart, endTime: todayEnd } : 'skip',
   );
 
   // Mutations
-  const respondToRequest = useMutation(api.drivers.respondToDriverRequest);
-  const updateAvailability = useMutation(api.drivers.updateDriverAvailability);
-  const addDriverNotes = useMutation(api.drivers.addDriverNotes);
-  const markArrived = useMutation(api.drivers.markDriverArrived);
-  const markPickedUp = useMutation(api.drivers.markPassengerPickedUp);
-  const updateETAMutation = useMutation(api.drivers.updateETA);
+  const respondToRequest = useMutation(api.drivers.requests_mutations.respondToDriverRequest);
+  const updateAvailability = useMutation(api.drivers.driver_registration.updateDriverAvailability);
+  const addDriverNotes = useMutation(api.drivers.driver_operations.addDriverNotes);
+  const markArrived = useMutation(api.drivers.driver_operations.markDriverArrived);
+  const markPickedUp = useMutation(api.drivers.driver_operations.markPassengerPickedUp);
+  const updateETAMutation = useMutation(api.drivers.driver_operations.updateETA);
 
   // Driver notes state
   const [notesScheduleId, setNotesScheduleId] = useState<string | null>(null);
@@ -780,8 +780,8 @@ function InAppCallButton({
   const { t } = useTranslation();
   const [activeCall, setActiveCall] = React.useState<ActiveCall | null>(null);
   const [calling, setCalling] = React.useState(false);
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const initiateCallMutation = useMutation(api.chat.initiateCall);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const initiateCallMutation = useMutation(api.chat.calls.initiateCall);
 
   const handleCall = async () => {
     if (calling) return;
@@ -858,8 +858,8 @@ function DriverQuickMessage({
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const sendChatMessage = useMutation(api.chat.sendMessage);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.mutations.sendMessage);
 
   const DRIVER_TEMPLATES = [
     {
@@ -972,8 +972,8 @@ function PassengerQuickMessage({
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
-  const getOrCreateDM = useMutation(api.chat.getOrCreateDM);
-  const sendChatMessage = useMutation(api.chat.sendMessage);
+  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
+  const sendChatMessage = useMutation(api.chat.mutations.sendMessage);
 
   const PASSENGER_TEMPLATES = [
     {
@@ -1088,7 +1088,7 @@ function RatingDialog({
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const submitRating = useMutation(api.drivers.submitPassengerRating);
+  const submitRating = useMutation(api.drivers.driver_operations.submitPassengerRating);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -1199,10 +1199,10 @@ function ReassignDriverDialog({
   const [selectedNewDriver, setSelectedNewDriver] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const availableDrivers = useQuery(
-    api.drivers.getAvailableDrivers,
+    api.drivers.queries.getAvailableDrivers,
     organizationId ? { organizationId } : 'skip',
   );
-  const reassign = useMutation(api.drivers.reassignDriverRequest);
+  const reassign = useMutation(api.drivers.requests_mutations.reassignDriverRequest);
 
   const otherDrivers = availableDrivers?.filter((d) => d && d._id !== currentDriverId) ?? [];
 
@@ -1392,7 +1392,7 @@ export default function DriversPage() {
 
   // Get all users in organization to select driver
   const allUsers = useQuery(
-    api.users.getUsersByOrganizationId,
+    api.users.queries.getUsersByOrganizationId,
     mounted && organizationId ? { requesterId: userId!, organizationId } : 'skip',
   );
 
@@ -1403,12 +1403,12 @@ export default function DriversPage() {
   const effectiveOrgId = useOrgFilter ? selectedOrgId : organizationId;
 
   const availableDrivers = useQuery(
-    api.drivers.getAvailableDrivers,
+    api.drivers.queries.getAvailableDrivers,
     mounted && effectiveOrgId ? { organizationId: effectiveOrgId as any } : 'skip',
   );
 
   // Get my driver requests
-  const myRequests = useQuery(api.drivers.getMyRequests, mounted && userId ? { userId } : 'skip');
+  const myRequests = useQuery(api.drivers.requests_queries.getMyRequests, mounted && userId ? { userId } : 'skip');
 
   // Calendar week range for selected driver
   const calendarWeekStart = useMemo(() => {
@@ -1422,7 +1422,7 @@ export default function DriversPage() {
   }, [calendarWeekStart]);
 
   const calendarSchedule = useQuery(
-    api.drivers.getDriverSchedule,
+    api.drivers.queries.getDriverSchedule,
     calendarDriverId
       ? { driverId: calendarDriverId, startTime: calendarWeekStart, endTime: calendarWeekEnd }
       : 'skip',
@@ -1437,37 +1437,37 @@ export default function DriversPage() {
   }, [allUsers, availableDrivers]);
 
   // Mutations - MUST be called unconditionally at top level
-  const requestDriver = useMutation(api.drivers.requestDriver);
-  const requestCalendarAccess = useMutation(api.drivers.requestCalendarAccess);
-  const registerAsDriver = useMutation(api.drivers.registerAsDriver);
-  const updateDriverRequest = useMutation(api.drivers.updateDriverRequest);
-  const deleteDriverRequest = useMutation(api.drivers.deleteDriverRequest);
+  const requestDriver = useMutation(api.drivers.requests_mutations.requestDriver);
+  const requestCalendarAccess = useMutation(api.drivers.calendar_mutations.requestCalendarAccess);
+  const registerAsDriver = useMutation(api.drivers.driver_registration.registerAsDriver);
+  const updateDriverRequest = useMutation(api.drivers.requests_mutations.updateDriverRequest);
+  const deleteDriverRequest = useMutation(api.drivers.requests_mutations.deleteDriverRequest);
 
   // New feature mutations
-  const addFavorite = useMutation(api.drivers.addFavoriteDriver);
-  const removeFavorite = useMutation(api.drivers.removeFavoriteDriver);
-  const createRecurring = useMutation(api.drivers.createRecurringTrip);
-  const toggleRecurring = useMutation(api.drivers.toggleRecurringTrip);
-  const deleteRecurring = useMutation(api.drivers.deleteRecurringTrip);
-  const reassignRequest = useMutation(api.drivers.reassignDriverRequest);
+  const addFavorite = useMutation(api.drivers.driver_registration.addFavoriteDriver);
+  const removeFavorite = useMutation(api.drivers.driver_registration.removeFavoriteDriver);
+  const createRecurring = useMutation(api.drivers.recurring_trips.createRecurringTrip);
+  const toggleRecurring = useMutation(api.drivers.recurring_trips.toggleRecurringTrip);
+  const deleteRecurring = useMutation(api.drivers.recurring_trips.deleteRecurringTrip);
+  const reassignRequest = useMutation(api.drivers.requests_mutations.reassignDriverRequest);
 
   // New feature queries
   const favoriteDrivers = useQuery(
-    api.drivers.getFavoriteDrivers,
+    api.drivers.requests_queries.getFavoriteDrivers,
     mounted && userId ? { userId } : 'skip',
   );
   const recurringTrips = useQuery(
-    api.drivers.getRecurringTrips,
+    api.drivers.recurring_trips.getRecurringTrips,
     mounted && userId ? { userId } : 'skip',
   );
   const completedTrips = useQuery(
-    api.drivers.getCompletedTrips,
+    api.drivers.requests_queries.getCompletedTrips,
     mounted && userId ? { userId, limit: 50 } : 'skip',
   );
 
   // Check if selected driver is on leave
   const driverLeaveCheck = useQuery(
-    api.drivers.isDriverOnLeave,
+    api.drivers.queries.isDriverOnLeave,
     selectedDriver && startTime && endTime
       ? {
           driverId: selectedDriver,

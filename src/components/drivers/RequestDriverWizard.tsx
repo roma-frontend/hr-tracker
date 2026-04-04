@@ -29,10 +29,10 @@ interface RequestDriverWizardProps {
 
 export function RequestDriverWizard({ userId, onComplete, onCancel }: RequestDriverWizardProps) {
   const { t } = useTranslation();
-  const requestDriver = useMutation(api.drivers.requestDriver);
-  const user = useQuery(api.users.getCurrentUser, {});
+  const requestDriver = useMutation(api.drivers.requests_mutations.requestDriver);
+  const user = useQuery(api.users.queries.getCurrentUser, {});
   const drivers = useQuery(
-    api.drivers.getAvailableDrivers,
+    api.drivers.queries.getAvailableDrivers,
     user?.organizationId ? { organizationId: user.organizationId } : 'skip',
   );
 

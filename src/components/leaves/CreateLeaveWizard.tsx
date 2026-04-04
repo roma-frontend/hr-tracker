@@ -31,7 +31,7 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
   const createLeave = useMutation(api.leaves.createLeave);
 
   // Загрузка данных пользователя
-  const user = useQuery(api.users.getUserById, { userId });
+  const user = useQuery(api.users.queries.getUserById, { userId });
   const userOrg = useQuery(
     api.organizations.getMyOrganization,
     user?._id ? { userId: user._id as Id<'users'> } : 'skip',

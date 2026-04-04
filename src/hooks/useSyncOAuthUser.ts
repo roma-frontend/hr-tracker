@@ -11,7 +11,7 @@ export function useSyncOAuthUser() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { login, isAuthenticated } = useAuthStore();
-  const createOAuthUser = useMutation(api.users.createOAuthUser);
+  const createOAuthUser = useMutation(api.users.auth.createOAuthUser);
   const syncingRef = useRef(false);
 
   useEffect(() => {

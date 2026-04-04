@@ -272,7 +272,9 @@
     "tripStartTime": "Ուղևորության սկիզբ",
     "tripEndTime": "Ուղևորության ավարտ",
     "destructive": "Վտանգավոր",
-    "assignee": "Կատարող"
+    "assignee": "Կատարող",
+    "unknown": "Անհայտ",
+    "none": "Ոչ մեկը"
   },
   "nav": {
     "home": "Գլխավոր",
@@ -2096,6 +2098,15 @@
     "backToOrganizations": "Վերադառնալ կազմակերպություններին",
     "yourEmail": "Ձեր էլ. հասցեն",
     "role": "Դեր",
+    "profilePictureUpload": "Վերբեռնել պրոֆիլի նկարը",
+    "clickCameraToUpload": "Սեղմեք տեսախցիկի պատկերակին՝ նկարը վերբեռնելու համար",
+    "recommendedImageSize": "Խորհուրդ է տրվում չափը՝ 400x400px (առավ. 2MB)",
+    "deletePicture": "Ջնջել նկարը",
+    "personalInformation": "Անձնական տվյալներ",
+    "updateYourPersonalDetails": "Թարմացրեք ձեր անձնական տվյալները",
+    "accountInformation": "Հաշվի տվյալներ",
+    "yourAccountDetails": "Ձեր հաշվի մանրամասները",
+    "yourActivity": "Ձեր ակտիվությունը",
     "notCheckedInWarning": "Դուք չեք նշել ներկայությունը այսօր",
     "comprehensiveAnalysis": "Համապարփակ վերլուծություն",
     "memberSince": "Անդամ է սկսած",
@@ -4946,5 +4957,16 @@
     "dateFormatYYYY": "YYYY-MM-DD (2024-12-25)",
     "dateFormatDDMMYY": "DD.MM.YYYY (25.12.2024)",
     "weekStartsOn": "Շաբաթը սկսվում է"
+  },
+  "wizard": {
+    "personalInfo": "Անձնական տվյալներ",
+    "personalInfoDesc": "Հիմնական տվյալներ աշխատակցի մասին",
+    "workDetails": "Աշխատանքային տվյալներ",
+    "workDetailsDesc": "Բաժին և պաշտոն",
+    "roleType": "Դեր և տեսակ",
+    "roleTypeDesc": "Սահմանեք դերը և զբաղվածության տեսակը",
+    "reviewDesc": "Հաստատեք տվյալները ավելացնելուց առաջ",
+    "previous": "Նախորդ",
+    "next": "Հաջորդ"
   }
 }
