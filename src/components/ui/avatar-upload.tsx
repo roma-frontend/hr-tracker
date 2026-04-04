@@ -166,7 +166,7 @@ export function AvatarUpload({
         style={{ background: 'var(--primary-muted)' }}
       >
         {displayUrl ? (
-          <Image src={displayUrl} alt={name} fill className="object-cover" />
+          <Image src={displayUrl} alt={name} fill className="object-cover" sizes="100%" />
         ) : (
           <div
             className={`${sizes[size]} rounded-full flex items-center justify-center font-bold`}
