@@ -9,14 +9,25 @@ interface EnvConfig {
 }
 
 const ENV_CONFIG: EnvConfig = {
-  required: ['CONVEX_DEPLOYMENT', 'NEXT_PUBLIC_CONVEX_URL', 'NEXTAUTH_SECRET', 'NEXTAUTH_URL'],
+  required: [
+    'CONVEX_DEPLOYMENT',
+    'NEXT_PUBLIC_CONVEX_URL',
+    // Auth.js v5 uses AUTH_* prefix
+    'AUTH_SECRET',
+    'AUTH_GOOGLE_ID',
+    'AUTH_GOOGLE_SECRET',
+  ],
   optional: [
+    'AUTH_URL', // Optional - auto-detected in production
     'GROQ_API_KEY',
     'STRIPE_SECRET_KEY',
     'STRIPE_WEBHOOK_SECRET',
     'REDIS_URL',
     'SENTRY_DSN',
     'CSRF_SECRET',
+    // Legacy vars (for backwards compatibility)
+    'NEXTAUTH_SECRET',
+    'NEXTAUTH_URL',
   ],
 };
 

@@ -6,6 +6,7 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
 import { useUnreadRequestsCount, useTabBlink } from '@/hooks/useUnreadRequests';
+import { useTranslation } from 'react-i18next';
 import type { Id } from '@/convex/_generated/dataModel';
 
 interface UnreadRequestsBadgeProps {
@@ -58,6 +59,7 @@ export function UnreadTabBadge({ userId, className = '' }: UnreadRequestsBadgePr
  * Full notification banner component
  */
 export function UnreadRequestsBanner({ userId, className = '' }: UnreadRequestsBadgeProps) {
+  const { t } = useTranslation();
   const { count, hasUnread } = useUnreadRequestsCount(userId);
 
   if (!hasUnread) return null;
@@ -65,13 +67,13 @@ export function UnreadRequestsBanner({ userId, className = '' }: UnreadRequestsB
   return (
     <div
       className={`w-full px-4 py-3 rounded-lg border
-        bg-red-500/10 border-red-500/20 flex items-center gap-3 
+        bg-red-500/10 border-red-500/20 flex items-center gap-3
         animate-pulse ${className}`}
     >
       <Bell className="w-5 h-5 text-red-500 shrink-0" />
       <div className="flex-1">
         <p className="text-sm font-medium text-red-600 dark:text-red-400">
-          {count} pending {count === 1 ? 'request' : 'requests'} awaiting review
+          {count} {t('banners.pendingRequests', 'pending')} {count === 1 ? t('banners.request', 'request') : t('banners.requests', 'requests')} {t('banners.awaitingReview', 'awaiting review')}
         </p>
       </div>
     </div>

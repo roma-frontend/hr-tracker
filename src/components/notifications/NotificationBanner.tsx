@@ -9,6 +9,7 @@ import { SmartBanner } from '@/components/ui/SmartBanner';
 import { useRouter } from 'next/navigation';
 import { MessageSquare } from 'lucide-react';
 import { playNotificationSound } from '@/lib/notificationSound';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Real-time notification banner that slides in from top
@@ -16,6 +17,7 @@ import { playNotificationSound } from '@/lib/notificationSound';
  * Shown only for admin users, sound plays only for admin
  */
 export function NotificationBanner() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const router = useRouter();
   const isAdmin = user?.role === 'admin';
@@ -96,7 +98,7 @@ export function NotificationBanner() {
         onDismiss={handleDismiss}
         className="rounded-none border-x-0 border-t-0"
         action={{
-          label: 'View',
+          label: t('banners.view', 'View'),
           onClick: () => {
             handleDismiss();
             if (

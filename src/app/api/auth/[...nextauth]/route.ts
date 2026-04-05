@@ -7,7 +7,6 @@ import type { NextAuthConfig } from 'next-auth';
 // ═══════════════════════════════════════════════════════════════
 const requiredEnvVars = [
   'AUTH_SECRET',
-  'AUTH_URL',
   'AUTH_GOOGLE_ID',
   'AUTH_GOOGLE_SECRET',
 ];
@@ -21,6 +20,8 @@ if (missingVars.length > 0) {
 }
 
 export const authConfig: NextAuthConfig = {
+  // AUTH_URL is auto-detected, but can be set explicitly for Vercel
+  ...(process.env.AUTH_URL && { basePath: new URL(process.env.AUTH_URL).pathname }),
   providers: [
     Google({
       profile(profile) {

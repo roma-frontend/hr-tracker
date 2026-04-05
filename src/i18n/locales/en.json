@@ -5355,5 +5355,25 @@
     "registerError": "Failed to register face",
     "lookAtCamera": "Look directly at the camera",
     "waitForDetection": "Wait for Face Detected indicator"
+  },
+  "banners": {
+    "welcomeBack": "Welcome back, {{name}}! You are logged in successfully.",
+    "productiveDay": "Have a productive day ahead!",
+    "unusualLogin": "Unusual login activity detected",
+    "loginWarning": "This login was from a new device or location. If this was not you, change your password immediately.",
+    "reviewSecurity": "Review security settings",
+    "sessionExpires": "Your session expires in {{minutes}} minute{{plural}}",
+    "saveWork": "Save your work and extend your session to avoid losing changes.",
+    "extendSession": "Extend session",
+    "welcomeTeam": "Welcome to the team! We are excited to have you here.",
+    "exploreDashboard": "Start by exploring the dashboard, setting up your profile, and checking your leave balances.",
+    "setUpProfile": "Set up your profile",
+    "leaveBalanceLow": "Your leave balance is running low",
+    "viewLeaveHistory": "View leave history",
+    "view": "View",
+    "pendingRequests": "pending",
+    "request": "request",
+    "requests": "requests",
+    "awaitingReview": "awaiting review"
   }
 }

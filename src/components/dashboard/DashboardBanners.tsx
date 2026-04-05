@@ -152,8 +152,8 @@ export function DashboardBanners({
       {showLoginSuccess && (
         <SmartBanner
           type="success"
-          message={`Welcome back, ${user?.name?.split(' ')[0] || ''}! You're logged in successfully.`}
-          suggestion="Have a productive day ahead!"
+          message={t('banners.welcomeBack', { name: user?.name?.split(' ')[0] || '' })}
+          suggestion={t('banners.productiveDay', 'Have a productive day ahead!')}
           autoDismiss={5000}
           onDismiss={() => setShowLoginSuccess(false)}
         />
@@ -163,14 +163,14 @@ export function DashboardBanners({
       {showSuspiciousLogin && (
         <SmartBanner
           type="warning"
-          message="Unusual login activity detected"
+          message={t('banners.unusualLogin', 'Unusual login activity detected')}
           suggestion={
             suspiciousDetails ||
-            "This login was from a new device or location. If this wasn't you, change your password immediately."
+            t('banners.loginWarning', 'This login was from a new device or location. If this was not you, change your password immediately.')
           }
           icon={<Shield className="w-5 h-5 text-amber-500" />}
           action={{
-            label: 'Review security settings',
+            label: t('banners.reviewSecurity', 'Review security settings'),
             onClick: () => router.push('/settings'),
           }}
           onDismiss={() => setShowSuspiciousLogin(false)}
@@ -181,12 +181,12 @@ export function DashboardBanners({
       {showSessionExpiry && (
         <SmartBanner
           type="warning"
-          message={`Your session expires in ${sessionMinutes} minute${sessionMinutes > 1 ? 's' : ''}`}
-          suggestion="Save your work and extend your session to avoid losing changes."
+          message={t('banners.sessionExpires', { minutes: sessionMinutes, plural: sessionMinutes > 1 ? 's' : '' })}
+          suggestion={t('banners.saveWork', 'Save your work and extend your session to avoid losing changes.')}
           icon={<Timer className="w-5 h-5 text-amber-500" />}
           dismissable={false}
           action={{
-            label: 'Extend session',
+            label: t('banners.extendSession', 'Extend session'),
             onClick: handleExtendSession,
           }}
         />
@@ -196,10 +196,10 @@ export function DashboardBanners({
       {showWelcome && (
         <SmartBanner
           type="purple"
-          message="Welcome to the team! We're excited to have you here."
-          suggestion="Start by exploring the dashboard, setting up your profile, and checking your leave balances."
+          message={t('banners.welcomeTeam', "Welcome to the team! We are excited to have you here.")}
+          suggestion={t('banners.exploreDashboard', 'Start by exploring the dashboard, setting up your profile, and checking your leave balances.')}
           action={{
-            label: 'Set up your profile',
+            label: t('banners.setUpProfile', 'Set up your profile'),
             onClick: () => router.push('/settings'),
           }}
           onDismiss={handleDismissWelcome}
@@ -210,10 +210,10 @@ export function DashboardBanners({
       {showLeaveWarning && (
         <SmartBanner
           type="warning"
-          message="Your leave balance is running low"
+          message={t('banners.leaveBalanceLow', 'Your leave balance is running low')}
           suggestion={lowBalances.join(' / ')}
           action={{
-            label: 'View leave history',
+            label: t('banners.viewLeaveHistory', 'View leave history'),
             onClick: () => router.push('/leaves'),
           }}
           autoDismiss={15000}
