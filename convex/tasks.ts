@@ -83,12 +83,16 @@ export const createTask = mutation({
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
+    const assigner = await ctx.db.get(args.assignedBy);
+    const organizationId = assigner?.organizationId;
+
     const now = Date.now();
     const taskId = await ctx.db.insert('tasks', {
       title: args.title,
       description: args.description,
       assignedTo: args.assignedTo,
       assignedBy: args.assignedBy,
+      organizationId,
       status: 'pending',
       priority: args.priority,
       deadline: args.deadline,
@@ -251,13 +255,9 @@ export const getTasksForEmployee = query({
     // Filter by organization (skip for superadmin)
     let orgTasks = tasks;
     if (!isSuperadmin) {
-      orgTasks = tasks.filter((task) => {
-        const assignedBy = ctx.db.get(task.assignedBy);
-        return (
-          !employee.organizationId ||
-          assignedBy.then((a) => a?.organizationId === employee.organizationId)
-        );
-      });
+      orgTasks = tasks.filter(
+        (task) => !employee.organizationId || task.organizationId === employee.organizationId,
+      );
     }
 
     return enrichTasksWithUserData(ctx, orgTasks);
@@ -283,13 +283,9 @@ export const getTasksAssignedBy = query({
     // Filter by organization (skip for superadmin)
     let orgTasks = tasks;
     if (!isSuperadmin) {
-      orgTasks = tasks.filter((task) => {
-        const assignedTo = ctx.db.get(task.assignedTo);
-        return (
-          !supervisor.organizationId ||
-          assignedTo.then((a) => a?.organizationId === supervisor.organizationId)
-        );
-      });
+      orgTasks = tasks.filter(
+        (task) => !supervisor.organizationId || task.organizationId === supervisor.organizationId,
+      );
     }
 
     return enrichTasksWithUserData(ctx, orgTasks);
@@ -323,18 +319,12 @@ export const getAllTasks = query({
     if (isSuperadmin) {
       // For superadmin: filter by selectedOrganizationId if provided
       if (args.selectedOrganizationId) {
-        orgTasks = tasks.filter((task) => {
-          const assignedTo = ctx.db.get(task.assignedTo);
-          return assignedTo.then((a) => a?.organizationId === args.selectedOrganizationId);
-        });
+        orgTasks = tasks.filter((task) => task.organizationId === args.selectedOrganizationId);
       }
       // If no selectedOrganizationId, superadmin sees all tasks (no filter)
     } else {
       // For regular admin: filter by their organization
-      orgTasks = tasks.filter((task) => {
-        const assignedTo = ctx.db.get(task.assignedTo);
-        return assignedTo.then((a) => a?.organizationId === requester.organizationId);
-      });
+      orgTasks = tasks.filter((task) => task.organizationId === requester.organizationId);
     }
 
     return enrichTasksWithUserData(ctx, orgTasks);
