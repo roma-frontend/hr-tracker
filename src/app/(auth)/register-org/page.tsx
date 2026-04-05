@@ -9,67 +9,67 @@ import { Building2, Check, Zap, Crown, ArrowRight } from 'lucide-react';
 
 type Plan = 'starter' | 'professional' | 'enterprise';
 
-const plans = [
-  {
-    id: 'starter' as Plan,
-    name: 'Starter',
-    price: 'Free',
-    description: 'Perfect for small teams getting started',
-    icon: Zap,
-    color: 'from-green-500 to-emerald-500',
-    features: [
-      'Up to 10 employees',
-      'Basic leave management',
-      'Time tracking',
-      'Employee profiles',
-      'Email notifications',
-      'Community support',
-    ],
-    instant: true,
-  },
-  {
-    id: 'professional' as Plan,
-    name: 'Professional',
-    price: '$29/mo',
-    description: 'For growing teams with advanced needs',
-    icon: Building2,
-    color: 'from-blue-500 to-cyan-500',
-    features: [
-      'Up to 50 employees',
-      'Everything in Starter',
-      'Advanced analytics',
-      'Custom workflows',
-      'Priority support',
-      'API access',
-      'Integrations',
-    ],
-    instant: false,
-    popular: true,
-  },
-  {
-    id: 'enterprise' as Plan,
-    name: 'Enterprise',
-    price: 'Custom',
-    description: 'Unlimited scale for large organizations',
-    icon: Crown,
-    color: 'from-purple-500 to-pink-500',
-    features: [
-      '100+ employees',
-      'Everything in Professional',
-      'Dedicated support',
-      'Custom integrations',
-      'SLA guarantee',
-      'Advanced security',
-      'Training & onboarding',
-    ],
-    instant: false,
-  },
-];
-
 export default function RegisterOrgPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+
+  const plans = [
+    {
+      id: 'starter' as Plan,
+      name: t('auth.plans.starter.name', 'Starter'),
+      price: t('auth.plans.free', 'Free'),
+      description: t('auth.plans.starter.desc', 'Perfect for small teams getting started'),
+      icon: Zap,
+      color: 'from-green-500 to-emerald-500',
+      features: [
+        t('auth.plans.starter.employees', 'Up to 10 employees'),
+        t('auth.plans.starter.basicLeave', 'Basic leave management'),
+        t('auth.plans.starter.timeTracking', 'Time tracking'),
+        t('auth.plans.starter.employeeProfiles', 'Employee profiles'),
+        t('auth.plans.starter.emailNotifications', 'Email notifications'),
+        t('auth.plans.starter.communitySupport', 'Community support'),
+      ],
+      instant: true,
+    },
+    {
+      id: 'professional' as Plan,
+      name: t('auth.plans.professional.name', 'Professional'),
+      price: '$29' + t('auth.plans.perMonth', '/mo'),
+      description: t('auth.plans.professional.desc', 'For growing teams with advanced needs'),
+      icon: Building2,
+      color: 'from-blue-500 to-cyan-500',
+      features: [
+        t('auth.plans.professional.employees50', 'Up to 50 employees'),
+        t('auth.plans.professional.everythingStarter', 'Everything in Starter'),
+        t('auth.plans.professional.advancedAnalytics', 'Advanced analytics'),
+        t('auth.plans.professional.customWorkflows', 'Custom workflows'),
+        t('auth.plans.professional.prioritySupport', 'Priority support'),
+        t('auth.plans.professional.apiAccess', 'API access'),
+        t('auth.plans.professional.integrations', 'Integrations'),
+      ],
+      instant: false,
+      popular: true,
+    },
+    {
+      id: 'enterprise' as Plan,
+      name: t('auth.plans.enterprise.name', 'Enterprise'),
+      price: t('auth.plans.custom', 'Custom'),
+      description: t('auth.plans.enterprise.desc', 'Unlimited scale for large organizations'),
+      icon: Crown,
+      color: 'from-purple-500 to-pink-500',
+      features: [
+        t('auth.plans.enterprise.employees100', '100+ employees'),
+        t('auth.plans.enterprise.everythingPro', 'Everything in Professional'),
+        t('auth.plans.enterprise.dedicatedSupport', 'Dedicated support'),
+        t('auth.plans.enterprise.customIntegrations', 'Custom integrations'),
+        t('auth.plans.enterprise.slaGuarantee', 'SLA guarantee'),
+        t('auth.plans.enterprise.advancedSecurity', 'Advanced security'),
+        t('auth.plans.enterprise.trainingOnboarding', 'Training & onboarding'),
+      ],
+      instant: false,
+    },
+  ];
 
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan);
@@ -107,10 +107,10 @@ export default function RegisterOrgPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Choose Your Plan
+            {t('auth.chooseYourPlan', 'Choose Your Plan')}
           </h1>
           <p className="text-lg" style={{ color: 'var(--text-muted)' }}>
-            Start managing your team today
+            {t('auth.startManagingTeam', 'Start managing your team today')}
           </p>
         </div>
 
@@ -137,7 +137,7 @@ export default function RegisterOrgPage() {
                 {/* Popular badge */}
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-blue-500 to-cyan-500">
-                    Most Popular
+                    {t('auth.mostPopular', 'Most Popular')}
                   </div>
                 )}
 
@@ -184,7 +184,7 @@ export default function RegisterOrgPage() {
 
                 {!plan.instant && (
                   <p className="text-xs text-center mt-3" style={{ color: 'var(--text-muted)' }}>
-                    Approval within 24 hours
+                    {t('auth.approvalWithin24h', 'Approval within 24 hours')}
                   </p>
                 )}
               </motion.div>

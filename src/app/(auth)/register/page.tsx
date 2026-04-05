@@ -146,7 +146,7 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
               )}
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 uppercase">
-              Found
+              {t('auth.found', 'Found')}
             </span>
           </motion.div>
         )}
@@ -165,11 +165,11 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
             {results === undefined ? (
               <div className="flex items-center gap-2 p-3 text-sm text-[var(--text-muted)]">
                 <ShieldLoader size="xs" variant="inline" />
-                Searching…
+                {t('auth.searching', 'Searching…')}
               </div>
             ) : results.length === 0 ? (
               <div className="p-3 text-sm text-[var(--text-muted)] text-center">
-                No organization found for &ldquo;{debouncedQuery}&rdquo;
+                {t('auth.noOrgFound', 'No organization found for')} &ldquo;{debouncedQuery}&rdquo;
                 <p className="text-xs mt-1">{t('auth.askAdmin')}</p>
               </div>
             ) : (
@@ -203,7 +203,7 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
       {!selected && query.length < 2 && (
         <p className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 px-1">
           <Users className="w-3 h-3" />
-          Type at least 2 characters to search for your organization
+          {t('auth.typeToSearchOrg', 'Type at least 2 characters to search for your organization')}
         </p>
       )}
     </div>
@@ -242,7 +242,7 @@ function RegisterPageContent() {
 
   const handleOrgNext = () => {
     if (!selectedOrg && !inviteToken) {
-      setError('Please select your organization');
+      setError(t('auth.selectOrg', 'Please select your organization'));
       return;
     }
     setError(null);
@@ -254,7 +254,7 @@ function RegisterPageContent() {
     setError(null);
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('auth.passwordMustBe', 'Password must be at least 8 characters'));
       return;
     }
 
@@ -271,8 +271,11 @@ function RegisterPageContent() {
         const result = await registerAction(fd);
 
         if (result.needsApproval) {
-          toast.success(`Request sent to ${selectedOrg?.name ?? 'your organization'} admin! ⏳`, {
-            description: "You'll be notified when your account is approved.",
+          toast.success(t('auth.requestSent', 'Request sent!'), {
+            description: t(
+              'auth.requestSentDesc',
+              "You'll be notified when your account is approved.",
+            ),
             duration: 6000,
           });
           setTimeout(() => router.push('/login'), 3000);
@@ -294,7 +297,9 @@ function RegisterPageContent() {
           router.push('/dashboard');
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Registration failed');
+        setError(
+          err instanceof Error ? err.message : t('auth.registrationFailed', 'Registration failed'),
+        );
       }
     });
   };
@@ -338,12 +343,14 @@ function RegisterPageContent() {
                 <Building2 className="w-7 h-7 text-white" />
               </div>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {step === 'org' ? 'Find your organization' : 'Create account'}
+                {step === 'org'
+                  ? t('auth.findYourOrg', 'Find your organization')
+                  : t('auth.createAccount', 'Create account')}
               </h1>
               <p className="text-sm mt-1 text-center" style={{ color: 'var(--text-muted)' }}>
                 {step === 'org'
-                  ? 'Search for your company to get started'
-                  : `Joining ${selectedOrg?.name ?? 'your organization'}`}
+                  ? t('auth.searchCompany', 'Search for your company to get started')
+                  : `${t('auth.joining', 'Joining')} ${selectedOrg?.name ?? t('auth.yourOrganization', 'your organization')}`}
               </p>
             </div>
 
@@ -373,7 +380,9 @@ function RegisterPageContent() {
                       className="text-xs font-medium"
                       style={{ color: step === s ? 'var(--text-primary)' : 'var(--text-muted)' }}
                     >
-                      {s === 'org' ? 'Organization' : 'Your details'}
+                      {s === 'org'
+                        ? t('auth.organizationStep', 'Organization')
+                        : t('auth.yourDetails', 'Your details')}
                     </span>
                   </div>
                   {i < 1 && <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />}
@@ -438,7 +447,7 @@ function RegisterPageContent() {
                     className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
                   >
-                    Continue
+                    {t('auth.continue', 'Continue')}
                     <ChevronRight className="w-4 h-4" />
                   </motion.button>
                 </motion.div>
@@ -464,7 +473,7 @@ function RegisterPageContent() {
                     }}
                     className="flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors -mt-1 mb-1"
                   >
-                    <ArrowLeft className="w-3 h-3" /> Back to organization
+                    <ArrowLeft className="w-3 h-3" /> {t('auth.backToOrg', 'Back to organization')}
                   </button>
 
                   {/* Name */}
@@ -502,7 +511,8 @@ function RegisterPageContent() {
                     />
                     {isSuperadmin && (
                       <p className="text-xs text-blue-500 flex items-center gap-1 px-1 mt-2">
-                        <CheckCircle2 className="w-3 h-3" /> Superadmin account
+                        <CheckCircle2 className="w-3 h-3" />{' '}
+                        {t('auth.superadminAccount', 'Superadmin account')}
                       </p>
                     )}
                   </div>
@@ -536,7 +546,7 @@ function RegisterPageContent() {
                     <SmartPasswordInput
                       value={formData.password}
                       onChange={(val) => setFormData((p) => ({ ...p, password: val }))}
-                      label="Password"
+                      label={t('auth.password', 'Password')}
                       placeholder={t('placeholders.minCharacters')}
                       showStrength={true}
                       showGenerator={true}
@@ -559,11 +569,11 @@ function RegisterPageContent() {
                   >
                     {isPending ? (
                       <>
-                        <ShieldLoader size="xs" variant="inline" className="mr-2" /> Creating
-                        account…
+                        <ShieldLoader size="xs" variant="inline" className="mr-2" />{' '}
+                        {t('auth.creatingAccount', 'Creating account…')}
                       </>
                     ) : (
-                      'Request to Join'
+                      t('auth.requestToJoin', 'Request to Join')
                     )}
                   </motion.button>
                 </motion.form>
@@ -572,19 +582,19 @@ function RegisterPageContent() {
 
             <div className="text-center mt-6 space-y-3">
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Already have an account?{' '}
+                {t('auth.alreadyHaveAccount', 'Already have an account?')}{' '}
                 <Link
                   href="/login"
                   className="font-semibold hover:underline"
                   style={{ color: '#2563eb' }}
                 >
-                  Sign in
+                  {t('auth.signIn', 'Sign in')}
                 </Link>
               </p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  or
+                  {t('common.or', 'or')}
                 </span>
                 <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
               </div>
@@ -605,7 +615,7 @@ function RegisterPageContent() {
               className="text-sm hover:underline"
               style={{ color: 'var(--text-muted)' }}
             >
-              ← Back to home
+              ← {t('auth.backToHome', 'Back to home')}
             </Link>
           </div>
         </motion.div>

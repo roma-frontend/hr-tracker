@@ -298,9 +298,14 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
     <Card className="p-6 bg-[var(--surface-base)] border-[var(--border-primary)]">
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">Register Face ID</h3>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+            {t('faceRegistration.title', 'Register Face ID')}
+          </h3>
           <p className="text-sm text-[var(--text-tertiary)] mt-1">
-            Position your face in the camera frame to register Face ID login
+            {t(
+              'faceRegistration.subtitle',
+              'Position your face in the camera frame to register Face ID login',
+            )}
           </p>
         </div>
 
@@ -406,20 +411,22 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
 
           {capturedImage && onCancel && (
             <Button onClick={onCancel} variant="outline" className="flex-1">
-              Close
+              {t('common.close', 'Close')}
             </Button>
           )}
         </div>
 
         {/* Instructions */}
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-400 mb-2">Instructions:</h4>
+          <h4 className="text-sm font-medium text-blue-400 mb-2">
+            {t('faceRegistration.instructions', 'Instructions:')}
+          </h4>
           <ul className="text-xs text-[var(--text-secondary)] space-y-1 list-disc list-inside">
-            <li>Position your face within the frame</li>
-            <li>Ensure good lighting on your face</li>
-            <li>Look directly at the camera</li>
-            <li>Remove glasses or hats if possible</li>
-            <li>Wait for "Face Detected" indicator</li>
+            <li>{t('faceRegistration.positionFace', 'Position your face within the frame')}</li>
+            <li>{t('faceRegistration.goodLighting', 'Ensure good lighting on your face')}</li>
+            <li>{t('faceRegistration.lookAtCamera', 'Look directly at the camera')}</li>
+            <li>{t('faceRegistration.removeGlasses', 'Remove glasses or hats if possible')}</li>
+            <li>{t('faceRegistration.waitForDetection', 'Wait for "Face Detected" indicator')}</li>
           </ul>
         </div>
       </div>

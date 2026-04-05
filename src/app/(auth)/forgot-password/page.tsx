@@ -25,10 +25,13 @@ export default function ForgotPasswordPage() {
           body: JSON.stringify({ email }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        if (!res.ok)
+          throw new Error(data.error || t('auth.somethingWentWrong', 'Something went wrong'));
         setSent(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong');
+        setError(
+          err instanceof Error ? err.message : t('auth.somethingWentWrong', 'Something went wrong'),
+        );
       }
     });
   };
@@ -99,9 +102,9 @@ export default function ForgotPasswordPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      Email address
+                      {t('auth.emailAddress', 'Email address')}
                     </label>
-                    <div className="relative">
+                    <div className="relative mt-1.5">
                       <Mail
                         className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
                         style={{ color: 'var(--text-muted)' }}
@@ -198,7 +201,7 @@ export default function ForgotPasswordPage() {
             style={{ color: 'var(--text-muted)' }}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back to login
+            {t('auth.backToLogin', 'Back to login')}
           </Link>
         </div>
       </motion.div>

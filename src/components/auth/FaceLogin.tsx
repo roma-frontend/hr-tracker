@@ -58,7 +58,7 @@ export function FaceLogin() {
     // Load models on mount
     loadFaceApiModels().catch((err) => {
       console.error('Failed to load face models:', err);
-      toast.error('Failed to load face recognition models');
+      toast.error(t('faceLogin.modelsFailed', 'Failed to load face recognition models'));
     });
 
     // Get available cameras
@@ -157,7 +157,7 @@ export function FaceLogin() {
 
       if (!videoElementAvailable || !videoRef.current) {
         console.error('❌ Video element ref is null after waiting!');
-        toast.error('Video element not found. Please try again.');
+        toast.error(t('faceLogin.videoNotFound', 'Video element not found. Please try again.'));
         // Stop the stream and reset state
         mediaStream.getTracks().forEach((track) => track.stop());
         setStream(null);
@@ -192,7 +192,7 @@ export function FaceLogin() {
           detectFaceLoop(true); // Force start with true flag
         } catch (err) {
           console.error('❌ Failed to play video:', err);
-          toast.error('Failed to start video playback');
+          toast.error(t('faceLogin.videoPlaybackFailed', 'Failed to start video playback'));
         }
       };
 
@@ -444,7 +444,12 @@ export function FaceLogin() {
 
       if (!detection) {
         console.error('❌ No face detected in frame');
-        toast.error('No face detected. Please position your face in the frame.');
+        toast.error(
+          t(
+            'faceLogin.noFaceDetected',
+            'No face detected. Please position your face in the frame.',
+          ),
+        );
         setIsProcessing(false);
         setMatchStatus('not_found');
 
@@ -664,9 +669,11 @@ export function FaceLogin() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-4">
             <ScanFace className="w-8 h-8 text-blue-500" />
           </div>
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">Face ID Login</h3>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+            {t('faceLogin.title', 'Face ID Login')}
+          </h3>
           <p className="text-sm text-[var(--text-tertiary)] mt-1">
-            Position your face in the camera to login
+            {t('faceLogin.subtitle', 'Position your face in the camera to login')}
           </p>
         </div>
 
@@ -675,7 +682,7 @@ export function FaceLogin() {
           {!isWebcamActive && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
               <Camera className="w-16 h-16 mb-4" />
-              <p className="text-sm">Camera not active</p>
+              <p className="text-sm">{t('faceLogin.cameraNotActive', 'Camera not active')}</p>
             </div>
           )}
 
@@ -780,7 +787,7 @@ export function FaceLogin() {
                   {faceDetected && scanningProgress > 0 && (
                     <div className="absolute -bottom-8 left-0 right-0 text-center">
                       <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
-                        Scanning: {scanningProgress}%
+                        {t('faceLogin.scanning', 'Scanning')}: {scanningProgress}%
                       </div>
                     </div>
                   )}
@@ -836,7 +843,7 @@ export function FaceLogin() {
           {!isWebcamActive && !isBlocked && (
             <Button onClick={startWebcam} className="flex-1">
               <Camera className="w-4 h-4 mr-2" />
-              Start Face Login
+              {t('faceLogin.start', 'Start Face Login')}
             </Button>
           )}
 
@@ -845,20 +852,22 @@ export function FaceLogin() {
               {isProcessing ? (
                 <div className="flex-1 flex items-center justify-center gap-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 px-4 py-3 rounded-lg border border-blue-500/20">
                   <ShieldLoader size="xs" variant="inline" />
-                  <span className="text-sm font-medium">Authenticating...</span>
+                  <span className="text-sm font-medium">
+                    {t('faceLogin.authenticating', 'Authenticating...')}
+                  </span>
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center gap-2 bg-green-500/10 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg border border-green-500/20">
                   <ScanFace className="w-4 h-4" />
                   <span className="text-sm font-medium">
                     {scanningProgress >= 100
-                      ? 'Ready to login...'
-                      : `Scanning... ${scanningProgress}%`}
+                      ? t('faceLogin.ready', 'Ready to login...')
+                      : `${t('faceLogin.scanning', 'Scanning')}... ${scanningProgress}%`}
                   </span>
                 </div>
               )}
               <Button onClick={stopWebcam} variant="outline">
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
             </>
           )}
@@ -866,7 +875,7 @@ export function FaceLogin() {
           {/* Alternative login button when blocked */}
           {isBlocked && (
             <Button onClick={() => router.push('/login')} className="flex-1" variant="default">
-              Use Email/Password Login
+              {t('faceLogin.useEmailPassword', 'Use Email/Password Login')}
             </Button>
           )}
         </div>
@@ -875,11 +884,15 @@ export function FaceLogin() {
         {allFaceDescriptors !== undefined && allFaceDescriptors.length === 0 && (
           <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
             <p className="text-sm text-orange-600 dark:text-orange-400 text-center font-medium">
-              ⚠️ No Registered Faces
+              {t('faceLogin.noRegisteredFacesTitle', '⚠️ No Registered Faces')}
             </p>
             <p className="text-xs text-orange-600/80 dark:text-orange-400/80 text-center mt-1">
-              No users have registered their face yet. Please register your face in your profile
-              settings first.
+              {t('faceLogin.noUsersRegistered', 'No users have registered their face yet')}.{' '}
+              {t(
+                'faceLogin.registerFaceFirst',
+                'Please register your face in your profile settings first',
+              )}
+              .
             </p>
           </div>
         )}
@@ -887,12 +900,15 @@ export function FaceLogin() {
         {/* Info */}
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
           <p className="text-xs text-[var(--text-secondary)]">
-            <strong>🚀 Automatic Login:</strong> Position your face in the camera frame. The system
-            will automatically authenticate you when your face is detected and scanned (100%).
+            {t(
+              'faceLogin.autoLoginInfo',
+              '🚀 Automatic Login: Position your face in the camera frame. The system will automatically authenticate you when your face is detected and scanned (100%).',
+            )}
             {allFaceDescriptors !== undefined && (
               <span className="block mt-1 text-[var(--text-tertiary)]">
-                📊 {allFaceDescriptors.length} registered face
-                {allFaceDescriptors.length !== 1 ? 's' : ''} in the system
+                📊 {allFaceDescriptors.length} {t('faceLogin.registeredFace', 'registered face')}
+                {allFaceDescriptors.length !== 1 ? 's' : ''}{' '}
+                {t('faceLogin.inSystem', 'in the system')}
               </span>
             )}
           </p>

@@ -47,10 +47,10 @@ export default function PendingPage() {
 
           {/* Message */}
           <h1 className="text-3xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
-            Request Submitted!
+            {t('auth.pending.title', 'Request Submitted!')}
           </h1>
           <p className="text-lg mb-8" style={{ color: 'var(--text-secondary)' }}>
-            Thank you for your interest in OfficeHub.
+            {t('auth.pending.subtitle', 'Thank you for your interest in OfficeHub.')}
           </p>
 
           {/* Timeline */}
@@ -67,10 +67,13 @@ export default function PendingPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
-                  Request Received
+                  {t('auth.pending.requestReceived', 'Request Received')}
                 </h3>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  We've received your organization creation request.
+                  {t(
+                    'auth.pending.requestReceivedDesc',
+                    "We've received your organization creation request.",
+                  )}
                 </p>
               </div>
             </div>
@@ -87,10 +90,13 @@ export default function PendingPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
-                  Under Review
+                  {t('auth.pending.underReview', 'Under Review')}
                 </h3>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  Our team is reviewing your request. This typically takes up to 24 hours.
+                  {t(
+                    'auth.pending.underReviewDesc',
+                    'Our team is reviewing your request. This typically takes up to 24 hours.',
+                  )}
                 </p>
               </div>
             </div>
@@ -107,10 +113,13 @@ export default function PendingPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
-                  Email Notification
+                  {t('auth.pending.emailNotification', 'Email Notification')}
                 </h3>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  You'll receive an email with login instructions once approved.
+                  {t(
+                    'auth.pending.emailNotificationDesc',
+                    "You'll receive an email with login instructions once approved.",
+                  )}
                 </p>
               </div>
             </div>
@@ -122,8 +131,11 @@ export default function PendingPage() {
             style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' }}
           >
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              💡 <strong>Next Steps:</strong> Check your email for updates. We'll notify you as soon
-              as your organization is ready.
+              💡 <strong>{t('auth.pending.nextSteps', 'Next Steps')}:</strong>{' '}
+              {t(
+                'auth.pending.nextStepsDesc',
+                "Check your email for updates. We'll notify you as soon as your organization is ready.",
+              )}
             </p>
           </div>
 
@@ -136,7 +148,7 @@ export default function PendingPage() {
                 className="w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
               >
-                Go to Login
+                {t('auth.pending.goToLogin', 'Go to Login')}
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
@@ -153,7 +165,8 @@ export default function PendingPage() {
         </div>
 
         <p className="text-center text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
-          Questions? Contact us at support@officehub.com
+          {t('auth.pending.questions', 'Questions?')}{' '}
+          {t('auth.pending.contactSupport', 'Contact us at')} support@officehub.com
         </p>
       </motion.div>
     </div>
