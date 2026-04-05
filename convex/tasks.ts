@@ -1,6 +1,6 @@
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 /**
  * Helper to batch load users and enrich task data
@@ -15,19 +15,24 @@ async function enrichTasksWithUserData(ctx: any, tasks: any[]) {
   const allUserIds = [...new Set([...assignedToIds, ...assignedByIds])];
 
   // Batch load all users
-  const users = await Promise.all(allUserIds.map((id: Id<"users">) => ctx.db.get(id)));
+  const users = await Promise.all(allUserIds.map((id: Id<'users'>) => ctx.db.get(id)));
   const userMap = new Map(users.map((u) => [u?._id, u]));
 
   // Batch load all comments
-  const allComments = await ctx.db.query("taskComments").collect();
-  const commentsByTask = new Map<Id<"tasks">, any[]>();
+  const allComments = await ctx.db.query('taskComments').collect();
+  const commentsByTask = new Map<Id<'tasks'>, any[]>();
   tasks.forEach((t) => {
-    commentsByTask.set(t._id, allComments.filter((c: any) => c.taskId === t._id));
+    commentsByTask.set(
+      t._id,
+      allComments.filter((c: any) => c.taskId === t._id),
+    );
   });
 
   // Collect all comment author IDs
   const commentAuthorIds = [...new Set(allComments.map((c: any) => c.authorId))];
-  const commentAuthors = await Promise.all(commentAuthorIds.map((id: any) => ctx.db.get(id as Id<"users">)));
+  const commentAuthors = await Promise.all(
+    commentAuthorIds.map((id: any) => ctx.db.get(id as Id<'users'>)),
+  );
   const commentAuthorMap = new Map(commentAuthors.map((a: any) => [a?._id, a]));
 
   // Enrich tasks
@@ -59,32 +64,32 @@ async function enrichTasksWithUserData(ctx: any, tasks: any[]) {
   });
 }
 
-const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
 // ── Create Task ────────────────────────────────────────────────────────────
 export const createTask = mutation({
   args: {
     title: v.string(),
     description: v.optional(v.string()),
-    assignedTo: v.id("users"),
-    assignedBy: v.id("users"),
+    assignedTo: v.id('users'),
+    assignedBy: v.id('users'),
     priority: v.union(
-      v.literal("low"),
-      v.literal("medium"),
-      v.literal("high"),
-      v.literal("urgent")
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('urgent'),
     ),
     deadline: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const taskId = await ctx.db.insert("tasks", {
+    const taskId = await ctx.db.insert('tasks', {
       title: args.title,
       description: args.description,
       assignedTo: args.assignedTo,
       assignedBy: args.assignedBy,
-      status: "pending",
+      status: 'pending',
       priority: args.priority,
       deadline: args.deadline,
       tags: args.tags,
@@ -94,11 +99,11 @@ export const createTask = mutation({
 
     // Notify the person who assigned the task (skip superadmin)
     const assigner = await ctx.db.get(args.assignedBy);
-    if (assigner?.role !== "superadmin") {
-      await ctx.db.insert("notifications", {
+    if (assigner?.role !== 'superadmin') {
+      await ctx.db.insert('notifications', {
         userId: args.assignedBy,
-        type: "system",
-        title: "Task Assigned",
+        type: 'system',
+        title: 'Task Assigned',
         message: `You assigned a task: "${args.title}"`,
         isRead: false,
         relatedId: taskId,
@@ -113,37 +118,37 @@ export const createTask = mutation({
 // ── Update Task Status (employee can update) ───────────────────────────────
 export const updateTaskStatus = mutation({
   args: {
-    taskId: v.id("tasks"),
+    taskId: v.id('tasks'),
     status: v.union(
-      v.literal("pending"),
-      v.literal("in_progress"),
-      v.literal("review"),
-      v.literal("completed"),
-      v.literal("cancelled")
+      v.literal('pending'),
+      v.literal('in_progress'),
+      v.literal('review'),
+      v.literal('completed'),
+      v.literal('cancelled'),
     ),
-    userId: v.id("users"),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const task = await ctx.db.get(args.taskId);
-    if (!task) throw new Error("Task not found");
+    if (!task) throw new Error('Task not found');
 
     const now = Date.now();
     await ctx.db.patch(args.taskId, {
       status: args.status,
       updatedAt: now,
-      completedAt: args.status === "completed" ? now : task.completedAt,
+      completedAt: args.status === 'completed' ? now : task.completedAt,
     });
 
     // Notify supervisor when task goes to review or completed (skip superadmin)
-    if (args.status === "review" || args.status === "completed") {
+    if (args.status === 'review' || args.status === 'completed') {
       const employee = await ctx.db.get(args.userId);
       const supervisor = await ctx.db.get(task.assignedBy);
-      if (supervisor?.role !== "superadmin") {
-        await ctx.db.insert("notifications", {
+      if (supervisor?.role !== 'superadmin') {
+        await ctx.db.insert('notifications', {
           userId: task.assignedBy,
-          type: "system",
-          title: args.status === "completed" ? "Task Completed" : "Task Ready for Review",
-          message: `"${task.title}" has been ${args.status === "completed" ? "completed" : "submitted for review"} by ${employee?.name ?? "employee"}`,
+          type: 'system',
+          title: args.status === 'completed' ? 'Task Completed' : 'Task Ready for Review',
+          message: `"${task.title}" has been ${args.status === 'completed' ? 'completed' : 'submitted for review'} by ${employee?.name ?? 'employee'}`,
           isRead: false,
           relatedId: args.taskId,
           createdAt: now,
@@ -156,42 +161,39 @@ export const updateTaskStatus = mutation({
 // ── Update Task (supervisor/admin) ─────────────────────────────────────────
 export const updateTask = mutation({
   args: {
-    taskId: v.id("tasks"),
+    taskId: v.id('tasks'),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
-    priority: v.optional(v.union(
-      v.literal("low"),
-      v.literal("medium"),
-      v.literal("high"),
-      v.literal("urgent")
-    )),
+    priority: v.optional(
+      v.union(v.literal('low'), v.literal('medium'), v.literal('high'), v.literal('urgent')),
+    ),
     deadline: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
-    status: v.optional(v.union(
-      v.literal("pending"),
-      v.literal("in_progress"),
-      v.literal("review"),
-      v.literal("completed"),
-      v.literal("cancelled")
-    )),
+    status: v.optional(
+      v.union(
+        v.literal('pending'),
+        v.literal('in_progress'),
+        v.literal('review'),
+        v.literal('completed'),
+        v.literal('cancelled'),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const { taskId, ...updates } = args;
-    const filtered = Object.fromEntries(
-      Object.entries(updates).filter(([, v]) => v !== undefined)
-    );
+    const filtered = Object.fromEntries(Object.entries(updates).filter(([, v]) => v !== undefined));
     await ctx.db.patch(taskId, { ...filtered, updatedAt: Date.now() });
   },
 });
 
 // ── Delete Task ────────────────────────────────────────────────────────────
 export const deleteTask = mutation({
-  args: { taskId: v.id("tasks") },
+  args: { taskId: v.id('tasks') },
   handler: async (ctx, args) => {
     // Delete comments first
     const comments = await ctx.db
-      .query("taskComments")
-      .withIndex("by_task", q => q.eq("taskId", args.taskId))
+      .query('taskComments')
+      .withIndex('by_task', (q) => q.eq('taskId', args.taskId))
       .collect();
     for (const c of comments) await ctx.db.delete(c._id);
     await ctx.db.delete(args.taskId);
@@ -201,13 +203,13 @@ export const deleteTask = mutation({
 // ── Add Comment ────────────────────────────────────────────────────────────
 export const addComment = mutation({
   args: {
-    taskId: v.id("tasks"),
-    authorId: v.id("users"),
+    taskId: v.id('tasks'),
+    authorId: v.id('users'),
     content: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    await ctx.db.insert("taskComments", {
+    await ctx.db.insert('taskComments', {
       taskId: args.taskId,
       authorId: args.authorId,
       content: args.content,
@@ -220,8 +222,8 @@ export const addComment = mutation({
 // ── Assign Supervisor to Employee ──────────────────────────────────────────
 export const assignSupervisor = mutation({
   args: {
-    employeeId: v.id("users"),
-    supervisorId: v.optional(v.id("users")),
+    employeeId: v.id('users'),
+    supervisorId: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.employeeId, {
@@ -233,17 +235,17 @@ export const assignSupervisor = mutation({
 // ── Get Tasks for Employee ─────────────────────────────────────────────────
 // OPTIMIZED: Batch loading eliminates N+1 queries
 export const getTasksForEmployee = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, args) => {
     const employee = await ctx.db.get(args.userId);
-    if (!employee) throw new Error("Employee not found");
+    if (!employee) throw new Error('Employee not found');
 
     const isSuperadmin = employee.email.toLowerCase() === SUPERADMIN_EMAIL;
 
     const tasks = await ctx.db
-      .query("tasks")
-      .withIndex("by_assigned_to", (q) => q.eq("assignedTo", args.userId))
-      .order("desc")
+      .query('tasks')
+      .withIndex('by_assigned_to', (q) => q.eq('assignedTo', args.userId))
+      .order('desc')
       .collect();
 
     // Filter by organization (skip for superadmin)
@@ -251,7 +253,10 @@ export const getTasksForEmployee = query({
     if (!isSuperadmin) {
       orgTasks = tasks.filter((task) => {
         const assignedBy = ctx.db.get(task.assignedBy);
-        return !employee.organizationId || assignedBy.then((a) => a?.organizationId === employee.organizationId);
+        return (
+          !employee.organizationId ||
+          assignedBy.then((a) => a?.organizationId === employee.organizationId)
+        );
       });
     }
 
@@ -262,17 +267,17 @@ export const getTasksForEmployee = query({
 // ── Get Tasks assigned by supervisor ──────────────────────────────────────
 // OPTIMIZED: Batch loading eliminates N+1 queries
 export const getTasksAssignedBy = query({
-  args: { supervisorId: v.id("users") },
+  args: { supervisorId: v.id('users') },
   handler: async (ctx, args) => {
     const supervisor = await ctx.db.get(args.supervisorId);
-    if (!supervisor) throw new Error("Supervisor not found");
+    if (!supervisor) throw new Error('Supervisor not found');
 
     const isSuperadmin = supervisor.email.toLowerCase() === SUPERADMIN_EMAIL;
 
     const tasks = await ctx.db
-      .query("tasks")
-      .withIndex("by_assigned_by", (q) => q.eq("assignedBy", args.supervisorId))
-      .order("desc")
+      .query('tasks')
+      .withIndex('by_assigned_by', (q) => q.eq('assignedBy', args.supervisorId))
+      .order('desc')
       .collect();
 
     // Filter by organization (skip for superadmin)
@@ -280,7 +285,10 @@ export const getTasksAssignedBy = query({
     if (!isSuperadmin) {
       orgTasks = tasks.filter((task) => {
         const assignedTo = ctx.db.get(task.assignedTo);
-        return !supervisor.organizationId || assignedTo.then((a) => a?.organizationId === supervisor.organizationId);
+        return (
+          !supervisor.organizationId ||
+          assignedTo.then((a) => a?.organizationId === supervisor.organizationId)
+        );
       });
     }
 
@@ -291,28 +299,38 @@ export const getTasksAssignedBy = query({
 // ── Get All Tasks (admin) ──────────────────────────────────────────────────
 // OPTIMIZED: Batch loading eliminates N+1 queries
 export const getAllTasks = query({
-  args: { requesterId: v.id("users") },
+  args: { requesterId: v.id('users'), selectedOrganizationId: v.optional(v.id('organizations')) },
   handler: async (ctx, args) => {
     const requester = await ctx.db.get(args.requesterId);
-    if (!requester) throw new Error("Requester not found");
+    if (!requester) throw new Error('Requester not found');
 
     // Only admin/superadmin can get all tasks
-    if (requester.role !== "admin" && requester.role !== "superadmin") {
-      throw new Error("Only admins can access all tasks");
+    if (requester.role !== 'admin' && requester.role !== 'superadmin') {
+      throw new Error('Only admins can access all tasks');
     }
 
     const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
 
     // Superadmin without org can still access (but will see nothing if no tasks exist)
     if (!isSuperadmin && !requester.organizationId) {
-      throw new Error("Admin must belong to an organization");
+      throw new Error('Admin must belong to an organization');
     }
 
-    const tasks = await ctx.db.query("tasks").order("desc").collect();
+    const tasks = await ctx.db.query('tasks').order('desc').collect();
 
-    // Filter tasks by organization (skip filter for superadmin)
+    // Filter tasks by organization
     let orgTasks = tasks;
-    if (!isSuperadmin) {
+    if (isSuperadmin) {
+      // For superadmin: filter by selectedOrganizationId if provided
+      if (args.selectedOrganizationId) {
+        orgTasks = tasks.filter((task) => {
+          const assignedTo = ctx.db.get(task.assignedTo);
+          return assignedTo.then((a) => a?.organizationId === args.selectedOrganizationId);
+        });
+      }
+      // If no selectedOrganizationId, superadmin sees all tasks (no filter)
+    } else {
+      // For regular admin: filter by their organization
       orgTasks = tasks.filter((task) => {
         const assignedTo = ctx.db.get(task.assignedTo);
         return assignedTo.then((a) => a?.organizationId === requester.organizationId);
@@ -326,18 +344,18 @@ export const getAllTasks = query({
 // ── Get My Team Tasks (supervisor sees tasks of their subordinates) ─────────
 // OPTIMIZED: Batch loading eliminates N+1 queries
 export const getTeamTasks = query({
-  args: { supervisorId: v.id("users") },
+  args: { supervisorId: v.id('users') },
   handler: async (ctx, args) => {
     // Get all employees under this supervisor
     const employees = await ctx.db
-      .query("users")
-      .withIndex("by_supervisor", (q) => q.eq("supervisorId", args.supervisorId))
+      .query('users')
+      .withIndex('by_supervisor', (q) => q.eq('supervisorId', args.supervisorId))
       .collect();
 
     const employeeIds = employees.map((e) => e._id);
 
     // Get all tasks and filter by employee IDs
-    const allTasks = await ctx.db.query("tasks").collect();
+    const allTasks = await ctx.db.query('tasks').collect();
     const teamTasks = allTasks.filter((t) => employeeIds.includes(t.assignedTo));
 
     return enrichTasksWithUserData(ctx, teamTasks);
@@ -346,13 +364,13 @@ export const getTeamTasks = query({
 
 // ── Get Employees under supervisor ────────────────────────────────────────
 export const getMyEmployees = query({
-  args: { supervisorId: v.id("users") },
+  args: { supervisorId: v.id('users') },
   handler: async (ctx, args) => {
     const employees = await ctx.db
-      .query("users")
-      .withIndex("by_supervisor", q => q.eq("supervisorId", args.supervisorId))
+      .query('users')
+      .withIndex('by_supervisor', (q) => q.eq('supervisorId', args.supervisorId))
       .collect();
-    return employees.map(e => ({
+    return employees.map((e) => ({
       ...e,
       avatarUrl: e.avatarUrl ?? e.faceImageUrl,
     }));
@@ -361,27 +379,31 @@ export const getMyEmployees = query({
 
 // ── Get all users for assignment (admin/supervisor) ────────────────────────
 export const getUsersForAssignment = query({
-  args: { requesterId: v.optional(v.id("users")) },
+  args: { requesterId: v.optional(v.id('users')) },
   handler: async (ctx, args) => {
     // If requesterId provided, filter by organization
-    let users = await ctx.db.query("users").collect();
+    let users = await ctx.db.query('users').collect();
 
     if (args.requesterId) {
       const requester = await ctx.db.get(args.requesterId);
       if (requester && requester.organizationId) {
-        users = users.filter(u => u.organizationId === requester.organizationId);
+        users = users.filter((u) => u.organizationId === requester.organizationId);
       }
     }
 
     // Return all active users (employees, supervisors, admins, AND drivers)
     // Anyone in the organization can be assigned a task
     return users
-      .filter(u => 
-        u.isActive !== false && 
-        u.isApproved !== false && 
-        (u.role === "employee" || u.role === "supervisor" || u.role === "admin" || u.role === "driver")
+      .filter(
+        (u) =>
+          u.isActive !== false &&
+          u.isApproved !== false &&
+          (u.role === 'employee' ||
+            u.role === 'supervisor' ||
+            u.role === 'admin' ||
+            u.role === 'driver'),
       )
-      .map(u => ({
+      .map((u) => ({
         _id: u._id,
         name: u.name,
         position: u.position,
@@ -395,36 +417,41 @@ export const getUsersForAssignment = query({
 
 // ── Get supervisors list ───────────────────────────────────────────────────
 export const getSupervisors = query({
-  args: { requesterId: v.optional(v.id("users")) },
+  args: { requesterId: v.optional(v.id('users')) },
   handler: async (ctx, args) => {
-    console.log("[getSupervisors] args:", args);
-    
+    console.log('[getSupervisors] args:', args);
+
     let supervisors = await ctx.db
-      .query("users")
-      .withIndex("by_role", q => q.eq("role", "supervisor"))
+      .query('users')
+      .withIndex('by_role', (q) => q.eq('role', 'supervisor'))
       .collect();
     let admins = await ctx.db
-      .query("users")
-      .withIndex("by_role", q => q.eq("role", "admin"))
+      .query('users')
+      .withIndex('by_role', (q) => q.eq('role', 'admin'))
       .collect();
 
-    console.log("[getSupervisors] raw supervisors:", supervisors.length, "admins:", admins.length);
+    console.log('[getSupervisors] raw supervisors:', supervisors.length, 'admins:', admins.length);
 
     // Filter by organization if requesterId provided
     if (args.requesterId) {
       const requester = await ctx.db.get(args.requesterId);
-      console.log("[getSupervisors] requester:", requester);
+      console.log('[getSupervisors] requester:', requester);
       if (requester && requester.organizationId) {
-        supervisors = supervisors.filter(u => u.organizationId === requester.organizationId);
-        admins = admins.filter(u => u.organizationId === requester.organizationId);
+        supervisors = supervisors.filter((u) => u.organizationId === requester.organizationId);
+        admins = admins.filter((u) => u.organizationId === requester.organizationId);
       }
     }
 
-    console.log("[getSupervisors] filtered supervisors:", supervisors.length, "admins:", admins.length);
+    console.log(
+      '[getSupervisors] filtered supervisors:',
+      supervisors.length,
+      'admins:',
+      admins.length,
+    );
 
     return [...supervisors, ...admins]
-      .filter(u => u.isActive && u.isApproved)
-      .map(u => ({
+      .filter((u) => u.isActive && u.isApproved)
+      .map((u) => ({
         _id: u._id,
         name: u.name,
         role: u.role,
@@ -439,26 +466,29 @@ export const getSupervisors = query({
 // ── Add Attachment ─────────────────────────────────────────────────────────
 export const addAttachment = mutation({
   args: {
-    taskId: v.id("tasks"),
+    taskId: v.id('tasks'),
     url: v.string(),
     name: v.string(),
     type: v.string(),
     size: v.number(),
-    uploadedBy: v.id("users"),
+    uploadedBy: v.id('users'),
   },
   handler: async (ctx, args) => {
     const task = await ctx.db.get(args.taskId);
-    if (!task) throw new Error("Task not found");
+    if (!task) throw new Error('Task not found');
     const attachments = task.attachments ?? [];
     await ctx.db.patch(args.taskId, {
-      attachments: [...attachments, {
-        url: args.url,
-        name: args.name,
-        type: args.type,
-        size: args.size,
-        uploadedBy: args.uploadedBy,
-        uploadedAt: Date.now(),
-      }],
+      attachments: [
+        ...attachments,
+        {
+          url: args.url,
+          name: args.name,
+          type: args.type,
+          size: args.size,
+          uploadedBy: args.uploadedBy,
+          uploadedAt: Date.now(),
+        },
+      ],
       updatedAt: Date.now(),
     });
   },
@@ -467,12 +497,12 @@ export const addAttachment = mutation({
 // ── Remove Attachment ──────────────────────────────────────────────────────
 export const removeAttachment = mutation({
   args: {
-    taskId: v.id("tasks"),
+    taskId: v.id('tasks'),
     url: v.string(),
   },
   handler: async (ctx, args) => {
     const task = await ctx.db.get(args.taskId);
-    if (!task) throw new Error("Task not found");
+    if (!task) throw new Error('Task not found');
     const attachments = (task.attachments ?? []).filter((a: any) => a.url !== args.url);
     await ctx.db.patch(args.taskId, { attachments, updatedAt: Date.now() });
   },
@@ -481,17 +511,17 @@ export const removeAttachment = mutation({
 // ── Get Task Comments ──────────────────────────────────────────────────────
 // OPTIMIZED: Batch loading for comments with authors
 export const getTaskComments = query({
-  args: { taskId: v.id("tasks") },
+  args: { taskId: v.id('tasks') },
   handler: async (ctx, args) => {
     const comments = await ctx.db
-      .query("taskComments")
-      .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
-      .order("asc")
+      .query('taskComments')
+      .withIndex('by_task', (q) => q.eq('taskId', args.taskId))
+      .order('asc')
       .collect();
 
     // Batch load all authors
     const authorIds = [...new Set(comments.map((c) => c.authorId))];
-    const authors = await Promise.all(authorIds.map((id: Id<"users">) => ctx.db.get(id)));
+    const authors = await Promise.all(authorIds.map((id: Id<'users'>) => ctx.db.get(id)));
     const authorMap = new Map(authors.map((a) => [a?._id, a]));
 
     return comments.map((c) => ({

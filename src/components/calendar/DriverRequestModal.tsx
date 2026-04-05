@@ -13,6 +13,7 @@ import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,7 +43,10 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
   const { t } = useTranslation();
   const currentUser = useQuery(api.users.queries.getCurrentUser, { email: undefined });
   const userId = currentUser?._id as Id<'users'> | undefined;
-  const organizationId = currentUser?.organizationId as Id<'organizations'> | undefined;
+  const selectedOrgId = useSelectedOrganization();
+  const organizationId = (selectedOrgId ?? currentUser?.organizationId) as
+    | Id<'organizations'>
+    | undefined;
 
   const availableDrivers = useQuery(
     api.drivers.queries.getAvailableDrivers,

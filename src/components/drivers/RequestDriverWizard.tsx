@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
 interface RequestDriverWizardProps {
   userId: Id<'users'>;
@@ -32,7 +33,8 @@ export function RequestDriverWizard({ userId, onComplete, onCancel }: RequestDri
   const { t } = useTranslation();
   const requestDriver = useMutation(api.drivers.requests_mutations.requestDriver);
   const { user } = useAuthStore();
-  const organizationId = user?.organizationId as Id<'organizations'> | undefined;
+  const selectedOrgId = useSelectedOrganization();
+  const organizationId = (selectedOrgId ?? user?.organizationId) as Id<'organizations'> | undefined;
   const drivers = useQuery(
     api.drivers.queries.getAvailableDrivers,
     organizationId ? { organizationId } : 'skip',

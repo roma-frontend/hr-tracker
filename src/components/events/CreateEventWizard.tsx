@@ -18,6 +18,7 @@ import { Calendar, Clock, Users, MapPin } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { toast } from 'sonner';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
 interface CreateEventWizardProps {
   onComplete?: () => void;
@@ -28,6 +29,8 @@ export function CreateEventWizard({ onComplete, onCancel }: CreateEventWizardPro
   const { t } = useTranslation();
   const createEvent = useMutation(api.events.createCompanyEvent);
   const user = useQuery(api.users.queries.getCurrentUser, {});
+  const selectedOrgId = useSelectedOrganization();
+  const organizationId = (selectedOrgId ?? user?.organizationId) as any;
 
   const steps: WizardStep[] = [
     {
@@ -145,7 +148,7 @@ export function CreateEventWizard({ onComplete, onCancel }: CreateEventWizardPro
       const endDate = new Date(dateTime.getTime() + 2 * 60 * 60 * 1000); // +2 hours
 
       await createEvent({
-        organizationId: user?.organizationId as any,
+        organizationId,
         userId: user?._id as any,
         name: String(data.title),
         description: String(data.description) || '',

@@ -478,9 +478,14 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
   const adminTasks = useQuery(
     api.tasks.getAllTasks,
     userRole === 'admin' && effectiveOrgId
-      ? { requesterId: convexId }
-      : userRole === 'superadmin' && effectiveOrgId
-        ? { requesterId: convexId }
+      ? { requesterId: convexId, selectedOrganizationId: effectiveOrgId as Id<'organizations'> }
+      : userRole === 'superadmin'
+        ? {
+            requesterId: convexId,
+            selectedOrganizationId: selectedOrgId
+              ? (selectedOrgId as Id<'organizations'>)
+              : undefined,
+          }
         : 'skip',
   );
   const supervisorTasks = useQuery(
