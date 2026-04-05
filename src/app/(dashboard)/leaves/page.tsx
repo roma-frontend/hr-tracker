@@ -1,15 +1,12 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 function LeavesSkeleton() {
   return (
-    <div className="p-6 space-y-4 animate-pulse">
-      <div className="h-8 w-48 rounded-lg bg-white/5" />
-      <div className="h-20 rounded-2xl bg-white/5" />
-      <div className="h-20 rounded-2xl bg-white/5" />
-      <div className="h-20 rounded-2xl bg-white/5" />
-      <div className="h-20 rounded-2xl bg-white/5" />
+    <div className="p-6 flex items-center justify-center min-h-[60vh]">
+      <ShieldLoader size="lg" />
     </div>
   );
 }

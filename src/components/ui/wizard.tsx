@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
@@ -40,12 +41,13 @@ export function Wizard({
   steps,
   onComplete,
   onCancel,
-  submitLabel = 'Submit',
-  cancelLabel = 'Cancel',
+  submitLabel,
+  cancelLabel,
   showStepper = true,
   className,
   defaultStepData = {},
 }: WizardProps): React.ReactElement {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] =
     useState<Record<string, string | number | boolean | null>>(defaultStepData);
@@ -223,7 +225,7 @@ export function Wizard({
           className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) w-full sm:w-auto text-sm"
         >
           <ChevronLeft className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-          Back
+          {t('wizard.back', 'Back')}
         </Button>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -234,7 +236,7 @@ export function Wizard({
               disabled={isSubmitting}
               className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) w-full sm:w-auto text-sm"
             >
-              {cancelLabel}
+              {cancelLabel || t('wizard.cancel', 'Cancel')}
             </Button>
           )}
 
@@ -249,12 +251,12 @@ export function Wizard({
             )}
           >
             {isSubmitting ? (
-              'Processing...'
+              t('wizard.processing', 'Processing...')
             ) : currentStep === steps.length - 1 ? (
-              submitLabel
+              submitLabel || t('wizard.submit', 'Submit')
             ) : (
               <>
-                Next
+                {t('wizard.next', 'Next')}
                 <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
               </>
             )}

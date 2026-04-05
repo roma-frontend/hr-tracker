@@ -5090,16 +5090,13 @@
     "weekStartsOn": "Շաբաթը սկսվում է"
   },
   "wizard": {
-    "personalInfo": "Անձնական տվյալներ",
-    "personalInfoDesc": "Հիմնական տվյալներ աշխատակցի մասին",
-    "workDetails": "Աշխատանքային տվյալներ",
-    "workDetailsDesc": "Բաժին և պաշտոն",
-    "roleType": "Դեր և տեսակ",
-    "roleTypeDesc": "Սահմանեք դերը և զբաղվածության տեսակը",
-    "reviewDesc": "Հաստատեք տվյալները ավելացնելուց առաջ",
-    "review": "Վերանայում",
-    "previous": "Նախորդ",
-    "next": "Հաջորդ"
+    "back": "Back",
+    "next": "Next",
+    "processing": "Processing...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "step": "Step",
+    "of": "of"
   },
   "taskWizard": {
     "submit": "Create Task",
@@ -5163,7 +5160,7 @@
     }
   },
   "driverWizard": {
-    "submit": "Request Driver",
+    "submit": "Submit",
     "steps": {
       "type": {
         "title": "Trip Type",
@@ -5196,8 +5193,9 @@
       "corporateDesc": "Company event transportation"
     },
     "toast": {
-      "success": "Driver request submitted!",
-      "error": "Failed to request driver"
+      "success": "Driver requested successfully!",
+      "error": "Failed to request driver",
+      "noOrg": "No organization selected"
     }
   },
   "supportWizard": {

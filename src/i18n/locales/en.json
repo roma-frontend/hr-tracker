@@ -4810,7 +4810,7 @@
     }
   },
   "driverWizard": {
-    "submit": "Request Driver",
+    "submit": "Submit",
     "steps": {
       "type": {
         "title": "Trip Type",
@@ -4843,8 +4843,9 @@
       "corporateDesc": "Company event transportation"
     },
     "toast": {
-      "success": "Driver request submitted!",
-      "error": "Failed to request driver"
+      "success": "Driver requested successfully!",
+      "error": "Failed to request driver",
+      "noOrg": "No organization selected"
     }
   },
   "supportWizard": {
@@ -5292,16 +5293,13 @@
     "weekStartsOn": "Week starts on"
   },
   "wizard": {
-    "personalInfo": "Personal Information",
-    "personalInfoDesc": "Basic details about the employee",
-    "workDetails": "Work Details",
-    "workDetailsDesc": "Department and position information",
-    "roleType": "Role & Type",
-    "roleTypeDesc": "Set role and employment type",
-    "reviewDesc": "Confirm the details before adding",
-    "review": "Review",
-    "previous": "Previous",
-    "next": "Next"
+    "back": "Back",
+    "next": "Next",
+    "processing": "Processing...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "step": "Step",
+    "of": "of"
   },
   "faceLogin": {
     "title": "Face ID Login",
