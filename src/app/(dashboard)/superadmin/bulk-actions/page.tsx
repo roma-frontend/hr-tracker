@@ -142,7 +142,7 @@ export default function BulkActionsPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex flex-col sm:flex-row">
+            <div className="flex flex-col">
               <h1
                 className="text-2xl md:text-4xl font-bold mb-2"
                 style={{ color: 'var(--text-primary)' }}
