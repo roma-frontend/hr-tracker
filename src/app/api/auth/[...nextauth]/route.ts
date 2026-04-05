@@ -5,11 +5,7 @@ import type { NextAuthConfig } from 'next-auth';
 // ═══════════════════════════════════════════════════════════════
 // VALIDATE ENVIRONMENT — fail fast, not silently
 // ═══════════════════════════════════════════════════════════════
-const requiredEnvVars = [
-  'AUTH_SECRET',
-  'AUTH_GOOGLE_ID',
-  'AUTH_GOOGLE_SECRET',
-];
+const requiredEnvVars = ['AUTH_SECRET', 'AUTH_GOOGLE_ID', 'AUTH_GOOGLE_SECRET'];
 const missingVars = requiredEnvVars.filter((v) => !process.env[v]);
 
 if (missingVars.length > 0) {
@@ -20,8 +16,6 @@ if (missingVars.length > 0) {
 }
 
 export const authConfig: NextAuthConfig = {
-  // AUTH_URL is auto-detected, but can be set explicitly for Vercel
-  ...(process.env.AUTH_URL && { basePath: new URL(process.env.AUTH_URL).pathname }),
   providers: [
     Google({
       profile(profile) {
