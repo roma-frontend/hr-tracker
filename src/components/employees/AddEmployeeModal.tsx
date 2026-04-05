@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
@@ -206,7 +205,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
         {/* Header with progress */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70" />
-          <DialogHeader className="relative z-10 px-6 pt-6 pb-4">
+          <div className="relative z-10 px-6 pt-6 pb-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
                 <UserPlus className="w-5 h-5 text-white" />
@@ -242,7 +241,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
               </span>
               <span className="text-xs text-white/80 font-medium">{steps[step]?.label}</span>
             </div>
-          </DialogHeader>
+          </div>
         </div>
 
         {/* Content */}

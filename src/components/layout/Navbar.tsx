@@ -465,11 +465,12 @@ export function Navbar() {
               align="end"
               sideOffset={8}
               collisionPadding={{ top: 72, bottom: 16, left: 16, right: 16 }}
-              className="w-[calc(100vw-2rem)] sm:w-80 max-h-[calc(100vh-90px)] overflow-y-auto bg-[var(--card)] border-[var(--border)] shadow-xl"
+              className="w-[calc(100vw-2rem)] sm:w-80 max-h-[calc(100vh-90px)] overflow-y-auto bg-[var(--card)] border-[var(--border)] shadow-xl z-[60]"
             >
               {/* Mobile close button */}
               <button
-                className="sm:hidden absolute top-3 right-3 p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-subtle)] transition-colors z-10"
+                className="sm:hidden absolute top-3 right-3 p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-subtle)] transition-colors"
+                style={{ zIndex: 999 }}
                 onClick={() => setMenuOpen(false)}
                 aria-label="Close"
               >

@@ -79,7 +79,6 @@ export default function OrganizationsPage() {
 
   // Debug logging
   useEffect(() => {
-
     if (user) {
       console.log('🔍 Organizations page - User data:', {
         email: user.email,
@@ -142,7 +141,7 @@ export default function OrganizationsPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">

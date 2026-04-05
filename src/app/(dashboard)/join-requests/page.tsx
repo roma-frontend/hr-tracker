@@ -166,7 +166,7 @@ export default function JoinRequestsPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6 max-w-5xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -221,12 +221,12 @@ export default function JoinRequestsPage() {
 
       {/* Filters + Search */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide pb-1 -mb-1 sm:pb-0 sm:mb-0">
           {(['pending', 'approved', 'rejected', 'all'] as FilterStatus[]).map((f: any) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all flex-shrink-0"
               style={{
                 background: filter === f ? 'var(--primary)' : 'var(--background-subtle)',
                 color: filter === f ? '#fff' : 'var(--text-muted)',

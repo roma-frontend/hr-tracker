@@ -71,7 +71,7 @@ export default function ApprovalsPage() {
 
   if (user?.role !== 'admin') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex flex-col items-center justify-center text-center min-h-[60vh] gap-4">
         <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
           <UserX className="w-8 h-8 text-red-500" />
         </div>

@@ -233,7 +233,7 @@ function DriverDashboard({
     todaySchedule?.filter((s) => s.type === 'trip' && s.status === 'scheduled').length ?? 0;
 
   return (
-    <div className="max-w-[1600px] mx-auto p-2 sm:p-4 md:p-6">
+    <div className="max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between mb-8">
         <div>
@@ -1766,7 +1766,7 @@ export default function DriversPage() {
   const canRegisterDrivers = user.role === 'admin';
 
   return (
-    <div className="max-w-[1600px] mx-auto p-2 sm:p-4 md:p-6">
+    <div className="max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between mb-6 sm:mb-8">
         <div>
@@ -1799,7 +1799,7 @@ export default function DriversPage() {
           >
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">{t('driver.requestDriver', 'Request Driver')}</span>
-            <span className="sm:hidden">Request</span>
+            <span className="sm:hidden">{t('driver.requestDriverShort', 'Request')}</span>
           </Button>
         </div>
       </div>

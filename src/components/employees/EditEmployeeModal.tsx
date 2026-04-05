@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../../convex/_generated/api';
@@ -16,11 +16,22 @@ import {
   Building2,
   Shield,
   AlertTriangle,
+  ChevronRight,
+  ChevronLeft,
+  CheckCircle,
 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
 import { AvatarUpload } from '@/components/ui/avatar-upload';
+import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/useAuthStore';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -55,7 +66,7 @@ interface EditEmployeeModalProps {
 }
 
 const ADMIN_EMAIL = 'romangulanyan@gmail.com';
-// Departments will be translated using i18n in the component
+
 const ALL_ROLES_CONFIG = [
   { value: 'admin', icon: '👑', labelKey: 'roles.admin', descKey: 'editEmployee.fullAccess' },
   {
@@ -72,6 +83,21 @@ const ALL_ROLES_CONFIG = [
   },
 ];
 
+const DEPARTMENTS_LIST = [
+  'Engineering',
+  'HR',
+  'Finance',
+  'Marketing',
+  'Operations',
+  'Sales',
+  'Design',
+  'Management',
+  'Legal',
+  'IT',
+];
+
+const TOTAL_STEPS = 3;
+
 export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModalProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
@@ -85,19 +111,8 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
     user?.role === 'superadmin' ? {} : 'skip',
   );
 
-  const DEPARTMENTS = [
-    { value: 'Engineering', label: t('departments.engineering') },
-    { value: 'HR', label: t('departments.hr') },
-    { value: 'Finance', label: t('departments.finance') },
-    { value: 'Marketing', label: t('departments.marketing') },
-    { value: 'Operations', label: t('departments.operations') },
-    { value: 'Sales', label: t('departments.sales') },
-    { value: 'Design', label: t('departments.design') },
-    { value: 'Management', label: t('departments.management') },
-    { value: 'Legal', label: t('departments.legal') },
-    { value: 'IT', label: t('departments.it') },
-  ];
-
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState(employee.organizationId ?? '');
   const [form, setForm] = useState({
@@ -113,48 +128,113 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
     sickLeaveBalance: employee.sickLeaveBalance,
     familyLeaveBalance: employee.familyLeaveBalance,
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const canEditRole = user?.role === 'admin' || user?.role === 'superadmin';
   const currentUser = useAuthStore((s) => s.user);
-  // Only romangulanyan@gmail.com can assign admin role
   const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
   const isSuperadmin = user?.role === 'superadmin';
+
+  const effectiveTotalSteps = isSuperadmin ? TOTAL_STEPS + 1 : TOTAL_STEPS;
+
+  // Reset form on open
+  useEffect(() => {
+    if (open) {
+      setStep(0);
+      setDirection(1);
+      setSelectedOrgId(employee.organizationId ?? '');
+      setForm({
+        name: employee.name,
+        role: employee.role,
+        employeeType: employee.employeeType,
+        department: employee.department ?? '',
+        position: employee.position ?? '',
+        phone: employee.phone ?? '',
+        supervisorId: employee.supervisorId ?? '',
+        isActive: employee.isActive,
+        paidLeaveBalance: employee.paidLeaveBalance,
+        sickLeaveBalance: employee.sickLeaveBalance,
+        familyLeaveBalance: employee.familyLeaveBalance,
+      });
+      setErrors({});
+    }
+  }, [open, employee]);
+
+  const validateStep = (currentStep: number): boolean => {
+    const errs: Record<string, string> = {};
+
+    if (isSuperadmin && currentStep === 0) {
+      if (!selectedOrgId)
+        errs.organization = t('employees.organization') + ' ' + t('errors.required').toLowerCase();
+    }
+
+    if (currentStep === (isSuperadmin ? 1 : 0)) {
+      if (!form.name.trim())
+        errs.name = t('common.name') + ' ' + t('errors.required').toLowerCase();
+    }
+
+    if (currentStep === (isSuperadmin ? 2 : 1)) {
+      if (!form.department)
+        errs.department = t('employees.department') + ' ' + t('errors.required').toLowerCase();
+      if (!form.position.trim())
+        errs.position = t('employees.position') + ' ' + t('errors.required').toLowerCase();
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const nextStep = () => {
+    if (validateStep(step)) {
+      setDirection(1);
+      setStep((s) => Math.min(s + 1, effectiveTotalSteps - 1));
+    }
+  };
+
+  const prevStep = () => {
+    setDirection(-1);
+    setStep((s) => Math.max(s - 1, 0));
+  };
 
   // Protection: non-superadmin cannot edit superadmin
   if (employee.role === 'superadmin' && !isActualAdmin) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative p-6 rounded-2xl border shadow-2xl max-w-sm w-full text-center"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-        >
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'rgba(239,68,68,0.1)' }}
-          >
-            <AlertTriangle className="w-7 h-7" style={{ color: '#ef4444' }} />
+      <AnimatePresence>
+        {open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative p-6 rounded-2xl border shadow-2xl max-w-sm w-full text-center"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+            >
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'rgba(239,68,68,0.1)' }}
+              >
+                <AlertTriangle className="w-7 h-7" style={{ color: '#ef4444' }} />
+              </div>
+              <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                {t('editEmployee.accessDenied')}
+              </h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+                {t('editEmployee.cannotEditSuperadmin')}
+              </p>
+              <button
+                onClick={onClose}
+                className="w-full py-2 rounded-xl text-sm font-semibold text-white"
+                style={{ background: '#2563eb' }}
+              >
+                {t('common.close')}
+              </button>
+            </motion.div>
           </div>
-          <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            {t('editEmployee.accessDenied')}
-          </h3>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-            Вы не можете редактировать аккаунт суперадмина
-          </p>
-          <button
-            onClick={onClose}
-            className="w-full py-2 rounded-xl text-sm font-semibold text-white"
-            style={{ background: '#2563eb' }}
-          >
-            {t('common.close')}
-          </button>
-        </motion.div>
-      </div>
+        )}
+      </AnimatePresence>
     );
   }
 
-  // Protection: admin cannot edit OTHER admins (but can edit themselves)
+  // Protection: admin cannot edit OTHER admins
   if (
     employee.role === 'admin' &&
     user?.role === 'admin' &&
@@ -162,34 +242,38 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
     employee._id !== user?.id
   ) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative p-6 rounded-2xl border shadow-2xl max-w-sm w-full text-center"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-        >
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'rgba(239,68,68,0.1)' }}
-          >
-            <AlertTriangle className="w-7 h-7" style={{ color: '#ef4444' }} />
+      <AnimatePresence>
+        {open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative p-6 rounded-2xl border shadow-2xl max-w-sm w-full text-center"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+            >
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'rgba(239,68,68,0.1)' }}
+              >
+                <AlertTriangle className="w-7 h-7" style={{ color: '#ef4444' }} />
+              </div>
+              <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                {t('editEmployee.accessDenied')}
+              </h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+                {t('editEmployee.onlySuperadminCanEditAdmins')}
+              </p>
+              <button
+                onClick={onClose}
+                className="w-full py-2 rounded-xl text-sm font-semibold text-white"
+                style={{ background: '#2563eb' }}
+              >
+                {t('common.close')}
+              </button>
+            </motion.div>
           </div>
-          <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            {t('editEmployee.accessDenied')}
-          </h3>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-            Только суперадмин может редактировать аккаунты администраторов
-          </p>
-          <button
-            onClick={onClose}
-            className="w-full py-2 rounded-xl text-sm font-semibold text-white"
-            style={{ background: '#2563eb' }}
-          >
-            {t('common.close')}
-          </button>
-        </motion.div>
-      </div>
+        )}
+      </AnimatePresence>
     );
   }
 
@@ -201,6 +285,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
   const ROLES = isActualAdmin ? ALL_ROLES : ALL_ROLES.filter((r) => r.value !== 'admin');
 
   const handleSave = async () => {
+    if (!validateStep(step)) return;
     setLoading(true);
     try {
       if (!user?.id) {
@@ -235,232 +320,82 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
     }
   };
 
-  return (
-    <AnimatePresence>
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0"
-            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-          />
+  const steps = [
+    ...(isSuperadmin ? [{ icon: Building2, label: t('employees.organization') }] : []),
+    { icon: User, label: t('common.name') },
+    { icon: Briefcase, label: t('employees.position') },
+    { icon: CheckCircle, label: t('common.review') || 'Review' },
+  ];
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden"
-            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-          >
-            {/* Header */}
-            <div
-              className="flex items-center justify-between p-6 border-b"
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <div className="flex items-center gap-3">
-                <AvatarUpload
-                  userId={employee._id}
-                  currentUrl={employee.avatarUrl}
-                  name={employee.name}
-                  size="md"
-                />
-                <div>
-                  <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {t('modals.editEmployee.title')}
-                  </h2>
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    {employee.email}
-                  </p>
-                </div>
+  const isLastStep = step === effectiveTotalSteps - 1;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg max-h-[90vh] p-0">
+        {/* Header with progress */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70" />
+          <div className="relative z-10 px-6 pt-6 pb-4">
+            <div className="flex items-center gap-3 mb-4">
+              <AvatarUpload
+                userId={employee._id}
+                currentUrl={employee.avatarUrl}
+                name={employee.name}
+                size="md"
+              />
+              <div>
+                <DialogTitle className="text-lg text-white">
+                  {t('modals.editEmployee.title')}
+                </DialogTitle>
+                <DialogDescription className="text-white/70 text-sm">
+                  {employee.email}
+                </DialogDescription>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-xl transition-colors hover:opacity-70"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
-              {/* Name */}
-              <div className="space-y-1.5">
-                <label
-                  className="text-sm font-medium flex items-center gap-1.5"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <User className="w-3.5 h-3.5" /> {t('labels.fullName')}
-                </label>
-                <input
-                  value={form.name}
-                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
-                  style={{
-                    background: 'var(--input)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)',
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = '#2563eb')}
-                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
-                />
-              </div>
-
-              {/* Role — admin only */}
-              {canEditRole && (
-                <div className="space-y-1.5">
-                  <label
-                    className="text-sm font-medium flex items-center gap-1.5"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    <Shield className="w-3.5 h-3.5" /> {t('labels.role')}
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {ROLES.map((r) => (
-                      <button
-                        key={r.value}
-                        type="button"
-                        onClick={() =>
-                          setForm((p) => ({
-                            ...p,
-                            role: r.value as 'admin' | 'supervisor' | 'employee',
-                          }))
-                        }
-                        className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-sm font-medium transition-all"
-                        style={{
-                          borderColor: form.role === r.value ? '#2563eb' : 'var(--border)',
-                          background:
-                            form.role === r.value
-                              ? 'rgba(99,102,241,0.1)'
-                              : 'var(--background-subtle)',
-                          color: form.role === r.value ? '#2563eb' : 'var(--text-muted)',
-                        }}
-                      >
-                        <span className="text-lg">{r.icon}</span>
-                        <span>{r.label}</span>
-                        <span className="text-xs opacity-70">{r.description}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Employee Type */}
-              <div className="space-y-1.5">
-                <label
-                  className="text-sm font-medium flex items-center gap-1.5"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <Briefcase className="w-3.5 h-3.5" /> {t('common.employeeType')}
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {['staff', 'contractor'].map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() =>
-                        setForm((p) => ({ ...p, employeeType: type as 'staff' | 'contractor' }))
-                      }
-                      className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-sm font-medium transition-all"
-                      style={{
-                        borderColor: form.employeeType === type ? '#2563eb' : 'var(--border)',
-                        background:
-                          form.employeeType === type
-                            ? 'rgba(99,102,241,0.1)'
-                            : 'var(--background-subtle)',
-                        color: form.employeeType === type ? '#2563eb' : 'var(--text-muted)',
-                      }}
-                    >
-                      <span className="capitalize">{t(`employeeTypes.${type}`)}</span>
-                      <span className="text-xs opacity-70">
-                        {type === 'contractor'
-                          ? `12,000 ${t('currency.amd')}`
-                          : `20,000 ${t('currency.amd')}`}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Department & Position */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label
-                    className="text-sm font-medium flex items-center gap-1.5"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    <Building2 className="w-3.5 h-3.5" /> {t('labels.department')}
-                  </label>
-                  <select
-                    value={form.department}
-                    onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
-                    style={{
-                      background: 'var(--input)',
-                      borderColor: 'var(--border)',
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    <option value="">Select...</option>
-                    {DEPARTMENTS.map((d) => (
-                      <option key={d.value} value={d.value}>
-                        {d.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('labels.position')}
-                  </label>
-                  <input
-                    value={form.position}
-                    onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
-                    placeholder="e.g. Engineer"
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm outline-none transition-all focus:border-[var(--primary)]"
+            {/* Step indicators */}
+            <div className="flex items-center gap-1.5 mt-2">
+              {steps.map((s, i) => (
+                <div key={i} className="flex items-center gap-1.5 flex-1">
+                  <div
+                    className={`flex-1 h-1 rounded-full transition-all duration-300 ${
+                      i <= step ? 'bg-white' : 'bg-white/30'
+                    }`}
+                    style={{ transformOrigin: 'left' }}
                   />
                 </div>
-              </div>
+              ))}
+            </div>
 
-              {/* Phone */}
-              <div className="space-y-1.5">
-                <label
-                  className="text-sm font-medium flex items-center gap-1.5"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <Phone className="w-3.5 h-3.5" /> {t('labels.phone')}
-                </label>
-                <input
-                  value={form.phone}
-                  onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                  placeholder="+374 XX XXX XXX"
-                  className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
-                  style={{
-                    background: 'var(--input)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)',
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = '#2563eb')}
-                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
-                />
-              </div>
+            {/* Step labels */}
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs text-white/60">
+                {t('common.step') || 'Step'} {step + 1} / {effectiveTotalSteps}
+              </span>
+              <span className="text-xs text-white/80 font-medium">{steps[step]?.label}</span>
+            </div>
+          </div>
+        </div>
 
-              {/* Organization — superadmin only */}
-              {isSuperadmin && (
+        {/* Content */}
+        <div className="px-6 py-5 max-h-[50vh] overflow-y-auto">
+          <AnimatePresence mode="wait">
+            {/* Step 0: Organization (superadmin only) */}
+            {isSuperadmin && step === 0 && (
+              <motion.div
+                key="step-org"
+                initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+                className="space-y-4"
+              >
                 <div className="space-y-1.5">
-                  <label
-                    className="text-sm font-medium flex items-center gap-1.5"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    <Building2 className="w-3.5 h-3.5" /> {t('employees.organization')}
+                  <label className="text-sm font-medium flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5" /> {t('employees.organization')} *
                   </label>
                   <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
-                    <SelectTrigger>
+                    <SelectTrigger className={errors.organization ? 'border-red-500' : ''}>
                       <SelectValue placeholder={t('employees.selectOrganization')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -471,108 +406,410 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.organization && (
+                    <p className="text-xs text-red-500">{errors.organization}</p>
+                  )}
                 </div>
-              )}
+              </motion.div>
+            )}
 
-              {/* Leave Balances — admin only */}
-              {canEditRole && (
+            {/* Step: Personal Info */}
+            {step === (isSuperadmin ? 1 : 0) && (
+              <motion.div
+                key="step-personal"
+                initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+                className="space-y-4"
+              >
+                <div>
+                  <h3 className="text-sm font-semibold mb-1">
+                    {t('wizard.personalInfo') || 'Personal Information'}
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {t('wizard.personalInfoDesc') || 'Basic details about the employee'}
+                  </p>
+                </div>
+
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('labels.leaveBalances')}
+                  <label className="text-sm font-medium flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" /> {t('labels.fullName')} *
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {[
-                      { key: 'paidLeaveBalance', label: 'Paid', color: '#2563eb' },
-                      { key: 'sickLeaveBalance', label: 'Sick', color: '#ef4444' },
-                      { key: 'familyLeaveBalance', label: 'Family', color: '#10b981' },
-                    ].map(({ key, label, color }) => (
-                      <div key={key} className="space-y-1">
-                        <label className="text-xs font-medium" style={{ color }}>
-                          {label}
-                        </label>
-                        <input
-                          type="number"
-                          min={0}
-                          max={365}
-                          value={form[key as keyof typeof form] as number}
-                          onChange={(e) =>
-                            setForm((p) => ({ ...p, [key]: parseInt(e.target.value) || 0 }))
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all ${
+                      errors.name ? 'border-red-500' : ''
+                    }`}
+                    style={{
+                      background: 'var(--input)',
+                      borderColor: errors.name ? undefined : 'var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = '#2563eb')}
+                    onBlur={(e) =>
+                      (e.target.style.borderColor = errors.name ? '#ef4444' : 'var(--border)')
+                    }
+                  />
+                  {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" /> {t('labels.email')}
+                  </label>
+                  <div
+                    className="px-3 py-2 rounded-xl border text-sm"
+                    style={{
+                      background: 'var(--background-subtle)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
+                    {employee.email}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5" /> {t('labels.phone')}
+                  </label>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                    placeholder="+374 XX XXX XXX"
+                    className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
+                    style={{
+                      background: 'var(--input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = '#2563eb')}
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step: Work Details */}
+            {step === (isSuperadmin ? 2 : 1) && (
+              <motion.div
+                key="step-work"
+                initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+                className="space-y-4"
+              >
+                <div>
+                  <h3 className="text-sm font-semibold mb-1">
+                    {t('wizard.workDetails') || 'Work Details'}
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {t('wizard.workDetailsDesc') || 'Department and position information'}
+                  </p>
+                </div>
+
+                {/* Role — admin only */}
+                {canEditRole && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5" /> {t('labels.role')}
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {ROLES.map((r) => (
+                        <button
+                          key={r.value}
+                          type="button"
+                          onClick={() =>
+                            setForm((p) => ({
+                              ...p,
+                              role: r.value as 'admin' | 'supervisor' | 'employee',
+                            }))
                           }
-                          className="w-full px-3 py-2 rounded-xl border text-sm outline-none text-center"
+                          className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-sm font-medium transition-all"
                           style={{
-                            background: 'var(--input)',
-                            borderColor: 'var(--border)',
-                            color: 'var(--text-primary)',
+                            borderColor: form.role === r.value ? '#2563eb' : 'var(--border)',
+                            background:
+                              form.role === r.value
+                                ? 'rgba(99,102,241,0.1)'
+                                : 'var(--background-subtle)',
+                            color: form.role === r.value ? '#2563eb' : 'var(--text-muted)',
                           }}
-                        />
-                      </div>
+                        >
+                          <span className="text-lg">{r.icon}</span>
+                          <span>{r.label}</span>
+                          <span className="text-xs opacity-70">{r.description}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Employee Type */}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5" /> {t('common.employeeType')}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {['staff', 'contractor'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() =>
+                          setForm((p) => ({ ...p, employeeType: type as 'staff' | 'contractor' }))
+                        }
+                        className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-sm font-medium transition-all"
+                        style={{
+                          borderColor: form.employeeType === type ? '#2563eb' : 'var(--border)',
+                          background:
+                            form.employeeType === type
+                              ? 'rgba(99,102,241,0.1)'
+                              : 'var(--background-subtle)',
+                          color: form.employeeType === type ? '#2563eb' : 'var(--text-muted)',
+                        }}
+                      >
+                        <span className="capitalize">{t(`employeeTypes.${type}`)}</span>
+                        <span className="text-xs opacity-70">
+                          {type === 'contractor'
+                            ? `12,000 ${t('currency.amd')}`
+                            : `20,000 ${t('currency.amd')}`}
+                        </span>
+                      </button>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {/* Status */}
-              {canEditRole && employee.role !== 'admin' && (
-                <div
-                  className="flex items-center justify-between p-3 rounded-xl border"
-                  style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
-                >
-                  <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      Account Status
-                    </p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {form.isActive ? 'Active — employee can login' : 'Deactivated — no access'}
-                    </p>
+                {/* Department & Position */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5" /> {t('labels.department')} *
+                    </label>
+                    <select
+                      value={form.department}
+                      onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))}
+                      className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all ${
+                        errors.department ? 'border-red-500' : ''
+                      }`}
+                      style={{
+                        background: 'var(--input)',
+                        borderColor: errors.department ? undefined : 'var(--border)',
+                        color: 'var(--text-primary)',
+                      }}
+                    >
+                      <option value="">{t('placeholders.select', 'Select...')}</option>
+                      {DEPARTMENTS_LIST.map((d) => (
+                        <option key={d} value={d}>
+                          {t(`departments.${d.toLowerCase()}`, d)}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.department && (
+                      <p className="text-xs text-red-500">{errors.department}</p>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setForm((p) => ({ ...p, isActive: !p.isActive }))}
-                    className="w-12 h-6 rounded-full transition-all relative"
-                    style={{ background: form.isActive ? '#2563eb' : 'var(--border)' }}
-                  >
-                    <div
-                      className="absolute top-0.5 w-5 h-5 rounded-full bg-white dark:bg-gray-700 shadow transition-all"
-                      style={{ left: form.isActive ? '26px' : '2px' }}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">{t('labels.position')} *</label>
+                    <input
+                      value={form.position}
+                      onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
+                      placeholder="e.g. Engineer"
+                      className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all ${
+                        errors.position ? 'border-red-500' : ''
+                      }`}
+                      style={{
+                        background: 'var(--input)',
+                        color: 'var(--text-primary)',
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = '#2563eb')}
+                      onBlur={(e) =>
+                        (e.target.style.borderColor = errors.position ? '#ef4444' : 'var(--border)')
+                      }
                     />
-                  </button>
+                    {errors.position && <p className="text-xs text-red-500">{errors.position}</p>}
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* Footer */}
-            <div
-              className="flex items-center justify-end gap-3 p-6 border-t"
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded-xl text-sm font-medium transition-all border"
-                style={{
-                  borderColor: 'var(--border)',
-                  color: 'var(--text-muted)',
-                  background: 'var(--background-subtle)',
-                }}
+                {/* Supervisor */}
+                {supervisors && supervisors.length > 0 && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5" /> {t('labels.supervisor')}
+                    </label>
+                    <Select
+                      value={form.supervisorId}
+                      onValueChange={(v) => setForm((p) => ({ ...p, supervisorId: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('placeholders.select', 'Select...')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {supervisors.map((s: any) => (
+                          <SelectItem key={s._id} value={s._id}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Step: Review */}
+            {step === (isSuperadmin ? 3 : 2) && (
+              <motion.div
+                key="step-review"
+                initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+                className="space-y-4"
               >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className="px-6 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2 disabled:opacity-70"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
-              >
+                <div>
+                  <h3 className="text-sm font-semibold mb-1">
+                    {t('wizard.review') || 'Review Changes'}
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {t('wizard.reviewDesc') || 'Confirm the details before saving'}
+                  </p>
+                </div>
+
+                <div
+                  className="rounded-xl border p-4 space-y-3"
+                  style={{
+                    background: 'var(--background-subtle)',
+                    borderColor: 'var(--border)',
+                  }}
+                >
+                  {[
+                    { label: t('labels.fullName'), value: form.name },
+                    { label: t('labels.email'), value: employee.email },
+                    { label: t('labels.phone'), value: form.phone || '—' },
+                    {
+                      label: t('common.employeeType'),
+                      value: t(`employeeTypes.${form.employeeType}`),
+                    },
+                    { label: t('labels.department'), value: form.department || '—' },
+                    { label: t('labels.position'), value: form.position || '—' },
+                    { label: t('labels.role'), value: t(`roles.${form.role}`) },
+                    ...(isSuperadmin
+                      ? [
+                          {
+                            label: t('employees.organization'),
+                            value:
+                              organizations?.find((o: any) => o._id === selectedOrgId)?.name || '—',
+                          },
+                        ]
+                      : []),
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex justify-between text-sm">
+                      <span className="text-[var(--text-muted)]">{label}</span>
+                      <span className="font-medium text-[var(--text-primary)]">{value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Leave Balances */}
+                {canEditRole && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">{t('labels.leaveBalances')}</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { key: 'paidLeaveBalance', label: 'Paid', color: '#2563eb' },
+                        { key: 'sickLeaveBalance', label: 'Sick', color: '#ef4444' },
+                        { key: 'familyLeaveBalance', label: 'Family', color: '#10b981' },
+                      ].map(({ key, label, color }) => (
+                        <div key={key} className="space-y-1">
+                          <label className="text-xs font-medium" style={{ color }}>
+                            {label}
+                          </label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={365}
+                            value={form[key as keyof typeof form] as number}
+                            onChange={(e) =>
+                              setForm((p) => ({ ...p, [key]: parseInt(e.target.value) || 0 }))
+                            }
+                            className="w-full px-2 py-1.5 rounded-lg border text-sm outline-none text-center"
+                            style={{
+                              background: 'var(--input)',
+                              borderColor: 'var(--border)',
+                              color: 'var(--text-primary)',
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Status toggle */}
+                {canEditRole && employee.role !== 'admin' && (
+                  <div
+                    className="flex items-center justify-between p-3 rounded-xl border"
+                    style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
+                  >
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                        {t('editEmployee.accountStatus')}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {form.isActive
+                          ? t('editEmployee.activeCanLogin')
+                          : t('editEmployee.deactivatedNoAccess')}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setForm((p) => ({ ...p, isActive: !p.isActive }))}
+                      className="w-12 h-6 rounded-full transition-all relative"
+                      style={{ background: form.isActive ? '#2563eb' : 'var(--border)' }}
+                    >
+                      <div
+                        className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all"
+                        style={{ left: form.isActive ? '26px' : '2px' }}
+                      />
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Footer */}
+        <DialogFooter className="px-6 py-4 border-t" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center justify-between w-full">
+            {step > 0 ? (
+              <Button variant="outline" onClick={prevStep} className="gap-1">
+                <ChevronLeft className="w-4 h-4" />
+                {t('wizard.previous') || 'Previous'}
+              </Button>
+            ) : (
+              <div />
+            )}
+            {isLastStep ? (
+              <Button onClick={handleSave} disabled={loading} className="gap-2">
                 {loading ? (
                   <ShieldLoader size="xs" variant="inline" />
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
                 {t('modals.editEmployee.saveChanges')}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+              </Button>
+            ) : (
+              <Button onClick={nextStep} className="gap-1">
+                {t('wizard.next') || 'Next'}
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

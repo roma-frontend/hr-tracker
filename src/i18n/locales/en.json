@@ -276,7 +276,8 @@
     "unknown": "Unknown",
     "none": "None",
     "name": "Name",
-    "step": "Step"
+    "step": "Step",
+    "review": "Review"
   },
   "nav": {
     "home": "Home",
@@ -2700,7 +2701,12 @@
     "fullAccess": "Full access",
     "manageTeam": "Manage team",
     "basicAccess": "Basic access",
-    "accessDenied": "Access denied"
+    "accessDenied": "Access denied",
+    "cannotEditSuperadmin": "You cannot edit the superadmin account",
+    "onlySuperadminCanEditAdmins": "Only the superadmin can edit admin accounts",
+    "accountStatus": "Account Status",
+    "activeCanLogin": "Active — employee can login",
+    "deactivatedNoAccess": "Deactivated — no access"
   },
   "employeesExtra": {
     "contractorTip": "Tip: include \"contractor\" in email Р В Р’В Р вЂ™Р’В Р В РІР‚в„ўР вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р’В Р Р†Р вЂљР’В Р В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р РЋРІвЂћСћР В Р’В Р Р†Р вЂљРІвЂћСћР В РІР‚в„ўР вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р’В Р Р†Р вЂљР’В Р В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р РЋРІвЂћСћР В Р’В Р В РІР‚В Р В Р вЂ Р В РІР‚С™Р РЋРІР‚С”Р В Р Р‹Р РЋРІР‚С” auto-sets contractor type (12,000 Р В Р’В Р вЂ™Р’В Р В РІР‚в„ўР вЂ™Р’В Р В Р’В Р Р†Р вЂљРІвЂћСћР В РІР‚в„ўР вЂ™Р’В¦Р В Р’В Р вЂ™Р’В Р В РІР‚в„ўР вЂ™Р’В Р В Р’В Р вЂ™Р’В Р В Р’В Р В Р РЏ allowance)",
@@ -4031,6 +4037,7 @@
     "booking": "Driver Booking",
     "bookingDesc": "Book a driver for your business trips and transfers",
     "requestDriver": "Request Driver",
+    "requestDriverShort": "Request",
     "selectDriver": "Select Driver",
     "chooseDriver": "Choose a driver",
     "available": "Available",
@@ -4428,7 +4435,9 @@
     "eventsTab": "Events",
     "conflictAlertsTab": "Conflict Alerts",
     "createEvent": "Create Event",
+    "createEventShort": "Create",
     "checkConflicts": "Check Conflicts",
+    "checkConflictsShort": "Conflicts",
     "upcomingEvents": "Upcoming Events",
     "noEvents": "No events created yet",
     "createFirst": "Create your first event",
@@ -5243,6 +5252,7 @@
     "roleType": "Role & Type",
     "roleTypeDesc": "Set role and employment type",
     "reviewDesc": "Confirm the details before adding",
+    "review": "Review",
     "previous": "Previous",
     "next": "Next"
   }

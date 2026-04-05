@@ -71,9 +71,9 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div>
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
           <Shield className="w-6 h-6 text-[var(--primary)]" />
           {t('admin.superadminPanel')}

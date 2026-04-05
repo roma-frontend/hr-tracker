@@ -104,9 +104,9 @@ export default function SubscriptionsManagementPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+        <div className="w-full">
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
             {t('superadmin.subscriptions.title')}
           </h1>
@@ -114,10 +114,7 @@ export default function SubscriptionsManagementPage() {
             {t('superadmin.subscriptions.subtitle')}
           </p>
         </div>
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 w-full sm:w-auto"
-        >
+        <Button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 w-auto">
           <Plus className="w-4 h-4" />
           {showForm
             ? t('superadmin.subscriptions.cancelButtonText')

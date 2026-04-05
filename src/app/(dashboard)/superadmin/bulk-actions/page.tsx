@@ -136,14 +136,14 @@ export default function BulkActionsPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--background)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between p-6">
-            <div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row">
               <h1
-                className="text-3xl md:text-4xl font-bold mb-2"
+                className="text-2xl md:text-4xl font-bold mb-2"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {t('superadmin.bulkActions.title')}

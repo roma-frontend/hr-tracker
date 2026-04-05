@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
 
   if (!analytics) {
     return (
-      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
         <div className="h-10 bg-[var(--background-subtle)] animate-pulse rounded-lg w-64" />
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {[1, 2, 3, 4].map((i) => (
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
       title={t('planGate.analyticsTitle')}
       description={t('planGate.analyticsDescription')}
     >
-      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-primary)]">

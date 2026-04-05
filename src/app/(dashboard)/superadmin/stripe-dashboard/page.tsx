@@ -61,7 +61,7 @@ export default function StripeDashboardPage() {
 
     const planPrices: Record<string, number> = {
       starter: 0,
-      professional: 49,
+      professional: 29,
       enterprise: 199,
     };
 
@@ -480,7 +480,7 @@ export default function StripeDashboardPage() {
               {Object.entries(stats.byPlan).map(([plan, count]) => {
                 const prices: Record<string, number> = {
                   starter: 0,
-                  professional: 49,
+                  professional: 29,
                   enterprise: 199,
                 };
                 const price = prices[plan] || 0;
@@ -533,7 +533,7 @@ export default function StripeDashboardPage() {
                 {subscriptions?.slice(0, 10).map((sub) => {
                   const prices: Record<string, number> = {
                     starter: 0,
-                    professional: 49,
+                    professional: 29,
                     enterprise: 199,
                   };
                   const price = prices[sub.plan] || 0;

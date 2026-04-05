@@ -195,7 +195,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               ) : isAIChatPage ? (
                 <div className="flex flex-col flex-1 min-h-0 h-full p-0">{children}</div>
               ) : (
-                <div className="p-2 sm:p-4 md:p-6 max-w-[1600px] mx-auto">{children}</div>
+                <div className="p-3 sm:p-4 md:p-6 max-w-[1600px] mx-auto">{children}</div>
               )}
             </main>
           </div>

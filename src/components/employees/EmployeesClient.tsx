@@ -320,7 +320,7 @@ export function EmployeesClient() {
         className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4"
       >
         <div className="min-w-0">
-          <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
             {t('nav.employees')}
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>

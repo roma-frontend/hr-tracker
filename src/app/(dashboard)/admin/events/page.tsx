@@ -97,7 +97,7 @@ export default function CompanyEventsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{t('events.title', 'Company Events')}</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
@@ -154,12 +154,12 @@ export default function CompanyEventsPage() {
             <span className="hidden sm:inline">
               {t('events.checkConflicts', 'Check Conflicts')}
             </span>
-            <span className="sm:hidden">Conflicts</span>
+            <span className="sm:hidden">{t('events.checkConflictsShort', 'Conflicts')}</span>
           </Button>
           <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">{t('events.createEvent', 'Create Event')}</span>
-            <span className="sm:hidden">Create</span>
+            <span className="sm:hidden">{t('events.createEventShort', 'Create')}</span>
           </Button>
         </div>
       </div>

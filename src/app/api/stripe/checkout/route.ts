@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { isValidEmail } from '@/lib/stripe-config';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-02-25.clover',
@@ -13,7 +14,7 @@ const PLANS: Record<string, { priceId: string; name: string }> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { plan, email } = await req.json();
+    const { plan, email, organizationId } = await req.json();
 
     // Starter plan is free, redirect to direct signup
     if (plan === 'starter') {
@@ -28,6 +29,11 @@ export async function POST(req: NextRequest) {
 
     if (!plan || !PLANS[plan]) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
+    }
+
+    // Validate email if provided
+    if (email && !isValidEmail(email)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
     const priceId = PLANS[plan].priceId;
@@ -60,11 +66,11 @@ export async function POST(req: NextRequest) {
       billing_address_collection: 'auto',
       subscription_data: {
         trial_period_days: 14,
-        metadata: { plan },
+        metadata: { plan, organizationId: organizationId ?? '' },
       },
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url: `${origin}/#pricing`,
-      metadata: { plan },
+      metadata: { plan, organizationId: organizationId ?? '' },
     });
 
     return NextResponse.json({ url: session.url });

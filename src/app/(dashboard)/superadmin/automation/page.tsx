@@ -54,7 +54,7 @@ export default function AutomationPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-6"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -68,12 +68,10 @@ export default function AutomationPage() {
           </p>
         </div>
         <Button onClick={handleRunAutomation} disabled={isRunning} className="gap-2">
-          {isRunning ? (
-            <ShieldLoader size="xs" variant="inline" />
-          ) : (
-            <Play className="w-4 h-4" />
-          )}
-          {isRunning ? (t('automation.running') || 'Running...') : (t('automation.runNow') || 'Run Now')}
+          {isRunning ? <ShieldLoader size="xs" variant="inline" /> : <Play className="w-4 h-4" />}
+          {isRunning
+            ? t('automation.running') || 'Running...'
+            : t('automation.runNow') || 'Run Now'}
         </Button>
       </div>
 

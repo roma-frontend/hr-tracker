@@ -213,7 +213,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com https://*.sentry.io",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://*.convex.cloud https://*.convex.site https://*.sentry.io https://vercel.live wss://*.convex.cloud wss://*.vercel.live",
+              "connect-src 'self' https://*.convex.cloud https://*.convex.site https://*.sentry.io https://vercel.live https://*.stripe.com https://*.js.stripe.com wss://*.convex.cloud wss://*.vercel.live",
               "worker-src 'self' blob:",
               "frame-src 'none'",
               "object-src 'none'",

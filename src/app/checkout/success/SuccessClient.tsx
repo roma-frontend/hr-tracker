@@ -9,13 +9,31 @@ import { useTranslation } from 'react-i18next';
 const PLAN_LABELS: Record<string, string> = {
   starter: 'Starter',
   professional: 'Professional',
+  enterprise: 'Enterprise',
 };
 
 export default function SuccessClient() {
   const { t } = useTranslation();
   const params = useSearchParams();
   const plan = params.get('plan') ?? 'starter';
+  const sessionId = params.get('session_id');
   const [count, setCount] = useState(5);
+  const [verified, setVerified] = useState<boolean | null>(null);
+
+  // Verify the checkout session is real
+  useEffect(() => {
+    if (!sessionId) {
+      setVerified(false);
+      return;
+    }
+
+    fetch(`/api/stripe/verify-session?session_id=${sessionId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setVerified(data.valid ?? false);
+      })
+      .catch(() => setVerified(false));
+  }, [sessionId]);
 
   useEffect(() => {
     if (count === 0) {
@@ -25,6 +43,36 @@ export default function SuccessClient() {
     const t = setTimeout(() => setCount((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [count]);
+
+  // Show loading while verifying
+  if (verified === null && sessionId) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--background)' }}
+      >
+        <p className="text-white/50">Verifying...</p>
+      </div>
+    );
+  }
+
+  // If session is invalid, show error
+  if (verified === false && sessionId) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-4"
+        style={{ background: 'var(--background)' }}
+      >
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-red-400 mb-4">Invalid Session</h1>
+          <p className="text-white/50 mb-6">We couldn't verify your payment session.</p>
+          <Link href="/#pricing" className="text-blue-400 hover:underline">
+            Return to pricing
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

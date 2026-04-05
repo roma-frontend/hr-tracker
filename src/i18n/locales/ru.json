@@ -276,7 +276,8 @@
     "unknown": "Неизвестно",
     "none": "Нет",
     "name": "Имя",
-    "step": "Шаг"
+    "step": "Шаг",
+    "review": "Проверка"
   },
   "nav": {
     "home": "Главная",
@@ -2686,7 +2687,12 @@
     "fullAccess": "Полный доступ",
     "manageTeam": "Управление командой",
     "basicAccess": "Базовый доступ",
-    "accessDenied": "Доступ запрещён"
+    "accessDenied": "Доступ запрещён",
+    "cannotEditSuperadmin": "Вы не можете редактировать аккаунт суперадмина",
+    "onlySuperadminCanEditAdmins": "Только суперадмин может редактировать аккаунты администраторов",
+    "accountStatus": "Статус аккаунта",
+    "activeCanLogin": "Активен — сотрудник может входить",
+    "deactivatedNoAccess": "Деактивирован — нет доступа"
   },
   "employeesExtra": {
     "contractorTip": "Подсказка: включите \"contractor\" в email для автоматической установки типа подрядчика (12,000 драм/день)",
@@ -4013,6 +4019,7 @@
     "booking": "Бронирование водителя",
     "bookingDesc": "Забронируйте водителя для деловых поездок и трансферов",
     "requestDriver": "Заказать водителя",
+    "requestDriverShort": "Заказ",
     "selectDriver": "Выбрать водителя",
     "chooseDriver": "Выбрать водителя",
     "available": "Доступен",
@@ -4413,7 +4420,9 @@
     "eventsTab": "Мероприятия",
     "conflictAlertsTab": "Конфликты",
     "createEvent": "Создать мероприятие",
+    "createEventShort": "Создать",
     "checkConflicts": "Проверить конфликты",
+    "checkConflictsShort": "Конфликты",
     "upcomingEvents": "Предстоящие мероприятия",
     "noEvents": "Мероприятия еще не созданы",
     "createFirst": "Создайте первое мероприятие",
@@ -5202,6 +5211,7 @@
     "roleType": "Роль и тип",
     "roleTypeDesc": "Установите роль и тип занятости",
     "reviewDesc": "Подтвердите данные перед добавлением",
+    "review": "Проверка",
     "previous": "Назад",
     "next": "Далее"
   }

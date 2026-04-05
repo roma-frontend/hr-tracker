@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
 
 const execAsync = promisify(exec);
 
@@ -15,7 +17,42 @@ const ALLOWED_SCRIPTS = [
   'stripe:check-trials',
 ];
 
+/**
+ * Verify the user is a superadmin by checking the JWT session cookie.
+ */
+async function verifySuperadmin(
+  req: NextRequest,
+): Promise<{ userId: string; role: string } | null> {
+  try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('oauth-session');
+    if (!sessionCookie) return null;
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? 'dev-fallback-secret');
+    const { payload } = await jwtVerify(sessionCookie.value, secret);
+
+    if (payload.role !== 'superadmin') {
+      console.warn('[Stripe Run-Script] Non-superadmin access attempt:', payload.role);
+      return null;
+    }
+
+    return { userId: payload.sub as string, role: payload.role as string };
+  } catch (err) {
+    console.error('[Stripe Run-Script] Auth verification failed:', err);
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
+  // Require superadmin authentication
+  const user = await verifySuperadmin(req);
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Superadmin access required.' },
+      { status: 401 },
+    );
+  }
+
   try {
     const { script } = await req.json();
 
@@ -33,6 +70,8 @@ export async function POST(req: NextRequest) {
 
     const raw = (stdout || '') + (stderr || '');
     const output = stripAnsi(raw);
+
+    console.log(`[Stripe Run-Script] ${script} executed by superadmin ${user.userId}`);
 
     return NextResponse.json({
       success: true,
@@ -55,13 +94,11 @@ export async function POST(req: NextRequest) {
 
 // Strip ANSI escape codes from terminal output
 function stripAnsi(str: string): string {
-  // Remove ANSI color/style codes
-
   return str
     .replace(/\x1B\[[0-9;]*[mGKHF]/g, '')
     .replace(/\x1B\[[0-9;]*m/g, '')
     .replace(/\x1B\[[\d;]*[A-Za-z]/g, '')
     .replace(/\x1b\[[0-9;]*m/gi, '')
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // non-printable chars
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     .trim();
 }

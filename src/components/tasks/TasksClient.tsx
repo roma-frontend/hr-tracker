@@ -555,7 +555,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen p-3 sm:p-6">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="mb-6 sm:mb-8">
         <div className="flex items-start justify-between flex-wrap gap-4">
