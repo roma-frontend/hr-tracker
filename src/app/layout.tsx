@@ -146,14 +146,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* Safari pinned tab */}
         <link rel="mask-icon" href="/favicon.svg?v=3" color="#2563eb" />
 
-        {/* ── Resource hints: only 3 most critical preconnects ── */}
+        {/* ── Resource hints: only fonts preconnect ── */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="preconnect"
-          href="https://steady-jaguar-712.convex.cloud"
-          crossOrigin="anonymous"
-        />
+        {/* Convex preconnect removed — only needed for dashboard pages, triggers Lighthouse warning on static pages */}
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
 

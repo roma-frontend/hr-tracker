@@ -43,11 +43,11 @@ export default function ScrollToTop() {
         className="group"
         style={{
           position: 'fixed',
-          bottom: '32px',
-          right: '32px',
+          bottom: '40px',
+          right: '40px',
           zIndex: 99999,
-          width: '56px',
-          height: '56px',
+          width: '40px',
+          height: '40px',
           borderRadius: '16px',
           background: 'linear-gradient(135deg, #2563eb, #93c5fd)',
           boxShadow: '0 8px 32px rgba(37, 99, 235, 0.3)',
@@ -76,7 +76,7 @@ export default function ScrollToTop() {
         aria-label="Scroll to top"
       >
         <ArrowUp
-          size={24}
+          size={22}
           style={{
             color: '#ffffff',
             transition: 'transform 0.3s ease',

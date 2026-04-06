@@ -19,7 +19,6 @@ export function middleware(request: NextRequest) {
       [
         '<https://fonts.googleapis.com>; rel=preconnect',
         '<https://fonts.gstatic.com>; rel=preconnect; crossorigin',
-        '<https://steady-jaguar-712.convex.cloud>; rel=preconnect',
       ].join(', '),
     );
   }
