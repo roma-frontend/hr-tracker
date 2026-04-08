@@ -20,16 +20,12 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import type { Id } from '../../../../convex/_generated/dataModel';
 
 // Isolate Convex API refs to avoid infinite type instantiation
-// @ts-expect-error TS2589 - Convex types cause infinite instantiation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTodaySummaryApi: any = api.timeTracking.getTodayAttendanceSummary;
-// @ts-expect-error TS2589 - Convex types cause infinite instantiation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getCurrentlyAtWorkApi: any = api.timeTracking.getCurrentlyAtWork;
-// @ts-expect-error TS2589 - Convex types cause infinite instantiation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTodayAllAttendanceApi: any = api.timeTracking.getTodayAttendance;
-// @ts-expect-error TS2589 - Convex types cause infinite instantiation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getNeedsRatingApi: any = api.timeTracking.getEmployeesNeedingRating;
 
