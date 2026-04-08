@@ -1,0 +1,286 @@
+'use client';
+
+import { useEffect } from 'react';
+import { motion } from '@/lib/cssMotion';
+import {
+  Car,
+  Clock,
+  MapPin,
+  Users,
+  Star,
+  Navigation2,
+  MessageSquare,
+  PhoneCall,
+  AlertCircle,
+  X,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+
+interface TripDetailsModalProps {
+  schedule: any;
+  currentTime: number;
+  onClose: () => void;
+  onRate?: (rating: number) => void;
+  onReassign?: () => void;
+  onMessage?: () => void;
+  onCall?: () => void;
+  userId: string;
+}
+
+export function TripDetailsModal({
+  schedule,
+  currentTime,
+  onClose,
+  onRate,
+  onReassign,
+  onMessage,
+  onCall,
+  userId,
+}: TripDetailsModalProps) {
+  const { t } = useTranslation();
+
+  // Block body scroll when modal is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalOverscroll = document.body.style.overscrollBehavior;
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.overscrollBehavior = originalOverscroll;
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.overscrollBehavior = '';
+    };
+  }, []);
+
+  if (!schedule) return null;
+
+  const isTrip = schedule.type === 'trip';
+  const statusColors: Record<string, string> = {
+    scheduled: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    pending: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    approved: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    rejected: 'bg-red-500/10 text-red-600 dark:text-red-400',
+    in_progress: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
+    completed: 'bg-green-500/10 text-green-600 dark:text-green-400',
+    cancelled: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+  };
+
+  const statusTranslations: Record<string, string> = {
+    scheduled: t('driver.status.scheduled', 'Scheduled'),
+    pending: t('driver.status.pending', 'Pending'),
+    approved: t('driver.status.approved', 'Approved'),
+    rejected: t('driver.status.rejected', 'Rejected'),
+    in_progress: t('driver.status.inProgress', 'In Progress'),
+    completed: t('driver.status.completed', 'Completed'),
+    cancelled: t('driver.status.cancelled', 'Cancelled'),
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="max-w-4xl w-full mx-auto"
+    >
+      <div className="bg-[var(--card)] rounded-2xl shadow-2xl overflow-hidden">
+        {/* Header with gradient */}
+        <div
+          className={`relative p-6 ${
+            isTrip
+              ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80'
+              : 'bg-gradient-to-r from-amber-500 to-orange-500'
+          }`}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="flex items-start justify-between pr-10">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                {isTrip ? (
+                  <Car className="w-6 h-6 text-white" />
+                ) : (
+                  <AlertCircle className="w-6 h-6 text-white" />
+                )}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  {isTrip
+                    ? t('driver.tripDetails', 'Trip Details')
+                    : t('driver.timeBlock', 'Time Block')}
+                </h2>
+                <p className="text-white/80 text-sm mt-1">
+                  {format(new Date(schedule.startTime), 'EEEE, MMMM dd, yyyy')}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Badge className="bg-white/20 text-white border-0">
+                {isTrip ? t('driver.trip', 'Trip') : t('driver.blocked', 'Blocked')}
+              </Badge>
+              <Badge
+                className={`${statusColors[schedule.status] || 'bg-gray-500/10 text-gray-600'} border-none`}
+              >
+                {statusTranslations[schedule.status] || schedule.status}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Content - No borders, clean design */}
+        <div className="p-6 space-y-5">
+          {isTrip && schedule.tripInfo && (
+            <>
+              {/* Route */}
+              <div className="rounded-xl bg-muted/30 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Navigation2 className="w-4 h-4 text-[var(--primary)]" />
+                  <span className="text-sm font-semibold text-foreground">
+                    {t('driver.route', 'Route')}
+                  </span>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('driver.pickup', 'Pickup')}
+                      </p>
+                      <p className="text-sm font-medium text-foreground mt-0.5">
+                        {schedule.tripInfo.from}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="ml-1.5 border-l-2 border-dashed border-border/40 h-6" />
+                  <div className="flex items-start gap-3">
+                    <div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('driver.dropoff', 'Dropoff')}
+                      </p>
+                      <p className="text-sm font-medium text-foreground mt-0.5">
+                        {schedule.tripInfo.to}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Passenger Info */}
+              {schedule.userName && (
+                <div className="rounded-xl bg-muted/30 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-4 h-4 text-[var(--primary)]" />
+                    <span className="text-sm font-semibold text-foreground">
+                      {t('driver.passenger', 'Passenger')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10">
+                      {schedule.userAvatar && <AvatarImage src={schedule.userAvatar} />}
+                      <AvatarFallback className="text-xs">
+                        {schedule.userName
+                          ?.split(' ')
+                          .map((n: string) => n[0])
+                          .join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-foreground">{schedule.userName}</p>
+                      {schedule.tripInfo.passengerPhone && (
+                        <p className="text-xs text-muted-foreground">
+                          {schedule.tripInfo.passengerPhone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Trip Details */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-muted/30 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-[var(--primary)]" />
+                    <p className="text-xs text-muted-foreground">{t('driver.time', 'Time')}</p>
+                  </div>
+                  <p className="text-lg font-bold text-foreground">
+                    {format(new Date(schedule.startTime), 'HH:mm')} -{' '}
+                    {format(new Date(schedule.endTime), 'HH:mm')}
+                  </p>
+                </div>
+                {schedule.tripInfo.distanceKm && (
+                  <div className="rounded-xl bg-muted/30 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MapPin className="w-4 h-4 text-[var(--primary)]" />
+                      <p className="text-xs text-muted-foreground">
+                        {t('driver.distance', 'Distance')}
+                      </p>
+                    </div>
+                    <p className="text-lg font-bold text-foreground">
+                      {schedule.tripInfo.distanceKm} km
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              {schedule.tripInfo.notes && (
+                <div className="rounded-xl bg-muted/30 p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageSquare className="w-4 h-4 text-[var(--primary)]" />
+                    <span className="text-sm font-semibold text-foreground">
+                      {t('driver.notes', 'Notes')}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{schedule.tripInfo.notes}</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap gap-2 pt-4">
+            {onMessage && (
+              <Button variant="outline" size="sm" onClick={onMessage} className="gap-2">
+                <MessageSquare className="w-4 h-4" />
+                {t('driver.message', 'Message')}
+              </Button>
+            )}
+            {onCall && (
+              <Button variant="outline" size="sm" onClick={onCall} className="gap-2">
+                <PhoneCall className="w-4 h-4" />
+                {t('driver.call', 'Call')}
+              </Button>
+            )}
+            {onRate && schedule.status === 'completed' && (
+              <Button variant="outline" size="sm" onClick={() => onRate(5)} className="gap-2">
+                <Star className="w-4 h-4" />
+                {t('driver.rate', 'Rate')}
+              </Button>
+            )}
+            {onReassign && (
+              <Button variant="outline" size="sm" onClick={onReassign} className="gap-2">
+                <Users className="w-4 h-4" />
+                {t('driver.reassign', 'Reassign')}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

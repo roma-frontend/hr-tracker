@@ -11,10 +11,15 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -33,15 +38,28 @@ import {
   MapPin,
   Clock,
   Calendar as CalendarIcon,
+  Car,
+  Coffee,
+  Shield,
+  ArrowRight,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Wrench,
 } from 'lucide-react';
 import { format, startOfWeek, addDays, isSameDay, isToday } from 'date-fns';
 import { Input } from '../ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
+// Isolate Convex API ref to avoid infinite type instantiation
+// @ts-ignore TS2589
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getDriverScheduleApi: any = api.drivers.queries.getDriverSchedule;
+
 interface DriverCalendarProps {
   driverId: Id<'drivers'>;
   organizationId: Id<'organizations'>;
-  userId: Id<'users'>;
+  userId?: Id<'users'>;
 }
 
 interface ScheduleItem {
@@ -59,6 +77,147 @@ interface ScheduleItem {
   userName?: string;
 }
 
+// Trip Card Component
+function TripCard({
+  item,
+  onUpdateStatus,
+}: {
+  item: ScheduleItem;
+  onUpdateStatus: (
+    id: Id<'driverSchedules'>,
+    status: 'in_progress' | 'completed' | 'cancelled',
+  ) => void;
+}) {
+  const { t } = useTranslation();
+  const startTime = format(new Date(item.startTime), 'HH:mm');
+  const endTime = format(new Date(item.endTime), 'HH:mm');
+
+  const isTimeOff = item.type === 'time_off';
+  const isBlocked = item.type === 'blocked';
+  const isMaintenance = item.type === 'maintenance';
+
+  const getStatusGradient = () => {
+    if (isTimeOff) return 'from-purple-500/10 via-purple-500/5 to-transparent border-purple-500/20';
+    if (isBlocked) return 'from-slate-500/10 via-slate-500/5 to-transparent border-slate-500/20';
+    if (isMaintenance)
+      return 'from-orange-500/10 via-orange-500/5 to-transparent border-orange-500/20';
+    switch (item.status) {
+      case 'completed':
+        return 'from-emerald-500/10 via-emerald-500/5 to-transparent border-emerald-500/20';
+      case 'in_progress':
+        return 'from-blue-500/10 via-blue-500/5 to-transparent border-blue-500/20';
+      case 'cancelled':
+        return 'from-red-500/10 via-red-500/5 to-transparent border-red-500/20';
+      default:
+        return 'from-slate-500/10 via-slate-500/5 to-transparent border-slate-500/20';
+    }
+  };
+
+  const getStatusAccentColor = () => {
+    if (isTimeOff) return 'bg-purple-500';
+    if (isBlocked) return 'bg-slate-500';
+    if (isMaintenance) return 'bg-orange-500';
+    switch (item.status) {
+      case 'completed':
+        return 'bg-emerald-500';
+      case 'in_progress':
+        return 'bg-blue-500';
+      case 'cancelled':
+        return 'bg-red-500';
+      default:
+        return 'bg-slate-500';
+    }
+  };
+
+  const getTypeIcon = () => {
+    if (isTimeOff) return <Coffee className="w-3 h-3" />;
+    if (isBlocked) return <Shield className="w-3 h-3" />;
+    if (isMaintenance) return <Wrench className="w-3 h-3" />;
+    return <Car className="w-3 h-3" />;
+  };
+
+  const getTypeLabel = () => {
+    if (isTimeOff) return t('driverCalendar.timeOff');
+    if (isBlocked) return t('driverCalendar.blocked');
+    if (isMaintenance) return t('driverCalendar.maintenance');
+    return t('driverCalendar.trip');
+  };
+
+  return (
+    <div
+      className={`group relative rounded-xl border bg-gradient-to-br ${getStatusGradient()} backdrop-blur-sm transition-all duration-200 hover:shadow-lg hover:scale-[1.02]`}
+    >
+      {/* Status accent bar */}
+      <div
+        className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-full ${getStatusAccentColor()}`}
+      />
+
+      <div className="p-3 pl-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-lg ${getStatusAccentColor()} bg-opacity-20`}>
+              {getTypeIcon()}
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-foreground">{startTime}</span>
+              <span className="text-[10px] text-muted-foreground ml-1.5">— {endTime}</span>
+            </div>
+          </div>
+          <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-current opacity-60">
+            {getTypeLabel()}
+          </Badge>
+        </div>
+
+        {/* Content */}
+        {item.type === 'trip' && item.tripInfo ? (
+          <div className="space-y-1.5">
+            <div className="flex items-start gap-2">
+              <MapPin className="w-3 h-3 mt-0.5 text-muted-foreground shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="font-medium text-foreground">{item.tripInfo.from}</span>
+                <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                <span className="font-medium text-foreground">{item.tripInfo.to}</span>
+              </div>
+            </div>
+            {item.tripInfo.purpose && (
+              <p className="text-[11px] text-muted-foreground italic pl-5">
+                {item.tripInfo.purpose}
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground pl-5">{item.reason || getTypeLabel()}</p>
+        )}
+
+        {/* Action Buttons */}
+        {item.type === 'trip' && item.status === 'scheduled' && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="w-full mt-3 h-7 text-[11px] gap-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400"
+            onClick={() => onUpdateStatus(item._id, 'in_progress')}
+          >
+            <Play className="w-3 h-3" />
+            {t('driverCalendar.startTrip', 'Start Trip')}
+          </Button>
+        )}
+        {item.type === 'trip' && item.status === 'in_progress' && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="w-full mt-3 h-7 text-[11px] gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+            onClick={() => onUpdateStatus(item._id, 'completed')}
+          >
+            <CheckCircle2 className="w-3 h-3" />
+            {t('driverCalendar.completeTrip', 'Complete')}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function DriverCalendar({ driverId, organizationId, userId }: DriverCalendarProps) {
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -67,7 +226,6 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
   const [blockReason, setBlockReason] = useState('');
   const [blockStartTime, setBlockStartTime] = useState('');
   const [blockEndTime, setBlockEndTime] = useState('');
-  const [selectedDaySchedule, setSelectedDaySchedule] = useState<ScheduleItem[] | null>(null);
 
   // Get current week
   const weekStart = useMemo(() => {
@@ -76,13 +234,11 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
     return d.getTime();
   }, [selectedDate]);
 
-  const weekEnd = useMemo(() => {
-    return weekStart + 7 * 24 * 60 * 60 * 1000 - 1;
-  }, [weekStart]);
+  const weekEnd = useMemo(() => weekStart + 7 * 24 * 60 * 60 * 1000 - 1, [weekStart]);
 
   // Get schedule for the week
   const schedule = useQuery(
-    api.drivers.queries.getDriverSchedule,
+    getDriverScheduleApi,
     driverId ? { driverId, startTime: weekStart, endTime: weekEnd } : 'skip',
   );
 
@@ -115,7 +271,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
       setBlockStartTime('');
       setBlockEndTime('');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to block time');
+      toast.error(error.message || t('driverCalendar.failedToBlockTime', 'Failed to block time'));
     }
   };
 
@@ -123,11 +279,19 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
     scheduleId: Id<'driverSchedules'>,
     status: 'in_progress' | 'completed' | 'cancelled',
   ) => {
+    if (!userId) {
+      toast.error(t('driverCalendar.userIdRequired', 'User ID is required'));
+      return;
+    }
     try {
       await updateTripStatus({ scheduleId, userId, status });
-      toast.success(`Trip status updated to ${status}`);
+      toast.success(
+        t('driverCalendar.tripStatusUpdated', 'Trip status updated to {{status}}', { status }),
+      );
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update status');
+      toast.error(
+        error.message || t('driverCalendar.failedToUpdateStatus', 'Failed to update status'),
+      );
     }
   };
 
@@ -137,112 +301,96 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
     );
   }, [selectedDate]);
 
-  const getScheduleForDay = (date: Date) => {
-    return schedule?.filter((s) => isSameDay(new Date(s.startTime), date)) || [];
-  };
-
-  const getStatusColor = (status: string, type: string) => {
-    if (type === 'time_off') {
-      return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800';
-    }
-    if (type === 'blocked') {
-      return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800';
-    }
-    if (type === 'maintenance') {
-      return 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800';
-    }
-    switch (status) {
-      case 'completed':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800';
-      case 'in_progress':
-        return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800';
-      case 'cancelled':
-        return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800';
-    }
-  };
-
-  const getStatusIcon = (type: string, status: string) => {
-    if (type === 'time_off') return '🏖';
-    if (type === 'blocked') return '🚫';
-    if (type === 'maintenance') return '🔧';
-    if (status === 'completed') return '✓';
-    if (status === 'in_progress') return '▶';
-    if (status === 'cancelled') return '✕';
-    return '•';
+  const getScheduleForDay = (date: Date): ScheduleItem[] => {
+    return (
+      (schedule as ScheduleItem[])?.filter((s: ScheduleItem) =>
+        isSameDay(new Date(s.startTime), date),
+      ) || []
+    );
   };
 
   // Mobile day view
   const [mobileViewDay, setMobileViewDay] = useState<number>(0);
 
   return (
-    <div className="space-y-4">
-      {/* Calendar Header - Responsive */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 shrink-0"
-            onClick={() => setSelectedDate(addDays(selectedDate, -7))}
-            aria-label="Previous week"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="min-w-[100px] shrink-0"
-            onClick={() => {
-              setSelectedDate(new Date());
-              setMobileViewDay(0);
-            }}
-          >
-            Today
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 shrink-0"
-            onClick={() => setSelectedDate(addDays(selectedDate, 7))}
-            aria-label="Next week"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <div className="hidden sm:block text-sm font-medium text-muted-foreground ml-2">
-            {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
+    <div className="space-y-6 p-4 md:p-6">
+      {/* Calendar Header - Modern Design */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-muted/50 rounded-xl p-1 gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-lg hover:bg-background"
+              onClick={() => setSelectedDate(addDays(selectedDate, -7))}
+              aria-label={t('driverCalendar.previousWeek', 'Previous week')}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 px-3 rounded-lg text-xs font-medium hover:bg-background"
+              onClick={() => {
+                setSelectedDate(new Date());
+                setMobileViewDay(0);
+              }}
+            >
+              {t('common.today', 'Today')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-lg hover:bg-background"
+              onClick={() => setSelectedDate(addDays(selectedDate, 7))}
+              aria-label={t('driverCalendar.nextWeek', 'Next week')}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="hidden sm:block">
+            <h3 className="text-sm font-semibold text-foreground">
+              {format(weekStart, 'MMM d')} — {format(new Date(weekEnd), 'MMM d, yyyy')}
+            </h3>
           </div>
         </div>
-        <Button onClick={() => setShowBlockModal(true)} className="w-full sm:w-auto shrink-0">
-          <Plus className="w-4 h-4 mr-2" />
-          Block Time
+        <Button
+          onClick={() => setShowBlockModal(true)}
+          className="w-full sm:w-auto gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all"
+        >
+          <Shield className="w-4 h-4" />
+          {t('driverCalendar.blockTime', 'Block Time')}
         </Button>
       </div>
 
       {/* Week Range for Mobile */}
-      <div className="sm:hidden text-center text-sm font-medium text-muted-foreground">
-        {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
+      <div className="sm:hidden text-center">
+        <p className="text-sm font-semibold text-foreground">
+          {format(weekStart, 'MMM d')} — {format(new Date(weekEnd), 'MMM d, yyyy')}
+        </p>
       </div>
 
       {/* Desktop Week View - Hidden on mobile */}
       <div className="hidden sm:block">
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-3">
           {weekDays.map((day: any) => {
             const daySchedule = getScheduleForDay(day);
             const today = isToday(day);
 
             return (
-              <Card
+              <div
                 key={day.toISOString()}
-                className={`min-h-[280px] transition-all duration-200 ${
-                  today ? 'ring-2 ring-primary ring-offset-2 shadow-md' : 'hover:shadow-sm'
+                className={`rounded-2xl border transition-all duration-200 ${
+                  today
+                    ? 'border-primary/40 bg-gradient-to-b from-primary/5 to-transparent shadow-lg shadow-primary/5'
+                    : 'border-border/50 bg-card/50 hover:border-border'
                 }`}
               >
-                <CardHeader className="p-3 pb-2 border-b">
+                {/* Day Header */}
+                <div className="p-3 pb-2 border-b border-border/30">
                   <div className="text-center">
                     <div
-                      className={`text-xs font-semibold uppercase tracking-wide ${
+                      className={`text-[11px] font-semibold uppercase tracking-wider ${
                         today ? 'text-primary' : 'text-muted-foreground'
                       }`}
                     >
@@ -256,70 +404,26 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                       {format(day, 'd')}
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="p-2 space-y-2 max-h-[200px] overflow-y-auto">
+                </div>
+
+                {/* Schedule Items */}
+                <div className="p-2 space-y-2 max-h-[320px] overflow-y-auto scrollbar-thin">
                   {daySchedule.length > 0 ? (
                     daySchedule
-                      .sort((a, b) => a.startTime - b.startTime)
-                      .map((s: any) => (
-                        <div
-                          key={s._id}
-                          className={`p-2 rounded-lg border text-xs transition-all ${getStatusColor(s.status, s.type)}`}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-semibold text-xs">
-                              {format(new Date(s.startTime), 'HH:mm')}
-                            </span>
-                            <span className="text-xs opacity-70">
-                              {getStatusIcon(s.type, s.status)}
-                            </span>
-                          </div>
-                          {s.type === 'trip' && s.tripInfo ? (
-                            <>
-                              <div className="flex items-center gap-1 mt-1 text-[10px]">
-                                <MapPin className="w-2.5 h-2.5 shrink-0" />
-                                <span className="truncate font-medium">{s.tripInfo.from}</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-[10px]">
-                                <MapPin className="w-2.5 h-2.5 shrink-0" />
-                                <span className="truncate font-medium">{s.tripInfo.to}</span>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="mt-1 text-[10px] font-medium">{s.reason || s.type}</div>
-                          )}
-
-                          {/* Status Actions */}
-                          {s.type === 'trip' && s.status === 'scheduled' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-6 text-[10px] w-full mt-2 bg-white/50 hover:bg-white dark:bg-transparent"
-                              onClick={() => handleUpdateTripStatus(s._id, 'in_progress')}
-                            >
-                              ▶ Start
-                            </Button>
-                          )}
-                          {s.type === 'trip' && s.status === 'in_progress' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-6 text-[10px] w-full mt-2 bg-white/50 hover:bg-white dark:bg-transparent"
-                              onClick={() => handleUpdateTripStatus(s._id, 'completed')}
-                            >
-                              {t('driverCalendar.complete')}
-                            </Button>
-                          )}
-                        </div>
+                      .sort((a: ScheduleItem, b: ScheduleItem) => a.startTime - b.startTime)
+                      .map((s: ScheduleItem) => (
+                        <TripCard key={s._id} item={s} onUpdateStatus={handleUpdateTripStatus} />
                       ))
                   ) : (
-                    <div className="text-center text-xs text-muted-foreground py-12">
-                      <CalendarIcon className="w-6 h-6 mx-auto mb-1 opacity-20" />
-                      <span>{t('driverCalendar.noTrips')}</span>
+                    <div className="text-center py-8">
+                      <CalendarIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                      <span className="text-[11px] text-muted-foreground">
+                        {t('driverCalendar.noTrips')}
+                      </span>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
@@ -327,8 +431,9 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
 
       {/* Mobile Day View - Horizontal Scroll */}
       <div className="sm:hidden">
-        <Card className="min-h-[320px]">
-          <CardHeader className="p-3 pb-2 border-b">
+        <div className="rounded-2xl border border-border/50 bg-card/50 overflow-hidden">
+          {/* Day Selector */}
+          <div className="p-3 pb-2 border-b border-border/30">
             <ScrollArea className="w-full">
               <div className="flex gap-2 pb-2">
                 {weekDays.map((day: any, index: any) => {
@@ -340,17 +445,17 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                     <button
                       key={day.toISOString()}
                       onClick={() => setMobileViewDay(index)}
-                      className={`flex flex-col items-center justify-center min-w-[60px] p-2 rounded-lg transition-all ${
+                      className={`flex flex-col items-center justify-center min-w-[56px] p-2.5 rounded-xl transition-all duration-200 ${
                         isSelected
                           ? today
-                            ? 'bg-primary text-primary-foreground shadow-md'
-                            : 'bg-muted text-foreground'
+                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                            : 'bg-muted text-foreground shadow-sm'
                           : 'hover:bg-muted/50'
                       }`}
                     >
                       <span
-                        className={`text-xs font-semibold uppercase ${
-                          isSelected ? '' : 'text-muted-foreground'
+                        className={`text-[10px] font-semibold uppercase ${
+                          isSelected ? 'opacity-80' : 'text-muted-foreground'
                         }`}
                       >
                         {format(day, 'EEE')}
@@ -364,8 +469,12 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                       </span>
                       {daySchedule.length > 0 && (
                         <div
-                          className={`w-1.5 h-1.5 rounded-full mt-1 ${
-                            today ? 'bg-primary-foreground' : 'bg-primary'
+                          className={`w-1.5 h-1.5 rounded-full mt-1.5 ${
+                            isSelected
+                              ? 'bg-primary-foreground'
+                              : today
+                                ? 'bg-primary'
+                                : 'bg-primary/60'
                           }`}
                         />
                       )}
@@ -375,159 +484,176 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
-          </CardHeader>
-          <CardContent className="p-3 space-y-2 max-h-[240px] overflow-y-auto">
+          </div>
+
+          {/* Schedule Content */}
+          <div className="p-3 space-y-3 max-h-[360px] overflow-y-auto">
             {weekDays[mobileViewDay] && getScheduleForDay(weekDays[mobileViewDay]).length > 0 ? (
               getScheduleForDay(weekDays[mobileViewDay])
-                .sort((a, b) => a.startTime - b.startTime)
-                .map((s: any) => (
-                  <div
-                    key={s._id}
-                    className={`p-3 rounded-lg border text-sm transition-all ${getStatusColor(s.status, s.type)}`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span className="font-semibold">
-                          {format(new Date(s.startTime), 'HH:mm')} -{' '}
-                          {format(new Date(s.endTime), 'HH:mm')}
-                        </span>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {getStatusIcon(s.type, s.status)}
-                      </Badge>
-                    </div>
-                    {s.type === 'trip' && s.tripInfo ? (
-                      <>
-                        <div className="flex items-start gap-2 mt-2 text-xs">
-                          <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                          <div className="space-y-1">
-                            <div className="font-medium">{s.tripInfo.from}</div>
-                            <div className="text-muted-foreground">↓</div>
-                            <div className="font-medium">{s.tripInfo.to}</div>
-                          </div>
-                        </div>
-                        {s.tripInfo.purpose && (
-                          <div className="mt-2 text-xs text-muted-foreground italic">
-                            {s.tripInfo.purpose}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="mt-2 text-sm font-medium">{s.reason || s.type}</div>
-                    )}
-
-                    {/* Status Actions */}
-                    {s.type === 'trip' && s.status === 'scheduled' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full mt-3 h-8 text-xs bg-white/50 hover:bg-white dark:bg-transparent"
-                        onClick={() => handleUpdateTripStatus(s._id, 'in_progress')}
-                      >
-                        ▶ Start Trip
-                      </Button>
-                    )}
-                    {s.type === 'trip' && s.status === 'in_progress' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full mt-3 h-8 text-xs bg-white/50 hover:bg-white dark:bg-transparent"
-                        onClick={() => handleUpdateTripStatus(s._id, 'completed')}
-                      >
-                        {t('driverCalendar.completeTrip')}
-                      </Button>
-                    )}
-                  </div>
+                .sort((a: ScheduleItem, b: ScheduleItem) => a.startTime - b.startTime)
+                .map((s: ScheduleItem) => (
+                  <TripCard key={s._id} item={s} onUpdateStatus={handleUpdateTripStatus} />
                 ))
             ) : (
-              <div className="text-center text-muted-foreground py-16">
-                <CalendarIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                <p className="text-sm">{t('driverCalendar.noTripsScheduled')}</p>
-                <p className="text-xs mt-1">
+              <div className="text-center py-12">
+                <CalendarIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground/20" />
+                <p className="text-sm font-medium text-foreground">
+                  {t('driverCalendar.noTripsScheduled')}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
                   {format(weekDays[mobileViewDay] ?? new Date(), 'EEEE, MMM d')}
                 </p>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Legend - Responsive */}
-      <div className="flex flex-wrap gap-3 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700" />
-          <span className="text-muted-foreground">{t('driverCalendar.completed')}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-blue-100 border border-blue-300 dark:bg-blue-900/30 dark:border-blue-700" />
-          <span className="text-muted-foreground">{t('driverCalendar.inProgress')}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-gray-100 border border-gray-300 dark:bg-gray-900/30 dark:border-gray-700" />
-          <span className="text-muted-foreground">{t('driverCalendar.scheduled')}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-purple-100 border border-purple-300 dark:bg-purple-900/30 dark:border-purple-700" />
-          <span className="text-muted-foreground">{t('driverCalendar.timeOff')}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-orange-100 border border-orange-300 dark:bg-orange-900/30 dark:border-orange-700" />
-          <span className="text-muted-foreground">{t('driverCalendar.maintenance')}</span>
+          </div>
         </div>
       </div>
 
-      {/* Block Time Modal */}
+      {/* Legend - Modern Design */}
+      <div className="flex flex-wrap items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/30">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+          <span className="text-xs text-muted-foreground">{t('driverCalendar.completed')}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50" />
+          <span className="text-xs text-muted-foreground">{t('driverCalendar.inProgress')}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-slate-400 shadow-sm shadow-slate-400/50" />
+          <span className="text-xs text-muted-foreground">{t('driverCalendar.scheduled')}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-purple-500 shadow-sm shadow-purple-500/50" />
+          <span className="text-xs text-muted-foreground">{t('driverCalendar.timeOff')}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm shadow-orange-500/50" />
+          <span className="text-xs text-muted-foreground">{t('driverCalendar.maintenance')}</span>
+        </div>
+      </div>
+
+      {/* Block Time Modal - Beautiful Design */}
       <Dialog open={showBlockModal} onOpenChange={setShowBlockModal}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="text-lg">{t('driverCalendar.blockTime')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
+        <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden">
+          {/* Modal Header with Gradient */}
+          <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-5">
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10">
+                  <Shield className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg font-semibold">
+                    {t('driverCalendar.blockTime')}
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                    {t('driverCalendar.blockTimeDesc', 'Block your availability for future dates')}
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+          </div>
+
+          {/* Modal Body */}
+          <div className="p-6 pt-5 space-y-5">
+            {/* Block Type Selection */}
             <div>
-              <Label>{t('driverCalendar.type')}</Label>
-              <Select
-                value={blockType}
-                onValueChange={(v) => setBlockType(v as 'vacation' | 'sick' | 'personal')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('driverCalendar.selectType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="vacation">{t('driverCalendar.vacation')}</SelectItem>
-                  <SelectItem value="sick">{t('driverCalendar.sickLeave')}</SelectItem>
-                  <SelectItem value="personal">{t('driverCalendar.personal')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-sm font-medium mb-2 block">{t('driverCalendar.type')}</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  {
+                    value: 'vacation',
+                    label: t('driverCalendar.vacation'),
+                    icon: <Coffee className="w-4 h-4" />,
+                  },
+                  {
+                    value: 'sick',
+                    label: t('driverCalendar.sickLeave'),
+                    icon: <Shield className="w-4 h-4" />,
+                  },
+                  {
+                    value: 'personal',
+                    label: t('driverCalendar.personal'),
+                    icon: <Clock className="w-4 h-4" />,
+                  },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setBlockType(option.value as 'vacation' | 'sick' | 'personal')}
+                    className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                      blockType === option.value
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-border/50 hover:border-border hover:bg-muted/30'
+                    }`}
+                  >
+                    <span
+                      className={
+                        blockType === option.value ? 'text-primary' : 'text-muted-foreground'
+                      }
+                    >
+                      {option.icon}
+                    </span>
+                    <span
+                      className={`text-xs font-medium ${blockType === option.value ? 'text-foreground' : 'text-muted-foreground'}`}
+                    >
+                      {option.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+
+            {/* Time Range */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label>{t('driverCalendar.startTime')}</Label>
-                <Input
-                  type="datetime-local"
-                  value={blockStartTime}
-                  onChange={(e) => setBlockStartTime(e.target.value)}
-                />
+                <Label className="text-sm font-medium mb-2 block">
+                  {t('driverCalendar.startTime')}
+                </Label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="datetime-local"
+                    value={blockStartTime}
+                    onChange={(e) => setBlockStartTime(e.target.value)}
+                    className="pl-10 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20"
+                  />
+                </div>
               </div>
               <div>
-                <Label>{t('driverCalendar.endTime')}</Label>
-                <Input
-                  type="datetime-local"
-                  value={blockEndTime}
-                  onChange={(e) => setBlockEndTime(e.target.value)}
-                />
+                <Label className="text-sm font-medium mb-2 block">
+                  {t('driverCalendar.endTime')}
+                </Label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="datetime-local"
+                    value={blockEndTime}
+                    onChange={(e) => setBlockEndTime(e.target.value)}
+                    className="pl-10 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20"
+                  />
+                </div>
               </div>
             </div>
+
+            {/* Reason */}
             <div>
-              <Label>{t('driverCalendar.reason')}</Label>
+              <Label className="text-sm font-medium mb-2 block">{t('driverCalendar.reason')}</Label>
               <Textarea
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
                 placeholder={t('driverCalendar.enterReason')}
                 rows={3}
+                className="resize-none rounded-xl border-border/50 focus:border-primary focus:ring-primary/20"
               />
             </div>
-            <Button onClick={handleBlockTime} className="w-full">
+
+            {/* Submit Button */}
+            <Button
+              onClick={handleBlockTime}
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all font-medium"
+            >
+              <Shield className="w-4 h-4 mr-2" />
               {t('driverCalendar.blockTimeBtn')}
             </Button>
           </div>

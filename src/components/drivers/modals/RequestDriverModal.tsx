@@ -1,0 +1,39 @@
+'use client';
+
+/**
+ * Request Driver Modal - Wrapper for RequestDriverWizard
+ */
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { RequestDriverWizard } from '../RequestDriverWizard';
+import type { Id } from '@/convex/_generated/dataModel';
+
+interface RequestDriverModalProps {
+  open: boolean;
+  onClose: () => void;
+  userId: Id<'users'>;
+  preselectedDriverId?: string;
+}
+
+export function RequestDriverModal({
+  open,
+  onClose,
+  userId,
+  preselectedDriverId,
+}: RequestDriverModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Request Driver</DialogTitle>
+        </DialogHeader>
+        <RequestDriverWizard
+          userId={userId}
+          onComplete={onClose}
+          onCancel={onClose}
+          preselectedDriverId={preselectedDriverId}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
