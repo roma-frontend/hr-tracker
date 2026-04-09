@@ -29,7 +29,6 @@ import {
 import StatsCard from './StatsCard';
 import FeatureCard from './FeatureCard';
 import MobileMenu from './MobileMenu';
-import CookieBanner from '@/components/CookieBanner';
 import { Button } from '@/components/ui/button';
 
 const FloatingParticles = dynamic(() => import('./FloatingParticles'), {
@@ -670,9 +669,6 @@ function HeroSection() {
           ))}
         </div>
       </div>
-
-      {/* Cookie Banner - integrated in hero section */}
-      <CookieBanner />
 
       {/* Scroll indicator */}
       <div

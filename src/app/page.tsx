@@ -3,6 +3,7 @@
 import { LoadingProvider } from '@/components/ui/LoadingProvider';
 import LandingClient from '@/components/landing/LandingClient';
 import ScrollToTop from '@/components/landing/ScrollToTop';
+import CookieBanner from '@/components/CookieBanner';
 import {
   SoftwareApplicationJsonLd,
   OrganizationJsonLd,
@@ -11,16 +12,20 @@ import {
 
 export default function RootPage() {
   return (
-    <LoadingProvider>
-      <div className="min-h-screen" style={{ maxWidth: '100vw', overflowX: 'clip' }}>
-        {/* JSON-LD Structured Data for SEO */}
-        <SoftwareApplicationJsonLd />
-        <OrganizationJsonLd />
-        <FAQPageJsonLd />
+    <>
+      <LoadingProvider>
+        <div className="min-h-screen" style={{ maxWidth: '100vw', overflowX: 'clip' }}>
+          {/* JSON-LD Structured Data for SEO */}
+          <SoftwareApplicationJsonLd />
+          <OrganizationJsonLd />
+          <FAQPageJsonLd />
 
-        <LandingClient />
-        <ScrollToTop />
-      </div>
-    </LoadingProvider>
+          <LandingClient />
+          <ScrollToTop />
+        </div>
+      </LoadingProvider>
+      {/* CookieBanner outside LoadingProvider to show immediately after preloader */}
+      <CookieBanner />
+    </>
   );
 }
