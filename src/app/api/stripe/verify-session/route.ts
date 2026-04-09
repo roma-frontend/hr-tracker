@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-02-25.clover',
-});
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return null;
+  return new Stripe(key, { apiVersion: '2026-02-25.clover' });
+}
 
 /**
  * Verify a Stripe checkout session is real and completed.
  * Prevents users from accessing /checkout/success without paying.
  */
 export async function GET(req: NextRequest) {
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json({ valid: false, error: 'Stripe not configured' }, { status: 503 });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const sessionId = searchParams.get('session_id');

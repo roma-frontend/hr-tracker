@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { isValidEmail } from '@/lib/stripe-config';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-02-25.clover',
-});
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return null;
+  return new Stripe(key, { apiVersion: '2026-02-25.clover' });
+}
 
 const PLANS: Record<string, { priceId: string; name: string }> = {
   // Starter is now free, so no Stripe checkout needed
@@ -13,6 +15,14 @@ const PLANS: Record<string, { priceId: string; name: string }> = {
 };
 
 export async function POST(req: NextRequest) {
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json(
+      { error: 'Stripe not configured', message: 'STRIPE_SECRET_KEY is not set' },
+      { status: 503 },
+    );
+  }
+
   try {
     const { plan, email, organizationId } = await req.json();
 

@@ -3,11 +3,19 @@ import Stripe from 'stripe';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-02-25.clover',
-});
-
 const isDev = process.env.NODE_ENV === 'development';
+
+// Safe Stripe initialization - only create if key exists
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    console.warn('[Stripe] STRIPE_SECRET_KEY not configured');
+    return null;
+  }
+  return new Stripe(key, {
+    apiVersion: '2026-02-25.clover',
+  });
+}
 
 async function verifySuperadmin(req: NextRequest): Promise<boolean> {
   if (isDev) return true;
@@ -40,6 +48,31 @@ async function verifySuperadmin(req: NextRequest): Promise<boolean> {
 export async function GET(req: NextRequest) {
   if (!(await verifySuperadmin(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json(
+      {
+        error: 'Stripe not configured',
+        message: 'STRIPE_SECRET_KEY environment variable is not set',
+        metrics: {
+          totalSubscriptions: 0,
+          active: 0,
+          trialing: 0,
+          canceled: 0,
+          pastDue: 0,
+          mrr: 0,
+          totalRevenue: 0,
+          last30DaysRevenue: 0,
+          growth: '0',
+          trialEnding: 0,
+        },
+        subscriptions: [],
+        recentTransactions: [],
+      },
+      { status: 200 },
+    );
   }
 
   try {

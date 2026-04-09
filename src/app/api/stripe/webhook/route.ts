@@ -4,11 +4,13 @@ import { Resend } from 'resend';
 import { resolvePlanFromPriceId } from '@/lib/stripe-config';
 import * as Sentry from '@sentry/nextjs';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-02-25.clover',
-});
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return null;
+  return new Stripe(key, { apiVersion: '2026-02-25.clover' });
+}
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const resend = new Resend(process.env.RESEND_API_KEY!);
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
@@ -83,8 +85,19 @@ async function notifyManager({
 }
 
 export async function POST(req: NextRequest) {
+  const stripe = getStripe();
+  if (!stripe) {
+    console.warn('[Stripe Webhook] Not configured, skipping');
+    return NextResponse.json({ received: true, skipped: true });
+  }
+
   const body = await req.text();
   const sig = req.headers.get('stripe-signature') ?? '';
+
+  if (!webhookSecret) {
+    console.warn('[Stripe Webhook] STRIPE_WEBHOOK_SECRET not set');
+    return NextResponse.json({ received: true, skipped: true });
+  }
 
   let event: Stripe.Event;
   try {
