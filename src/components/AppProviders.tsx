@@ -11,7 +11,6 @@ import { AuthSyncProvider } from '@/components/providers/AuthSyncProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from 'sonner';
 import { MaintenanceAutoLogout } from '@/components/MaintenanceAutoLogout';
-import { LoadingProvider } from '@/components/ui/LoadingProvider';
 
 /**
  * Combined app provider to reduce nesting depth in layout.
@@ -20,16 +19,15 @@ import { LoadingProvider } from '@/components/ui/LoadingProvider';
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <GlobalErrorBoundaryProvider>
-      <LoadingProvider>
-        <MonitoringProvider>
-          <SessionProvider>
-            <I18nProvider>
-              <StatusUpdateProvider>
-                <ConvexClientProvider>
-                  <AuthSyncProvider>
-                    <MaintenanceAutoLogout />
-                    <ThemeProvider
-                      attribute="class"
+      <MonitoringProvider>
+        <SessionProvider>
+          <I18nProvider>
+            <StatusUpdateProvider>
+              <ConvexClientProvider>
+                <AuthSyncProvider>
+                  <MaintenanceAutoLogout />
+                  <ThemeProvider
+                    attribute="class"
                     defaultTheme="system"
                     enableSystem
                     disableTransitionOnChange
@@ -56,7 +54,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
           </I18nProvider>
         </SessionProvider>
       </MonitoringProvider>
-      </LoadingProvider>
     </GlobalErrorBoundaryProvider>
   );
 }

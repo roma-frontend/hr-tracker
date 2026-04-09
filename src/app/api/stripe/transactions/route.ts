@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { fetchQuery } from 'convex/nextjs';
-import { api } from '@/convex/_generated/api';
+import { verifyJWT } from '@/lib/jwt';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -21,24 +20,19 @@ async function verifySuperadmin(req: NextRequest): Promise<boolean> {
   if (isDev) return true;
 
   try {
-    // Get the Convex token from the request cookie
-    const convexToken = req.cookies.get('__convex_token')?.value;
+    const cookieHeader = req.headers.get('cookie') || '';
+    const jwtMatch = cookieHeader.match(/hr-auth-token=([^;]+)/);
+    const jwt = jwtMatch ? jwtMatch[1] : null;
 
-    if (!convexToken) return false;
+    if (!jwt) return false;
 
-    // Verify with Convex using getCurrentUser
-    const user = await fetchQuery(
-      api.users.getCurrentUser,
-      {},
-      {
-        token: convexToken,
-      },
-    );
-
-    if (!user) return false;
+    const payload = await verifyJWT(jwt);
+    if (!payload) return false;
 
     const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
-    return user.email?.toLowerCase() === SUPERADMIN_EMAIL || user.role === 'superadmin';
+    return (
+      payload.email?.toLowerCase() === SUPERADMIN_EMAIL || payload.role === 'superadmin'
+    );
   } catch (error) {
     console.error('[Stripe Auth] Error:', error);
     return false;

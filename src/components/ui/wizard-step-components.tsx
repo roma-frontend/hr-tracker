@@ -204,20 +204,20 @@ export function CardSelectionStep({
   const selectedValue = stepData[field];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 md:space-y-3">
       <div>
-        <Label className="text-[var(--text-primary)] text-base">
+        <Label className="text-[var(--text-primary)] text-sm md:text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>}
+        {description && <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1">{description}</p>}
       </div>
 
       <div
         className={cn(
-          'grid gap-3',
-          columns === 2 && 'grid-cols-2',
-          columns === 3 && 'grid-cols-2 md:grid-cols-3',
-          columns === 4 && 'grid-cols-2 md:grid-cols-4',
+          'grid gap-2 md:gap-3',
+          'grid-cols-1 sm:grid-cols-2',
+          columns === 3 && 'md:grid-cols-3',
+          columns === 4 && 'md:grid-cols-4',
         )}
       >
         {options.map((option) => {
@@ -234,29 +234,29 @@ export function CardSelectionStep({
               )}
               onClick={() => updateStepData(field, option.value)}
             >
-              <CardContent className="p-5 flex flex-col items-center text-center gap-3">
+              <CardContent className="p-3 md:p-5 flex flex-col items-center text-center gap-2 md:gap-3">
                 <div
                   className={cn(
-                    'p-3 rounded-full transition-colors',
+                    'p-2 md:p-3 rounded-full transition-colors',
                     isSelected
                       ? 'bg-[var(--primary)] text-white'
                       : option.color || 'bg-[var(--background-subtle)] text-[var(--text-muted)]',
                   )}
                 >
-                  {React.isValidElement(option.icon) ? React.cloneElement(option.icon as React.ReactElement<any>, { className: 'w-6 h-6' }) : option.icon}
+                  {React.isValidElement(option.icon) ? React.cloneElement(option.icon as React.ReactElement<any>, { className: 'w-4 h-4 md:w-6 md:h-6' }) : option.icon}
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1 md:space-y-1.5">
                   <p
                     className={cn(
-                      'font-semibold text-sm leading-tight',
+                      'font-semibold text-xs md:text-sm leading-tight',
                       isSelected ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]',
                     )}
                   >
                     {option.title}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] leading-relaxed line-clamp-2">{option.description}</p>
+                  <p className="text-[10px] md:text-xs text-[var(--text-muted)] leading-relaxed line-clamp-2">{option.description}</p>
                 </div>
-                {isSelected && <Badge className="bg-[var(--primary)] text-white text-xs px-2 py-0.5">✓ Выбрано</Badge>}
+                {isSelected && <Badge className="bg-[var(--primary)] text-white text-[10px] md:text-xs px-2 py-0.5">✓ Выбрано</Badge>}
               </CardContent>
             </Card>
           );
@@ -290,12 +290,12 @@ export function RadioGroupStep({
 }: RadioGroupStepProps) {
   const value = stepData[field] as string | undefined;
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 md:space-y-3">
       <div>
-        <Label className="text-[var(--text-primary)] text-base">
+        <Label className="text-[var(--text-primary)] text-sm md:text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>}
+        {description && <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1">{description}</p>}
       </div>
 
       <RadioGroup

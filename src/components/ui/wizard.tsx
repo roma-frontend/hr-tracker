@@ -93,87 +93,88 @@ export function Wizard({
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className={cn('p-4 md:p-6', className)}>
-      {/* Stepper */}
-      {showStepper && (
-        <div className="mb-6 md:mb-8">
-          {/* Progress Bar */}
-          <div className="relative h-1.5 md:h-2 bg-(--background-subtle) rounded-full overflow-hidden mb-4 md:mb-6">
-            <motion.div
-              className="absolute inset-y-0 left-0 bg-(--primary)"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-            />
-          </div>
+    <div className={cn('flex flex-col max-h-[calc(100vh-8rem)] md:max-h-[85vh] overflow-hidden', className)}>
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6 scrollbar-thin">
+        {/* Stepper */}
+        {showStepper && (
+          <div className="mb-4 md:mb-6">
+            {/* Progress Bar */}
+            <div className="relative h-1.5 bg-(--background-subtle) rounded-full overflow-hidden mb-3 md:mb-5">
+              <motion.div
+                className="absolute inset-y-0 left-0 bg-(--primary)"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              />
+            </div>
 
-          {/* Steps */}
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => {
-              const isCompleted = index < currentStep;
-              const isCurrent = index === currentStep;
+            {/* Steps */}
+            <div className="flex items-center justify-between gap-1">
+              {steps.map((step, index) => {
+                const isCompleted = index < currentStep;
+                const isCurrent = index === currentStep;
 
-              return (
-                <React.Fragment key={step.id}>
-                  <div className="flex flex-col items-center flex-1 min-w-0">
-                    <motion.div
-                      className={cn(
-                        'w-7 h-7 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-colors shrink-0',
-                        isCompleted
-                          ? 'bg-(--primary) border-(--primary) text-white'
-                          : isCurrent
-                            ? 'border-(--primary) bg-(--background) text-(--primary)'
-                            : 'border-(--border) bg-(--background) text-(--muted-foreground)',
-                      )}
-                      initial={{ scale: 1 }}
-                      animate={{ scale: isCurrent ? 1.1 : 1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {isCompleted ? (
-                        <CheckCircle className="w-3 h-3 md:w-5 md:h-5" />
-                      ) : (
-                        <span className="text-[10px] md:text-sm font-semibold">{index + 1}</span>
-                      )}
-                    </motion.div>
-                    <div className="mt-1 md:mt-2 text-center w-full px-1">
-                      <p
-                        className={cn(
-                          'text-[9px] md:text-xs font-medium transition-colors truncate',
-                          isCurrent ? 'text-(--primary)' : 'text-(--muted-foreground)',
-                        )}
-                      >
-                        {step.title}
-                      </p>
-                      {step.description && (
-                        <p className="text-[8px] md:text-xs text-(--muted-foreground) mt-0.5 hidden lg:block truncate">
-                          {step.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {index < steps.length - 1 && (
-                    <div className="flex-1 h-0.5 bg-(--border) mx-1 md:mx-2 max-w-5 md:max-w-none">
+                return (
+                  <React.Fragment key={step.id}>
+                    <div className="flex flex-col items-center flex-1 min-w-0">
                       <motion.div
                         className={cn(
-                          'h-full transition-colors',
-                          isCompleted ? 'bg-(--primary)' : 'bg-(--border)',
+                          'w-6 h-6 md:w-9 md:h-9 rounded-full flex items-center justify-center border-2 transition-colors shrink-0',
+                          isCompleted
+                            ? 'bg-(--primary) border-(--primary) text-white'
+                            : isCurrent
+                              ? 'border-(--primary) bg-(--background) text-(--primary)'
+                              : 'border-(--border) bg-(--background) text-(--muted-foreground)',
                         )}
-                        initial={{ width: '0%' }}
-                        animate={{ width: isCompleted ? '100%' : '0%' }}
-                        transition={{ duration: 0.3 }}
-                      />
+                        initial={{ scale: 1 }}
+                        animate={{ scale: isCurrent ? 1.1 : 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+                        ) : (
+                          <span className="text-[10px] md:text-xs font-semibold">{index + 1}</span>
+                        )}
+                      </motion.div>
+                      <div className="mt-1 md:mt-1.5 text-center w-full px-0.5">
+                        <p
+                          className={cn(
+                            'text-[8px] md:text-[10px] font-medium transition-colors leading-tight',
+                            isCurrent ? 'text-(--primary)' : 'text-(--muted-foreground)',
+                          )}
+                        >
+                          {step.title}
+                        </p>
+                        {step.description && (
+                          <p className="text-[7px] md:text-[9px] text-(--muted-foreground) mt-0.5 hidden md:block truncate">
+                            {step.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
-      {/* Step Content */}
-      <div className="min-h-50 md:min-h-75">
+                    {index < steps.length - 1 && (
+                      <div className="flex-1 h-0.5 bg-(--border) mx-0.5 md:mx-1.5 max-w-4 md:max-w-none">
+                        <motion.div
+                          className={cn(
+                            'h-full transition-colors',
+                            isCompleted ? 'bg-(--primary)' : 'bg-(--border)',
+                          )}
+                          initial={{ width: '0%' }}
+                          animate={{ width: isCompleted ? '100%' : '0%' }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Step Content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -181,9 +182,8 @@ export function Wizard({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="h-full"
           >
-            <div className="mb-4 md:mb-6">
+            <div className="mb-4 md:mb-5">
               <h2 className="text-base md:text-xl font-bold text-(--text-primary) mb-1 md:mb-2">
                 {currentStepData?.title}
               </h2>
@@ -216,51 +216,53 @@ export function Wizard({
         </AnimatePresence>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 md:mt-8 pt-4 md:pt-6 border-t border-(--border) gap-2 md:gap-0">
-        <Button
-          variant="outline"
-          onClick={handleBack}
-          disabled={currentStep === 0 || isSubmitting}
-          className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) w-full sm:w-auto text-sm"
-        >
-          <ChevronLeft className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-          {t('wizard.back', 'Back')}
-        </Button>
-
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-          {onCancel && (
-            <Button
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSubmitting}
-              className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) w-full sm:w-auto text-sm"
-            >
-              {cancelLabel || t('wizard.cancel', 'Cancel')}
-            </Button>
-          )}
-
+      {/* Fixed Navigation Buttons */}
+      <div className="flex-shrink-0 px-3 py-3 md:px-6 md:py-4 border-t border-(--border) bg-(--background)">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2">
           <Button
-            onClick={handleNext}
-            disabled={!canGoNext() || isSubmitting}
-            className={cn(
-              'gap-1 md:gap-2 w-full sm:w-auto text-sm',
-              currentStep === steps.length - 1
-                ? 'bg-(--primary) hover:bg-(--primary-hover) text-white'
-                : 'bg-(--primary) hover:bg-(--primary-hover) text-white',
-            )}
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 0 || isSubmitting}
+            className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) w-full sm:w-auto text-sm"
           >
-            {isSubmitting ? (
-              t('wizard.processing', 'Processing...')
-            ) : currentStep === steps.length - 1 ? (
-              submitLabel || t('wizard.submit', 'Submit')
-            ) : (
-              <>
-                {t('wizard.next', 'Next')}
-                <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
-              </>
-            )}
+            <ChevronLeft className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+            {t('wizard.back', 'Back')}
           </Button>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            {onCancel && (
+              <Button
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSubmitting}
+                className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) w-full sm:w-auto text-sm"
+              >
+                {cancelLabel || t('wizard.cancel', 'Cancel')}
+              </Button>
+            )}
+
+            <Button
+              onClick={handleNext}
+              disabled={!canGoNext() || isSubmitting}
+              className={cn(
+                'gap-1 md:gap-2 w-full sm:w-auto text-sm',
+                currentStep === steps.length - 1
+                  ? 'bg-(--primary) hover:bg-(--primary-hover) text-white'
+                  : 'bg-(--primary) hover:bg-(--primary-hover) text-white',
+              )}
+            >
+              {isSubmitting ? (
+                t('wizard.processing', 'Processing...')
+              ) : currentStep === steps.length - 1 ? (
+                submitLabel || t('wizard.submit', 'Submit')
+              ) : (
+                <>
+                  {t('wizard.next', 'Next')}
+                  <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

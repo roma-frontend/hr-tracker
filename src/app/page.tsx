@@ -1,5 +1,6 @@
 'use client';
 
+import { LoadingProvider } from '@/components/ui/LoadingProvider';
 import LandingClient from '@/components/landing/LandingClient';
 import ScrollToTop from '@/components/landing/ScrollToTop';
 import {
@@ -10,14 +11,16 @@ import {
 
 export default function RootPage() {
   return (
-    <div className="min-h-screen" style={{ maxWidth: '100vw', overflowX: 'clip' }}>
-      {/* JSON-LD Structured Data for SEO */}
-      <SoftwareApplicationJsonLd />
-      <OrganizationJsonLd />
-      <FAQPageJsonLd />
+    <LoadingProvider>
+      <div className="min-h-screen" style={{ maxWidth: '100vw', overflowX: 'clip' }}>
+        {/* JSON-LD Structured Data for SEO */}
+        <SoftwareApplicationJsonLd />
+        <OrganizationJsonLd />
+        <FAQPageJsonLd />
 
-      <LandingClient />
-      <ScrollToTop />
-    </div>
+        <LandingClient />
+        <ScrollToTop />
+      </div>
+    </LoadingProvider>
   );
 }
