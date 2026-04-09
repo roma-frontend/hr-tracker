@@ -369,6 +369,7 @@ function TicketRow({
   getPriorityColor: (priority: string) => string;
   getStatusColor: (status: string) => string;
 }) {
+  const { t } = useTranslation();
   const formatDate = (date: number) => {
     const now = new Date();
     const ticketDate = new Date(date);
@@ -613,6 +614,7 @@ function TicketDetailDialog({
   onOpenChange: (open: boolean) => void;
   userId: Id<'users'>;
 }) {
+  const { t } = useTranslation();
   const ticket = useQuery(
     api.tickets.getTicketById,
     open ? { ticketId: ticketId as Id<'supportTickets'> } : 'skip',
