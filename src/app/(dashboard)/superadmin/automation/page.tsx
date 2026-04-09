@@ -92,7 +92,7 @@ export default function AutomationPage() {
               'Monitor and manage your automation workflows'}
           </p>
         </div>
-        <Button onClick={handleRunAutomation} disabled={isRunning} className="gap-2">
+        <Button onClick={handleRunAutomation} disabled={isRunning} className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
           {isRunning ? <ShieldLoader size="xs" variant="inline" /> : <Play className="w-4 h-4" />}
           {isRunning
             ? t('automation.running') || 'Running...'

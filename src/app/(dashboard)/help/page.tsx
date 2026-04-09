@@ -149,7 +149,7 @@ export default function HelpSupportPage() {
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    className="gap-2 w-full sm:w-auto"
+                    className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
                     onClick={handleCreateTicket}
                     disabled={!canCreateTickets || isLimitReached}
                   >

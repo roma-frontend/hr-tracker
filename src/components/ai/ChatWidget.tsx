@@ -884,7 +884,7 @@ export function ChatWidget() {
             }
             setIsOpen((o) => !o);
           }}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white shadow-2xl shadow-[#2563eb]/40 flex items-center justify-center hover:scale-105 transition-transform"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center gap-2 justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
           whileTap={{ scale: 0.95 }}
         >
           <AnimatePresence mode="wait">

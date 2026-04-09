@@ -114,7 +114,7 @@ export default function SubscriptionsManagementPage() {
             {t('superadmin.subscriptions.subtitle')}
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 w-auto">
+        <Button onClick={() => setShowForm(!showForm)} variant="ghost" className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
           <Plus className="w-4 h-4" />
           {showForm
             ? t('superadmin.subscriptions.cancelButtonText')

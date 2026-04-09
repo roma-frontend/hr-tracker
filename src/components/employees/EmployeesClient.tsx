@@ -47,6 +47,7 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useRouter } from 'next/navigation';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { Button } from '../ui/button';
 
 const ROLE_CONFIG = {
   superadmin: {
@@ -291,13 +292,13 @@ export function EmployeesClient() {
           </p>
         </div>
         {canManage && (
-          <button
+          <Button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
+            className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+            variant="default"
           >
             <Plus className="w-5 h-5" /> {t('employees.addEmployee')}
-          </button>
+          </Button>
         )}
       </motion.div>
 

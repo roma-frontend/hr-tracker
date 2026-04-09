@@ -513,7 +513,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
             <CalendarDays className="w-4 h-4" />
             {t('buttons.today')}
           </Button>
-          <Button size="sm" onClick={() => setShowLeaveModal(true)}>
+          <Button size="sm" onClick={() => setShowLeaveModal(true)} className='flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg'>
             <Plus className="w-4 h-4" />
             {t('calendar.newLeave')}
           </Button>

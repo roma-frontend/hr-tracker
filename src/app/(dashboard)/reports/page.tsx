@@ -181,7 +181,7 @@ export default function ReportsPage() {
             </h2>
             <p className="text-[var(--text-muted)] text-sm mt-1">{t('ui.comprehensiveAnalysis')}</p>
           </div>
-          <Button variant="outline" onClick={handleExport} disabled={isLoading}>
+          <Button variant="outline" onClick={handleExport} disabled={isLoading} className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
             <Download className="w-4 h-4" /> Export CSV
           </Button>
         </motion.div>

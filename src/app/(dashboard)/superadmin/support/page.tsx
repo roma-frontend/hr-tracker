@@ -127,7 +127,7 @@ export default function SupportTicketsPage() {
             </div>
             <Button
               onClick={() => setCreateDialogOpen(true)}
-              className="gap-2 w-full sm:w-auto shrink-0"
+              className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
             >
               <Plus className="w-4 h-4 transition-transform duration-200" />
               <span>{t('superadmin.support.createTicket')}</span>

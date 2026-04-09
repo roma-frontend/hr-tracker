@@ -156,7 +156,7 @@ export default function CompanyEventsPage() {
             </span>
             <span className="sm:hidden">{t('events.checkConflictsShort', 'Conflicts')}</span>
           </Button>
-          <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
+          <Button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">{t('events.createEvent', 'Create Event')}</span>
             <span className="sm:hidden">{t('events.createEventShort', 'Create')}</span>
