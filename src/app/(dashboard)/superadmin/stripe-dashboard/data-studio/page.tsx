@@ -67,19 +67,6 @@ export default function StripeSupportStudio() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  if (!hydrated) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <ShieldLoader size="lg" />
-      </div>
-    );
-  }
 
   const fetchStripeData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -115,8 +102,12 @@ export default function StripeSupportStudio() {
   };
 
   useEffect(() => {
-    fetchStripeData();
-  }, []);
+    if (user) {
+      fetchStripeData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   // Filtering Logic
   const filteredData = useMemo(() => {
