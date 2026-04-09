@@ -225,7 +225,7 @@ export function CreateEventWizard({
 
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
-      const departments = (data.departments as string[]) || [];
+      const departments = ((data.departments as unknown) as string[]) || [];
       
       if (departments.length === 0) {
         toast.error(t('eventWizard.toast.selectDepartments'));

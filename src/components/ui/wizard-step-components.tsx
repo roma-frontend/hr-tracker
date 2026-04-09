@@ -34,6 +34,7 @@ interface TextInputStepProps {
   description?: string;
   required?: boolean;
   type?: 'text' | 'email' | 'number' | 'password' | 'date' | 'time';
+  defaultValue?: string;
 }
 
 export function TextInputStep({
@@ -45,8 +46,9 @@ export function TextInputStep({
   description,
   required = false,
   type = 'text',
+  defaultValue,
 }: TextInputStepProps) {
-  const value = stepData[field] as string | number | undefined;
+  const value = (stepData[field] as string | number | undefined) ?? defaultValue;
   return (
     <div className="space-y-2">
       <Label htmlFor={field} className="text-[var(--text-primary)]">
@@ -277,6 +279,7 @@ interface RadioGroupStepProps {
   options: { value: string; label: string; description?: string }[];
   description?: string;
   required?: boolean;
+  defaultValue?: string;
 }
 
 export function RadioGroupStep({
@@ -287,8 +290,9 @@ export function RadioGroupStep({
   options,
   description,
   required = false,
+  defaultValue,
 }: RadioGroupStepProps) {
-  const value = stepData[field] as string | undefined;
+  const value = (stepData[field] as string | undefined) ?? defaultValue;
   return (
     <div className="space-y-2 md:space-y-3">
       <div>
