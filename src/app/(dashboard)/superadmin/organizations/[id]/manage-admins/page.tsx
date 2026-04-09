@@ -5,7 +5,7 @@ import { api } from '../../../../../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Shield,
@@ -460,24 +460,20 @@ export default function ManageAdminsPage() {
 
             <DialogDescription className="text-center text-sm text-muted-foreground pb-4">
               {actionType === 'promote' ? (
-                <Trans
-                  i18nKey="ui.makeAdminConfirm"
-                  values={{ name: selectedMember?.name, email: selectedMember?.email, org: organization.name }}
-                  components={[
-                    <strong key="name" className="text-foreground" />,
-                    <span key="email" className="text-muted-foreground" />,
-                    <strong key="org" className="text-foreground" />,
-                  ]}
-                />
+                <>
+                  {t.rich('ui.makeAdminConfirm', {
+                    name: selectedMember?.name,
+                    email: selectedMember?.email,
+                    org: organization.name,
+                  })}
+                </>
               ) : (
-                <Trans
-                  i18nKey="ui.removeAdminConfirm"
-                  values={{ name: selectedMember?.name, email: selectedMember?.email }}
-                  components={[
-                    <strong key="name" className="text-foreground" />,
-                    <span key="email" className="text-muted-foreground" />,
-                  ]}
-                />
+                <>
+                  {t.rich('ui.removeAdminConfirm', {
+                    name: selectedMember?.name,
+                    email: selectedMember?.email,
+                  })}
+                </>
               )}
             </DialogDescription>
 

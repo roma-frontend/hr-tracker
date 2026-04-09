@@ -1,12 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Shield } from 'lucide-react';
 
+// Track if preloader has already run (persists across StrictMode remounts)
+let hasRun = false;
+
 export default function Preloader() {
+  const hasRunRef = useRef(false);
   const [phase, setPhase] = useState<'loading' | 'exiting' | 'done'>('loading');
 
   useEffect(() => {
+    // Skip if already ran (StrictMode double-mount protection)
+    if (hasRun || hasRunRef.current) {
+      setPhase('done');
+      return;
+    }
+    hasRun = true;
+    hasRunRef.current = true;
+
     const exitTimer = setTimeout(() => setPhase('exiting'), 2000);
     const doneTimer = setTimeout(() => setPhase('done'), 2700);
     return () => {

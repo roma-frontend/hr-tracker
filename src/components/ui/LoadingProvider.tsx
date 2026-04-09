@@ -1,14 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Preloader from './Preloader';
 
+// Track if timer has been set (persists across StrictMode remounts)
+let timerSet = false;
+
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
+  const timerSetRef = useRef(false);
   const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
-    // Match preloader exit animation start (2s) + exit duration (0.7s) = 2.7s
-    const timer = setTimeout(() => setIsDone(true), 2700);
+    // Skip if already set (StrictMode double-mount protection)
+    if (timerSet || timerSetRef.current) {
+      setIsDone(true);
+      return;
+    }
+    timerSet = true;
+    timerSetRef.current = true;
+
+    // Preloader exits at 2s (opacity transition starts) and is gone at 2.7s
+    // Start content fade-in right when preloader starts exiting (2s)
+    // so content is visible when preloader is fully gone
+    const timer = setTimeout(() => setIsDone(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -18,11 +32,11 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
       <div
         style={{
           opacity: isDone ? 1 : 0,
-          transition: 'opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-          transitionDelay: '1.8s',
-          position: isDone ? 'relative' : 'absolute',
+          transition: 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
+          position: 'relative',
           width: '100%',
           minHeight: '100vh',
+          pointerEvents: isDone ? 'auto' : 'none',
         }}
       >
         {children}
