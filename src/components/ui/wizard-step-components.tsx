@@ -306,18 +306,18 @@ export function RadioGroupStep({
         {options.map((option) => (
           <div
             key={option.value}
-            className="flex items-start space-x-3 p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] transition-colors cursor-pointer"
+            className="flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] transition-colors cursor-pointer"
             onClick={() => updateStepData(field, option.value)}
           >
             <RadioGroupItem
               value={option.value}
               id={`${field}-${option.value}`}
-              className="mt-0.5"
+              className="mt-0.5 shrink-0"
             />
             <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
-              <p className="font-medium text-[var(--text-primary)]">{option.label}</p>
+              <p className="font-medium text-sm md:text-base text-[var(--text-primary)]">{option.label}</p>
               {option.description && (
-                <p className="text-xs text-[var(--text-muted)] mt-1">{option.description}</p>
+                <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-0.5 md:mt-1">{option.description}</p>
               )}
             </Label>
           </div>
@@ -357,10 +357,10 @@ export function CheckboxStep({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 md:space-y-3">
       <div>
-        <Label className="text-[var(--text-primary)] text-base">{label}</Label>
-        {description && <p className="text-xs text-[var(--text-muted)] mt-1">{description}</p>}
+        <Label className="text-[var(--text-primary)] text-sm md:text-base">{label}</Label>
+        {description && <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1">{description}</p>}
       </div>
 
       <div className="space-y-2">
@@ -370,18 +370,19 @@ export function CheckboxStep({
           return (
             <div
               key={option.value}
-              className="flex items-start space-x-3 p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] transition-colors cursor-pointer"
+              className="flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] transition-colors cursor-pointer"
               onClick={() => toggleValue(option.value)}
             >
               <Checkbox
                 checked={isChecked}
                 onCheckedChange={() => toggleValue(option.value)}
                 id={`${field}-${option.value}`}
+                className="shrink-0 mt-0.5"
               />
               <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
-                <p className="font-medium text-[var(--text-primary)]">{option.label}</p>
+                <p className="font-medium text-sm md:text-base text-[var(--text-primary)]">{option.label}</p>
                 {option.description && (
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{option.description}</p>
+                  <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-0.5 md:mt-1">{option.description}</p>
                 )}
               </Label>
             </div>
