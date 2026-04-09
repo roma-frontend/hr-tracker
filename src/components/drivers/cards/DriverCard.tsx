@@ -99,13 +99,12 @@ export const DriverCard = memo(function DriverCard({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-4 ">
           <Button
             size="sm"
             onClick={() => onBook(driver._id)}
-            className="flex-1 drivers-btn-hover text-white"
+            className="flex-1 drivers-btn-hover bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
             style={{
-              background: 'linear-gradient(135deg, rgb(37, 99, 235), rgb(14, 165, 233))',
               border: 'none',
               fontWeight: 600,
               boxShadow: '0 4px 16px rgba(99, 102, 241, 0.25)',

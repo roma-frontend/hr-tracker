@@ -169,8 +169,7 @@ export function AvatarUpload({
           <Image src={displayUrl} alt={name} fill className="object-cover" sizes="100%" />
         ) : (
           <div
-            className={`${sizes[size]} rounded-full flex items-center justify-center font-bold`}
-            style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)', color: '#fff' }}
+            className={`${sizes[size]} rounded-full flex items-center justify-center font-bold bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white shadow-md hover:shadow-lg`}
           >
             {initials || <User className="w-1/2 h-1/2" />}
           </div>

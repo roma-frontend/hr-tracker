@@ -285,6 +285,8 @@
     "actions": "Actions",
     "recorded": "recorded",
     "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
     "employee": "Employee"
   },
   "nav": {

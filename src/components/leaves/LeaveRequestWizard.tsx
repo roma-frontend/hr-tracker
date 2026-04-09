@@ -30,7 +30,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType } from '@/lib/types';
+import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, getLeaveTypeLabel, type LeaveType } from '@/lib/types';
 
 interface LeaveRequestWizardProps {
   userId: Id<'users'>;
@@ -154,7 +154,7 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
                         : 'border-[var(--border)] bg-[var(--card)] text-[var(--text-primary)] hover:border-[var(--primary)]/50'
                     }`}
                   >
-                    {LEAVE_TYPE_LABELS[type]}
+                    {getLeaveTypeLabel(type, t)}
                   </button>
                 ))}
               </div>
@@ -282,7 +282,7 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
                 <div className="flex justify-between">
                   <span className="text-[var(--text-muted)]">{t('leaveWizard.type')}</span>
                   <span className="font-medium text-[var(--text-primary)]">
-                    {LEAVE_TYPE_LABELS[leaveType]}
+                    {getLeaveTypeLabel(leaveType, t)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -423,7 +423,7 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
                 <Button
                   onClick={handleSubmit}
                   disabled={isSubmitting || !hasEnoughBalance}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
                 >
                   {isSubmitting ? t('leaveWizard.submitting') : t('leaveWizard.submit')}
                 </Button>
@@ -431,7 +431,7 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
                 <Button
                   onClick={handleNext}
                   disabled={currentStep === 'dates' && (!startDate || !endDate || days <= 0)}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
                 >
                   {t('common.next')}
                   <ChevronRight className="w-4 h-4 ml-2" />
