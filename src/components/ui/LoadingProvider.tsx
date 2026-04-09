@@ -4,12 +4,11 @@ import { useState, useEffect } from 'react';
 import Preloader from './Preloader';
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
-  const [showContent, setShowContent] = useState(false);
+  const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
-    // Start fading in content when preloader starts exiting (2s)
-    // Content fade-in (0.8s) overlaps with preloader exit animation (0.7s)
-    const timer = setTimeout(() => setShowContent(true), 2000);
+    // Match preloader exit animation start (2s) + exit duration (0.7s) = 2.7s
+    const timer = setTimeout(() => setIsDone(true), 2700);
     return () => clearTimeout(timer);
   }, []);
 
@@ -18,9 +17,12 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
       <Preloader />
       <div
         style={{
-          opacity: showContent ? 1 : 0,
-          visibility: showContent ? 'visible' : 'hidden',
-          transition: 'opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+          opacity: isDone ? 1 : 0,
+          transition: 'opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+          transitionDelay: '1.8s',
+          position: isDone ? 'relative' : 'absolute',
+          width: '100%',
+          minHeight: '100vh',
         }}
       >
         {children}

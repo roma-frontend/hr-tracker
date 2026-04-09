@@ -157,10 +157,10 @@ export default function ManageAdminsPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">{t('ui.accessDenied')}</h1>
           <p className="text-muted-foreground">
-            {isSuperadmin ? 'Organization not found' : 'You can only manage your own organization'}
+            {isSuperadmin ? t('ui.organizationNotFound') : t('manageAdmins.onlyManageOwn')}
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            Your role: {user.role} | Your org: {user.organizationId} | Requested: {orgId}
+            {t('manageAdmins.yourRole')}: {user.role} | {t('manageAdmins.yourOrg')}: {user.organizationId} | {t('manageAdmins.requested')}: {orgId}
           </p>
         </div>
       </div>
@@ -180,7 +180,7 @@ export default function ManageAdminsPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">{t('ui.organizationNotFound')}</h1>
-          <p className="text-muted-foreground">The organization you're looking for doesn't exist</p>
+          <p className="text-muted-foreground">{t('manageAdmins.notFoundDesc')}</p>
           <button
             onClick={() => router.push('/superadmin/organizations')}
             className="mt-4 px-4 py-2 rounded-lg bg-primary text-white hover:opacity-90 transition"
@@ -216,7 +216,7 @@ export default function ManageAdminsPage() {
               {organization.plan.toUpperCase()}
             </span>
           </div>
-          <p className="text-muted-foreground">Manage administrators for this organization</p>
+          <p className="text-muted-foreground">{t('manageAdmins.manageDesc')}</p>
         </div>
 
         {/* Stats Overview */}
@@ -227,7 +227,7 @@ export default function ManageAdminsPage() {
                 <Users className="w-5 h-5 text-blue-500 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Members</p>
+                <p className="text-sm text-muted-foreground">{t('manageAdmins.totalMembers')}</p>
                 <p className="text-2xl font-bold">{orgMembers.length}</p>
               </div>
             </div>
@@ -239,7 +239,7 @@ export default function ManageAdminsPage() {
                 <Shield className="w-5 h-5 text-purple-500 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Admins</p>
+                <p className="text-sm text-muted-foreground">{t('manageAdmins.admins')}</p>
                 <p className="text-2xl font-bold">{admins.length}</p>
               </div>
             </div>
@@ -251,7 +251,7 @@ export default function ManageAdminsPage() {
                 <UserCheck className="w-5 h-5 text-green-500 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-sm text-muted-foreground">{t('manageAdmins.active')}</p>
                 <p className="text-2xl font-bold">{orgMembers.filter((m) => m.isActive).length}</p>
               </div>
             </div>
@@ -266,7 +266,7 @@ export default function ManageAdminsPage() {
               style={{ color: 'var(--text-primary)' }}
             >
               <Shield className="w-6 h-6 text-purple-500" />
-              Current Admins
+              {t('manageAdmins.currentAdmins')}
             </h2>
           </div>
 
@@ -298,7 +298,7 @@ export default function ManageAdminsPage() {
                       >
                         {admin.name}
                         <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-400">
-                          Admin
+                          {t('manageAdmins.admin')}
                         </span>
                       </h3>
                       <p className="text-sm text-muted-foreground">{admin.email}</p>
@@ -328,9 +328,9 @@ export default function ManageAdminsPage() {
               style={{ background: 'var(--card)' }}
             >
               <AlertCircle className="w-12 h-12 mx-auto mb-3 text-yellow-500 opacity-50" />
-              <p className="text-muted-foreground">No admins assigned yet</p>
+              <p className="text-muted-foreground">{t('manageAdmins.noAdminsYet')}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Select an employee below to make them an admin
+                {t('manageAdmins.noAdminsHint')}
               </p>
             </div>
           )}
@@ -343,7 +343,7 @@ export default function ManageAdminsPage() {
             style={{ color: 'var(--text-primary)' }}
           >
             <Users className="w-6 h-6 text-blue-500" />
-            Employees {employees.length > 0 && `(${employees.length})`}
+            {t('manageAdmins.employees')} {employees.length > 0 && `(${employees.length})`}
           </h2>
 
           {employees.length > 0 ? (
@@ -382,12 +382,12 @@ export default function ManageAdminsPage() {
                         {!employee.isApproved && (
                           <span className="px-2 py-0.5 rounded text-xs font-semibold bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            Pending Approval
+                            {t('manageAdmins.pendingApproval')}
                           </span>
                         )}
                         {!employee.isActive && (
                           <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-500/10 text-red-600 dark:text-red-400">
-                            Inactive
+                            {t('manageAdmins.inactive')}
                           </span>
                         )}
                       </div>
@@ -400,10 +400,10 @@ export default function ManageAdminsPage() {
                     className="p-2 rounded-lg hover:bg-green-500/10 text-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title={
                       !employee.isApproved
-                        ? 'Cannot promote unapproved employee'
+                        ? t('manageAdmins.cannotPromoteUnapproved')
                         : !employee.isActive
-                          ? 'Cannot promote inactive employee'
-                          : 'Make admin'
+                          ? t('manageAdmins.cannotPromoteInactive')
+                          : t('manageAdmins.makeAdmin')
                     }
                   >
                     <UserCheck className="w-5 h-5" />
@@ -417,9 +417,9 @@ export default function ManageAdminsPage() {
               style={{ background: 'var(--card)' }}
             >
               <Users className="w-12 h-12 mx-auto mb-3 text-blue-500 opacity-50" />
-              <p className="text-muted-foreground">No employees available</p>
+              <p className="text-muted-foreground">{t('manageAdmins.noEmployees')}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                All members in this organization are already admins
+                {t('manageAdmins.noEmployeesHint')}
               </p>
             </div>
           )}
