@@ -24,7 +24,7 @@ import { LeaveRequestModal } from '@/components/leaves/LeaveRequestModal';
 import { LeaveRequestWizard } from '@/components/leaves/LeaveRequestWizard';
 import { useAuthStore, type User } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
-import { LEAVE_TYPE_LABELS, type LeaveType, type LeaveStatus } from '@/lib/types';
+import { LEAVE_TYPE_LABELS, getLeaveTypeLabel, type LeaveType, type LeaveStatus } from '@/lib/types';
 import dynamic from 'next/dynamic';
 import { playNotificationSound, sendBrowserNotification } from '@/lib/notificationSound';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
@@ -60,6 +60,7 @@ function StatusBadge({ status }: { status: LeaveStatus }) {
 }
 
 function LeaveTypeBadge({ type }: { type: LeaveType }) {
+  const { t } = useTranslation();
   const colorMap: Record<LeaveType, string> = {
     paid: 'bg-[#2563eb]/20 text-[#2563eb] border-[#2563eb]/30',
     unpaid: 'bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30',
@@ -71,7 +72,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${colorMap[type]}`}
     >
-      {LEAVE_TYPE_LABELS[type]}
+      {getLeaveTypeLabel(type, t)}
     </span>
   );
 }
@@ -279,13 +280,11 @@ export function LeavesClient() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('leave.allTypes')}</SelectItem>
-                  {(Object.entries(LEAVE_TYPE_LABELS) as [LeaveType, string][]).map(
-                    ([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ),
-                  )}
+                  {(Object.keys(LEAVE_TYPE_LABELS) as LeaveType[]).map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {getLeaveTypeLabel(value, t)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

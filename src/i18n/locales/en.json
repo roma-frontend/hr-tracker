@@ -990,6 +990,16 @@
       }
     }
   },
+  "support": {
+    "categories": {
+      "technical": "Technical Issue",
+      "billing": "Billing & Payments",
+      "access": "Access & Permissions",
+      "feature": "Feature Request",
+      "bug": "Bug Report",
+      "other": "Other"
+    }
+  },
   "priority": {
     "low": "Low",
     "medium": "Medium",
