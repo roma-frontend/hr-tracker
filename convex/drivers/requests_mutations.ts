@@ -60,10 +60,18 @@ export const requestDriver = mutation({
     }
 
     // Check if driver is on leave
-    const startDate = new Date(args.startTime);
-    const endDate = new Date(args.endTime);
-    const startDateStr = startDate.toISOString().split('T')[0] || '';
-    const endDateStr = endDate.toISOString().split('T')[0] || '';
+const dateStr = String(data.date).trim();
+const timeStr = String(data.time).trim();
+const parsedStartDate = new Date(`${dateStr}T${timeStr}`);
+const startTime = parsedStartDate.getTime();
+
+if (isNaN(startTime)) {
+  toast.error('Invalid date or time. Please use YYYY-MM-DD and HH:MM formats.');
+  return;
+}
+
+const endTime = startTime + 3600000;
+
 
     const driver = await ctx.db.get(args.driverId);
     let leaveError = null;
