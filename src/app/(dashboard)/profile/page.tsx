@@ -455,7 +455,7 @@ export default function ProfilePage() {
         >
           {t('ui.discardChanges')}
         </Button>
-        <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
+        <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white">
           <Save className="w-4 h-4 mr-2" />
           {saving ? t('ui.saving') : t('ui.saveChanges')}
         </Button>

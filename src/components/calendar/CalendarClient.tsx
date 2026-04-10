@@ -963,7 +963,11 @@ export const CalendarClient = React.memo(function CalendarClient() {
       </div>
 
       {/* Leave Request Modal */}
-      <LeaveRequestModal open={showLeaveModal} onClose={() => setShowLeaveModal(false)} />
+      <LeaveRequestModal
+        open={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+        preselectedStartDate={selectedDay ? format(selectedDay, 'yyyy-MM-dd') : undefined}
+      />
 
       {/* Driver Request Modal */}
       <DriverRequestModal

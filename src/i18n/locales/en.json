@@ -1325,6 +1325,7 @@
     "allTypes": "All Types",
     "requests": "Requests",
     "days": "Days",
+    "day": "day",
     "types": {
       "paid": "Paid Leave",
       "paidDesc": "Annual vacation",
@@ -1337,6 +1338,9 @@
     }
   },
   "leaveRequest": {
+    "newLeaveRequest": "New Leave Request",
+    "adminDesc": "Submit a leave request for an employee",
+    "selfDesc": "Submit a leave request for yourself",
     "pickDate": "Pick a date",
     "reasonRequired": "Reason *",
     "reasonPlaceholder": "Enter the reason for your leave request...",
@@ -1696,6 +1700,7 @@
     "createOrgWithPlan": "Create New Organization"
   },
   "placeholders": {
+    "selectEmployee": "Select employee...",
     "acmeCorp": "Acme Corp",
     "acmeCorporation": "Acme Corporation",
     "acmeInc": "acme-inc",
@@ -4900,6 +4905,10 @@
     "balanceAfter": "Balance After",
     "submit": "Submit Request",
     "submitting": "Submitting...",
+    "selectEmployee": "Select the employee for this leave request",
+    "selectType": "What type of leave are you requesting?",
+    "selectDates": "Choose start and end dates for your leave",
+    "confirm": "Confirm",
     "steps": {
       "dates": {
         "title": "Dates",

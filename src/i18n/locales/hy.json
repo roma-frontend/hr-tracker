@@ -1293,6 +1293,7 @@
     "approved": "Հաստատված",
     "rejected": "Մերժված",
     "days": "Օրեր",
+    "day": "օր",
     "requests": "Հայտեր",
     "endDate": "Ավարտի ամսաթիվ",
     "myLeaves": "Արձակուրդների հայտեր",
@@ -1313,6 +1314,9 @@
     }
   },
   "leaveRequest": {
+    "newLeaveRequest": "Նոր արձակուրդի հայտ",
+    "adminDesc": "Արձակուրդի հայտ ներկայացնել աշխատակցի համար",
+    "selfDesc": "Արձակուրդի հայտ ներկայացնել ինքներդ ձեզ համար",
     "pickDate": "Ընտրեք ամսաթիվ",
     "reasonRequired": "Պատճառը պարտադիր է",
     "reasonPlaceholder": "Նշեք պատճառը",
@@ -1672,6 +1676,7 @@
     "createOrgWithPlan": "Ստեղծել նոր կազմակերպություն"
   },
   "placeholders": {
+    "selectEmployee": "Ընտրեք աշխատակցին...",
     "acmeCorp": "Acme Corp",
     "acmeCorporation": "Acme Corporation",
     "acmeInc": "acme-inc",
@@ -4851,6 +4856,10 @@
     "balanceAfter": "Մնացորդ հետո",
     "submit": "Ներկայացնել հայտ",
     "submitting": "Ներկայացնում է...",
+    "selectEmployee": "Ընտրեք աշխատակցին այս արձակուրդի հայտի համար",
+    "selectType": "Ի՞նչ տեսակի արձակուրդ եք դուք խնդրում",
+    "selectDates": "Ընտրեք սկսման և ավարտման ամսաթվերը ձեր արձակուրդի համար",
+    "confirm": "Հաստատել",
     "steps": {
       "dates": {
         "title": "Ամսաթվեր",

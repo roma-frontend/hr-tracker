@@ -607,6 +607,7 @@ export default function CompanyEventsPage() {
                   {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button
+                className='bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white'
                   onClick={async () => {
                     try {
                       await updateEvent({

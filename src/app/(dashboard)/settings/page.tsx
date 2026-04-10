@@ -434,7 +434,7 @@ export default function SettingsPage() {
           onClick={handleSave}
           disabled={saving}
           size="lg"
-          className="shadow-lg shadow-[var(--primary)]/20 w-full sm:w-auto"
+          className="shadow-lg shadow-[var(--primary)]/20 w-full sm:w-auto bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
         >
           {saving ? (
             <>

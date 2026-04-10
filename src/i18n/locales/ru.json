@@ -1244,7 +1244,7 @@
     "employee": "Сотрудник",
     "type": "Тип",
     "dates": "Даты",
-    "days": "Дни",
+    "days": "Дня",
     "status": "Статус",
     "statistics": "статистика",
     "quickActions": "быстрые действия",
@@ -1330,7 +1330,8 @@
     "allStatuses": "Все статусы",
     "allTypes": "Все типы",
     "requests": "Запросы",
-    "days": "Дни",
+    "days": "Дня",
+    "day": "день",
     "types": {
       "paid": "Оплачиваемый",
       "paidDesc": "Ежегодный отпуск",
@@ -1343,6 +1344,9 @@
     }
   },
   "leaveRequest": {
+    "newLeaveRequest": "Новая заявка на отпуск",
+    "adminDesc": "Подать заявку на отпуск для сотрудника",
+    "selfDesc": "Подать заявку на отпуск для себя",
     "pickDate": "Выберите дату",
     "reasonRequired": "Причина обязательна",
     "reasonPlaceholder": "Введите причину отпуска",
@@ -1418,7 +1422,7 @@
     "missedPunch": "Пропущенная отметка",
     "correction": "Исправление",
     "noFound": "Записи посещаемости не найдены",
-    "days": "Дни",
+    "days": "Дня",
     "hours": "Часы",
     "punctuality": "Пунктуальность",
     "noRecordsFor": "Нет записей за {{month}}",
@@ -1702,6 +1706,7 @@
     "createOrgWithPlan": "Создать новую организацию"
   },
   "placeholders": {
+    "selectEmployee": "Выберите сотрудника...",
     "acmeCorp": "Acme Corp",
     "acmeCorporation": "Acme Corporation",
     "acmeInc": "acme-inc",
@@ -4787,7 +4792,7 @@
     "recurringTripCreated": "Повторяющаяся поездка создана!",
     "departureTime": "Время отправления",
     "arrivalTime": "Время прибытия",
-    "days": "Дни",
+    "days": "Дня",
     "activated": "Активировано",
     "paused": "Приостановлено",
     "deleted": "Удалено",
@@ -5122,6 +5127,10 @@
     "balanceAfter": "Баланс после",
     "submit": "Отправить заявку",
     "submitting": "Отправка...",
+    "selectEmployee": "Выберите сотрудника для этой заявки на отпуск",
+    "selectType": "Какой тип отпуска вы запрашиваете?",
+    "selectDates": "Выберите даты начала и окончания отпуска",
+    "confirm": "Подтверждение",
     "steps": {
       "dates": {
         "title": "Выберите даты отпуска",

@@ -154,7 +154,7 @@ export default function EditOrganizationPage() {
             {t('ui.backToOrganizations')}
           </button>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
+            <div className="p-3 rounded-xl bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white">
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -347,8 +347,7 @@ export default function EditOrganizationPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-6 py-2.5 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
+              className="flex-1 px-6 py-2.5 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
             >
               {isLoading ? (
                 <>

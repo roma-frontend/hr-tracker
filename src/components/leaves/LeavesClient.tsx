@@ -453,7 +453,11 @@ export function LeavesClient() {
 
       {/* Leave Request Wizard (New) */}
       {wizardOpen && user?.id && (
-        <LeaveRequestWizard userId={user.id as Id<'users'>} onClose={() => setWizardOpen(false)} />
+        <LeaveRequestWizard 
+          userId={user.id as Id<'users'>} 
+          isSuperadmin={isSuperadmin}
+          onCancel={() => setWizardOpen(false)} 
+        />
       )}
 
       {/* Legacy Modal (keep for backward compatibility) */}
