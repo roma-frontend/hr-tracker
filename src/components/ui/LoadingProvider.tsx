@@ -21,45 +21,47 @@ export function LoadingProvider({
   cookieBanner?: React.ReactNode;
 }) {
   const timerSetRef = useRef(false);
-  const [isDone, setIsDone] = useState(false);
-  const [contentReady, setContentReady] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const contentReadyRef = useRef(false);
-  const minTimeElapsedRef = useRef(false);
 
   useEffect(() => {
     // Skip if already set (StrictMode double-mount protection)
     if (timerSet || timerSetRef.current) {
-      setIsDone(true);
+      setShowContent(true);
       contentReadyRef.current = true;
+      setMinTimeElapsed(true);
       return;
     }
     timerSet = true;
     timerSetRef.current = true;
 
     // Minimum display time: 2s for smooth UX
-    // After that, wait for content to signal it's ready
-    const minTimer = setTimeout(() => {
-      minTimeElapsedRef.current = true;
-    }, 2000);
+    const minTimer = setTimeout(() => setMinTimeElapsed(true), 2000);
 
-    return () => clearTimeout(minTimer);
+    // Fallback: force show after 5s max
+    const fallbackTimer = setTimeout(() => setShowContent(true), 5000);
+
+    return () => {
+      clearTimeout(minTimer);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const markReady = useCallback(() => {
     contentReadyRef.current = true;
-    setContentReady(true);
-  }, []);
-
-  // Show content when BOTH conditions are met:
-  // 1. Minimum time (2s) has elapsed
-  // 2. Content has signaled it's ready
-  useEffect(() => {
-    if (minTimeElapsedRef.current && contentReadyRef.current) {
-      setIsDone(true);
+    // If min time already elapsed, show content immediately
+    if (minTimeElapsed) {
+      setShowContent(true);
     }
-  }, [contentReady]);
+  }, [minTimeElapsed]);
 
-  const showContent = isDone;
+  // When min time elapses, check if content is ready
+  useEffect(() => {
+    if (minTimeElapsed && contentReadyRef.current) {
+      setShowContent(true);
+    }
+  }, [minTimeElapsed]);
 
   return (
     <LoadingContext.Provider value={markReady}>
