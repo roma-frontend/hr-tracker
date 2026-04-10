@@ -1,15 +1,14 @@
-// Server Component — HTML skeleton streams immediately.
-// Client components are automatically split into separate chunks by Next.js.
+// Server Component — renders immediately, no Preloader.
+// Content appears as soon as the page loads.
 
 import dynamic from 'next/dynamic';
-import { LoadingProvider } from '@/components/ui/LoadingProvider';
 import {
   SoftwareApplicationJsonLd,
   OrganizationJsonLd,
   FAQPageJsonLd,
 } from '@/components/seo/JsonLd';
 
-// Separate chunk for LandingClient. While downloading, show a hero-like skeleton.
+// Separate chunk for LandingClient
 const LandingClient = dynamic(() => import('@/components/landing/LandingClient'), {
   loading: () => (
     <div
@@ -29,22 +28,20 @@ const LandingClient = dynamic(() => import('@/components/landing/LandingClient')
   ),
 });
 
-// Separate chunks for minor client components (no ssr: false in Server Components)
 const ScrollToTop = dynamic(() => import('@/components/landing/ScrollToTop'));
 const CookieBanner = dynamic(() => import('@/components/CookieBanner'));
 
 export default function RootPage() {
   return (
-    <LoadingProvider cookieBanner={<CookieBanner />}>
-      <div className="min-h-screen" style={{ maxWidth: '100vw', overflowX: 'clip' }}>
-        {/* JSON-LD Structured Data for SEO */}
-        <SoftwareApplicationJsonLd />
-        <OrganizationJsonLd />
-        <FAQPageJsonLd />
+    <div className="min-h-screen" style={{ maxWidth: '100vw', overflowX: 'clip' }}>
+      {/* JSON-LD Structured Data for SEO */}
+      <SoftwareApplicationJsonLd />
+      <OrganizationJsonLd />
+      <FAQPageJsonLd />
 
-        <LandingClient />
-        <ScrollToTop />
-      </div>
-    </LoadingProvider>
+      <LandingClient />
+      <ScrollToTop />
+      <CookieBanner />
+    </div>
   );
 }
