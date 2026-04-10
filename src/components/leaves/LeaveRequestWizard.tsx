@@ -26,6 +26,10 @@ import { ru } from 'date-fns/locale';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
+
+// @ts-ignore - Convex API type causes infinite instantiation
+const leavesApi = (api as any).leaves;
+const usersApi = (api as any).users;
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -51,8 +55,8 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
   const [comment, setComment] = useState<string>('');
 
   // Загрузка баланса пользователя
-  const user = useQuery(api.users.queries.getUserById, { userId });
-  const createLeave = useMutation(api.leaves.createLeave);
+  const user = useQuery(usersApi.queries.getUserById, { userId });
+  const createLeave = useMutation(leavesApi.createLeave);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Вычисление дней
@@ -372,7 +376,7 @@ export function LeaveRequestWizard({ userId, onClose }: LeaveRequestWizardProps)
                           ? 'bg-blue-600 text-white'
                           : ['dates', 'details', 'confirm'].indexOf(currentStep) > index
                             ? 'bg-green-600 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                            : 'bg-gray-200 dark:bg-gray-700 text-white'
                       }`}
                     >
                       {['dates', 'details', 'confirm'].indexOf(currentStep) > index ? (

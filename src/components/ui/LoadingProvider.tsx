@@ -27,7 +27,7 @@ export function LoadingProvider({
 
     // Preloader displays for 2s minimum, then content fades in
     // Content (including dynamic imports) shows loading skeletons while chunks load
-    const timer = setTimeout(() => setShowContent(true), 2000);
+    const timer = setTimeout(() => setShowContent(true), 0);
     return () => clearTimeout(timer);
   }, []);
 
