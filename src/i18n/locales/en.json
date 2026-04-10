@@ -4903,6 +4903,7 @@
     "steps": {
       "dates": {
         "title": "Dates",
+        "short": "Dates",
         "description": "Select start and end dates",
         "startDateLabel": "Start Date *",
         "endDateLabel": "End Date *",
@@ -4911,6 +4912,7 @@
       },
       "details": {
         "title": "Details",
+        "short": "Details",
         "description": "Provide additional information",
         "reasonLabel": "Reason *",
         "reasonPlaceholder": "e.g., Annual vacation",
@@ -4920,6 +4922,7 @@
       },
       "confirm": {
         "title": "Confirm",
+        "short": "Confirm",
         "description": "Review and submit",
         "summary": "Summary",
         "type": "Type",

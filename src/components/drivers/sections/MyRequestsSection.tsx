@@ -263,20 +263,14 @@ export const MyRequestsSection = memo(function MyRequestsSection({
   return (
     <Card className="mb-6 sm:mb-8 border-[var(--border)]">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-          <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[var(--primary)]" />
-              {t('driver.myRequests', 'My Driver Requests')}
-            </CardTitle>
-            <CardDescription>
-              {t('driver.myRequestsDesc', 'View and manage your requests')}
-            </CardDescription>
-          </div>
-          <Button onClick={onRequestDriver} className="gap-2">
-            <Plus className="w-4 h-4" />
-            {t('driver.requestDriver', 'Request Driver')}
-          </Button>
+        <div>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Clock className="w-5 h-5 text-[var(--primary)]" />
+            {t('driver.myRequests', 'My Driver Requests')}
+          </CardTitle>
+          <CardDescription>
+            {t('driver.myRequestsDesc', 'View and manage your requests')}
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent>
