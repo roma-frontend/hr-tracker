@@ -508,7 +508,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
             {t('calendarExtended.visualOverview')}
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
           <Button variant="outline" size="sm" onClick={goToday}>
             <CalendarDays className="w-4 h-4" />
             {t('buttons.today')}
