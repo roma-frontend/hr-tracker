@@ -215,44 +215,44 @@ export function RequestDriverWizard({
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
       const mergedData = { ...wizardData, ...data };
+
       if (!organizationId) {
         toast.error(t('driverWizard.toast.noOrg'));
         return;
       }
 
-      const dateStr = String(data.date || '').trim();
-const timeStr = String(data.time || '').trim();
+      const dateStr = String(mergedData.date || '').trim();
+      const timeStr = String(mergedData.time || '').trim();
 
-if (!dateStr || !timeStr) {
-  toast.error('Please fill in both date and time fields.');
-  return;
-}
+      if (!dateStr || !timeStr) {
+        toast.error('Please fill in both date and time fields.');
+        return;
+      }
 
-const parsedDate = new Date(`${dateStr}T${timeStr}`);
-const startTime = parsedDate.getTime();
+      const parsedDate = new Date(`${dateStr}T${timeStr}:00`);
+      const startTime = parsedDate.getTime();
 
-if (isNaN(startTime)) {
-  toast.error('Invalid date or time. Please use YYYY-MM-DD and HH:MM formats.');
-  return;
-}
+      if (isNaN(startTime)) {
+        toast.error('Invalid date or time. Please use YYYY-MM-DD and HH:MM formats.');
+        return;
+      }
 
-const endTime = startTime + 3600000;
-
+      const endTime = startTime + 3600000;
 
       const result = await requestDriver({
         organizationId,
         requesterId: userId,
-        driverId: data.driverId as Id<'drivers'>,
+        driverId: mergedData.driverId as Id<'drivers'>,
         startTime,
         endTime,
         tripInfo: {
-          from: String(data.from),
-          to: String(data.to),
-          purpose: String(data.purpose),
-          passengerCount: Number(data.passengerCount) || 1,
-          notes: data.notes ? String(data.notes) : undefined,
+          from: String(mergedData.from),
+          to: String(mergedData.to),
+          purpose: String(mergedData.purpose),
+          passengerCount: Number(mergedData.passengerCount) || 1,
+          notes: mergedData.notes ? String(mergedData.notes) : undefined,
         },
-        tripCategory: data.tripCategory as
+        tripCategory: mergedData.tripCategory as
           | 'client_meeting'
           | 'airport'
           | 'office_transfer'
