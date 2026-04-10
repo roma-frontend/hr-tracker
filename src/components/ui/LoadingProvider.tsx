@@ -25,13 +25,12 @@ export function LoadingProvider({
     timerSet = true;
     timerSetRef.current = true;
 
-    // Preloader: starts exiting at 2s, fully done at 2.7s
-    // Show content exactly when Preloader is done (2.7s)
-    const timer = setTimeout(() => setShowContent(true), 2700);
+    // Preloader starts exiting at 2s, fully gone at 2.7s
+    // Show content at 2s so it fades in WHILE Preloader is exiting
+    // — seamless transition, no gap between them
+    const timer = setTimeout(() => setShowContent(true), 2000);
     
-    // Guaranteed fallback: force show after 5s no matter what.
-    // In production, JS chunks may take longer to download on slow connections.
-    // This ensures the user never waits more than 5 seconds.
+    // Guaranteed fallback: force show after 5s
     const guaranteedShow = setTimeout(() => setShowContent(true), 5000);
     
     return () => {
