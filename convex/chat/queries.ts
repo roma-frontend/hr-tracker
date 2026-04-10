@@ -49,26 +49,33 @@ export const getMyConversations = query({
       isPinned?: boolean;
     }>;
 
-    // Step 4: Collect all user IDs that we need to load
+    // Step 4: Load ALL chat members first (needed to find DM participants)
+    const allChatMembers = await ctx.db.query('chatMembers').collect();
+
+    // Step 5: Collect all user IDs that we need to load (including DM other-participants)
     const allUserIds = new Set<Id<'users'>>();
 
     filteredConvs.forEach((conv) => {
+      allUserIds.add(conv.createdBy);
+
+      // For DMs: also add the other participant so their name is resolved
       if (conv.type === 'direct') {
-        allUserIds.add(conv.createdBy);
-      } else if (conv.type === 'group') {
-        allUserIds.add(conv.createdBy);
+        const members = allChatMembers.filter((m) => m.conversationId === conv._id);
+        const otherMember = members.find((m) => m.userId !== args.userId);
+        if (otherMember) {
+          allUserIds.add(otherMember.userId);
+        }
       }
     });
 
-    // Step 5: Batch load all users with leave status
+    // Step 6: Batch load all users with leave status
     const usersWithLeaveStatus = await getUsersWithLeaveStatus(ctx, Array.from(allUserIds));
     const userMap = usersWithLeaveStatus.userMap;
     const userStatusMap = usersWithLeaveStatus.result;
 
-    // Step 6: Batch load group members for groups
+    // Step 7: Build group members map
     const groupConvs = filteredConvs.filter((c) => c.type === 'group');
 
-    const allGroupMembers = await ctx.db.query('chatMembers').collect();
     const groupMembersMap = new Map<
       Id<'chatConversations'>,
       Array<{
@@ -78,7 +85,7 @@ export const getMyConversations = query({
       }>
     >();
     groupConvs.forEach((conv) => {
-      const members = allGroupMembers.filter((m) => m.conversationId === conv._id);
+      const members = allChatMembers.filter((m) => m.conversationId === conv._id);
       groupMembersMap.set(conv._id, members);
     });
 
@@ -92,14 +99,14 @@ export const getMyConversations = query({
     const groupMemberUsers = await getUsersWithLeaveStatus(ctx, Array.from(groupMemberUserIds));
     const groupMemberUserMap = groupMemberUsers.userMap;
 
-    // Step 7: Build result with pre-loaded data
+    // Step 8: Build result with pre-loaded data
     const conversationsWithDetails = filteredConvs.map((conv, idx) => {
       const membership = validMemberships[idx];
 
       // For DMs: get other user
       let otherUser = null;
       if (conv.type === 'direct') {
-        const allMembers = allGroupMembers.filter((m) => m.conversationId === conv._id);
+        const allMembers = allChatMembers.filter((m) => m.conversationId === conv._id);
         const otherMember = allMembers.find((m) => m.userId !== args.userId);
         if (otherMember) {
           const status = userStatusMap.get(otherMember.userId);
@@ -141,7 +148,7 @@ export const getMyConversations = query({
       };
     });
 
-    // Step 8: Sort (pinned first, then by last message time)
+    // Step 9: Sort (pinned first, then by last message time)
     return conversationsWithDetails.sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
