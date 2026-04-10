@@ -214,6 +214,7 @@ export function RequestDriverWizard({
 
   const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
     try {
+      const mergedData = { ...wizardData, ...data };
       if (!organizationId) {
         toast.error(t('driverWizard.toast.noOrg'));
         return;
