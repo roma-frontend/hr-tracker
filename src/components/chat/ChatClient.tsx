@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
@@ -13,6 +13,7 @@ import { MessageCircle } from 'lucide-react';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useTranslation } from 'react-i18next';
+import { playChatMessageSound } from '@/lib/notificationSound';
 
 interface Props {
   userId: string;
@@ -152,6 +153,35 @@ export default function ChatClient({
     }
   }, [selectedConvId]);
 
+  // Global notification sound for new messages in ANY conversation
+  const previousTotalUnreadRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!conversations) return;
+
+    const totalUnread = conversations.reduce(
+      (sum, conv) => sum + ((conv as any)?.membership?.unreadCount ?? 0),
+      0,
+    );
+
+    if (previousTotalUnreadRef.current === null) {
+      // First load — just save the count, don't play sound
+      previousTotalUnreadRef.current = totalUnread;
+      return;
+    }
+
+    // Play sound only when unread count increases (new message arrived)
+    if (totalUnread > previousTotalUnreadRef.current) {
+      // Skip if the currently open ChatWindow will handle the sound itself
+      const isActiveConvHandlingSound = selectedConvId != null;
+           if (!isActiveConvHandlingSound) {
+        playChatMessageSound();
+      }
+    }
+
+    previousTotalUnreadRef.current = totalUnread;
+  }, [conversations, selectedConvId]);
+
   if (!uid || !effectiveOrgId)
     return (
       <div
@@ -207,12 +237,9 @@ export default function ChatClient({
         <div
           className={cn(
             'flex flex-col border-r shrink-0 transition-all duration-300 ease-in-out',
-            // Mobile: full height of parent (parent already accounts for navbar)
             'absolute inset-0 md:relative md:inset-auto',
             'md:w-72 lg:w-80',
-            // Desktop: always visible and interactive
             'md:opacity-100 md:translate-x-0 md:pointer-events-auto',
-            // Mobile: hide/show based on mobileShowChat
             mobileShowChat
               ? 'opacity-0 pointer-events-none -translate-x-4'
               : 'opacity-100 translate-x-0 pointer-events-auto',
@@ -250,8 +277,6 @@ export default function ChatClient({
         <div
           className={cn(
             'flex-1 flex flex-col min-w-0 overflow-x-hidden',
-            // Mobile: absolute overlay sliding from right
-            // Parent container already starts below navbar, so inset-0 is correct
             'absolute inset-0 md:relative md:inset-auto',
             'z-20 md:z-auto',
             mobileShowChat
@@ -262,7 +287,6 @@ export default function ChatClient({
           style={{ background: 'var(--background)' }}
         >
           {selectedConvId ? (
-            /* Animate the chat window content in */
             <div
               className={cn(
                 'flex flex-col h-full transition-all duration-300 ease-out',
@@ -304,7 +328,6 @@ function EmptyState({ onNewConversation }: { onNewConversation: () => void }) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-5 p-8 select-none animate-fade-in">
-      {/* Animated shield icon */}
       <div
         className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg"
         style={{
@@ -336,3 +359,5 @@ function EmptyState({ onNewConversation }: { onNewConversation: () => void }) {
     </div>
   );
 }
+
+
