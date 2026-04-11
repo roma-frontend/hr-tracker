@@ -28,10 +28,14 @@ import {
 
 import StatsCard from './StatsCard';
 import FeatureCard from './FeatureCard';
-import MobileMenu from './MobileMenu';
 import { Button } from '@/components/ui/button';
 
 const FloatingParticles = dynamic(() => import('./FloatingParticles'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const MobileMenu = dynamic(() => import('./MobileMenu'), {
   ssr: false,
   loading: () => null,
 });
@@ -212,11 +216,21 @@ function Navbar() {
 
   // Track scroll position for navbar background effect
   React.useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (ticking) return;
+
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 20);
+        ticking = false;
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -458,7 +472,9 @@ function Navbar() {
       </nav>
 
       {/* Mobile Menu Component */}
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      {isMobileMenuOpen ? (
+        <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      ) : null}
     </>
   );
 }
@@ -697,36 +713,10 @@ function HeroSection() {
 function StatsSection() {
   const { t } = useTranslation();
   const STATS = getStatsData(t);
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = React.useState(false);
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e?.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.1 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   return (
     <section className="relative px-6 md:px-12 py-20" id="stats" aria-label="Platform statistics">
-      <div
-        ref={ref}
-        className="text-center mb-12"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(30px)',
-          transition:
-            'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
-        }}
-      >
+      <div className="text-center mb-12 section-fade">
         <span className="section-eyebrow">{t('landing.byTheNumbers')}</span>
         <h2
           className="mt-3 text-3xl md:text-4xl font-bold"
@@ -748,37 +738,11 @@ function StatsSection() {
 function FeaturesSection() {
   const { t } = useTranslation();
   const FEATURES = getFeaturesData(t);
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = React.useState(false);
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e?.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.08 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   return (
     <section id="features" className="relative px-6 md:px-12 py-20" aria-label="Platform features">
       {/* Section header */}
-      <div
-        ref={ref}
-        className="text-center mb-16"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(30px)',
-          transition:
-            'opacity 0.75s cubic-bezier(0.22,1,0.36,1), transform 0.75s cubic-bezier(0.22,1,0.36,1)',
-        }}
-      >
+      <div className="text-center mb-16 section-fade">
         <span className="section-eyebrow">{t('landing.leaveTypes')}</span>
         <h2
           className="mt-3 text-3xl md:text-5xl font-black leading-tight"
