@@ -1,11 +1,9 @@
 ﻿'use client';
-import Image from 'next/image';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from 'convex/react';
 import { useDebouncedCallback } from 'use-debounce';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
@@ -15,7 +13,6 @@ import {
   Search,
   Shield,
   Users,
-  Briefcase,
   User,
   AlertTriangle,
   LayoutGrid,
@@ -108,8 +105,6 @@ export function EmployeesClient() {
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [pageCount, setPageCount] = useState(0);
-  const PAGE_SIZE = 50;
 
   // Debounced search - prevents excessive re-renders while typing
   const handleSearchChange = useDebouncedCallback((value: string) => {
@@ -142,7 +137,6 @@ export function EmployeesClient() {
     }
   }, [allUsersDirect]);
 
-  const usersPage = allUsersDirect; // For compatibility
 
   // Build supervisor lookup map from allUsers (more reliable than separate query)
   const supervisorMap = useMemo(() => {
@@ -168,43 +162,6 @@ export function EmployeesClient() {
   const isAdmin = user?.role === 'admin';
   const isSupervisor = user?.role === 'supervisor';
   const canManage = isAdmin || isSupervisor || isSuperadmin;
-
-  // Check if current user can delete a specific employee
-  const canDeleteEmployee = (emp: any) => {
-    if (!canManage) return false;
-    if (emp._id === user?.id) return false;
-
-    const isSuperadminUser =
-      isSuperadmin || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
-    const isSuperadminEmployee =
-      emp.role === 'superadmin' || emp.email?.toLowerCase() === 'romangulanyan@gmail.com';
-
-    if (isSuperadminUser) return true;
-    if (isSuperadminEmployee) return false;
-    if (emp.role === 'admin') return false;
-
-    return true;
-  };
-
-  // Check if current user can edit a specific employee
-  const canEditEmployee = (emp: any) => {
-    if (!canManage) return false;
-
-    // Superadmin (by role OR email) can edit anyone
-    const isSuperadminUser =
-      isSuperadmin || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
-    if (isSuperadminUser) return true;
-
-    // Non-superadmin cannot edit superadmin (by role OR email)
-    const isSuperadminEmployee =
-      emp.role === 'superadmin' || emp.email?.toLowerCase() === 'romangulanyan@gmail.com';
-    if (isSuperadminEmployee) return false;
-
-    // Admin cannot edit OTHER admins (but can edit themselves)
-    if (emp.role === 'admin' && isAdmin && emp._id !== user?.id) return false;
-
-    return true;
-  };
 
   const filtered = useMemo(() => {
     const usersToFilter = allUsers || [];
@@ -749,7 +706,7 @@ export function EmployeesClient() {
                       >
                         {/* Employee name + avatar */}
                         <div className="sm:col-span-4 flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-xs font-bold">
+                          <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 flex items-center justify-center text-white text-xs font-bold">
                             {emp.avatarUrl ? (
                               <img
                                 src={emp.avatarUrl}
