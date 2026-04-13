@@ -10,6 +10,7 @@ import { Calendar, Clock, TrendingUp, AlertTriangle, Award, Target } from 'lucid
 import { motion } from '@/lib/cssMotion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { format } from 'date-fns';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export function AttendanceDashboard() {
   const { user } = useAuthStore();
@@ -30,7 +31,7 @@ export function AttendanceDashboard() {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-center text-[var(--text-muted)]">{t('ui.loadingAttendanceData')}</p>
+          <ShieldLoader size="md" className="py-8" />
         </CardContent>
       </Card>
     );
@@ -174,8 +175,10 @@ export function AttendanceDashboard() {
                     )}
                     {record.status === 'checked_out' && record.totalWorkedMinutes && (
                       <Badge variant="secondary">
-                        {Math.floor(record.totalWorkedMinutes / 60)}h{' '}
-                        {record.totalWorkedMinutes % 60}m
+                        {Math.floor(record.totalWorkedMinutes / 60)}
+                        {t('attendanceExtra.hoursShort')}{' '}
+                        {record.totalWorkedMinutes % 60}
+                        {t('attendanceExtra.minutesShort')}
                       </Badge>
                     )}
                     {record.isLate && <Badge variant="destructive">{t('statuses.late')}</Badge>}
@@ -186,7 +189,9 @@ export function AttendanceDashboard() {
                     )}
                     {record.overtimeMinutes && record.overtimeMinutes > 0 && (
                       <Badge className="bg-sky-400 text-white">
-                        +{Math.floor(record.overtimeMinutes / 60)}h OT
+                        +{Math.floor(record.overtimeMinutes / 60)}
+                        {t('attendanceExtra.hoursShort')}{' '}
+                        {t('attendanceExtra.overtimeShort')}
                       </Badge>
                     )}
                   </div>

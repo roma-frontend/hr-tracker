@@ -118,7 +118,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
           {/* Employee select */}
           <div>
             <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
-              Select Employee
+              {t('modals.assignSupervisor.selectEmployee')}
             </label>
             <select
               value={selectedEmployee}
@@ -128,9 +128,9 @@ export function AssignSupervisorModal({ onClose }: Props) {
               }}
               className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-              <option value="">Choose employee...</option>
+              <option value="">{t('modals.assignSupervisor.chooseEmployee')}</option>
               {employees === undefined && <option disabled>{t('commonUI.loading')}...</option>}
-              {employees?.length === 0 && <option disabled>No employees found</option>}
+              {employees?.length === 0 && <option disabled>{t('employees.noFound')}</option>}
               {employees?.map((emp) => (
                 <option key={emp._id} value={emp._id}>
                   {emp.name}

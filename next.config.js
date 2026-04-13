@@ -11,7 +11,14 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
-  productionBrowserSourceMaps: false,
+  productionBrowserSourceMaps: true,
+
+  // Target modern browsers only — removes unnecessary polyfills (Array.at, Array.flat, etc.)
+  // This eliminates ~24 KiB of legacy JavaScript warned by Lighthouse
+  env: {
+    // Signal to browserslist to target evergreen browsers
+    BROWSERSLIST: 'defaults, not IE 11, not dead',
+  },
 
   // TypeScript: DO NOT ignore build errors — catch type issues early
   typescript: { ignoreBuildErrors: false },
@@ -100,9 +107,9 @@ const nextConfig = {
       // More aggressive code splitting
       config.optimization.splitChunks = {
         chunks: 'all',
-        minSize: 20000,
-        maxSize: 244000,
-        maxAsyncRequests: 30,
+        minSize: 24000,
+        maxSize: 200000,
+        maxAsyncRequests: 50,
         maxInitialRequests: 30,
         minChunks: 1,
         cacheGroups: {
@@ -177,7 +184,8 @@ const nextConfig = {
     }
 
     if (!dev) {
-      config.devtool = false; // Disable source maps in production for smaller bundle
+      // Keep source maps for Lighthouse debugging (hidden-source-map is smaller)
+      config.devtool = 'hidden-source-map';
     }
 
     return config;

@@ -155,7 +155,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         {/* ── Resource hints: only fonts preconnect ── */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* preconnect to gstatic removed — Lighthouse warns about unused preconnect; dns-prefetch is sufficient */}
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         {/* Convex preconnect removed — only needed for dashboard pages, triggers Lighthouse warning on static pages */}
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />

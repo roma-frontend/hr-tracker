@@ -78,12 +78,12 @@ export default function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4
+              <h3
                 className="text-xs uppercase tracking-[0.2em] font-bold mb-4"
                 style={{ color: 'var(--landing-text-muted)' }}
               >
                 {t(`landingExtra.${category === 'product' ? 'footerProduct' : category === 'platform' ? 'footerPlatform' : category === 'account' ? 'footerAccount' : 'footerLegal'}`)}
-              </h4>
+              </h3>
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.nameKey}>

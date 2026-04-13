@@ -1392,6 +1392,16 @@
     "missedPunch": "Բացակայող նշում",
     "correction": "Ուղղում",
     "noFound": "Իմ ներկայությունը - Արդյունք չկա",
+    "atWork": "Աշխատանքի վրա",
+    "finishedToday": "Ավարտել է այսօր",
+    "lateBy": "Ուշացել է {{minutes}} րոպեով",
+    "leftEarlyBy": "Հեռացել է {{minutes}} րոպե շուտ",
+    "totalWorked": "Ընդհանուր աշխատել է",
+    "seeYouTomorrow": "Մինչ վաղը! 👋",
+    "online": "Ցանցում",
+    "offline": "Ցանցից դուրս",
+    "failedCheckIn": "Չհաջողվեց ներկայանալ",
+    "failedCheckOut": "Չհաջողվեց հեռանալ",
     "days": "Օրեր",
     "hours": "Ժամեր",
     "punctuality": "Ժամանակակություն",
@@ -2832,7 +2842,10 @@
   "attendanceExtra": {
     "daysWorked": "Աշխատանքային օրեր",
     "totalHours": "Ընդհանուր ժամեր",
-    "punctuality": "Ժամանակին գալը"
+    "punctuality": "Ժամանակին գալը",
+    "hoursShort": "ժ",
+    "minutesShort": "րոպե",
+    "overtimeShort": "գերժամ"
   },
   "editEmployee": {
     "fullAccess": "Լիարժեք մուտք",

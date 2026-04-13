@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 
 // Inline SVG icons to avoid lucide-react on SSR
@@ -45,6 +46,7 @@ function ZapIcon() {
 export default function HeroCTA() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { t } = useTranslation();
 
   if (user) {
     return (
@@ -54,10 +56,10 @@ export default function HeroCTA() {
           variant="cta"
           size="2xl"
           className="gap-3"
-          aria-label="Go to Dashboard"
+          aria-label={t('landing.goToDashboard')}
         >
           <ActivityIcon />
-          Go to Dashboard
+          {t('landing.goToDashboard')}
           <ArrowRightIcon />
         </Button>
         <Button
@@ -65,10 +67,10 @@ export default function HeroCTA() {
           variant="ctaSecondary"
           size="2xl"
           className="gap-3"
-          aria-label="View analytics"
+          aria-label={t('landing.viewAnalytics')}
         >
           <BarChartIcon />
-          View Analytics
+          {t('landing.viewAnalytics')}
         </Button>
       </div>
     );
@@ -77,9 +79,9 @@ export default function HeroCTA() {
   return (
     <div className="hero-fade-2 flex flex-col sm:flex-row items-center gap-4 mb-16">
       <Link href="/register">
-        <Button variant="cta" size="2xl" className="gap-3" aria-label="Get started for free">
+        <Button variant="cta" size="2xl" className="gap-3" aria-label={t('landing.getStartedFree')}>
           <ZapIcon />
-          Get Started Free
+          {t('landing.getStartedFree')}
           <ArrowRightIcon />
         </Button>
       </Link>
@@ -88,9 +90,9 @@ export default function HeroCTA() {
           variant="ctaSecondary"
           size="2xl"
           className="gap-3"
-          aria-label="Sign in to your account"
+          aria-label={t('landing.signIn')}
         >
-          Sign In
+          {t('landing.signIn')}
           <ArrowRightIcon />
         </Button>
       </Link>

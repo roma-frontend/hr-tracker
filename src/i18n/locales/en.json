@@ -45,7 +45,7 @@
       "allRightsReserved": "All rights reserved"
     },
     "exclusiveHR": "Exclusive HR",
-    "goToDashboard": "Go to Dashboard",
+    "goToDashboard: ,": "Go to Dashboard",
     "viewAnalytics": "View Analytics",
     "signIn": "Sign In",
     "trustedByElite": "Trusted by elite HR professionals",
@@ -1416,6 +1416,16 @@
     "missedPunch": "Missed Punch",
     "correction": "Correction",
     "noFound": "No attendance records found",
+    "atWork": "At Work",
+    "finishedToday": "Finished for Today",
+    "lateBy": "Late by {{minutes}} min",
+    "leftEarlyBy": "Left {{minutes}} min early",
+    "totalWorked": "Total Worked",
+    "seeYouTomorrow": "See you tomorrow! 👋",
+    "online": "Online",
+    "offline": "Offline",
+    "failedCheckIn": "Failed to check in",
+    "failedCheckOut": "Failed to check out",
     "days": "Days",
     "hours": "Hours",
     "punctuality": "Punctuality",
@@ -2856,7 +2866,10 @@
   "attendanceExtra": {
     "daysWorked": "Days Worked",
     "totalHours": "Total Hours",
-    "punctuality": "Punctuality"
+    "punctuality": "Punctuality",
+    "hoursShort": "h",
+    "minutesShort": "m",
+    "overtimeShort": "OT"
   },
   "editEmployee": {
     "fullAccess": "Full access",

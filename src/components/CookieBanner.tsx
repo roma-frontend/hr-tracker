@@ -83,10 +83,10 @@ export default function CookieBanner() {
                         href="/privacy"
                         className="inline-flex items-center font-medium text-[var(--primary)] hover:underline"
                         aria-label={t('cookies.learnMoreDetailed', {
-                          defaultValue: 'Learn more about our privacy policy',
+                          defaultValue: 'Learn more about our privacy policy and how we handle your data',
                         })}
                       >
-                        {t('cookies.learnMore', { defaultValue: 'Learn more about privacy' })}
+                        {t('cookies.learnMore', { defaultValue: 'Learn more about our privacy policy' })}
                       </Link>
                       {t('cookies.or')}{' '}
                       <button
@@ -100,7 +100,7 @@ export default function CookieBanner() {
 
                     {/* Cookie categories preview */}
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <div className="flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-600 dark:text-white">
+                      <div className="flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white">
                         <Shield className="h-3 w-3" />
                         {t('cookies.essential')}
                       </div>

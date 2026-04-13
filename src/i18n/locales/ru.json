@@ -1422,6 +1422,16 @@
     "missedPunch": "Пропущенная отметка",
     "correction": "Исправление",
     "noFound": "Записи посещаемости не найдены",
+    "atWork": "На работе",
+    "finishedToday": "Завершил на сегодня",
+    "lateBy": "Опоздание на {{minutes}} мин",
+    "leftEarlyBy": "Ушёл на {{minutes}} мин рано",
+    "totalWorked": "Всего отработано",
+    "seeYouTomorrow": "До завтра! 👋",
+    "online": "В сети",
+    "offline": "Не в сети",
+    "failedCheckIn": "Не удалось отметиться",
+    "failedCheckOut": "Не удалось завершить работу",
     "days": "Дня",
     "hours": "Часы",
     "punctuality": "Пунктуальность",
@@ -2887,7 +2897,10 @@
     "totalHours": "Всего часов",
     "punctuality": "Пунктуальность",
     "lateDays": "Дней опозданий",
-    "overtime": "сверхурочно"
+    "overtime": "сверхурочно",
+    "hoursShort": "ч",
+    "minutesShort": "мин",
+    "overtimeShort": "сверхур."
   },
   "editEmployee": {
     "fullAccess": "Полный доступ",
