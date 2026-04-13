@@ -254,9 +254,11 @@ export function Sidebar() {
       className={cn(
         'relative hidden lg:flex flex-col h-screen border-r z-60 shrink-0 bg-sidebar-bg border-sidebar-border',
         collapsed ? 'w-18' : 'w-60',
-        'transition-[width] duration-500 ease-in-out',
-        'will-change-[width]',
       )}
+      style={{
+        transition: 'width 600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        willChange: 'width',
+      }}
     >
       {/* Header with Logo */}
       <div className="flex items-center justify-center h-16 px-4 border-b border-sidebar-border">
@@ -282,13 +284,13 @@ export function Sidebar() {
                 <span className="text-white font-bold text-sm">HR</span>
               </div>
               <div
+                className="overflow-hidden whitespace-nowrap"
                 style={{
                   opacity: collapsed ? 0 : 1,
                   transform: collapsed ? 'translateX(-8px)' : 'translateX(0)',
+                  // Text appears AFTER sidebar opens (350ms delay = sidebar is mostly open)
                   transition: `opacity 250ms ease-in-out ${collapsed ? '0ms' : '350ms'}, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1) ${collapsed ? '0ms' : '350ms'}`,
                   width: collapsed ? 0 : 'auto',
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap',
                 }}
               >
                 <h1 className="text-sm font-bold text-text-primary">
@@ -341,13 +343,13 @@ export function Sidebar() {
 
       {/* Quick Actions Palette (Cmd+K) - Only when expanded */}
       {!collapsed && (
-        <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--sidebar-border)' }}>
+        <div className="px-4 py-2 border-b border-sidebar-border">
           <QuickActionsPalette />
         </div>
       )}
 
       {/* Organization Selector - Top Position */}
-      <div className="px-2 py-3 border-b" style={{ borderColor: 'var(--sidebar-border)' }}>
+      <div className="px-2 py-3 border-b border-sidebar-border">
         <OrganizationSelector collapsed={collapsed} />
       </div>
 
@@ -382,17 +384,14 @@ export function Sidebar() {
                 onMouseLeave={() => setHoveredItem(null)}
                 className={cn(
                   'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200',
-                  'focus:outline-none focus:ring-2 focus:ring-(--primary)/30',
-                  isActive && 'shadow-sm',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/30',
+                  isActive
+                    ? 'bg-sidebar-item-active shadow-sm text-sidebar-item-active-text'
+                    : cn(
+                        'text-sidebar-text',
+                        hoveredItem === item.href ? 'bg-sidebar-item-hover' : 'bg-transparent',
+                      ),
                 )}
-                style={{
-                  backgroundColor: isActive
-                    ? 'var(--sidebar-item-active)'
-                    : hoveredItem === item.href
-                      ? 'var(--sidebar-item-hover)'
-                      : 'transparent',
-                  color: isActive ? 'var(--sidebar-item-active-text)' : 'var(--text-muted)',
-                }}
               >
                 {/* Active Indicator */}
                 {isActive && (
