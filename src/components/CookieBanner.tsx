@@ -102,7 +102,7 @@ export default function CookieBanner() {
 
                     {/* Cookie categories preview */}
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <div className="flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white">
+                      <div className="flex items-center gap-1.5 rounded-full bg-[#1a3460] px-3 py-1 text-xs font-medium text-white">
                         <Shield className="h-3 w-3" />
                         {t('cookies.essential')}
                       </div>
