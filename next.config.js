@@ -13,13 +13,6 @@ const nextConfig = {
   poweredByHeader: false,
   productionBrowserSourceMaps: true,
 
-  // Target modern browsers only — removes unnecessary polyfills (Array.at, Array.flat, etc.)
-  // This eliminates ~24 KiB of legacy JavaScript warned by Lighthouse
-  env: {
-    // Signal to browserslist to target evergreen browsers
-    BROWSERSLIST: 'defaults, not IE 11, not dead',
-  },
-
   // TypeScript: DO NOT ignore build errors — catch type issues early
   typescript: { ignoreBuildErrors: false },
 

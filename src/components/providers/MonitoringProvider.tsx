@@ -1,50 +1,35 @@
 'use client';
 
 import { useEffect } from 'react';
-import { initSentryClient } from '../../../sentry.client.config';
 
 /**
  * Monitoring Provider Component
  * Initializes Sentry and OpenTelemetry on the client side
- * Uses requestIdleCallback to defer non-critical monitoring initialization
+ * Uses dynamic imports to avoid bundling Sentry on every page.
+ * Sentry is only loaded on dashboard pages where errors need tracking.
  */
 export function MonitoringProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Initialize Sentry immediately but in background thread
-    // Don't wait for idle - just ensure it doesn't block rendering
-    try {
-      initSentryClient();
-    } catch (error) {
-      console.error('Failed to initialize Sentry:', error);
-    }
-
-    // Initialize OpenTelemetry client-side with deferred timing
-    if (process.env.NEXT_PUBLIC_ENABLE_OTEL === 'true') {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(
-          () => {
-            import('../../../opentelemetry.client.config').then(({ initOpenTelemetryClient }) => {
-              try {
-                initOpenTelemetryClient();
-                console.log('✅ OpenTelemetry initialized in browser');
-              } catch (error) {
-                console.error('Failed to initialize OpenTelemetry:', error);
-              }
-            });
-          },
-          { timeout: 5000 },
-        );
-      } else {
-        setTimeout(() => {
-          import('../../../opentelemetry.client.config').then(({ initOpenTelemetryClient }) => {
-            try {
-              initOpenTelemetryClient();
-              console.log('✅ OpenTelemetry initialized in browser');
-            } catch (error) {
-              console.error('Failed to initialize OpenTelemetry:', error);
-            }
+    // Defer Sentry initialization until after LCP
+    // Only load Sentry on dashboard pages (not landing pages)
+    const isDashboard = typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard');
+    
+    if (isDashboard || process.env.NODE_ENV === 'production') {
+      // Use requestIdleCallback to defer non-critical monitoring
+      const initMonitoring = () => {
+        try {
+          import('../../../sentry.client.config').then(({ initSentryClient }) => {
+            initSentryClient();
           });
-        }, 2000);
+        } catch (error) {
+          console.error('Failed to initialize Sentry:', error);
+        }
+      };
+
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(initMonitoring, { timeout: 5000 });
+      } else {
+        setTimeout(initMonitoring, 2000);
       }
     }
   }, []);
