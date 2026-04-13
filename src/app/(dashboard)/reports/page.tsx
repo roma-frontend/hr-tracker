@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState, useMemo } from 'react';
 import { motion } from '@/lib/cssMotion';
+import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
 import {
   BarChart,
   Bar,
@@ -168,7 +169,8 @@ export default function ReportsPage() {
       title={t('planGate.reportsTitle')}
       description={t('planGate.reportsDescription')}
     >
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <WidgetErrorBoundary name="ReportsPage">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -623,6 +625,7 @@ export default function ReportsPage() {
           </Tabs>
         </motion.div>
       </motion.div>
-    </PlanGate>
+    </WidgetErrorBoundary>
+  </PlanGate>
   );
 }

@@ -1,5 +1,35 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
+import bcrypt from 'bcryptjs';
+
+// ── Password Hashing Helpers ─────────────────────────────────────────────────
+const BCRYPT_ROUNDS = 12;
+
+/**
+ * Hash a password with bcrypt on the server side.
+ * The client sends plaintext (or client-hash), we re-hash with bcrypt.
+ */
+async function hashPassword(plaintext: string): Promise<string> {
+  return bcrypt.hash(plaintext, BCRYPT_ROUNDS);
+}
+
+/**
+ * Compare a plaintext password against a bcrypt hash.
+ * Includes fallback for legacy passwords that weren't bcrypt-hashed.
+ */
+async function verifyPassword(plaintext: string, hash: string): Promise<boolean> {
+  // Try bcrypt first (new passwords)
+  try {
+    const match = await bcrypt.compare(plaintext, hash);
+    if (match) return true;
+  } catch {
+    // bcrypt.compare throws if hash is not a valid bcrypt hash (legacy users)
+  }
+
+  // Fallback: direct comparison for legacy passwords (client-side SHA-256 hashes)
+  // These will be upgraded to bcrypt on next successful login
+  return plaintext === hash;
+}
 
 // ── Error Handler Helper ─────────────────────────────────────────────────────
 /**
@@ -234,11 +264,14 @@ export const register = mutation({
       if (!organizationId) throw new Error('Could not resolve organization');
 
       // ── 3. Create user ─────────────────────────────────────────────────────
+      // SECURITY: Hash password server-side with bcrypt instead of storing client-side hash
+      const hashedPassword = await hashPassword(args.password);
+
       const userId = await ctx.db.insert('users', {
         organizationId,
         name: args.name,
         email,
-        passwordHash: args.password,
+        passwordHash: hashedPassword,
         phone: args.phone,
         role,
         employeeType: 'staff',
@@ -314,8 +347,18 @@ export const login = mutation({
       }
 
       // Skip password check for Face ID login
-      if (!isFaceLogin && user.passwordHash !== passwordHash) {
-        throw new Error('Invalid email or password');
+      if (!isFaceLogin) {
+        // SECURITY: Use bcrypt.compare instead of direct string comparison
+        const passwordValid = await verifyPassword(passwordHash, user.passwordHash);
+        if (!passwordValid) {
+          throw new Error('Invalid email or password');
+        }
+
+        // Auto-upgrade: if password was legacy (not bcrypt), re-hash with bcrypt
+        if (!user.passwordHash.startsWith('$2')) {
+          const hashedPassword = await hashPassword(passwordHash);
+          await ctx.db.patch(user._id, { passwordHash: hashedPassword });
+        }
       }
 
       // Verify org is still active
@@ -455,8 +498,11 @@ export const resetPassword = mutation({
       throw new Error('Reset token has expired. Please request a new one.');
     }
 
+    // SECURITY: Hash new password with bcrypt before storing
+    const hashedPassword = await hashPassword(newPassword);
+
     await ctx.db.patch(user._id, {
-      passwordHash: newPassword,
+      passwordHash: hashedPassword,
       resetPasswordToken: undefined,
       resetPasswordExpiry: undefined,
       sessionToken: undefined,
@@ -499,7 +545,9 @@ export const changePassword = mutation({
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
-    if (user.passwordHash !== currentPassword) {
+    // SECURITY: Use bcrypt.compare for current password verification
+    const passwordValid = await verifyPassword(currentPassword, user.passwordHash);
+    if (!passwordValid) {
       throw new Error('Current password is incorrect');
     }
 
@@ -507,8 +555,10 @@ export const changePassword = mutation({
       throw new Error('New password must be at least 6 characters');
     }
 
+    // SECURITY: Hash new password with bcrypt
+    const hashedPassword = await hashPassword(newPassword);
     await ctx.db.patch(userId, {
-      passwordHash: newPassword,
+      passwordHash: hashedPassword,
       sessionToken: undefined, // force re-login on other devices
     });
 

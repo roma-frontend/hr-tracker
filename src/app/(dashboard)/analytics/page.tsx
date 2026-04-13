@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { StatsCard } from '@/components/analytics/StatsCard';
 import dynamic from 'next/dynamic';
+import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
 
 // Recharts is ~500KB — lazy load chart components so they don't block
 // the initial analytics page render
@@ -18,20 +19,34 @@ const ChartSkeleton = () => (
 const LeavesTrendChart = dynamic(
   () =>
     import('@/components/analytics/LeavesTrendChart').then((mod) => ({
-      default: mod.LeavesTrendChart,
+      default: (props: any) => (
+        <WidgetErrorBoundary name="LeavesTrendChart">
+          <mod.LeavesTrendChart {...props} />
+        </WidgetErrorBoundary>
+      ),
     })),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
 const DepartmentStats = dynamic(
   () =>
     import('@/components/analytics/DepartmentStats').then((mod) => ({
-      default: mod.DepartmentStats,
+      default: (props: any) => (
+        <WidgetErrorBoundary name="DepartmentStats">
+          <mod.DepartmentStats {...props} />
+        </WidgetErrorBoundary>
+      ),
     })),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
 const LeaveHeatmap = dynamic(
   () =>
-    import('@/components/analytics/LeaveHeatmap').then((mod) => ({ default: mod.LeaveHeatmap })),
+    import('@/components/analytics/LeaveHeatmap').then((mod) => ({
+      default: (props: any) => (
+        <WidgetErrorBoundary name="LeaveHeatmap">
+          <mod.LeaveHeatmap {...props} />
+        </WidgetErrorBoundary>
+      ),
+    })),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
 import { Users, Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';

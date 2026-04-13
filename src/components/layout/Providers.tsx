@@ -8,6 +8,7 @@ import { useAuthStore, type User } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { usePathname } from 'next/navigation';
+import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
@@ -42,10 +43,20 @@ const Navbar = dynamic(() => import('@/components/layout/Navbar').then((m) => m.
   ),
 });
 
-const ChatWidget = dynamic(() => import('@/components/ai/ChatWidget').then((m) => m.ChatWidget), {
-  ssr: false,
-  loading: () => null,
-});
+const ChatWidget = dynamic(
+  () =>
+    import('@/components/ai/ChatWidget').then((m) => ({
+      default: (props: any) => (
+        <WidgetErrorBoundary name="ChatWidget">
+          <m.ChatWidget {...props} />
+        </WidgetErrorBoundary>
+      ),
+    })),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
 
 const BreakReminderService = dynamic(
   () => import('@/components/productivity/BreakReminderService'),
