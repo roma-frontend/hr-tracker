@@ -704,8 +704,8 @@ export default function LoginPage() {
                             loginMode === 'email' ? 'var(--text-primary)' : 'var(--text-muted)',
                         }}
                       >
-                        <Mail className="w-4 h-4 inline mr-2" />
-                        {t('auth.email')}
+                        <Mail className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{t('auth.email')}</span>
                       </button>
                       <button
                         type="button"
@@ -718,8 +718,8 @@ export default function LoginPage() {
                           color: loginMode === 'face' ? 'var(--text-primary)' : 'var(--text-muted)',
                         }}
                       >
-                        <ScanFace className="w-4 h-4 inline mr-2" />
-                        {t('auth.faceId')}
+                        <ScanFace className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{t('auth.faceId')}</span>
                       </button>
                       <button
                         type="button"
@@ -733,8 +733,8 @@ export default function LoginPage() {
                             loginMode === 'touch' ? 'var(--text-primary)' : 'var(--text-muted)',
                         }}
                       >
-                        <Fingerprint className="w-4 h-4 inline mr-2" />
-                        Touch ID
+                        <Fingerprint className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Touch ID</span>
                       </button>
                     </div>
 
