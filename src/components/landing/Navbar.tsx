@@ -95,7 +95,7 @@ export default function Navbar() {
               ? 'rgba(var(--landing-navbar-bg-rgb, 15, 23, 42), 0.98)'
               : 'rgba(var(--landing-navbar-bg-rgb, 15, 23, 42), 0.7)',
             borderColor: 'var(--landing-card-border)',
-            transitionProperty: 'box-shadow, background',
+            transition: 'box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease-in-out',
             boxShadow: scrolled
               ? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
               : '0 0 0 0 rgba(0, 0, 0, 0)',
