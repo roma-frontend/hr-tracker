@@ -87,6 +87,9 @@ export default function CookieBanner() {
                         aria-label={t('cookies.learnMoreDetailed', {
                           defaultValue: 'Learn more about our privacy policy and how we handle your data',
                         })}
+                        title={t('cookies.learnMoreDetailed', {
+                          defaultValue: 'Learn more about our privacy policy and how we handle your data',
+                        })}
                       >
                         {t('cookies.learnMore', { defaultValue: 'Learn more about our privacy policy' })}
                       </Link>
