@@ -5,7 +5,7 @@ export const loginTourSteps: TourStep[] = [
     target: '#login-card',
     title: '👋 Добро пожаловать!',
     description: 'Давайте быстро покажем вам все возможности входа в систему!',
-    placement: 'center',
+    placement: 'top',
     highlight: false,
   },
   {
@@ -56,7 +56,7 @@ export const loginTourSteps: TourStep[] = [
     target: '#login-card',
     title: '🎉 Всё готово!',
     description: 'Выберите удобный способ входа и начните работу! Приятного использования! 🚀',
-    placement: 'center',
+    placement: 'top',
     highlight: false,
   },
 ];

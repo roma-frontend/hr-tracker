@@ -216,11 +216,10 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
         rect.right > window.innerWidth - 20;
 
       if (isOffScreen) {
-        // Scroll element into view with smooth behavior
+        // Scroll element into view with smooth behavior — only when truly needed
         element.scrollIntoView({
           behavior: 'smooth',
-          block: 'center',
-          inline: 'center',
+          block: 'nearest',
         });
 
         // Update position using requestAnimationFrame for smooth updates
