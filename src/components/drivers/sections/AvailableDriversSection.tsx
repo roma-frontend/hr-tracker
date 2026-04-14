@@ -108,13 +108,14 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
       <CardHeader>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <CarFront className="w-5 h-5 text-[var(--primary)]" />
-                  {t('driver.availableDrivers', 'Available Drivers')}
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <CarFront className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--primary)]" />
+                  <span className="hidden sm:inline">{t('driver.availableDrivers', 'Available Drivers')}</span>
+                  <span className="sm:hidden">{t('driver.availableDrivers', 'Drivers')}</span>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="hidden sm:block">
                   {t('driver.availableDriversDesc', 'Browse and book drivers')}
                 </CardDescription>
               </div>
@@ -123,7 +124,7 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push('/drivers/favorites')}
-                  className="gap-1.5 h-8 text-xs rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all"
+                  className="gap-1.5 h-8 text-xs rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all p-1.5 sm:p-0"
                 >
                   <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" />
                   <span className="hidden sm:inline">
@@ -152,7 +153,7 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
               value={String(capacityFilter ?? 0)}
               onValueChange={(v) => onCapacityChange(v === '0' ? null : Number(v))}
             >
-              <SelectTrigger className="w-[140px] h-8 text-xs" style={{ borderRadius: '0.75rem' }}>
+              <SelectTrigger className="w-full sm:w-[140px] h-8 text-xs" style={{ borderRadius: '0.75rem' }}>
                 <SelectValue placeholder={t('driver.minSeats', 'Min seats')} />
               </SelectTrigger>
               <SelectContent>
@@ -164,8 +165,8 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={onSortChange}>
-              <SelectTrigger className="w-[130px] h-8 text-xs" style={{ borderRadius: '0.75rem' }}>
-                <SortAsc className="w-3 h-3 mr-1" />
+              <SelectTrigger className="w-full sm:w-[130px] h-8 text-xs" style={{ borderRadius: '0.75rem' }}>
+                <SortAsc className="w-3 h-3 mr-1 hidden sm:inline" />
                 <SelectValue placeholder={t('driver.sortBy', 'Sort by')} />
               </SelectTrigger>
               <SelectContent>
