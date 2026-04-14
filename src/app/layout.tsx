@@ -158,20 +158,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
-
-        {/* ── Preload only critical fonts (IBM Plex Sans + Inter) ── */}
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
-          as="style"
-          onLoad="this.onload=null;this.rel='stylesheet'"
-        />
-        <noscript>
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
-          />
-        </noscript>
       </head>
       <body
         className={`${ibmPlexSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}

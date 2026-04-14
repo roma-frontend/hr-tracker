@@ -292,7 +292,7 @@ export default function DashboardClient() {
         <div className="flex gap-1.5 sm:gap-2 flex-wrap">
           {user?.role === 'superadmin' && (
             <>
-              <Button asChild size="sm" variant="outline" className="hover:text-black/80 hover:dark:text-white/90">
+              <Button asChild size="sm" variant="outline" className="hover:text-black/80 dark:hover:text-white/90">
                 <Link href="/superadmin/organizations">
                   <Building2 className="w-4 h-4" />
                   {t('dashboard.manageOrgs')}
@@ -345,7 +345,7 @@ export default function DashboardClient() {
               </Button>
             </>
           )}
-          <Button asChild size="sm" variant="outline" className="hover:text-black hover:dark:text-white">
+          <Button asChild size="sm" variant="outline" className="hover:text-black dark:hover:text-white">
             <Link href="/calendar">
               <CalendarDays className="w-4 h-4" />
               {t('nav.calendar')}
