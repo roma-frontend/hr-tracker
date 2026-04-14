@@ -248,24 +248,24 @@ export default function ReportsPage() {
             <TabsList className="w-full mb-6 gap-2 bg-transparent p-0 h-auto grid grid-cols-3">
               <TabsTrigger
                 value="overview"
-                className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium"
+                className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
               >
-                <FileText className="w-4 h-4 mr-2 inline-block" />
-                {t('reports.overview')} Overview
+                <FileText className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('reports.overview')} Overview</span>
               </TabsTrigger>
               <TabsTrigger
                 value="departments"
-                className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium"
+                className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
               >
-                <Users className="w-4 h-4 mr-2 inline-block" />
-                {t('reportsExtended.departments')}
+                <Users className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('reportsExtended.departments')}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="trends"
-                className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium"
+                className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
               >
-                <TrendingUp className="w-4 h-4 mr-2 inline-block" />
-                {t('reportsExtended.trends')}
+                <TrendingUp className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('reportsExtended.trends')}</span>
               </TabsTrigger>
             </TabsList>
 
