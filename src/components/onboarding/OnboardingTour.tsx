@@ -381,10 +381,10 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[9999]"
-            style={{ pointerEvents: 'none' }}
+            style={{ pointerEvents: 'auto' }}
           >
-            {/* Dark overlay */}
-            <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
+            {/* Dark overlay with spotlight cutout */}
+            <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'auto' }}>
               <defs>
                 <mask id="spotlight-mask">
                   <rect width="100%" height="100%" fill="white" />
@@ -410,6 +410,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
                 height="100%"
                 fill="rgba(0, 0, 0, 0.7)"
                 mask="url(#spotlight-mask)"
+                style={{ pointerEvents: 'auto' }}
               />
             </svg>
 
