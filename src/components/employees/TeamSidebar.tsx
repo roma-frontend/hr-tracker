@@ -32,7 +32,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface TeamSidebarProps {
   userId?: Id<'users'>;
@@ -136,6 +136,22 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
     recent: true,
     quickStats: true,
   });
+
+  // Блокировка скролла страницы при открытии панели на мобильных
+  useEffect(() => {
+    if (isMobile && !isPanelCollapsed) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isMobile, isPanelCollapsed]);
 
   const toggleSection = (section: keyof typeof collapsedSections) => {
     setCollapsedSections((prev) => ({ ...prev, [section]: !prev[section] }));
