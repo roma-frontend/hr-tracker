@@ -6,7 +6,6 @@ import { validateEnvironment } from '@/lib/env-validation';
 import { AppProviders } from '@/components/AppProviders';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 
 // Validate environment variables at startup
 validateEnvironment();
@@ -175,7 +174,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <AppProviders>
             {children}
             <Analytics />
-            <SpeedInsights />
           </AppProviders>
         </Suspense>
         {/* Performance monitoring (только в dev) */}
