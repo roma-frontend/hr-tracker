@@ -21,9 +21,9 @@ export default function CookieBanner() {
   useEffect(() => {
     // SECURITY & PERFORMANCE: Defer cookie banner rendering until after LCP measurement.
     // LCP is typically measured within 2.5s. Delaying banner prevents it from being
-    // counted as the LCP element (was causing 4,020ms render delay per Lighthouse).
-    // Increased delay to 3s for better LCP optimization on slower connections.
-    const timer = setTimeout(() => setMounted(true), 3000);
+    // counted as the LCP element (was causing 5,700ms render delay per Lighthouse).
+    // Increased delay to 4s for better LCP optimization on slower connections.
+    const timer = setTimeout(() => setMounted(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 

@@ -80,6 +80,8 @@ const nextConfig = {
     // Critical CSS optimization - inline critical CSS for faster FCP
     // This reduces render-blocking requests by inlining critical CSS
     // and deferring non-critical CSS loading
+    // Enable CSS chunking to reduce render-blocking CSS
+    cssChunking: true,
   },
 
   // Enable Turbopack for production builds (faster, smaller bundles)
