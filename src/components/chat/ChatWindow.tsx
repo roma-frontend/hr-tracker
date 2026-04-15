@@ -105,14 +105,11 @@ export const ChatWindow = React.memo(function ChatWindow({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesParentRef = useRef<HTMLDivElement>(null);
 
-  const messages = (useQuery as any)(
-    (api.chat.queries as any).getMessages,
-    {
-      conversationId,
-      userId: currentUserId,
-      limit: 200,
-    },
-  ) as any;
+  const messages = (useQuery as any)((api.chat.queries as any).getMessages, {
+    conversationId,
+    userId: currentUserId,
+    limit: 200,
+  }) as any;
 
   // Debug: Log first message sender
   if (messages && messages.length > 0 && !messages[0]?.sender) {
@@ -455,10 +452,14 @@ export const ChatWindow = React.memo(function ChatWindow({
     const value = e.target.value;
     setInput(value);
     handleTyping();
-    // Avoid forced reflow: read scrollHeight before writing style
-    const scrollHeight = e.target.scrollHeight;
-    e.target.style.height = 'auto';
-    e.target.style.height = Math.min(scrollHeight, 120) + 'px';
+
+    // Use requestAnimationFrame to avoid forced reflow
+    requestAnimationFrame(() => {
+      if (e.target) {
+        e.target.style.height = 'auto';
+        e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+      }
+    });
 
     // Detect @mention — look backward from cursor for '@'
     const cursorPos = e.target.selectionStart;

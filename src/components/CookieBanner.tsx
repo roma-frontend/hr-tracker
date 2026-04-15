@@ -84,14 +84,9 @@ export default function CookieBanner() {
                       <Link
                         href="/privacy"
                         className="inline-flex items-center font-medium text-[var(--primary)] hover:underline"
-                        aria-label={t('cookies.learnMoreDetailed', {
-                          defaultValue: 'Learn more about our privacy policy and how we handle your data',
-                        })}
-                        title={t('cookies.learnMoreDetailed', {
-                          defaultValue: 'Learn more about our privacy policy and how we handle your data',
-                        })}
+                        aria-label="Read our privacy policy and data handling practices"
                       >
-                        {t('cookies.learnMore', { defaultValue: 'Learn more about our privacy policy' })}
+                        {t('cookies.learnMore', { defaultValue: 'Read our privacy policy' })}
                       </Link>
                       {t('cookies.or')}{' '}
                       <button
