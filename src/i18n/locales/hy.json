@@ -5226,7 +5226,8 @@
     "startTrip": "Սկսել ուղևորությունը",
     "failedToBlockTime": "Չհաջողվեց արգելափակել ամանակը",
     "tripStatusUpdated": "Ուղևորության կարգավիճակը թարմացվեց {{status}}",
-    "failedToUpdateStatus": "Չհաջողվեց թարմացնել կարգավիճակը"
+    "failedToUpdateStatus": "Չհաջողվեց թարմացնել կարգավիճակը",
+    "blockTimeDesc": "Ընտրեք ամսաթվերը և նշեք պատճառը՝ ձեր հասանելիությունը արգելափակելու համար:"
   },
   "driversWizard": {
     "personalInfo": "Անձնական տվյալներ",

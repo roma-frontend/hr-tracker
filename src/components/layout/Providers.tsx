@@ -190,7 +190,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   ? 'flex-1 overflow-hidden flex flex-col min-h-0'
                   : 'flex-1 overflow-y-auto overflow-x-hidden min-h-0'
               }
-              style={{ contain: 'layout' }}
+              style={{ contain: 'paint' }}
             >
               {isChatPage ? (
                 <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">

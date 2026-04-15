@@ -5548,7 +5548,8 @@
     "startTrip": "Start Trip",
     "failedToBlockTime": "Failed to block time",
     "tripStatusUpdated": "Trip status updated to {{status}}",
-    "failedToUpdateStatus": "Failed to update status"
+    "failedToUpdateStatus": "Failed to update status",
+    "blockTimeDesc": "Select dates and provide a reason to block your availability."
   },
   "driversWizard": {
     "personalInfo": "Personal Information",

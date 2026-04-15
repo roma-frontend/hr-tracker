@@ -51,10 +51,6 @@ import { format, startOfWeek, addDays, isSameDay, isToday } from 'date-fns';
 import { Input } from '../ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
-// Isolate Convex API ref to avoid infinite type instantiation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getDriverScheduleApi: any = api.drivers.queries.getDriverSchedule;
-
 interface DriverCalendarProps {
   driverId: Id<'drivers'>;
   organizationId: Id<'organizations'>;
@@ -237,7 +233,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
 
   // Get schedule for the week
   const schedule = useQuery(
-    getDriverScheduleApi,
+    api.drivers.queries.getDriverSchedule,
     driverId ? { driverId, startTime: weekStart, endTime: weekEnd } : 'skip',
   );
 
@@ -547,7 +543,10 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                     {t('driverCalendar.blockTime')}
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                    {t('driverCalendar.blockTimeDesc', 'Block your availability for future dates')}
+                    {t(
+                      'driverCalendar.blockTimeDesc',
+                      'Select dates and provide a reason to block your availability.',
+                    )}
                   </DialogDescription>
                 </div>
               </div>

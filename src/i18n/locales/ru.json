@@ -5770,7 +5770,8 @@
     "startTrip": "Начать поездку",
     "failedToBlockTime": "Не удалось заблокировать время",
     "tripStatusUpdated": "Статус поездки обновлён на {{status}}",
-    "failedToUpdateStatus": "Не удалось обновить статус"
+    "failedToUpdateStatus": "Не удалось обновить статус",
+    "blockTimeDesc": "Выберите даты и укажите причину, чтобы заблокировать свою доступность."
   },
   "driversWizard": {
     "personalInfo": "Личная информация",

@@ -19,9 +19,6 @@ import {
 } from '@/components/drivers/modals';
 import { toast } from 'sonner';
 
-// Isolate Convex API reference to avoid deep type instantiation
-const driversApi = (api as any).drivers;
-
 export default function DriversPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -46,9 +43,9 @@ export default function DriversPage() {
   const orgId = user?.organizationId as Id<'organizations'> | undefined;
 
   // 2. Mutation hooks
-  const addFavorite = useMutation(driversApi.driver_registration.addFavoriteDriver);
-  const removeFavorite = useMutation(driversApi.driver_registration.removeFavoriteDriver);
-  const registerAsDriver = useMutation(driversApi.driver_registration.registerAsDriver);
+  const addFavorite = useMutation(api.drivers.driver_registration.addFavoriteDriver);
+  const removeFavorite = useMutation(api.drivers.driver_registration.removeFavoriteDriver);
+  const registerAsDriver = useMutation(api.drivers.driver_registration.registerAsDriver);
 
   // 3. Effect hooks
   useEffect(() => {
@@ -61,22 +58,22 @@ export default function DriversPage() {
 
   // 4. Query hooks
   const driverRecord = useQuery(
-    driversApi.queries.getDriverByUserId,
+    api.drivers.queries.getDriverByUserId,
     userId && orgId ? { userId } : 'skip',
   );
 
   const availableDrivers = useQuery(
-    driversApi.queries.getAvailableDrivers,
+    api.drivers.queries.getAvailableDrivers,
     orgId ? { organizationId: orgId } : 'skip',
   );
 
   const myRequests = useQuery(
-    driversApi.requests_queries.getMyRequests,
+    api.drivers.requests_queries.getMyRequests,
     userId ? { userId } : 'skip',
   );
 
   const favoriteDrivers = useQuery(
-    driversApi.requests_queries.getFavoriteDrivers,
+    api.drivers.requests_queries.getFavoriteDrivers,
     userId ? { userId } : 'skip',
   );
 
@@ -94,7 +91,7 @@ export default function DriversPage() {
   }, [favoriteDrivers, initialized]);
 
   const recurringTrips = useQuery(
-    driversApi.recurring_trips.getRecurringTrips,
+    api.drivers.recurring_trips.getRecurringTrips,
     userId ? { userId } : 'skip',
   );
 
@@ -156,36 +153,39 @@ export default function DriversPage() {
     [availableDrivers, myRequests],
   );
 
-  // 7. Effect for scroll blocking when wizard or trip details are open
+  // 7. Effect for scroll blocking when wizard, calendar, or trip details are open
   useEffect(() => {
-    if (showRequestWizard || showTripDetails) {
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-      const mainContent = document.querySelector<HTMLElement>('main, [role="main"]');
-      if (mainContent) mainContent.style.overflow = 'hidden';
+    if (showRequestWizard || showTripDetails || showCalendarDialog) {
+      const mainEl = document.querySelector<HTMLElement>('main');
+      const originalMainOverflow = mainEl?.style.overflow;
+      const originalBodyOverflow = document.body.style.overflow;
 
-      const preventScroll = (e: WheelEvent | TouchEvent) => {
-        const target = e.target as HTMLElement;
-        const isInsideModal = target.closest('[class*="max-h-"]');
-        if (!isInsideModal) e.preventDefault();
-      };
-      document.addEventListener('wheel', preventScroll, { passive: false });
-      document.addEventListener('touchmove', preventScroll, { passive: false });
+      document.body.style.overflow = 'hidden';
+      if (mainEl) {
+        mainEl.style.overflow = 'hidden';
+        mainEl.style.paddingRight = '0px';
+      }
 
       return () => {
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-        if (mainContent) mainContent.style.overflow = '';
-        document.removeEventListener('wheel', preventScroll);
-        document.removeEventListener('touchmove', preventScroll);
+        document.body.style.overflow = originalBodyOverflow;
+        if (mainEl) {
+          mainEl.style.overflow = originalMainOverflow || '';
+          mainEl.style.paddingRight = '';
+        }
       };
     }
-  }, [showRequestWizard, showTripDetails]);
+  }, [showRequestWizard, showTripDetails, showCalendarDialog]);
 
   // 8. Callback hooks (MUST be before early returns!)
   const handleBook = useCallback((id: string) => {
     setSelectedDriverId(id);
     setShowRequestWizard(true);
+    const mainEl = document.querySelector<HTMLElement>('main');
+    if (mainEl) {
+      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, []);
 
   const handleToggleFavorite = useCallback(
@@ -326,7 +326,7 @@ export default function DriversPage() {
       />
 
       {showRequestWizard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-2xl">
             <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
               <h2 className="text-xl font-bold">{t('driver.requestDriver', 'Request Driver')}</h2>
@@ -353,17 +353,19 @@ export default function DriversPage() {
       )}
 
       {showCalendarDialog && orgId && (
-        <DriverCalendarDialog
-          open={showCalendarDialog}
-          onClose={() => setShowCalendarDialog(false)}
-          driverId={selectedDriverId}
-          organizationId={orgId}
-        />
+        <div className="fixed inset-0 z-[9999]">
+          <DriverCalendarDialog
+            open={showCalendarDialog}
+            onClose={() => setShowCalendarDialog(false)}
+            driverId={selectedDriverId}
+            organizationId={orgId}
+          />
+        </div>
       )}
 
       {showTripDetails && selectedRequest && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto overscroll-contain"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto overscroll-contain"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowTripDetails(false);
