@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "browserslist": [
-    "last 2 Chrome versions",
-    "last 2 Firefox versions",
-    "last 2 Safari versions",
-    "last 2 Edge versions"
+    "Chrome >= 120",
+    "Firefox >= 120",
+    "Safari >= 17",
+    "Edge >= 120"
   ],
   "lint-staged": {
     "**/*.{ts,tsx}": [

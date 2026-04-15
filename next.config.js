@@ -82,6 +82,8 @@ const nextConfig = {
     // and deferring non-critical CSS loading
     // Enable CSS chunking to reduce render-blocking CSS
     cssChunking: true,
+    // Inline critical CSS for landing page
+    inlineCriticalCss: true,
   },
 
   // Enable Turbopack for production builds (faster, smaller bundles)

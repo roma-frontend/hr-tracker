@@ -161,10 +161,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* Preconnect to Google for OAuth (user authentication) */}
         <link rel="preconnect" href="https://accounts.google.com" />
         <link rel="preconnect" href="https://oauth2.googleapis.com" />
-
-        {/* ── Preload critical CSS ── */}
-        {/* Preload main CSS to reduce render-blocking */}
-        <link rel="preload" href="/_next/static/css/app/layout.css" as="style" />
       </head>
       <body
         className={`${ibmPlexSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}
