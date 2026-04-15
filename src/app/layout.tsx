@@ -154,11 +154,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="mask-icon" href="/favicon.svg?v=3" color="#2563eb" />
 
         {/* ── Resource hints: preconnect to critical origins ── */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
-        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        {/* Preconnect to Sentry for error monitoring (critical for error tracking) */}
+        <link rel="preconnect" href="https://o4505283179249664.ingest.us.sentry.io" />
+        {/* Preconnect to Cloudinary for images (LCP optimization) */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        {/* Preconnect to Google for OAuth (user authentication) */}
+        <link rel="preconnect" href="https://accounts.google.com" />
+        <link rel="preconnect" href="https://oauth2.googleapis.com" />
       </head>
       <body
         className={`${ibmPlexSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}
