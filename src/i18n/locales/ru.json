@@ -1078,6 +1078,7 @@
     "noOrganizationFound": "Организация не найдена",
     "requestNewOrg": "Запросить новую организацию",
     "createOrganization": "Создать организацию",
+    "orUseEmail": "или используйте email",
     "pending": {
       "title": "Запрос отправлен!",
       "subtitle": "Спасибо за интерес к OfficeHub.",
@@ -3847,6 +3848,11 @@
   "tasks": {
     "taskCompleted": "Задача выполнена! 🎉",
     "taskReopened": "Задача переоткрыта",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "overdue": "Просрочено",
+    "topPriority": "Задачи с высоким приоритетом",
+    "quickAccess": "Быстрый доступ к важным задачам",
     "status": {
       "pending": "В ожидании",
       "inProgress": "В процессе",
@@ -4966,6 +4972,15 @@
       "yandex": "Яндекс Карты",
       "2gis": "2ГИС",
       "waze": "Waze"
+    },
+    "map": {
+      "navigate": "Навигация",
+      "pickupTarget": "Посадка",
+      "dropoffTarget": "Высадка"
+    },
+    "status": {
+      "active": "Активен",
+      "inactive": "Неактивен"
     }
   },
   "events": {
@@ -5339,7 +5354,9 @@
     "toast": {
       "success": "Водитель успешно запрошен!",
       "error": "Не удалось запросить водителя",
-      "noOrg": "Организация не выбрана"
+      "noOrg": "Организация не выбрана",
+      "fillDateAndTime": "Пожалуйста, заполните оба поля: дата и время.",
+      "invalidDateTime": "Неверная дата или время. Пожалуйста, используйте формат YYYY-MM-DD и HH:MM."
     }
   },
   "supportWizard": {
@@ -5897,6 +5914,32 @@
     "noMatchingFace": "Совпадающее лицо не найдено.",
     "faceNotRecognized": "Лицо не распознано. Попытка {{attempts}} из 3.",
     "tooManyAttempts": "Слишком много неудачных попыток. Face ID теперь заблокирован.",
+    "tooManyAttemptsUseEmail": "Слишком много неудачных попыток. Пожалуйста, используйте вход через email/пароль.",
+    "tooManyAttemptsBlocked": "Слишком много неудачных попыток. Face ID заблокирован. Пожалуйста, используйте вход через email/пароль.",
+    "noCameraFound": "Камера не найдена. Пожалуйста, подключите камеру и попробуйте снова.",
+    "cameraAlreadyInUse": "Камера уже используется другим приложением.",
+    "noFaceInFrame": "Лицо не обнаружено. Пожалуйста, наведите лицо на камеру.",
+    "faceRegistered": "Лицо успешно зарегистрировано! Теперь вы можете использовать Face ID для входа.",
+    "faceRegisterFailed": "Не удалось зарегистрировать лицо. Пожалуйста, попробуйте снова.",
+    "calendarConnectionFailed": "Не удалось подключиться к календарю",
+    "icalExported": "iCal файл успешно загружен",
+    "calendarExportFailed": "Не удалось экспортировать календарь",
+    "noEventsToSync": "Нет событий для синхронизации",
+    "googleCalendarSyncFailed": "Не удалось синхронизировать с Google Calendar",
+    "googleCalendarNotConfigured": "Google Calendar не настроен",
+    "outlookCalendarSyncFailed": "Не удалось синхронизировать с Outlook Calendar",
+    "outlookCalendarNotConfigured": "Outlook Calendar не настроен",
+    "stopSessionFirst": "Сначала остановите текущую сессию",
+    "userIdNotFound": "ID пользователя не найден",
+    "statusUpdateFailed": "Не удалось обновить статус",
+    "fillDateAndTime": "Пожалуйста, заполните оба поля: дата и время.",
+    "invalidDateTime": "Неверная дата или время. Пожалуйста, используйте формат YYYY-MM-DD и HH:MM.",
+    "messageSent": "Сообщение отправлено через Team Chat",
+    "messageCopied": "Сообщение скопировано в буфер обмена",
+    "callStartFailed": "Не удалось начать звонок",
+    "noPhoneNumber": "Номер телефона недоступен",
+    "fillAllRequired": "Пожалуйста, заполните все обязательные поля",
+    "microphoneAccessDenied": "Не удалось получить доступ к микрофону. Пожалуйста, проверьте разрешения.",
     "loginFailed": "Не удалось войти",
     "loginFailedUnknown": "Не удалось войти: {{error}}"
   },
@@ -5954,5 +5997,118 @@
     "submitFailed": "Не удалось отправить оценку",
     "lastRated": "Последняя оценка",
     "rate": "Оценить"
+  },
+  "driverStats": {
+    "todaysTrips": "Поездок сегодня",
+    "pendingRequests": "Ожидающих запросов",
+    "totalCompleted": "Всего выполнено",
+    "rating": "Рейтинг"
+  },
+  "emptyStates": {
+    "noRequests": {
+      "title": "Запросов пока нет",
+      "description": "Вы еще не запрашивали водителей.",
+      "action": "Запросить водителя"
+    },
+    "noDrivers": {
+      "title": "Нет доступных водителей",
+      "description": "Сейчас нет доступных водителей. Попробуйте позже.",
+      "action": "Запросить водителя"
+    }
+  },
+  "driverActions": {
+    "navigator": {
+      "copyCoords": "Копировать координаты",
+      "copied": "Скопировано!"
+    },
+    "call": "Позвонить",
+    "callStartFailed": "Не удалось начать звонок",
+    "messagePassenger": "Сообщение",
+    "messageDriver": "Сообщение водителю",
+    "driverTemplates": {
+      "onWay": {
+        "label": "В пути",
+        "message": "Я уже еду к вам."
+      },
+      "arrived": {
+        "label": "Прибыл",
+        "message": "Я прибыл к месту посадки."
+      },
+      "runningLate": {
+        "label": "Опаздываю",
+        "message": "Опаздываю на 5 минут, извините за задержку."
+      },
+      "whereAreYou": {
+        "label": "Где вы?",
+        "message": "Я на месте посадки. Где вы?"
+      },
+      "plateNumber": {
+        "label": "Номер машины",
+        "message": "Мой номер машины: ___"
+      }
+    },
+    "passengerTemplates": {
+      "whereAreYou": {
+        "label": "Где вы?",
+        "message": "Где вы? Я жду на месте посадки."
+      },
+      "ready": {
+        "label": "Я готов",
+        "message": "Я готов к посадке."
+      },
+      "changePickup": {
+        "label": "Изменить место",
+        "message": "Можете забрать меня в другом месте?"
+      },
+      "runningLate": {
+        "label": "Опаздываю",
+        "message": "Я опоздаю на несколько минут, извините."
+      },
+      "cancel": {
+        "label": "Отменить поездку",
+        "message": "Мне нужно отменить эту поездку."
+      }
+    },
+    "toasts": {
+      "messageSentToDriver": "Сообщение отправлено",
+      "messageFailedToSend": "Не удалось отправить сообщение"
+    }
+  },
+  "messageTemplates": {
+    "quickMessages": "Быстрые сообщения",
+    "message": "Сообщение",
+    "call": "Звонок",
+    "arrived": {
+      "label": "Я прибыл",
+      "message": "Привет! Я прибыл к месту посадки. Готов, когда вы готовы! 🚗"
+    },
+    "delayed": {
+      "label": "Опаздываю",
+      "message": "Привет! Из-за пробок я опаздываю примерно на 5 минут. Приношу извинения за неудобства! ⏰"
+    },
+    "waiting": {
+      "label": "Ожидаю",
+      "message": "Привет! Я жду у места посадки. Пожалуйста, сообщите, когда будете готовы. 👋"
+    },
+    "confirming": {
+      "label": "Подтверждаю поездку",
+      "message": "Привет! Подтверждаю вашу поездку из {from} в {to}. До встречи! ✅"
+    },
+    "completed": {
+      "label": "Поездка завершена",
+      "message": "Спасибо, что выбрали наш сервис! Надеюсь, поездка прошла отлично. Пожалуйста, оцените ваш опыт. ⭐"
+    },
+    "cantFind": {
+      "label": "Не могу найти место",
+      "message": "Привет! У меня проблемы с поиском места посадки. Можете предоставить больше деталей? 📍"
+    },
+    "calling": {
+      "label": "Звоню вам",
+      "message": "Привет! Сейчас звоню вам, чтобы подтвердить детали посадки. 📞"
+    },
+    "sentViaChat": "Сообщение отправлено через Team Chat",
+    "copiedToClipboard": "Сообщение скопировано в буфер обмена",
+    "failedToStartCall": "Не удалось начать звонок",
+    "noPhoneAvailable": "Номер телефона недоступен"
   }
 }

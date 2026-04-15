@@ -556,6 +556,7 @@ function NavigatorButtons({
   pickupLabel?: string;
   dropoffLabel?: string;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [target, setTarget] = useState<'dropoff' | 'pickup'>(dropoffCoords ? 'dropoff' : 'pickup');
 
@@ -583,7 +584,7 @@ function NavigatorButtons({
             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        Navigate
+        {t('driver.map.navigate', 'Navigate')}
         <svg
           className={`w-3 h-3 transition-transform ${expanded ? 'rotate-180' : ''}`}
           fill="none"
@@ -609,7 +610,7 @@ function NavigatorButtons({
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                Pickup
+                {t('driver.map.pickupTarget', 'Pickup')}
               </button>
               <button
                 onClick={() => setTarget('dropoff')}
@@ -620,7 +621,7 @@ function NavigatorButtons({
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-red-500" />
-                Dropoff
+                {t('driver.map.dropoffTarget', 'Dropoff')}
               </button>
             </div>
           )}

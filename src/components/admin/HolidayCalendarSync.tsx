@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
@@ -49,7 +49,7 @@ export default function HolidayCalendarSync() {
       window.history.replaceState({}, '', window.location.pathname);
     }
     if (params.get('error')) {
-      toast.error('Failed to connect to calendar');
+      toast.error(t('calendarSync.connectionFailed', 'Failed to connect to calendar'));
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
@@ -62,10 +62,10 @@ export default function HolidayCalendarSync() {
       const icsContent = generateICalendar(calendarData);
       const filename = `company-leaves-${new Date().toISOString().split('T')[0]}.ics`;
       downloadICalFile(icsContent, filename);
-      toast.success('iCal file downloaded successfully');
+      toast.success(t('calendarSync.icalDownloadSuccess', 'iCal file downloaded successfully'));
     } catch (error) {
       console.error('Export error:', error);
-      toast.error('Failed to export calendar');
+      toast.error(t('calendarSync.exportFailed', 'Failed to export calendar'));
     } finally {
       setIsExporting(false);
     }
@@ -75,7 +75,7 @@ export default function HolidayCalendarSync() {
     if (googleConnected) {
       // Already connected, sync events
       if (!calendarData || calendarData.length === 0) {
-        toast.info('No events to sync');
+        toast.info(t('calendarSync.noEventsToSync', 'No events to sync'));
         return;
       }
 
@@ -95,7 +95,7 @@ export default function HolidayCalendarSync() {
         toast.success(result.message);
       } catch (error) {
         console.error('Google sync error:', error);
-        toast.error('Failed to sync with Google Calendar');
+        toast.error(t('calendarSync.googleSyncFailed', 'Failed to sync with Google Calendar'));
         setGoogleConnected(false);
       } finally {
         setIsSyncingGoogle(false);
@@ -108,7 +108,7 @@ export default function HolidayCalendarSync() {
         window.location.href = authUrl;
       } catch (error) {
         console.error('Google auth error:', error);
-        toast.error('Google Calendar is not configured');
+        toast.error(t('calendarSync.googleNotConfigured', 'Google Calendar is not configured'));
       }
     }
   };
@@ -117,7 +117,7 @@ export default function HolidayCalendarSync() {
     if (outlookConnected) {
       // Already connected, sync events
       if (!calendarData || calendarData.length === 0) {
-        toast.info('No events to sync');
+        toast.info(t('calendarSync.noEventsToSync', 'No events to sync'));
         return;
       }
 
@@ -137,7 +137,7 @@ export default function HolidayCalendarSync() {
         toast.success(result.message);
       } catch (error) {
         console.error('Outlook sync error:', error);
-        toast.error('Failed to sync with Outlook Calendar');
+        toast.error(t('calendarSync.outlookSyncFailed', 'Failed to sync with Outlook Calendar'));
         setOutlookConnected(false);
       } finally {
         setIsSyncingOutlook(false);
@@ -150,7 +150,7 @@ export default function HolidayCalendarSync() {
         window.location.href = authUrl;
       } catch (error) {
         console.error('Outlook auth error:', error);
-        toast.error('Outlook Calendar is not configured');
+        toast.error(t('calendarSync.outlookNotConfigured', 'Outlook Calendar is not configured'));
       }
     }
   };

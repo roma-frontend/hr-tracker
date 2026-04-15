@@ -201,6 +201,7 @@ const RecurringTripItem = memo(function RecurringTripItem({
   onToggle: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const activeDays = trip.days.map((d) => dayNames[d - 1]).join(', ');
 
@@ -214,7 +215,9 @@ const RecurringTripItem = memo(function RecurringTripItem({
               {trip.tripInfo.from} → {trip.tripInfo.to}
             </p>
             <Badge variant={trip.isActive ? 'default' : 'secondary'} className="text-xs">
-              {trip.isActive ? 'Active' : 'Inactive'}
+              {trip.isActive
+                ? t('driver.status.active', 'Active')
+                : t('driver.status.inactive', 'Inactive')}
             </Badge>
           </div>
           <p className="text-xs text-[var(--text-muted)]">

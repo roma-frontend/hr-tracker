@@ -53,19 +53,21 @@ export function TodayTasksPanel() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    if (date.toDateString() === today.toDateString()) return t('tasks.today', 'Today');
+    if (date.toDateString() === tomorrow.toDateString()) return t('tasks.tomorrow', 'Tomorrow');
 
     const isOverdue = date < today;
-    return isOverdue ? 'Overdue' : date.toLocaleDateString();
+    return isOverdue ? t('tasks.overdue', 'Overdue') : date.toLocaleDateString();
   };
 
   return (
     <div className="px-2 py-3">
       <div className="mb-3 px-2">
-        <h3 className="text-xs font-semibold text-[var(--text-muted)]">Top Priority Tasks</h3>
+        <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+          {t('tasks.topPriority', 'Top Priority Tasks')}
+        </h3>
         <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-          Quick access to your important tasks
+          {t('tasks.quickAccess', 'Quick access to your important tasks')}
         </p>
       </div>
 

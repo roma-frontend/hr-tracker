@@ -259,7 +259,7 @@ export function DriverShiftControls({
             </div>
             <div>
               <Label>
-                {t('driver.shift.notes', 'Notes')} ({t('common.optional', 'Optional')})
+                {t('driver.shift.notesLabel', 'Notes')} ({t('common.optional', 'Optional')})
               </Label>
               <Textarea
                 value={driverNotes}

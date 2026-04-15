@@ -42,38 +42,52 @@ interface MessageTemplatesProps {
 const TEMPLATES = [
   {
     id: 'arrived',
+    labelKey: 'messageTemplates.arrived.label',
+    messageKey: 'messageTemplates.arrived.message',
     label: "I've Arrived",
     message: "Hi! I've arrived at the pickup location. Ready when you are! 🚗",
   },
   {
     id: 'delayed',
+    labelKey: 'messageTemplates.delayed.label',
+    messageKey: 'messageTemplates.delayed.message',
     label: 'Running Late',
     message:
       "Hi! I'm running about 5 minutes late due to traffic. Apologies for the inconvenience! ⏰",
   },
   {
     id: 'waiting',
+    labelKey: 'messageTemplates.waiting.label',
+    messageKey: 'messageTemplates.waiting.message',
     label: 'Waiting',
     message: "Hi! I'm waiting at the pickup point. Please let me know when you're ready. 👋",
   },
   {
     id: 'confirming',
+    labelKey: 'messageTemplates.confirming.label',
+    messageKey: 'messageTemplates.confirming.message',
     label: 'Confirming Trip',
     message: 'Hi! Confirming your trip from {from} to {to}. See you soon! ✅',
   },
   {
     id: 'completed',
+    labelKey: 'messageTemplates.completed.label',
+    messageKey: 'messageTemplates.completed.message',
     label: 'Trip Completed',
     message:
       'Thank you for choosing our service! Hope you had a great trip. Please rate your experience. ⭐',
   },
   {
     id: 'cant_find',
+    labelKey: 'messageTemplates.cantFind.label',
+    messageKey: 'messageTemplates.cantFind.message',
     label: "Can't Find Location",
     message: "Hi! I'm having trouble finding the pickup location. Can you provide more details? 📍",
   },
   {
     id: 'calling',
+    labelKey: 'messageTemplates.calling.label',
+    messageKey: 'messageTemplates.calling.message',
     label: 'Request Call',
     message: "Hi! I'm calling you now to confirm the pickup details. 📞",
   },
@@ -127,7 +141,7 @@ export function MessageTemplates({
   );
 
   const handleSendMessage = async (template: (typeof TEMPLATES)[0]) => {
-    let message = template.message;
+    let message = t(template.messageKey);
 
     // Replace placeholders
     if (tripInfo) {
@@ -149,7 +163,7 @@ export function MessageTemplates({
     if (canUseChat) {
       const sent = await sendViaChatMessage(message);
       if (sent) {
-        toast.success('Message sent via Team Chat');
+        toast.success(t('messageTemplates.sentViaChat', 'Message sent via Team Chat'));
         setOpen(false);
         return;
       }
@@ -157,7 +171,7 @@ export function MessageTemplates({
 
     // Fallback: copy to clipboard
     navigator.clipboard.writeText(message);
-    toast.success('Message copied to clipboard');
+    toast.success(t('messageTemplates.copiedToClipboard', 'Message copied to clipboard'));
     setOpen(false);
   };
 
@@ -192,7 +206,7 @@ export function MessageTemplates({
         if (passengerPhone) {
           window.open(`tel:${passengerPhone}`);
         } else {
-          toast.error('Failed to start call');
+          toast.error(t('messageTemplates.failedToStartCall', 'Failed to start call'));
         }
       } finally {
         setCalling(false);
@@ -204,7 +218,7 @@ export function MessageTemplates({
     if (passengerPhone) {
       window.open(`tel:${passengerPhone}`);
     } else {
-      toast.error('No phone number available');
+      toast.error(t('messageTemplates.noPhoneAvailable', 'No phone number available'));
     }
   }, [
     canUseChat,
@@ -229,8 +243,10 @@ export function MessageTemplates({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="text-xs sm:text-sm">
               <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Quick Messages</span>
-              <span className="sm:hidden">Message</span>
+              <span className="hidden sm:inline">
+                {t('messageTemplates.quickMessages', 'Quick Messages')}
+              </span>
+              <span className="sm:hidden">{t('messageTemplates.message', 'Message')}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-72">
@@ -241,11 +257,11 @@ export function MessageTemplates({
                 className="flex flex-col items-start gap-1 py-3"
               >
                 <div className="flex items-center gap-2 w-full">
-                  <span className="font-medium">{template.label}</span>
+                  <span className="font-medium">{t(template.labelKey)}</span>
                   {canUseChat && <Send className="w-3 h-3 text-blue-500 ml-auto" />}
                 </div>
                 <span className="text-xs text-muted-foreground line-clamp-2">
-                  {template.message}
+                  {t(template.messageKey)}
                 </span>
               </DropdownMenuItem>
             ))}
@@ -260,7 +276,7 @@ export function MessageTemplates({
           disabled={calling}
         >
           <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-          Call
+          {t('messageTemplates.call', 'Call')}
         </Button>
       </div>
 

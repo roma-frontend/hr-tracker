@@ -91,7 +91,9 @@ export function NavigatorDropdown({ label, coords }: NavigatorDropdownProps) {
         ))}
         <DropdownMenuItem onClick={handleCopyCoords} className="gap-2">
           {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
-          {copied ? t('driver.copied', 'Copied!') : t('driver.copyCoords', 'Copy Coords')}
+          {copied
+            ? t('driverActions.navigator.copied', 'Copied!')
+            : t('driverActions.navigator.copyCoords', 'Copy Coords')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -143,7 +145,7 @@ export function InAppCallButton({
         remoteUserName: remoteName,
       });
     } catch (error: any) {
-      toast.error(error.message || t('driver.callStartFailed', 'Failed to start call'));
+      toast.error(error.message || t('driverActions.callStartFailed', 'Failed to start call'));
     } finally {
       setCalling(false);
     }
@@ -186,19 +188,31 @@ interface DriverQuickMessageProps {
 }
 
 const DRIVER_TEMPLATES = [
-  { id: 'on_way', label: 'On my way', message: "I'm on my way to pick you up." },
-  { id: 'arrived', label: 'Arrived', message: "I've arrived at the pickup location." },
+  {
+    id: 'on_way',
+    labelKey: 'driverActions.driverTemplates.onWay.label',
+    messageKey: 'driverActions.driverTemplates.onWay.message',
+  },
+  {
+    id: 'arrived',
+    labelKey: 'driverActions.driverTemplates.arrived.label',
+    messageKey: 'driverActions.driverTemplates.arrived.message',
+  },
   {
     id: 'running_late',
-    label: 'Running late',
-    message: 'Running 5 minutes late, sorry for the delay.',
+    labelKey: 'driverActions.driverTemplates.runningLate.label',
+    messageKey: 'driverActions.driverTemplates.runningLate.message',
   },
   {
     id: 'where_are_you',
-    label: 'Where are you?',
-    message: "I'm at the pickup point. Where are you?",
+    labelKey: 'driverActions.driverTemplates.whereAreYou.label',
+    messageKey: 'driverActions.driverTemplates.whereAreYou.message',
   },
-  { id: 'plate_number', label: 'Plate number', message: 'My plate number is: ___' },
+  {
+    id: 'plate_number',
+    labelKey: 'driverActions.driverTemplates.plateNumber.label',
+    messageKey: 'driverActions.driverTemplates.plateNumber.message',
+  },
 ];
 
 export function DriverQuickMessage({
@@ -228,10 +242,10 @@ export function DriverQuickMessage({
         type: 'text',
         content: message,
       });
-      toast.success(t('toasts.messageSentToDriver', 'Message sent'));
+      toast.success(t('driverActions.toasts.messageSentToDriver', 'Message sent'));
       setOpen(false);
     } catch (error: any) {
-      toast.error(t('toasts.messageFailedToSend', 'Failed to send message'));
+      toast.error(t('driverActions.toasts.messageFailedToSend', 'Failed to send message'));
     }
   };
 
@@ -239,19 +253,19 @@ export function DriverQuickMessage({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1 h-7 px-2 text-xs">
-          <MessageSquare className="w-3 h-3" />
-          {t('driver.messagePassenger', 'Message')}
+          <PhoneCall className="w-3 h-3" />
+          {t('driverActions.call', 'Call')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
         {DRIVER_TEMPLATES.map((tpl) => (
           <DropdownMenuItem
             key={tpl.id}
-            onClick={() => handleSend(tpl.message)}
+            onClick={() => handleSend(t(tpl.messageKey))}
             className="flex flex-col items-start gap-1 py-2"
           >
-            <span className="font-medium text-sm">{tpl.label}</span>
-            <span className="text-xs text-muted-foreground line-clamp-1">{tpl.message}</span>
+            <span className="font-medium text-sm">{t(tpl.labelKey)}</span>
+            <span className="text-xs text-muted-foreground line-clamp-1">{t(tpl.messageKey)}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -272,17 +286,29 @@ interface PassengerQuickMessageProps {
 const PASSENGER_TEMPLATES = [
   {
     id: 'where_are_you',
-    label: 'Where are you?',
-    message: "Where are you? I'm waiting at the pickup point.",
+    labelKey: 'driverActions.passengerTemplates.whereAreYou.label',
+    messageKey: 'driverActions.passengerTemplates.whereAreYou.message',
   },
-  { id: 'ready', label: "I'm ready", message: "I'm ready for pickup." },
+  {
+    id: 'ready',
+    labelKey: 'driverActions.passengerTemplates.ready.label',
+    messageKey: 'driverActions.passengerTemplates.ready.message',
+  },
   {
     id: 'change_pickup',
-    label: 'Change pickup',
-    message: 'Can you pick me up at a different location?',
+    labelKey: 'driverActions.passengerTemplates.changePickup.label',
+    messageKey: 'driverActions.passengerTemplates.changePickup.message',
   },
-  { id: 'running_late', label: 'Running late', message: "I'll be a few minutes late, sorry." },
-  { id: 'cancel', label: 'Cancel trip', message: 'I need to cancel this trip.' },
+  {
+    id: 'running_late',
+    labelKey: 'driverActions.passengerTemplates.runningLate.label',
+    messageKey: 'driverActions.passengerTemplates.runningLate.message',
+  },
+  {
+    id: 'cancel',
+    labelKey: 'driverActions.passengerTemplates.cancel.label',
+    messageKey: 'driverActions.passengerTemplates.cancel.message',
+  },
 ];
 
 export function PassengerQuickMessage({
@@ -311,10 +337,10 @@ export function PassengerQuickMessage({
         type: 'text',
         content: message,
       });
-      toast.success(t('toasts.messageSentToDriver', 'Message sent'));
+      toast.success(t('driverActions.toasts.messageSentToDriver', 'Message sent'));
       setOpen(false);
     } catch (error: any) {
-      toast.error(t('toasts.messageFailedToSend', 'Failed to send message'));
+      toast.error(t('driverActions.toasts.messageFailedToSend', 'Failed to send message'));
     }
   };
 
@@ -323,18 +349,18 @@ export function PassengerQuickMessage({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1 h-7 px-2 text-xs">
           <MessageSquare className="w-3 h-3" />
-          {t('driver.messageDriver', 'Message Driver')}
+          {t('driverActions.messageDriver', 'Message Driver')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
         {PASSENGER_TEMPLATES.map((tpl) => (
           <DropdownMenuItem
             key={tpl.id}
-            onClick={() => handleSend(tpl.message)}
+            onClick={() => handleSend(t(tpl.messageKey))}
             className="flex flex-col items-start gap-1 py-2"
           >
-            <span className="font-medium text-sm">{tpl.label}</span>
-            <span className="text-xs text-muted-foreground line-clamp-1">{tpl.message}</span>
+            <span className="font-medium text-sm">{t(tpl.labelKey)}</span>
+            <span className="text-xs text-muted-foreground line-clamp-1">{t(tpl.messageKey)}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

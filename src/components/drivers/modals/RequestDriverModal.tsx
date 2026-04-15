@@ -5,6 +5,7 @@
  */
 
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RequestDriverWizard } from '../RequestDriverWizard';
 import type { Id } from '@/convex/_generated/dataModel';
@@ -22,6 +23,8 @@ export function RequestDriverModal({
   userId,
   preselectedDriverId,
 }: RequestDriverModalProps) {
+  const { t } = useTranslation();
+
   // Block body scroll when modal is open
   useEffect(() => {
     if (open) {
@@ -36,9 +39,14 @@ export function RequestDriverModal({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-4xl max-h-[90vh] flex flex-col" aria-describedby={undefined}>
+      <DialogContent
+        className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-4xl max-h-[90vh] flex flex-col"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
-          <DialogTitle className="text-lg md:text-xl">Request Driver</DialogTitle>
+          <DialogTitle className="text-lg md:text-xl">
+            {t('driver.requestDriver', 'Request Driver')}
+          </DialogTitle>
         </DialogHeader>
         <div className="flex-1 min-h-0 overflow-y-auto">
           <RequestDriverWizard

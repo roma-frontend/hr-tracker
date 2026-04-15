@@ -5,6 +5,7 @@
 'use client';
 
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Clock, Plus } from 'lucide-react';
 
@@ -16,11 +17,20 @@ interface NoRequestsEmptyStateProps {
 }
 
 export const NoRequestsEmptyState = memo(function NoRequestsEmptyState({
-  title = 'No Requests Yet',
-  description = "You haven't requested any drivers yet.",
+  title,
+  description,
   onAction,
-  actionLabel = 'Request Driver',
+  actionLabel,
 }: NoRequestsEmptyStateProps) {
+  const { t } = useTranslation();
+
+  const defaultTitle = t('emptyStates.noRequests.title', 'No Requests Yet');
+  const defaultDescription = t(
+    'emptyStates.noRequests.description',
+    "You haven't requested any drivers yet.",
+  );
+  const defaultAction = t('emptyStates.noRequests.action', 'Request Driver');
+
   return (
     <div
       className="text-center py-12"
@@ -32,12 +42,12 @@ export const NoRequestsEmptyState = memo(function NoRequestsEmptyState({
       }}
     >
       <Clock className="w-16 h-16 mx-auto mb-4 text-[var(--text-muted)] opacity-50" />
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-sm text-[var(--text-muted)] mb-4">{description}</p>
+      <h3 className="text-lg font-semibold mb-2">{title || defaultTitle}</h3>
+      <p className="text-sm text-[var(--text-muted)] mb-4">{description || defaultDescription}</p>
       {onAction && (
         <Button onClick={onAction} className="gap-2">
           <Plus className="w-4 h-4" />
-          {actionLabel}
+          {actionLabel || defaultAction}
         </Button>
       )}
     </div>

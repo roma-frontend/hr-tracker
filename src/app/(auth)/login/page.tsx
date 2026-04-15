@@ -767,7 +767,7 @@ export default function LoginPage() {
                             className="text-xs font-medium"
                             style={{ color: 'var(--text-muted)' }}
                           >
-                            or use email
+                            {t('login.orUseEmail')}
                           </span>
                           <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
                         </div>

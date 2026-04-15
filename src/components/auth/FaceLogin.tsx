@@ -88,7 +88,7 @@ export function FaceLogin() {
   const startWebcam = async () => {
     // Проверка блокировки перед запуском камеры
     if (isBlocked) {
-      toast.error('Face ID is blocked. Please use email/password login.', {
+      toast.error(t('faceLogin.blocked', 'Face ID is blocked. Please use email/password login.'), {
         duration: 5000,
       });
       return;

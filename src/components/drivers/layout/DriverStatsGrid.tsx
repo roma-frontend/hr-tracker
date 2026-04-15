@@ -5,6 +5,7 @@
 'use client';
 
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StatCard } from './StatCard';
 import { Calendar, Clock, TrendingUp, Star } from 'lucide-react';
 
@@ -21,10 +22,12 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
   totalCompleted,
   rating,
 }: DriverStatsGridProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mb-8 drivers-stagger">
       <StatCard
-        label="Today's Trips"
+        label={t('driverStats.todaysTrips', "Today's Trips")}
         value={todayTrips}
         icon={Calendar}
         gradientFrom="#3b82f6"
@@ -32,7 +35,7 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
         iconBgColor="rgba(59, 130, 246, 0.1)"
       />
       <StatCard
-        label="Pending Requests"
+        label={t('driverStats.pendingRequests', 'Pending Requests')}
         value={pendingRequests}
         icon={Clock}
         gradientFrom="#f59e0b"
@@ -40,7 +43,7 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
         iconBgColor="rgba(245, 158, 11, 0.1)"
       />
       <StatCard
-        label="Total Completed"
+        label={t('driverStats.totalCompleted', 'Total Completed')}
         value={totalCompleted}
         icon={TrendingUp}
         gradientFrom="#22c55e"
@@ -48,7 +51,7 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
         iconBgColor="rgba(34, 197, 94, 0.1)"
       />
       <StatCard
-        label="Rating"
+        label={t('driverStats.rating', 'Rating')}
         value={rating.toFixed(1)}
         icon={Star}
         gradientFrom="#eab308"

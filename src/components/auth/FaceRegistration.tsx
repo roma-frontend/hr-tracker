@@ -36,7 +36,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
     // Load models on mount
     loadFaceApiModels().catch((err) => {
       console.error('Failed to load face models:', err);
-      toast.error('Failed to load face recognition models');
+      toast.error(t('faceRegistration.modelLoadFailed', 'Failed to load face recognition models'));
     });
 
     // Get available cameras
@@ -68,7 +68,10 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         toast.error(
-          'Camera access is not supported in this browser. Please use Chrome, Edge, or Firefox.',
+          t(
+            'faceRegistration.cameraNotSupported',
+            'Camera access is not supported in this browser. Please use Chrome, Edge, or Firefox.',
+          ),
         );
         return;
       }
@@ -118,7 +121,9 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
 
       if (!videoElementAvailable || !videoRef.current) {
         console.error('❌ Video element ref is null after waiting!');
-        toast.error('Video element not found. Please try again.');
+        toast.error(
+          t('faceRegistration.videoNotFound', 'Video element not found. Please try again.'),
+        );
         // Stop the stream and reset state
         mediaStream.getTracks().forEach((track) => track.stop());
         setStream(null);
@@ -150,7 +155,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
           detectFaceLoop(true); // Force start with true flag
         } catch (err) {
           console.error('❌ Failed to play video:', err);
-          toast.error('Failed to start video playback');
+          toast.error(t('faceRegistration.videoPlaybackFailed', 'Failed to start video playback'));
         }
       };
 
@@ -176,14 +181,28 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
 
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         toast.error(
-          'Camera permission denied. Please allow camera access in your browser settings.',
+          t(
+            'faceRegistration.cameraPermissionDenied',
+            'Camera permission denied. Please allow camera access in your browser settings.',
+          ),
         );
       } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        toast.error('No camera found. Please connect a camera and try again.');
+        toast.error(
+          t(
+            'faceRegistration.noCameraFound',
+            'No camera found. Please connect a camera and try again.',
+          ),
+        );
       } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-        toast.error('Camera is already in use by another application.');
+        toast.error(
+          t('faceRegistration.cameraInUse', 'Camera is already in use by another application.'),
+        );
       } else {
-        toast.error(`Unable to access camera: ${error.message || 'Unknown error'}`);
+        toast.error(
+          t('faceRegistration.cameraAccessError', 'Unable to access camera: {{message}}', {
+            message: error.message || 'Unknown error',
+          }),
+        );
       }
     }
   };
@@ -259,7 +278,12 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
       const detection = await detectFace(videoRef.current);
 
       if (!detection) {
-        toast.error('No face detected. Please position your face in the frame.');
+        toast.error(
+          t(
+            'faceRegistration.noFaceDetected',
+            'No face detected. Please position your face in the frame.',
+          ),
+        );
         setIsProcessing(false);
         return;
       }
@@ -284,11 +308,18 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
       setCapturedImage(canvas.toDataURL());
       stopWebcam();
 
-      toast.success('Face registered successfully! You can now use Face ID to login.');
+      toast.success(
+        t(
+          'faceRegistration.faceRegistered',
+          'Face registered successfully! You can now use Face ID to login.',
+        ),
+      );
       onSuccess?.();
     } catch (error) {
       console.error('Error capturing face:', error);
-      toast.error('Failed to register face. Please try again.');
+      toast.error(
+        t('faceRegistration.registrationFailed', 'Failed to register face. Please try again.'),
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -314,7 +345,9 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
           {!isWebcamActive && !capturedImage && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
               <Camera className="w-16 h-16 mb-4" />
-              <p className="text-sm">Camera not active</p>
+              <p className="text-sm">
+                {t('faceRegistration.cameraNotActive', 'Camera not active')}
+              </p>
             </div>
           )}
 
@@ -333,12 +366,12 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
                 {faceDetected ? (
                   <div className="flex items-center gap-2 bg-green-500/90 text-white px-3 py-1.5 rounded-full text-sm">
                     <CheckCircle className="w-4 h-4" />
-                    Face Detected
+                    {t('faceRegistration.faceDetected', 'Face Detected')}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 bg-red-500/90 text-white px-3 py-1.5 rounded-full text-sm">
                     <XCircle className="w-4 h-4" />
-                    No Face
+                    {t('faceRegistration.noFace', 'No Face')}
                   </div>
                 )}
               </div>
@@ -359,7 +392,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
         {!isWebcamActive && !capturedImage && cameras.length > 1 && (
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
-              Select Camera:
+              {t('faceRegistration.selectCamera', 'Select Camera:')}
             </label>
             <select
               value={selectedCamera}
@@ -380,7 +413,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
           {!isWebcamActive && !capturedImage && (
             <Button onClick={startWebcam} className="flex-1">
               <Camera className="w-4 h-4 mr-2" />
-              Start Camera
+              {t('faceRegistration.startCamera', 'Start Camera')}
             </Button>
           )}
 
@@ -394,17 +427,17 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
                 {isProcessing ? (
                   <>
                     <ShieldLoader size="xs" variant="inline" className="mr-2" />
-                    Processing...
+                    {t('common.processing', 'Processing...')}
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Capture & Register
+                    {t('faceRegistration.captureAndRegister', 'Capture & Register')}
                   </>
                 )}
               </Button>
               <Button onClick={stopWebcam} variant="outline">
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
             </>
           )}

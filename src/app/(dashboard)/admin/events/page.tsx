@@ -55,9 +55,17 @@ import {
 } from '@/components/ui/dialog';
 
 type Priority = 'high' | 'medium' | 'low';
-const PRIORITY_CONFIG: Record<Priority, { color: string; bg: string; label: string; icon: string }> = {
+const PRIORITY_CONFIG: Record<
+  Priority,
+  { color: string; bg: string; label: string; icon: string }
+> = {
   high: { color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-500/10', label: 'High', icon: '🔴' },
-  medium: { color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-500/10', label: 'Medium', icon: '🟡' },
+  medium: {
+    color: 'text-amber-600',
+    bg: 'bg-amber-50 dark:bg-amber-500/10',
+    label: 'Medium',
+    icon: '🟡',
+  },
   low: { color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-500/10', label: 'Low', icon: '🔵' },
 };
 
@@ -171,9 +179,13 @@ export default function CompanyEventsPage() {
     }
     if (totalConflicts > 0) {
       toast.success(
-        t('events.conflictsFound', 'Found {{count}} conflict(s)! Check Conflict Alerts tab.', { count: totalConflicts }),
+        t('events.conflictsFound', 'Found {{count}} conflict(s)! Check Conflict Alerts tab.', {
+          count: totalConflicts,
+        }),
         {
-          description: t('events.leavesChecked', '{{count}} leave requests checked', { count: pendingList.length }),
+          description: t('events.leavesChecked', '{{count}} leave requests checked', {
+            count: pendingList.length,
+          }),
           duration: 5000,
         },
       );
@@ -213,9 +225,15 @@ export default function CompanyEventsPage() {
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
-          <Button variant="outline" onClick={handleCheckConflicts} className="gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={handleCheckConflicts}
+            className="gap-2 w-full sm:w-auto"
+          >
             <RefreshCw className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('events.checkConflicts', 'Check Conflicts')}</span>
+            <span className="hidden sm:inline">
+              {t('events.checkConflicts', 'Check Conflicts')}
+            </span>
             <span className="sm:hidden">{t('events.checkConflictsShort', 'Conflicts')}</span>
           </Button>
           <Button
@@ -233,10 +251,30 @@ export default function CompanyEventsPage() {
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {[
-            { label: t('events.stats.totalEvents', 'Total Events'), value: stats.total, icon: Calendar, color: 'text-blue-600' },
-            { label: t('events.stats.upcoming', 'Upcoming'), value: stats.upcoming, icon: Clock, color: 'text-emerald-600' },
-            { label: t('events.stats.highPriority', 'High Priority'), value: stats.highPriority, icon: AlertCircle, color: 'text-red-600' },
-            { label: t('events.stats.thisMonth', 'This Month'), value: stats.thisMonth, icon: Bell, color: 'text-amber-600' },
+            {
+              label: t('events.stats.totalEvents', 'Total Events'),
+              value: stats.total,
+              icon: Calendar,
+              color: 'text-blue-600',
+            },
+            {
+              label: t('events.stats.upcoming', 'Upcoming'),
+              value: stats.upcoming,
+              icon: Clock,
+              color: 'text-emerald-600',
+            },
+            {
+              label: t('events.stats.highPriority', 'High Priority'),
+              value: stats.highPriority,
+              icon: AlertCircle,
+              color: 'text-red-600',
+            },
+            {
+              label: t('events.stats.thisMonth', 'This Month'),
+              value: stats.thisMonth,
+              icon: Bell,
+              color: 'text-amber-600',
+            },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -264,7 +302,11 @@ export default function CompanyEventsPage() {
       <div className="flex gap-1 rounded-xl bg-(--background-subtle) p-1 w-fit">
         {[
           { key: 'events' as const, label: t('events.eventsTab', 'Events'), icon: Calendar },
-          { key: 'conflicts' as const, label: t('events.conflictAlertsTab', 'Conflicts'), icon: AlertCircle },
+          {
+            key: 'conflicts' as const,
+            label: t('events.conflictAlertsTab', 'Conflicts'),
+            icon: AlertCircle,
+          },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -316,7 +358,9 @@ export default function CompanyEventsPage() {
                   <SelectValue placeholder={t('events.filters.priority', 'Priority')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('events.filters.allPriorities', 'All Priorities')}</SelectItem>
+                  <SelectItem value="all">
+                    {t('events.filters.allPriorities', 'All Priorities')}
+                  </SelectItem>
                   <SelectItem value="high">🔴 {t('events.priority.high', 'High')}</SelectItem>
                   <SelectItem value="medium">🟡 {t('events.priority.medium', 'Medium')}</SelectItem>
                   <SelectItem value="low">🔵 {t('events.priority.low', 'Low')}</SelectItem>
@@ -405,18 +449,22 @@ export default function CompanyEventsPage() {
                           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                             {/* Date Badge */}
                             <div className="flex-shrink-0 w-14 text-center">
-                              <div className={cn(
-                                'text-lg font-bold',
-                                isPast ? 'text-muted-foreground' : priorityCfg.color,
-                              )}>
+                              <div
+                                className={cn(
+                                  'text-lg font-bold',
+                                  isPast ? 'text-muted-foreground' : priorityCfg.color,
+                                )}
+                              >
                                 {new Date(event.startDate).getDate()}
                               </div>
                               <div className="text-[10px] uppercase text-muted-foreground">
-                                {new Date(event.startDate).toLocaleString('en-US', { month: 'short' })}
+                                {new Date(event.startDate).toLocaleString('en-US', {
+                                  month: 'short',
+                                })}
                               </div>
                               {!isPast && days <= 3 && (
                                 <Badge variant="destructive" className="mt-1 text-[9px] px-1 py-0">
-                                  {days === 0 ? 'Today' : `${days}d`}
+                                  {days === 0 ? t('common.today', 'Today') : `${days}d`}
                                 </Badge>
                               )}
                             </div>
@@ -470,12 +518,21 @@ export default function CompanyEventsPage() {
                                 size="icon"
                                 className="w-8 h-8"
                                 onClick={async () => {
-                                  if (confirm(t('events.confirmDelete', 'Delete event "{{name}}"?', { name: event.name }))) {
+                                  if (
+                                    confirm(
+                                      t('events.confirmDelete', 'Delete event "{{name}}"?', {
+                                        name: event.name,
+                                      }),
+                                    )
+                                  ) {
                                     try {
                                       await deleteEvent({ eventId: event._id, userId: userId! });
                                       toast.success(t('events.eventDeleted', 'Event deleted'));
                                     } catch (error: any) {
-                                      toast.error(error.message || t('events.deleteFailed', 'Failed to delete event'));
+                                      toast.error(
+                                        error.message ||
+                                          t('events.deleteFailed', 'Failed to delete event'),
+                                      );
                                     }
                                   }
                                 }}
@@ -502,9 +559,14 @@ export default function CompanyEventsPage() {
 
       {/* Create Event Dialog */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-2xl max-h-[90vh] flex flex-col" aria-describedby={undefined}>
+        <DialogContent
+          className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-2xl max-h-[90vh] flex flex-col"
+          aria-describedby={undefined}
+        >
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl">{t('events.createEvent', 'Create Event')}</DialogTitle>
+            <DialogTitle className="text-lg md:text-xl">
+              {t('events.createEvent', 'Create Event')}
+            </DialogTitle>
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-y-auto">
             <CreateEventWizard
@@ -528,7 +590,10 @@ export default function CompanyEventsPage() {
           if (!open) setSelectedEvent(null);
         }}
       >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
+        <DialogContent
+          className="max-w-2xl max-h-[90vh] overflow-y-auto"
+          aria-describedby={undefined}
+        >
           <DialogHeader className="px-6 pt-6 pb-4">
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Edit className="w-5 h-5" />
@@ -548,7 +613,9 @@ export default function CompanyEventsPage() {
                 />
               </div>
               <div>
-                <Label className="text-sm font-medium mb-2 block">{t('events.description', 'Description')}</Label>
+                <Label className="text-sm font-medium mb-2 block">
+                  {t('events.description', 'Description')}
+                </Label>
                 <Textarea
                   defaultValue={selectedEvent.description || ''}
                   id="edit-description"
@@ -579,7 +646,9 @@ export default function CompanyEventsPage() {
                 </div>
               </div>
               <div>
-                <Label className="text-sm font-medium mb-2 block">{t('admin.editPriority', 'Priority')}</Label>
+                <Label className="text-sm font-medium mb-2 block">
+                  {t('admin.editPriority', 'Priority')}
+                </Label>
                 <div className="grid grid-cols-3 gap-3 mt-2">
                   {[
                     { key: 'high', label: t('events.priority.high', 'High'), icon: '🔴' },
@@ -607,7 +676,7 @@ export default function CompanyEventsPage() {
                   {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button
-                className='bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white'
+                  className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
                   onClick={async () => {
                     try {
                       await updateEvent({

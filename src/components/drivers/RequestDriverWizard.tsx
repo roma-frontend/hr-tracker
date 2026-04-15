@@ -225,7 +225,9 @@ export function RequestDriverWizard({
       const timeStr = String(mergedData.time || '').trim();
 
       if (!dateStr || !timeStr) {
-        toast.error('Please fill in both date and time fields.');
+        toast.error(
+          t('driverWizard.toast.fillDateAndTime', 'Please fill in both date and time fields.'),
+        );
         return;
       }
 
@@ -233,7 +235,12 @@ export function RequestDriverWizard({
       const startTime = parsedDate.getTime();
 
       if (isNaN(startTime)) {
-        toast.error('Invalid date or time. Please use YYYY-MM-DD and HH:MM formats.');
+        toast.error(
+          t(
+            'driverWizard.toast.invalidDateTime',
+            'Invalid date or time. Please use YYYY-MM-DD and HH:MM formats.',
+          ),
+        );
         return;
       }
 
