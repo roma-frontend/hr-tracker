@@ -1,9 +1,3 @@
-/**
-import Image from 'next/image';
- * Team Sidebar — Боковая панель с информацией о команде
- * Компактная сворачиваемая панель с accordion для виджетов
- */
-
 'use client';
 
 import { useQuery } from 'convex/react';
@@ -33,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface TeamSidebarProps {
   userId?: Id<'users'>;
@@ -140,30 +135,52 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
   // Блокировка скролла страницы при открытии панели на мобильных
   useEffect(() => {
     if (isMobile && !isPanelCollapsed) {
+      // Немедленно блокируем скролл
       const scrollY = window.scrollY;
-      document.body.style.overflow = 'hidden';
+
+      // Применяем стили синхронно
       document.documentElement.style.overflow = 'hidden';
+      document.documentElement.style.height = '100vh';
+      document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
+      document.body.style.height = '100vh';
       document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+
+      // Сохраняем позицию для восстановления
+      sessionStorage.setItem('scrollY', scrollY.toString());
     } else {
-      const scrollY = document.body.style.top;
-      document.body.style.overflow = '';
+      // Восстанавливаем скролл
+      const scrollY = sessionStorage.getItem('scrollY');
+
       document.documentElement.style.overflow = '';
+      document.documentElement.style.height = '';
+      document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+
       if (scrollY) {
-        document.body.style.top = '';
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        window.scrollTo(0, parseInt(scrollY));
+        sessionStorage.removeItem('scrollY');
       }
     }
 
     return () => {
-      document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
+      document.documentElement.style.height = '';
+      document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      document.body.style.height = '';
       document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
     };
   }, [isMobile, isPanelCollapsed]);
 
@@ -250,7 +267,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
     </span>
   );
 
-  return (
+  return createPortal(
     <>
       {/* Кнопка сворачивания/разворачивания панели */}
       <motion.button
@@ -264,7 +281,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
           setIsPanelCollapsed(newCollapsedState);
           onToggle?.(!newCollapsedState);
         }}
-        className="fixed top-20 sm:top-9 right-3 sm:right-6 z-[100] w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-lg flex items-center justify-center transition-colors lg:fixed"
+        className="fixed top-20 sm:top-9 right-3 sm:right-6 z-[100] w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-lg flex items-center justify-center transition-colors"
         style={{
           background: 'var(--primary)',
           color: 'var(--primary-foreground)',
@@ -307,7 +324,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
               duration: isMobile ? 0.3 : 0.4,
               ease: isMobile ? 'easeInOut' : [0.34, 1.56, 0.64, 1],
             }}
-            className="fixed top-16 sm:top-24 right-0 sm:right-6 z-[70] w-full sm:w-64 max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-180px)] overflow-y-auto space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent lg:shadow-lg lg:fixed rounded-xl"
+            className="fixed top-16 sm:top-24 right-0 sm:right-6 z-[70] w-full sm:w-64 max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-180px)] overflow-y-auto space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent lg:shadow-lg rounded-xl"
             style={{
               background: 'var(--card)',
               boxShadow: isMobile
@@ -576,6 +593,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
           </motion.aside>
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body,
   );
 }
