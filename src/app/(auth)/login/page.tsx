@@ -6,25 +6,13 @@ import React, { useState, useTransition, useEffect, useRef, useCallback } from '
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  Fingerprint,
-  AlertCircle,
-  Building2,
-  ScanFace,
-  ShieldCheck,
-} from 'lucide-react';
+import { Mail, Fingerprint, AlertCircle, Building2, ScanFace, ShieldCheck } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
-import { loginAction } from '@/actions/auth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { WebAuthnButton } from '@/components/auth/WebAuthnButton';
 import { FaceLogin } from '@/components/auth/FaceLogin';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { OAuthSyncLoader } from '@/components/auth/OAuthSyncLoader';
-import { toast } from 'sonner';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { loginTourSteps } from '@/components/onboarding/loginTourSteps';
 import { useSession } from 'next-auth/react';
@@ -33,7 +21,6 @@ import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { SmartEmailInput } from '@/components/auth/SmartEmailInput';
 import { SmartPasswordInput } from '@/components/auth/SmartPasswordInput';
 import { SmartErrorMessage, parseAuthError } from '@/components/auth/SmartErrorMessage';
-import { MaintenanceScreen } from '@/components/MaintenanceScreen';
 
 function MaintenanceBanner() {
   const { t } = useTranslation();
@@ -235,7 +222,7 @@ export default function LoginPage() {
   const { login, isAuthenticated } = useAuthStore();
   const { status } = useSession();
   const [isPending, startTransition] = useTransition();
-  const [showPassword, setShowPassword] = useState(false);
+  const [_showPassword, _setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loginMode, setLoginMode] = useState<'email' | 'face' | 'touch'>('email');
@@ -256,7 +243,7 @@ export default function LoginPage() {
   });
   const [isRedirecting, setIsRedirecting] = useState(false);
   const deviceFingerprintRef = useRef<string | undefined>(undefined);
-  const { onKeyDown, onKeyUp, getSample, reset } = useKeystrokeDynamics();
+  const { getSample, reset } = useKeystrokeDynamics();
 
   // Collect device fingerprint on mount (client-side only)
   useEffect(() => {
@@ -272,10 +259,10 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const isMaintenance = params.get('maintenance') === 'true';
-      console.log('🔧 useEffect check - isMaintenance:', isMaintenance);
+      console.error('🔧 useEffect check - isMaintenance:', isMaintenance);
 
       if (isMaintenance) {
-        console.log('✅ Setting maintenance banner to true in useEffect');
+        console.error('✅ Setting maintenance banner to true in useEffect');
         setShowMaintenanceBanner(true);
         document.documentElement.style.opacity = '1';
         document.documentElement.style.transition = 'none';
@@ -294,7 +281,7 @@ export default function LoginPage() {
 
     // Don't redirect if in maintenance mode
     if (isMaintenance) {
-      console.log('[Login] Maintenance mode detected - not redirecting');
+      console.error('[Login] Maintenance mode detected - not redirecting');
       return;
     }
 
@@ -319,7 +306,7 @@ export default function LoginPage() {
 
     startTransition(async () => {
       try {
-        console.log('🔐 Attempting login...');
+        console.error('🔐 Attempting login...');
 
         // Collect keystroke sample and device fingerprint
         const keystrokeSample = getSample();
@@ -338,7 +325,7 @@ export default function LoginPage() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = (await response.json()) as { error?: string; organizationId?: string };
           // If maintenance mode is active, redirect to maintenance screen
           if (errorData.error === 'maintenance') {
             window.location.href = `/login?maintenance=true${errorData.organizationId ? `&org=${errorData.organizationId}` : ''}`;
@@ -347,32 +334,53 @@ export default function LoginPage() {
           throw new Error(errorData.error || 'Login failed');
         }
 
-        const result = await response.json();
+        const result = (await response.json()) as {
+          requiresTwoFactor?: boolean;
+          tempToken?: string;
+          session?: {
+            userId: string;
+            name: string;
+            email: string;
+            role: string;
+            organizationId: string;
+            department?: string;
+            position?: string;
+            employeeType?: string;
+            avatar?: string;
+          };
+          riskLevel?: string;
+          error?: string;
+        };
 
         // Check if 2FA is required
         if (result.requiresTwoFactor) {
           setTwoFactorPending(true);
-          setTempToken(result.tempToken);
+          setTempToken(result.tempToken ?? null);
           // Focus TOTP input after render
           setTimeout(() => totpInputRef.current?.focus(), 100);
           return;
         }
 
-        console.log('✅ Login successful:', result);
+        console.error('✅ Login successful:', result);
 
-        const userData = {
-          id: result.session.userId,
-          name: result.session.name,
-          email: result.session.email,
-          role: result.session.role,
-          organizationId: result.session.organizationId,
-          department: result.session.department,
-          position: result.session.position,
-          employeeType: result.session.employeeType,
-          avatar: result.session.avatar,
+        if (!result.session) {
+          throw new Error('No session data in response');
+        }
+
+        const session = result.session;
+        const userData: import('@/store/useAuthStore').User = {
+          id: session.userId,
+          name: session.name,
+          email: session.email,
+          role: session.role as 'admin' | 'supervisor' | 'employee' | 'superadmin' | 'driver',
+          organizationId: session.organizationId,
+          department: session.department,
+          position: session.position,
+          employeeType: session.employeeType as 'staff' | 'contractor' | undefined,
+          avatar: session.avatar,
         };
 
-        console.log('💾 Saving user to store:', userData);
+        console.error('💾 Saving user to store:', userData);
         login(userData);
         reset(); // clear keystroke buffer after successful login
 
@@ -388,11 +396,11 @@ export default function LoginPage() {
         }
 
         // Redirect to dashboard or callback URL
-        console.log('🔄 Redirecting to dashboard...');
+        console.error('🔄 Redirecting to dashboard...');
         const params = new URLSearchParams(window.location.search);
         const nextUrl = params.get('next');
         const redirectUrl = nextUrl || '/dashboard';
-        console.log('🔄 Redirect URL:', redirectUrl);
+        console.error('🔄 Redirect URL:', redirectUrl);
         window.location.href = redirectUrl;
       } catch (err) {
         console.error('❌ Login failed:', err);
@@ -401,7 +409,7 @@ export default function LoginPage() {
     });
   };
 
-  const handleWebAuthnSuccess = async (credentialId: string) => {
+  const handleWebAuthnSuccess = async (_credentialId: string) => {
     try {
       // Get user data from JWT session
       const { getSessionAction } = await import('@/actions/auth');
@@ -452,23 +460,41 @@ export default function LoginPage() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = (await response.json()) as { error?: string };
           setTwoFactorError(errorData.error || 'Invalid code');
           setTotpCode('');
           return;
         }
 
-        const result = await response.json();
-        const userData = {
-          id: result.session.userId,
-          name: result.session.name,
-          email: result.session.email,
-          role: result.session.role,
-          organizationId: result.session.organizationId,
-          department: result.session.department,
-          position: result.session.position,
-          employeeType: result.session.employeeType,
-          avatar: result.session.avatar,
+        const result = (await response.json()) as {
+          session?: {
+            userId: string;
+            name: string;
+            email: string;
+            role: string;
+            organizationId: string;
+            department?: string;
+            position?: string;
+            employeeType?: string;
+            avatar?: string;
+          };
+        };
+
+        if (!result.session) {
+          throw new Error('No session data in 2FA response');
+        }
+
+        const session = result.session;
+        const userData: import('@/store/useAuthStore').User = {
+          id: session.userId,
+          name: session.name,
+          email: session.email,
+          role: session.role as 'admin' | 'supervisor' | 'employee' | 'superadmin' | 'driver',
+          organizationId: session.organizationId,
+          department: session.department,
+          position: session.position,
+          employeeType: session.employeeType as 'staff' | 'contractor' | undefined,
+          avatar: session.avatar,
         };
 
         login(userData);
@@ -496,11 +522,9 @@ export default function LoginPage() {
 
   return (
     <>
-      {console.log('🔍 DEBUG: showMaintenanceBanner =', showMaintenanceBanner)}
       {/* Maintenance Banner - Show if maintenance mode is enabled */}
       {showMaintenanceBanner && (
         <>
-          {console.log('✅ Rendering Maintenance Banner')}
           <MaintenanceBanner />
         </>
       )}
@@ -519,8 +543,8 @@ export default function LoginPage() {
             <OnboardingTour
               steps={loginTourSteps}
               tourId={t('auth.loginTour')}
-              onComplete={() => console.log('Tour completed!')}
-              onSkip={() => console.log('Tour skipped')}
+              onComplete={() => {}}
+              onSkip={() => {}}
             />
           )}
 
@@ -812,7 +836,7 @@ export default function LoginPage() {
                         <button
                           type="submit"
                           disabled={isPending}
-                          className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-2 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+                          className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-2 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
                         >
                           {isPending ? (
                             <>

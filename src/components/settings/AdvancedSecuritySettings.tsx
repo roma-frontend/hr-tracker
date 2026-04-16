@@ -233,7 +233,7 @@ export function AdvancedSecuritySettings() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Key className="w-5 h-5 text-[var(--primary)]" />
+              <Key className="w-5 h-5 text-(--primary)" />
               <CardTitle>{t('settingsAdvancedSecurity.twoFactor')}</CardTitle>
             </div>
             {twoFactorEnabled && (
@@ -251,16 +251,16 @@ export function AdvancedSecuritySettings() {
         <CardContent className="space-y-4">
           {/* Status / Toggle */}
           {setupStep === 'idle' && !showDisableConfirm && (
-            <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+            <div className="flex items-center justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🔐</span>
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-medium text-(--text-primary)">
                     {twoFactorEnabled
                       ? 'Two-factor authentication is active'
                       : t('settingsAdvancedSecurity.enable2fa')}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="text-xs text-(--text-muted) mt-0.5">
                     {twoFactorEnabled
                       ? 'Your account is protected with an authenticator app'
                       : t('settingsAdvancedSecurity.enable2faDesc')}
@@ -289,18 +289,18 @@ export function AdvancedSecuritySettings() {
           {setupStep === 'loading' && (
             <div className="flex items-center justify-center py-8">
               <ShieldLoader size="sm" variant="inline" />
-              <span className="ml-2 text-sm text-[var(--text-muted)]">Setting up 2FA...</span>
+              <span className="ml-2 text-sm text-(--text-muted)">Setting up 2FA...</span>
             </div>
           )}
 
           {/* QR Code Step */}
           {setupStep === 'qr' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
-                <p className="text-sm font-medium text-[var(--text-primary)] mb-3">
+              <div className="p-4 rounded-lg border border-(--primary)/20 bg-(--primary)/5">
+                <p className="text-sm font-medium text-(--text-primary) mb-3">
                   Step 1: Scan QR Code
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mb-4">
+                <p className="text-xs text-(--text-muted) mb-4">
                   Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
                 </p>
                 <div className="flex justify-center mb-4">
@@ -309,11 +309,11 @@ export function AdvancedSecuritySettings() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-[var(--text-muted)] mb-1">
+                  <p className="text-xs text-(--text-muted) mb-1">
                     Or enter this code manually:
                   </p>
                   <div className="flex items-center justify-center gap-2">
-                    <code className="text-sm font-mono bg-[var(--surface-hover)] px-3 py-1.5 rounded border border-[var(--border)]">
+                    <code className="text-sm font-mono bg-(--surface-hover) px-3 py-1.5 rounded border border-(--border)">
                       {totpSecret}
                     </code>
                     <Button
@@ -358,11 +358,11 @@ export function AdvancedSecuritySettings() {
           {/* Verify Code Step */}
           {setupStep === 'verify' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
-                <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
+              <div className="p-4 rounded-lg border border-(--primary)/20 bg-(--primary)/5">
+                <p className="text-sm font-medium text-(--text-primary) mb-2">
                   Step 2: Verify Code
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mb-4">
+                <p className="text-xs text-(--text-muted) mb-4">
                   Enter the 6-digit code from your authenticator app to verify setup
                 </p>
                 <input
@@ -414,7 +414,7 @@ export function AdvancedSecuritySettings() {
                   <ShieldCheck className="w-5 h-5 text-green-600" />
                   <p className="text-sm font-medium text-green-600">2FA Enabled Successfully!</p>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mb-4">
+                <p className="text-xs text-(--text-muted) mb-4">
                   Save these backup codes in a safe place. Each code can only be used once. If you
                   lose access to your authenticator app, you can use these codes to sign in.
                 </p>
@@ -422,7 +422,7 @@ export function AdvancedSecuritySettings() {
                   {backupCodes.map((code, i) => (
                     <div
                       key={i}
-                      className="font-mono text-sm text-center py-2 px-3 rounded bg-[var(--surface-hover)] border border-[var(--border)]"
+                      className="font-mono text-sm text-center py-2 px-3 rounded bg-(--surface-hover) border border-(--border)"
                       style={{ color: 'var(--text-primary)' }}
                     >
                       {code}
@@ -467,7 +467,7 @@ export function AdvancedSecuritySettings() {
                 <p className="text-sm font-medium text-red-600 mb-2">
                   Disable Two-Factor Authentication
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mb-4">
+                <p className="text-xs text-(--text-muted) mb-4">
                   Enter your password to confirm. This will remove 2FA protection from your account.
                 </p>
                 <input
@@ -520,7 +520,7 @@ export function AdvancedSecuritySettings() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-[var(--primary)]" />
+                <Smartphone className="w-5 h-5 text-(--primary)" />
                 <CardTitle>{t('settingsAdvancedSecurity.activeSessions')}</CardTitle>
               </div>
               <CardDescription>{t('settingsAdvancedSecurity.activeSessionsDesc')}</CardDescription>
@@ -532,15 +532,15 @@ export function AdvancedSecuritySettings() {
           {activeSessions.map((session) => (
             <div
               key={session.id}
-              className="flex items-start justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]"
+              className="flex items-start justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)"
             >
               <div className="flex items-start gap-3 flex-1">
-                <div className="w-10 h-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center">
-                  <Smartphone className="w-5 h-5 text-[var(--primary)]" />
+                <div className="w-10 h-10 rounded-lg bg-(--primary)/10 flex items-center justify-center">
+                  <Smartphone className="w-5 h-5 text-(--primary)" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                    <p className="text-sm font-medium text-(--text-primary)">
                       {session.device}
                     </p>
                     {session.current && (
@@ -549,10 +549,10 @@ export function AdvancedSecuritySettings() {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                  <p className="text-xs text-(--text-muted) mt-1">
                     {session.location} • {session.ip}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-(--text-muted)">
                     {t('settingsAdvancedSecurity.lastActive')} {session.lastActive}
                   </p>
                 </div>
@@ -576,7 +576,7 @@ export function AdvancedSecuritySettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-[var(--primary)]" />
+            <History className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsAdvancedSecurity.loginHistory')}</CardTitle>
           </div>
           <CardDescription>{t('settingsAdvancedSecurity.loginHistoryDesc')}</CardDescription>
@@ -593,13 +593,13 @@ export function AdvancedSecuritySettings() {
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                      <p className="text-sm font-medium text-(--text-primary)">
                         {login.device}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)] mt-1">
+                      <p className="text-xs text-(--text-muted) mt-1">
                         {login.location} • {login.ip}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)]">{login.date}</p>
+                      <p className="text-xs text-(--text-muted)">{login.date}</p>
                     </div>
                   </div>
                   <Badge
@@ -612,7 +612,7 @@ export function AdvancedSecuritySettings() {
                   </Badge>
                 </div>
                 {idx < loginHistory.length - 1 && (
-                  <div className="border-b border-[var(--border)]" />
+                  <div className="border-b border-(--border)" />
                 )}
               </div>
             ))}
@@ -624,18 +624,18 @@ export function AdvancedSecuritySettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-[var(--warning)]" />
+            <Shield className="w-5 h-5 text-(--warning)" />
             <CardTitle>{t('settingsAdvancedSecurity.securityAlerts')}</CardTitle>
           </div>
           <CardDescription>{t('settingsAdvancedSecurity.securityAlertsDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3">
               <span className="text-2xl">🔔</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{t('settingsAdvancedSecurity.loginAlerts')}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-sm font-medium text-(--text-primary)">{t('settingsAdvancedSecurity.loginAlerts')}</p>
+                <p className="text-xs text-(--text-muted) mt-0.5">
                   {t('settingsAdvancedSecurity.loginAlertsDesc')}
                 </p>
               </div>
@@ -648,7 +648,7 @@ export function AdvancedSecuritySettings() {
               <span className="text-xl">💡</span>
               <div>
                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('settingsAdvancedSecurity.securityTip')}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsAdvancedSecurity.securityTipDesc')}
                 </p>
               </div>

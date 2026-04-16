@@ -177,13 +177,13 @@ function DayCell({
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       className={[
-        'relative w-full min-h-[40px] sm:min-h-[90px] rounded-xl p-1.5 text-left transition-all duration-200 border',
+        'relative w-full min-h-10 sm:min-h-22.5 rounded-xl p-1.5 text-left transition-all duration-200 border',
         isSelected
-          ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/20'
+          ? 'bg-(--primary) border-(--primary) text-white shadow-lg shadow-(--primary)/20'
           : isTodayDate
-            ? 'bg-[var(--primary)]/10 border-[var(--primary)]/40'
+            ? 'bg-(--primary)/10 border-(--primary)/40'
             : isCurrentMonth
-              ? 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[var(--background-subtle)]'
+              ? 'bg-(--card) border-(--border) hover:border-(--primary)/50 hover:bg-(--background-subtle)'
               : 'bg-transparent border-transparent opacity-40',
       ].join(' ')}
     >
@@ -194,14 +194,14 @@ function DayCell({
           isSelected
             ? 'text-white'
             : isTodayDate
-              ? 'text-[var(--primary)] font-bold'
+              ? 'text-(--primary) font-bold'
               : isCurrentMonth
-                ? 'text-[var(--text-primary)]'
-                : 'text-[var(--text-muted)]',
+                ? 'text-(--text-primary)'
+                : 'text-(--text-muted)',
         ].join(' ')}
       >
         {isTodayDate && !isSelected && (
-          <span className="absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
+          <span className="absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full bg-(--primary)" />
         )}
         {date.getDate()}
       </span>
@@ -217,7 +217,7 @@ function DayCell({
               style={{ background: `${LEAVE_TYPE_BG[l.type]}22` }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                className="w-1.5 h-1.5 rounded-full shrink-0"
                 style={{ background: LEAVE_TYPE_BG[l.type] }}
               />
               <span
@@ -236,7 +236,7 @@ function DayCell({
               style={{ background: `${DRIVER_EVENT_COLOR}22` }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                className="w-1.5 h-1.5 rounded-full shrink-0"
                 style={{ background: DRIVER_EVENT_COLOR }}
               />
               <span
@@ -255,7 +255,7 @@ function DayCell({
               style={{ background: `${GOOGLE_EVENT_COLOR}22` }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                className="w-1.5 h-1.5 rounded-full shrink-0"
                 style={{ background: GOOGLE_EVENT_COLOR }}
               />
               <span
@@ -267,7 +267,7 @@ function DayCell({
             </div>
           ))}
           {totalItems > 2 && (
-            <span className="text-[9px] text-[var(--text-muted)] pl-1">+{totalItems - 2} more</span>
+            <span className="text-[9px] text-(--text-muted) pl-1">+{totalItems - 2} more</span>
           )}
         </div>
       )}
@@ -501,10 +501,10 @@ export const CalendarClient = React.memo(function CalendarClient() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+          <h2 className="text-2xl font-bold text-(--text-primary)">
             {t('calendarExtended.leaveCalendar')}
           </h2>
-          <p className="text-[var(--text-muted)] text-sm mt-1">
+          <p className="text-(--text-muted) text-sm mt-1">
             {t('calendarExtended.visualOverview')}
           </p>
         </div>
@@ -540,7 +540,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     key={format(currentMonth, 'yyyy-MM')}
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-lg font-bold text-[var(--text-primary)] min-w-[160px] text-center"
+                    className="text-lg font-bold text-(--text-primary) min-w-40 text-center"
                   >
                     {format(currentMonth, 'MMMM yyyy')}
                   </motion.h3>
@@ -553,7 +553,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 <div className="hidden sm:flex items-center gap-4 text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    <span className="text-[var(--text-muted)]">
+                    <span className="text-(--text-muted)">
                       {
                         leaves.filter(
                           (r) =>
@@ -566,7 +566,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                    <span className="text-[var(--text-muted)]">
+                    <span className="text-(--text-muted)">
                       {
                         leaves.filter(
                           (r) =>
@@ -587,7 +587,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 {DAYS_OF_WEEK.map((d) => (
                   <div
                     key={d}
-                    className="text-center text-xs font-semibold text-[var(--text-muted)] py-2 border-b border-[var(--border)]"
+                    className="text-center text-xs font-semibold text-(--text-muted) py-2 border-b border-(--border)"
                   >
                     {d}
                   </div>
@@ -637,35 +637,35 @@ export const CalendarClient = React.memo(function CalendarClient() {
             {(Object.entries(LEAVE_TYPE_COLORS) as [LeaveType, string][]).map(([type, color]) => (
               <div key={type} className="flex items-center gap-2">
                 <span
-                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  className="w-3 h-3 rounded-full shrink-0"
                   style={{ background: color }}
                 />
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-xs text-(--text-muted)">
                   {getLeaveTypeLabel(type, t)}
                 </span>
               </div>
             ))}
             <div className="flex items-center gap-2">
               <span
-                className="w-3 h-3 rounded-full flex-shrink-0"
+                className="w-3 h-3 rounded-full shrink-0"
                 style={{ background: DRIVER_EVENT_COLOR }}
               />
-              <span className="text-xs text-[var(--text-muted)]">
+              <span className="text-xs text-(--text-muted)">
                 {t('driver.driverBookings', 'Driver Bookings')}
               </span>
             </div>
             {googleConnected && (
               <div className="flex items-center gap-2">
                 <span
-                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  className="w-3 h-3 rounded-full shrink-0"
                   style={{ background: GOOGLE_EVENT_COLOR }}
                 />
-                <span className="text-xs text-[var(--text-muted)]">Google Calendar</span>
+                <span className="text-xs text-(--text-muted)">Google Calendar</span>
               </div>
             )}
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full border-2 border-[var(--primary)] bg-[var(--primary)]/10 flex-shrink-0" />
-              <span className="text-xs text-[var(--text-muted)]">{t('timePeriods.today')}</span>
+              <span className="w-3 h-3 rounded-full border-2 border-(--primary) bg-(--primary)/10 shrink-0" />
+              <span className="text-xs text-(--text-muted)">{t('timePeriods.today')}</span>
             </div>
           </motion.div>
         </motion.div>
@@ -680,7 +680,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
           {/* Selected day details */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm uppercase tracking-wider text-[var(--text-muted)]">
+              <CardTitle className="text-sm uppercase tracking-wider text-(--text-muted)">
                 {selectedDay ? format(selectedDay, 'EEEE, MMM d') : t('calendar.selectADay')}
               </CardTitle>
             </CardHeader>
@@ -696,8 +696,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     exit={{ opacity: 0 }}
                     className="py-6 text-center"
                   >
-                    <CalendarDays className="w-8 h-8 text-[var(--border)] mx-auto mb-2" />
-                    <p className="text-sm text-[var(--text-muted)]">
+                    <CalendarDays className="w-8 h-8 text-(--border) mx-auto mb-2" />
+                    <p className="text-sm text-(--text-muted)">
                       {t('calendarExtended.noLeavesThisDay')}
                     </p>
                   </motion.div>
@@ -716,9 +716,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.04 }}
-                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)]"
+                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-(--border) bg-(--background-subtle)"
                       >
-                        <Avatar className="w-8 h-8 flex-shrink-0">
+                        <Avatar className="w-8 h-8 shrink-0">
                           <AvatarFallback
                             className="text-[10px] font-bold text-white"
                             style={{ background: LEAVE_TYPE_BG[leave.type] }}
@@ -728,29 +728,29 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                            <p className="text-xs font-semibold text-(--text-primary) truncate">
                               {leave.userName ?? 'Unknown'}
                             </p>
                             <StatusIcon status={leave.status as LeaveStatus} />
                           </div>
-                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                          <p className="text-[10px] text-(--text-muted) mt-0.5">
                             {leave.userDepartment ?? ''}
                           </p>
                           <div className="flex items-center gap-1 mt-1">
                             <span
-                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              className="w-2 h-2 rounded-full shrink-0"
                               style={{ background: LEAVE_TYPE_BG[leave.type] }}
                             />
-                            <span className="text-[10px] text-[var(--text-secondary)]">
+                            <span className="text-[10px] text-(--text-secondary)">
                               {getLeaveTypeLabel(leave.type as LeaveType, t)}
                             </span>
                           </div>
-                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                          <p className="text-[10px] text-(--text-muted) mt-0.5">
                             {safeFormat(leave.startDate, 'MMM d')} &ndash;{' '}
                             {safeFormat(leave.endDate, 'MMM d')} &middot; {leave.days}d
                           </p>
                           {leave.comment && (
-                            <p className="text-[10px] text-[var(--text-muted)] mt-1 italic line-clamp-2">
+                            <p className="text-[10px] text-(--text-muted) mt-1 italic line-clamp-2">
                               &quot;{leave.comment}&quot;
                             </p>
                           )}
@@ -765,17 +765,17 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: (selectedDayLeaves.length + i) * 0.04 }}
-                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)]"
+                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-(--border) bg-(--background-subtle)"
                       >
                         <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white"
+                          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold text-white"
                           style={{ background: GOOGLE_EVENT_COLOR }}
                         >
                           G
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                            <p className="text-xs font-semibold text-(--text-primary) truncate">
                               {evt.title}
                             </p>
                             {evt.htmlLink && (
@@ -783,7 +783,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                                 href={evt.htmlLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[var(--text-muted)] hover:text-[var(--primary)] flex-shrink-0"
+                                className="text-(--text-muted) hover:text-(--primary) shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <ExternalLink className="w-3 h-3" />
@@ -791,25 +791,25 @@ export const CalendarClient = React.memo(function CalendarClient() {
                             )}
                           </div>
                           {evt.startTime && (
-                            <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                            <p className="text-[10px] text-(--text-muted) mt-0.5">
                               {format(new Date(evt.startTime), 'h:mm a')}
                               {evt.endTime && ` – ${format(new Date(evt.endTime), 'h:mm a')}`}
                             </p>
                           )}
                           {!evt.startTime && (
-                            <p className="text-[10px] text-[var(--text-muted)] mt-0.5">All day</p>
+                            <p className="text-[10px] text-(--text-muted) mt-0.5">All day</p>
                           )}
                           {evt.location && (
-                            <p className="text-[10px] text-[var(--text-muted)] mt-0.5 truncate">
+                            <p className="text-[10px] text-(--text-muted) mt-0.5 truncate">
                               📍 {evt.location}
                             </p>
                           )}
                           <div className="flex items-center gap-1 mt-1">
                             <span
-                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              className="w-2 h-2 rounded-full shrink-0"
                               style={{ background: GOOGLE_EVENT_COLOR }}
                             />
-                            <span className="text-[10px] text-[var(--text-secondary)]">
+                            <span className="text-[10px] text-(--text-secondary)">
                               Google Calendar
                             </span>
                           </div>
@@ -826,42 +826,42 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         transition={{
                           delay: (selectedDayLeaves.length + selectedDayGoogle.length + i) * 0.04,
                         }}
-                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] cursor-pointer hover:border-[var(--primary)]/50 transition-colors"
+                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-(--border) bg-(--background-subtle) cursor-pointer hover:border-(--primary)/50 transition-colors"
                         onClick={() => setSelectedDriverEvent(evt)}
                       >
                         <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white"
+                          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold text-white"
                           style={{ background: DRIVER_EVENT_COLOR }}
                         >
                           <Car className="w-4 h-4" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                            <p className="text-xs font-semibold text-(--text-primary) truncate">
                               {evt.driverName}
                             </p>
                             <Badge
                               variant="secondary"
-                              className="text-[9px] h-4 px-1.5 flex-shrink-0"
+                              className="text-[9px] h-4 px-1.5 shrink-0"
                             >
                               {evt.type}
                             </Badge>
                           </div>
-                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                          <p className="text-[10px] text-(--text-muted) mt-0.5">
                             {format(new Date(evt.startTime), 'h:mm a')} –{' '}
                             {format(new Date(evt.endTime), 'h:mm a')}
                           </p>
                           {evt.tripInfo && (
-                            <p className="text-[10px] text-[var(--text-muted)] mt-0.5 truncate">
+                            <p className="text-[10px] text-(--text-muted) mt-0.5 truncate">
                               {evt.tripInfo.from} → {evt.tripInfo.to}
                             </p>
                           )}
                           <div className="flex items-center gap-1 mt-1">
                             <span
-                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              className="w-2 h-2 rounded-full shrink-0"
                               style={{ background: DRIVER_EVENT_COLOR }}
                             />
-                            <span className="text-[10px] text-[var(--text-secondary)]">
+                            <span className="text-[10px] text-(--text-secondary)">
                               {t('driver.driverBookings', 'Driver Booking')}
                             </span>
                           </div>
@@ -877,13 +877,13 @@ export const CalendarClient = React.memo(function CalendarClient() {
           {/* Monthly summary */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm uppercase tracking-wider text-[var(--text-muted)]">
+              <CardTitle className="text-sm uppercase tracking-wider text-(--text-muted)">
                 {format(currentMonth, 'MMMM')} {t('calendar.summary')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 space-y-2">
               {monthlySummary.length === 0 ? (
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-(--text-muted)">
                   {t('calendarExtended.noLeavesThisMonth')}
                 </p>
               ) : (
@@ -894,7 +894,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         className="w-2.5 h-2.5 rounded-full"
                         style={{ background: LEAVE_TYPE_BG[type] }}
                       />
-                      <span className="text-xs text-[var(--text-secondary)]">
+                      <span className="text-xs text-(--text-secondary)">
                         {getLeaveTypeLabel(type, t)}
                       </span>
                     </div>
@@ -911,7 +911,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm uppercase tracking-wider text-[var(--text-muted)]">
+                <CardTitle className="text-sm uppercase tracking-wider text-(--text-muted)">
                   {t('calendar.onLeaveToday')}
                 </CardTitle>
                 {onLeaveToday.length > 0 && (
@@ -924,15 +924,15 @@ export const CalendarClient = React.memo(function CalendarClient() {
             <CardContent className="px-4 pb-4 space-y-2">
               {onLeaveToday.length === 0 ? (
                 <div className="flex items-center gap-2 py-2">
-                  <Users className="w-4 h-4 text-[var(--border)]" />
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <Users className="w-4 h-4 text-(--border)" />
+                  <p className="text-xs text-(--text-muted)">
                     {t('calendarExtended.everyoneInToday')}
                   </p>
                 </div>
               ) : (
                 onLeaveToday.map((l) => (
                   <div key={l._id} className="flex items-center gap-2.5">
-                    <Avatar className="w-7 h-7 flex-shrink-0">
+                    <Avatar className="w-7 h-7 shrink-0">
                       <AvatarFallback
                         className="text-[9px] font-bold text-white"
                         style={{ background: LEAVE_TYPE_BG[l.type] }}
@@ -941,15 +941,15 @@ export const CalendarClient = React.memo(function CalendarClient() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-[var(--text-primary)] truncate">
+                      <p className="text-xs font-medium text-(--text-primary) truncate">
                         {l.userName ?? 'Unknown'}
                       </p>
-                      <p className="text-[10px] text-[var(--text-muted)]">
+                      <p className="text-[10px] text-(--text-muted)">
                         {getLeaveTypeLabel(l.type as LeaveType, t)}
                       </p>
                     </div>
                     <Badge
-                      className="ml-auto text-[9px] h-4 px-1.5 flex-shrink-0"
+                      className="ml-auto text-[9px] h-4 px-1.5 shrink-0"
                       variant="success"
                     >
                       away
@@ -991,7 +991,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative z-10 w-full max-w-md mx-4 rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-xl overflow-hidden"
+              className="relative z-10 w-full max-w-md mx-4 rounded-2xl border border-(--border) bg-(--card) shadow-xl overflow-hidden"
             >
               {/* Header */}
               <div className="px-5 pt-5 pb-3 flex items-center justify-between">
@@ -1003,10 +1003,10 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <Car className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-[var(--text-primary)]">
+                    <h3 className="text-base font-bold text-(--text-primary)">
                       {selectedDriverEvent.driverName}
                     </h3>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-(--text-muted)">
                       {selectedDriverEvent.type === 'trip'
                         ? t('driver.trip', 'Trip')
                         : selectedDriverEvent.type === 'blocked'
@@ -1017,7 +1017,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 </div>
                 <button
                   onClick={() => setSelectedDriverEvent(null)}
-                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
+                  className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-1"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -1027,8 +1027,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
               <div className="px-5 pb-5 space-y-3">
                 {/* Time */}
                 <div className="flex items-center gap-2 text-sm">
-                  <Clock className="w-4 h-4 text-[var(--text-muted)]" />
-                  <span className="text-[var(--text-secondary)]">
+                  <Clock className="w-4 h-4 text-(--text-muted)" />
+                  <span className="text-(--text-secondary)">
                     {format(new Date(selectedDriverEvent.startTime), 'MMM d, h:mm a')} –{' '}
                     {format(new Date(selectedDriverEvent.endTime), 'h:mm a')}
                   </span>
@@ -1037,8 +1037,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 {/* Vehicle info */}
                 {selectedDriverEvent.driverVehicle && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Car className="w-4 h-4 text-[var(--text-muted)]" />
-                    <span className="text-[var(--text-secondary)]">
+                    <Car className="w-4 h-4 text-(--text-muted)" />
+                    <span className="text-(--text-secondary)">
                       {selectedDriverEvent.driverVehicle.model} ·{' '}
                       {selectedDriverEvent.driverVehicle.plateNumber}
                       {selectedDriverEvent.driverVehicle.color &&
@@ -1049,44 +1049,44 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
                 {/* Trip info */}
                 {selectedDriverEvent.tripInfo && (
-                  <div className="rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] p-3 space-y-2">
+                  <div className="rounded-lg border border-(--border) bg-(--background-subtle) p-3 space-y-2">
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                      <span className="text-xs font-semibold text-(--text-muted) w-14 shrink-0">
                         {t('driver.from', 'From')}
                       </span>
-                      <span className="text-xs text-[var(--text-primary)]">
+                      <span className="text-xs text-(--text-primary)">
                         {selectedDriverEvent.tripInfo.from}
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                      <span className="text-xs font-semibold text-(--text-muted) w-14 shrink-0">
                         {t('driver.to', 'To')}
                       </span>
-                      <span className="text-xs text-[var(--text-primary)]">
+                      <span className="text-xs text-(--text-primary)">
                         {selectedDriverEvent.tripInfo.to}
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                      <span className="text-xs font-semibold text-(--text-muted) w-14 shrink-0">
                         {t('driver.purpose', 'Purpose')}
                       </span>
-                      <span className="text-xs text-[var(--text-primary)]">
+                      <span className="text-xs text-(--text-primary)">
                         {selectedDriverEvent.tripInfo.purpose}
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Users className="w-3 h-3 text-[var(--text-muted)] mt-0.5 shrink-0" />
-                      <span className="text-xs text-[var(--text-primary)]">
+                      <Users className="w-3 h-3 text-(--text-muted) mt-0.5 shrink-0" />
+                      <span className="text-xs text-(--text-primary)">
                         {selectedDriverEvent.tripInfo.passengerCount}{' '}
                         {t('driver.passengers', 'passengers')}
                       </span>
                     </div>
                     {selectedDriverEvent.tripInfo.notes && (
                       <div className="flex items-start gap-2">
-                        <span className="text-xs font-semibold text-[var(--text-muted)] w-14 shrink-0">
+                        <span className="text-xs font-semibold text-(--text-muted) w-14 shrink-0">
                           {t('driver.notes', 'Notes')}
                         </span>
-                        <span className="text-xs text-[var(--text-primary)]">
+                        <span className="text-xs text-(--text-primary)">
                           {selectedDriverEvent.tripInfo.notes}
                         </span>
                       </div>
@@ -1097,8 +1097,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 {/* Booked by */}
                 {selectedDriverEvent.bookedByName && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Users className="w-4 h-4 text-[var(--text-muted)]" />
-                    <span className="text-[var(--text-secondary)]">
+                    <Users className="w-4 h-4 text-(--text-muted)" />
+                    <span className="text-(--text-secondary)">
                       {t('driver.bookedBy', 'Booked by')} {selectedDriverEvent.bookedByName}
                     </span>
                   </div>
@@ -1107,7 +1107,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 {/* Blocked reason */}
                 {selectedDriverEvent.reason && (
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-[var(--text-secondary)]">
+                    <span className="text-(--text-secondary)">
                       {t('driver.reason', 'Reason')}: {selectedDriverEvent.reason}
                     </span>
                   </div>

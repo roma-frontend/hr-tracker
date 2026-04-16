@@ -138,13 +138,13 @@ function PlanCard({
     <div
       className={`relative flex flex-col rounded-2xl overflow-hidden border transition-all duration-200 ${
         isCurrent
-          ? 'border-[var(--border)] bg-[var(--background-subtle)] opacity-80'
-          : 'border-[var(--border)] bg-[var(--background-subtle)] hover:border-[var(--primary)]/40'
+          ? 'border-(--border) bg-(--background-subtle) opacity-80'
+          : 'border-(--border) bg-(--background-subtle) hover:border-(--primary)/40'
       }`}
     >
       {/* Current plan badge */}
       {isCurrent && (
-        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider z-10 bg-[var(--background-subtle)] border border-[var(--border)] text-[var(--text-muted)]">
+        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider z-10 bg-(--background-subtle) border border-(--border) text-(--text-muted)">
           Current Plan
         </div>
       )}
@@ -162,7 +162,7 @@ function PlanCard({
 
       {/* Top accent line */}
       <div
-        className="h-[3px] w-full flex-shrink-0"
+        className="h-0.75 w-full shrink-0"
         style={{ background: `linear-gradient(90deg, ${tier.accentFrom}, ${tier.accentTo})` }}
       />
 
@@ -170,7 +170,7 @@ function PlanCard({
         {/* Icon + name */}
         <div className="flex items-center gap-3">
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
             style={{
               background: `${tier.accentFrom}1a`,
               border: `1px solid ${tier.accentFrom}33`,
@@ -180,25 +180,25 @@ function PlanCard({
             {tier.icon}
           </div>
           <div>
-            <p className="font-bold text-[var(--text-primary)] leading-tight text-sm">
+            <p className="font-bold text-(--text-primary) leading-tight text-sm">
               {tier.name}
             </p>
-            <p className="text-[11px] text-[var(--text-muted)]">{tier.description}</p>
+            <p className="text-[11px] text-(--text-muted)">{tier.description}</p>
           </div>
         </div>
 
         {/* Price */}
         <div>
           <div className="flex items-end gap-1">
-            <span className="text-2xl font-black leading-none text-[var(--text-primary)]">
+            <span className="text-2xl font-black leading-none text-(--text-primary)">
               {tier.price}
             </span>
             {tier.priceMonthly && (
-              <span className="text-xs text-[var(--text-muted)] pb-0.5">/mo</span>
+              <span className="text-xs text-(--text-muted) pb-0.5">/mo</span>
             )}
           </div>
           {tier.priceMonthly && (
-            <p className="text-[11px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1">
+            <p className="text-[11px] text-(--text-muted) mt-0.5 flex items-center gap-1">
               <Shield size={9} />
               14-day free trial
             </p>
@@ -210,7 +210,7 @@ function PlanCard({
           {tier.features.map((feature) => (
             <li key={feature} className="flex items-start gap-2 text-xs">
               <div
-                className="w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                 style={{
                   background: `${tier.accentFrom}1a`,
                   border: `1px solid ${tier.accentFrom}33`,
@@ -218,7 +218,7 @@ function PlanCard({
               >
                 <Check size={8} style={{ color: tier.accentFrom }} />
               </div>
-              <span className="text-[var(--text-secondary)]">{feature}</span>
+              <span className="text-(--text-secondary)">{feature}</span>
             </li>
           ))}
         </ul>
@@ -305,10 +305,10 @@ export function UpgradeModal({
     >
       <DialogContent className="max-w-3xl w-full p-0 overflow-hidden gap-0">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-[var(--border)]">
+        <div className="px-6 pt-6 pb-4 border-b border-(--border)">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center flex-shrink-0">
-              <Zap className="w-5 h-5 text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary)/10 border border-(--primary)/20 flex items-center justify-center shrink-0">
+              <Zap className="w-5 h-5 text-(--primary)" />
             </div>
             <div>
               <DialogTitle className="text-base font-bold leading-tight">
@@ -334,7 +334,7 @@ export function UpgradeModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 pb-5 flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
+        <div className="px-6 pb-5 flex items-center justify-center gap-2 text-xs text-(--text-muted)">
           <Shield size={11} />
           Payments secured by Stripe · Cancel anytime · GDPR compliant
         </div>

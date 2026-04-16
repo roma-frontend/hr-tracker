@@ -185,7 +185,7 @@ export default React.memo(
         {/* ═══════════════════════════════════════════════════════════════
           ПЕРСОНАЛЬНАЯ СТАТИСТИКА
           ═══════════════════════════════════════════════════════════════ */}
-        <Card className="border-[var(--border)]">
+        <Card className="border-(--border)">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -225,11 +225,11 @@ export default React.memo(
             </div>
 
             {/* Общий баланс */}
-            <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+            <div className="p-4 rounded-lg bg-linear-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">{t('leaveStats.totalAvailable')}</p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <p className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     {stats.totalBalance} {t('leaveStats.days')}
                   </p>
                 </div>

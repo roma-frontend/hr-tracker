@@ -672,7 +672,7 @@ export function FaceLogin() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-4">
             <ScanFace className="w-8 h-8 text-blue-500" />
           </div>
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+          <h3 className="text-lg font-semibold text-(--text-primary)">
             {t('faceLogin.title', 'Face ID Login')}
           </h3>
           <p className="text-sm text-[var(--text-tertiary)] mt-1">
@@ -770,7 +770,7 @@ export function FaceLogin() {
                       <>
                         {/* Scanning line */}
                         <div
-                          className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent animate-pulse"
+                          className="absolute left-0 right-0 h-1 bg-linear-to-r from-transparent via-green-400 to-transparent animate-pulse"
                           style={{
                             top: `${scanningProgress}%`,
                             transition: 'top 0.5s ease-out',
@@ -803,13 +803,13 @@ export function FaceLogin() {
         {/* Camera Selection */}
         {!isWebcamActive && cameras.length > 1 && (
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">
+            <label className="text-sm font-medium text-(--text-secondary)">
               Select Camera:
             </label>
             <select
               value={selectedCamera}
               onChange={(e) => setSelectedCamera(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-base)] text-[var(--text-primary)]"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-base)] text-(--text-primary)"
             >
               {cameras.map((camera: any) => (
                 <option key={camera.deviceId} value={camera.deviceId}>
@@ -902,7 +902,7 @@ export function FaceLogin() {
 
         {/* Info */}
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-(--text-secondary)">
             {t(
               'faceLogin.autoLoginInfo',
               '🚀 Automatic Login: Position your face in the camera frame. The system will automatically authenticate you when your face is detected and scanned (100%).',

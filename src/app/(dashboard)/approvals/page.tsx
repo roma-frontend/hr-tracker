@@ -1,6 +1,4 @@
-﻿'use client';
-import Image from 'next/image';
-
+'use client';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from '@/lib/cssMotion';
@@ -16,23 +14,13 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import type { Id } from '../../../../convex/_generated/dataModel';
-import dynamic from 'next/dynamic';
-
-const AILeaveAssistant = dynamic(() => import('@/components/leaves/AILeaveAssistant'), {
-  ssr: false,
-});
 
 export default function ApprovalsPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
   const isSuperadmin = user?.role === 'superadmin';
-  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : user?.organizationId;
-
-  // Debug
-  React.useEffect(() => {
-    console.log('Approvals page - Current user:', user);
-  }, [user]);
+  const _effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : user?.organizationId;
 
   const pendingUsers = useQuery(
     api.users.queries.getPendingApprovalUsers,
@@ -43,16 +31,13 @@ export default function ApprovalsPage() {
 
   const handleApprove = async (userId: Id<'users'>, userName: string) => {
     if (!user?.id) {
-      console.error('No user ID found in store:', user);
       toast.error(t('ui.pleaseLoginAgain'));
       return;
     }
     try {
-      console.log('Approving user:', { userId, adminId: user.id });
       await approveUser({ userId, adminId: user.id as Id<'users'> });
       toast.success(t('ui.userApproved', { name: userName }));
     } catch (err) {
-      console.error('Approve error:', err);
       toast.error(err instanceof Error ? err.message : t('ui.failedToApproveUser'));
     }
   };
@@ -75,8 +60,8 @@ export default function ApprovalsPage() {
         <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
           <UserX className="w-8 h-8 text-red-500" />
         </div>
-        <h2 className="text-xl font-bold text-[var(--text-primary)]">{t('ui.accessDenied')}</h2>
-        <p className="text-[var(--text-muted)] text-sm">{t('ui.onlyAdminsCanAccess')}</p>
+        <h2 className="text-xl font-bold text-(--text-primary)">{t('ui.accessDenied')}</h2>
+        <p className="text-(--text-muted) text-sm">{t('ui.onlyAdminsCanAccess')}</p>
       </div>
     );
   }
@@ -90,10 +75,10 @@ export default function ApprovalsPage() {
       className="space-y-4 sm:space-y-6"
     >
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
+        <h2 className="text-xl sm:text-2xl font-bold text-(--text-primary)">
           {t('ui.userApprovals')}
         </h2>
-        <p className="text-[var(--text-muted)] text-sm mt-1">{t('ui.approvalsPageDescription')}</p>
+        <p className="text-(--text-muted) text-sm mt-1">{t('ui.approvalsPageDescription')}</p>
       </div>
 
       {isLoading ? (
@@ -106,10 +91,10 @@ export default function ApprovalsPage() {
         <Card>
           <CardContent className="p-6 sm:p-8 text-center">
             <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-500 mx-auto mb-3" />
-            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-1">
+            <h3 className="text-base sm:text-lg font-semibold text-(--text-primary) mb-1">
               {t('ui.allCaughtUp')}
             </h3>
-            <p className="text-sm text-[var(--text-muted)]">{t('ui.noPendingApprovals')}</p>
+            <p className="text-sm text-(--text-muted)">{t('ui.noPendingApprovals')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -118,10 +103,11 @@ export default function ApprovalsPage() {
             <Card key={pendingUser._id}>
               <CardHeader className="pb-3 p-4 sm:p-6">
                 <div className="flex items-start gap-2 sm:gap-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-sm sm:text-lg flex-shrink-0">
-                    {(pendingUser as any).avatarUrl ? (
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
+                    {(pendingUser as unknown as { avatarUrl?: string }).avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={(pendingUser as any).avatarUrl}
+                        src={(pendingUser as unknown as { avatarUrl?: string }).avatarUrl}
                         alt={pendingUser.name}
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
@@ -129,7 +115,7 @@ export default function ApprovalsPage() {
                     ) : (
                       pendingUser.name
                         .split(' ')
-                        .map((n: any) => n[0])
+                        .map((n) => n[0])
                         .join('')
                         .toUpperCase()
                         .slice(0, 2)
@@ -142,11 +128,11 @@ export default function ApprovalsPage() {
                           {pendingUser.name}
                         </CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-1 text-xs sm:text-sm">
-                          <Mail className="w-3 h-3 flex-shrink-0" />
+                          <Mail className="w-3 h-3 shrink-0" />
                           <span className="truncate">{pendingUser.email}</span>
                         </CardDescription>
                       </div>
-                      <Badge variant="warning" className="flex items-center gap-1 flex-shrink-0">
+                      <Badge variant="warning" className="flex items-center gap-1 shrink-0">
                         <Clock className="w-3 h-3" />
                         <span className="hidden sm:inline">{t('ui.pending')}</span>
                       </Badge>
@@ -157,43 +143,37 @@ export default function ApprovalsPage() {
               <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
                   <div>
-                    <p className="text-[var(--text-muted)] text-[10px] sm:text-xs">
-                      {t('labels.role')}
-                    </p>
-                    <p className="text-[var(--text-primary)] font-medium capitalize">
+                    <p className="text-(--text-muted) text-[10px] sm:text-xs">{t('labels.role')}</p>
+                    <p className="text-(--text-primary) font-medium capitalize">
                       {pendingUser.role}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[var(--text-muted)] text-[10px] sm:text-xs">
-                      {t('labels.type')}
-                    </p>
-                    <p className="text-[var(--text-primary)] font-medium capitalize">
+                    <p className="text-(--text-muted) text-[10px] sm:text-xs">{t('labels.type')}</p>
+                    <p className="text-(--text-primary) font-medium capitalize">
                       {pendingUser.employeeType}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[var(--text-muted)] text-[10px] sm:text-xs">
+                    <p className="text-(--text-muted) text-[10px] sm:text-xs">
                       {t('labels.registered')}
                     </p>
-                    <p className="text-[var(--text-primary)] font-medium flex items-center gap-1">
-                      <Calendar className="w-3 h-3 flex-shrink-0" />
+                    <p className="text-(--text-primary) font-medium flex items-center gap-1">
+                      <Calendar className="w-3 h-3 shrink-0" />
                       <span className="truncate">
                         {format(new Date(pendingUser.createdAt), 'MMM d, yyyy')}
                       </span>
                     </p>
                   </div>
                   <div>
-                    <p className="text-[var(--text-muted)] text-[10px] sm:text-xs">
+                    <p className="text-(--text-muted) text-[10px] sm:text-xs">
                       {t('employeeInfo.phone')}
                     </p>
-                    <p className="text-[var(--text-primary)] font-medium">
-                      {pendingUser.phone ?? '—'}
-                    </p>
+                    <p className="text-(--text-primary) font-medium">{pendingUser.phone ?? '—'}</p>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-2 border-t border-[var(--border)]">
+                <div className="flex gap-2 pt-2 border-t border-(--border)">
                   <Button
                     size="sm"
                     onClick={() => handleApprove(pendingUser._id, pendingUser.name)}

@@ -165,7 +165,7 @@ export function RegisterDriverModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="w-full max-w-2xl bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-(--card) rounded-2xl border border-(--border) shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -208,7 +208,7 @@ export function RegisterDriverModal({
                         ? 'bg-emerald-500 text-white'
                         : isCurrent
                           ? 'bg-emerald-500/20 text-emerald-500 ring-2 ring-emerald-500'
-                          : 'bg-[var(--background-subtle)] text-[var(--text-muted)]'
+                          : 'bg-(--background-subtle) text-(--text-muted)'
                     }`}
                   >
                     {isCompleted ? (
@@ -220,7 +220,7 @@ export function RegisterDriverModal({
                   {idx < steps.length - 1 && (
                     <div
                       className={`w-12 sm:w-20 h-0.5 mx-2 transition-colors duration-300 ${
-                        idx < currentStep ? 'bg-emerald-500' : 'bg-[var(--border)]'
+                        idx < currentStep ? 'bg-emerald-500' : 'bg-(--border)'
                       }`}
                     />
                   )}
@@ -246,20 +246,20 @@ export function RegisterDriverModal({
                   {t('driver.personalInfo', 'Personal Information')}
                 </h3>
                 <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-[var(--background-subtle)] space-y-3">
+                  <div className="p-4 rounded-xl bg-(--background-subtle) space-y-3">
                     <div className="flex items-center gap-3">
-                      <User className="w-4 h-4 text-[var(--primary)]" />
+                      <User className="w-4 h-4 text-(--primary)" />
                       <div>
-                        <p className="text-xs text-[var(--text-muted)]">
+                        <p className="text-xs text-(--text-muted)">
                           {t('driver.fullName', 'Full Name')}
                         </p>
                         <p className="font-medium">{userName}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Mail className="w-4 h-4 text-[var(--primary)]" />
+                      <Mail className="w-4 h-4 text-(--primary)" />
                       <div>
-                        <p className="text-xs text-[var(--text-muted)]">
+                        <p className="text-xs text-(--text-muted)">
                           {t('driver.email', 'Email')}
                         </p>
                         <p className="font-medium">{userEmail}</p>
@@ -267,9 +267,9 @@ export function RegisterDriverModal({
                     </div>
                     {userPhone && (
                       <div className="flex items-center gap-3">
-                        <Phone className="w-4 h-4 text-[var(--primary)]" />
+                        <Phone className="w-4 h-4 text-(--primary)" />
                         <div>
-                          <p className="text-xs text-[var(--text-muted)]">
+                          <p className="text-xs text-(--text-muted)">
                             {t('driver.phone', 'Phone')}
                           </p>
                           <p className="font-medium">{userPhone}</p>
@@ -277,7 +277,7 @@ export function RegisterDriverModal({
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-[var(--text-muted)]">
+                  <p className="text-sm text-(--text-muted)">
                     {t(
                       'driver.personalInfoDesc',
                       'Your personal information will be used for driver registration. Vehicle details are required in the next step.',
@@ -306,7 +306,7 @@ export function RegisterDriverModal({
                       value={formData.vehicleMake}
                       onChange={(e) => setFormData((p) => ({ ...p, vehicleMake: e.target.value }))}
                       placeholder={t('driverWizard.makePlaceholder', 'Toyota')}
-                      className="border-[var(--border)] bg-[var(--input)]"
+                      className="border-(--border) bg-(--input)"
                     />
                   </div>
                   <div className="space-y-2">
@@ -315,7 +315,7 @@ export function RegisterDriverModal({
                       value={formData.vehicleModel}
                       onChange={(e) => setFormData((p) => ({ ...p, vehicleModel: e.target.value }))}
                       placeholder={t('driverWizard.modelPlaceholder', 'Camry')}
-                      className="border-[var(--border)] bg-[var(--input)]"
+                      className="border-(--border) bg-(--input)"
                     />
                   </div>
                 </div>
@@ -327,7 +327,7 @@ export function RegisterDriverModal({
                       value={formData.vehicleYear}
                       onChange={(e) => setFormData((p) => ({ ...p, vehicleYear: e.target.value }))}
                       placeholder={t('driverWizard.yearPlaceholder', '2024')}
-                      className="border-[var(--border)] bg-[var(--input)]"
+                      className="border-(--border) bg-(--input)"
                     />
                   </div>
                   <div className="space-y-2">
@@ -336,7 +336,7 @@ export function RegisterDriverModal({
                       value={formData.vehicleColor}
                       onChange={(e) => setFormData((p) => ({ ...p, vehicleColor: e.target.value }))}
                       placeholder={t('driverWizard.colorPlaceholder', 'Black')}
-                      className="border-[var(--border)] bg-[var(--input)]"
+                      className="border-(--border) bg-(--input)"
                     />
                   </div>
                 </div>
@@ -348,7 +348,7 @@ export function RegisterDriverModal({
                       setFormData((p) => ({ ...p, licensePlate: e.target.value.toUpperCase() }))
                     }
                     placeholder={t('driverWizard.platePlaceholder', 'ABC-1234')}
-                    className="border-[var(--border)] bg-[var(--input)] font-mono"
+                    className="border-(--border) bg-(--input) font-mono"
                   />
                 </div>
                 <div className="space-y-2">
@@ -361,7 +361,7 @@ export function RegisterDriverModal({
                         className={`p-3 rounded-xl border text-center transition-all duration-200 ${
                           formData.vehicleType === type.id
                             ? 'border-emerald-500 bg-emerald-500/10'
-                            : 'border-[var(--border)] bg-[var(--background-subtle)] hover:border-[var(--primary)]/50'
+                            : 'border-(--border) bg-(--background-subtle) hover:border-(--primary)/50'
                         }`}
                       >
                         <span className="text-2xl">{type.icon}</span>
@@ -417,7 +417,7 @@ export function RegisterDriverModal({
                 <h3 className="text-lg font-semibold">
                   {t('driver.availability', 'Availability')}
                 </h3>
-                <p className="text-sm text-[var(--text-muted)]">
+                <p className="text-sm text-(--text-muted)">
                   {t('driver.availabilityDesc', 'Select your available days')}
                 </p>
                 <div className="grid grid-cols-7 gap-2">
@@ -434,11 +434,11 @@ export function RegisterDriverModal({
                       className={`p-3 rounded-xl border text-center transition-all duration-200 ${
                         formData.availability[day]
                           ? 'border-emerald-500 bg-emerald-500/10'
-                          : 'border-[var(--border)] bg-[var(--background-subtle)]'
+                          : 'border-(--border) bg-(--background-subtle)'
                       }`}
                     >
                       <Clock
-                        className={`w-4 h-4 mx-auto mb-1 ${formData.availability[day] ? 'text-emerald-500' : 'text-[var(--text-muted)]'}`}
+                        className={`w-4 h-4 mx-auto mb-1 ${formData.availability[day] ? 'text-emerald-500' : 'text-(--text-muted)'}`}
                       />
                       <p className="text-xs font-medium">{dayLabels[day]}</p>
                     </motion.button>
@@ -452,7 +452,7 @@ export function RegisterDriverModal({
                     value={formData.notes}
                     onChange={(e) => setFormData((p) => ({ ...p, notes: e.target.value }))}
                     placeholder={t('driver.notesPlaceholder', 'Any additional information...')}
-                    className="resize-none border-[var(--border)] bg-[var(--input)]"
+                    className="resize-none border-(--border) bg-(--input)"
                     rows={2}
                   />
                 </div>
@@ -472,20 +472,20 @@ export function RegisterDriverModal({
                   {t('driver.confirmRegistration', 'Confirm Registration')}
                 </h3>
                 <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-[var(--background-subtle)] space-y-3">
+                  <div className="p-4 rounded-xl bg-(--background-subtle) space-y-3">
                     <div className="flex items-center gap-3">
-                      <User className="w-4 h-4 text-[var(--primary)]" />
+                      <User className="w-4 h-4 text-(--primary)" />
                       <div>
-                        <p className="text-xs text-[var(--text-muted)]">
+                        <p className="text-xs text-(--text-muted)">
                           {t('driver.driver', 'Driver')}
                         </p>
                         <p className="font-medium">{userName}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Car className="w-4 h-4 text-[var(--primary)]" />
+                      <Car className="w-4 h-4 text-(--primary)" />
                       <div>
-                        <p className="text-xs text-[var(--text-muted)]">
+                        <p className="text-xs text-(--text-muted)">
                           {t('driver.vehicle', 'Vehicle')}
                         </p>
                         <p className="font-medium">
@@ -495,9 +495,9 @@ export function RegisterDriverModal({
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Settings className="w-4 h-4 text-[var(--primary)]" />
+                      <Settings className="w-4 h-4 text-(--primary)" />
                       <div>
-                        <p className="text-xs text-[var(--text-muted)]">
+                        <p className="text-xs text-(--text-muted)">
                           {t('driver.vehicleType', 'Type')}
                         </p>
                         <Badge variant="secondary">
@@ -507,8 +507,8 @@ export function RegisterDriverModal({
                       </div>
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--background-subtle)]">
-                    <p className="text-xs text-[var(--text-muted)] mb-2">
+                  <div className="p-3 rounded-xl bg-(--background-subtle)">
+                    <p className="text-xs text-(--text-muted) mb-2">
                       {t('driver.availableDays', 'Available Days')}
                     </p>
                     <div className="flex flex-wrap gap-1">
@@ -528,7 +528,7 @@ export function RegisterDriverModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border)] bg-[var(--background-subtle)]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-(--border) bg-(--background-subtle)">
           {currentStep > 0 ? (
             <Button variant="outline" onClick={prevStep} disabled={isSubmitting}>
               {t('driver.back', 'Back')}

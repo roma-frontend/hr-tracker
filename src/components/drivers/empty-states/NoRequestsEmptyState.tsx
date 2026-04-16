@@ -41,9 +41,9 @@ export const NoRequestsEmptyState = memo(function NoRequestsEmptyState({
         border: '2px dashed var(--border)',
       }}
     >
-      <Clock className="w-16 h-16 mx-auto mb-4 text-[var(--text-muted)] opacity-50" />
+      <Clock className="w-16 h-16 mx-auto mb-4 text-(--text-muted) opacity-50" />
       <h3 className="text-lg font-semibold mb-2">{title || defaultTitle}</h3>
-      <p className="text-sm text-[var(--text-muted)] mb-4">{description || defaultDescription}</p>
+      <p className="text-sm text-(--text-muted) mb-4">{description || defaultDescription}</p>
       {onAction && (
         <Button onClick={onAction} className="gap-2">
           <Plus className="w-4 h-4" />

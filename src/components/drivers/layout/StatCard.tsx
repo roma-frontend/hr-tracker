@@ -27,10 +27,10 @@ export const StatCard = memo(function StatCard({
   iconBgColor = 'rgba(99, 102, 241, 0.1)',
 }: StatCardProps) {
   return (
-    <Card className="drivers-card-hover relative overflow-hidden border-[var(--border)]">
+    <Card className="drivers-card-hover relative overflow-hidden border-(--border)">
       <div className="drivers-stats-shimmer absolute inset-0 pointer-events-none" />
       <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-        <h3 className="text-sm font-medium text-[var(--text-muted)]">{label}</h3>
+        <h3 className="text-sm font-medium text-(--text-muted)">{label}</h3>
         <div className="p-2 rounded-lg" style={{ background: iconBgColor }}>
           <Icon className="w-4 h-4" style={{ color: gradientFrom }} />
         </div>

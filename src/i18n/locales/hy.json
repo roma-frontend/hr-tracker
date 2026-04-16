@@ -2288,7 +2288,8 @@
     "makeAdminTitle": "Նշանակել ադմի՞ն:",
     "removeAdminTitle": "Հեռացնել ադմինի դե՞րը:",
     "cancel": "Չեղարկել",
-    "processing": "Մշակվում է..."
+    "processing": "Մշակվում է...",
+    "backToPlans": "Վերադառնալ պլաններին"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Հաշվետվություններ և վերլուծություն",

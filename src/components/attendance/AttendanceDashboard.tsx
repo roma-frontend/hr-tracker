@@ -94,7 +94,7 @@ export function AttendanceDashboard() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-[var(--text-muted)] mb-1">{stat.label}</p>
+                      <p className="text-sm text-(--text-muted) mb-1">{stat.label}</p>
                       <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
                     </div>
                     <div className={`p-3 rounded-xl ${stat.iconBg}`}>
@@ -144,7 +144,7 @@ export function AttendanceDashboard() {
         </CardHeader>
         <CardContent>
           {!history || history.length === 0 ? (
-            <p className="text-center text-[var(--text-muted)] py-4">
+            <p className="text-center text-(--text-muted) py-4">
               {t('attendanceIssues.noRecordsYet')}
             </p>
           ) : (
@@ -160,7 +160,7 @@ export function AttendanceDashboard() {
                       <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                         {format(new Date(record.date), 'MMMM dd, yyyy')}
                       </p>
-                      <p className="text-sm text-[var(--text-muted)]">
+                      <p className="text-sm text-(--text-muted)">
                         {record.checkInTime ? format(new Date(record.checkInTime), 'HH:mm') : '—'} →{' '}
                         {record.checkOutTime ? format(new Date(record.checkOutTime), 'HH:mm') : '—'}
                       </p>

@@ -64,6 +64,8 @@ export default function RequestOrgPage() {
 
   const requestOrg = useMutation(api.organizationRequests.requestOrganization);
 
+  const strength = passwordStrength(formData.password);
+
   const plan = searchParams.get('plan') as 'professional' | 'enterprise' | null;
 
   useEffect(() => {
@@ -71,20 +73,6 @@ export default function RequestOrgPage() {
       router.push('/register-org');
     }
   }, [plan, router]);
-
-  // Auto-generate slug from org name
-  useEffect(() => {
-    if (formData.orgName && !formData.slug) {
-      const slug = formData.orgName
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 30);
-      setFormData((prev) => ({ ...prev, slug }));
-    }
-  }, [formData.orgName, formData.slug]);
-
-  const strength = passwordStrength(formData.password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,9 +117,10 @@ export default function RequestOrgPage() {
 
         // Redirect to confirmation page
         router.push('/register-org/pending');
-      } catch (err: any) {
-        setError(err.message || 'Failed to submit request');
-        toast.error(err.message || 'Failed to submit request');
+      } catch (_err) {
+        const errorMessage = _err instanceof Error ? _err.message : 'Failed to submit request';
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     });
   };
@@ -212,12 +201,20 @@ export default function RequestOrgPage() {
                   Organization Name
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
                     type="text"
                     required
                     value={formData.orgName}
-                    onChange={(e) => setFormData((p) => ({ ...p, orgName: e.target.value }))}
+                    onChange={(e) => {
+                      const orgName = e.target.value;
+                      const slug = orgName
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .substring(0, 30);
+                      setFormData((p) => ({ ...p, orgName, slug }));
+                    }}
                     placeholder={t('placeholders.acmeCorporation')}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
@@ -238,7 +235,7 @@ export default function RequestOrgPage() {
                   Organization URL
                 </label>
                 <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
                     type="text"
                     required
@@ -273,7 +270,7 @@ export default function RequestOrgPage() {
                     Industry
                   </label>
                   <div className="relative">
-                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <input
                       type="text"
                       value={formData.industry}
@@ -298,7 +295,7 @@ export default function RequestOrgPage() {
                     Team Size
                   </label>
                   <div className="relative">
-                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <select
                       value={formData.teamSize}
                       onChange={(e) => setFormData((p) => ({ ...p, teamSize: e.target.value }))}
@@ -337,7 +334,7 @@ export default function RequestOrgPage() {
                     Your Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <input
                       type="text"
                       required
@@ -363,7 +360,7 @@ export default function RequestOrgPage() {
                     {t('auth.email')}
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <input
                       type="email"
                       required
@@ -391,7 +388,7 @@ export default function RequestOrgPage() {
                     Phone
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <input
                       type="tel"
                       value={formData.phone}
@@ -439,7 +436,7 @@ export default function RequestOrgPage() {
                   {t('auth.password')}
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
@@ -460,7 +457,7 @@ export default function RequestOrgPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted)"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -498,7 +495,7 @@ export default function RequestOrgPage() {
                 Tell us about your needs (optional)
               </label>
               <div className="relative">
-                <MessageSquare className="absolute left-3 top-3 w-4 h-4 text-[var(--text-muted)]" />
+                <MessageSquare className="absolute left-3 top-3 w-4 h-4 text-(--text-muted)" />
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
@@ -526,7 +523,7 @@ export default function RequestOrgPage() {
                 className="flex items-center gap-2 p-3 rounded-xl text-sm"
                 style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
               >
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}
               </motion.div>
             )}

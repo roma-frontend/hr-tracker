@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react';
@@ -18,30 +18,34 @@ export default function SuccessClient() {
   const plan = params.get('plan') ?? 'starter';
   const sessionId = params.get('session_id');
   const [count, setCount] = useState(5);
-  const [verified, setVerified] = useState<boolean | null>(null);
+  const [verified, setVerified] = useState<boolean | null>(sessionId ? null : false);
 
-  // Verify the checkout session is real
-  useEffect(() => {
-    if (!sessionId) {
-      setVerified(false);
-      return;
+  const handleVerify = useCallback(async () => {
+    if (!sessionId) return false;
+
+    try {
+      const res = await fetch(`/api/stripe/verify-session?session_id=${sessionId}`);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const data: { valid?: boolean } = await res.json();
+      return data.valid ?? false;
+    } catch {
+      return false;
     }
-
-    fetch(`/api/stripe/verify-session?session_id=${sessionId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setVerified(data.valid ?? false);
-      })
-      .catch(() => setVerified(false));
   }, [sessionId]);
+
+  useEffect(() => {
+    if (sessionId) {
+      handleVerify().then((result) => setVerified(result));
+    }
+  }, [sessionId, handleVerify]);
 
   useEffect(() => {
     if (count === 0) {
       window.location.href = '/register';
       return;
     }
-    const t = setTimeout(() => setCount((c) => c - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setCount((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
   }, [count]);
 
   // Show loading while verifying
@@ -81,8 +85,8 @@ export default function SuccessClient() {
     >
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px]" />
-        <div className="absolute top-1/3 left-1/3 w-[300px] h-[300px] bg-indigo-600/10 rounded-full blur-[80px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-blue-600/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/3 left-1/3 w-75 h-75 bg-indigo-600/10 rounded-full blur-[80px]" />
       </div>
 
       <div className="relative z-10 max-w-lg w-full text-center">
@@ -90,7 +94,7 @@ export default function SuccessClient() {
         <div className="flex justify-center mb-8">
           <div className="relative">
             <div className="absolute inset-0 bg-green-500/20 rounded-full blur-xl scale-150" />
-            <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/30">
+            <div className="relative w-24 h-24 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/30">
               <CheckCircle size={48} className="text-white" />
             </div>
           </div>
@@ -124,7 +128,7 @@ export default function SuccessClient() {
 
         {/* CTA */}
         <Link href="/register">
-          <button className="group w-full py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3">
+          <button className="group w-full py-4 rounded-2xl bg-linear-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3">
             {t('checkout.createAccount')}
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </button>

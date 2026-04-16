@@ -21,12 +21,12 @@ export const DriverSearchBar = memo(function DriverSearchBar({
 }: DriverSearchBarProps) {
   return (
     <div className="relative flex-1 sm:flex-initial">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-10 border-[var(--border)]"
+        className="pl-10 border-(--border)"
         style={{
           borderRadius: '1rem',
           background: 'var(--background-subtle)',

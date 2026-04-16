@@ -47,13 +47,13 @@ function UpgradeCard({
   const planLabel = PLAN_LABELS[requiredPlan];
 
   return (
-    <div className="flex flex-col items-center justify-center text-center px-6 py-12 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] gap-4 min-h-[220px]">
-      <div className="w-14 h-14 rounded-2xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center">
-        <Lock className="w-6 h-6 text-[var(--primary)]" />
+    <div className="flex flex-col items-center justify-center text-center px-6 py-12 rounded-2xl border border-dashed border-(--border) bg-(--surface) gap-4 min-h-55">
+      <div className="w-14 h-14 rounded-2xl bg-(--primary)/10 border border-(--primary)/20 flex items-center justify-center">
+        <Lock className="w-6 h-6 text-(--primary)" />
       </div>
       <div>
-        <h3 className="text-lg font-bold text-[var(--text-primary)]">{title}</h3>
-        <p className="text-sm text-[var(--text-muted)] mt-1 max-w-xs mx-auto">{description}</p>
+        <h3 className="text-lg font-bold text-(--text-primary)">{title}</h3>
+        <p className="text-sm text-(--text-muted) mt-1 max-w-xs mx-auto">{description}</p>
       </div>
       <Button size="sm" className="gap-1.5" onClick={onUpgradeClick}>
         <Zap className="w-4 h-4" />
@@ -107,7 +107,7 @@ export function PlanGate({
       <>
         <div className="relative">
           <div className="pointer-events-none select-none blur-sm opacity-40">{children}</div>
-          <div className="absolute inset-0 flex items-center justify-center bg-[var(--background)]/60 backdrop-blur-sm rounded-2xl">
+          <div className="absolute inset-0 flex items-center justify-center bg-(--background)/60 backdrop-blur-sm rounded-2xl">
             <UpgradeCard
               title={finalTitle}
               description={finalDescription}
@@ -139,7 +139,7 @@ export function PlanGate({
 
 export function UpgradeBadge({ requiredPlan = 'professional' }: { requiredPlan?: PlanType }) {
   return (
-    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white leading-tight">
+    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white leading-tight">
       {PLAN_LABELS[requiredPlan]}
     </span>
   );

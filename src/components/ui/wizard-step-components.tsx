@@ -51,7 +51,7 @@ export function TextInputStep({
   const value = (stepData[field] as string | number | undefined) ?? defaultValue;
   return (
     <div className="space-y-2">
-      <Label htmlFor={field} className="text-[var(--text-primary)]">
+      <Label htmlFor={field} className="text-(--text-primary)">
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Input
@@ -61,10 +61,10 @@ export function TextInputStep({
         value={value ?? ''}
         onChange={(e) => updateStepData(field, e.target.value)}
         placeholder={placeholder}
-        className="bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+        className="bg-(--input) border-(--input-border) text-(--text-primary) placeholder-(--text-muted)"
         required={required}
       />
-      {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
+      {description && <p className="text-xs text-(--text-muted)">{description}</p>}
     </div>
   );
 }
@@ -96,7 +96,7 @@ export function TextareaStep({
   const value = stepData[field] as string | number | undefined;
   return (
     <div className="space-y-2">
-      <Label htmlFor={field} className="text-[var(--text-primary)]">
+      <Label htmlFor={field} className="text-(--text-primary)">
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Textarea
@@ -106,10 +106,10 @@ export function TextareaStep({
         onChange={(e) => updateStepData(field, e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none"
+        className="bg-(--input) border-(--input-border) text-(--text-primary) placeholder-(--text-muted) resize-none"
         required={required}
       />
-      {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
+      {description && <p className="text-xs text-(--text-muted)">{description}</p>}
     </div>
   );
 }
@@ -142,7 +142,7 @@ export function SelectStep({
   const value = stepData[field] as string | undefined;
   return (
     <div className="space-y-2">
-      <Label htmlFor={field} className="text-[var(--text-primary)]">
+      <Label htmlFor={field} className="text-(--text-primary)">
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Select
@@ -150,7 +150,7 @@ export function SelectStep({
         onValueChange={(value) => updateStepData(field, value)}
         required={required}
       >
-        <SelectTrigger className="bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)]">
+        <SelectTrigger className="bg-(--input) border-(--input-border) text-(--text-primary)">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -158,7 +158,7 @@ export function SelectStep({
             <SelectItem
               key={option.value}
               value={option.value}
-              className="text-[var(--text-primary)]"
+              className="text-(--text-primary)"
             >
               <div className="flex items-center gap-2">
                 {option.icon}
@@ -168,7 +168,7 @@ export function SelectStep({
           ))}
         </SelectContent>
       </Select>
-      {description && <p className="text-xs text-[var(--text-muted)]">{description}</p>}
+      {description && <p className="text-xs text-(--text-muted)">{description}</p>}
     </div>
   );
 }
@@ -208,10 +208,10 @@ export function CardSelectionStep({
   return (
     <div className="space-y-2 md:space-y-3">
       <div>
-        <Label className="text-[var(--text-primary)] text-sm md:text-base">
+        <Label className="text-(--text-primary) text-sm md:text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1">{description}</p>}
+        {description && <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>}
       </div>
 
       <div
@@ -231,8 +231,8 @@ export function CardSelectionStep({
               className={cn(
                 'cursor-pointer transition-all duration-200 hover:shadow-md',
                 isSelected
-                  ? 'border-[var(--primary)] bg-[var(--primary)]/5 shadow-md'
-                  : 'border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)]',
+                  ? 'border-(--primary) bg-(--primary)/5 shadow-md'
+                  : 'border-(--border) bg-(--background) hover:bg-(--background-subtle)',
               )}
               onClick={() => updateStepData(field, option.value)}
             >
@@ -241,8 +241,8 @@ export function CardSelectionStep({
                   className={cn(
                     'p-2 md:p-3 rounded-full transition-colors',
                     isSelected
-                      ? 'bg-[var(--primary)] text-white'
-                      : option.color || 'bg-[var(--background-subtle)] text-[var(--text-muted)]',
+                      ? 'bg-(--primary) text-white'
+                      : option.color || 'bg-(--background-subtle) text-(--text-muted)',
                   )}
                 >
                   {React.isValidElement(option.icon) ? React.cloneElement(option.icon as React.ReactElement<any>, { className: 'w-4 h-4 md:w-6 md:h-6' }) : option.icon}
@@ -251,14 +251,14 @@ export function CardSelectionStep({
                   <p
                     className={cn(
                       'font-semibold text-xs md:text-sm leading-tight',
-                      isSelected ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]',
+                      isSelected ? 'text-(--primary)' : 'text-(--text-primary)',
                     )}
                   >
                     {option.title}
                   </p>
-                  <p className="text-[10px] md:text-xs text-[var(--text-muted)] leading-relaxed line-clamp-2">{option.description}</p>
+                  <p className="text-[10px] md:text-xs text-(--text-muted) leading-relaxed line-clamp-2">{option.description}</p>
                 </div>
-                {isSelected && <Badge className="bg-[var(--primary)] text-white text-[10px] md:text-xs px-2 py-0.5">✓ Выбрано</Badge>}
+                {isSelected && <Badge className="bg-(--primary) text-white text-[10px] md:text-xs px-2 py-0.5">✓ Выбрано</Badge>}
               </CardContent>
             </Card>
           );
@@ -296,10 +296,10 @@ export function RadioGroupStep({
   return (
     <div className="space-y-2 md:space-y-3">
       <div>
-        <Label className="text-[var(--text-primary)] text-sm md:text-base">
+        <Label className="text-(--text-primary) text-sm md:text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1">{description}</p>}
+        {description && <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>}
       </div>
 
       <RadioGroup
@@ -310,7 +310,7 @@ export function RadioGroupStep({
         {options.map((option) => (
           <div
             key={option.value}
-            className="flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] transition-colors cursor-pointer"
+            className="flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border border-(--border) bg-(--background) hover:bg-(--background-subtle) transition-colors cursor-pointer"
             onClick={() => updateStepData(field, option.value)}
           >
             <RadioGroupItem
@@ -319,9 +319,9 @@ export function RadioGroupStep({
               className="mt-0.5 shrink-0"
             />
             <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
-              <p className="font-medium text-sm md:text-base text-[var(--text-primary)]">{option.label}</p>
+              <p className="font-medium text-sm md:text-base text-(--text-primary)">{option.label}</p>
               {option.description && (
-                <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-0.5 md:mt-1">{option.description}</p>
+                <p className="text-[10px] md:text-xs text-(--text-muted) mt-0.5 md:mt-1">{option.description}</p>
               )}
             </Label>
           </div>
@@ -363,8 +363,8 @@ export function CheckboxStep({
   return (
     <div className="space-y-2 md:space-y-3">
       <div>
-        <Label className="text-[var(--text-primary)] text-sm md:text-base">{label}</Label>
-        {description && <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1">{description}</p>}
+        <Label className="text-(--text-primary) text-sm md:text-base">{label}</Label>
+        {description && <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>}
       </div>
 
       <div className="space-y-2">
@@ -374,7 +374,7 @@ export function CheckboxStep({
           return (
             <div
               key={option.value}
-              className="flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] transition-colors cursor-pointer"
+              className="flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border border-(--border) bg-(--background) hover:bg-(--background-subtle) transition-colors cursor-pointer"
               onClick={() => toggleValue(option.value)}
             >
               <Checkbox
@@ -384,9 +384,9 @@ export function CheckboxStep({
                 className="shrink-0 mt-0.5"
               />
               <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
-                <p className="font-medium text-sm md:text-base text-[var(--text-primary)]">{option.label}</p>
+                <p className="font-medium text-sm md:text-base text-(--text-primary)">{option.label}</p>
                 {option.description && (
-                  <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-0.5 md:mt-1">{option.description}</p>
+                  <p className="text-[10px] md:text-xs text-(--text-muted) mt-0.5 md:mt-1">{option.description}</p>
                 )}
               </Label>
             </div>

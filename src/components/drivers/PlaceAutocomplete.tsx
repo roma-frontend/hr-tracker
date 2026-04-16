@@ -172,7 +172,7 @@ export function PlaceAutocomplete({
   return (
     <div ref={containerRef} className={cn('relative', className)}>
       <div className="relative flex items-center">
-        <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
+        <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted) pointer-events-none" />
         <input
           ref={inputRef}
           type="text"
@@ -184,22 +184,22 @@ export function PlaceAutocomplete({
           }}
           placeholder={placeholder}
           className={cn(
-            'flex h-9 w-full rounded-lg border border-[var(--input-border)] bg-[var(--input)] pl-8 py-1 text-sm text-[var(--text-primary)] shadow-sm transition-colors',
+            'flex h-9 w-full rounded-lg border border-(--input-border) bg-(--input) pl-8 py-1 text-sm text-(--text-primary) shadow-sm transition-colors',
             value || isLoading ? 'pr-9' : 'pr-3',
-            'placeholder:text-[var(--text-muted)]',
-            'focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-[var(--primary)]',
+            'placeholder:text-(--text-muted)',
+            'focus:outline-none focus:ring-2 focus:ring-(--ring) focus:border-(--primary)',
           )}
         />
         {isLoading ? (
-          <div className="absolute right-0 top-0 bottom-0 flex items-center pr-2.5 pl-3 bg-gradient-to-l from-[var(--input)] via-[var(--input)] to-transparent pointer-events-none">
+          <div className="absolute right-0 top-0 bottom-0 flex items-center pr-2.5 pl-3 bg-linear-to-l from-(--input) via-(--input) to-transparent pointer-events-none">
             <ShieldLoader size="xs" variant="inline" />
           </div>
         ) : value ? (
-          <div className="absolute right-0 top-0 bottom-0 flex items-center pr-1.5 pl-4 bg-gradient-to-l from-[var(--input)] from-60% to-transparent">
+          <div className="absolute right-0 top-0 bottom-0 flex items-center pr-1.5 pl-4 bg-linear-to-l from-(--input) from-60% to-transparent">
             <button
               type="button"
               onClick={clearInput}
-              className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--muted)] transition-colors"
+              className="p-1 rounded-full text-(--text-muted) hover:text-(--text-primary) hover:bg-(--muted) transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -209,24 +209,24 @@ export function PlaceAutocomplete({
 
       {/* Dropdown */}
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-[var(--input-border)] bg-[var(--card)] shadow-lg overflow-hidden">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-(--input-border) bg-(--card) shadow-lg overflow-hidden">
           {suggestions.map((s, i) => (
             <button
               key={`${s.lat}-${s.lon}`}
               type="button"
               onClick={() => handleSelect(s)}
               className={cn(
-                'w-full text-left px-3 py-2.5 text-sm flex items-start gap-2.5 transition-colors border-b border-[var(--input-border)] last:border-b-0',
+                'w-full text-left px-3 py-2.5 text-sm flex items-start gap-2.5 transition-colors border-b border-(--input-border) last:border-b-0',
                 i === highlightedIndex
-                  ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
-                  : 'text-[var(--text-primary)] hover:bg-[var(--muted)]',
+                  ? 'bg-(--primary)/10 text-(--primary)'
+                  : 'text-(--text-primary) hover:bg-(--muted)',
               )}
             >
-              <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-[var(--text-muted)]" />
+              <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-(--text-muted)" />
               <div className="min-w-0">
                 <div className="font-medium truncate">{formatAddress(s)}</div>
                 {s.display_name !== formatAddress(s) && (
-                  <div className="text-xs text-[var(--text-muted)] truncate mt-0.5">
+                  <div className="text-xs text-(--text-muted) truncate mt-0.5">
                     {s.display_name}
                   </div>
                 )}

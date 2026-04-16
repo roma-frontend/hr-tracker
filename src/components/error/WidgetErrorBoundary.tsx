@@ -63,17 +63,17 @@ export class WidgetErrorBoundary extends Component<Props, State> {
 
       const widgetName = this.props.name || 'Widget';
       return (
-        <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-[var(--border)] bg-[var(--background-subtle)] min-h-[200px] gap-3">
-          <AlertTriangle className="w-8 h-8 text-[var(--warning)]" />
-          <p className="text-sm text-[var(--text-muted)] text-center">
+        <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-(--border) bg-(--background-subtle) min-h-[200px] gap-3">
+          <AlertTriangle className="w-8 h-8 text-(--warning)" />
+          <p className="text-sm text-(--text-muted) text-center">
             <strong>{widgetName}</strong> encountered an error
           </p>
           {process.env.NODE_ENV === 'development' && this.state.error && (
-            <details className="text-xs text-[var(--text-muted)] max-w-sm">
-              <summary className="cursor-pointer hover:text-[var(--text-primary)]">
+            <details className="text-xs text-(--text-muted) max-w-sm">
+              <summary className="cursor-pointer hover:text-(--text-primary)">
                 Show error details
               </summary>
-              <pre className="mt-2 p-2 bg-[var(--background)] rounded overflow-auto max-h-32 whitespace-pre-wrap">
+              <pre className="mt-2 p-2 bg-(--background) rounded overflow-auto max-h-32 whitespace-pre-wrap">
                 {this.state.error.message}
               </pre>
             </details>

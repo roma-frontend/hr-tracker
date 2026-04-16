@@ -119,11 +119,9 @@ export default function RegisterOrgPage() {
           {plans.map((plan) => {
             const Icon = plan.icon;
             return (
-              <motion.div
+              <div
                 key={plan.id}
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative rounded-2xl p-6 cursor-pointer border-2 transition-all ${
+                className={`relative rounded-2xl p-6 cursor-pointer border-2 hover:scale-105 transition-transform ${
                   selectedPlan === plan.id
                     ? 'border-blue-500 shadow-xl'
                     : 'border-transparent hover:border-blue-300'
@@ -136,7 +134,7 @@ export default function RegisterOrgPage() {
               >
                 {/* Popular badge */}
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-blue-500 to-cyan-500">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-white text-center bg-linear-to-r from-blue-500 to-cyan-500">
                     {t('auth.mostPopular', 'Most Popular')}
                   </div>
                 )}
@@ -154,7 +152,7 @@ export default function RegisterOrgPage() {
                   {plan.name}
                 </h3>
                 <p
-                  className="text-3xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent"
+                  className="text-3xl font-bold mb-2 bg-linear-to-r bg-clip-text text-transparent"
                   style={{ backgroundImage: `linear-gradient(135deg, ${plan.color})` }}
                 >
                   {plan.price}
@@ -167,7 +165,7 @@ export default function RegisterOrgPage() {
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
+                      <Check className="w-4 h-4 mt-0.5 text-green-500 shrink-0" />
                       <span style={{ color: 'var(--text-secondary)' }}>{feature}</span>
                     </li>
                   ))}
@@ -187,7 +185,7 @@ export default function RegisterOrgPage() {
                     {t('auth.approvalWithin24h', 'Approval within 24 hours')}
                   </p>
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </div>

@@ -176,7 +176,7 @@ export function PomodoroTimer() {
   return (
     <div className="px-2 py-4">
       <div className="mb-3 px-2">
-        <h3 className="text-xs font-semibold text-[var(--text-muted)] flex items-center gap-2">
+        <h3 className="text-xs font-semibold text-(--text-muted) flex items-center gap-2">
           <Timer className="w-3.5 h-3.5" />
           Pomodoro Timer
         </h3>
@@ -188,8 +188,8 @@ export function PomodoroTimer() {
           onClick={() => handleModeChange('pomodoro')}
           className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
             mode === 'pomodoro'
-              ? 'bg-[var(--primary)] text-white shadow-sm'
-              : 'bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80'
+              ? 'bg-(--primary) text-white shadow-sm'
+              : 'bg-(--background-subtle) text-(--text-muted) hover:bg-(--background-subtle)/80'
           }`}
         >
           Focus
@@ -198,8 +198,8 @@ export function PomodoroTimer() {
           onClick={() => handleModeChange('shortBreak')}
           className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
             mode === 'shortBreak'
-              ? 'bg-[var(--primary)] text-white shadow-sm'
-              : 'bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80'
+              ? 'bg-(--primary) text-white shadow-sm'
+              : 'bg-(--background-subtle) text-(--text-muted) hover:bg-(--background-subtle)/80'
           }`}
         >
           Short
@@ -208,8 +208,8 @@ export function PomodoroTimer() {
           onClick={() => handleModeChange('longBreak')}
           className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
             mode === 'longBreak'
-              ? 'bg-[var(--primary)] text-white shadow-sm'
-              : 'bg-[var(--background-subtle)] text-[var(--text-muted)] hover:bg-[var(--background-subtle)]/80'
+              ? 'bg-(--primary) text-white shadow-sm'
+              : 'bg-(--background-subtle) text-(--text-muted) hover:bg-(--background-subtle)/80'
           }`}
         >
           Long
@@ -238,10 +238,10 @@ export function PomodoroTimer() {
 
         {/* Time text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-3xl font-bold text-[var(--text-primary)] font-mono">
+          <div className="text-3xl font-bold text-(--text-primary) font-mono">
             {formatTime(timeLeft)}
           </div>
-          <div className="text-xs text-[var(--text-muted)] mt-1 capitalize">
+          <div className="text-xs text-(--text-muted) mt-1 capitalize">
             {mode === 'pomodoro'
               ? t('pomodoro.focusTime')
               : mode === 'shortBreak'
@@ -280,7 +280,7 @@ export function PomodoroTimer() {
       {/* Stats */}
       {mode === 'pomodoro' && (
         <div className="mt-3 px-2 text-center">
-          <p className="text-[10px] text-[var(--text-muted)]">{t('pomodoro.productivityTip')}</p>
+          <p className="text-[10px] text-(--text-muted)">{t('pomodoro.productivityTip')}</p>
         </div>
       )}
     </div>

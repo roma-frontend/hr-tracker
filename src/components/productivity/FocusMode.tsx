@@ -53,49 +53,49 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
   return (
     <div className="px-2 py-3">
       <div className="mb-3 px-2">
-        <h3 className="text-xs font-semibold text-[var(--text-muted)] flex items-center gap-2">
+        <h3 className="text-xs font-semibold text-(--text-muted) flex items-center gap-2">
           <Focus className="w-3.5 h-3.5" />
           {t('focusMode.title')}
         </h3>
-        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{t('focusMode.description')}</p>
+        <p className="text-[10px] text-(--text-muted) mt-0.5">{t('focusMode.description')}</p>
       </div>
 
       {/* Focus Mode Toggle */}
       <div
         className={`rounded-xl border p-4 transition-all ${
           isFocusMode
-            ? 'border-[var(--primary)]/50 bg-[var(--primary)]/5'
-            : 'border-[var(--border)] bg-[var(--background-subtle)]'
+            ? 'border-(--primary)/50 bg-(--primary)/5'
+            : 'border-(--border) bg-(--background-subtle)'
         }`}
       >
         <div className="flex items-start gap-3 mb-3">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all ${
               isFocusMode
-                ? 'bg-[var(--primary)] shadow-lg'
-                : 'bg-[var(--background-subtle)] border border-[var(--border)]'
+                ? 'bg-(--primary) shadow-lg'
+                : 'bg-(--background-subtle) border border-(--border)'
             }`}
           >
             {isFocusMode ? (
               <Zap className="h-5 w-5 text-white" />
             ) : (
-              <Focus className="h-5 w-5 text-[var(--text-muted)]" />
+              <Focus className="h-5 w-5 text-(--text-muted)" />
             )}
           </div>
 
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-[var(--text-primary)]">
+            <h4 className="text-sm font-semibold text-(--text-primary)">
               {isFocusMode ? t('focusMode.modeActive') : t('focusMode.title')}
             </h4>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            <p className="text-xs text-(--text-muted) mt-0.5">
               {isFocusMode ? t('focusMode.deepWorkMode') : t('focusMode.enterDeepWork')}
             </p>
           </div>
 
           <button
             onClick={toggleFocusMode}
-            className={`relative h-6 w-11 rounded-full transition-all flex-shrink-0 ${
-              isFocusMode ? 'bg-[var(--primary)]' : 'bg-gray-300 dark:bg-gray-700'
+            className={`relative h-6 w-11 rounded-full transition-all shrink-0 ${
+              isFocusMode ? 'bg-(--primary)' : 'bg-gray-300 dark:bg-gray-700'
             }`}
           >
             <span
@@ -107,15 +107,15 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
         </div>
 
         {/* Features list */}
-        <div className="space-y-1.5 border-t border-[var(--border)] pt-3">
+        <div className="space-y-1.5 border-t border-(--border) pt-3">
           <div className="flex items-center gap-2 text-xs">
             {isFocusMode ? (
-              <BellOff className="w-3.5 h-3.5 text-[var(--primary)]" />
+              <BellOff className="w-3.5 h-3.5 text-(--primary)" />
             ) : (
-              <Bell className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              <Bell className="w-3.5 h-3.5 text-(--text-muted)" />
             )}
             <span
-              className={isFocusMode ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}
+              className={isFocusMode ? 'text-(--text-primary)' : 'text-(--text-muted)'}
             >
               {isFocusMode ? t('focusMode.notificationsMuted') : t('focusMode.muteNotifications')}
             </span>
@@ -123,10 +123,10 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
 
           <div className="flex items-center gap-2 text-xs">
             <div
-              className={`w-2 h-2 rounded-full ${isFocusMode ? 'bg-red-500' : 'bg-[var(--text-muted)]'}`}
+              className={`w-2 h-2 rounded-full ${isFocusMode ? 'bg-red-500' : 'bg-(--text-muted)'}`}
             />
             <span
-              className={isFocusMode ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}
+              className={isFocusMode ? 'text-(--text-primary)' : 'text-(--text-muted)'}
             >
               {isFocusMode ? t('focusMode.statusBusy') : t('focusMode.setStatusBusy')}
             </span>
@@ -134,10 +134,10 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
 
           <div className="flex items-center gap-2 text-xs">
             <Zap
-              className={`w-3.5 h-3.5 ${isFocusMode ? 'text-[var(--primary)]' : 'text-[var(--text-muted)]'}`}
+              className={`w-3.5 h-3.5 ${isFocusMode ? 'text-(--primary)' : 'text-(--text-muted)'}`}
             />
             <span
-              className={isFocusMode ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}
+              className={isFocusMode ? 'text-(--text-primary)' : 'text-(--text-muted)'}
             >
               {isFocusMode ? t('focusMode.deepWorkEnabled') : t('focusMode.enableDeepWork')}
             </span>
@@ -145,8 +145,8 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
         </div>
 
         {isFocusMode && (
-          <div className="mt-3 pt-3 border-t border-[var(--border)]">
-            <p className="text-xs text-center text-[var(--primary)] font-medium">
+          <div className="mt-3 pt-3 border-t border-(--border)">
+            <p className="text-xs text-center text-(--primary) font-medium">
               {t('focusMode.stayFocused')}
             </p>
           </div>

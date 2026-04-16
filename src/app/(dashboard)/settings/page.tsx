@@ -10,7 +10,6 @@ import {
   Palette,
   CreditCard,
   Settings as SettingsIcon,
-  Lock,
   Zap,
   Globe,
   LayoutDashboard,
@@ -26,6 +25,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import dynamic from 'next/dynamic';
 import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard';
 import { CookiePreferences } from '@/components/settings/CookiePreferences';
@@ -46,8 +46,8 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { user, login } = useAuthStore();
   const [activeTab, setActiveTab] = useState('profile');
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [pushNotifs, setPushNotifs] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState(user?.name ?? '');
@@ -147,9 +147,9 @@ export default function SettingsPage() {
   // Auto-migrate: copy faceImageUrl → avatarUrl for users who registered face but have no avatar
   useEffect(() => {
     if (user?.role === 'admin') {
-      migrateFaceToAvatar({}).catch(() => {});
+      void migrateFaceToAvatar({}).catch(() => {});
     }
-  }, [user?.role]);
+  }, [user?.role, migrateFaceToAvatar]);
 
   const handleSave = async () => {
     if (!user?.id) return;
@@ -166,11 +166,9 @@ export default function SettingsPage() {
         ...dashboardSettings,
       };
 
-      console.log('Saving settings:', allSettings);
-
       // 1. Save all settings to Convex DB
       await updateOwnProfile({
-        userId: user.id as any,
+        userId: user.id as Id<'users'>,
         ...allSettings,
       });
 
@@ -181,7 +179,6 @@ export default function SettingsPage() {
       });
 
       toast.success(t('toasts.settingsSaved'));
-      console.log('Settings saved to store:', { ...user, ...allSettings });
     } catch (err) {
       console.error('Failed to save settings:', err);
       toast.error(err instanceof Error ? err.message : 'Failed to save');
@@ -272,10 +269,10 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
+          <h2 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
             {t('nav.settings')}
           </h2>
-          <p className="text-[var(--text-muted)] text-sm mt-2">{t('dashboard.settingsSubtitle')}</p>
+          <p className="text-(--text-muted) text-sm mt-2">{t('dashboard.settingsSubtitle')}</p>
         </div>
       </div>
 
@@ -287,11 +284,11 @@ export default function SettingsPage() {
               const el = tabsScrollRef.current;
               if (el) el.scrollBy({ left: -200, behavior: 'smooth' });
             }}
-            className="absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-transparent rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-linear-to-r from-(--surface) via-(--surface) to-transparent rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ display: canScrollLeft ? undefined : 'none' }}
             aria-label={t('settings.scrollLeft')}
           >
-            <ChevronLeft className="w-4 h-4 text-[var(--text-muted)]" />
+            <ChevronLeft className="w-4 h-4 text-(--text-muted)" />
           </button>
           <div
             ref={tabsScrollRef}
@@ -301,19 +298,19 @@ export default function SettingsPage() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
-            className={`bg-[var(--surface)] p-1.5 rounded-xl border border-[var(--border)] overflow-x-auto scrollbar-hide ${
+            className={`bg-(--surface) p-1.5 rounded-xl border border-(--border) overflow-x-auto scrollbar-hide ${
               isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
             }`}
           >
             <TabsList className="inline-flex w-auto min-w-full gap-1 bg-transparent h-auto flex-nowrap">
-              {tabs.map((tab: any) => {
+              {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
                     data-value={tab.value}
-                    className="data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:text-[var(--text-muted)] transition-colors rounded-lg py-2.5 px-3 h-auto whitespace-nowrap"
+                    className="data-[state=active]:bg-(--primary) data-[state=active]:text-white data-[state=inactive]:text-(--text-muted) transition-colors rounded-lg py-2.5 px-3 h-auto whitespace-nowrap"
                   >
                     <div className="flex items-center justify-center gap-2">
                       <Icon className="w-4 h-4" />
@@ -329,11 +326,11 @@ export default function SettingsPage() {
               const el = tabsScrollRef.current;
               if (el) el.scrollBy({ left: 200, behavior: 'smooth' });
             }}
-            className="absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-l from-[var(--surface)] via-[var(--surface)] to-transparent rounded-r-xl opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-linear-to-l from-(--surface) via-(--surface) to-transparent rounded-r-xl opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ display: canScrollRight ? undefined : 'none' }}
             aria-label={t('settings.scrollRight')}
           >
-            <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+            <ChevronRight className="w-4 h-4 text-(--text-muted)" />
           </button>
         </div>
 
@@ -365,11 +362,11 @@ export default function SettingsPage() {
             {/* Notifications Tab */}
             <TabsContent value="notifications" className="space-y-6 mt-0">
               <NotificationSettings
-                emailNotifs={emailNotifs}
-                pushNotifs={pushNotifs}
+                emailNotifs={emailNotifications}
+                pushNotifs={pushNotifications}
                 weeklyReport={weeklyReport}
-                onEmailNotifsChange={setEmailNotifs}
-                onPushNotifsChange={setPushNotifs}
+                onEmailNotifsChange={setEmailNotifications}
+                onPushNotifsChange={setPushNotifications}
                 onWeeklyReportChange={setWeeklyReport}
               />
             </TabsContent>
@@ -397,7 +394,7 @@ export default function SettingsPage() {
             {/* Localization Tab */}
             <TabsContent value="localization" className="space-y-6 mt-0">
               <LocalizationSettings
-                userId={user?.id as any}
+                userId={user?.id as Id<'users'>}
                 user={user}
                 onSettingsChange={setLocalizationSettings}
               />
@@ -434,7 +431,7 @@ export default function SettingsPage() {
           onClick={handleSave}
           disabled={saving}
           size="lg"
-          className="shadow-lg shadow-[var(--primary)]/20 w-full sm:w-auto bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
+          className="shadow-lg shadow-(--primary)/20 w-full sm:w-auto bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
         >
           {saving ? (
             <>

@@ -104,14 +104,14 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
   }, [drivers, searchQuery, capacityFilter, sortBy]);
 
   return (
-    <Card className="mb-6 sm:mb-8 border-[var(--border)]">
+    <Card className="mb-6 sm:mb-8 border-(--border)">
       <CardHeader>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               <div>
                 <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                  <CarFront className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--primary)]" />
+                  <CarFront className="w-4 h-4 sm:w-5 sm:h-5 text-(--primary)" />
                   <span className="hidden sm:inline">{t('driver.availableDrivers', 'Available Drivers')}</span>
                   <span className="sm:hidden">{t('driver.availableDrivers', 'Drivers')}</span>
                 </CardTitle>
@@ -137,7 +137,7 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
               )}
             </div>
             <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
               <Input
                 placeholder={t('driver.searchDriver', 'Search driver...')}
                 value={searchQuery}
@@ -148,7 +148,7 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Filter className="w-4 h-4 text-[var(--text-muted)]" />
+            <Filter className="w-4 h-4 text-(--text-muted)" />
             <Select
               value={String(capacityFilter ?? 0)}
               onValueChange={(v) => onCapacityChange(v === '0' ? null : Number(v))}

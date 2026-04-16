@@ -65,7 +65,7 @@ describe('Badge', () => {
     it('should apply bg-primary for default variant', () => {
       const { container } = render(<Badge variant="default">Test</Badge>);
       const badge = container.firstChild as HTMLElement;
-      expect(badge.className).toContain('bg-[var(--primary)]');
+      expect(badge.className).toContain('bg-(--primary)');
     });
 
     it('should apply bg-success for success variant', () => {

@@ -44,7 +44,7 @@ export function PasswordStrengthIndicator({
       {/* Strength Bar */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[var(--text-muted)]">Надежность пароля</span>
+          <span className="text-(--text-muted)">Надежность пароля</span>
           <motion.span
             key={validation.strength}
             initial={{ scale: 0.8, opacity: 0 }}
@@ -57,7 +57,7 @@ export function PasswordStrengthIndicator({
         </div>
 
         {/* Animated progress bar */}
-        <div className="h-2 bg-[var(--background-subtle)] rounded-full overflow-hidden">
+        <div className="h-2 bg-(--background-subtle) rounded-full overflow-hidden">
           <motion.div
             className="h-full rounded-full transition-all duration-500"
             initial={{ width: 0 }}
@@ -106,8 +106,8 @@ export function PasswordStrengthIndicator({
                   req.met
                     ? 'text-green-600 dark:text-green-400'
                     : req.required
-                      ? 'text-[var(--text-muted)]'
-                      : 'text-[var(--text-muted)] opacity-60'
+                      ? 'text-(--text-muted)'
+                      : 'text-(--text-muted) opacity-60'
                 }`}
               >
                 <motion.div
@@ -138,9 +138,9 @@ export function PasswordStrengthIndicator({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-2 pt-2 border-t border-[var(--border)]"
+          className="space-y-2 pt-2 border-t border-(--border)"
         >
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-1.5 text-xs text-(--text-muted)">
             <Sparkles className="w-3.5 h-3.5" />
             <span className="font-medium">Рекомендации:</span>
           </div>
@@ -151,7 +151,7 @@ export function PasswordStrengthIndicator({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="text-xs text-[var(--text-muted)] flex items-start gap-2"
+                className="text-xs text-(--text-muted) flex items-start gap-2"
               >
                 <span className="text-blue-500 mt-0.5">•</span>
                 <span>{suggestion}</span>

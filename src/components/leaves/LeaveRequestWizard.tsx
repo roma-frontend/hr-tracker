@@ -148,9 +148,9 @@ export function LeaveRequestWizard({
       {/* Stepper */}
       <div className="px-4 pt-4 pb-3 md:px-6">
         {/* Progress bar */}
-        <div className="relative h-1.5 md:h-2 bg-[var(--background-subtle)] rounded-full overflow-hidden mb-4">
+        <div className="relative h-1.5 md:h-2 bg-(--background-subtle) rounded-full overflow-hidden mb-4">
           <motion.div
-            className="absolute inset-y-0 left-0 bg-[var(--primary)]"
+            className="absolute inset-y-0 left-0 bg-(--primary)"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -169,10 +169,10 @@ export function LeaveRequestWizard({
                     className={cn(
                       'w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center border-2 transition-colors shrink-0',
                       isCompleted
-                        ? 'bg-[var(--primary)] border-[var(--primary)] text-white'
+                        ? 'bg-(--primary) border-(--primary) text-white'
                         : isCurrent
-                        ? 'border-[var(--primary)] bg-[var(--background)] text-[var(--primary)]'
-                        : 'border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]',
+                        ? 'border-(--primary) bg-(--background) text-(--primary)'
+                        : 'border-(--border) bg-(--background) text-(--muted-foreground)',
                     )}
                     animate={{ scale: isCurrent ? 1.1 : 1 }}
                     transition={{ duration: 0.2 }}
@@ -185,15 +185,15 @@ export function LeaveRequestWizard({
                   </motion.div>
                   <p className={cn(
                     'text-[10px] md:text-xs font-medium mt-1.5 text-center leading-tight truncate w-full px-1',
-                    isCurrent ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]',
+                    isCurrent ? 'text-(--primary)' : 'text-(--muted-foreground)',
                   )}>
                     {cfg?.title}
                   </p>
                 </div>
                 {idx < stepIds.length - 1 && (
-                  <div className="flex-1 h-0.5 bg-[var(--border)] mx-1 max-w-6">
+                  <div className="flex-1 h-0.5 bg-(--border) mx-1 max-w-6">
                     <motion.div
-                      className={cn('h-full', isCompleted ? 'bg-[var(--primary)]' : 'bg-[var(--border)]')}
+                      className={cn('h-full', isCompleted ? 'bg-(--primary)' : 'bg-(--border)')}
                       initial={{ width: '0%' }}
                       animate={{ width: isCompleted ? '100%' : '0%' }}
                       transition={{ duration: 0.3 }}
@@ -248,7 +248,7 @@ export function LeaveRequestWizard({
       </div>
 
       {/* Navigation */}
-      <div className="flex-shrink-0 px-4 py-4 md:px-6 border-t border-[var(--border)] bg-[var(--background)]">
+      <div className="shrink-0 px-4 py-4 md:px-6 border-t border-(--border) bg-(--background)">
         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
           <Button
             variant="outline"
@@ -304,17 +304,17 @@ function EmployeeStep({
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-sm font-medium text-[var(--text-primary)]">
+        <p className="text-sm font-medium text-(--text-primary)">
           {t('labels.employee', 'Employee')} <span className="text-red-500">*</span>
         </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">
+        <p className="text-xs text-(--text-muted) mt-1">
           {t('leaveWizard.selectEmployee', 'Select the employee for this leave request')}
         </p>
       </div>
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2.5 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
+        className="w-full px-3 py-2.5 rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
       >
         <option value="">{t('placeholders.selectEmployee', 'Select employee...')}</option>
         {allUsers?.map((emp: any) => (
@@ -347,10 +347,10 @@ function TypeStep({ value, onChange }: { value?: LeaveType; onChange: (v: LeaveT
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-sm font-medium text-[var(--text-primary)]">
+        <p className="text-sm font-medium text-(--text-primary)">
           {t('labels.leaveType', 'Leave Type')} <span className="text-red-500">*</span>
         </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">
+        <p className="text-xs text-(--text-muted) mt-1">
           {t('leaveWizard.selectType', 'What type of leave are you requesting?')}
         </p>
       </div>
@@ -365,20 +365,20 @@ function TypeStep({ value, onChange }: { value?: LeaveType; onChange: (v: LeaveT
               className={cn(
                 'p-4 rounded-xl border-2 text-left transition-all duration-200 flex flex-col items-center text-center gap-2',
                 isSelected
-                  ? 'border-[var(--primary)] bg-[var(--primary)]/5 shadow-md'
-                  : 'border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)]',
+                  ? 'border-(--primary) bg-(--primary)/5 shadow-md'
+                  : 'border-(--border) bg-(--background) hover:bg-(--background-subtle)',
               )}
             >
-              <div className={cn('p-2.5 rounded-full', isSelected ? 'bg-[var(--primary)] text-white' : colorMap[type.color])}>
+              <div className={cn('p-2.5 rounded-full', isSelected ? 'bg-(--primary) text-white' : colorMap[type.color])}>
                 {type.icon}
               </div>
               <div>
-                <p className={cn('text-sm font-semibold', isSelected ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]')}>
+                <p className={cn('text-sm font-semibold', isSelected ? 'text-(--primary)' : 'text-(--text-primary)')}>
                   {type.title}
                 </p>
-                <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">{type.desc}</p>
+                <p className="text-[10px] md:text-xs text-(--text-muted) mt-0.5 line-clamp-2">{type.desc}</p>
               </div>
-              {isSelected && <Badge className="bg-[var(--primary)] text-white text-[10px] px-2 py-0.5 mt-1">✓</Badge>}
+              {isSelected && <Badge className="bg-(--primary) text-white text-[10px] px-2 py-0.5 mt-1">✓</Badge>}
             </button>
           );
         })}
@@ -411,16 +411,16 @@ function DatesStep({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium text-[var(--text-primary)]">
+        <p className="text-sm font-medium text-(--text-primary)">
           {t('labels.dates', 'Dates')} <span className="text-red-500">*</span>
         </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">
+        <p className="text-xs text-(--text-muted) mt-1">
           {t('leaveWizard.selectDates', 'Choose start and end dates for your leave')}
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[var(--text-primary)]">
+          <label className="text-sm font-medium text-(--text-primary)">
             {t('labels.startDate', 'Start Date')}
           </label>
           <input
@@ -428,11 +428,11 @@ function DatesStep({
             value={start}
             onChange={(e) => onStartDateChange(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full px-3 py-2.5 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
+            className="w-full px-3 py-2.5 rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[var(--text-primary)]">
+          <label className="text-sm font-medium text-(--text-primary)">
             {t('labels.endDate', 'End Date')}
           </label>
           <input
@@ -440,7 +440,7 @@ function DatesStep({
             value={end}
             onChange={(e) => onEndDateChange(e.target.value)}
             min={start || new Date().toISOString().split('T')[0]}
-            className="w-full px-3 py-2.5 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
+            className="w-full px-3 py-2.5 rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
           />
         </div>
       </div>
@@ -448,14 +448,14 @@ function DatesStep({
         <motion.div
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)]/20"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-(--primary)/10 border border-(--primary)/20"
         >
-          <CalendarDays className="w-5 h-5 text-[var(--primary)] flex-shrink-0" />
+          <CalendarDays className="w-5 h-5 text-(--primary) shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-[var(--text-primary)]">
+            <p className="text-sm font-semibold text-(--text-primary)">
               {days} {days === 1 ? t('leave.day', 'day') : t('leave.days', 'days')}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xs text-(--text-muted)">
               {format(new Date(start), 'MMM d')} – {format(new Date(end), 'MMM d, yyyy')}
             </p>
           </div>
@@ -507,22 +507,22 @@ function DetailsStep({
     <div className="space-y-4">
       {/* Employee */}
       {displayUser && (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--background-subtle)] border border-[var(--border)]">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/60 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-(--background-subtle) border border-(--border)">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-(--primary) to-[var(--primary)]/60 flex items-center justify-center text-white font-bold text-sm shrink-0">
             {displayUser.name?.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{displayUser.name}</p>
-            {displayUser.department && <p className="text-xs text-[var(--text-muted)] truncate">{displayUser.department}</p>}
+            <p className="text-sm font-semibold text-(--text-primary) truncate">{displayUser.name}</p>
+            {displayUser.department && <p className="text-xs text-(--text-muted) truncate">{displayUser.department}</p>}
           </div>
         </div>
       )}
 
       {/* Type */}
       {stepData.type && (
-        <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--background-subtle)] border border-[var(--border)]">
-          <span className="text-sm text-[var(--text-muted)]">{t('labels.leaveType', 'Leave Type')}</span>
-          <span className={cn('text-sm font-semibold', typeColors[stepData.type] || 'text-[var(--text-primary)]')}>
+        <div className="flex items-center justify-between p-3 rounded-lg bg-(--background-subtle) border border-(--border)">
+          <span className="text-sm text-(--text-muted)">{t('labels.leaveType', 'Leave Type')}</span>
+          <span className={cn('text-sm font-semibold', typeColors[stepData.type] || 'text-(--text-primary)')}>
             {typeLabels[stepData.type] || stepData.type}
           </span>
         </div>
@@ -530,20 +530,20 @@ function DetailsStep({
 
       {/* Dates */}
       {stepData.startDate && stepData.endDate && (
-        <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--background-subtle)] border border-[var(--border)]">
-          <span className="text-sm text-[var(--text-muted)]">{t('labels.dates', 'Dates')}</span>
+        <div className="flex items-center justify-between p-3 rounded-lg bg-(--background-subtle) border border-(--border)">
+          <span className="text-sm text-(--text-muted)">{t('labels.dates', 'Dates')}</span>
           <div className="text-right">
-            <p className="text-sm font-medium text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-(--text-primary)">
               {format(new Date(stepData.startDate), 'MMM d')} – {format(new Date(stepData.endDate), 'MMM d, yyyy')}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">{days} {days === 1 ? t('leave.day', 'day') : t('leave.days', 'days')}</p>
+            <p className="text-xs text-(--text-muted)">{days} {days === 1 ? t('leave.day', 'day') : t('leave.days', 'days')}</p>
           </div>
         </div>
       )}
 
       {/* Reason */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[var(--text-primary)]">
+        <label className="text-sm font-medium text-(--text-primary)">
           {t('labels.reason', 'Reason')} <span className="text-red-500">*</span>
         </label>
         <textarea
@@ -551,13 +551,13 @@ function DetailsStep({
           onChange={(e) => onReasonChange(e.target.value)}
           placeholder={t('leaveRequest.reasonPlaceholder', 'e.g., Annual vacation')}
           rows={2}
-          className="w-full px-3 py-2.5 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] text-sm resize-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
+          className="w-full px-3 py-2.5 rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) placeholder-(--text-muted) text-sm resize-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
         />
       </div>
 
       {/* Comment */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[var(--text-primary)]">
+        <label className="text-sm font-medium text-(--text-primary)">
           {t('leaveRequest.additionalComments', 'Comments')} ({t('common.optional', 'optional')})
         </label>
         <textarea
@@ -565,7 +565,7 @@ function DetailsStep({
           onChange={(e) => onCommentChange(e.target.value)}
           placeholder={t('leaveRequest.commentsPlaceholder', 'Additional information...')}
           rows={2}
-          className="w-full px-3 py-2.5 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] text-sm resize-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
+          className="w-full px-3 py-2.5 rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) placeholder-(--text-muted) text-sm resize-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none"
         />
       </div>
 

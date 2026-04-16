@@ -107,34 +107,34 @@ export const StatsCard = memo(
         whileHover={{ y: -2, transition: { duration: 0.2 } }}
         className={cn(
           'relative overflow-hidden rounded-lg sm:rounded-xl border p-3 sm:p-5 shadow-sm transition-colors duration-300',
-          'bg-[var(--card)]',
+          'bg-(--card)',
           colors.border,
         )}
       >
         {/* Background gradient */}
         <div
           className={cn(
-            'absolute inset-0 bg-gradient-to-br opacity-40 pointer-events-none',
+            'absolute inset-0 bg-linear-to-br opacity-40 pointer-events-none',
             colors.bg,
           )}
         />
 
         <div className="relative flex items-start justify-between gap-2 sm:gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] sm:text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1 sm:mb-2 truncate">
+            <p className="text-[10px] sm:text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-1 sm:mb-2 truncate">
               {title}
             </p>
             <div className="flex items-baseline gap-0.5 sm:gap-1">
               {prefix && (
-                <span className="text-base sm:text-xl font-bold text-[var(--text-primary)]">
+                <span className="text-base sm:text-xl font-bold text-(--text-primary)">
                   {prefix}
                 </span>
               )}
-              <span className="text-xl sm:text-3xl font-bold text-[var(--text-primary)] tabular-nums">
+              <span className="text-xl sm:text-3xl font-bold text-(--text-primary) tabular-nums">
                 {typeof value === 'number' ? animatedValue.toLocaleString() : value}
               </span>
               {suffix && (
-                <span className="text-base sm:text-xl font-bold text-[var(--text-primary)]">
+                <span className="text-base sm:text-xl font-bold text-(--text-primary)">
                   {suffix}
                 </span>
               )}
@@ -157,7 +157,7 @@ export const StatsCard = memo(
                   {change}%
                 </span>
                 {changeLabel && (
-                  <span className="text-[10px] sm:text-xs text-[var(--text-muted)] hidden sm:inline">
+                  <span className="text-[10px] sm:text-xs text-(--text-muted) hidden sm:inline">
                     {changeLabel}
                   </span>
                 )}
@@ -167,7 +167,7 @@ export const StatsCard = memo(
 
           <div
             className={cn(
-              'w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0',
+              'w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0',
               colors.icon,
             )}
           >

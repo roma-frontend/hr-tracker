@@ -39,10 +39,10 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
               <span className="text-3xl">🔐</span>
               <div className="flex-1">
-                <p className="text-sm text-[var(--text-muted)]">
+                <p className="text-sm text-(--text-muted)">
                   {t('settingsSecurity.touchIdEnable')}
                 </p>
               </div>
@@ -89,7 +89,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
                     <p className="text-sm font-medium text-green-600 dark:text-green-400 truncate">
                       {t('settingsSecurity.faceIdRegistered')}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-1 truncate">
+                    <p className="text-xs text-(--text-muted) mt-1 truncate">
                       {t('settingsSecurity.registeredOn')}{' '}
                       {new Date(faceData.faceRegisteredAt || 0).toLocaleDateString()}
                     </p>
@@ -112,10 +112,10 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
               <>
                 {!showFaceRegistration ? (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
                       <span className="text-3xl">📸</span>
                       <div className="flex-1">
-                        <p className="text-sm text-[var(--text-muted)]">
+                        <p className="text-sm text-(--text-muted)">
                           {t('settingsSecurity.registerFaceDesc')}
                         </p>
                       </div>

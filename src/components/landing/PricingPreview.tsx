@@ -345,7 +345,7 @@ function PricingCard({
             {tier.featureKeys.map((feature, i) => (
               <li key={i} className="flex items-start gap-2 sm:gap-3">
                 <div
-                  className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                  className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                   style={{
                     background: `${tier.accentFrom}22`,
                     border: `1px solid ${tier.accentFrom}44`,

@@ -109,7 +109,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
     return (
       <Card>
         <CardContent className="p-8 text-center">
-          <p className="text-[var(--text-muted)]">Loading employee profile...</p>
+          <p className="text-(--text-muted)">Loading employee profile...</p>
         </CardContent>
       </Card>
     );
@@ -122,7 +122,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-2xl shrink-0">
                 {(employee as any).avatarUrl ? (
                   <img
                     src={(employee as any).avatarUrl}
@@ -141,7 +141,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               </div>
               <div>
                 <CardTitle className="text-2xl">{employee.name}</CardTitle>
-                <p className="text-[var(--text-muted)] text-sm mt-1">
+                <p className="text-(--text-muted) text-sm mt-1">
                   {employee.position || 'Employee'}
                 </p>
                 <div className="flex gap-2 mt-2 flex-wrap">
@@ -158,8 +158,8 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="flex flex-col items-start sm:items-end gap-2">
               {score && (
                 <div className="text-left sm:text-right">
-                  <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.aiScore')}</p>
-                  <p className="text-3xl font-bold text-[var(--primary)]">
+                  <p className="text-xs text-(--text-muted)">{t('employeeProfile.aiScore')}</p>
+                  <p className="text-3xl font-bold text-(--primary)">
                     {score.overallScore}/100
                   </p>
                 </div>
@@ -189,7 +189,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                   <Button
                     size="sm"
                     onClick={() => setShowRatingForm(!showRatingForm)}
-                    className="bg-gradient-to-r from-blue-600 to-sky-700 hover:from-blue-700 hover:to-sky-800 text-white"
+                    className="bg-linear-to-r from-blue-600 to-sky-700 hover:from-blue-700 hover:to-sky-800 text-white"
                   >
                     <Star className="w-4 h-4 mr-1" />
                     {showRatingForm
@@ -203,26 +203,26 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
-            <Mail className="w-5 h-5 text-[var(--text-muted)]" />
+            <Mail className="w-5 h-5 text-(--text-muted)" />
             <div>
-              <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.email')}</p>
+              <p className="text-xs text-(--text-muted)">{t('employeeProfile.email')}</p>
               <p className="text-sm font-medium">{employee.email}</p>
             </div>
           </div>
           {employee.phone && (
             <div className="flex items-center gap-3">
-              <Phone className="w-5 h-5 text-[var(--text-muted)]" />
+              <Phone className="w-5 h-5 text-(--text-muted)" />
               <div>
-                <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.phone')}</p>
+                <p className="text-xs text-(--text-muted)">{t('employeeProfile.phone')}</p>
                 <p className="text-sm font-medium">{employee.phone}</p>
               </div>
             </div>
           )}
           {employee.department && (
             <div className="flex items-center gap-3">
-              <Building2 className="w-5 h-5 text-[var(--text-muted)]" />
+              <Building2 className="w-5 h-5 text-(--text-muted)" />
               <div>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-(--text-muted)">
                   {t('employeeProfile.department')}
                 </p>
                 <p className="text-sm font-medium">{employee.department}</p>
@@ -230,9 +230,9 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             </div>
           )}
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-[var(--text-muted)]" />
+            <Calendar className="w-5 h-5 text-(--text-muted)" />
             <div>
-              <p className="text-xs text-[var(--text-muted)]">{t('employeeProfile.joined')}</p>
+              <p className="text-xs text-(--text-muted)">{t('employeeProfile.joined')}</p>
               <p className="text-sm font-medium">
                 {format(new Date(employee.createdAt), 'MMM d, yyyy')}
               </p>
@@ -262,38 +262,38 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
+              <div className="text-center p-3 rounded-lg bg-(--background-subtle)">
                 <p className="text-2xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('attendance.daysWorked')}
                 </p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
+              <div className="text-center p-3 rounded-lg bg-(--background-subtle)">
                 <p className="text-2xl font-bold text-green-500">
                   {monthlyStats.totalWorkedHours}h
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('attendance.totalHours')}
                 </p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
+              <div className="text-center p-3 rounded-lg bg-(--background-subtle)">
                 <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('attendance.punctuality')}
                 </p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-[var(--background-subtle)]">
+              <div className="text-center p-3 rounded-lg bg-(--background-subtle)">
                 <p
                   className={`text-2xl font-bold ${Number(monthlyStats.lateDays) > 0 ? 'text-red-500' : 'text-green-500'}`}
                 >
                   {monthlyStats.lateDays}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('attendance.lateDays')}</p>
+                <p className="text-xs text-(--text-muted) mt-1">{t('attendance.lateDays')}</p>
               </div>
             </div>
             {(Number(monthlyStats.lateDays) > 0 || Number(monthlyStats.earlyLeaveDays) > 0) && (
               <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950">
-                <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0" />
                 <p className="text-sm text-orange-700 dark:text-orange-200">
                   {Number(monthlyStats.lateDays) > 0 &&
                     `${monthlyStats.lateDays} ${t('attendance.lateArrivals')}`}
@@ -319,11 +319,11 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                 {t('employeeProfile.latestPerformanceRating')}
               </CardTitle>
               <div className="text-right">
-                <p className="text-2xl font-bold text-[var(--primary)]">
+                <p className="text-2xl font-bold text-(--primary)">
                   {latestRating.overallRating.toFixed(1)}
-                  <span className="text-sm font-normal text-[var(--text-muted)]">/5</span>
+                  <span className="text-sm font-normal text-(--text-muted)">/5</span>
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-(--text-muted)">
                   by {latestRating.supervisor?.name ?? 'Supervisor'} · {latestRating.ratingPeriod}
                 </p>
               </div>
@@ -339,7 +339,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               { label: t('dashboard.reliability'), value: latestRating.reliability },
             ].map(({ label, value }: any) => (
               <div key={label} className="flex items-center justify-between">
-                <span className="text-sm text-[var(--text-muted)] w-36">{label}</span>
+                <span className="text-sm text-(--text-muted) w-36">{label}</span>
                 <div className="flex items-center gap-2">
                   <div className="flex">{renderStars(value)}</div>
                   <span
@@ -372,9 +372,9 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
               </div>
             )}
             {latestRating.generalComments && (
-              <div className="mt-2 p-3 rounded-lg bg-[var(--background-subtle)]">
-                <p className="text-xs font-semibold text-[var(--text-muted)] mb-1">💬 Comments</p>
-                <p className="text-sm text-[var(--text-primary)]">{latestRating.generalComments}</p>
+              <div className="mt-2 p-3 rounded-lg bg-(--background-subtle)">
+                <p className="text-xs font-semibold text-(--text-muted) mb-1">💬 Comments</p>
+                <p className="text-sm text-(--text-primary)">{latestRating.generalComments}</p>
               </div>
             )}
           </CardContent>
@@ -399,13 +399,13 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                     <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {rating.ratingPeriod}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-(--text-muted)">
                       by {rating.supervisor?.name ?? 'Supervisor'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex">{renderStars(rating.overallRating)}</div>
-                    <span className="text-sm font-bold text-[var(--primary)]">
+                    <span className="text-sm font-bold text-(--primary)">
                       {rating.overallRating.toFixed(1)}
                     </span>
                   </div>
@@ -420,11 +420,11 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
       {latestRating === null && isAdminOrSupervisor && (
         <Card className="border-dashed">
           <CardContent className="p-6 text-center">
-            <Star className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-            <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.noRatingYet')}</p>
+            <Star className="w-10 h-10 text-(--text-muted) mx-auto mb-2 opacity-30" />
+            <p className="text-sm text-(--text-muted)">{t('employeeProfile.noRatingYet')}</p>
             <Button
               size="sm"
-              className="mt-3 bg-gradient-to-r from-blue-600 to-sky-700 text-white"
+              className="mt-3 bg-linear-to-r from-blue-600 to-sky-700 text-white"
               onClick={() => setShowRatingForm(true)}
             >
               <Plus className="w-4 h-4 mr-1" />
@@ -442,19 +442,19 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         <CardContent className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <p className="text-2xl font-bold text-[#2563eb]">{employee.paidLeaveBalance}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p className="text-xs text-(--text-muted) mt-1">
               {t('employeeProfile.paidLeave')}
             </p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-[#ef4444]">{employee.sickLeaveBalance}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p className="text-xs text-(--text-muted) mt-1">
               {t('employeeProfile.sickLeave')}
             </p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-[#10b981]">{employee.familyLeaveBalance}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p className="text-xs text-(--text-muted) mt-1">
               {t('employeeProfile.familyLeave')}
             </p>
           </div>
@@ -466,34 +466,34 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Target className="w-5 h-5 text-[var(--primary)]" />
+              <Target className="w-5 h-5 text-(--primary)" />
               {t('employeeProfile.performance')} {t('common.breakdown', 'Breakdown')}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.performance')}</p>
-              <p className="text-2xl font-bold text-[var(--primary)]">
+              <p className="text-sm text-(--text-muted)">{t('employeeProfile.performance')}</p>
+              <p className="text-2xl font-bold text-(--primary)">
                 {score.breakdown.performance}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.attendance')}</p>
-              <p className="text-2xl font-bold text-[var(--primary)]">
+              <p className="text-sm text-(--text-muted)">{t('employeeProfile.attendance')}</p>
+              <p className="text-2xl font-bold text-(--primary)">
                 {score.breakdown.attendance}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-[var(--text-muted)]">{t('employeeProfile.behavior')}</p>
-              <p className="text-2xl font-bold text-[var(--primary)]">
+              <p className="text-sm text-(--text-muted)">{t('employeeProfile.behavior')}</p>
+              <p className="text-2xl font-bold text-(--primary)">
                 {score.breakdown.behavior}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-[var(--text-muted)]">
+              <p className="text-sm text-(--text-muted)">
                 {t('employeeProfile.leaveHistory')}
               </p>
-              <p className="text-2xl font-bold text-[var(--primary)]">
+              <p className="text-2xl font-bold text-(--primary)">
                 {score.breakdown.leaveHistory}%
               </p>
             </div>
@@ -551,13 +551,13 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                   className="flex items-center justify-between p-3 bg-[var(--card-hover)] rounded-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <Briefcase className="w-5 h-5 text-[var(--text-muted)]" />
+                    <Briefcase className="w-5 h-5 text-(--text-muted)" />
                     <div>
                       <p className="text-sm font-medium">{doc.fileName}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{doc.category}</p>
+                      <p className="text-xs text-(--text-muted)">{doc.category}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-(--text-muted)">
                     {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
                   </p>
                 </div>

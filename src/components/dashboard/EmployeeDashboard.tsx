@@ -117,7 +117,7 @@ export function EmployeeDashboard() {
   // Don't render anything if user is not loaded (Providers handles onboarding redirect)
   if (!user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+      <div className="flex h-screen items-center justify-center bg-(--background)">
         <ShieldLoader size="lg" />
       </div>
     );
@@ -145,10 +145,10 @@ export function EmployeeDashboard() {
 
       {/* Welcome header */}
       <motion.div variants={itemVariants}>
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+        <h2 className="text-2xl font-bold text-(--text-primary)">
           {t('dashboard.welcome')}, {user?.name?.split(' ')[0]} 👋
         </h2>
-        <p className="text-[var(--text-muted)] text-sm mt-1">
+        <p className="text-(--text-muted) text-sm mt-1">
           {format(today, 'EEEE, MMMM d, yyyy')}
         </p>
       </motion.div>
@@ -170,7 +170,7 @@ export function EmployeeDashboard() {
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-blue-500">{monthlyStats.totalDays}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.daysWorked')}</p>
+                <p className="text-xs text-(--text-muted) mt-1">{t('dashboard.daysWorked')}</p>
               </CardContent>
             </Card>
             <Card>
@@ -178,13 +178,13 @@ export function EmployeeDashboard() {
                 <p className="text-2xl font-bold text-green-500">
                   {monthlyStats.totalWorkedHours}h
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.totalHours')}</p>
+                <p className="text-xs text-(--text-muted) mt-1">{t('dashboard.totalHours')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-sky-400">{monthlyStats.punctualityRate}%</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('dashboard.punctuality')}
                 </p>
               </CardContent>
@@ -196,7 +196,7 @@ export function EmployeeDashboard() {
                 >
                   {monthlyStats.lateDays}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.lateDays')}</p>
+                <p className="text-xs text-(--text-muted) mt-1">{t('dashboard.lateDays')}</p>
               </CardContent>
             </Card>
           </div>
@@ -214,11 +214,11 @@ export function EmployeeDashboard() {
                   {t('dashboard.myPerformanceScore')}
                 </CardTitle>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-[var(--primary)]">
+                  <p className="text-2xl font-bold text-(--primary)">
                     {latestRating.overallRating.toFixed(1)}
-                    <span className="text-sm font-normal text-[var(--text-muted)]">/5</span>
+                    <span className="text-sm font-normal text-(--text-muted)">/5</span>
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-(--text-muted)">
                     by {latestRating.supervisor?.name ?? 'Supervisor'} · {latestRating.ratingPeriod}
                   </p>
                 </div>
@@ -234,7 +234,7 @@ export function EmployeeDashboard() {
                 { label: t('dashboard.reliability'), value: latestRating.reliability },
               ].map(({ label, value }: any) => (
                 <div key={label} className="flex items-center justify-between">
-                  <span className="text-sm text-[var(--text-muted)] w-36">{label}</span>
+                  <span className="text-sm text-(--text-muted) w-36">{label}</span>
                   <div className="flex items-center gap-2">
                     <div className="flex">
                       <StarRating rating={value} />
@@ -270,11 +270,11 @@ export function EmployeeDashboard() {
                 </div>
               )}
               {latestRating.generalComments && (
-                <div className="mt-2 p-3 rounded-lg bg-[var(--background-subtle)]">
-                  <p className="text-xs font-semibold text-[var(--text-muted)] mb-1">
+                <div className="mt-2 p-3 rounded-lg bg-(--background-subtle)">
+                  <p className="text-xs font-semibold text-(--text-muted) mb-1">
                     💬 {t('dashboard.comments')}
                   </p>
-                  <p className="text-sm text-[var(--text-primary)]">
+                  <p className="text-sm text-(--text-primary)">
                     {latestRating.generalComments}
                   </p>
                 </div>
@@ -293,11 +293,11 @@ export function EmployeeDashboard() {
         <motion.div variants={itemVariants}>
           <Card className="border-dashed">
             <CardContent className="p-6 text-center">
-              <Star className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <Star className="w-10 h-10 text-(--text-muted) mx-auto mb-2 opacity-30" />
+              <p className="text-sm text-(--text-muted)">
                 {t('dashboard.noPerformanceRating')}
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-(--text-muted) mt-1">
                 {t('dashboard.supervisorWillRate')}
               </p>
             </CardContent>
@@ -313,23 +313,23 @@ export function EmployeeDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
+              <div className="text-center p-4 rounded-lg bg-(--background-subtle)">
                 <p className="text-2xl font-bold text-[#2563eb]">
                   {userData?.paidLeaveBalance ?? 0}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.paidLeave')}</p>
+                <p className="text-xs text-(--text-muted) mt-1">{t('dashboard.paidLeave')}</p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
+              <div className="text-center p-4 rounded-lg bg-(--background-subtle)">
                 <p className="text-2xl font-bold text-[#ef4444]">
                   {userData?.sickLeaveBalance ?? 0}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{t('dashboard.sickLeave')}</p>
+                <p className="text-xs text-(--text-muted) mt-1">{t('dashboard.sickLeave')}</p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-[var(--background-subtle)]">
+              <div className="text-center p-4 rounded-lg bg-(--background-subtle)">
                 <p className="text-2xl font-bold text-[#10b981]">
                   {userData?.familyLeaveBalance ?? 0}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('dashboard.familyLeave')}
                 </p>
               </div>
@@ -348,10 +348,10 @@ export function EmployeeDashboard() {
                   <Clock className="w-6 h-6 text-[#f59e0b]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">
+                  <p className="text-2xl font-bold text-(--text-primary)">
                     {leaveStats.pendingLeaves.length}
                   </p>
-                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.pending')}</p>
+                  <p className="text-sm text-(--text-muted)">{t('dashboard.pending')}</p>
                 </div>
               </div>
             </CardContent>
@@ -366,10 +366,10 @@ export function EmployeeDashboard() {
                   <CheckCircle className="w-6 h-6 text-[#10b981]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">
+                  <p className="text-2xl font-bold text-(--text-primary)">
                     {leaveStats.approvedLeaves.length}
                   </p>
-                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.approved')}</p>
+                  <p className="text-sm text-(--text-muted)">{t('dashboard.approved')}</p>
                 </div>
               </div>
             </CardContent>
@@ -384,10 +384,10 @@ export function EmployeeDashboard() {
                   <XCircle className="w-6 h-6 text-[#ef4444]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">
+                  <p className="text-2xl font-bold text-(--text-primary)">
                     {leaveStats.rejectedLeaves.length}
                   </p>
-                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.rejected')}</p>
+                  <p className="text-sm text-(--text-muted)">{t('dashboard.rejected')}</p>
                 </div>
               </div>
             </CardContent>
@@ -412,8 +412,8 @@ export function EmployeeDashboard() {
           <CardContent>
             {leaveStats.myLeaves.length === 0 ? (
               <div className="text-center py-8">
-                <CalendarIcon className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3 opacity-40" />
-                <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noLeaveRequests')}</p>
+                <CalendarIcon className="w-12 h-12 text-(--text-muted) mx-auto mb-3 opacity-40" />
+                <p className="text-sm text-(--text-muted)">{t('dashboard.noLeaveRequests')}</p>
                 <Button asChild size="sm" className="mt-4">
                   <Link href="/leaves">
                     <Plus className="w-4 h-4" />
@@ -426,13 +426,13 @@ export function EmployeeDashboard() {
                 {leaveStats.myLeaves.slice(0, 5).map((leave: any) => (
                   <div
                     key={leave._id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-[var(--border)] hover:bg-[var(--background-subtle)] transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg border border-(--border) hover:bg-(--background-subtle) transition-colors"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                      <p className="text-sm font-medium text-(--text-primary)">
                         {LEAVE_TYPE_LABELS[leave.type as LeaveType]}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      <p className="text-xs text-(--text-muted) mt-0.5">
                         {format(new Date(leave.startDate), 'MMM d')} –{' '}
                         {format(new Date(leave.endDate), 'MMM d, yyyy')} ({leave.days}{' '}
                         {t('ui.days').toLowerCase()})

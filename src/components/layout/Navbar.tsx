@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
 import { useTranslation } from 'react-i18next';
 // framer-motion removed — replaced with CSS transitions to reduce main-thread work,
@@ -22,11 +22,7 @@ import {
   Calendar,
   Clock,
   FileText,
-  Zap,
   Keyboard,
-  History,
-  Star,
-  Circle,
   Home,
 } from 'lucide-react';
 
@@ -60,9 +56,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import type { Id } from '../../../convex/_generated/dataModel';
@@ -74,49 +67,6 @@ import { FocusMode } from '@/components/productivity/FocusMode';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useStatusUpdate } from '@/context/StatusUpdateContext';
 
-// Play a beautiful notification sound using Web Audio API
-function playNotificationSound() {
-  try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-    const playTone = (freq: number, startTime: number, duration: number, gain: number) => {
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, startTime);
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-      osc.start(startTime);
-      osc.stop(startTime + duration);
-    };
-
-    const now = ctx.currentTime;
-    // Beautiful 3-note chime: C5 → E5 → G5
-    playTone(523.25, now, 0.4, 0.3);
-    playTone(659.25, now + 0.15, 0.4, 0.25);
-    playTone(783.99, now + 0.3, 0.6, 0.2);
-  } catch (e) {
-    // Silently fail if audio not supported
-  }
-}
-
-// Page titles mapped to translation keys
-const PAGE_TITLE_KEYS: Record<string, string> = {
-  '/dashboard': 'nav.dashboard',
-  '/leaves': 'nav.leaveManagement',
-  '/employees': 'nav.employees',
-  '/calendar': 'nav.calendar',
-  '/reports': 'nav.reports',
-  '/tasks': 'nav.tasks',
-  '/attendance': 'nav.attendance',
-  '/analytics': 'nav.analytics',
-  '/approvals': 'nav.approvals',
-  '/profile': 'nav.profile',
-  '/settings': 'nav.settings',
-};
 
 function getInitials(name: string) {
   return name
@@ -127,15 +77,9 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-interface ToastNotif {
-  id: string;
-  title: string;
-  message: string;
-}
 
 export function Navbar() {
   const { t } = useTranslation();
-  const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { setMobileOpen } = useSidebarStore();
@@ -144,7 +88,6 @@ export function Navbar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [toasts, setToasts] = useState<ToastNotif[]>([]);
   const [statusExpanded, setStatusExpanded] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const prevUnreadCount = useRef<number>(-1);
@@ -169,17 +112,13 @@ export function Navbar() {
     api.users.queries.getUserById,
     user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
-  const userStats = useQuery(
-    api.userStats.getUserStats,
-    user?.id && currentUserData ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+
   const currentPresence = ((currentUserData as any)?.presenceStatus ??
     'available') as PresenceStatus;
   const presenceCfg = PRESENCE_CONFIG[currentPresence];
   const presenceLabel = t(presenceCfg.labelKey);
 
   const unreadCount = notifications.filter((n: { isRead: boolean }) => !n.isRead).length;
-  const leaveBalance = currentUserData?.paidLeaveBalance || 0;
 
   // Detect new notifications and play sound + show toast
   useEffect(() => {
@@ -223,10 +162,6 @@ export function Navbar() {
     prevUnreadCount.current = unreadCount;
   }, [notifications, unreadCount, user]);
 
-  const pageTitleKey = Object.entries(PAGE_TITLE_KEYS).find(([key]) =>
-    pathname.startsWith(key),
-  )?.[1];
-  const pageTitle = pageTitleKey ? t(pageTitleKey) : 'HR Office';
 
   const handleLogout = async () => {
     try {
@@ -273,12 +208,12 @@ export function Navbar() {
 
   return (
     <>
-      <header className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] flex items-center px-4 gap-4 sticky top-0 z-[50] transition-colors duration-300">
+      <header className="h-16 border-b border-(--border) bg-(--navbar-bg) flex items-center px-4 gap-4 sticky top-0 z-50 transition-colors duration-300">
         {/* Mobile hamburger */}
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="lg:hidden text-(--text-muted) hover:text-(--text-primary)"
           onClick={() => setMobileOpen(true)}
           aria-label={t('nav.openMenu', { defaultValue: 'Open menu' })}
         >
@@ -289,7 +224,7 @@ export function Navbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="text-(--text-muted) hover:text-(--text-primary)"
           onClick={() => router.push('/')}
           title={t('nav.home') || 'Home'}
         >
@@ -306,7 +241,7 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="relative text-(--text-muted) hover:text-(--text-primary)"
               onClick={() => setShowNotifications(!showNotifications)}
               aria-label={t('notifications.title', { defaultValue: 'Notifications' })}
             >
@@ -321,13 +256,13 @@ export function Navbar() {
                 <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
                 {/* CSS transition instead of motion.div — no JS-driven layout recalc */}
                 <div
-                  className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-20 overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-(--card) border border-(--border) rounded-xl shadow-2xl z-20 overflow-hidden"
                   style={{
                     animation: 'notif-dropdown 0.15s ease both',
                   }}
                 >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
-                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-(--border)">
+                    <p className="text-sm font-semibold text-(--text-primary)">
                       {t('notifications.title')}
                     </p>
                     <div className="flex items-center gap-2">
@@ -346,11 +281,11 @@ export function Navbar() {
                       )}
                     </div>
                   </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-[var(--border)]">
+                  <div className="max-h-72 overflow-y-auto divide-y divide-(--border)">
                     {notifications.length === 0 ? (
                       <div className="px-4 py-6 text-center">
-                        <Bell className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-40" />
-                        <p className="text-sm text-[var(--text-muted)]">
+                        <Bell className="w-8 h-8 text-(--text-muted) mx-auto mb-2 opacity-40" />
+                        <p className="text-sm text-(--text-muted)">
                           {t('notifications.noNotifications')}
                         </p>
                       </div>
@@ -397,15 +332,15 @@ export function Navbar() {
                               }
                               setShowNotifications(false);
                             }}
-                            className={`px-4 py-3 hover:bg-[var(--background-subtle)] cursor-pointer transition-colors ${
+                            className={`px-4 py-3 hover:bg-(--background-subtle) cursor-pointer transition-colors ${
                               !n.isRead ? 'bg-[#2563eb]/5 border-l-2 border-[#2563eb]' : ''
                             }`}
                           >
-                            <p className="text-sm font-semibold text-[var(--text-primary)] leading-snug">
+                            <p className="text-sm font-semibold text-(--text-primary) leading-snug">
                               {n.title}
                             </p>
-                            <p className="text-xs text-[var(--text-muted)] mt-1">{n.message}</p>
-                            <p className="text-xs text-[var(--text-muted)] mt-1">
+                            <p className="text-xs text-(--text-muted) mt-1">{n.message}</p>
+                            <p className="text-xs text-(--text-muted) mt-1">
                               {timeAgo(n._creationTime)}
                             </p>
                           </div>
@@ -427,7 +362,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="text-(--text-muted) hover:text-(--text-primary)"
                 title={t('settings.theme', { defaultValue: 'Theme' })}
                 aria-label={t('settings.theme', { defaultValue: 'Select theme' })}
               >
@@ -470,41 +405,41 @@ export function Navbar() {
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-[var(--background-subtle)] transition-colors outline-none focus-visible:outline-none focus:outline-none"
+                className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-(--background-subtle) transition-colors outline-none focus-visible:outline-none focus:outline-none"
                 aria-label={t('nav.userMenu', { defaultValue: 'User menu' })}
               >
                 <div className="relative">
                   <Avatar className="w-8 h-8">
                     {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                    <AvatarFallback className="text-xs bg-gradient-to-br from-[#1d4ed8] to-[#0ea5e9] text-white font-semibold">
+                    <AvatarFallback className="text-xs bg-linear-to-br from-[#1d4ed8] to-[#0ea5e9] text-white font-semibold">
                       {user?.name ? getInitials(user.name) : 'U'}
                     </AvatarFallback>
                   </Avatar>
                   {/* Presence dot */}
                   <span
-                    className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--navbar-bg)] ${presenceCfg.dot}`}
+                    className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-(--navbar-bg) ${presenceCfg.dot}`}
                   />
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">
+                  <p className="text-xs font-semibold text-(--text-primary) leading-tight">
                     {user?.name ?? 'User'}
                   </p>
-                  <p className="text-[10px] text-[var(--text-muted)] capitalize">
+                  <p className="text-[10px] text-(--text-muted) capitalize">
                     <PresenceEmoji emoji={presenceCfg.icon} /> {presenceLabel}
                   </p>
                 </div>
-                <ChevronDown className="w-3 h-3 text-[var(--text-muted)] hidden sm:block" />
+                <ChevronDown className="w-3 h-3 text-(--text-muted) hidden sm:block" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
               sideOffset={8}
               collisionPadding={{ top: 72, bottom: 16, left: 16, right: 16 }}
-              className="w-[calc(100vw-2rem)] sm:w-80 max-h-[calc(100vh-90px)] overflow-y-auto bg-[var(--card)] border-[var(--border)] shadow-xl z-[60]"
+              className="w-[calc(100vw-2rem)] sm:w-80 max-h-[calc(100vh-90px)] overflow-y-auto bg-(--card) border-(--border) shadow-xl z-60"
             >
               {/* Mobile close button */}
               <button
-                className="sm:hidden absolute top-3 right-3 p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-subtle)] transition-colors"
+                className="sm:hidden absolute top-3 right-3 p-1.5 rounded-lg text-(--text-muted) hover:text-(--text-primary) hover:bg-(--background-subtle) transition-colors"
                 style={{ zIndex: 999 }}
                 onClick={() => setMenuOpen(false)}
                 aria-label="Close"
@@ -516,84 +451,84 @@ export function Navbar() {
                 <>
                   {/* Quick Stats Widget */}
                   <QuickStatsWidget />
-                  <DropdownMenuSeparator className="bg-[var(--border)]" />
+                  <DropdownMenuSeparator className="bg-(--border)" />
 
                   {/* Focus Mode */}
                   <FocusMode currentPresence={currentPresence} />
-                  <DropdownMenuSeparator className="bg-[var(--border)]" />
+                  <DropdownMenuSeparator className="bg-(--border)" />
 
                   {/* Pomodoro Timer */}
                   <PomodoroTimer />
-                  <DropdownMenuSeparator className="bg-[var(--border)]" />
+                  <DropdownMenuSeparator className="bg-(--border)" />
 
                   {/* Team Presence */}
                   <TeamPresence />
-                  <DropdownMenuSeparator className="bg-[var(--border)]" />
+                  <DropdownMenuSeparator className="bg-(--border)" />
                 </>
               )}
-              <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">
+              <DropdownMenuLabel className="text-(--text-muted) text-xs">
                 {t('nav.quickActions')}
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-[var(--border)]" />
+              <DropdownMenuSeparator className="bg-(--border)" />
               <DropdownMenuItem
-                className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2 font-medium"
+                className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2 font-medium"
                 onClick={() => router.push('/tasks?new=true')}
               >
                 <Plus className="w-4 h-4 text-blue-500" />
                 <span>{t('shortcuts.newTask')}</span>
-                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">
+                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-(--background-subtle) border border-(--border) rounded">
                   ⌘T
                 </kbd>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+                className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
                 onClick={() => router.push('/leaves?new=true')}
               >
                 <Calendar className="w-4 h-4 text-purple-500" />
                 <span>{t('leave.requestLeave')}</span>
-                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">
+                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-(--background-subtle) border border-(--border) rounded">
                   ⌘L
                 </kbd>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+                className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
                 onClick={() => router.push('/attendance')}
               >
                 <Clock className="w-4 h-4 text-green-500" />
                 <span>{t('navbar.clockInOut')}</span>
-                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">
+                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-(--background-subtle) border border-(--border) rounded">
                   ⌘A
                 </kbd>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+                className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
                 onClick={() => router.push('/reports')}
               >
                 <FileText className="w-4 h-4 text-orange-500" />
                 {t('navbar.myReports')}
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="bg-[var(--border)]" />
-              <DropdownMenuLabel className="text-[var(--text-muted)] text-xs">
+              <DropdownMenuSeparator className="bg-(--border)" />
+              <DropdownMenuLabel className="text-(--text-muted) text-xs">
                 {t('nav.accountSettings')}
               </DropdownMenuLabel>
               <DropdownMenuItem
-                className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+                className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
                 onClick={() => router.push('/profile')}
               >
-                <User className="w-4 h-4 text-[var(--text-muted)]" />
+                <User className="w-4 h-4 text-(--text-muted)" />
                 {t('nav.profile')}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+                className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
                 onClick={() => router.push('/settings')}
               >
-                <Settings className="w-4 h-4 text-[var(--text-muted)]" />
+                <Settings className="w-4 h-4 text-(--text-muted)" />
                 {t('nav.settings')}
               </DropdownMenuItem>
 
               {/* Status selector - collapsible */}
-              <DropdownMenuSeparator className="bg-[var(--border)]" />
+              <DropdownMenuSeparator className="bg-(--border)" />
 
               {/* Status trigger button */}
               <div
@@ -602,14 +537,14 @@ export function Navbar() {
                   e.stopPropagation();
                   setStatusExpanded(!statusExpanded);
                 }}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-all duration-200 hover:bg-[var(--background-subtle)]/60 hover:pl-2.5 cursor-pointer"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-all duration-200 hover:bg-(--background-subtle)/60 hover:pl-2.5 cursor-pointer"
               >
-                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${presenceCfg.dot}`} />
-                <span className="flex-1 text-left font-medium text-[var(--text-primary)]">
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${presenceCfg.dot}`} />
+                <span className="flex-1 text-left font-medium text-(--text-primary)">
                   <PresenceEmoji emoji={presenceCfg.icon} /> {presenceLabel}
                 </span>
                 <ChevronDown
-                  className={`h-4 w-4 text-[var(--text-muted)] transition-transform duration-200 ${
+                  className={`h-4 w-4 text-(--text-muted) transition-transform duration-200 ${
                     statusExpanded ? 'rotate-180' : ''
                   }`}
                 />
@@ -618,7 +553,7 @@ export function Navbar() {
               {/* Expandable status list */}
               <div
                 className={`overflow-hidden transition-all duration-300 ease-out ${
-                  statusExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'
+                  statusExpanded ? 'max-h-75 opacity-100' : 'max-h-0 opacity-0'
                 }`}
               >
                 <div className="py-1">
@@ -640,11 +575,11 @@ export function Navbar() {
                           setStatusExpanded(false); // Close after selection
                         }
                       }}
-                      className={`ml-4 ${currentPresence === key ? 'bg-[var(--background-subtle)]/40' : ''}`}
+                      className={`ml-4 ${currentPresence === key ? 'bg-(--background-subtle)/40' : ''}`}
                     >
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} />
                       <span
-                        className={`text-sm flex-1 ${currentPresence === key ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}
+                        className={`text-sm flex-1 ${currentPresence === key ? 'font-semibold text-(--text-primary)' : 'text-(--text-muted)'}`}
                       >
                         {t(cfg.labelKey)}
                       </span>
@@ -655,19 +590,19 @@ export function Navbar() {
               </div>
 
               {/* Keyboard Shortcuts hint */}
-              <DropdownMenuSeparator className="bg-[var(--border)]" />
+              <DropdownMenuSeparator className="bg-(--border)" />
               <DropdownMenuItem
-                className="text-[var(--text-primary)] cursor-pointer hover:bg-[var(--background-subtle)] focus:bg-[var(--background-subtle)] gap-2"
+                className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
                 onClick={() => setShowShortcutsModal(true)}
               >
-                <Keyboard className="w-4 h-4 text-[var(--text-muted)]" />
+                <Keyboard className="w-4 h-4 text-(--text-muted)" />
                 <span>{t('shortcuts.keyboardShortcuts')}</span>
-                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-subtle)] border border-[var(--border)] rounded">
+                <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-(--background-subtle) border border-(--border) rounded">
                   ⌘/
                 </kbd>
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="bg-[var(--border)]" />
+              <DropdownMenuSeparator className="bg-(--border)" />
               <DropdownMenuItem
                 className="text-red-500 focus:text-red-500 focus:bg-red-500/10 cursor-pointer gap-2"
                 onClick={handleLogout}

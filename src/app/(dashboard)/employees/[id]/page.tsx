@@ -48,10 +48,10 @@ export default function EmployeeProfilePage() {
         <Card>
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-orange-500 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
+            <h3 className="text-lg font-semibold text-(--text-primary) mb-1">
               {t('employees.employeeNotFound')}
             </h3>
-            <p className="text-sm text-[var(--text-muted)]">
+            <p className="text-sm text-(--text-muted)">
               {t('employees.employeeNotFoundDesc')}
             </p>
           </CardContent>

@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         });
-        const data = await res.json();
+        const data = (await res.json()) as { error?: string };
         if (!res.ok)
           throw new Error(data.error || t('auth.somethingWentWrong', 'Something went wrong'));
         setSent(true);
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
         >
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-(--primary) to-(--primary-dark,var(--primary)) flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-(--primary) to-(--primary-dark,var(--primary)) flex items-center justify-center shadow-lg">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -137,7 +137,7 @@ export default function ForgotPasswordPage() {
                         className="flex items-center gap-2 p-3 rounded-xl text-sm"
                         style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
                       >
-                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <AlertCircle className="w-4 h-4 shrink-0" />
                         {error}
                       </motion.div>
                     )}

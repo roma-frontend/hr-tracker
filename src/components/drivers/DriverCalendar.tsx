@@ -21,20 +21,12 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import type { FunctionReference } from 'convex/server';
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
   MapPin,
   Clock,
   Calendar as CalendarIcon,
@@ -44,7 +36,6 @@ import {
   ArrowRight,
   Play,
   CheckCircle2,
-  XCircle,
   Wrench,
 } from 'lucide-react';
 import { format, startOfWeek, addDays, isSameDay, isToday } from 'date-fns';
@@ -141,7 +132,7 @@ function TripCard({
 
   return (
     <div
-      className={`group relative rounded-xl border bg-gradient-to-br ${getStatusGradient()} backdrop-blur-sm transition-all duration-200 hover:shadow-lg hover:scale-[1.02]`}
+      className={`group relative rounded-xl border bg-linear-to-br ${getStatusGradient()} backdrop-blur-sm transition-all duration-200 hover:shadow-lg hover:scale-[1.02]`}
     >
       {/* Status accent bar */}
       <div
@@ -355,7 +346,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
         </div>
         <Button
           onClick={() => setShowBlockModal(true)}
-          className="w-full sm:w-auto gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all"
+          className="w-full sm:w-auto gap-2 rounded-xl bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all"
         >
           <Shield className="w-4 h-4" />
           {t('driverCalendar.blockTime', 'Block Time')}
@@ -382,7 +373,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                 key={day.toISOString()}
                 className={`rounded-2xl border transition-all duration-200 ${
                   today
-                    ? 'border-primary/40 bg-gradient-to-b from-primary/5 to-transparent shadow-lg shadow-primary/5'
+                    ? 'border-primary/40 bg-linear-to-b from-primary/5 to-transparent shadow-lg shadow-primary/5'
                     : 'border-border/50 bg-card/50 hover:border-border'
                 }`}
               >
@@ -407,7 +398,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                 </div>
 
                 {/* Schedule Items */}
-                <div className="p-2 space-y-2 max-h-[320px] overflow-y-auto scrollbar-thin">
+                <div className="p-2 space-y-2 max-h-80 overflow-y-auto scrollbar-thin">
                   {daySchedule.length > 0 ? (
                     daySchedule
                       .sort((a: ScheduleItem, b: ScheduleItem) => a.startTime - b.startTime)
@@ -445,7 +436,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
                     <button
                       key={day.toISOString()}
                       onClick={() => setMobileViewDay(index)}
-                      className={`flex flex-col items-center justify-center min-w-[56px] p-2.5 rounded-xl transition-all duration-200 ${
+                      className={`flex flex-col items-center justify-center min-w-14 p-2.5 rounded-xl transition-all duration-200 ${
                         isSelected
                           ? today
                             ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
@@ -487,7 +478,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
           </div>
 
           {/* Schedule Content */}
-          <div className="p-3 space-y-3 max-h-[360px] overflow-y-auto">
+          <div className="p-3 space-y-3 max-h-90 overflow-y-auto">
             {weekDays[mobileViewDay] && getScheduleForDay(weekDays[mobileViewDay]).length > 0 ? (
               getScheduleForDay(weekDays[mobileViewDay])
                 .sort((a: ScheduleItem, b: ScheduleItem) => a.startTime - b.startTime)
@@ -537,9 +528,9 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
 
       {/* Block Time Modal - Beautiful Design */}
       <Dialog open={showBlockModal} onOpenChange={setShowBlockModal}>
-        <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-120 p-0 overflow-hidden">
           {/* Modal Header with Gradient */}
-          <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-5">
+          <div className="relative bg-linear-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-5">
             <DialogHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-primary/10">
@@ -656,7 +647,7 @@ export function DriverCalendar({ driverId, organizationId, userId }: DriverCalen
             {/* Submit Button */}
             <Button
               onClick={handleBlockTime}
-              className="w-full h-11 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all font-medium"
+              className="w-full h-11 rounded-xl bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all font-medium"
             >
               <Shield className="w-4 h-4 mr-2" />
               {t('driverCalendar.blockTimeBtn')}

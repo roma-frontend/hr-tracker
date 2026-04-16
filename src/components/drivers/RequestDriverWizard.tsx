@@ -136,7 +136,7 @@ export function RequestDriverWizard({
               max="10"
               value={String(wizardData.passengerCount || '1')}
               onChange={(e) => updateStepData('passengerCount', parseInt(e.target.value) || 1)}
-              className="bg-[var(--background)] border-[var(--border)] text-[var(--text-primary)]"
+              className="bg-(--background) border-(--border) text-(--text-primary)"
             />
           </div>
         </div>
@@ -167,7 +167,7 @@ export function RequestDriverWizard({
             required
           />
         ) : (
-          <div className="text-center py-8 text-[var(--text-muted)]">
+          <div className="text-center py-8 text-(--text-muted)">
             {t('driverWizard.steps.driver.noDrivers')}
           </div>
         ),

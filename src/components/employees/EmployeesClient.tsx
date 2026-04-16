@@ -267,7 +267,7 @@ export function EmployeesClient() {
             className="p-4 rounded-xl border flex items-start gap-3"
             style={{ background: 'rgba(37,99,235,0.08)', borderColor: 'rgba(37,99,235,0.2)' }}
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-blue-500 bg-blue-500/10">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-blue-500 bg-blue-500/10">
               <Plus className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
@@ -363,7 +363,7 @@ export function EmployeesClient() {
                   key={label}
                   value={value}
                   onChange={(e) => setter(e.target.value)}
-                  className="bg-[var(--card)] border-[var(--border)] text-[var(--text-primary)] px-3 py-2 rounded-xl border text-sm outline-none capitalize flex-1 min-w-[100px]"
+                  className="bg-(--card) border-(--border) text-(--text-primary) px-3 py-2 rounded-xl border text-sm outline-none capitalize flex-1 min-w-[100px]"
                 >
                   {options.map((o: any) => (
                     <option key={o} value={o} className="capitalize">
@@ -374,14 +374,14 @@ export function EmployeesClient() {
               );
             })}
             {/* View toggle */}
-            <div className="flex rounded-xl flex-shrink-0" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex rounded-xl shrink-0" style={{ borderColor: 'var(--border)' }}>
               <button
                 onClick={() => setViewMode('grid')}
                 className={cn(
                   'p-2.5 transition-colors rounded-lg',
                   viewMode === 'grid'
                     ? 'bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) text-white'
-                    : 'bg-[var(--card)] text-[var(--text-muted)]',
+                    : 'bg-(--card) text-(--text-muted)',
                 )}
                 title={t('ariaLabels.gridView')}
               >
@@ -393,7 +393,7 @@ export function EmployeesClient() {
                   'p-2.5 transition-colors rounded-lg',
                   viewMode === 'list'
                     ? 'bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) text-white'
-                    : 'bg-[var(--card)] text-[var(--text-muted)]',
+                    : 'bg-(--card) text-(--text-muted)',
                 )}
                 title={t('ariaLabels.listView')}
               >
@@ -418,7 +418,7 @@ export function EmployeesClient() {
 
           const renderMenu = (emp: any) =>
             canManage ? (
-              <div className="relative flex-shrink-0">
+              <div className="relative shrink-0">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -543,7 +543,7 @@ export function EmployeesClient() {
                               className="flex items-center gap-2"
                               style={{ color: 'var(--text-muted)' }}
                             >
-                              <Mail className="w-3 h-3 flex-shrink-0" />
+                              <Mail className="w-3 h-3 shrink-0" />
                               <span className="truncate">{emp.email}</span>
                             </div>
                             {(emp as any).phone && (
@@ -566,7 +566,7 @@ export function EmployeesClient() {
                             )}
                             {(emp as any).supervisorId && (
                               <div className="flex items-center gap-2">
-                                <UserCog className="w-3 h-3 flex-shrink-0 text-blue-400" />
+                                <UserCog className="w-3 h-3 shrink-0 text-blue-400" />
                                 <span className="truncate text-blue-500 font-medium">
                                   {supervisorMap.get((emp as any).supervisorId) ??
                                     t('employees.noSupervisor')}
@@ -701,12 +701,12 @@ export function EmployeesClient() {
                           exit={{ opacity: 0, x: -20 }}
                           transition={{ delay: i * 0.02 }}
                           onClick={() => router.push(`/employees/${emp._id}`)}
-                          className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-[var(--background-subtle)] relative"
+                          className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-(--background-subtle) relative"
                           style={{ borderColor: 'var(--border)', opacity: emp.isActive ? 1 : 0.5 }}
                         >
                           {/* Employee name + avatar */}
                           <div className="sm:col-span-4 flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 flex items-center justify-center text-white text-xs font-bold">
+                            <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 flex items-center justify-center text-white text-xs font-bold">
                               {emp.avatarUrl ? (
                                 <img
                                   src={emp.avatarUrl}
@@ -742,7 +742,7 @@ export function EmployeesClient() {
                             </div>
                             {/* Mobile-only action chevron */}
                             <ChevronRight
-                              className="w-4 h-4 sm:hidden flex-shrink-0"
+                              className="w-4 h-4 sm:hidden shrink-0"
                               style={{ color: 'var(--text-muted)' }}
                             />
                           </div>

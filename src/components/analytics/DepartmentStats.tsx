@@ -13,7 +13,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-interface User {
+export interface User {
   department?: string;
   paidLeaveBalance: number;
   sickLeaveBalance: number;
@@ -71,8 +71,8 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
   }));
 
   return (
-    <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
-      <h3 className="text-xl font-bold mb-4 text-[var(--text-primary)]">
+    <div className="bg-(--background) rounded-2xl p-6 shadow-lg border border-(--border)">
+      <h3 className="text-xl font-bold mb-4 text-(--text-primary)">
         🏢 {t('departmentStats.title')}
       </h3>
       <ResponsiveContainer width="100%" height={300}>

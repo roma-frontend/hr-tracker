@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
+// cspell:disable
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -19,12 +20,7 @@ import {
   Wrench,
   Eye,
   LogOut,
-  TrendingUp,
-  Calendar,
-  DollarSign,
-  AlertTriangle,
   Search,
-  Filter,
 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { SuperadminBroadcastsPanel } from '@/components/admin/SuperadminBroadcastsPanel';
@@ -38,16 +34,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+
+interface Organization {
+  _id: Id<'organizations'>;
+  name: string;
+  slug: string;
+  plan: 'starter' | 'professional' | 'enterprise';
+  isActive: boolean;
+  totalEmployees: number;
+  activeEmployees: number;
+  employeeLimit: number;
+  industry?: string;
+  adminNames?: string[];
+}
 
 export default function OrganizationsPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
   const selectedOrgId = useOrgSelectorStore((state) => state.selectedOrgId);
-  const setSelectedOrgId = useOrgSelectorStore((state) => state.setSelectedOrgId);
+  const _setSelectedOrgId = useOrgSelectorStore((state) => state.setSelectedOrgId);
   const clearSelection = useOrgSelectorStore((state) => state.clearSelection);
   const [activeTab, setActiveTab] = useState('organizations');
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,11 +63,11 @@ export default function OrganizationsPage() {
 
   const organizations = useQuery(
     api.organizations.getAllOrganizations,
-    user?.id ? { superadminUserId: user.id as any } : 'skip',
-  );
+    user?.id ? { superadminUserId: user.id as Id<'users'> } : 'skip',
+  ) as Organization[] | undefined;
 
   // Filter organizations
-  const filteredOrgs = organizations?.filter((org: any) => {
+  const filteredOrgs = organizations?.filter((org) => {
     const matchesSearch =
       org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       org.slug.toLowerCase().includes(searchQuery.toLowerCase());
@@ -72,28 +79,17 @@ export default function OrganizationsPage() {
     return matchesSearch && matchesPlan && matchesStatus;
   });
 
-  console.log('🔍 [Organizations] organizations query result:', organizations);
-
   const isSuperadmin =
     user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
 
   // Debug logging
   useEffect(() => {
     if (user) {
-      console.log('🔍 Organizations page - User data:', {
-        email: user.email,
-        role: user.role,
-        isSuperadmin,
-      });
+      // Debug info
     }
 
     if (!user) {
-      console.log('🔍 [Organizations] No user - would redirect to /login BUT DISABLED FOR DEBUG');
       // router.push("/login"); // TEMPORARY DISABLED
-    } else if (!isSuperadmin) {
-      console.log('🔍 [Organizations] Not superadmin - should show access denied');
-    } else {
-      console.log('🔍 [Organizations] ✅ User is superadmin - should show page');
     }
   }, [user, isSuperadmin, router]);
 
@@ -217,7 +213,7 @@ export default function OrganizationsPage() {
                   </p>
                 </div>
                 <p className="text-2xl font-bold text-green-500">
-                  {filteredOrgs?.filter((o: any) => o.isActive).length || 0}
+                  {filteredOrgs?.filter((o) => o.isActive).length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {t('superadmin.organizations.stats.working')}
@@ -234,10 +230,7 @@ export default function OrganizationsPage() {
                   </p>
                 </div>
                 <p className="text-2xl font-bold">
-                  {filteredOrgs?.reduce(
-                    (sum: number, o: any) => sum + (o.totalEmployees || 0),
-                    0,
-                  ) || 0}
+                  {filteredOrgs?.reduce((sum, o) => sum + (o.totalEmployees || 0), 0) || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {t('superadmin.organizations.stats.total')}
@@ -254,7 +247,7 @@ export default function OrganizationsPage() {
                   </p>
                 </div>
                 <p className="text-2xl font-bold text-red-500">
-                  {filteredOrgs?.filter((o: any) => !o.isActive).length || 0}
+                  {filteredOrgs?.filter((o) => !o.isActive).length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {t('superadmin.organizations.stats.suspended')}
@@ -275,7 +268,7 @@ export default function OrganizationsPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Select value={planFilter} onValueChange={setPlanFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-37.5">
                     <SelectValue placeholder={t('filters.plan')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -286,7 +279,7 @@ export default function OrganizationsPage() {
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-37.5">
                     <SelectValue placeholder={t('filters.status')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -310,7 +303,7 @@ export default function OrganizationsPage() {
                 <Eye className="w-4 h-4 text-blue-500" />
                 <span className="text-sm text-blue-500 font-medium">
                   {t('superadmin.viewingOrganization')}:{' '}
-                  {organizations?.find((o: any) => o._id === selectedOrgId)?.name}
+                  {organizations?.find((o) => o._id === selectedOrgId)?.name}
                 </span>
               </div>
             )}
@@ -326,7 +319,7 @@ export default function OrganizationsPage() {
                 </p>
               </div>
 
-              {organizations?.map((org: any) => (
+              {organizations?.map((org) => (
                 <div
                   key={org._id}
                   className="p-4 rounded-lg border hover:border-blue-400/50 transition-all hover:shadow-md"
@@ -343,7 +336,7 @@ export default function OrganizationsPage() {
                       </h3>
                       <p className="text-xs text-muted-foreground font-mono mt-1">{org.slug}</p>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
+                    <div className="flex gap-2 shrink-0 flex-wrap justify-end">
                       <span
                         className={`px-2 py-1 rounded text-xs font-semibold border ${getPlanBadgeColor(
                           org.plan,
@@ -399,7 +392,7 @@ export default function OrganizationsPage() {
                     <div className="flex-1">
                       {org.adminNames && org.adminNames.length > 0 && (
                         <div className="flex gap-1 flex-wrap">
-                          {org.adminNames.map((name: any, idx: any) => (
+                          {org.adminNames.map((name, idx) => (
                             <span
                               key={idx}
                               className="px-2 py-1 rounded text-xs bg-blue-500/10 text-blue-500 border border-blue-500/30 whitespace-nowrap"
@@ -410,7 +403,7 @@ export default function OrganizationsPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() =>
                           router.push(`/superadmin/organizations/${org._id}/manage-admins`)

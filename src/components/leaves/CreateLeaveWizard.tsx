@@ -110,10 +110,10 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
               required
             />
           </div>
-          <div className="p-4 rounded-lg bg-[var(--background-subtle)] border border-[var(--border)]">
-            <p className="text-sm text-[var(--text-muted)]">
+          <div className="p-4 rounded-lg bg-(--background-subtle) border border-(--border)">
+            <p className="text-sm text-(--text-muted)">
               {t('leaveWizard.steps.dates.totalDays')}:{' '}
-              <span className="font-semibold text-[var(--text-primary)]">
+              <span className="font-semibold text-(--text-primary)">
                 {t('leaveWizard.steps.dates.calculating')}
               </span>
             </p>
@@ -168,32 +168,32 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
       icon: <CheckCircle className="w-5 h-5" />,
       content: (
         <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-[var(--background-subtle)] border border-[var(--border)]">
-            <h4 className="font-semibold text-[var(--text-primary)] mb-3">
+          <div className="p-4 rounded-lg bg-(--background-subtle) border border-(--border)">
+            <h4 className="font-semibold text-(--text-primary) mb-3">
               {t('leaveWizard.steps.confirm.summary')}
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">
+                <span className="text-(--text-muted)">
                   {t('leaveWizard.steps.confirm.type')}:
                 </span>
-                <span className="font-medium text-[var(--text-primary)]">
+                <span className="font-medium text-(--text-primary)">
                   {t('leaveWizard.steps.confirm.typeValue')}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">
+                <span className="text-(--text-muted)">
                   {t('leaveWizard.steps.confirm.dates')}:
                 </span>
-                <span className="font-medium text-[var(--text-primary)]">
+                <span className="font-medium text-(--text-primary)">
                   {t('leaveWizard.steps.confirm.datesValue')}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">
+                <span className="text-(--text-muted)">
                   {t('leaveWizard.steps.confirm.days')}:
                 </span>
-                <span className="font-medium text-[var(--text-primary)]">
+                <span className="font-medium text-(--text-primary)">
                   {t('leaveWizard.steps.confirm.daysValue')}
                 </span>
               </div>

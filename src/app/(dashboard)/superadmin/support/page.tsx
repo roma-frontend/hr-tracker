@@ -111,7 +111,7 @@ export default function SupportTicketsPage() {
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-[var(--background)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--background)]/60 border-b border-[var(--border)]">
+        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1
@@ -187,7 +187,7 @@ export default function SupportTicketsPage() {
         )}
 
         {/* Filters */}
-        <Card className="mb-6 border-[var(--border)]" style={{ background: 'var(--card)' }}>
+        <Card className="mb-6 border-(--border)" style={{ background: 'var(--card)' }}>
           <CardContent className="p-3">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1 max-w-sm">
@@ -383,7 +383,7 @@ function TicketRow({
   return (
     <div
       onClick={onClick}
-      className="group p-5 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-primary/30 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer"
+      className="group p-5 rounded-xl border border-(--border) bg-(--card) hover:border-primary/30 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer"
     >
       <div className="flex items-start gap-4">
         {/* Main Info */}
@@ -700,7 +700,7 @@ function TicketDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="border-b border-[var(--border)] px-6 py-5 transition-all duration-200">
+        <div className="border-b border-(--border) px-6 py-5 transition-all duration-200">
           <div className="flex items-start gap-3 mb-3">
             <DialogTitle className="font-mono text-base" style={{ color: 'var(--text-muted)' }}>
               {ticket.ticketNumber}
@@ -765,7 +765,7 @@ function TicketDetailDialog({
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {/* Tab Buttons */}
-          <div className="border-b border-[var(--border)] px-4 sm:px-6 pt-4">
+          <div className="border-b border-(--border) px-4 sm:px-6 pt-4">
             <div className="flex gap-4">
               <button
                 onClick={() => setActiveTab('comments')}
@@ -782,7 +782,7 @@ function TicketDetailDialog({
                   </span>
                   <span className="sm:hidden">{t('superadmin.support.detail.comments')}</span>
                   {ticket.comments?.length > 0 && (
-                    <span className="px-1.5 py-0.5 text-xs rounded-full bg-[var(--background-subtle)]">
+                    <span className="px-1.5 py-0.5 text-xs rounded-full bg-(--background-subtle)">
                       {ticket.comments.length}
                     </span>
                   )}
@@ -829,7 +829,7 @@ function TicketDetailDialog({
                       className={`p-4 rounded-lg transition-all duration-200 hover:shadow-sm ${
                         comment.isInternal
                           ? 'bg-yellow-500/5 border border-yellow-500/20'
-                          : 'bg-[var(--background-subtle)] hover:bg-[var(--background)]'
+                          : 'bg-(--background-subtle) hover:bg-(--background)'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -901,7 +901,7 @@ function TicketDetailDialog({
                       </svg>
                       {t('superadmin.support.detail.description')}
                     </h4>
-                    <div className="p-4 rounded-lg bg-[var(--background-subtle)] transition-all duration-200 hover:shadow-sm">
+                    <div className="p-4 rounded-lg bg-(--background-subtle) transition-all duration-200 hover:shadow-sm">
                       <p className="text-sm leading-relaxed">{ticket.description}</p>
                     </div>
                   </div>
@@ -927,7 +927,7 @@ function TicketDetailDialog({
                       {t('superadmin.support.ticketInfo')}
                     </h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 rounded-lg bg-[var(--background-subtle)] transition-colors duration-300 hover:bg-[var(--card)]">
+                      <div className="p-3 rounded-lg bg-(--background-subtle) transition-colors duration-300 hover:bg-(--card)">
                         <p
                           className="text-xs mb-1 transition-colors duration-200"
                           style={{ color: 'var(--text-muted)' }}
@@ -946,7 +946,7 @@ function TicketDetailDialog({
                           {ticket.status === 'closed' && t('superadmin.support.statusClosed')}
                         </Badge>
                       </div>
-                      <div className="p-3 rounded-lg bg-[var(--background-subtle)] transition-colors duration-300 hover:bg-[var(--card)]">
+                      <div className="p-3 rounded-lg bg-(--background-subtle) transition-colors duration-300 hover:bg-(--card)">
                         <p
                           className="text-xs mb-1 transition-colors duration-200"
                           style={{ color: 'var(--text-muted)' }}
@@ -963,7 +963,7 @@ function TicketDetailDialog({
                           {ticket.priority === 'low' && t('superadmin.support.priorityLow')}
                         </Badge>
                       </div>
-                      <div className="p-3 rounded-lg bg-[var(--background-subtle)] transition-colors duration-300 hover:bg-[var(--card)]">
+                      <div className="p-3 rounded-lg bg-(--background-subtle) transition-colors duration-300 hover:bg-(--card)">
                         <p
                           className="text-xs mb-1 transition-colors duration-200"
                           style={{ color: 'var(--text-muted)' }}
@@ -974,7 +974,7 @@ function TicketDetailDialog({
                           {ticket.category}
                         </p>
                       </div>
-                      <div className="p-3 rounded-lg bg-[var(--background-subtle)] transition-colors duration-300 hover:bg-[var(--card)]">
+                      <div className="p-3 rounded-lg bg-(--background-subtle) transition-colors duration-300 hover:bg-(--card)">
                         <p
                           className="text-xs mb-1 transition-colors duration-200"
                           style={{ color: 'var(--text-muted)' }}
@@ -993,7 +993,7 @@ function TicketDetailDialog({
 
             {/* Comment Input - always visible in comments tab */}
             {activeTab === 'comments' && (
-              <div className="border-t border-[var(--border)] p-4 space-y-3 transition-all duration-300 ease-in-out tab-content-animate">
+              <div className="border-t border-(--border) p-4 space-y-3 transition-all duration-300 ease-in-out tab-content-animate">
                 <Textarea
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
@@ -1026,7 +1026,7 @@ function TicketDetailDialog({
             )}
 
             {/* Actions & Info Sidebar - below content on mobile, right side on desktop */}
-            <div className="border-t lg:border-t-0 lg:border-l border-[var(--border)] p-4 sm:p-6 space-y-4 sm:space-y-6 transition-all duration-200">
+            <div className="border-t lg:border-t-0 lg:border-l border-(--border) p-4 sm:p-6 space-y-4 sm:space-y-6 transition-all duration-200">
               <div className="transition-all duration-200">
                 <h4
                   className="text-sm font-medium mb-3 transition-colors duration-200"
@@ -1079,7 +1079,7 @@ function TicketDetailDialog({
                 </Button>
               )}
 
-              <div className="pt-3 sm:pt-4 border-t border-[var(--border)] transition-all duration-200">
+              <div className="pt-3 sm:pt-4 border-t border-(--border) transition-all duration-200">
                 <h4
                   className="text-sm font-medium mb-3 transition-colors duration-200"
                   style={{ color: 'var(--text-muted)' }}
@@ -1087,7 +1087,7 @@ function TicketDetailDialog({
                   {t('superadmin.support.info')}
                 </h4>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between transition-all duration-200 hover:bg-[var(--background-subtle)] rounded p-1">
+                  <div className="flex justify-between transition-all duration-200 hover:bg-(--background-subtle) rounded p-1">
                     <span style={{ color: 'var(--text-muted)' }}>
                       {t('superadmin.support.detail.priority')}:
                     </span>
@@ -1098,7 +1098,7 @@ function TicketDetailDialog({
                       {ticket.priority}
                     </span>
                   </div>
-                  <div className="flex justify-between transition-all duration-200 hover:bg-[var(--background-subtle)] rounded p-1">
+                  <div className="flex justify-between transition-all duration-200 hover:bg-(--background-subtle) rounded p-1">
                     <span style={{ color: 'var(--text-muted)' }}>
                       {t('superadmin.support.detail.category')}:
                     </span>

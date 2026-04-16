@@ -14,7 +14,7 @@ export default function SmartSuggestions() {
 
   if (!suggestions) {
     return (
-      <Card className="border-[var(--border)]">
+      <Card className="border-(--border)">
         <CardContent className="flex items-center justify-center p-8">
           <ShieldLoader size="lg" />
         </CardContent>
@@ -51,7 +51,7 @@ export default function SmartSuggestions() {
   };
 
   return (
-    <Card className="border-[var(--border)]">
+    <Card className="border-(--border)">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-sky-400" />
@@ -62,10 +62,10 @@ export default function SmartSuggestions() {
         {suggestions.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
             <Lightbulb className="mb-3 h-12 w-12 text-sky-400 opacity-50" />
-            <p className="text-sm font-medium text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-(--text-primary)">
               {t('aiSuggestions.noSuggestions')}
             </p>
-            <p className="text-xs text-[var(--text-secondary)]">{t('aiSuggestions.optimal')}</p>
+            <p className="text-xs text-(--text-secondary)">{t('aiSuggestions.optimal')}</p>
           </div>
         ) : (
           <div className="max-h-[400px] space-y-3 overflow-y-auto">
@@ -78,9 +78,9 @@ export default function SmartSuggestions() {
                   <div className="flex-1">
                     <div className="mb-1 flex items-center gap-2">
                       <Lightbulb className="h-4 w-4" />
-                      <p className="font-semibold text-[var(--text-primary)]">{suggestion.title}</p>
+                      <p className="font-semibold text-(--text-primary)">{suggestion.title}</p>
                     </div>
-                    <p className="text-sm text-[var(--text-primary)] opacity-90">
+                    <p className="text-sm text-(--text-primary) opacity-90">
                       {suggestion.description}
                     </p>
                   </div>

@@ -86,7 +86,6 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
   // Superadmin: org selection is step 0, so adjust total
   const effectiveTotalSteps = isSuperadmin ? TOTAL_STEPS + 1 : TOTAL_STEPS;
-  const activeStep = step;
 
   useEffect(() => {
     if (open) {
@@ -204,7 +203,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
       <DialogContent className="max-w-lg max-h-[90vh] p-0">
         {/* Header with progress */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70" />
+          <div className="absolute inset-0 bg-linear-to-br from-(--primary) to-(--primary)/70" />
           <div className="relative z-10 px-6 pt-6 pb-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
@@ -263,14 +262,14 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                   className="space-y-4"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-[var(--primary)]" />
+                    <div className="w-10 h-10 rounded-xl bg-(--primary)/10 flex items-center justify-center">
+                      <Building2 className="w-5 h-5 text-(--primary)" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[var(--text-primary)]">
+                      <h3 className="font-semibold text-(--text-primary)">
                         {t('employees.selectOrganization')}
                       </h3>
-                      <p className="text-sm text-[var(--text-muted)]">
+                      <p className="text-sm text-(--text-muted)">
                         {t('employees.selectOrgDescription') ||
                           'Choose which organization to add this employee to'}
                       </p>
@@ -312,10 +311,10 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       <User className="w-5 h-5 text-blue-500" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[var(--text-primary)]">
+                      <h3 className="font-semibold text-(--text-primary)">
                         {t('wizard.personalInfo') || 'Personal Information'}
                       </h3>
-                      <p className="text-sm text-[var(--text-muted)]">
+                      <p className="text-sm text-(--text-muted)">
                         {t('wizard.personalInfoDesc') || 'Basic details about the employee'}
                       </p>
                     </div>
@@ -324,7 +323,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                   <div className="space-y-1.5">
                     <Label htmlFor="emp-name">{t('common.name')} *</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                       <Input
                         id="emp-name"
                         placeholder={t('placeholders.johnSmith')}
@@ -339,7 +338,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                   <div className="space-y-1.5">
                     <Label htmlFor="emp-email">{t('common.email')} *</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                       <Input
                         id="emp-email"
                         type="email"
@@ -350,7 +349,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       />
                     </div>
                     {errors.email && <p className="text-xs text-(--destructive)">{errors.email}</p>}
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-(--text-muted)">
                       {t('employees.contractorHint')}
                     </p>
                   </div>
@@ -369,10 +368,10 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       <Briefcase className="w-5 h-5 text-amber-500" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[var(--text-primary)]">
+                      <h3 className="font-semibold text-(--text-primary)">
                         {t('wizard.workDetails') || 'Work Details'}
                       </h3>
-                      <p className="text-sm text-[var(--text-muted)]">
+                      <p className="text-sm text-(--text-muted)">
                         {t('wizard.workDetailsDesc') || 'Department and position information'}
                       </p>
                     </div>
@@ -428,10 +427,10 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       <Shield className="w-5 h-5 text-purple-500" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[var(--text-primary)]">
+                      <h3 className="font-semibold text-(--text-primary)">
                         {t('wizard.roleType') || 'Role & Type'}
                       </h3>
-                      <p className="text-sm text-[var(--text-muted)]">
+                      <p className="text-sm text-(--text-muted)">
                         {t('wizard.roleTypeDesc') || 'Set role and employment type'}
                       </p>
                     </div>
@@ -467,8 +466,8 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                           onClick={() => setType(empType)}
                           className={`px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
                             type === empType
-                              ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--text-primary)] shadow-sm'
-                              : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-subtle)]'
+                              ? 'border-(--primary) bg-(--primary)/10 text-(--text-primary) shadow-sm'
+                              : 'border-(--border) text-(--text-muted) hover:border-(--border-subtle)'
                           }`}
                         >
                           {t(`employees.${empType}`)}
@@ -481,7 +480,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                   <div className="space-y-1.5">
                     <Label htmlFor="emp-phone">{t('common.phone')}</Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                       <Input
                         id="emp-phone"
                         placeholder="+374 91 123456"
@@ -506,25 +505,25 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       <CheckCircle className="w-5 h-5 text-green-500" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[var(--text-primary)]">
+                      <h3 className="font-semibold text-(--text-primary)">
                         {t('common.review') || 'Review'}
                       </h3>
-                      <p className="text-sm text-[var(--text-muted)]">
+                      <p className="text-sm text-(--text-muted)">
                         {t('wizard.reviewDesc') || 'Confirm the details before adding'}
                       </p>
                     </div>
                   </div>
 
                   {/* Summary card */}
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] overflow-hidden">
+                  <div className="rounded-xl border border-(--border) bg-(--background-subtle) overflow-hidden">
                     {/* Avatar preview */}
-                    <div className="flex items-center gap-4 p-4 border-b border-[var(--border)]">
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                    <div className="flex items-center gap-4 p-4 border-b border-(--border)">
+                      <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
                         {name.charAt(0).toUpperCase() || 'E'}
                       </div>
                       <div>
-                        <p className="font-semibold text-[var(--text-primary)]">{name || '—'}</p>
-                        <p className="text-sm text-[var(--text-muted)]">{email || '—'}</p>
+                        <p className="font-semibold text-(--text-primary)">{name || '—'}</p>
+                        <p className="text-sm text-(--text-muted)">{email || '—'}</p>
                       </div>
                     </div>
 
@@ -538,8 +537,8 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                         ...(phone ? [{ label: t('common.phone'), value: phone }] : []),
                       ].map((item, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
-                          <span className="text-[var(--text-muted)]">{item.label}</span>
-                          <span className="font-medium text-[var(--text-primary)]">
+                          <span className="text-(--text-muted)">{item.label}</span>
+                          <span className="font-medium text-(--text-primary)">
                             {item.value || '—'}
                           </span>
                         </div>
@@ -552,20 +551,20 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                     key={allowance}
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="rounded-lg bg-[var(--background-subtle)] border border-[var(--border)] p-4 flex items-center justify-between"
+                    className="rounded-lg bg-(--background-subtle) border border-(--border) p-4 flex items-center justify-between"
                   >
                     <div>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                      <p className="text-sm font-medium text-(--text-primary)">
                         {t('employees.travelAllowance')}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      <p className="text-xs text-(--text-muted) mt-0.5">
                         {type === 'contractor'
                           ? t('employeeTypes.contractor')
                           : t('employeeTypes.staff')}{' '}
                         type
                       </p>
                     </div>
-                    <p className="text-xl font-bold text-[var(--text-primary)]">
+                    <p className="text-xl font-bold text-(--text-primary)">
                       {formatCurrency(allowance)}
                     </p>
                   </motion.div>
@@ -576,7 +575,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
         </div>
 
         {/* Footer */}
-        <DialogFooter className="px-6 py-4 border-t border-[var(--border)] bg-[var(--background-subtle)]">
+        <DialogFooter className="px-6 py-4 border-t border-(--border) bg-(--background-subtle)">
           <div className="flex items-center justify-between w-full">
             {step > 0 ? (
               <Button

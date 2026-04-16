@@ -162,7 +162,7 @@ export function AvatarUpload({
   return (
     <div className="relative inline-block">
       <div
-        className={`${sizes[size]} rounded-full relative overflow-hidden flex-shrink-0`}
+        className={`${sizes[size]} rounded-full relative overflow-hidden shrink-0`}
         style={{ background: 'var(--primary-muted)' }}
       >
         {displayUrl ? (

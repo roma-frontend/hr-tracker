@@ -1,6 +1,4 @@
 'use client';
-import Image from 'next/image';
-
 import React, { useState } from 'react';
 import { useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
@@ -18,18 +16,62 @@ import { Button } from '@/components/ui/button';
 import { Clock, Users, Star, UserCheck, BarChart2, Search } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import type { Id } from '../../../../convex/_generated/dataModel';
+import type { AttendanceRecord } from '@/components/attendance/AttendanceDetailModal';
+import type { EmployeeInfo } from '@/components/attendance/EmployeeAttendanceDrawer';
 
 // Isolate Convex API refs to avoid infinite type instantiation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getTodaySummaryApi: any = api.timeTracking.getTodayAttendanceSummary;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getCurrentlyAtWorkApi: any = api.timeTracking.getCurrentlyAtWork;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getTodayAllAttendanceApi: any = api.timeTracking.getTodayAllAttendance;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getNeedsRatingApi: any = api.supervisorRatings.getEmployeesNeedingRating;
+const getTodaySummaryApi = api.timeTracking.getTodayAttendanceSummary;
+const getCurrentlyAtWorkApi = api.timeTracking.getCurrentlyAtWork;
+const getTodayAllAttendanceApi = api.timeTracking.getTodayAllAttendance;
+const getNeedsRatingApi = api.supervisorRatings.getEmployeesNeedingRating;
 
 type Tab = 'today' | 'all' | 'rating';
+
+interface AttendanceUser {
+  _id: Id<'users'>;
+  name: string;
+  avatarUrl?: string | null;
+  position?: string;
+  department?: string;
+}
+
+interface AttendanceRecordType {
+  _id: Id<'timeTracking'>;
+  user?: AttendanceUser;
+  status: string;
+  checkInTime: number;
+  checkOutTime?: number;
+  totalWorkedMinutes?: number;
+  isLate?: boolean;
+  lateMinutes?: number;
+  isEarlyLeave?: boolean;
+  earlyLeaveMinutes?: number;
+  overtimeMinutes?: number;
+  notes?: string;
+  date: string;
+  userId: Id<'users'>;
+}
+
+interface EmployeeOverviewStats {
+  totalDays: number;
+  lateDays: number;
+  absentDays: number;
+  punctualityRate: string;
+  totalWorkedHours: string;
+}
+
+interface EmployeeOverview {
+  user: AttendanceUser;
+  supervisor: { _id: Id<'users'>; name: string } | null;
+  stats: EmployeeOverviewStats;
+  lastRecord: AttendanceRecordType | null;
+}
+
+interface EmployeeNeedingRating {
+  employee: AttendanceUser;
+  lastRated: string;
+  needsRating: boolean;
+}
 
 export default function AttendancePage() {
   const { t } = useTranslation();
@@ -39,19 +81,19 @@ export default function AttendancePage() {
     id: Id<'users'>;
     name: string;
   } | null>(null);
-  const [detailRecord, setDetailRecord] = useState<any | null>(null);
+  const [detailRecord, setDetailRecord] = useState<AttendanceRecord | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('today');
-  const [drawerEmployee, setDrawerEmployee] = useState<any | null>(null);
+  const [drawerEmployee, setDrawerEmployee] = useState<EmployeeInfo | null>(null);
   const [empSearch, setEmpSearch] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
 
   const isAdminOrSupervisor = user?.role === 'admin' || user?.role === 'supervisor';
   const isSuperadmin = user?.role === 'superadmin';
-  const isEmployee = user?.role === 'employee';
+  const _isEmployee = user?.role === 'employee';
 
   // For superadmin, use selectedOrgId if available
-  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : user?.organizationId;
+  const _effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : user?.organizationId;
 
   // Admin/Supervisor: fetch today's attendance summary and employees needing rating
   // Use user?.id as dependency so queries only run after localStorage hydration
@@ -61,7 +103,7 @@ export default function AttendancePage() {
       ? { adminId: user.id as Id<'users'> }
       : 'skip',
   );
-  const currentlyAtWork = useQuery(
+  const _currentlyAtWork = useQuery(
     getCurrentlyAtWorkApi,
     user?.id && (isAdminOrSupervisor || isSuperadmin)
       ? { adminId: user.id as Id<'users'> }
@@ -87,7 +129,13 @@ export default function AttendancePage() {
       : 'skip',
   );
 
-  const MONTHS = [
+  const tabs = [
+    { id: 'today' as const, label: t('timePeriods.today'), icon: Clock },
+    { id: 'all' as const, label: t('attendance.allEmployees'), icon: Users },
+    { id: 'rating' as const, label: t('attendance.rating'), icon: Star },
+  ];
+
+  const MONTHS: string[] = [
     t('months.january'),
     t('months.february'),
     t('months.march'),
@@ -101,7 +149,7 @@ export default function AttendancePage() {
     t('months.november'),
     t('months.december'),
   ];
-  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+  const monthOptions: string[] = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(new Date().getFullYear(), new Date().getMonth() - i, 1);
     return d.toISOString().slice(0, 7);
   });
@@ -117,12 +165,12 @@ export default function AttendancePage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+        <h2 className="text-2xl font-bold text-(--text-primary)">
           {isAdminOrSupervisor
             ? t('attendance.attendanceManagement')
             : t('attendance.myAttendance')}
         </h2>
-        <p className="text-[var(--text-muted)] text-sm mt-1">
+        <p className="text-(--text-muted) text-sm mt-1">
           {isAdminOrSupervisor
             ? t('attendance.monitorEmployeeAttendance')
             : t('attendance.trackWorkHours')}
@@ -148,13 +196,7 @@ export default function AttendancePage() {
             className="flex gap-1 p-1 rounded-xl w-fit"
             style={{ background: 'var(--background-subtle)' }}
           >
-            {(
-              [
-                { id: 'today', label: t('timePeriods.today'), icon: Clock },
-                { id: t('common.allEmployees'), label: t('attendance.allEmployees'), icon: Users },
-                { id: 'rating', label: t('attendance.rating'), icon: Star },
-              ] as { id: Tab; label: string; icon: any }[]
-            ).map((tab: any) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -241,18 +283,16 @@ export default function AttendancePage() {
             <CardContent>
               {todayAllAttendance.length === 0 ? (
                 <div className="text-center py-8">
-                  <Clock className="w-10 h-10 mx-auto mb-3 text-[var(--text-muted)] opacity-40" />
-                  <p className="text-sm text-[var(--text-muted)]">
-                    {t('attendance.noRecordsToday')}
-                  </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                  <Clock className="w-10 h-10 mx-auto mb-3 text-(--text-muted) opacity-40" />
+                  <p className="text-sm text-(--text-muted)">{t('attendance.noRecordsToday')}</p>
+                  <p className="text-xs text-(--text-muted) mt-1">
                     {t('emptyStates.employeesWillAppear')}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {todayAllAttendance.map(
-                    (record: any) =>
+                    (record: AttendanceRecordType | null) =>
                       record && (
                         <div
                           key={record._id}
@@ -262,13 +302,14 @@ export default function AttendancePage() {
                             background: 'var(--background-subtle)',
                           }}
                           onClick={() => {
-                            setDetailRecord(record);
+                            setDetailRecord(record as unknown as AttendanceRecord);
                             setDetailOpen(true);
                           }}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-sm font-bold">
+                            <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-sm font-bold">
                               {record.user?.avatarUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={record.user.avatarUrl}
                                   alt={record.user?.name ?? ''}
@@ -278,7 +319,7 @@ export default function AttendancePage() {
                               ) : (
                                 (record.user?.name
                                   ?.split(' ')
-                                  .map((n: any) => n[0])
+                                  .map((n: string) => n[0])
                                   .join('')
                                   .toUpperCase()
                                   .slice(0, 2) ?? '?')
@@ -291,7 +332,7 @@ export default function AttendancePage() {
                               >
                                 {record.user?.name ?? 'Unknown'}
                               </p>
-                              <p className="text-xs text-[var(--text-muted)]">
+                              <p className="text-xs text-(--text-muted)">
                                 {record.status !== 'absent' && record.checkInTime > 0
                                   ? `In: ${new Date(record.checkInTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
                                   : ''}
@@ -380,8 +421,8 @@ export default function AttendancePage() {
                       color: 'var(--text-primary)',
                     }}
                   >
-                    {monthOptions.map((m: any) => {
-                      const [y, mo] = m.split('-').map((numFn: any) => numFn);
+                    {monthOptions.map((m: string) => {
+                      const [y, mo] = m.split('-').map(Number) as [number, number];
                       return (
                         <option key={m} value={m}>
                           {MONTHS[mo - 1]} {y}
@@ -403,116 +444,127 @@ export default function AttendancePage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {filteredEmployees.map(({ user: emp, supervisor, stats, lastRecord }: any) => (
-                    <div
-                      key={emp._id}
-                      onClick={() =>
-                        setDrawerEmployee({ ...emp, supervisorName: supervisor?.name })
-                      }
-                      className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all group"
-                    >
-                      {/* Avatar */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        {emp.avatarUrl ? (
-                          <img
-                            src={emp.avatarUrl}
-                            alt={emp.name}
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          emp.name
-                            .split(' ')
-                            .map((n: any) => n[0])
-                            .join('')
-                            .toUpperCase()
-                            .slice(0, 2)
-                        )}
-                      </div>
+                  {filteredEmployees.map(
+                    ({ user: emp, supervisor, stats, lastRecord }: EmployeeOverview) => (
+                      <div
+                        key={emp._id}
+                        onClick={() => {
+                          const empForDrawer: EmployeeInfo = {
+                            _id: emp._id,
+                            name: emp.name,
+                            position: emp.position,
+                            department: emp.department,
+                            avatarUrl: emp.avatarUrl ?? undefined,
+                            supervisorName: supervisor?.name,
+                          };
+                          setDrawerEmployee(empForDrawer);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all group"
+                      >
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-linear-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                          {emp.avatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={emp.avatarUrl}
+                              alt={emp.name}
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            emp.name
+                              .split(' ')
+                              .map((n: string) => n[0])
+                              .join('')
+                              .toUpperCase()
+                              .slice(0, 2)
+                          )}
+                        </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className="font-semibold text-sm group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors truncate"
-                          style={{ color: 'var(--text-primary)' }}
-                        >
-                          {emp.name}
-                        </p>
-                        <div
-                          className="flex items-center gap-2 text-xs mt-0.5"
-                          style={{ color: 'var(--text-muted)' }}
-                        >
-                          {emp.position && <span>{emp.position}</span>}
-                          {supervisor && (
-                            <span className="text-blue-400 dark:text-blue-500">
-                              · {supervisor.name}
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className="font-semibold text-sm group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors truncate"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            {emp.name}
+                          </p>
+                          <div
+                            className="flex items-center gap-2 text-xs mt-0.5"
+                            style={{ color: 'var(--text-muted)' }}
+                          >
+                            {emp.position && <span>{emp.position}</span>}
+                            {supervisor && (
+                              <span className="text-blue-400 dark:text-blue-500">
+                                · {supervisor.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="hidden sm:flex items-center gap-4 text-center shrink-0">
+                          <div>
+                            <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                              {stats.totalDays}
+                            </p>
+                            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                              {t('attendance.days')}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-rose-500 dark:text-rose-400">
+                              {stats.lateDays}
+                            </p>
+                            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                              {t('statuses.late')}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                              {stats.totalWorkedHours}h
+                            </p>
+                            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                              {t('attendance.worked')}
+                            </p>
+                          </div>
+                          <div>
+                            <p
+                              className={`text-sm font-bold ${Number(stats.punctualityRate) >= 80 ? 'text-emerald-600 dark:text-emerald-400' : Number(stats.punctualityRate) >= 60 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'}`}
+                            >
+                              {stats.punctualityRate}%
+                            </p>
+                            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                              {t('attendance.punctuality')}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Last record badge */}
+                        <div className="shrink-0">
+                          {lastRecord?.status === t('status.checkedIn') ? (
+                            <span className="text-xs bg-green-500/20 dark:bg-green-500/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full font-medium animate-pulse">
+                              ● Active
+                            </span>
+                          ) : lastRecord?.status === t('status.checkedOut') ? (
+                            <span className="text-xs bg-blue-500/20 dark:bg-blue-500/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">
+                              Done
+                            </span>
+                          ) : (
+                            <span
+                              className="text-xs px-2 py-1 rounded-full font-medium"
+                              style={{
+                                background: 'var(--background-subtle)',
+                                color: 'var(--text-muted)',
+                              }}
+                            >
+                              —
                             </span>
                           )}
                         </div>
                       </div>
-
-                      {/* Stats */}
-                      <div className="hidden sm:flex items-center gap-4 text-center flex-shrink-0">
-                        <div>
-                          <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                            {stats.totalDays}
-                          </p>
-                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            {t('attendance.days')}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-rose-500 dark:text-rose-400">
-                            {stats.lateDays}
-                          </p>
-                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            {t('statuses.late')}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                            {stats.totalWorkedHours}h
-                          </p>
-                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            {t('attendance.worked')}
-                          </p>
-                        </div>
-                        <div>
-                          <p
-                            className={`text-sm font-bold ${Number(stats.punctualityRate) >= 80 ? 'text-emerald-600 dark:text-emerald-400' : Number(stats.punctualityRate) >= 60 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'}`}
-                          >
-                            {stats.punctualityRate}%
-                          </p>
-                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            {t('attendance.punctuality')}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Last record badge */}
-                      <div className="flex-shrink-0">
-                        {lastRecord?.status === t('status.checkedIn') ? (
-                          <span className="text-xs bg-green-500/20 dark:bg-green-500/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full font-medium animate-pulse">
-                            ● Active
-                          </span>
-                        ) : lastRecord?.status === t('status.checkedOut') ? (
-                          <span className="text-xs bg-blue-500/20 dark:bg-blue-500/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">
-                            Done
-                          </span>
-                        ) : (
-                          <span
-                            className="text-xs px-2 py-1 rounded-full font-medium"
-                            style={{
-                              background: 'var(--background-subtle)',
-                              color: 'var(--text-muted)',
-                            }}
-                          >
-                            —
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </CardContent>
@@ -536,7 +588,7 @@ export default function AttendancePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {needsRating.map(({ employee, lastRated }: any) => (
+                  {needsRating.map(({ employee, lastRated }: EmployeeNeedingRating) => (
                     <div
                       key={employee._id}
                       className="flex items-center justify-between p-3 rounded-lg border"
@@ -546,8 +598,9 @@ export default function AttendancePage() {
                       }}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold">
+                        <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-linear-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold">
                           {employee.avatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={employee.avatarUrl}
                               alt={employee.name}
@@ -557,7 +610,7 @@ export default function AttendancePage() {
                           ) : (
                             employee.name
                               .split(' ')
-                              .map((n: any) => n[0])
+                              .map((n: string) => n[0])
                               .join('')
                               .toUpperCase()
                               .slice(0, 2)
@@ -570,9 +623,11 @@ export default function AttendancePage() {
                           >
                             {employee.name}
                           </p>
-                          <p className="text-xs text-[var(--text-muted)]">
-                            {employee.position ?? employee.department ?? t('common.employee', 'Employee')} · {t('rating.lastRated', 'Last rated')}:{' '}
-                            {lastRated}
+                          <p className="text-xs text-(--text-muted)">
+                            {employee.position ??
+                              employee.department ??
+                              t('common.employee', 'Employee')}{' '}
+                            · {t('rating.lastRated', 'Last rated')}: {lastRated}
                           </p>
                         </div>
                       </div>
@@ -617,10 +672,10 @@ export default function AttendancePage() {
             <Card className="border-dashed">
               <CardContent className="p-6 text-center">
                 <UserCheck className="w-10 h-10 text-green-500 mx-auto mb-2" />
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('attendance.allEmployeesRated')}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('attendance.checkBackNextMonth')}
                 </p>
               </CardContent>

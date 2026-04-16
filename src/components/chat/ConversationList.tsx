@@ -239,7 +239,7 @@ export function ConversationList({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('chat.searchConversations')}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none transition-all"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-(--input-border) bg-(--input) text-(--text-primary) outline-none transition-all"
             onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
             onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
           />
@@ -252,7 +252,7 @@ export function ConversationList({
         <button
           onClick={() => scrollFilters('left')}
           className={cn(
-            'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all',
+            'shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all',
             canScrollLeft ? 'opacity-100 hover:opacity-70' : 'opacity-30 cursor-not-allowed',
           )}
           style={{ background: 'var(--background-subtle)' }}
@@ -310,7 +310,7 @@ export function ConversationList({
         <button
           onClick={() => scrollFilters('right')}
           className={cn(
-            'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all',
+            'shrink-0 w-6 h-6 flex items-center justify-center rounded-md transition-all',
             canScrollRight ? 'opacity-100 hover:opacity-70' : 'opacity-30 cursor-not-allowed',
           )}
           style={{ background: 'var(--background-subtle)' }}

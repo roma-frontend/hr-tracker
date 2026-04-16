@@ -9,10 +9,11 @@
 import React from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Mail, Building2, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, Mail, Building2, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { signOut } from 'next-auth/react';
 
@@ -28,16 +29,16 @@ export default function PendingApprovalPage() {
 
   const myRequests = useQuery(
     api.organizationJoinRequests.getMyJoinRequests,
-    user?.id ? { userId: user.id as any } : 'skip',
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
-  const pendingRequest = myRequests?.find((req: any) => req.status === 'pending');
-  const rejectedRequest = myRequests?.find((req: any) => req.status === 'rejected');
+  const pendingRequest = myRequests?.find((req: { status: string }) => req.status === 'pending');
+  const rejectedRequest = myRequests?.find((req: { status: string }) => req.status === 'rejected');
 
   // Check if user was approved while on this page
   React.useEffect(() => {
     if (freshUserData?.organizationId && freshUserData?.isApproved) {
-      console.log('[PendingPage] ✅ User was approved! Redirecting to dashboard...');
+      console.error('[PendingPage] ✅ User was approved! Redirecting to dashboard...');
       // Update auth store with fresh data
       setUser({
         id: freshUserData._id,
@@ -61,7 +62,7 @@ export default function PendingApprovalPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 to-orange-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">

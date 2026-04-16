@@ -455,7 +455,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
             {/* Progress bar */}
             <div className="h-0.5 rounded-t-2xl bg-muted">
               <motion.div
-                className="h-full bg-gradient-to-r from-blue-500 to-cyan-500"
+                className="h-full bg-linear-to-r from-blue-500 to-cyan-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}

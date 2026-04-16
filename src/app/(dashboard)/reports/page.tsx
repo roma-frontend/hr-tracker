@@ -179,10 +179,10 @@ export default function ReportsPage() {
             className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
           >
             <div>
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl font-bold text-(--text-primary)">
                 {t('reportsAnalytics.reportsAnalytics')}
               </h2>
-              <p className="text-[var(--text-muted)] text-sm mt-1">
+              <p className="text-(--text-muted) text-sm mt-1">
                 {t('ui.comprehensiveAnalysis')}
               </p>
             </div>
@@ -207,36 +207,36 @@ export default function ReportsPage() {
                 label: t('reports.totalRequests'),
                 value: isLoading ? '—' : totalLeaves,
                 icon: FileText,
-                color: 'text-[var(--primary)]',
-                bg: 'bg-[var(--primary)]/10',
+                color: 'text-(--primary)',
+                bg: 'bg-(--primary)/10',
               },
               {
                 label: t('reports.approvalRate'),
                 value: isLoading ? '—' : `${approvalRate}%`,
                 icon: TrendingUp,
-                color: 'text-[var(--success)]',
+                color: 'text-(--success)',
                 bg: 'bg-[var(--success)]/10',
               },
               {
                 label: t('reports.avgDuration'),
                 value: isLoading ? '—' : `${avgDays}${t('common.daysShort')}`,
                 icon: CalendarDays,
-                color: 'text-[var(--warning)]',
+                color: 'text-(--warning)',
                 bg: 'bg-[var(--warning)]/10',
               },
               {
                 label: t('organization.activeEmployees'),
                 value: isLoading ? '—' : (users?.length ?? 0),
                 icon: Users,
-                color: 'text-[var(--text-secondary)]',
-                bg: 'bg-[var(--background-subtle)]',
+                color: 'text-(--text-secondary)',
+                bg: 'bg-(--background-subtle)',
               },
             ].map((kpi) => (
               <Card key={kpi.label}>
                 <CardContent className="pt-5 pb-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
+                      <p className="text-xs text-(--text-muted) uppercase tracking-wider">
                         {kpi.label}
                       </p>
                       <p className={`text-2xl font-bold mt-1 ${kpi.color}`}>{kpi.value}</p>
@@ -258,21 +258,21 @@ export default function ReportsPage() {
               <TabsList className="w-full mb-6 gap-2 bg-transparent p-0 h-auto grid grid-cols-3">
                 <TabsTrigger
                   value="overview"
-                  className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
+                  className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-(--primary) data-[state=active]:text-white data-[state=inactive]:bg-(--background-subtle) data-[state=inactive]:hover:bg-(--background-hover) transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
                 >
                   <FileText className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t('reports.overview')} Overview</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="departments"
-                  className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
+                  className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-(--primary) data-[state=active]:text-white data-[state=inactive]:bg-(--background-subtle) data-[state=inactive]:hover:bg-(--background-hover) transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
                 >
                   <Users className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t('reportsExtended.departments')}</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="trends"
-                  className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-[var(--primary)] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] data-[state=inactive]:hover:bg-[var(--background-hover)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
+                  className="w-full px-5 py-3 rounded-xl data-[state=active]:bg-(--primary) data-[state=active]:text-white data-[state=inactive]:bg-(--background-subtle) data-[state=inactive]:hover:bg-(--background-hover) transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
                 >
                   <TrendingUp className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t('reportsExtended.trends')}</span>
@@ -284,13 +284,13 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                      <CardTitle className="text-sm text-(--text-muted) uppercase tracking-wider font-semibold">
                         {t('reportsPage.leaveDistribution')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       {pieData.length === 0 ? (
-                        <div className="h-[220px] flex items-center justify-center">
+                        <div className="h-55 flex items-center justify-center">
                           <ShieldLoader size="sm" message={t('emptyStates.noDataYet')} />
                         </div>
                       ) : (
@@ -330,7 +330,7 @@ export default function ReportsPage() {
 
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                      <CardTitle className="text-sm text-(--text-muted) uppercase tracking-wider font-semibold">
                         {t('reportsExtended.requestStatusBreakdown')}
                       </CardTitle>
                     </CardHeader>
@@ -362,13 +362,13 @@ export default function ReportsPage() {
                                 className="w-2.5 h-2.5 rounded-full"
                                 style={{ background: s.color }}
                               />
-                              <span className="text-sm text-[var(--text-secondary)]">
+                              <span className="text-sm text-(--text-secondary)">
                                 {s.label}
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant={s.variant}>{s.count}</Badge>
-                              <span className="text-xs text-[var(--text-muted)]">
+                              <span className="text-xs text-(--text-muted)">
                                 {totalLeaves > 0 ? Math.round((s.count / totalLeaves) * 100) : 0}%
                               </span>
                             </div>
@@ -380,22 +380,22 @@ export default function ReportsPage() {
                         </div>
                       ))}
 
-                      <div className="mt-6 pt-4 border-t border-[var(--border)]">
-                        <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-3">
+                      <div className="mt-6 pt-4 border-t border-(--border)">
+                        <p className="text-xs text-(--text-muted) uppercase tracking-wider mb-3">
                           {t('reports.workforceComposition')}
                         </p>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="rounded-lg bg-[var(--background-subtle)] border border-[var(--border)] p-3 text-center">
-                            <p className="text-xl font-bold text-[var(--primary)]">{staffCount}</p>
-                            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                          <div className="rounded-lg bg-(--background-subtle) border border-(--border) p-3 text-center">
+                            <p className="text-xl font-bold text-(--primary)">{staffCount}</p>
+                            <p className="text-xs text-(--text-muted) mt-0.5">
                               {t('employees.staff')}
                             </p>
                           </div>
-                          <div className="rounded-lg bg-[var(--background-subtle)] border border-[var(--border)] p-3 text-center">
-                            <p className="text-xl font-bold text-[var(--warning)]">
+                          <div className="rounded-lg bg-(--background-subtle) border border-(--border) p-3 text-center">
+                            <p className="text-xl font-bold text-(--warning)">
                               {contractorCount}
                             </p>
-                            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                            <p className="text-xs text-(--text-muted) mt-0.5">
                               {t('employees.contractors')}
                             </p>
                           </div>
@@ -411,13 +411,13 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                      <CardTitle className="text-sm text-(--text-muted) uppercase tracking-wider font-semibold">
                         {t('reports.leavesByDepartment')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       {deptData.length === 0 ? (
-                        <div className="h-[250px] flex items-center justify-center text-[var(--text-muted)] text-sm">
+                        <div className="h-62.5 flex items-center justify-center text-(--text-muted) text-sm">
                           No department data yet
                         </div>
                       ) : (
@@ -470,26 +470,26 @@ export default function ReportsPage() {
 
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                      <CardTitle className="text-sm text-(--text-muted) uppercase tracking-wider font-semibold">
                         {t('reportsExtended.departmentDetails')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       {deptData.length === 0 ? (
-                        <p className="text-xs text-[var(--text-muted)]">
+                        <p className="text-xs text-(--text-muted)">
                           {t('emptyStates.noDataYet')}
                         </p>
                       ) : (
                         deptData.map((d) => (
                           <div
                             key={d.dept}
-                            className="flex items-center justify-between py-2 border-b border-[var(--border)] last:border-0"
+                            className="flex items-center justify-between py-2 border-b border-(--border) last:border-0"
                           >
                             <div>
-                              <p className="text-sm font-medium text-[var(--text-primary)]">
+                              <p className="text-sm font-medium text-(--text-primary)">
                                 {d.fullName}
                               </p>
-                              <p className="text-xs text-[var(--text-muted)]">
+                              <p className="text-xs text-(--text-muted)">
                                 {d.total} {t('reports.totalRequests').toLowerCase()}
                               </p>
                             </div>
@@ -514,7 +514,7 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-1 gap-4">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                      <CardTitle className="text-sm text-(--text-muted) uppercase tracking-wider font-semibold">
                         {t('reportsPage.attendanceTrends')}
                       </CardTitle>
                     </CardHeader>
@@ -580,7 +580,7 @@ export default function ReportsPage() {
 
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                      <CardTitle className="text-sm text-(--text-muted) uppercase tracking-wider font-semibold">
                         {t('reportsExtended.cumulativeLeaveDays')}
                       </CardTitle>
                     </CardHeader>

@@ -35,13 +35,13 @@ export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: S
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.2 }}
-      className="bg-[var(--background)] rounded-2xl p-3 sm:p-4 shadow-lg border border-[var(--border)] relative overflow-hidden"
+      className="bg-(--background) rounded-2xl p-3 sm:p-4 shadow-lg border border-(--border) relative overflow-hidden"
     >
       <div className="relative z-10">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-[var(--text-muted)] mb-1">{title}</p>
-            <p className="text-lg sm:text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-(--text-muted) mb-1">{title}</p>
+            <p className="text-lg sm:text-2xl md:text-3xl font-bold text-(--text-primary)">
               {value}
             </p>
 
@@ -52,7 +52,7 @@ export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: S
                 >
                   {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                 </span>
-                <span className="text-xs text-[var(--text-muted)]">vs last month</span>
+                <span className="text-xs text-(--text-muted)">vs last month</span>
               </div>
             )}
           </div>

@@ -1,23 +1,13 @@
 'use client';
 
+// cspell:disable
 import { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { Id } from '@/convex/_generated/dataModel';
-import {
-  User,
-  Search,
-  Shield,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  X,
-  LogOut,
-  History,
-  Eye,
-} from 'lucide-react';
+import { User, Search, Shield, Clock, AlertTriangle, LogOut, History, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,29 +27,58 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
+interface SearchUser {
+  id: Id<'users'>;
+  name: string;
+  email: string;
+  role: string;
+  avatarUrl?: string;
+  organizationId?: string;
+}
+
+interface ImpersonationSession {
+  _id: Id<'impersonationSessions'>;
+  isActive: boolean;
+  superadminName: string;
+  targetUserName: string;
+  targetUserEmail: string;
+  organizationName: string;
+  reason: string;
+  startedAt: string | number | Date;
+  endedAt?: string | number | Date;
+  duration: number;
+  targetUser?: {
+    name: string;
+    email: string;
+  };
+  expiresAt?: string | number | Date;
+  sessionId: Id<'impersonationSessions'>;
+}
+// cspell:enable
+
 export default function ImpersonationPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<SearchUser | null>(null);
   const [startDialogOpen, setStartDialogOpen] = useState(false);
   const [reason, setReason] = useState('');
 
   const searchResults = useQuery(
     api.superadmin.searchUsersByPrefix,
     searchQuery.length >= 2 ? { prefix: searchQuery } : 'skip',
-  );
+  ) as SearchUser[] | undefined;
 
   const activeSession = useQuery(
     api.superadmin.getActiveImpersonation,
     user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  ) as ImpersonationSession | undefined;
 
   const impersonationHistory = useQuery(
     api.superadmin.getImpersonationHistory,
     user?.id ? { superadminId: user.id as Id<'users'>, limit: 20 } : 'skip',
-  );
+  ) as ImpersonationSession[] | undefined;
 
   const startImpersonation = useMutation(api.superadmin.startImpersonation);
   const endImpersonation = useMutation(api.superadmin.endImpersonation);
@@ -73,7 +92,7 @@ export default function ImpersonationPage() {
     try {
       await startImpersonation({
         superadminId: user!.id as Id<'users'>,
-        targetUserId: selectedUser.id as Id<'users'>,
+        targetUserId: selectedUser.id,
         reason: reason.trim(),
       });
 
@@ -168,8 +187,12 @@ export default function ImpersonationPage() {
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {t('superadmin.impersonate.sessionInfo.reason')}: {activeSession.reason} •{' '}
-                    {t('superadmin.impersonate.sessionInfo.expiresAt')}:{' '}
-                    {new Date(activeSession.expiresAt).toLocaleString()}
+                    {activeSession.expiresAt && (
+                      <>
+                        {t('superadmin.impersonate.sessionInfo.expiresAt')}:{' '}
+                        {new Date(activeSession.expiresAt).toLocaleString()}
+                      </>
+                    )}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
@@ -204,7 +227,7 @@ export default function ImpersonationPage() {
             {/* Search Results */}
             {searchResults && searchResults.length > 0 && (
               <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
-                {searchResults.map((u: any) => (
+                {searchResults?.map((u) => (
                   <div
                     key={u.id}
                     className="flex items-center justify-between p-3 rounded-lg border hover:border-primary/50 transition-colors"
@@ -212,11 +235,11 @@ export default function ImpersonationPage() {
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="w-10 h-10">
-                        <AvatarImage src={u.avatarUrl} />
+                        <AvatarImage src={u.avatarUrl ?? ''} />
                         <AvatarFallback>
                           {u.name
                             .split(' ')
-                            .map((n: string) => n[0])
+                            .map((n) => n[0])
                             .join('')
                             .toUpperCase()}
                         </AvatarFallback>
@@ -283,7 +306,7 @@ export default function ImpersonationPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {impersonationHistory.map((session: any) => (
+                {impersonationHistory?.map((session) => (
                   <div
                     key={session._id}
                     className="p-3 sm:p-4 rounded-lg border"
@@ -344,7 +367,7 @@ export default function ImpersonationPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-[10px] sm:text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 flex-shrink-0" />
+                            <Clock className="w-3 h-3 shrink-0" />
                             {t('impersonate.started')}{' '}
                             {new Date(session.startedAt).toLocaleString()}
                           </span>

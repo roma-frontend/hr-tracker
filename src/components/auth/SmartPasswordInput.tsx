@@ -59,7 +59,7 @@ export function SmartPasswordInput({
       <div className="flex items-center justify-between">
         <Label
           htmlFor="password"
-          className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]"
+          className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-(--text-primary)"
         >
           {label}
           {required && <span className="text-red-500">*</span>}
@@ -84,7 +84,7 @@ export function SmartPasswordInput({
       <div className="relative h-9">
         {/* Lock icon */}
         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <Lock className="w-4 h-4 text-[var(--text-muted)]" />
+          <Lock className="w-4 h-4 text-(--text-muted)" />
         </div>
 
         {/* Input field */}
@@ -111,7 +111,7 @@ export function SmartPasswordInput({
                 whileTap={{ scale: 0.9 }}
                 onClick={handleCopyPassword}
                 type="button"
-                className="p-1.5 rounded-md hover:bg-[var(--background-subtle)] transition-colors"
+                className="p-1.5 rounded-md hover:bg-(--background-subtle) transition-colors"
                 title="Копировать пароль"
               >
                 {copied ? (
@@ -134,7 +134,7 @@ export function SmartPasswordInput({
                     </svg>
                   </motion.div>
                 ) : (
-                  <Copy className="w-4 h-4 text-[var(--text-muted)]" />
+                  <Copy className="w-4 h-4 text-(--text-muted)" />
                 )}
               </motion.button>
             )}
@@ -146,7 +146,7 @@ export function SmartPasswordInput({
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowPassword(!showPassword)}
             type="button"
-            className="p-1.5 rounded-md hover:bg-[var(--background-subtle)] transition-colors"
+            className="p-1.5 rounded-md hover:bg-(--background-subtle) transition-colors"
             title={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
           >
             <AnimatePresence mode="wait">
@@ -157,7 +157,7 @@ export function SmartPasswordInput({
                   animate={{ scale: 1.1, rotate: 0 }}
                   exit={{ scale: 0, rotate: 180 }}
                 >
-                  <EyeOff className="w-4 h-4 text-[var(--text-muted)]" />
+                  <EyeOff className="w-4 h-4 text-(--text-muted)" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -166,7 +166,7 @@ export function SmartPasswordInput({
                   animate={{ scale: 1.1, rotate: 0 }}
                   exit={{ scale: 0, rotate: 180 }}
                 >
-                  <Eye className="w-4 h-4 text-[var(--text-muted)]" />
+                  <Eye className="w-4 h-4 text-(--text-muted)" />
                 </motion.div>
               )}
             </AnimatePresence>

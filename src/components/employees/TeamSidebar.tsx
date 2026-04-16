@@ -11,23 +11,20 @@ import {
   UserCheck,
   UserX,
   Briefcase,
-  Calendar,
   Award,
   TrendingUp,
   Clock,
   Star,
   Zap,
-  ChevronDown,
-  ChevronUp,
   X,
   PanelRightClose,
   PanelRightOpen,
+  ChevronUp,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { useState, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useLayoutEffect, useState } from 'react';
 
 interface TeamSidebarProps {
   userId?: Id<'users'>;
@@ -50,9 +47,9 @@ function CollapsibleSection({
   defaultIcon,
 }: CollapsibleSectionProps) {
   return (
-    <Card className="border-0 shadow-lg bg-gradient-to-br from-[var(--card)] to-[var(--background-subtle)] overflow-hidden px-3 sm:px-0">
+    <Card className="border-0 shadow-lg bg-linear-to-br from-(--card) to-(--background-subtle) overflow-hidden px-3 sm:px-0">
       <CardHeader className="pb-0 cursor-pointer" onClick={onToggle}>
-        <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider flex items-center justify-between gap-2 py-3">
+        <CardTitle className="text-sm font-semibold text-(--text-muted) uppercase tracking-wider flex items-center justify-between gap-2 py-3">
           <div className="flex items-center gap-2">{title}</div>
           <motion.div
             animate={{ rotate: isCollapsed ? 0 : 180 }}
@@ -273,7 +270,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
           setIsPanelCollapsed(newCollapsedState);
           onToggle?.(!newCollapsedState);
         }}
-        className="fixed top-34 sm:top-25 right-3 sm:right-6 z-[100] w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-lg flex items-center justify-center transition-colors"
+        className="fixed top-34 sm:top-25 right-3 sm:right-6 z-100 w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-lg flex items-center justify-center transition-colors"
         style={{
           background: 'var(--primary)',
           color: 'var(--primary-foreground)',
@@ -299,7 +296,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
               setIsPanelCollapsed(true);
               onToggle?.(false);
             }}
-            className="fixed inset-0 bg-black/60 z-[60] lg:hidden"
+            className="fixed inset-0 bg-black/60 z-60 lg:hidden"
             style={{ backdropFilter: 'blur(8px)' }}
           />
         )}
@@ -316,7 +313,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
               duration: isMobile ? 0.3 : 0.4,
               ease: isMobile ? 'easeInOut' : [0.34, 1.56, 0.64, 1],
             }}
-            className="fixed top-16 sm:top-24 right-0 sm:right-6 z-[70] w-full sm:w-64 max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-180px)] overflow-y-auto space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent lg:shadow-lg rounded-xl"
+            className="fixed top-16 sm:top-24 right-0 sm:right-6 z-70 w-full sm:w-64 max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-180px)] overflow-y-auto space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-[var(--muted-foreground)] scrollbar-track-transparent lg:shadow-lg rounded-xl"
             style={{
               background: 'var(--card)',
               boxShadow: isMobile
@@ -325,7 +322,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
             }}
           >
             {/* Кнопка закрытия для мобильных */}
-            <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-3 sm:p-0 sm:hidden border-b border-[var(--border)] bg-[var(--card)]">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-3 sm:p-0 sm:hidden border-b border-(--border) bg-(--card)">
               <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {t('employees.teamOverview')}
               </span>
@@ -334,7 +331,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                   setIsPanelCollapsed(true);
                   onToggle?.(false);
                 }}
-                className="p-2 rounded-lg hover:bg-[var(--background-subtle)]"
+                className="p-2 rounded-lg hover:bg-(--background-subtle)"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -379,14 +376,14 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                   </BizierEasingCard>
                 </div>
 
-                <div className="space-y-1.5 sm:space-y-2 pt-2 border-t border-[var(--border)]">
+                <div className="space-y-1.5 sm:space-y-2 pt-2 border-t border-(--border)">
                   <BizierEasingCard
                     index={2}
                     isExpanded={!collapsedSections.overview}
                     isMobile={isMobile}
                     className="flex items-center justify-between text-[10px] sm:text-xs"
                   >
-                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-(--text-muted) flex items-center gap-1 sm:gap-1.5">
                       <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.admin')}
                     </span>
                     <Badge
@@ -402,7 +399,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     isMobile={isMobile}
                     className="flex items-center justify-between text-[10px] sm:text-xs"
                   >
-                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-(--text-muted) flex items-center gap-1 sm:gap-1.5">
                       <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.supervisor')}
                     </span>
                     <Badge
@@ -418,7 +415,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     isMobile={isMobile}
                     className="flex items-center justify-between text-[10px] sm:text-xs"
                   >
-                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-(--text-muted) flex items-center gap-1 sm:gap-1.5">
                       <UserCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.employee')}
                     </span>
                     <Badge
@@ -435,7 +432,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                       isMobile={isMobile}
                       className="flex items-center justify-between text-[10px] sm:text-xs"
                     >
-                      <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                      <span className="text-(--text-muted) flex items-center gap-1 sm:gap-1.5">
                         <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('roles.driver')}
                       </span>
                       <Badge
@@ -448,17 +445,17 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-[var(--border)]">
+                <div className="pt-2 border-t border-(--border)">
                   <BizierEasingCard
                     index={6}
                     isExpanded={!collapsedSections.overview}
                     isMobile={isMobile}
                     className="flex items-center justify-between text-[10px] sm:text-xs"
                   >
-                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-(--text-muted) flex items-center gap-1 sm:gap-1.5">
                       <Briefcase className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t('employeeTypes.staff')}
                     </span>
-                    <span className="font-semibold text-[var(--text-primary)]">{stats.staff}</span>
+                    <span className="font-semibold text-(--text-primary)">{stats.staff}</span>
                   </BizierEasingCard>
                   <BizierEasingCard
                     index={7}
@@ -466,11 +463,11 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     isMobile={isMobile}
                     className="flex items-center justify-between text-[10px] sm:text-xs mt-1 sm:mt-1.5"
                   >
-                    <span className="text-[var(--text-muted)] flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-(--text-muted) flex items-center gap-1 sm:gap-1.5">
                       <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{' '}
                       {t('employeeTypes.contractor')}
                     </span>
-                    <span className="font-semibold text-[var(--text-primary)]">
+                    <span className="font-semibold text-(--text-primary)">
                       {stats.contractors}
                     </span>
                   </BizierEasingCard>
@@ -496,9 +493,9 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                           duration: 0.4,
                           ease: [0.34, 1.56, 0.64, 1],
                         }}
-                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-(--background-subtle) transition-colors"
                       >
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white text-[10px] sm:text-xs bg-gradient-to-br from-blue-500 to-sky-500">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold text-white text-[10px] sm:text-xs bg-linear-to-br from-blue-500 to-sky-500">
                           {emp.avatarUrl ? (
                             <img
                               src={emp.avatarUrl}
@@ -516,10 +513,10 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] sm:text-xs font-medium text-[var(--text-primary)] truncate">
+                          <p className="text-[10px] sm:text-xs font-medium text-(--text-primary) truncate">
                             {emp.name}
                           </p>
-                          <p className="text-[9px] sm:text-[10px] text-[var(--text-muted)]">
+                          <p className="text-[9px] sm:text-[10px] text-(--text-muted)">
                             {emp.position || t('common.noPosition')}
                           </p>
                         </div>
@@ -549,10 +546,10 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     transition={{ delay: 0.05, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                     className="flex items-center justify-between"
                   >
-                    <span className="text-[10px] sm:text-xs text-[var(--success)]">
+                    <span className="text-[10px] sm:text-xs text-(--success)">
                       {t('employees.supervisors')}
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-[var(--success)]">
+                    <span className="text-xs sm:text-sm font-bold text-(--success)">
                       {stats.supervisors}
                     </span>
                   </motion.div>
@@ -562,10 +559,10 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     transition={{ delay: 0.1, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                     className="flex items-center justify-between"
                   >
-                    <span className="text-[10px] sm:text-xs text-[var(--success)]">
+                    <span className="text-[10px] sm:text-xs text-(--success)">
                       {t('employees.contractors')}
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-[var(--success)]">
+                    <span className="text-xs sm:text-sm font-bold text-(--success)">
                       {stats.contractors}
                     </span>
                   </motion.div>
@@ -573,9 +570,9 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="pt-2 border-t border-[var(--border)]"
+                    className="pt-2 border-t border-(--border)"
                   >
-                    <p className="text-[9px] sm:text-[10px] text-[var(--text-muted)] text-center">
+                    <p className="text-[9px] sm:text-[10px] text-(--text-muted) text-center">
                       💡 {t('employees.teamHealthGood')}
                     </p>
                   </motion.div>

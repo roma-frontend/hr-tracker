@@ -921,17 +921,17 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-24 right-2 sm:right-6 z-50 w-[calc(100vw-1rem)] sm:w-[380px] max-h-[calc(100vh-8rem)] sm:max-h-[600px] flex flex-col rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden"
+            className="fixed bottom-24 right-2 sm:right-6 z-50 w-[calc(100vw-1rem)] sm:w-[380px] max-h-[calc(100vh-8rem)] sm:max-h-[600px] flex flex-col rounded-2xl border border-(--border) shadow-2xl overflow-hidden"
             style={{ background: 'var(--card)' }}
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] flex-shrink-0 bg-gradient-to-r from-[#2563eb]/10 to-[#0ea5e9]/10">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center shadow">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-(--border) shrink-0 bg-linear-to-r from-[#2563eb]/10 to-[#0ea5e9]/10">
+              <div className="w-8 h-8 rounded-xl bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center shadow">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[var(--text-primary)]">Shield HR AI</p>
-                <p className="text-[10px] text-[var(--text-muted)]">
+                <p className="text-sm font-semibold text-(--text-primary)">Shield HR AI</p>
+                <p className="text-[10px] text-(--text-muted)">
                   {t('chatWidget.subtitle', { defaultValue: 'Your intelligent HR assistant' })}
                 </p>
               </div>
@@ -941,18 +941,18 @@ export function ChatWidget() {
                     router.push('/ai-chat');
                     setIsOpen(false);
                   }}
-                  className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
                   aria-label="Open full screen chat"
                   title="Открыть на весь экран"
                 >
-                  <Maximize2 className="w-4 h-4 text-[var(--text-muted)]" />
+                  <Maximize2 className="w-4 h-4 text-(--text-muted)" />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
                   aria-label={t('chatWidget.closeChat', { defaultValue: 'Close chat' })}
                 >
-                  <X className="w-4 h-4 text-[var(--text-muted)]" />
+                  <X className="w-4 h-4 text-(--text-muted)" />
                 </button>
               </div>
             </div>
@@ -966,10 +966,10 @@ export function ChatWidget() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-3"
                 >
-                  <p className="text-xs text-[var(--text-muted)] text-center mb-1">
+                  <p className="text-xs text-(--text-muted) text-center mb-1">
                     👋 {t('chatWidget.greeting', { name: user?.name?.split(' ')[0] || 'there' })}
                   </p>
-                  <p className="text-[10px] text-[var(--text-muted)]/70 text-center mb-2">
+                  <p className="text-[10px] text-(--text-muted)/70 text-center mb-2">
                     💡{' '}
                     {t('chatWidget.smartHint', {
                       defaultValue: 'I know everything about Shield HR — ask me anything!',
@@ -981,7 +981,7 @@ export function ChatWidget() {
                         key={s}
                         onClick={() => handleSuggestion(s)}
                         disabled={isLoading}
-                        className="text-left px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] hover:border-[#2563eb]/50 hover:bg-[#2563eb]/5 hover:text-[#2563eb] text-xs text-[var(--text-primary)] transition-all duration-150 disabled:opacity-50"
+                        className="text-left px-3 py-2 rounded-xl border border-(--border) bg-(--background-subtle) hover:border-[#2563eb]/50 hover:bg-[#2563eb]/5 hover:text-[#2563eb] text-xs text-(--text-primary) transition-all duration-150 disabled:opacity-50"
                       >
                         {s}
                       </button>
@@ -1001,8 +1001,8 @@ export function ChatWidget() {
                       <div
                         className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                           isUser
-                            ? 'bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] text-white rounded-br-sm'
-                            : 'bg-[var(--background-subtle)] text-[var(--text-primary)] rounded-bl-sm'
+                            ? 'bg-linear-to-br from-[#2563eb] to-[#0ea5e9] text-white rounded-br-sm'
+                            : 'bg-(--background-subtle) text-(--text-primary) rounded-bl-sm'
                         }`}
                       >
                         {m.content}
@@ -1032,7 +1032,7 @@ export function ChatWidget() {
                                         : 'border-[#2563eb]/20 bg-[#2563eb]/5'
                                 }`}
                               >
-                                <div className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
+                                <div className="flex items-center gap-2 font-semibold text-(--text-primary)">
                                   {isDelete ? (
                                     <Trash2 className="w-3.5 h-3.5 text-red-500" />
                                   ) : isEdit ? (
@@ -1052,7 +1052,7 @@ export function ChatWidget() {
                                             (action as BookLeaveAction).leaveType
                                           ] ?? t('chatWidget.leaveRequest'))}
                                 </div>
-                                <div className="text-[var(--text-muted)] space-y-0.5">
+                                <div className="text-(--text-muted) space-y-0.5">
                                   {isBookDriver ? (
                                     <>
                                       <p>🚗 {(action as BookDriverAction).driverName}</p>
@@ -1104,10 +1104,10 @@ export function ChatWidget() {
                                     onClick={() => handleAction(m.id, action, idx)}
                                     className={`w-full py-2 px-3 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity ${
                                       isDelete
-                                        ? 'bg-gradient-to-r from-red-500 to-red-600'
+                                        ? 'bg-linear-to-r from-red-500 to-red-600'
                                         : isEdit
-                                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
-                                          : 'bg-gradient-to-r from-[#2563eb] to-[#0ea5e9]'
+                                          ? 'bg-linear-to-r from-yellow-500 to-orange-500'
+                                          : 'bg-linear-to-r from-[#2563eb] to-[#0ea5e9]'
                                     }`}
                                   >
                                     {isDelete
@@ -1120,14 +1120,14 @@ export function ChatWidget() {
                                 {state.status === 'loading' && (
                                   <div className="flex items-center justify-center gap-2 py-2">
                                     <ShieldLoader size="xs" variant="inline" />
-                                    <span className="text-xs text-[var(--text-muted)]">
+                                    <span className="text-xs text-(--text-muted)">
                                       {t('chatWidget.submitting')}
                                     </span>
                                   </div>
                                 )}
                                 {state.status === 'booked' && (
                                   <div className="flex items-start gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
-                                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
                                     <p className="text-xs text-green-600 dark:text-green-400">
                                       {state.result}
                                     </p>
@@ -1135,7 +1135,7 @@ export function ChatWidget() {
                                 )}
                                 {state.status === 'conflict' && (
                                   <div className="flex items-start gap-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20">
-                                    <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                                     <div className="flex-1">
                                       <p className="text-xs text-red-600 dark:text-red-400 whitespace-pre-line">
                                         {state.result}
@@ -1234,9 +1234,9 @@ export function ChatWidget() {
               {/* Loading indicator */}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-[var(--background-subtle)] px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2">
+                  <div className="bg-(--background-subtle) px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2">
                     <ShieldLoader size="xs" variant="inline" />
-                    <span className="text-xs text-[var(--text-muted)]">
+                    <span className="text-xs text-(--text-muted)">
                       {t('chatWidget.thinking', { defaultValue: 'Thinking...' })}
                     </span>
                   </div>
@@ -1248,7 +1248,7 @@ export function ChatWidget() {
 
             {/* Error */}
             {error && (
-              <div className="px-4 py-2 bg-red-500/10 border-t border-red-500/20 flex-shrink-0">
+              <div className="px-4 py-2 bg-red-500/10 border-t border-red-500/20 shrink-0">
                 <p className="text-xs text-red-500">⚠️ {error}</p>
               </div>
             )}
@@ -1256,7 +1256,7 @@ export function ChatWidget() {
             {/* Input */}
             <form
               onSubmit={handleSubmit}
-              className="p-4 border-t border-[var(--border)] flex-shrink-0"
+              className="p-4 border-t border-(--border) shrink-0"
             >
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -1267,10 +1267,10 @@ export function ChatWidget() {
                     placeholder={
                       isListening ? t('chatWidget.listening') : t('chatWidget.placeholder')
                     }
-                    className={`w-full px-4 py-2 pr-10 bg-[var(--input)] border rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-sm transition-colors ${
+                    className={`w-full px-4 py-2 pr-10 bg-(--input) border rounded-xl text-(--text-primary) placeholder:text-(--text-muted) focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-sm transition-colors ${
                       isListening
                         ? 'border-[#2563eb] ring-2 ring-[#2563eb]/30'
-                        : 'border-[var(--border)]'
+                        : 'border-(--border)'
                     }`}
                     disabled={isLoading}
                     onKeyDown={(e) => {
@@ -1288,7 +1288,7 @@ export function ChatWidget() {
                     className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors disabled:opacity-50 ${
                       isListening
                         ? 'text-[#2563eb] animate-pulse'
-                        : 'text-[var(--text-muted)] hover:text-[#2563eb]'
+                        : 'text-(--text-muted) hover:text-[#2563eb]'
                     }`}
                   >
                     {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -1297,7 +1297,7 @@ export function ChatWidget() {
                 <Button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] hover:opacity-90 disabled:opacity-50"
+                  className="bg-linear-to-br from-[#2563eb] to-[#0ea5e9] hover:opacity-90 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <ShieldLoader size="xs" variant="inline" />

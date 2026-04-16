@@ -99,7 +99,7 @@ const RequestItem = memo(function RequestItem({
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/30 transition-all duration-300 hover:shadow-lg hover:translate-x-1"
+      className="p-4 rounded-xl border border-(--border) bg-(--card) hover:border-(--primary)/30 transition-all duration-300 hover:shadow-lg hover:translate-x-1"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -125,12 +125,12 @@ const RequestItem = memo(function RequestItem({
               </Badge>
             </div>
             {request.startTime && (
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-(--text-muted)">
                 {format(new Date(request.startTime), 'MMM dd, HH:mm')}
               </p>
             )}
             {request.assignedDriver && (
-              <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              <p className="text-xs text-(--text-muted) mt-1 flex items-center gap-1">
                 <Car className="w-3 h-3" />
                 {request.assignedDriver.userName}
               </p>
@@ -206,11 +206,11 @@ const RecurringTripItem = memo(function RecurringTripItem({
   const activeDays = trip.days.map((d) => dayNames[d - 1]).join(', ');
 
   return (
-    <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)]">
+    <div className="p-4 rounded-xl border border-(--border) bg-(--card)">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Repeat className="w-4 h-4 text-[var(--primary)]" />
+            <Repeat className="w-4 h-4 text-(--primary)" />
             <p className="font-medium text-sm">
               {trip.tripInfo.from} → {trip.tripInfo.to}
             </p>
@@ -220,7 +220,7 @@ const RecurringTripItem = memo(function RecurringTripItem({
                 : t('driver.status.inactive', 'Inactive')}
             </Badge>
           </div>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-(--text-muted)">
             {activeDays} · {trip.startTime} - {trip.endTime}
           </p>
         </div>
@@ -264,11 +264,11 @@ export const MyRequestsSection = memo(function MyRequestsSection({
   const [activeTab, setActiveTab] = useState('active');
 
   return (
-    <Card className="mb-6 sm:mb-8 border-[var(--border)]">
+    <Card className="mb-6 sm:mb-8 border-(--border)">
       <CardHeader>
         <div>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Clock className="w-5 h-5 text-[var(--primary)]" />
+            <Clock className="w-5 h-5 text-(--primary)" />
             {t('driver.myRequests', 'My Driver Requests')}
           </CardTitle>
           <CardDescription>
@@ -306,7 +306,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
                 />
               ))
             ) : (
-              <div className="text-center py-8 text-[var(--text-muted)]">
+              <div className="text-center py-8 text-(--text-muted)">
                 <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>{t('driver.noActiveRequests', 'No active requests')}</p>
               </div>
@@ -324,7 +324,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
                 />
               ))
             ) : (
-              <div className="text-center py-8 text-[var(--text-muted)]">
+              <div className="text-center py-8 text-(--text-muted)">
                 <History className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>{t('driver.noHistory', 'No history yet')}</p>
               </div>
@@ -342,7 +342,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
                 />
               ))
             ) : (
-              <div className="text-center py-8 text-[var(--text-muted)]">
+              <div className="text-center py-8 text-(--text-muted)">
                 <Repeat className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>{t('driver.noRecurringTrips', 'No recurring trips')}</p>
               </div>

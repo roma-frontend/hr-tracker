@@ -70,7 +70,7 @@ function StatusBadge({
 
 export function SubscriptionPlanCard() {
   const { t } = useTranslation();
-  const { subscription, isLoading, plan, isTrialing, isPastDue, trialDaysLeft, periodDaysLeft } =
+  const { subscription, isLoading, plan, isTrialing, isPastDue, trialDaysLeft } =
     useSubscription();
 
   const { features } = usePlanFeatures();
@@ -105,7 +105,7 @@ export function SubscriptionPlanCard() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-[var(--primary)]" />
+            <CreditCard className="w-4 h-4 text-(--primary)" />
             <CardTitle className="text-base">{t('billing.subscriptionPlan')}</CardTitle>
           </div>
           <CardDescription>{t('billing.currentPlanFeatures')}</CardDescription>
@@ -113,8 +113,8 @@ export function SubscriptionPlanCard() {
         <CardContent className="space-y-5">
           {isLoading ? (
             <div className="space-y-3">
-              <div className="h-10 bg-[var(--background-subtle)] animate-pulse rounded-lg" />
-              <div className="h-4 bg-[var(--background-subtle)] animate-pulse rounded w-2/3" />
+              <div className="h-10 bg-(--background-subtle) animate-pulse rounded-lg" />
+              <div className="h-4 bg-(--background-subtle) animate-pulse rounded w-2/3" />
             </div>
           ) : (
             <>
@@ -122,15 +122,15 @@ export function SubscriptionPlanCard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`p-2 rounded-xl bg-[var(--background-subtle)] ${PLAN_COLORS[plan] ?? 'text-indigo-500'}`}
+                    className={`p-2 rounded-xl bg-(--background-subtle) ${PLAN_COLORS[plan] ?? 'text-indigo-500'}`}
                   >
                     {PLAN_ICONS[plan] ?? <Zap className="w-5 h-5" />}
                   </div>
                   <div>
-                    <p className="font-bold text-[var(--text-primary)] text-lg leading-tight">
+                    <p className="font-bold text-(--text-primary) text-lg leading-tight">
                       {PLAN_LABELS[plan]}
                     </p>
-                    <p className="text-sm text-[var(--text-muted)]">{PLAN_PRICES[plan]}</p>
+                    <p className="text-sm text-(--text-muted)">{PLAN_PRICES[plan]}</p>
                   </div>
                 </div>
                 <StatusBadge status={subscription?.status ?? null} isTrialing={isTrialing} />
@@ -139,7 +139,7 @@ export function SubscriptionPlanCard() {
               {/* Trial info */}
               {isTrialing && trialDaysLeft !== null && (
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm">
-                  <Clock className="w-4 h-4 flex-shrink-0" />
+                  <Clock className="w-4 h-4 shrink-0" />
                   <span
                     dangerouslySetInnerHTML={{
                       __html: t('billing.trialDaysRemaining', {
@@ -153,7 +153,7 @@ export function SubscriptionPlanCard() {
               {/* Past due warning */}
               {isPastDue && (
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{t('billing.paymentFailed')}</span>
                 </div>
               )}
@@ -161,7 +161,7 @@ export function SubscriptionPlanCard() {
               {/* Cancel at period end */}
               {subscription?.cancelAtPeriodEnd && periodEndStr && (
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-sm">
-                  <RefreshCw className="w-4 h-4 flex-shrink-0" />
+                  <RefreshCw className="w-4 h-4 shrink-0" />
                   <span
                     dangerouslySetInnerHTML={{
                       __html: t('billing.cancelsOn', { date: periodEndStr }),
@@ -172,20 +172,20 @@ export function SubscriptionPlanCard() {
 
               {/* Features list */}
               <div className="space-y-2">
-                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                <p className="text-xs text-(--text-muted) uppercase tracking-wider font-semibold">
                   {t('billing.includedInPlan')}
                 </p>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {featureList.map(({ label, enabled }) => (
                     <li key={label} className="flex items-center gap-2 text-sm">
                       <CheckCircle
-                        className={`w-4 h-4 flex-shrink-0 ${enabled ? 'text-[var(--success)]' : 'text-[var(--border)] opacity-40'}`}
+                        className={`w-4 h-4 shrink-0 ${enabled ? 'text-(--success)' : 'text-(--border) opacity-40'}`}
                       />
                       <span
                         className={
                           enabled
-                            ? 'text-[var(--text-secondary)]'
-                            : 'text-[var(--text-muted)] line-through opacity-50'
+                            ? 'text-(--text-secondary)'
+                            : 'text-(--text-muted) line-through opacity-50'
                         }
                       >
                         {label}
@@ -197,10 +197,10 @@ export function SubscriptionPlanCard() {
 
               {/* Upgrade CTA */}
               {plan !== 'enterprise' && (
-                <div className="pt-2 border-t border-[var(--border)]">
+                <div className="pt-2 border-t border-(--border)">
                   <button
                     onClick={() => setModalOpen(true)}
-                    className="flex items-center gap-2 text-sm font-semibold text-[var(--primary)] hover:underline"
+                    className="flex items-center gap-2 text-sm font-semibold text-(--primary) hover:underline"
                   >
                     <Zap className="w-4 h-4" />
                     {t('billing.upgradeYourPlan')}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { Star, Car, User, X } from 'lucide-react';
+import { Star, Car, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -68,11 +68,11 @@ export function RatingModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="w-full max-w-md bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden"
+        className="w-full max-w-md bg-(--card) rounded-2xl border border-(--border) shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative p-6 bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80">
+        <div className="relative p-6 bg-linear-to-r from-(--primary) to-(--primary)/80">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
@@ -101,16 +101,16 @@ export function RatingModal({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Trip Info */}
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--background-subtle)]">
-            <Car className="w-4 h-4 text-[var(--primary)] shrink-0" />
-            <span className="text-sm text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-(--background-subtle)">
+            <Car className="w-4 h-4 text-(--primary) shrink-0" />
+            <span className="text-sm text-(--text-muted)">
               {tripInfo.from} → {tripInfo.to}
             </span>
           </div>
 
           {/* Star Rating */}
           <div className="text-center space-y-3">
-            <p className="text-sm font-medium text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-(--text-primary)">
               {t('driver.howWasTrip', 'How was your trip?')}
             </p>
             <div className="flex items-center justify-center gap-1">
@@ -127,7 +127,7 @@ export function RatingModal({
                     className={`w-10 h-10 transition-all duration-200 ${
                       star <= (hoveredRating || rating)
                         ? 'fill-yellow-400 text-yellow-400 drop-shadow-lg'
-                        : 'fill-[var(--border)] text-[var(--border)]'
+                        : 'fill-(--border) text-(--border)'
                     }`}
                   />
                 </button>
@@ -140,7 +140,7 @@ export function RatingModal({
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
-                  className="text-sm font-medium text-[var(--primary)]"
+                  className="text-sm font-medium text-(--primary)"
                 >
                   {ratingLabels[ratingKey]}
                 </motion.p>
@@ -150,14 +150,14 @@ export function RatingModal({
 
           {/* Comment */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--text-primary)]">
+            <label className="text-sm font-medium text-(--text-primary)">
               {t('driver.comment', 'Comment')} ({t('driver.optional', 'Optional')})
             </label>
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder={t('driver.commentPlaceholder', 'Tell us about your experience...')}
-              className="resize-none border-[var(--border)] bg-[var(--input)]"
+              className="resize-none border-(--border) bg-(--input)"
               rows={3}
             />
           </div>

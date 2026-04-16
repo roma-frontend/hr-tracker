@@ -68,7 +68,7 @@ export default function ContactPage() {
         plan: 'enterprise',
       });
       setSent(true);
-    } catch (e: any) {
+    } catch (_e) {
       setError(t('errors.somethingWentWrong'));
     } finally {
       setLoading(false);
@@ -82,9 +82,9 @@ export default function ContactPage() {
 
       {/* Background glows */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/8 rounded-full blur-[140px]" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/8 rounded-full blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyan-600/4 rounded-full blur-[160px]" />
+        <div className="absolute top-0 left-1/4 w-150 h-150 bg-blue-600/8 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 right-1/4 w-125 h-125 bg-indigo-600/8 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-cyan-600/4 rounded-full blur-[160px]" />
       </div>
 
       {/* Grid pattern */}
@@ -132,7 +132,7 @@ export default function ContactPage() {
                   className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card/50 backdrop-blur-xl"
                 >
                   <div
-                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                     style={{
                       background:
                         'linear-gradient(135deg, rgba(56,189,248,0.2), rgba(99,102,241,0.1))',
@@ -183,7 +183,7 @@ export default function ContactPage() {
             <div className="relative rounded-3xl border border-border/80 overflow-hidden bg-card/90 dark:bg-card/70 backdrop-blur-xl shadow-xl">
               {/* Top accent */}
               <div
-                className="h-[1px]"
+                className="h-px"
                 style={{
                   background:
                     'linear-gradient(90deg, transparent, rgba(56,189,248,0.4), rgba(99,102,241,0.4), transparent)',
@@ -296,13 +296,13 @@ export default function ContactPage() {
                         rows={4}
                         value={form.message}
                         onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                        className="w-full bg-transparent text-foreground placeholder-muted-foreground/50 text-sm outline-none resize-none font-medium min-h-[100px]"
+                        className="w-full bg-transparent text-foreground placeholder-muted-foreground/50 text-sm outline-none resize-none font-medium min-h-25"
                       />
                     </Field>
 
                     {error && (
                       <p className="text-destructive text-sm flex items-center gap-2">
-                        <span className="w-1 h-1 rounded-full bg-destructive flex-shrink-0" />
+                        <span className="w-1 h-1 rounded-full bg-destructive shrink-0" />
                         {error}
                       </p>
                     )}

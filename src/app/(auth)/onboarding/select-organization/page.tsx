@@ -12,13 +12,21 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Building2, Search, CheckCircle2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+
+interface Organization {
+  _id: Id<'organizations'>;
+  name: string;
+  slug: string;
+  industry?: string;
+  logoUrl?: string;
+  country?: string;
+}
 
 export default function SelectOrganizationPage() {
   const { t } = useTranslation();
@@ -30,24 +38,10 @@ export default function SelectOrganizationPage() {
     user?.email ? { email: user.email } : 'skip',
   );
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('[SelectOrganization] user:', {
-      id: user?.id,
-      email: user?.email,
-      organizationId: user?.organizationId,
-      isApproved: user?.isApproved,
-    });
-    console.log('[SelectOrganization] freshUserData from Convex:', freshUserData);
-  }, [user, freshUserData]);
-
   // Redirect if user already has organization and is approved (check BOTH store and fresh Convex data)
   React.useEffect(() => {
     // Check fresh data from Convex first (more reliable than store)
     if (freshUserData?.organizationId && freshUserData?.isApproved) {
-      console.log(
-        '[SelectOrganization] ✅ Fresh Convex data shows user is approved - redirecting to dashboard',
-      );
       // Update auth store with fresh data
       setUser({
         id: freshUserData._id,
@@ -66,12 +60,8 @@ export default function SelectOrganizationPage() {
       return;
     }
 
-    // Fallback to store data
+    // Sallback to store data
     if (user?.organizationId && user?.isApproved) {
-      console.log(
-        '[SelectOrganization] ✅ Store data shows user is approved - redirecting to dashboard',
-      );
-
       // Check for callback URL
       const params = new URLSearchParams(window.location.search);
       const nextUrl = params.get('next');
@@ -80,70 +70,41 @@ export default function SelectOrganizationPage() {
     }
   }, [user, freshUserData, setUser]);
 
-  const organizations = useQuery(api.organizationJoinRequests.getActiveOrganizations);
+  const organizations = useQuery(api.organizationJoinRequests.getActiveOrganizations) as
+    | Organization[]
+    | undefined;
   const requestJoin = useMutation(api.organizationJoinRequests.requestJoinOrganization);
-  // Skip getMyRequests query to avoid rendering issues - user can see pending status after redirect
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isRequesting, setIsRequesting] = useState<Id<'organizations'> | null>(null);
 
   const filteredOrgs = organizations?.filter(
-    (org: any) =>
+    (org) =>
       org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       org.slug.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // Debug logging
-  console.log('[SelectOrganizationPage] Render:', {
-    user,
-    organizations,
-    filteredOrgs,
-    hasUser: !!user,
-    hasOrgs: !!organizations,
-    orgsCount: organizations?.length,
-    filteredCount: filteredOrgs?.length,
-    userId: user?.id,
-    user_id: user?.id,
-    buttonShouldBeDisabled: !user?.id,
-  });
-
   const handleRequestJoin = async (organizationId: Id<'organizations'>) => {
-    console.log('[handleRequestJoin] Called with organizationId:', organizationId);
-    console.log('[handleRequestJoin] user:', { id: user?.id, email: user?.email });
-
     if (!user?.id) {
-      console.error('[handleRequestJoin] No user ID!');
-      toast.error('User not loaded. Please try again.');
       return;
     }
 
     setIsRequesting(organizationId);
     try {
-      console.log(
-        '[handleRequestJoin] Sending request with userId:',
-        user.id,
-        'organizationId:',
-        organizationId,
-      );
-
       await requestJoin({
         userId: user.id as Id<'users'>,
         organizationId,
       });
 
-      console.log('[handleRequestJoin] Request successful!');
-      toast.success(t('onboarding.requestSent', 'Request sent!'));
       window.location.href = '/onboarding/pending';
-    } catch (error: any) {
-      console.error('[handleRequestJoin] Error:', error);
-      toast.error(error.message || t('onboarding.requestFailed', 'Failed to send request'));
+    } catch (_error) {
     } finally {
       setIsRequesting(null);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="w-full">
         {/* Header */}
         <div className="text-center mb-8">
@@ -197,8 +158,9 @@ export default function SelectOrganizationPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       {/* Logo */}
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
+                      <div className="w-12 h-12 rounded-lg bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
                         {org.logoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={org.logoUrl}
                             alt={org.name}
@@ -237,7 +199,6 @@ export default function SelectOrganizationPage() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('[Button onClick] Clicked!', { orgId: org._id, user });
                         handleRequestJoin(org._id);
                       }}
                       disabled={isRequesting === org._id || !user?.id}

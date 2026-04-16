@@ -48,7 +48,7 @@ export const RequestCard = memo(function RequestCard({
   onRate,
 }: RequestCardProps) {
   return (
-    <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/30 transition-all duration-300 hover:shadow-lg hover:translate-x-1">
+    <div className="p-4 rounded-xl border border-(--border) bg-(--card) hover:border-(--primary)/30 transition-all duration-300 hover:shadow-lg hover:translate-x-1">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div
@@ -74,13 +74,13 @@ export const RequestCard = memo(function RequestCard({
               </Badge>
             </div>
             {request.startTime && (
-              <p className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+              <p className="text-xs text-(--text-muted) flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {format(new Date(request.startTime), 'MMM dd, HH:mm')}
               </p>
             )}
             {request.assignedDriver && (
-              <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              <p className="text-xs text-(--text-muted) mt-1 flex items-center gap-1">
                 <Car className="w-3 h-3" />
                 {request.assignedDriver.userName}
               </p>

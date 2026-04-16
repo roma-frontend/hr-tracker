@@ -39,11 +39,11 @@ export function LeaveRequestModal({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xl p-0 overflow-hidden gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-[var(--border)]">
-          <DialogTitle className="text-xl font-bold text-[var(--text-primary)]">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-(--border)">
+          <DialogTitle className="text-xl font-bold text-(--text-primary)">
             🏖️ {t('leaveRequest.newLeaveRequest', 'New Leave Request')}
           </DialogTitle>
-          <DialogDescription className="text-sm text-[var(--text-muted)]">
+          <DialogDescription className="text-sm text-(--text-muted)">
             {isSuperadmin
               ? t('leaveRequest.adminDesc', 'Submit a leave request for an employee')
               : t('leaveRequest.selfDesc', 'Submit a leave request for yourself')}

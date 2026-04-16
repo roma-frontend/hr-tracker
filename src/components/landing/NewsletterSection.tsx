@@ -69,7 +69,7 @@ export default function NewsletterSection() {
       >
         {/* Background glow */}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-blue-600/15 to-slate-400/10 rounded-3xl blur-3xl"
+          className="absolute inset-0 bg-linear-to-r from-blue-500/15 via-blue-600/15 to-slate-400/10 rounded-3xl blur-3xl"
           aria-hidden="true"
         />
 
@@ -82,12 +82,12 @@ export default function NewsletterSection() {
         >
           {/* Static orb — CSS pulse instead of JS animate */}
           <div
-            className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br from-blue-500/25 to-blue-600/20 blur-3xl orb-pulse-1"
+            className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-linear-to-br from-blue-500/25 to-blue-600/20 blur-3xl orb-pulse-1"
             aria-hidden="true"
           />
 
           {/* Icon — CSS float */}
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 mb-6 animate-float">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 mb-6 animate-float">
             <Mail size={28} style={{ color: '#ffffff' }} />
           </div>
 

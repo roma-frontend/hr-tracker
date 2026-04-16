@@ -41,20 +41,20 @@ export function TeamPresence() {
     <div className="px-2 py-3">
       <div className="mb-3 px-2 flex items-center justify-between">
         <div>
-          <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+          <h3 className="text-xs font-semibold text-(--text-muted)">
             {t('quickStats.teamOnline')}
           </h3>
-          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+          <p className="text-[10px] text-(--text-muted) mt-0.5">
             {onlineCount} {onlineCount === 1 ? t('quickStats.member') : t('quickStats.members')}{' '}
             active
           </p>
         </div>
-        <Users className="w-4 h-4 text-[var(--text-muted)]" />
+        <Users className="w-4 h-4 text-(--text-muted)" />
       </div>
 
       {teamMembers.length === 0 ? (
         <div className="text-center py-4">
-          <p className="text-xs text-[var(--text-muted)]">{t('quickStats.noTeamMembersOnline')}</p>
+          <p className="text-xs text-(--text-muted)">{t('quickStats.noTeamMembersOnline')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -72,7 +72,7 @@ export function TeamPresence() {
             return (
               <div
                 key={member._id}
-                className="flex items-center gap-3 rounded-lg p-2 transition-all hover:bg-[var(--background-subtle)]"
+                className="flex items-center gap-3 rounded-lg p-2 transition-all hover:bg-(--background-subtle)"
               >
                 <div className="relative">
                   <Avatar className="h-8 w-8">
@@ -88,10 +88,10 @@ export function TeamPresence() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                  <p className="text-sm font-medium text-(--text-primary) truncate">
                     {member.name}
                   </p>
-                  <p className="text-[10px] text-[var(--text-muted)] truncate">
+                  <p className="text-[10px] text-(--text-muted) truncate">
                     {member.department || member.role}
                   </p>
                 </div>

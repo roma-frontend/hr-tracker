@@ -54,14 +54,14 @@ function FAQItem({ faq, delay }: { faq: FAQ; delay: number }) {
         aria-controls={`faq-answer-${faq.id}`}
       >
         <span
-          className="font-semibold text-lg pr-4 transition-colors hover:text-[var(--primary)]"
+          className="font-semibold text-lg pr-4 transition-colors hover:text-(--primary)"
           style={{ color: 'var(--landing-text-primary)' }}
         >
           {t(faq.questionKey)}
         </span>
         {/* CSS rotate instead of motion.div */}
         <div
-          className="flex-shrink-0 w-8 h-8 rounded-lg transition-colors flex items-center justify-center mt-1"
+          className="shrink-0 w-8 h-8 rounded-lg transition-colors flex items-center justify-center mt-1"
           style={{
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), background-color 0.3s',
@@ -160,7 +160,7 @@ export default function FAQSection() {
           </p>
           <a
             href="mailto:support@hroffice.io"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border transition-all font-medium hover:bg-[var(--card-hover)] hover:text-[var(--primary)]"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border transition-all font-medium hover:bg-[var(--card-hover)] hover:text-(--primary)"
             style={{
               backgroundColor: 'var(--landing-card-bg)',
               borderColor: 'var(--landing-card-border)',

@@ -315,7 +315,7 @@ export function NewConversationModal({
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder={t('chat.groupName')}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-(--input-border) bg-(--input) text-(--text-primary) outline-none"
               onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
               onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
             />

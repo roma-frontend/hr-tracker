@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -37,13 +37,13 @@ const passwordStrength = (pwd: string) => {
 };
 
 const STRENGTH_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#10b981'];
-const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
+const _STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
 
 export default function CreateStarterOrgPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuthStore();
+  const { login: _login } = useAuthStore();
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,25 +60,7 @@ export default function CreateStarterOrgPage() {
 
   const createStarterOrg = useMutation(api.organizationRequests.createStarterOrganization);
 
-  const plan = searchParams.get('plan');
-
-  useEffect(() => {
-    if (plan !== 'starter') {
-      router.push('/register-org');
-    }
-  }, [plan, router]);
-
-  // Auto-generate slug from org name
-  useEffect(() => {
-    if (formData.orgName && !formData.slug) {
-      const slug = formData.orgName
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 30);
-      setFormData((prev) => ({ ...prev, slug }));
-    }
-  }, [formData.orgName, formData.slug]);
+  const _plan = searchParams.get('plan');
 
   const strength = passwordStrength(formData.password);
 
@@ -102,7 +84,7 @@ export default function CreateStarterOrgPage() {
         const hashedPassword = await bcrypt.hash(formData.password, 10);
 
         // Create organization
-        const result = await createStarterOrg({
+        await createStarterOrg({
           name: formData.orgName,
           slug: formData.slug,
           email: formData.email,
@@ -120,16 +102,17 @@ export default function CreateStarterOrgPage() {
         setTimeout(() => {
           router.push('/login?message=Organization created! Please log in.');
         }, 1500);
-      } catch (err: any) {
-        setError(err.message || 'Failed to create organization');
-        toast.error(err.message || 'Failed to create organization');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to create organization';
+        setError(message);
+        toast.error(message);
       }
     });
   };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center"
+      className="min-h-screen flex items-center justify-center p-6"
       style={{ background: 'var(--background)' }}
     >
       {/* Background blobs */}
@@ -156,10 +139,7 @@ export default function CreateStarterOrgPage() {
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #10b981, #22c55e)' }}
-            >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90  transition-opacity">
               <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -180,12 +160,20 @@ export default function CreateStarterOrgPage() {
                 {t('register.orgNameLabel')}
               </label>
               <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <input
                   type="text"
                   required
                   value={formData.orgName}
-                  onChange={(e) => setFormData((p) => ({ ...p, orgName: e.target.value }))}
+                  onChange={(e) => {
+                    const orgName = e.target.value;
+                    const slug = orgName
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s-]/g, '')
+                      .replace(/\s+/g, '-')
+                      .substring(0, 30);
+                    setFormData((p) => ({ ...p, orgName, slug }));
+                  }}
                   placeholder={t('placeholders.acmeInc')}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
@@ -205,7 +193,7 @@ export default function CreateStarterOrgPage() {
                 {t('register.orgUrlLabel')}
               </label>
               <div className="relative">
-                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <input
                   type="text"
                   required
@@ -239,7 +227,7 @@ export default function CreateStarterOrgPage() {
                   {t('register.yourNameLabel')}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
                     type="text"
                     required
@@ -264,7 +252,7 @@ export default function CreateStarterOrgPage() {
                   {t('auth.email')}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
                     type="email"
                     required
@@ -291,7 +279,7 @@ export default function CreateStarterOrgPage() {
                   {t('register.phoneOptional')}
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
                     type="tel"
                     value={formData.phone}
@@ -337,7 +325,7 @@ export default function CreateStarterOrgPage() {
                 {t('register.industryOptional')}
               </label>
               <div className="relative">
-                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <input
                   type="text"
                   value={formData.industry}
@@ -361,7 +349,7 @@ export default function CreateStarterOrgPage() {
                 {t('auth.password')}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted) pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -441,19 +429,15 @@ export default function CreateStarterOrgPage() {
                 className="flex items-center gap-2 p-3 rounded-xl text-sm"
                 style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
               >
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}
               </motion.div>
             )}
 
             {/* Submit */}
-            <motion.button
+            <button
               type="submit"
-              disabled={isPending}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
-              style={{ background: 'linear-gradient(135deg, #10b981, #22c55e)' }}
+              className="w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90  transition-opacity"
             >
               {isPending ? (
                 <>
@@ -465,7 +449,7 @@ export default function CreateStarterOrgPage() {
                   <CheckCircle2 className="w-4 h-4" /> {t('register.createFreeOrg')}
                 </>
               )}
-            </motion.button>
+            </button>
           </form>
 
           <p className="text-center text-xs mt-6" style={{ color: 'var(--text-muted)' }}>

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Zap, Clock, Bell, Target, Keyboard } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Zap, Clock, Target, Keyboard } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -77,20 +77,20 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-[var(--warning)]" />
+            <Zap className="w-5 h-5 text-(--warning)" />
             <CardTitle>{t('settingsProductivity.focusMode')}</CardTitle>
           </div>
           <CardDescription>{t('settingsProductivity.focusModeDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3">
               <span className="text-2xl">🎯</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('settingsProductivity.focusModeToggle')}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-(--text-muted) mt-0.5">
                   {t('settingsProductivity.focusModeHelp')}
                 </p>
               </div>
@@ -99,7 +99,7 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
           </div>
 
           {focusMode && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg border border-(--primary)/20 bg-(--primary)/5">
               <div className="space-y-2">
                 <Label htmlFor="work-start">{t('settingsProductivity.workHoursStart')}</Label>
                 <Input
@@ -127,20 +127,20 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-[var(--primary)]" />
+            <Clock className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsProductivity.breakReminders')}</CardTitle>
           </div>
           <CardDescription>{t('settingsProductivity.breakRemindersDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3">
               <span className="text-2xl">☕</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('settingsProductivity.breakNotifications')}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-(--text-muted) mt-0.5">
                   {t('settingsProductivity.getReminded')}
                 </p>
               </div>
@@ -149,7 +149,7 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
           </div>
 
           {breakReminders && (
-            <div className="space-y-2 p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5">
+            <div className="space-y-2 p-4 rounded-lg border border-(--primary)/20 bg-(--primary)/5">
               <Label htmlFor="break-interval">{t('labels.breakInterval')}</Label>
               <Select value={breakInterval} onValueChange={setBreakInterval}>
                 <SelectTrigger id="break-interval">
@@ -163,7 +163,7 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
                   <SelectItem value="180">{t('settingsProductivity.every3hours')}</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-[var(--text-muted)] mt-2">
+              <p className="text-xs text-(--text-muted) mt-2">
                 {parseInt(breakInterval) === 1
                   ? t('settingsProductivity.breakTestingMode')
                   : t('settingsProductivity.breakReminderMessage', {
@@ -179,7 +179,7 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-[var(--success)]" />
+            <Target className="w-5 h-5 text-(--success)" />
             <CardTitle>{t('settingsProductivity.dailyGoals')}</CardTitle>
           </div>
           <CardDescription>{t('settingsProductivity.setTargets')}</CardDescription>
@@ -196,14 +196,14 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
                 value={dailyGoal}
                 onChange={(e) => setDailyGoal(e.target.value)}
               />
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-(--text-muted)">
                 {t('settingsProductivity.tasksPerDay')}
               </p>
             </div>
-            <div className="flex items-center justify-center p-6 rounded-lg bg-gradient-to-br from-[var(--primary)]/10 to-[var(--success)]/10 border border-[var(--border)]">
+            <div className="flex items-center justify-center p-6 rounded-lg bg-linear-to-br from-(--primary)/10 to-(--success)/10 border border-(--border)">
               <div className="text-center">
-                <p className="text-3xl font-bold text-[var(--primary)]">{dailyGoal}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-3xl font-bold text-(--primary)">{dailyGoal}</p>
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsProductivity.tasksDay')}
                 </p>
               </div>
@@ -216,7 +216,7 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Keyboard className="w-5 h-5 text-[var(--primary)]" />
+            <Keyboard className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsProductivity.keyboardShortcuts')}</CardTitle>
           </div>
           <CardDescription>{t('settingsProductivity.keyboardShortcutsDesc')}</CardDescription>
@@ -258,18 +258,18 @@ export function ProductivitySettings({ user, onSettingsChange }: ProductivitySet
               <div key={idx}>
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
-                    <kbd className="px-2 py-1 text-xs font-semibold bg-[var(--surface-hover)] border border-[var(--border)] rounded">
+                    <kbd className="px-2 py-1 text-xs font-semibold bg-(--surface-hover) border border-(--border) rounded">
                       {shortcut.key}
                     </kbd>
                     <div>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                      <p className="text-sm font-medium text-(--text-primary)">
                         {shortcut.action}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)]">{shortcut.desc}</p>
+                      <p className="text-xs text-(--text-muted)">{shortcut.desc}</p>
                     </div>
                   </div>
                 </div>
-                {idx < 5 && <div className="border-b border-[var(--border)] mt-2" />}
+                {idx < 5 && <div className="border-b border-(--border) mt-2" />}
               </div>
             ))}
           </div>

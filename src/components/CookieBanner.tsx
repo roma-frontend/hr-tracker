@@ -63,28 +63,28 @@ export default function CookieBanner() {
             }}
           >
             {/* Decorative gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#2563eb]/10 via-transparent to-[#0ea5e9]/10" />
+            <div className="absolute inset-0 bg-linear-to-br from-[#2563eb]/10 via-transparent to-[#0ea5e9]/10" />
 
             <div className="relative px-6 py-6 sm:px-8 sm:py-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 {/* Left section - Icon & Text */}
                 <div className="flex flex-col sm:flex-row items-start gap-4">
-                  <div className="text-left flex-shrink-0">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] shadow-lg">
+                  <div className="text-left shrink-0">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-[#2563eb] to-[#0ea5e9] shadow-lg">
                       <Cookie className="h-6 w-6 text-white" />
                     </div>
                   </div>
 
                   <div className="text-left sm:flex-1">
-                    <h3 className="text-lg font-semibold text-[var(--foreground)]">
+                    <h3 className="text-lg font-semibold text-(--foreground)">
                       🍪 {t('cookies.title')}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+                    <p className="mt-2 text-sm leading-relaxed text-(--text-secondary)">
                       {t('cookies.description')}
                       {t('cookies.acceptConsent')}{' '}
                       <Link
                         href="/privacy"
-                        className="inline-flex items-center font-medium text-[var(--primary)] hover:underline"
+                        className="inline-flex items-center font-medium text-(--primary) hover:underline"
                         aria-label="Read our privacy policy and data handling practices"
                       >
                         {t('cookies.learnMore', { defaultValue: 'Read our privacy policy' })}
@@ -92,7 +92,7 @@ export default function CookieBanner() {
                       {t('cookies.or')}{' '}
                       <button
                         onClick={handleSettingsClick}
-                        className="inline-flex items-center gap-1 font-medium text-[var(--primary)] hover:underline bg-transparent border-none p-0 cursor-pointer"
+                        className="inline-flex items-center gap-1 font-medium text-(--primary) hover:underline bg-transparent border-none p-0 cursor-pointer"
                       >
                         {t('cookies.customizeSettings')}
                         <Settings className="h-3 w-3" />
@@ -105,15 +105,15 @@ export default function CookieBanner() {
                         <Shield className="h-3 w-3" />
                         {t('cookies.essential')}
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-full bg-[var(--background-subtle)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                      <div className="flex items-center gap-1.5 rounded-full bg-(--background-subtle) px-3 py-1 text-xs font-medium text-(--text-secondary)">
                         <BarChart3 className="h-3 w-3" />
                         {t('cookies.analytics')}
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-full bg-[var(--background-subtle)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                      <div className="flex items-center gap-1.5 rounded-full bg-(--background-subtle) px-3 py-1 text-xs font-medium text-(--text-secondary)">
                         <Target className="h-3 w-3" />
                         {t('cookies.marketing')}
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-full bg-[var(--background-subtle)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                      <div className="flex items-center gap-1.5 rounded-full bg-(--background-subtle) px-3 py-1 text-xs font-medium text-(--text-secondary)">
                         <Palette className="h-3 w-3" />
                         {t('cookies.preferences')}
                       </div>
@@ -122,7 +122,7 @@ export default function CookieBanner() {
                 </div>
 
                 {/* Right section - Actions */}
-                <div className="flex flex-col gap-3 sm:flex-row lg:flex-shrink-0">
+                <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
                   <Button
                     onClick={acceptAll}
                     size="lg"

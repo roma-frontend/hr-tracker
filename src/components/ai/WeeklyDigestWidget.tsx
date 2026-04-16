@@ -53,7 +53,7 @@ export default function WeeklyDigestWidget() {
       {/* Trigger Button */}
       <button
         onClick={handleOpen}
-        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[#2563eb]/20"
+        className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-[#2563eb] to-[#0ea5e9] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[#2563eb]/20"
       >
         <Sparkles className="w-4 h-4" />
         {t('weeklyDigest.title')}
@@ -73,10 +73,10 @@ export default function WeeklyDigestWidget() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-2xl bg-[var(--background)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
+              className="w-full max-w-2xl bg-(--background) border border-(--border) rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
             >
               {/* Header */}
-              <div className="p-6 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white flex-shrink-0">
+              <div className="p-6 bg-linear-to-r from-[#2563eb] to-[#0ea5e9] text-white shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/20 rounded-xl">
@@ -147,28 +147,28 @@ export default function WeeklyDigestWidget() {
                 {loading ? (
                   <div className="flex flex-col items-center justify-center py-16 gap-4">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center">
                         <Sparkles className="w-8 h-8 text-white animate-pulse" />
                       </div>
                       <div className="absolute inset-0 rounded-full border-4 border-[#2563eb]/30 animate-ping" />
                     </div>
                     <div className="text-center">
-                      <p className="font-semibold text-[var(--text-primary)]">
+                      <p className="font-semibold text-(--text-primary)">
                         {t('weeklyDigest.generating')}
                       </p>
-                      <p className="text-sm text-[var(--text-muted)] mt-1">
+                      <p className="text-sm text-(--text-muted) mt-1">
                         {t('weeklyDigest.analyzing')}
                       </p>
                     </div>
                   </div>
                 ) : digest ? (
                   <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-sm text-[var(--text-primary)] leading-relaxed">
+                    <div className="whitespace-pre-wrap text-sm text-(--text-primary) leading-relaxed">
                       {digest}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-16 text-[var(--text-muted)]">
+                  <div className="text-center py-16 text-(--text-muted)">
                     <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-30" />
                     <p>{t('weeklyDigest.clickRefresh')}</p>
                   </div>
@@ -176,13 +176,13 @@ export default function WeeklyDigestWidget() {
               </div>
 
               {/* Footer */}
-              <div className="p-4 border-t border-[var(--border)] flex-shrink-0 flex items-center justify-between">
-                <p className="text-xs text-[var(--text-muted)]">{t('weeklyDigest.poweredBy')}</p>
+              <div className="p-4 border-t border-(--border) shrink-0 flex items-center justify-between">
+                <p className="text-xs text-(--text-muted)">{t('weeklyDigest.poweredBy')}</p>
                 <Button
                   onClick={generateDigest}
                   disabled={loading}
                   size="sm"
-                  className="bg-gradient-to-r from-[#2563eb] to-[#0ea5e9] text-white hover:opacity-90"
+                  className="bg-linear-to-r from-[#2563eb] to-[#0ea5e9] text-white hover:opacity-90"
                 >
                   {loading ? (
                     <ShieldLoader size="xs" variant="inline" className="mr-1" />

@@ -38,8 +38,8 @@ export default function AdminPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
-          <AlertCircle className="w-8 h-8 text-[var(--text-muted)] mx-auto" />
-          <p className="text-[var(--text-muted)]">{t('ui.onlySuperadminCanAccess')}</p>
+          <AlertCircle className="w-8 h-8 text-(--text-muted) mx-auto" />
+          <p className="text-(--text-muted)">{t('ui.onlySuperadminCanAccess')}</p>
         </div>
       </div>
     );
@@ -75,11 +75,11 @@ export default function AdminPage() {
     <div className="max-w-4xl mx-auto flex flex-col gap-4">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <Shield className="w-6 h-6 text-[var(--primary)]" />
+        <h1 className="text-2xl font-bold text-(--text-primary) flex items-center gap-2">
+          <Shield className="w-6 h-6 text-(--primary)" />
           {t('admin.superadminPanel')}
         </h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">{t('admin.manageSystemSettings')}</p>
+        <p className="text-sm text-(--text-muted) mt-1">{t('admin.manageSystemSettings')}</p>
       </div>
 
       {/* Assign User as Org Admin */}
@@ -93,7 +93,7 @@ export default function AdminPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--text-primary)]">
+            <label className="text-sm font-medium text-(--text-primary)">
               {t('labels.emailAddress')}
             </label>
             <input
@@ -101,13 +101,13 @@ export default function AdminPage() {
               value={assignEmail}
               onChange={(e) => setAssignEmail(e.target.value)}
               placeholder="user@example.com"
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[var(--primary)]"
+              className="w-full px-3 py-2 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-primary) outline-none focus:ring-2 focus:ring-[var(--primary)]"
             />
-            <p className="text-xs text-[var(--text-muted)]">{t('admin.emailDescription')}</p>
+            <p className="text-xs text-(--text-muted)">{t('admin.emailDescription')}</p>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--text-primary)]">
+            <label className="text-sm font-medium text-(--text-primary)">
               {t('admin.selectOrganization')}
             </label>
 
@@ -118,7 +118,10 @@ export default function AdminPage() {
                   <Eye className="w-4 h-4 text-blue-500" />
                   <span className="text-sm text-blue-500 font-medium">
                     {t('superadmin.viewingOrganization')}:{' '}
-                    {organizations?.find((o: any) => o._id === selectedOrgId)?.name}
+                    {
+                      organizations?.find((o: Doc<'organizations'>) => o._id === selectedOrgId)
+                        ?.name
+                    }
                   </span>
                 </div>
                 <Button
@@ -147,18 +150,23 @@ export default function AdminPage() {
                     <p className="text-xs text-muted-foreground truncate">{org.plan}</p>
                   </div>
                   {selectedOrgId === org._id && (
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 ml-2" />
+                    <CheckCircle className="w-4 h-4 text-green-500 shrink-0 ml-2" />
                   )}
                 </Button>
               ))}
             </div>
-            <p className="text-xs text-[var(--text-muted)]">{t('admin.selectOrgForAssignment')}</p>
+            <p className="text-xs text-(--text-muted)">{t('admin.selectOrgForAssignment')}</p>
           </div>
 
           <Button
             onClick={handleAssign}
             disabled={isAssigning || !assignEmail.trim() || !selectedOrgId}
-            className={cn("flex items-center gap-2 justify-center mx-auto", assignEmail ? "bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) text-white hover:opacity-90 transition-opacity font-medium shadow-md hover:shadow-lg" : "")}
+            className={cn(
+              'flex items-center gap-2 justify-center mx-auto',
+              assignEmail
+                ? 'bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) text-white hover:opacity-90 transition-opacity font-medium shadow-md hover:shadow-lg'
+                : '',
+            )}
             size="lg"
           >
             {isAssigning ? (
@@ -190,19 +198,17 @@ export default function AdminPage() {
               <ShieldLoader size="sm" />
             </div>
           ) : organizations.length === 0 ? (
-            <p className="text-[var(--text-muted)] text-center py-8">
-              {t('admin.noOrganizations')}
-            </p>
+            <p className="text-(--text-muted) text-center py-8">{t('admin.noOrganizations')}</p>
           ) : (
             <div className="space-y-3">
               {organizations.map((org: Doc<'organizations'>) => (
                 <div
                   key={org._id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)]"
+                  className="flex items-center justify-between p-4 rounded-lg border border-(--border) bg-(--background-subtle)"
                 >
                   <div className="flex-1">
-                    <p className="font-semibold text-[var(--text-primary)]">{org.name}</p>
-                    <p className="text-sm text-[var(--text-muted)]">
+                    <p className="font-semibold text-(--text-primary)">{org.name}</p>
+                    <p className="text-sm text-(--text-muted)">
                       {t('admin.plan')}:{' '}
                       <Badge variant="outline" className="ml-1">
                         {org.plan}

@@ -59,7 +59,7 @@ export default function PendingPage() {
               className="flex items-start gap-3 p-4 rounded-xl"
               style={{ background: 'rgba(37,99,235,0.05)' }}
             >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary))">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary))">
                 <CheckCircle2 className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -80,7 +80,7 @@ export default function PendingPage() {
               style={{ background: 'rgba(37,99,235,0.05)' }}
             >
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                 style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}
               >
                 <Clock className="w-4 h-4 text-white" />
@@ -103,7 +103,7 @@ export default function PendingPage() {
               style={{ background: 'rgba(107,114,128,0.05)' }}
             >
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                 style={{ background: 'linear-gradient(135deg, #6b7280, #9ca3af)' }}
               >
                 <Mail className="w-4 h-4 text-white" />

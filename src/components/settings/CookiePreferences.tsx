@@ -126,7 +126,7 @@ export function CookiePreferences() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Cookie className="w-4 h-4 text-[var(--primary)]" />
+            <Cookie className="w-4 h-4 text-(--primary)" />
             <CardTitle className="text-base">{t('cookies.privacyAndCookies')}</CardTitle>
           </div>
           {hasConsent && (
@@ -140,9 +140,9 @@ export function CookiePreferences() {
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Info Banner */}
-        <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/50 dark:bg-blue-950/30">
-          <Info className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
-          <div className="text-xs text-blue-900 dark:text-blue-100">
+        <div className="flex gap-3 rounded-lg border border-blue-200 bg-(--primary)/15 p-3 dark:border-blue-900/50 dark:bg-blue-950/30">
+          <Info className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
+          <div className="text-xs text-white">
             {t('cookies.respectPrivacy')}{' '}
             <Link
               href="/privacy"
@@ -176,8 +176,8 @@ export function CookiePreferences() {
                 key={category.id}
                 className={`rounded-lg border transition-all ${
                   isEnabled
-                    ? 'border-[var(--primary)]/30 bg-[var(--primary)]/5'
-                    : 'border-[var(--border)] bg-[var(--background-subtle)]'
+                    ? 'border-(--primary)/30 bg-(--primary)/5'
+                    : 'border-(--border) bg-(--background-subtle)'
                 }`}
               >
                 <div className="flex items-start justify-between gap-4 p-4">
@@ -186,16 +186,16 @@ export function CookiePreferences() {
                       className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                         isEnabled
                           ? 'bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity'
-                          : 'bg-[var(--background-subtle)] border border-[var(--border)]'
+                          : 'bg-(--background-subtle) border border-(--border)'
                       }`}
                     >
                       <Icon
-                        className={`h-4 w-4 ${isEnabled ? 'text-white' : 'text-[var(--text-muted)]'}`}
+                        className={`h-4 w-4 ${isEnabled ? 'text-white' : 'text-(--text-muted)'}`}
                       />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-semibold text-[var(--text-primary)]">
+                        <h4 className="text-sm font-semibold text-(--text-primary)">
                           {category.name}
                         </h4>
                         {category.required && (
@@ -204,7 +204,7 @@ export function CookiePreferences() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
+                      <p className="mt-1 text-xs leading-relaxed text-(--text-muted)">
                         {category.description}
                       </p>
                     </div>
@@ -234,7 +234,7 @@ export function CookiePreferences() {
             variant="ghost"
             size="sm"
             onClick={handleReset}
-            className="text-xs text-[var(--text-muted)]"
+            className="text-xs text-(--text-muted)"
           >
             <RotateCcw className="w-3 h-3 mr-1" />
             {t('cookies.resetConsent')}
@@ -243,7 +243,7 @@ export function CookiePreferences() {
 
         {/* Save Button */}
         {hasChanges && (
-          <div className="pt-2 border-t border-[var(--border)]">
+          <div className="pt-2 border-t border-(--border)">
             <Button onClick={handleSave} className="w-full" size="sm">
               <CheckCircle2 className="w-4 h-4 mr-2" />
               {t('cookies.savePreferences')}

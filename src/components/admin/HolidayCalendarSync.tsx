@@ -157,7 +157,7 @@ export default function HolidayCalendarSync() {
 
   if (!calendarData) {
     return (
-      <Card className="border-[var(--border)]">
+      <Card className="border-(--border)">
         <CardContent className="flex items-center justify-center p-8">
           <ShieldLoader size="lg" />
         </CardContent>
@@ -168,7 +168,7 @@ export default function HolidayCalendarSync() {
   return (
     <>
       {upgradeModal}
-      <Card className="border-[var(--border)]">
+      <Card className="border-(--border)">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-500" />
@@ -177,16 +177,16 @@ export default function HolidayCalendarSync() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Stats */}
-          <div className="rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4">
-            <p className="text-sm text-[var(--text-secondary)]">
+          <div className="rounded-lg bg-linear-to-br from-blue-500/10 to-cyan-500/10 p-4">
+            <p className="text-sm text-(--text-secondary)">
               {t('calendarSync.upcomingLeaves')}
             </p>
-            <p className="text-3xl font-bold text-[var(--text-primary)]">{calendarData.length}</p>
+            <p className="text-3xl font-bold text-(--text-primary)">{calendarData.length}</p>
           </div>
 
           {/* Export Options */}
           <div className="space-y-2">
-            <h4 className="mb-2 text-sm font-semibold text-[var(--text-primary)]">
+            <h4 className="mb-2 text-sm font-semibold text-(--text-primary)">
               Export Calendar
             </h4>
 
@@ -225,7 +225,7 @@ export default function HolidayCalendarSync() {
                 {isSyncingGoogle ? (
                   <ShieldLoader size="xs" variant="inline" className="mr-2" />
                 ) : !hasCalendarSync ? (
-                  <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
+                  <Lock className="mr-2 h-4 w-4 text-(--text-muted)" />
                 ) : googleConnected ? (
                   <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
                 ) : (
@@ -246,7 +246,7 @@ export default function HolidayCalendarSync() {
               {!hasCalendarSync && (
                 <Badge
                   variant="secondary"
-                  className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
+                  className="absolute -right-2 -top-2 bg-linear-to-r from-amber-500 to-orange-500 text-white text-[10px]"
                 >
                   Pro
                 </Badge>
@@ -274,7 +274,7 @@ export default function HolidayCalendarSync() {
                 {isSyncingOutlook ? (
                   <ShieldLoader size="xs" variant="inline" className="mr-2" />
                 ) : !hasCalendarSync ? (
-                  <Lock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
+                  <Lock className="mr-2 h-4 w-4 text-(--text-muted)" />
                 ) : outlookConnected ? (
                   <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
                 ) : (
@@ -295,7 +295,7 @@ export default function HolidayCalendarSync() {
               {!hasCalendarSync && (
                 <Badge
                   variant="secondary"
-                  className="absolute -right-2 -top-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
+                  className="absolute -right-2 -top-2 bg-linear-to-r from-amber-500 to-orange-500 text-white text-[10px]"
                 >
                   Pro
                 </Badge>
@@ -304,7 +304,7 @@ export default function HolidayCalendarSync() {
           </div>
 
           {calendarData.length === 0 && (
-            <p className="text-center text-sm text-[var(--text-secondary)]">
+            <p className="text-center text-sm text-(--text-secondary)">
               {t('calendarSync.noUpcoming')}
             </p>
           )}

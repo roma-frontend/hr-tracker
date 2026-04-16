@@ -300,7 +300,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
     <div className="flex flex-col h-full space-y-4">
       {/* Usage Stats — только для starter */}
       {!isProfessionalOrHigher && usage && (
-        <Card className="p-4 bg-gradient-to-r from-amber-100/10 to-orange-100/10 dark:from-amber-900/10 dark:to-orange-900/10 border-amber-300/20 dark:border-amber-800/20">
+        <Card className="p-4 bg-linear-to-r from-amber-100/10 to-orange-100/10 dark:from-amber-900/10 dark:to-orange-900/10 border-amber-300/20 dark:border-amber-800/20">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-600 mt-0.5" />
             <div className="flex-1">
@@ -349,7 +349,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
 
       {/* Professional/Enterprise badge */}
       {isProfessionalOrHigher && (
-        <Card className="p-4 bg-gradient-to-r from-purple-900/10 to-blue-900/10 dark:from-purple-50/20 dark:to-blue-50/20 border-purple-700/30 dark:border-purple-300/20">
+        <Card className="p-4 bg-linear-to-r from-purple-900/10 to-blue-900/10 dark:from-purple-50/20 dark:to-blue-50/20 border-purple-700/30 dark:border-purple-300/20">
           <div className="flex items-center gap-3">
             <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             <div>

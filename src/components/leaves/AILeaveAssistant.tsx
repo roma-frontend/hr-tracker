@@ -58,8 +58,8 @@ export default function AILeaveAssistant({
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-[var(--text-muted)] animate-pulse" />
-            <p className="text-sm text-[var(--text-muted)]">AI analyzing request...</p>
+            <Brain className="w-5 h-5 text-(--text-muted) animate-pulse" />
+            <p className="text-sm text-(--text-muted)">AI analyzing request...</p>
           </div>
         </CardContent>
       </Card>
@@ -108,17 +108,17 @@ export default function AILeaveAssistant({
   };
 
   return (
-    <Card className="border-2 border-[var(--primary)]/20">
+    <Card className="border-2 border-(--primary)/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
-            <Brain className="w-5 h-5 text-[var(--primary)]" />
+            <Brain className="w-5 h-5 text-(--primary)" />
             {t('aiFeatures.aiLeaveAssistant')}
           </CardTitle>
           {getRecommendationBadge()}
         </div>
         <div className="flex items-center gap-2 mt-2">
-          <span className="text-sm text-[var(--text-muted)]">{t('aiLeave.confidence')}:</span>
+          <span className="text-sm text-(--text-muted)">{t('aiLeave.confidence')}:</span>
           <Badge
             variant={
               confidence === 'HIGH'
@@ -152,7 +152,7 @@ export default function AILeaveAssistant({
                     <p className="font-medium text-red-800">{conflict.title}</p>
                     <p className="text-red-700 mt-1">{conflict.message}</p>
                     <div className="flex items-start gap-1 mt-2 text-red-600">
-                      <Briefcase className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Briefcase className="w-3 h-3 mt-0.5 shrink-0" />
                       <p className="text-xs">{conflict.suggestion}</p>
                     </div>
                   </div>
@@ -174,7 +174,7 @@ export default function AILeaveAssistant({
                     <p className="font-medium text-yellow-800">{conflict.title}</p>
                     <p className="text-yellow-700 mt-1">{conflict.message}</p>
                     <div className="flex items-start gap-1 mt-2 text-yellow-600">
-                      <Briefcase className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Briefcase className="w-3 h-3 mt-0.5 shrink-0" />
                       <p className="text-xs">{conflict.suggestion}</p>
                     </div>
                   </div>
@@ -210,7 +210,7 @@ export default function AILeaveAssistant({
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[var(--text-muted)]">Performance</span>
+              <span className="text-(--text-muted)">Performance</span>
               <span className={`font-medium ${getScoreColor(breakdown.performance.score)}`}>
                 {breakdown.performance.score}%
               </span>
@@ -219,7 +219,7 @@ export default function AILeaveAssistant({
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[var(--text-muted)]">
+              <span className="text-(--text-muted)">
                 {t('employeeInfo.attendance')}Attendance
               </span>
               <span className={`font-medium ${getScoreColor(breakdown.attendance.score)}`}>
@@ -230,7 +230,7 @@ export default function AILeaveAssistant({
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[var(--text-muted)]">Behavior</span>
+              <span className="text-(--text-muted)">Behavior</span>
               <span className={`font-medium ${getScoreColor(breakdown.behavior.score)}`}>
                 {breakdown.behavior.score}%
               </span>
@@ -239,7 +239,7 @@ export default function AILeaveAssistant({
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[var(--text-muted)]">Workload</span>
+              <span className="text-(--text-muted)">Workload</span>
               <span className={`font-medium ${getScoreColor(breakdown.workload.score)}`}>
                 {breakdown.workload.score}%
               </span>
@@ -249,12 +249,12 @@ export default function AILeaveAssistant({
         </div>
 
         {/* AI Reasoning */}
-        <div className="pt-3 border-t border-[var(--border)]">
+        <div className="pt-3 border-t border-(--border)">
           <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
             <Brain className="w-4 h-4" />
             {t('aiFeatures.aiAnalysis')}
           </h4>
-          <p className="text-sm text-[var(--text-muted)] leading-relaxed">{reasoning}</p>
+          <p className="text-sm text-(--text-muted) leading-relaxed">{reasoning}</p>
         </div>
 
         {/* Key Factors */}
@@ -264,25 +264,25 @@ export default function AILeaveAssistant({
             {breakdown.performance.factors.slice(0, 2).map((factor: any, i: any) => (
               <div key={i} className="flex items-start gap-2 text-xs">
                 {factor.startsWith('✅') ? (
-                  <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 shrink-0" />
                 ) : factor.startsWith('⚠️') ? (
-                  <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 shrink-0" />
                 ) : (
-                  <Minus className="w-3 h-3 text-red-600 mt-0.5 flex-shrink-0" />
+                  <Minus className="w-3 h-3 text-red-600 mt-0.5 shrink-0" />
                 )}
-                <span className="text-[var(--text-muted)]">{factor.substring(2)}</span>
+                <span className="text-(--text-muted)">{factor.substring(2)}</span>
               </div>
             ))}
             {breakdown.workload.factors.slice(0, 1).map((factor: any, i: any) => (
               <div key={i} className="flex items-start gap-2 text-xs">
                 {factor.startsWith('✅') ? (
-                  <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 shrink-0" />
                 ) : factor.startsWith('⚠️') ? (
-                  <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="w-3 h-3 text-yellow-600 mt-0.5 shrink-0" />
                 ) : (
-                  <Minus className="w-3 h-3 text-red-600 mt-0.5 flex-shrink-0" />
+                  <Minus className="w-3 h-3 text-red-600 mt-0.5 shrink-0" />
                 )}
-                <span className="text-[var(--text-muted)]">{factor.substring(2)}</span>
+                <span className="text-(--text-muted)">{factor.substring(2)}</span>
               </div>
             ))}
           </div>

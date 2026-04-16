@@ -40,7 +40,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-[var(--background)] rounded-2xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
+        className="w-full max-w-2xl bg-(--background) rounded-2xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -49,8 +49,8 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
           style={{ borderColor: 'var(--border)' }}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center">
-              <Bookmark className="w-5 h-5 text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary)/10 flex items-center justify-center">
+              <Bookmark className="w-5 h-5 text-(--primary)" />
             </div>
             <div>
               <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -63,7 +63,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+            className="p-2 rounded-lg hover:bg-(--background-subtle) transition-colors"
           >
             <X className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
           </button>
@@ -131,7 +131,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
                   {/* Unsave button */}
                   <button
                     onClick={(e) => handleUnsave(e, saved._id as Id<'chatMessages'>)}
-                    className="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--background)]"
+                    className="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--background)"
                     title="Remove from saved"
                   >
                     <X className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />

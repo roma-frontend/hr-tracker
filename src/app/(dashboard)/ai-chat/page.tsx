@@ -17,7 +17,6 @@ import {
   Bot,
   User,
   Copy,
-  MoreHorizontal,
   Trash2,
   Edit2,
   PanelLeftClose,
@@ -50,7 +49,7 @@ type Message = {
 
 type AnyAction = {
   type: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
 };
 
 type Conversation = {
@@ -154,8 +153,8 @@ export default function AIChatPage() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
-  const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
-  const [isListening, setIsListening] = useState(false);
+  const [_deletingConversationId, _setDeletingConversationId] = useState<string | null>(null);
+  const [_isListening, _setIsListening] = useState(false);
 
   // Update sidebar state when screen size changes
   useEffect(() => {
@@ -171,19 +170,11 @@ export default function AIChatPage() {
   };
 
   // Convex queries
-  const savedConversations = useQuery(
-    userId ? api.aiChat.getConversations : api.aiChat.getConversations,
-    userId ? { userId } : 'skip',
-  );
-
-  const fullContext = useQuery(
-    userId ? api.aiChat.getFullContext : api.aiChat.getFullContext,
-    userId ? { userId } : 'skip',
-  );
+  const savedConversations = useQuery(api.aiChat.getConversations, userId ? { userId } : 'skip');
 
   // Load messages for active conversation
   const savedMessages = useQuery(
-    activeConversationId ? api.aiChat.getMessages : api.aiChat.getMessages,
+    api.aiChat.getMessages,
     activeConversationId
       ? { conversationId: activeConversationId as Id<'aiConversations'> }
       : 'skip',
@@ -194,15 +185,11 @@ export default function AIChatPage() {
   const updateConversationTitle = useMutation(api.aiChatMutations.updateConversationTitle);
   const deleteConversation = useMutation(api.aiChatMutations.deleteConversation);
   const addMessage = useMutation(api.aiChatMutations.addMessage);
-  const deleteMessage = useMutation(api.aiChatMutations.deleteMessage);
   const autoRenameConversation = useMutation(api.aiChatMutations.autoRenameConversation);
-  const createLeaveRequest = useMutation(api.aiChatMutations.createLeaveRequest);
-  const createTask = useMutation(api.aiChatMutations.createTask);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -246,7 +233,7 @@ export default function AIChatPage() {
         setActiveConversationId(convs[0]!._id);
       }
     }
-  }, [savedConversations]);
+  }, [savedConversations, activeConversationId]);
 
   // Load messages when conversation selected
   useEffect(() => {
@@ -312,7 +299,7 @@ export default function AIChatPage() {
 
     try {
       // Start animation
-      setDeletingConversationId(conversationId);
+      _setDeletingConversationId(conversationId);
 
       // Wait for animation
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -328,11 +315,11 @@ export default function AIChatPage() {
         setActiveConversationId(null);
       }
 
-      setDeletingConversationId(null);
+      _setDeletingConversationId(null);
       toast.success(t('aiChat.chatDeleted') || 'Chat deleted');
     } catch (error) {
       console.error('[Delete conversation error]:', error);
-      setDeletingConversationId(null);
+      _setDeletingConversationId(null);
       toast.error(t('aiChat.deleteError') || 'Failed to delete chat');
     }
   };
@@ -432,7 +419,7 @@ export default function AIChatPage() {
     }
 
     try {
-      console.log('🤖 [AI Chat Page] Sending message to AI:', {
+      console.error('🤖 [AI Chat Page] Sending message to AI:', {
         userId,
         message: input,
       });
@@ -448,8 +435,9 @@ export default function AIChatPage() {
       });
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Server error ${res.status}`);
+        const errData = (await res.json().catch(() => ({}))) as { error?: string };
+        const errorMessage = errData.error || `Server error ${res.status}`;
+        throw new Error(errorMessage);
       }
 
       const reader = res.body?.getReader();
@@ -488,8 +476,7 @@ export default function AIChatPage() {
       // Check for navigation tags in response
       const navMatch = fullContent.match(/<NAVIGATE>(.*?)<\/NAVIGATE>/);
       if (navMatch && navMatch[1]) {
-        const route = navMatch[1];
-        console.log('🎯 [AI Navigation] Route:', route);
+        const route = navMatch[1] as string;
         setTimeout(() => {
           router.push(route);
         }, 800);
@@ -592,12 +579,12 @@ export default function AIChatPage() {
 
   return (
     <div
-      className="flex h-full bg-gradient-to-br from-[var(--background)] via-[var(--background)] to-[var(--primary)]/[0.02]"
+      className="flex h-full bg-linear-to-br from-(--background) via-(--background) to-(--primary)/2"
       style={{ contain: 'layout' }}
     >
       {/* Sidebar */}
       <aside
-        className={`fixed md:relative z-50 h-full bg-[var(--card)] border-r border-[var(--border)] flex-shrink-0 overflow-hidden ${
+        className={`fixed md:relative z-50 h-full bg-(--card) border-r border-(--border) shrink-0 overflow-hidden ${
           isMobile ? 'w-full' : ''
         }`}
         style={{
@@ -619,8 +606,8 @@ export default function AIChatPage() {
           {/* Mobile close button */}
           {isMobile && (
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-[var(--text-primary)] flex items-center gap-2 truncate">
-                <MessageSquare className="w-4 h-4 flex-shrink-0" />
+              <h2 className="font-semibold text-(--text-primary) flex items-center gap-2 truncate">
+                <MessageSquare className="w-4 h-4 shrink-0" />
                 <span className="truncate">{t('aiChat.conversations') || 'Conversations'}</span>
               </h2>
               <Button
@@ -630,7 +617,7 @@ export default function AIChatPage() {
                   e.stopPropagation();
                   setSidebarOpen(false);
                 }}
-                className="h-8 w-8 p-0 flex-shrink-0 z-50 relative"
+                className="h-8 w-8 p-0 shrink-0 z-50 relative"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -640,15 +627,15 @@ export default function AIChatPage() {
           {/* Desktop header */}
           {!isMobile && (
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-semibold text-[var(--text-primary)] flex items-center gap-2 truncate">
-                <MessageSquare className="w-4 h-4 flex-shrink-0" />
+              <h2 className="font-semibold text-(--text-primary) flex items-center gap-2 truncate">
+                <MessageSquare className="w-4 h-4 shrink-0" />
                 <span className="truncate">{t('aiChat.conversations') || 'Conversations'}</span>
               </h2>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleNewConversation}
-                className="h-8 w-8 p-0 flex-shrink-0"
+                className="h-8 w-8 p-0 shrink-0"
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -669,7 +656,7 @@ export default function AIChatPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-8 text-[var(--text-muted)] text-sm"
+                  className="text-center py-8 text-(--text-muted) text-sm"
                 >
                   {t('aiChat.noConversations') || 'No conversations yet'}
                 </motion.div>
@@ -679,12 +666,12 @@ export default function AIChatPage() {
                     key={conv._id}
                     className={`group relative flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
                       activeConversationId === conv._id
-                        ? 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20'
-                        : 'hover:bg-[var(--background-subtle)] border border-transparent'
+                        ? 'bg-(--primary)/10 text-(--primary) border border-(--primary)/20'
+                        : 'hover:bg-(--background-subtle) border border-transparent'
                     }`}
                     onClick={() => handleSelectConversation(conv._id)}
                   >
-                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                    <MessageSquare className="w-4 h-4 shrink-0" />
 
                     {editingTitleId === conv._id ? (
                       <div
@@ -699,7 +686,7 @@ export default function AIChatPage() {
                             if (e.key === 'Enter') saveEditedTitle(conv._id);
                             if (e.key === 'Escape') cancelEditingTitle();
                           }}
-                          className="flex-1 min-w-0 bg-transparent border-b border-[var(--primary)] outline-none text-sm"
+                          className="flex-1 min-w-0 bg-transparent border-b border-(--primary) outline-none text-sm"
                           autoFocus
                         />
                         <Button
@@ -725,7 +712,7 @@ export default function AIChatPage() {
                           {conv.title}
                         </span>
 
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -758,13 +745,13 @@ export default function AIChatPage() {
         className={`flex-1 flex flex-col min-w-0 h-full overflow-hidden ${!isMobile && !sidebarOpen ? 'md:ml-0' : ''}`}
       >
         {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b border-[var(--border)] bg-[var(--card)]/50 backdrop-blur flex-shrink-0">
+        <header className="flex items-center justify-between p-4 border-b border-(--border) bg-(--card)/50 backdrop-blur shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="h-9 w-9 p-0 flex-shrink-0"
+              className="h-9 w-9 p-0 shrink-0"
             >
               {sidebarOpen ? (
                 <PanelLeftClose className="w-4 h-4" />
@@ -773,14 +760,14 @@ export default function AIChatPage() {
               )}
             </Button>
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-(--primary) to-(--primary)/70 flex items-center justify-center shrink-0">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="font-semibold text-[var(--text-primary)] truncate">
+                <h1 className="font-semibold text-(--text-primary) truncate">
                   {t('aiChat.title') || 'Shield HR AI'}
                 </h1>
-                <p className="text-xs text-[var(--text-muted)] truncate">
+                <p className="text-xs text-(--text-muted) truncate">
                   {user?.role === 'superadmin'
                     ? '👑 Superadmin'
                     : user?.role === 'admin'
@@ -791,7 +778,7 @@ export default function AIChatPage() {
             </div>
           </div>
 
-          <Badge variant="secondary" className="gap-1 flex-shrink-0">
+          <Badge variant="secondary" className="gap-1 shrink-0">
             <Zap className="w-3 h-3" />
             AI Powered
           </Badge>
@@ -806,13 +793,13 @@ export default function AIChatPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center max-w-2xl px-4"
               >
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[var(--primary)]/20">
+                <div className="w-24 h-24 rounded-2xl bg-linear-to-br from-(--primary) to-(--primary)/70 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-(--primary)/20">
                   <Sparkles className="w-12 h-12 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+                <h2 className="text-2xl font-bold text-(--text-primary) mb-2">
                   {t('aiChat.welcomeTitle') || 'Welcome!'} {user?.name}
                 </h2>
-                <p className="text-[var(--text-muted)] mb-8">
+                <p className="text-(--text-muted) mb-8">
                   {t('aiChat.welcomeSubtitle') || "I'm your AI assistant. How can I help?"}
                 </p>
 
@@ -821,9 +808,9 @@ export default function AIChatPage() {
                     <button
                       key={index}
                       onClick={() => handleSuggestion(suggestion.query)}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[var(--border)] hover:bg-[var(--background-subtle)] hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/10 transition-all group"
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-(--border) hover:bg-(--background-subtle) hover:border-(--primary)/30 hover:shadow-lg hover:shadow-(--primary)/10 transition-all group"
                     >
-                      <div className="p-2 rounded-lg bg-[var(--primary)]/10 group-hover:bg-[var(--primary)]/20 transition-colors">
+                      <div className="p-2 rounded-lg bg-(--primary)/10 group-hover:bg-(--primary)/20 transition-colors">
                         {suggestion.icon}
                       </div>
                       <span className="text-sm font-medium">{suggestion.label}</span>
@@ -833,7 +820,7 @@ export default function AIChatPage() {
               </motion.div>
             </div>
           ) : (
-            <div className="space-y-4 max-w-[800px] mx-auto mt-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-4 max-w-200 mx-auto mt-6 px-4 sm:px-6 lg:px-8">
               {messages.map((message, index) => (
                 <motion.div
                   key={message.id}
@@ -842,12 +829,12 @@ export default function AIChatPage() {
                   transition={{ duration: 0.3, delay: message.isNew ? index * 0.05 : 0 }}
                   className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
                 >
-                  <Avatar className="w-8 h-8 flex-shrink-0">
+                  <Avatar className="w-8 h-8 shrink-0">
                     <AvatarFallback
                       className={
                         message.role === 'user'
-                          ? 'bg-[var(--primary)] text-white'
-                          : 'bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 text-white'
+                          ? 'bg-(--primary) text-white'
+                          : 'bg-linear-to-br from-(--primary) to-(--primary)/70 text-white'
                       }
                     >
                       {message.role === 'user' ? (
@@ -864,8 +851,8 @@ export default function AIChatPage() {
                     <Card
                       className={`p-4 border-0 shadow-sm ${
                         message.role === 'user'
-                          ? 'bg-[var(--primary)] text-white'
-                          : 'bg-[var(--card)] border-[var(--border)]'
+                          ? 'bg-(--primary) text-white'
+                          : 'bg-(--card) border-(--border)'
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -874,7 +861,7 @@ export default function AIChatPage() {
                     <div
                       className={`flex items-center gap-2 mt-1 ${message.role === 'user' ? 'justify-end' : ''}`}
                     >
-                      <span className="text-xs text-[var(--text-muted)]">
+                      <span className="text-xs text-(--text-muted)">
                         {message.timestamp.toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -902,7 +889,7 @@ export default function AIChatPage() {
                             <button
                               key={i}
                               onClick={() => handleSuggestion(suggestion)}
-                              className="text-xs px-3 py-1.5 rounded-full bg-[var(--background-subtle)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)] transition-colors border border-[var(--border)] hover:border-[var(--primary)]/30"
+                              className="text-xs px-3 py-1.5 rounded-full bg-(--background-subtle) hover:bg-(--primary)/10 hover:text-(--primary) transition-colors border border-(--border) hover:border-(--primary)/30"
                             >
                               {suggestion}
                             </button>
@@ -920,22 +907,22 @@ export default function AIChatPage() {
                   className="flex gap-3"
                 >
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 text-white">
+                    <AvatarFallback className="bg-linear-to-br from-(--primary) to-(--primary)/70 text-white">
                       <Bot className="w-4 h-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <Card className="p-4 bg-[var(--card)] border-[var(--border)]">
+                  <Card className="p-4 bg-(--card) border-(--border)">
                     <div className="flex gap-1">
                       <span
-                        className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce"
+                        className="w-2 h-2 rounded-full bg-(--primary) animate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <span
-                        className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce"
+                        className="w-2 h-2 rounded-full bg-(--primary) animate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <span
-                        className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce"
+                        className="w-2 h-2 rounded-full bg-(--primary) animate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </div>
@@ -949,7 +936,7 @@ export default function AIChatPage() {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-[var(--border)] bg-[var(--card)]/50 backdrop-blur flex-shrink-0">
+        <div className="p-4 border-t border-(--border) bg-(--card)/50 backdrop-blur shrink-0">
           <div className="relative max-w-4xl mx-auto">
             <textarea
               ref={textareaRef}
@@ -962,11 +949,11 @@ export default function AIChatPage() {
                 }
               }}
               placeholder={
-                isListening
+                _isListening
                   ? t('chatWidget.listening')
                   : t('aiChat.inputPlaceholder') || 'Ask anything...'
               }
-              className="flex-1 resize-none bg-[var(--background)] border border-[var(--border)] rounded-xl py-4 pl-4 pr-14 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 min-h-[56px] max-h-[200px] w-full"
+              className="flex-1 resize-none bg-(--background) border border-(--border) rounded-xl py-4 pl-4 pr-14 text-sm text-(--text-primary) outline-none focus:border-(--primary) focus:ring-2 focus:ring-(--primary)/20 min-h-14 max-h-50 w-full"
               rows={1}
             />
             <Button
@@ -979,7 +966,7 @@ export default function AIChatPage() {
             </Button>
           </div>
 
-          <p className="text-xs text-center text-[var(--text-muted)] mt-3">
+          <p className="text-xs text-center text-(--text-muted) mt-3">
             {t('aiChat.disclaimer') || 'AI may make mistakes. Please verify important information.'}
           </p>
         </div>
@@ -993,7 +980,7 @@ export default function AIChatPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={scrollToBottom}
-            className="absolute bottom-28 right-6 p-3 rounded-full bg-[var(--primary)] text-white shadow-lg hover:shadow-xl transition-shadow"
+            className="absolute bottom-28 right-6 p-3 rounded-full bg-(--primary) text-white shadow-lg hover:shadow-xl transition-shadow"
           >
             <ArrowDown className="w-4 h-4" />
           </motion.button>

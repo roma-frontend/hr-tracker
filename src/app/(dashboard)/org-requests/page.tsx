@@ -20,22 +20,51 @@ import {
   Briefcase,
   MessageSquare,
   Crown,
-  Zap,
-  Filter,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Id } from '../../../../convex/_generated/dataModel';
 
 type Status = 'pending' | 'approved' | 'rejected';
 
+interface OrganizationRequest {
+  _id: Id<'organizationRequests'>;
+  _creationTime: number;
+  status: Status;
+  requestedName: string;
+  requestedSlug: string;
+  requestedPlan: string;
+  requesterName: string;
+  requesterEmail: string;
+  requesterPhone?: string;
+  industry?: string;
+  teamSize?: string;
+  country?: string;
+  description?: string;
+  rejectionReason?: string;
+  createdAt: number;
+}
+
 export default function OrgRequestsPage() {
   const { t } = useTranslation();
-  const router = useRouter();
+  const _router = useRouter();
   const { user } = useAuthStore();
   const [statusFilter, setStatusFilter] = useState<Status | 'all'>('pending');
   const [selectedRequest, setSelectedRequest] = useState<Id<'organizationRequests'> | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
+
+  const requests = useQuery(
+    api.organizationRequests.getOrganizationRequests,
+    user
+      ? {
+          superadminUserId: user.id as Id<'users'>,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+        }
+      : 'skip',
+  );
+
+  const approveRequest = useMutation(api.organizationRequests.approveOrganizationRequest);
+  const rejectRequest = useMutation(api.organizationRequests.rejectOrganizationRequest);
 
   // Only admins can see organization requests
   const isAdmin = user?.role === 'admin';
@@ -51,26 +80,14 @@ export default function OrgRequestsPage() {
     );
   }
 
-  const requests = useQuery(
-    api.organizationRequests.getOrganizationRequests,
-    user
-      ? {
-          superadminUserId: user.id as Id<'users'>,
-          status: statusFilter === 'all' ? undefined : statusFilter,
-        }
-      : 'skip',
-  );
-
-  const approveRequest = useMutation(api.organizationRequests.approveOrganizationRequest);
-  const rejectRequest = useMutation(api.organizationRequests.rejectOrganizationRequest);
-
   const handleApprove = async (requestId: Id<'organizationRequests'>) => {
     if (!user) return;
     try {
       await approveRequest({ superadminUserId: user.id as Id<'users'>, requestId });
       toast.success(t('toasts.orgApprovedCreated'));
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to approve request');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to approve request';
+      toast.error(message);
     }
   };
 
@@ -86,8 +103,9 @@ export default function OrgRequestsPage() {
       setShowRejectModal(false);
       setRejectionReason('');
       setSelectedRequest(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to reject request');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to reject request';
+      toast.error(message);
     }
   };
 
@@ -129,7 +147,7 @@ export default function OrgRequestsPage() {
 
       {/* Filters */}
       <div className="flex gap-2 mb-6">
-        {(['all', 'pending', 'approved', 'rejected'] as const).map((status: any) => (
+        {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
@@ -159,7 +177,7 @@ export default function OrgRequestsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {requests.map((request: any) => {
+          {requests.map((request: OrganizationRequest) => {
             const Icon = request.requestedPlan === 'enterprise' ? Crown : Building2;
             const planColor =
               request.requestedPlan === 'enterprise'
@@ -177,7 +195,7 @@ export default function OrgRequestsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-4">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                       style={{ background: `linear-gradient(135deg, ${planColor})` }}
                     >
                       <Icon className="w-6 h-6 text-white" />
@@ -246,14 +264,14 @@ export default function OrgRequestsPage() {
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
-                      <Mail className="w-4 h-4 text-[var(--text-muted)]" />
+                      <Mail className="w-4 h-4 text-(--text-muted)" />
                       <span style={{ color: 'var(--text-secondary)' }}>
                         {request.requesterEmail}
                       </span>
                     </div>
                     {request.requesterPhone && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Phone className="w-4 h-4 text-[var(--text-muted)]" />
+                        <Phone className="w-4 h-4 text-(--text-muted)" />
                         <span style={{ color: 'var(--text-secondary)' }}>
                           {request.requesterPhone}
                         </span>
@@ -261,7 +279,7 @@ export default function OrgRequestsPage() {
                     )}
                     {request.industry && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Briefcase className="w-4 h-4 text-[var(--text-muted)]" />
+                        <Briefcase className="w-4 h-4 text-(--text-muted)" />
                         <span style={{ color: 'var(--text-secondary)' }}>{request.industry}</span>
                       </div>
                     )}
@@ -269,14 +287,14 @@ export default function OrgRequestsPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
-                      <Users className="w-4 h-4 text-[var(--text-muted)]" />
+                      <Users className="w-4 h-4 text-(--text-muted)" />
                       <span style={{ color: 'var(--text-secondary)' }}>
                         {request.teamSize || 'Not specified'} employees
                       </span>
                     </div>
                     {request.country && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Globe className="w-4 h-4 text-[var(--text-muted)]" />
+                        <Globe className="w-4 h-4 text-(--text-muted)" />
                         <span style={{ color: 'var(--text-secondary)' }}>{request.country}</span>
                       </div>
                     )}
@@ -290,7 +308,7 @@ export default function OrgRequestsPage() {
                     style={{ background: 'rgba(37,99,235,0.05)' }}
                   >
                     <div className="flex items-start gap-2 text-sm">
-                      <MessageSquare className="w-4 h-4 mt-0.5 text-[var(--text-muted)]" />
+                      <MessageSquare className="w-4 h-4 mt-0.5 text-(--text-muted)" />
                       <p style={{ color: 'var(--text-secondary)' }}>{request.description}</p>
                     </div>
                   </div>

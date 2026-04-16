@@ -66,17 +66,17 @@ export default function AIRecommendationsCard() {
   return (
     <Card className="border border-[#2563eb]/30 overflow-hidden">
       {/* Gradient top bar */}
-      <div className="h-1 bg-gradient-to-r from-[#2563eb] to-[#0ea5e9]" />
+      <div className="h-1 bg-linear-to-r from-[#2563eb] to-[#0ea5e9]" />
 
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#0ea5e9]">
+            <div className="p-1.5 rounded-lg bg-linear-to-br from-[#2563eb] to-[#0ea5e9]">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             {t('aiFeatures.aiRecommendations')}
             {lastFetched && (
-              <span className="text-xs text-[var(--text-muted)] font-normal">
+              <span className="text-xs text-(--text-muted) font-normal">
                 · {lastFetched.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
@@ -85,23 +85,23 @@ export default function AIRecommendationsCard() {
             <button
               onClick={fetchInsights}
               disabled={loading}
-              className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors disabled:opacity-50"
+              className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors disabled:opacity-50"
               title={t('titles.refresh')}
             >
               {loading ? (
                 <ShieldLoader size="xs" variant="inline" />
               ) : (
-                <RefreshCw className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <RefreshCw className="w-3.5 h-3.5 text-(--text-muted)" />
               )}
             </button>
             <button
               onClick={() => setExpanded(!expanded)}
-              className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+              className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
             >
               {expanded ? (
-                <ChevronUp className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <ChevronUp className="w-3.5 h-3.5 text-(--text-muted)" />
               ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <ChevronDown className="w-3.5 h-3.5 text-(--text-muted)" />
               )}
             </button>
           </div>
@@ -120,7 +120,7 @@ export default function AIRecommendationsCard() {
               {loading && !insights ? (
                 <div className="flex items-center gap-2 py-4 justify-center">
                   <ShieldLoader size="xs" variant="inline" />
-                  <span className="text-sm text-[var(--text-muted)]">Analyzing your data...</span>
+                  <span className="text-sm text-(--text-muted)">Analyzing your data...</span>
                 </div>
               ) : (
                 <>
@@ -131,7 +131,7 @@ export default function AIRecommendationsCard() {
                       animate={{ opacity: 1, x: 0 }}
                       className="flex items-start gap-3 p-3 rounded-xl border border-orange-500/30 bg-orange-500/5"
                     >
-                      <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                      <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-sm text-orange-500">{insights.balanceWarning}</p>
                     </motion.div>
                   )}
@@ -152,7 +152,7 @@ export default function AIRecommendationsCard() {
                         {insights.patterns.map((p, i) => (
                           <li
                             key={i}
-                            className="text-sm text-[var(--text-primary)] flex items-start gap-2"
+                            className="text-sm text-(--text-primary) flex items-start gap-2"
                           >
                             <span className="text-sky-400 mt-0.5">•</span>
                             {p}
@@ -180,14 +180,14 @@ export default function AIRecommendationsCard() {
                         {insights.bestDates.map((d, i) => (
                           <li
                             key={i}
-                            className="text-sm text-[var(--text-primary)] flex items-start gap-2"
+                            className="text-sm text-(--text-primary) flex items-start gap-2"
                           >
                             <span className="text-green-500 mt-0.5">✓</span>
                             {d}
                           </li>
                         ))}
                       </ul>
-                      <p className="text-xs text-[var(--text-muted)] mt-2">
+                      <p className="text-xs text-(--text-muted) mt-2">
                         💬 Ask the AI assistant to book any of these dates
                       </p>
                     </motion.div>
@@ -211,7 +211,7 @@ export default function AIRecommendationsCard() {
                         {insights.teamConflicts.map((c, i) => (
                           <li
                             key={i}
-                            className="text-sm text-[var(--text-primary)] flex items-start gap-2"
+                            className="text-sm text-(--text-primary) flex items-start gap-2"
                           >
                             <span className="text-blue-500 mt-0.5">•</span>
                             {c}

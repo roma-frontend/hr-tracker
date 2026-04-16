@@ -55,7 +55,7 @@ export function SmartEmailInput({
     <div className="space-y-2">
       <Label
         htmlFor="email"
-        className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]"
+        className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-(--text-primary)"
       >
         {label}
         {required && <span className="text-red-500">*</span>}
@@ -64,7 +64,7 @@ export function SmartEmailInput({
       <div className="relative">
         {/* Email icon */}
         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-          <Mail className="w-4 h-4 text-[var(--text-muted)]" />
+          <Mail className="w-4 h-4 text-(--text-muted)" />
         </div>
 
         {/* Input field */}
@@ -136,7 +136,7 @@ export function SmartEmailInput({
             onClick={handleSuggestionClick}
             className="w-full flex items-center gap-2 p-3 rounded-xl border border-blue-500/20 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 transition-all group"
           >
-            <Sparkles className="w-4 h-4 flex-shrink-0 group-hover:rotate-12 transition-transform" />
+            <Sparkles className="w-4 h-4 shrink-0 group-hover:rotate-12 transition-transform" />
             <div className="flex-1 text-left">
               <p className="text-xs font-medium">Использовать предложение?</p>
               <p className="text-sm font-semibold mt-0.5">{validation.suggestion}</p>

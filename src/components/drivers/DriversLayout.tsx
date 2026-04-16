@@ -31,17 +31,17 @@ export function DriversLayout({ children, title, subtitle, stats, actions }: Dri
         className="relative mb-8"
       >
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/5 via-[var(--primary)]/10 to-transparent rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-linear-to-r from-(--primary)/5 via-[var(--primary)]/10 to-transparent rounded-3xl -z-10" />
 
         <div className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-[var(--primary)]/10">
-                <Car className="w-7 h-7 text-[var(--primary)]" />
+              <div className="p-3 rounded-2xl bg-(--primary)/10">
+                <Car className="w-7 h-7 text-(--primary)" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
-                {subtitle && <p className="text-sm text-[var(--text-muted)] mt-1">{subtitle}</p>}
+                {subtitle && <p className="text-sm text-(--text-muted) mt-1">{subtitle}</p>}
               </div>
             </div>
             {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -67,18 +67,18 @@ export function DriversLayout({ children, title, subtitle, stats, actions }: Dri
                 transition={{ duration: 0.3, delay: 0.1 + idx * 0.05 }}
                 whileHover={{ scale: 1.02, y: -2 }}
               >
-                <div className="relative p-4 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+                <div className="relative p-4 rounded-2xl border border-(--border) bg-(--card) overflow-hidden">
                   {/* Gradient overlay */}
                   <div
                     className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl opacity-10 -z-10 ${
-                      stat.color || 'bg-[var(--primary)]'
+                      stat.color || 'bg-(--primary)'
                     }`}
                     style={{ transform: 'translate(30%, -30%)' }}
                   />
 
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs text-[var(--text-muted)] font-medium">{stat.label}</p>
+                      <p className="text-xs text-(--text-muted) font-medium">{stat.label}</p>
                       <p className="text-2xl font-bold mt-1">{stat.value}</p>
                       {stat.trend && (
                         <p className="text-xs text-green-500 mt-1 flex items-center gap-1">
@@ -87,7 +87,7 @@ export function DriversLayout({ children, title, subtitle, stats, actions }: Dri
                         </p>
                       )}
                     </div>
-                    <div className={`p-2 rounded-xl ${stat.color || 'bg-[var(--primary)]/10'}`}>
+                    <div className={`p-2 rounded-xl ${stat.color || 'bg-(--primary)/10'}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                   </div>

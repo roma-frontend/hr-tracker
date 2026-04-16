@@ -99,14 +99,14 @@ export default function BreakReminderService({
     toast(
       <div className="flex items-center gap-4 p-2">
         <div className="relative">
-          <div className="w-12 h-12 rounded-xl bg-[var(--primary)] flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 rounded-xl bg-(--primary) flex items-center justify-center shadow-lg">
             <Coffee className="w-6 h-6 text-white" />
           </div>
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
         </div>
         <div className="flex-1">
-          <p className="font-semibold text-[var(--foreground)] text-base">Time for a Break! ☕</p>
-          <p className="text-sm text-[var(--text-muted)] mt-0.5 leading-relaxed">
+          <p className="font-semibold text-(--foreground) text-base">Time for a Break! ☕</p>
+          <p className="text-sm text-(--text-muted) mt-0.5 leading-relaxed">
             {intervalMinutes === 1
               ? 'Testing mode: Time to take a quick break!'
               : `You've been working for ${intervalMinutes} minutes. Take 5 minutes to stretch and recharge!`}

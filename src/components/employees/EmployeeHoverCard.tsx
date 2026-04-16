@@ -172,7 +172,7 @@ export function EmployeeHoverCard({
               style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
             >
               {/* Header with avatar + name inside */}
-              <div className="bg-gradient-to-br from-blue-600 to-sky-700 p-4">
+              <div className="bg-linear-to-br from-blue-600 to-sky-700 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span
                     className="text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -198,7 +198,7 @@ export function EmployeeHoverCard({
                 </div>
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-14 h-14 rounded-full overflow-hidden shadow-lg flex-shrink-0 flex items-center justify-center text-xl font-bold"
+                    className="w-14 h-14 rounded-full overflow-hidden shadow-lg shrink-0 flex items-center justify-center text-xl font-bold"
                     style={{
                       backgroundColor: 'rgba(255,255,255,0.15)',
                       border: '2px solid rgba(255,255,255,0.4)',
@@ -240,7 +240,7 @@ export function EmployeeHoverCard({
                       className="flex items-center gap-2.5 group hover:opacity-80 transition-opacity"
                     >
                       <span
-                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0"
                         style={{ backgroundColor: 'var(--background-subtle)' }}
                       >
                         ✉️
@@ -260,7 +260,7 @@ export function EmployeeHoverCard({
                       className="flex items-center gap-2.5 group hover:opacity-80 transition-opacity"
                     >
                       <span
-                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0"
                         style={{ backgroundColor: 'var(--background-subtle)' }}
                       >
                         📞
@@ -277,7 +277,7 @@ export function EmployeeHoverCard({
                   {employee.department && (
                     <div className="flex items-center gap-2.5">
                       <span
-                        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                         style={{ backgroundColor: 'var(--background-subtle)' }}
                       >
                         🏢
@@ -291,7 +291,7 @@ export function EmployeeHoverCard({
                   {supervisor && (
                     <div className="flex items-center gap-2.5">
                       <span
-                        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                         style={{ backgroundColor: 'var(--background-subtle)' }}
                       >
                         👤

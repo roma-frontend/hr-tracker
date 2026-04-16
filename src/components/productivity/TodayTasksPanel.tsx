@@ -63,10 +63,10 @@ export function TodayTasksPanel() {
   return (
     <div className="px-2 py-3">
       <div className="mb-3 px-2">
-        <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+        <h3 className="text-xs font-semibold text-(--text-muted)">
           {t('tasks.topPriority', 'Top Priority Tasks')}
         </h3>
-        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+        <p className="text-[10px] text-(--text-muted) mt-0.5">
           {t('tasks.quickAccess', 'Quick access to your important tasks')}
         </p>
       </div>
@@ -80,21 +80,21 @@ export function TodayTasksPanel() {
           return (
             <div
               key={task._id}
-              className={`group rounded-lg border p-3 transition-all hover:border-[var(--primary)]/50 ${
+              className={`group rounded-lg border p-3 transition-all hover:border-(--primary)/50 ${
                 isCompleted
-                  ? 'border-[var(--border)] bg-[var(--background-subtle)]/50 opacity-60'
-                  : 'border-[var(--border)] bg-[var(--background-subtle)]'
+                  ? 'border-(--border) bg-(--background-subtle)/50 opacity-60'
+                  : 'border-(--border) bg-(--background-subtle)'
               }`}
             >
               <div className="flex items-start gap-2">
                 <button
                   onClick={() => handleToggleTask(task._id, task.status)}
-                  className="mt-0.5 flex-shrink-0 transition-transform hover:scale-110"
+                  className="mt-0.5 shrink-0 transition-transform hover:scale-110"
                 >
                   {isCompleted ? (
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
                   ) : (
-                    <Circle className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)]" />
+                    <Circle className="w-4 h-4 text-(--text-muted) group-hover:text-(--primary)" />
                   )}
                 </button>
 
@@ -102,8 +102,8 @@ export function TodayTasksPanel() {
                   <p
                     className={`text-sm font-medium leading-snug ${
                       isCompleted
-                        ? 'line-through text-[var(--text-muted)]'
-                        : 'text-[var(--text-primary)]'
+                        ? 'line-through text-(--text-muted)'
+                        : 'text-(--text-primary)'
                     }`}
                   >
                     {task.title}
@@ -123,7 +123,7 @@ export function TodayTasksPanel() {
                     {dueText && (
                       <span
                         className={`inline-flex items-center gap-1 text-[10px] ${
-                          isOverdue ? 'text-red-500 font-semibold' : 'text-[var(--text-muted)]'
+                          isOverdue ? 'text-red-500 font-semibold' : 'text-(--text-muted)'
                         }`}
                       >
                         {isOverdue ? (
@@ -145,7 +145,7 @@ export function TodayTasksPanel() {
       <div className="mt-3 px-2">
         <a
           href="/tasks"
-          className="block text-center text-xs text-[var(--primary)] hover:underline font-medium"
+          className="block text-center text-xs text-(--primary) hover:underline font-medium"
         >
           View all tasks →
         </a>

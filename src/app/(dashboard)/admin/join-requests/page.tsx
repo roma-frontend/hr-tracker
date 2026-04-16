@@ -45,8 +45,12 @@ export default function JoinRequestsPage() {
         reviewerId: user.id as Id<'users'>,
       });
       toast.success(t('joinRequests.approved', 'Request approved'));
-    } catch (error: any) {
-      toast.error(error.message || t('joinRequests.approveFailed', 'Failed to approve'));
+    } catch (_error) {
+      const errorMessage =
+        _error instanceof Error
+          ? _error.message
+          : t('joinRequests.approveFailed', 'Failed to approve');
+      toast.error(errorMessage);
     }
   };
 
@@ -67,8 +71,12 @@ export default function JoinRequestsPage() {
       toast.success(t('joinRequests.rejected', 'Request rejected'));
       setRejectReason('');
       setRejectingId(null);
-    } catch (error: any) {
-      toast.error(error.message || t('joinRequests.rejectFailed', 'Failed to reject'));
+    } catch (_error) {
+      const errorMessage =
+        _error instanceof Error
+          ? _error.message
+          : t('joinRequests.rejectFailed', 'Failed to reject');
+      toast.error(errorMessage);
     }
   };
 
@@ -100,7 +108,7 @@ export default function JoinRequestsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {requests.filter((r: any) => r.status === 'pending').length}
+                  {requests.filter((r: { status: string }) => r.status === 'pending').length}
                 </p>
                 <p className="text-sm text-gray-500">{t('joinRequests.pending', 'Pending')}</p>
               </div>
@@ -116,7 +124,7 @@ export default function JoinRequestsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {requests.filter((r: any) => r.status === 'approved').length}
+                  {requests.filter((r: { status: string }) => r.status === 'approved').length}
                 </p>
                 <p className="text-sm text-gray-500">{t('joinRequests.approved', 'Approved')}</p>
               </div>
@@ -132,7 +140,7 @@ export default function JoinRequestsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {requests.filter((r: any) => r.status === 'rejected').length}
+                  {requests.filter((r: { status: string }) => r.status === 'rejected').length}
                 </p>
                 <p className="text-sm text-gray-500">{t('joinRequests.rejected', 'Rejected')}</p>
               </div>
@@ -157,8 +165,10 @@ export default function JoinRequestsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12">
-                      <AvatarImage src={request.requesterAvatar} />
-                      <AvatarFallback>{request.requesterName?.charAt(0) || '?'}</AvatarFallback>
+                      <AvatarImage src={request.requesterAvatar as string | undefined} />
+                      <AvatarFallback>
+                        {(request.requesterName as string | undefined)?.charAt(0) || '?'}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
                       <CardTitle className="flex items-center gap-2">

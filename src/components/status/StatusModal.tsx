@@ -171,7 +171,7 @@ export function StatusModal({
               {t('status.confirmChange', 'Confirm Status Change')}
             </h2>
 
-            <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-l-4 border-blue-500">
+            <div className="mb-8 p-6 rounded-2xl bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-l-4 border-blue-500">
               <h3 className="font-semibold text-lg mb-2">
                 {t(`status.${selectedStatus}.label`, selectedStatus)}
               </h3>
@@ -200,7 +200,7 @@ export function StatusModal({
                     'status.outOfOfficePlaceholder',
                     "Tell your team when you'll be back...",
                   )}
-                  className="w-full px-4 py-3 rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) placeholder-(--text-muted) focus:ring-2 focus:ring-(--ring) focus:border-transparent resize-none"
                   rows={3}
                 />
               </div>
@@ -215,7 +215,7 @@ export function StatusModal({
               </button>
               <button
                 onClick={handleConfirm}
-                className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold hover:shadow-lg transition-all"
+                className="flex-1 px-6 py-3 rounded-lg bg-linear-to-r from-blue-500 to-blue-600 text-white font-semibold hover:shadow-lg transition-all"
               >
                 {t('status.confirm', 'Confirm')}
               </button>

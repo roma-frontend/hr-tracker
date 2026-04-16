@@ -2,16 +2,12 @@
 
 import { useTranslation } from 'react-i18next';
 
-import React, { useState, useTransition, useCallback, useEffect } from 'react';
+import React, { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
   User,
   Phone,
   AlertCircle,
@@ -44,6 +40,20 @@ interface OrgResult {
   plan: string;
 }
 
+interface RegisterActionResult {
+  success: boolean;
+  role: 'superadmin' | 'admin' | 'supervisor' | 'employee' | 'driver';
+  needsApproval: boolean;
+  message?: string;
+  userId?: string;
+  name?: string;
+  email?: string;
+  department?: string;
+  position?: string;
+  employeeType?: string;
+  avatar?: string;
+}
+
 // ── Password strength ─────────────────────────────────────────────────────────
 function passwordStrength(pwd: string) {
   let score = 0;
@@ -54,8 +64,8 @@ function passwordStrength(pwd: string) {
   return score;
 }
 
-const STRENGTH_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#2563eb'];
-const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
+const _STRENGTH_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#2563eb'];
+const _STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
 
 // ── Steps ─────────────────────────────────────────────────────────────────────
 type Step = 'org' | 'details';
@@ -92,7 +102,7 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
   return (
     <div className="space-y-3">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
         <input
           type="text"
           value={query}
@@ -119,7 +129,7 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-primary)"
           >
             <X className="w-4 h-4" />
           </button>
@@ -136,13 +146,13 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
             className="flex items-center gap-2 p-3 rounded-xl border"
             style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.3)' }}
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+              <p className="text-sm font-semibold text-(--text-primary) truncate">
                 {selected.name}
               </p>
               {selected.industry && (
-                <p className="text-xs text-[var(--text-muted)]">{selected.industry}</p>
+                <p className="text-xs text-(--text-muted)">{selected.industry}</p>
               )}
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 uppercase">
@@ -163,12 +173,12 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
             style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
           >
             {results === undefined ? (
-              <div className="flex items-center gap-2 p-3 text-sm text-[var(--text-muted)]">
+              <div className="flex items-center gap-2 p-3 text-sm text-(--text-muted)">
                 <ShieldLoader size="xs" variant="inline" />
                 {t('auth.searching', 'Searching…')}
               </div>
             ) : results.length === 0 ? (
-              <div className="p-3 text-sm text-[var(--text-muted)] text-center">
+              <div className="p-3 text-sm text-(--text-muted) text-center">
                 {t('auth.noOrgFound', 'No organization found for')} &ldquo;{debouncedQuery}&rdquo;
                 <p className="text-xs mt-1">{t('auth.askAdmin')}</p>
               </div>
@@ -178,20 +188,18 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
                   key={org._id}
                   type="button"
                   onClick={() => handleSelect(org)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--background-subtle)] transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-(--background-subtle) transition-colors text-left"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-4 h-4 text-[var(--primary)]" />
+                  <div className="w-8 h-8 rounded-lg bg-(--primary)/10 border border-(--primary)/20 flex items-center justify-center shrink-0">
+                    <Building2 className="w-4 h-4 text-(--primary)" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                    <p className="text-sm font-semibold text-(--text-primary) truncate">
                       {org.name}
                     </p>
-                    {org.industry && (
-                      <p className="text-xs text-[var(--text-muted)]">{org.industry}</p>
-                    )}
+                    {org.industry && <p className="text-xs text-(--text-muted)">{org.industry}</p>}
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-(--text-muted) shrink-0" />
                 </button>
               ))
             )}
@@ -201,7 +209,7 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
 
       {/* Hint */}
       {!selected && query.length < 2 && (
-        <p className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 px-1">
+        <p className="text-xs text-(--text-muted) flex items-center gap-1.5 px-1">
           <Users className="w-3 h-3" />
           {t('auth.typeToSearchOrg', 'Type at least 2 characters to search for your organization')}
         </p>
@@ -217,7 +225,7 @@ function RegisterPageContent() {
   const { login } = useAuthStore();
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<Step>('org');
-  const [showPassword, setShowPassword] = useState(false);
+  const [_showPassword, _setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrg, setSelectedOrg] = useState<OrgResult | null>(null);
   const [inviteToken, setInviteToken] = useState<string | null>(null);
@@ -238,7 +246,7 @@ function RegisterPageContent() {
     }
   }, []);
 
-  const strength = passwordStrength(formData.password);
+  const _strength = passwordStrength(formData.password);
 
   const handleOrgNext = () => {
     if (!selectedOrg && !inviteToken) {
@@ -268,7 +276,7 @@ function RegisterPageContent() {
 
     startTransition(async () => {
       try {
-        const result = await registerAction(fd);
+        const result = (await registerAction(fd)) as RegisterActionResult;
 
         if (result.needsApproval) {
           toast.success(t('auth.requestSent', 'Request sent!'), {
@@ -286,10 +294,10 @@ function RegisterPageContent() {
               id: result.userId,
               name: result.name!,
               email: result.email!,
-              role: result.role,
+              role: result.role as 'superadmin' | 'admin' | 'supervisor' | 'employee' | 'driver',
               department: result.department,
               position: result.position,
-              employeeType: result.employeeType,
+              employeeType: result.employeeType as 'staff' | 'contractor' | undefined,
               avatar: result.avatar,
             });
           }
@@ -410,14 +418,12 @@ function RegisterPageContent() {
                         borderColor: 'rgba(37,99,235,0.3)',
                       }}
                     >
-                      <Sparkles className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
                       <div>
-                        <p className="text-sm font-semibold text-[var(--text-primary)]">
+                        <p className="text-sm font-semibold text-(--text-primary)">
                           {t('auth.inviteLinkDetected')}
                         </p>
-                        <p className="text-xs text-[var(--text-muted)]">
-                          {t('auth.invitedToJoin')}
-                        </p>
+                        <p className="text-xs text-(--text-muted)">{t('auth.invitedToJoin')}</p>
                       </div>
                     </div>
                   ) : (
@@ -434,7 +440,7 @@ function RegisterPageContent() {
                         className="flex items-center gap-2 p-3 rounded-xl text-sm"
                         style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
                       >
-                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <AlertCircle className="w-4 h-4 shrink-0" />
                         {error}
                       </motion.div>
                     )}
@@ -472,7 +478,7 @@ function RegisterPageContent() {
                       setStep('org');
                       setError(null);
                     }}
-                    className="flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors -mt-1 mb-1"
+                    className="flex items-center gap-1 text-xs text-(--text-muted) hover:text-(--text-primary) transition-colors -mt-1 mb-1"
                   >
                     <ArrowLeft className="w-3 h-3" /> {t('auth.backToOrg', 'Back to organization')}
                   </button>
@@ -483,7 +489,7 @@ function RegisterPageContent() {
                       {t('auth.fullName')}
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                       <input
                         type="text"
                         required
@@ -524,7 +530,7 @@ function RegisterPageContent() {
                       {t('auth.phoneOptional')}
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                       <input
                         type="tel"
                         value={formData.phone}

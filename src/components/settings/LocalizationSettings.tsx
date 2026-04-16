@@ -117,7 +117,7 @@ export function LocalizationSettings({
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Globe className="w-5 h-5 text-[var(--primary)]" />
+            <Globe className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsLocalization.languageRegion')}</CardTitle>
           </div>
           <CardDescription>{t('settingsLocalization.customizeLanguage')}</CardDescription>
@@ -181,7 +181,7 @@ export function LocalizationSettings({
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[var(--primary)]" />
+            <Calendar className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsLocalization.dateTimeFormat')}</CardTitle>
           </div>
           <CardDescription>{t('settingsLocalization.configureDatetime')}</CardDescription>
@@ -209,7 +209,7 @@ export function LocalizationSettings({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-(--text-muted)">
                 Preview: {new Date().toLocaleDateString()}
               </p>
             </div>
@@ -225,7 +225,7 @@ export function LocalizationSettings({
                   <SelectItem value="12h">{t('settingsLocalization.hour12')}</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-(--text-muted)">
                 Preview: {new Date().toLocaleTimeString()}
               </p>
             </div>
@@ -237,7 +237,7 @@ export function LocalizationSettings({
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-[var(--primary)]" />
+            <Clock className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsLocalization.calendarPreferences')}</CardTitle>
           </div>
           <CardDescription>{t('settingsLocalization.customizeCalendar')}</CardDescription>
@@ -257,14 +257,14 @@ export function LocalizationSettings({
             </Select>
           </div>
 
-          <div className="p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-center gap-3">
               <span className="text-2xl">📅</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('localizationSettings.weekStartsOn')} {firstDayOfWeek}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-(--text-muted) mt-0.5">
                   {t('settingsLocalization.weekStartNote')}
                 </p>
               </div>

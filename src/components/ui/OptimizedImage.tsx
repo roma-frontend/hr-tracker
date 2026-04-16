@@ -135,7 +135,7 @@ export function OptimizedAvatar({ src, alt, size = 'md', className = '' }: Avata
   if (!src) {
     return (
       <div
-        className={`rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold ${className}`}
+        className={`rounded-full bg-linear-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold ${className}`}
         style={{ width: pixelSize, height: pixelSize }}
       >
         {alt.charAt(0).toUpperCase()}

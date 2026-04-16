@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import Image from 'next/image';
 
 import { useState } from 'react';
@@ -23,7 +23,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
-interface EmployeeInfo {
+export interface EmployeeInfo {
   _id: Id<'users'>;
   name: string;
   position?: string;
@@ -108,11 +108,11 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             style={{ background: 'var(--card)' }}
           >
             {/* Header */}
-            <div className="px-6 py-6 flex-shrink-0">
+            <div className="px-6 py-6 shrink-0">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
                   <div
-                    className="w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center text-xl font-bold flex-shrink-0"
+                    className="w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center text-xl font-bold shrink-0"
                     style={{
                       backgroundColor: 'rgba(255,255,255,0.15)',
                       color: 'var(--text-on-primary)',
@@ -135,12 +135,8 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                     )}
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">
-                      {employee.name}
-                    </h2>
-                    {employee.position && (
-                      <p className="text-sm">{employee.position}</p>
-                    )}
+                    <h2 className="text-xl font-bold">{employee.name}</h2>
+                    {employee.position && <p className="text-sm">{employee.position}</p>}
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {employee.department && (
                         <span className="flex items-center gap-1 text-xs">
@@ -157,7 +153,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors shrink-0"
                   style={{
                     backgroundColor: 'rgba(255,255,255,0.15)',
                     color: 'var(--text-on-primary)',
@@ -204,7 +200,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
             {/* Stats */}
             {monthlyStats && (
               <div
-                className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-b flex-shrink-0"
+                className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-b shrink-0"
                 style={{ borderColor: 'var(--border)' }}
               >
                 {[
@@ -287,7 +283,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                           {/* Date + status dot */}
                           <div className="flex items-center gap-3">
                             <div
-                              className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1 ${
+                              className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${
                                 record.status === 'checked_in'
                                   ? 'bg-green-500 animate-pulse'
                                   : record.status === 'checked_out'

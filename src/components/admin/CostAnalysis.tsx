@@ -17,7 +17,7 @@ export default function CostAnalysis() {
 
   if (!data) {
     return (
-      <Card className="border-[var(--border)]">
+      <Card className="border-(--border)">
         <CardContent className="flex items-center justify-center p-8">
           <ShieldLoader size="lg" />
         </CardContent>
@@ -26,7 +26,7 @@ export default function CostAnalysis() {
   }
 
   return (
-    <Card className="border-[var(--border)]">
+    <Card className="border-(--border)">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -60,14 +60,14 @@ export default function CostAnalysis() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Total Cost */}
-        <div className="rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4">
+        <div className="rounded-lg bg-linear-to-br from-green-500/10 to-emerald-500/10 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-secondary)]">{t('costAnalysis.totalCost')}</p>
-              <p className="text-3xl font-bold text-[var(--text-primary)]">
+              <p className="text-sm text-(--text-secondary)">{t('costAnalysis.totalCost')}</p>
+              <p className="text-3xl font-bold text-(--text-primary)">
                 ${data.totalCost.toLocaleString()}
               </p>
-              <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              <p className="mt-1 text-xs text-(--text-secondary)">
                 {data.totalLeaves} leaves В· {data.totalDays} days
               </p>
             </div>
@@ -77,21 +77,21 @@ export default function CostAnalysis() {
         {/* By Department */}
         {data.byDepartment.length > 0 && (
           <div>
-            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">
+            <h4 className="mb-2 font-semibold text-(--text-primary)">
               {t('costAnalysis.byDepartment')}
             </h4>
             <div className="space-y-2">
               {data.byDepartment.map((dept: any) => (
                 <div key={dept.name} className="space-y-1">
                   <div className="flex justify-between text-sm">
-                    <span className="text-[var(--text-secondary)]">{dept.name}</span>
-                    <span className="font-medium text-[var(--text-primary)]">
+                    <span className="text-(--text-secondary)">{dept.name}</span>
+                    <span className="font-medium text-(--text-primary)">
                       ${dept.cost.toLocaleString()} ({dept.percentage.toFixed(1)}%)
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[var(--background-subtle)]">
+                  <div className="h-2 overflow-hidden rounded-full bg-(--background-subtle)">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-500"
+                      className="h-full rounded-full bg-linear-to-r from-green-500 to-emerald-500"
                       style={{ width: `${dept.percentage}%` }}
                     />
                   </div>
@@ -104,21 +104,21 @@ export default function CostAnalysis() {
         {/* By Type */}
         {data.byType.length > 0 && (
           <div>
-            <h4 className="mb-2 font-semibold text-[var(--text-primary)]">
+            <h4 className="mb-2 font-semibold text-(--text-primary)">
               {t('costAnalysis.byLeaveType')}
             </h4>
             <div className="space-y-2">
               {data.byType.map((typeData: any) => (
                 <div key={typeData.type} className="space-y-1">
                   <div className="flex justify-between text-sm">
-                    <span className="text-[var(--text-secondary)] capitalize">{typeData.type}</span>
-                    <span className="font-medium text-[var(--text-primary)]">
+                    <span className="text-(--text-secondary) capitalize">{typeData.type}</span>
+                    <span className="font-medium text-(--text-primary)">
                       ${typeData.cost.toLocaleString()} ({typeData.percentage.toFixed(1)}%)
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[var(--background-subtle)]">
+                  <div className="h-2 overflow-hidden rounded-full bg-(--background-subtle)">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"
+                      className="h-full rounded-full bg-linear-to-r from-blue-500 to-cyan-500"
                       style={{ width: `${typeData.percentage}%` }}
                     />
                   </div>
@@ -129,7 +129,7 @@ export default function CostAnalysis() {
         )}
 
         {data.totalCost === 0 && (
-          <p className="text-center text-sm text-[var(--text-secondary)]">
+          <p className="text-center text-sm text-(--text-secondary)">
             {t('costAnalysis.noData')}
           </p>
         )}

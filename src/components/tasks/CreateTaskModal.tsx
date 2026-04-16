@@ -121,7 +121,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-[var(--border)]">
+      <div className="relative bg-(--card) rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-(--border)">
         {/* Header */}
         <div className="px-6 py-5">
           <div className="flex items-center justify-between">
@@ -150,20 +150,20 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+            <label className="block text-sm font-semibold text-(--text-secondary) mb-1.5">
               {t('task.taskTitleRequired')}
             </label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('task.titlePlaceholder')}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
+              className="w-full px-4 py-2.5 rounded-xl border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-(--text-muted)"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+            <label className="block text-sm font-semibold text-(--text-secondary) mb-1.5">
               {t('task.description')}
             </label>
             <textarea
@@ -171,19 +171,19 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('task.descriptionPlaceholder')}
               rows={3}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none placeholder:text-[var(--text-muted)]"
+              className="w-full px-4 py-2.5 rounded-xl border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none placeholder:text-(--text-muted)"
             />
           </div>
 
           {/* Assignee */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+            <label className="block text-sm font-semibold text-(--text-secondary) mb-1.5">
               {t('task.assignToRequired')}
             </label>
             <select
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              className="w-full px-4 py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
             >
               <option value="">{t('task.selectEmployee')}</option>
               {availableEmployees?.map((emp) => (
@@ -207,13 +207,13 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
           {/* Priority + Deadline row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-sm font-semibold text-(--text-secondary) mb-1.5">
                 {t('task.priority')}
               </label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as any)}
-                className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               >
                 <option value="low">{t('task.low')}</option>
                 <option value="medium">{t('task.medium')}</option>
@@ -222,7 +222,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-sm font-semibold text-(--text-secondary) mb-1.5">
                 {t('task.deadline')}
               </label>
               <input
@@ -230,22 +230,22 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">
+            <label className="block text-sm font-semibold text-(--text-secondary) mb-1.5">
               {t('task.tags')}{' '}
-              <span className="font-normal text-[var(--text-muted)]">{t('task.tagsHint')}</span>
+              <span className="font-normal text-(--text-muted)">{t('task.tagsHint')}</span>
             </label>
             <input
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder={t('task.tagsPlaceholder')}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
+              className="w-full px-4 py-2.5 rounded-xl border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-(--text-muted)"
             />
           </div>
 
@@ -254,14 +254,14 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--background-subtle)] transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-(--border) text-(--text-secondary) text-sm font-medium hover:bg-(--background-subtle) transition-colors"
             >
               {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-700 text-white text-sm font-semibold shadow-md shadow-blue-500/20 transition-all disabled:opacity-60"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-linear-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-700 text-white text-sm font-semibold shadow-md shadow-blue-500/20 transition-all disabled:opacity-60"
             >
               {loading ? t('task.creating') : t('task.createTaskButton')}
             </button>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import Image from 'next/image';
 
 import { useTranslation } from 'react-i18next';
@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Id } from '../../../convex/_generated/dataModel';
 
-interface AttendanceRecord {
+export interface AttendanceRecord {
   _id: string;
   userId: Id<'users'>;
   date: string;
@@ -112,7 +112,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
             style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
           >
             {/* Header gradient */}
-            <div className="relative h-28 bg-gradient-to-br from-blue-600 to-sky-700 flex items-end px-6 pb-4">
+            <div className="relative h-28 bg-linear-to-br from-blue-600 to-sky-700 flex items-end px-6 pb-4">
               <Button
                 onClick={onClose}
                 variant="ghost"
@@ -124,7 +124,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
 
               {/* Avatar */}
               <div className="flex items-end gap-4">
-                <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden shadow-lg bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full shrink-0 overflow-hidden shadow-lg bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-2xl font-bold">
                   {record.user?.avatarUrl ? (
                     <img
                       src={record.user.avatarUrl}
@@ -205,7 +205,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                   </div>
 
                   {/* Arrow */}
-                  <div className="text-[var(--text-muted)] text-lg">→</div>
+                  <div className="text-(--text-muted) text-lg">→</div>
 
                   {/* Check Out */}
                   <div className="flex-1 rounded-lg p-3 bg-white dark:bg-gray-900">

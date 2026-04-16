@@ -155,7 +155,7 @@ export function SupervisorRatingForm({
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base">{category.label}</Label>
-                  <p className="text-sm text-[var(--text-muted)]">{category.description}</p>
+                  <p className="text-sm text-(--text-muted)">{category.description}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((value) => (
@@ -187,7 +187,7 @@ export function SupervisorRatingForm({
         </div>
 
         {/* Average Score */}
-        <div className="p-4 rounded-lg bg-[var(--input)]">
+        <div className="p-4 rounded-lg bg-(--input)">
           <div className="flex items-center justify-between">
             <span className="font-medium text-black/70 dark:text-white/70">
               {t('rating.overallAverage', 'Overall Average')}
@@ -197,7 +197,7 @@ export function SupervisorRatingForm({
               <span className="text-3xl font-bold text-sky-500 dark:text-sky-400">
                 {averageRating.toFixed(1)}
               </span>
-              <span className="text-sm text-[var(--text-muted)]">/ 5.0</span>
+              <span className="text-sm text-(--text-muted)">/ 5.0</span>
             </div>
           </div>
         </div>

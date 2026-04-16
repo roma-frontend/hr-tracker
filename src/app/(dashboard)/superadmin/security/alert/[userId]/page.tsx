@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -20,6 +19,7 @@ import {
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 export default function SecurityAlertDetailPage() {
   const { t } = useTranslation();
@@ -200,9 +200,11 @@ export default function SecurityAlertDetailPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   {suspiciousUser.avatarUrl ? (
-                    <img
+                    <Image
                       src={suspiciousUser.avatarUrl}
                       alt={suspiciousUser.name}
+                      width={64}
+                      height={64}
                       className="w-16 h-16 rounded-full"
                     />
                   ) : (

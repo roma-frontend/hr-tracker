@@ -14,12 +14,14 @@ import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
 // Recharts is ~500KB — lazy load chart components so they don't block
 // the initial analytics page render
 const ChartSkeleton = () => (
-  <div className="h-96 bg-[var(--background-subtle)] animate-pulse rounded-2xl" />
+  <div className="h-96 bg-(--background-subtle) animate-pulse rounded-2xl" />
 );
 const LeavesTrendChart = dynamic(
   () =>
     import('@/components/analytics/LeavesTrendChart').then((mod) => ({
-      default: (props: any) => (
+      default: (props: {
+        leaves: Array<{ startDate: string; endDate: string; days: number; status: string }>;
+      }) => (
         <WidgetErrorBoundary name="LeavesTrendChart">
           <mod.LeavesTrendChart {...props} />
         </WidgetErrorBoundary>
@@ -27,10 +29,11 @@ const LeavesTrendChart = dynamic(
     })),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
+import type { User } from '@/components/analytics/DepartmentStats';
 const DepartmentStats = dynamic(
   () =>
     import('@/components/analytics/DepartmentStats').then((mod) => ({
-      default: (props: any) => (
+      default: (props: { users: User[] }) => (
         <WidgetErrorBoundary name="DepartmentStats">
           <mod.DepartmentStats {...props} />
         </WidgetErrorBoundary>
@@ -41,7 +44,10 @@ const DepartmentStats = dynamic(
 const LeaveHeatmap = dynamic(
   () =>
     import('@/components/analytics/LeaveHeatmap').then((mod) => ({
-      default: (props: any) => (
+      default: (props: {
+        leaves: Array<{ startDate: string; endDate: string; status: string }>;
+        month?: Date;
+      }) => (
         <WidgetErrorBoundary name="LeaveHeatmap">
           <mod.LeaveHeatmap {...props} />
         </WidgetErrorBoundary>
@@ -83,15 +89,15 @@ export default function AnalyticsPage() {
   if (!analytics) {
     return (
       <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-        <div className="h-10 bg-[var(--background-subtle)] animate-pulse rounded-lg w-64" />
+        <div className="h-10 bg-(--background-subtle) animate-pulse rounded-lg w-64" />
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-[var(--background-subtle)] animate-pulse rounded-2xl" />
+            <div key={i} className="h-32 bg-(--background-subtle) animate-pulse rounded-2xl" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           {[1, 2].map((i) => (
-            <div key={i} className="h-96 bg-[var(--background-subtle)] animate-pulse rounded-2xl" />
+            <div key={i} className="h-96 bg-(--background-subtle) animate-pulse rounded-2xl" />
           ))}
         </div>
       </div>
@@ -120,12 +126,10 @@ export default function AnalyticsPage() {
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+          <h2 className="text-2xl font-bold text-(--text-primary)">
             {t('analytics.analyticsDashboard')}
           </h2>
-          <p className="text-[var(--text-muted)] text-sm mt-1">
-            {t('analytics.hrMetricsOverview')}
-          </p>
+          <p className="text-(--text-muted) text-sm mt-1">{t('analytics.hrMetricsOverview')}</p>
         </div>
 
         {/* KPI Cards */}
@@ -158,10 +162,10 @@ export default function AnalyticsPage() {
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-          <div className="bg-[var(--background)] rounded-2xl p-4 sm:p-6 shadow-lg border border-[var(--border)]">
+          <div className="bg-(--background) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+                <p className="text-xs sm:text-sm text-(--text-muted)">
                   {t('analytics.pendingLeaves')}
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-1">
@@ -174,10 +178,10 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="bg-[var(--background)] rounded-2xl p-4 sm:p-6 shadow-lg border border-[var(--border)]">
+          <div className="bg-(--background) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+                <p className="text-xs sm:text-sm text-(--text-muted)">
                   {t('analytics.approvedLeaves')}
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-500 mt-1">
@@ -190,10 +194,10 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="bg-[var(--background)] rounded-2xl p-4 sm:p-6 shadow-lg border border-[var(--border)]">
+          <div className="bg-(--background) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+                <p className="text-xs sm:text-sm text-(--text-muted)">
                   {t('analytics.approvalRate')}
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-500 mt-1">

@@ -127,7 +127,7 @@ export function SmartBanner({
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-              className="flex-shrink-0"
+              className="shrink-0"
             >
               {icon || <Icon className={`w-5 h-5 ${iconColors[type]}`} />}
             </motion.div>
@@ -151,7 +151,7 @@ export function SmartBanner({
                   transition={{ delay: 0.2 }}
                   className="flex items-start gap-2 text-xs opacity-90"
                 >
-                  <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
                   <p className="leading-relaxed">{suggestion}</p>
                 </motion.div>
               )}

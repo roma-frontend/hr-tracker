@@ -181,21 +181,21 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[var(--primary)]" />
+            <Calendar className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
           <CardDescription>{t('settingsIntegration.calendarSync')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Google Calendar — working */}
-          <div className="flex items-start justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-start justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3 flex-1">
               <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-blue-500" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-medium text-(--text-primary)">
                     {t('settingsIntegration.googleCalendar')}
                   </p>
                   {googleConnected && (
@@ -205,11 +205,11 @@ export function IntegrationSettings() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsIntegration.googleCalendarDesc')}
                 </p>
                 {googleConnected && googleEmail && (
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{googleEmail}</p>
+                  <p className="text-xs text-(--text-muted) mt-1">{googleEmail}</p>
                 )}
               </div>
             </div>
@@ -235,14 +235,14 @@ export function IntegrationSettings() {
           </div>
 
           {/* Outlook Calendar — coming soon */}
-          <div className="flex items-start justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)] opacity-70">
+          <div className="flex items-start justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border) opacity-70">
             <div className="flex items-start gap-3 flex-1">
               <div className="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-blue-600" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-medium text-(--text-primary)">
                     {t('settingsIntegration.outlookCalendar')}
                   </p>
                   <Badge variant="outline" className="text-xs gap-1">
@@ -250,7 +250,7 @@ export function IntegrationSettings() {
                     {t('settingsIntegration.comingSoon')}
                   </Badge>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsIntegration.outlookCalendarDesc')}
                 </p>
               </div>
@@ -266,7 +266,7 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-[var(--primary)]" />
+            <Users className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsIntegration.sharepointEmployeeSync') || 'SharePoint Employee Sync'}</CardTitle>
           </div>
           <CardDescription>
@@ -274,14 +274,14 @@ export function IntegrationSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex items-start justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-start justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3 flex-1">
               <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center">
                 <Users className="w-5 h-5 text-teal-500" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-medium text-(--text-primary)">
                     {t('settingsIntegration.microsoftSharePoint') || 'Microsoft SharePoint'}
                   </p>
                   {sharepointConnected && (
@@ -291,11 +291,11 @@ export function IntegrationSettings() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsIntegration.sharepointAutoSync') || 'Automatically sync employees from your SharePoint List'}
                 </p>
                 {sharepointConnected && sharepointEmail && (
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{sharepointEmail}</p>
+                  <p className="text-xs text-(--text-muted) mt-1">{sharepointEmail}</p>
                 )}
               </div>
             </div>
@@ -343,20 +343,20 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Mail className="w-5 h-5 text-[var(--primary)]" />
+            <Mail className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
           <CardDescription>{t('settingsIntegration.emailReports')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3">
               <span className="text-2xl">📧</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('settingsIntegration.automatedReports')}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-(--text-muted) mt-0.5">
                   {t('settingsIntegration.automatedReportsDesc')}
                 </p>
               </div>
@@ -365,11 +365,11 @@ export function IntegrationSettings() {
           </div>
 
           {emailReports && (
-            <div className="p-4 rounded-lg border border-[var(--primary)]/20 bg-[var(--primary)]/5 space-y-2">
-              <p className="text-sm font-medium text-[var(--text-primary)]">
+            <div className="p-4 rounded-lg border border-(--primary)/20 bg-(--primary)/5 space-y-2">
+              <p className="text-sm font-medium text-(--text-primary)">
                 {t('settingsIntegration.reportSchedule')}
               </p>
-              <div className="space-y-1 text-xs text-[var(--text-muted)]">
+              <div className="space-y-1 text-xs text-(--text-muted)">
                 <p>• {t('settingsIntegration.weeklySummary')}</p>
                 <p>• {t('settingsIntegration.monthlyAnalytics')}</p>
                 <p>• {t('settingsIntegration.leaveApprovals')}</p>
@@ -383,21 +383,21 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-[var(--primary)]" />
+            <MessageSquare className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
           <CardDescription>{t('settingsIntegration.teamCommunication')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Slack */}
-          <div className="flex items-start justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-start justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3 flex-1">
               <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <MessageSquare className="w-5 h-5 text-purple-500" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-medium text-(--text-primary)">
                     {t('settingsIntegration.slack')}
                   </p>
                   {slackNotifications && (
@@ -406,7 +406,7 @@ export function IntegrationSettings() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsIntegration.slackDesc')}
                 </p>
               </div>
@@ -423,14 +423,14 @@ export function IntegrationSettings() {
           </div>
 
           {/* Microsoft Teams — coming soon */}
-          <div className="flex items-start justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)] opacity-70">
+          <div className="flex items-start justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border) opacity-70">
             <div className="flex items-start gap-3 flex-1">
               <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                 <MessageSquare className="w-5 h-5 text-indigo-500" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-medium text-(--text-primary)">
                     {t('settingsIntegration.microsoftTeams')}
                   </p>
                   <Badge variant="outline" className="text-xs gap-1">
@@ -438,7 +438,7 @@ export function IntegrationSettings() {
                     {t('settingsIntegration.comingSoon')}
                   </Badge>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsIntegration.microsoftTeamsDesc')}
                 </p>
               </div>
@@ -454,7 +454,7 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Download className="w-5 h-5 text-[var(--primary)]" />
+            <Download className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsIntegration.title')}</CardTitle>
           </div>
           <CardDescription>{t('settingsIntegration.dataManagement')}</CardDescription>
@@ -479,14 +479,14 @@ export function IntegrationSettings() {
             </Button>
           </div>
 
-          <div className="p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3">
               <span className="text-xl">💾</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('settingsIntegration.lastBackup')}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('settingsIntegration.neverBackedUp')}
                 </p>
               </div>

@@ -193,10 +193,10 @@ export default function ProfilePage() {
     >
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+        <h2 className="text-2xl font-bold text-(--text-primary)">
           {t('profileSettings.myProfile')}
         </h2>
-        <p className="text-[var(--text-muted)] text-sm mt-1">
+        <p className="text-(--text-muted) text-sm mt-1">
           {t('profileSettings.managePersonalInfo')}
         </p>
       </div>
@@ -205,7 +205,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Upload className="w-4 h-4 text-[var(--primary)]" />
+            <Upload className="w-4 h-4 text-(--primary)" />
             <CardTitle className="text-base">{t('profileSettings.profilePicture')}</CardTitle>
           </div>
           <CardDescription>{t('ui.profilePictureUpload')}</CardDescription>
@@ -229,10 +229,10 @@ export default function ProfilePage() {
             {/* Info & Actions */}
             <div className="flex-1 space-y-3">
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('ui.clickCameraToUpload')}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-xs text-(--text-muted) mt-1">
                   {t('ui.recommendedImageSize')}
                 </p>
               </div>
@@ -257,7 +257,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <UserIcon className="w-4 h-4 text-[var(--primary)]" />
+            <UserIcon className="w-4 h-4 text-(--primary)" />
             <CardTitle className="text-base">{t('ui.personalInformation')}</CardTitle>
           </div>
           <CardDescription>{t('profileSettings.updateDetails')}</CardDescription>
@@ -269,7 +269,7 @@ export default function ProfilePage() {
                 {t('labels.fullName')} {t('forms.required')}
               </Label>
               <div className="relative">
-                <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <Input
                   id="name"
                   value={name}
@@ -285,7 +285,7 @@ export default function ProfilePage() {
                 {t('labels.emailAddress')} {t('forms.required')}
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <Input
                   id="email"
                   value={email}
@@ -300,7 +300,7 @@ export default function ProfilePage() {
             <div className="space-y-1.5">
               <Label htmlFor="phone">{t('labels.phoneNumber')}</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <Input
                   id="phone"
                   value={phone}
@@ -315,7 +315,7 @@ export default function ProfilePage() {
             <div className="space-y-1.5">
               <Label htmlFor="location">{t('labels.location')}</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <Input
                   id="location"
                   value={location}
@@ -333,7 +333,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[var(--primary)]" />
+            <Shield className="w-4 h-4 text-(--primary)" />
             <CardTitle className="text-base">{t('ui.accountInformation')}</CardTitle>
           </div>
           <CardDescription>{t('ui.yourAccountDetails')}</CardDescription>
@@ -352,7 +352,7 @@ export default function ProfilePage() {
             <div className="space-y-1.5">
               <Label>{t('employeeInfo.department')}</Label>
               <div className="relative">
-                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <Input
                   value={user?.department ?? 'Not assigned'}
                   disabled
@@ -364,7 +364,7 @@ export default function ProfilePage() {
             <div className="space-y-1.5">
               <Label>{t('ui.memberSince')}</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <Input value={joinDate} disabled className="pl-10 opacity-60" />
               </div>
             </div>
@@ -372,7 +372,7 @@ export default function ProfilePage() {
             <div className="space-y-1.5">
               <Label>{t('labels.userId')}</Label>
               <div className="relative">
-                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                 <Input
                   value={user?.id ? user.id.slice(0, 16) + '...' : 'N/A'}
                   disabled
@@ -384,7 +384,7 @@ export default function ProfilePage() {
 
           {/* Info note */}
           <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-sm">
-            <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <Shield className="w-4 h-4 shrink-0 mt-0.5" />
             <p>{t('profile.roleManagedByAdmin')}</p>
           </div>
         </CardContent>
@@ -394,7 +394,7 @@ export default function ProfilePage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Award className="w-4 h-4 text-[var(--primary)]" />
+            <Award className="w-4 h-4 text-(--primary)" />
             <CardTitle className="text-base">{t('ui.activityStats')}</CardTitle>
           </div>
           <CardDescription>{t('ui.yourActivity')}</CardDescription>
@@ -426,11 +426,11 @@ export default function ProfilePage() {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="flex flex-col items-center p-4 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] hover:border-[var(--primary)] transition-all"
+                  className="flex flex-col items-center p-4 rounded-lg border border-(--border) bg-(--background-subtle) hover:border-(--primary) transition-all"
                 >
-                  <stat.icon className="w-5 h-5 text-[var(--primary)] mb-2" />
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</p>
-                  <p className="text-xs text-[var(--text-muted)] text-center mt-1">{stat.label}</p>
+                  <stat.icon className="w-5 h-5 text-(--primary) mb-2" />
+                  <p className="text-2xl font-bold text-(--text-primary)">{stat.value}</p>
+                  <p className="text-xs text-(--text-muted) text-center mt-1">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -488,7 +488,7 @@ export default function ProfilePage() {
               borderColor: 'var(--destructive-border, rgba(239, 68, 68, 0.3))',
             }}
           >
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               {user?.avatar ? (
                 <img
                   src={user.avatar}
@@ -496,7 +496,7 @@ export default function ProfilePage() {
                   className="w-16 h-16 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
                   {user?.name?.charAt(0) || 'U'}
                 </div>
               )}

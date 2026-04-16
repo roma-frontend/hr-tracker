@@ -57,17 +57,17 @@ function SLASettings() {
   };
 
   return (
-    <Card className="border-[var(--border)] bg-[var(--card)]">
+    <Card className="border-(--border) bg-(--card)">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
             <Settings className="w-5 h-5 text-blue-500" />
           </div>
           <div>
-            <CardTitle className="text-lg font-bold text-[var(--text-primary)]">
+            <CardTitle className="text-lg font-bold text-(--text-primary)">
               SLA Configuration
             </CardTitle>
-            <CardDescription className="text-sm text-[var(--text-muted)]">
+            <CardDescription className="text-sm text-(--text-muted)">
               Configure response time targets and thresholds
             </CardDescription>
           </div>
@@ -76,7 +76,7 @@ function SLASettings() {
       <CardContent className="space-y-6">
         {/* Target Response Time */}
         <div className="space-y-2">
-          <Label htmlFor="target" className="text-sm font-medium text-[var(--text-primary)]">
+          <Label htmlFor="target" className="text-sm font-medium text-(--text-primary)">
             Target Response Time (hours)
           </Label>
           <Input
@@ -88,14 +88,14 @@ function SLASettings() {
             onChange={(e) => setTargetHours(Number(e.target.value))}
             className="max-w-xs"
           />
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-(--text-muted)">
             {t('sla.targetHint', { hours: targetHours })}
           </p>
         </div>
 
         {/* Warning Threshold */}
         <div className="space-y-2">
-          <Label htmlFor="warning" className="text-sm font-medium text-[var(--text-primary)]">
+          <Label htmlFor="warning" className="text-sm font-medium text-(--text-primary)">
             Warning Threshold (%)
           </Label>
           <div className="flex items-center gap-3">
@@ -108,18 +108,18 @@ function SLASettings() {
               onChange={(e) => setWarningThreshold(Number(e.target.value))}
               className="max-w-xs"
             />
-            <span className="text-sm text-[var(--text-muted)]">
+            <span className="text-sm text-(--text-muted)">
               = {Math.round((targetHours * warningThreshold) / 100)} hours
             </span>
           </div>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-(--text-muted)">
             {t('sla.warningHint', { percent: warningThreshold })}
           </p>
         </div>
 
         {/* Critical Threshold */}
         <div className="space-y-2">
-          <Label htmlFor="critical" className="text-sm font-medium text-[var(--text-primary)]">
+          <Label htmlFor="critical" className="text-sm font-medium text-(--text-primary)">
             Critical Threshold (%)
           </Label>
           <div className="flex items-center gap-3">
@@ -132,11 +132,11 @@ function SLASettings() {
               onChange={(e) => setCriticalThreshold(Number(e.target.value))}
               className="max-w-xs"
             />
-            <span className="text-sm text-[var(--text-muted)]">
+            <span className="text-sm text-(--text-muted)">
               = {Math.round((targetHours * criticalThreshold) / 100)} hours
             </span>
           </div>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-(--text-muted)">
             {t('sla.criticalHint', { percent: criticalThreshold })}
           </p>
         </div>
@@ -148,7 +148,7 @@ function SLASettings() {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg"
           >
-            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
             <div className="text-sm text-amber-600 dark:text-amber-400">
               {t('sla.thresholdError')}
             </div>
@@ -156,7 +156,7 @@ function SLASettings() {
         )}
 
         {/* Save Button */}
-        <div className="flex justify-end pt-4 border-t border-[var(--border)]">
+        <div className="flex justify-end pt-4 border-t border-(--border)">
           <Button
             onClick={handleSave}
             disabled={isSaving || warningThreshold >= criticalThreshold}

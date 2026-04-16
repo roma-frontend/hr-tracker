@@ -33,7 +33,7 @@ export const DriverFilters = memo(function DriverFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Filter className="w-4 h-4 text-[var(--text-muted)]" />
+      <Filter className="w-4 h-4 text-(--text-muted)" />
       <Select
         value={String(capacityFilter ?? 0)}
         onValueChange={(v) => onCapacityChange(v === '0' ? null : Number(v))}

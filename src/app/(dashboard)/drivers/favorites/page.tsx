@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
@@ -17,8 +17,7 @@ import { motion } from '@/lib/cssMotion';
 import { Heart, ChevronLeft, Shield, Search, Car, Users, MapPin, Star } from 'lucide-react';
 
 // Isolate Convex API refs to avoid deep type instantiation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const removeFavoriteApi: any = api.drivers.driver_registration.removeFavoriteDriver;
+const removeFavoriteApi = api.drivers.driver_registration.removeFavoriteDriver;
 
 interface DriverData {
   _id: string;
@@ -37,11 +36,17 @@ interface DriverData {
 
 export default function FavoritesPage() {
   const { t } = useTranslation();
-  const router = useRouter();
+  const _router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showTripDetails, setShowTripDetails] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<Record<string, unknown> | null>(null);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const userId = user?.id as Id<'users'> | undefined;
   const orgId = user?.organizationId as Id<'organizations'> | undefined;
@@ -54,11 +59,11 @@ export default function FavoritesPage() {
   );
 
   const drivers = useMemo((): DriverData[] => {
-    // getFavoriteDrivers returns enriched driver objects with _id = driver._id
-    const base = (favoriteDrivers ?? [])
-      .filter((d: any) => d._id) // Filter out entries without valid _id
-      .map((d: any, index: number) => ({
-        _id: d._id,
+    if (!favoriteDrivers || favoriteDrivers.length === 0) return [];
+    const base = favoriteDrivers
+      .filter((d): d is NonNullable<typeof d> => d !== null)
+      .map((d) => ({
+        _id: d._id as string,
         userName: d.userName ?? 'Unknown',
         userAvatar: d.userAvatar,
         userPosition: d.userPosition,
@@ -77,8 +82,9 @@ export default function FavoritesPage() {
       try {
         await removeFavorite({ userId, driverId: driverId as Id<'drivers'> });
         toast.success(t('driver.removedFromFavorites', 'Removed from favorites'));
-      } catch (e: any) {
-        toast.error(e.message || t('driver.failed', 'Failed'));
+      } catch (e) {
+        const message = e instanceof Error ? e.message : t('driver.failed', 'Failed');
+        toast.error(message);
       }
     },
     [userId, orgId, removeFavorite, t],
@@ -98,19 +104,19 @@ export default function FavoritesPage() {
           to: driver.userPosition || '',
         },
         userName: driver.userName,
-      });
+      } as Record<string, unknown>);
       setShowTripDetails(true);
     },
     [drivers],
   );
 
   if (!isAuthenticated) {
-    router.push('/login');
+    _router.push('/login');
     return null;
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-6">
+    <div className="max-w-350 mx-auto p-4 md:p-6 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -123,7 +129,7 @@ export default function FavoritesPage() {
             variant="ghost"
             size="icon"
             className="rounded-xl hover:bg-muted/50"
-            onClick={() => router.push('/drivers')}
+            onClick={() => _router.push('/drivers')}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
@@ -191,8 +197,8 @@ export default function FavoritesPage() {
           </p>
           {!searchQuery && (
             <Button
-              onClick={() => router.push('/drivers')}
-              className="rounded-xl gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all"
+              onClick={() => _router.push('/drivers')}
+              className="rounded-xl gap-2 bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all"
             >
               <Car className="w-4 h-4" />
               {t('driver.favorites.browseDrivers', 'Browse Drivers')}
@@ -210,7 +216,7 @@ export default function FavoritesPage() {
             >
               <Card className="group relative overflow-hidden border border-border/50 bg-card/50 hover:border-border hover:shadow-lg transition-all duration-300">
                 {/* Gradient top border */}
-                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-red-500/50 via-primary/50 to-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute top-0 left-0 right-0 h-0.75 bg-linear-to-r from-red-500/50 via-primary/50 to-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 <CardContent className="pt-6">
                   <div className="flex flex-col items-start gap-4">
@@ -285,7 +291,7 @@ export default function FavoritesPage() {
                     <Button
                       size="sm"
                       onClick={() => handleBook(driver._id)}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all font-medium text-sm"
+                      className="flex-1 rounded-xl bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all font-medium text-sm"
                     >
                       {t('driver.book', 'Book')}
                     </Button>
@@ -310,8 +316,9 @@ export default function FavoritesPage() {
         >
           <div className="w-full max-w-2xl min-h-screen sm:min-h-0 flex items-center justify-center">
             <TripDetailsModal
-              schedule={selectedRequest}
-              currentTime={Date.now()}
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+              schedule={selectedRequest as any}
+              currentTime={currentTime}
               onClose={() => {
                 setShowTripDetails(false);
                 setSelectedRequest(null);

@@ -13,9 +13,9 @@ type Priority = 'low' | 'medium' | 'high' | 'urgent';
 
 const STATUS_STYLES: Record<Status, { color: string; bg: string; dot: string }> = {
   pending: {
-    color: 'text-[var(--text-muted)]',
-    bg: 'bg-[var(--background-subtle)]',
-    dot: 'bg-[var(--text-muted)]',
+    color: 'text-(--text-muted)',
+    bg: 'bg-(--background-subtle)',
+    dot: 'bg-(--text-muted)',
   },
   in_progress: { color: 'text-blue-400', bg: 'bg-blue-500/10', dot: 'bg-blue-500' },
   review: { color: 'text-amber-400', bg: 'bg-amber-500/10', dot: 'bg-amber-500' },
@@ -24,7 +24,7 @@ const STATUS_STYLES: Record<Status, { color: string; bg: string; dot: string }> 
 };
 
 const PRIORITY_STYLES: Record<Priority, { color: string; bg: string; icon: string }> = {
-  low: { color: 'text-[var(--text-muted)]', bg: 'bg-[var(--background-subtle)]', icon: '↓' },
+  low: { color: 'text-(--text-muted)', bg: 'bg-(--background-subtle)', icon: '↓' },
   medium: { color: 'text-blue-400', bg: 'bg-blue-500/10', icon: '→' },
   high: { color: 'text-orange-400', bg: 'bg-orange-500/10', icon: '↑' },
   urgent: { color: 'text-rose-400', bg: 'bg-rose-500/10', icon: '⚡' },
@@ -76,7 +76,7 @@ function Avatar({ name, url }: { name: string; url?: string | null }) {
     .toUpperCase()
     .slice(0, 2);
   return (
-    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white text-xs bg-gradient-to-br from-blue-500 to-sky-500">
+    <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold text-white text-xs bg-linear-to-br from-blue-500 to-sky-500">
       {url ? (
         <img
           src={url}
@@ -171,9 +171,9 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[var(--card)] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border)]">
+      <div className="relative bg-(--card) rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-(--border)">
         {/* Header */}
-        <div className="px-6 py-5 flex-shrink-0">
+        <div className="px-6 py-5 shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {editMode ? (
@@ -199,7 +199,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {canManage && !editMode && (
                 <Button
                   onClick={() => setEditMode(true)}
@@ -249,7 +249,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
           <div className="p-6 space-y-6">
             {/* Description */}
             <div>
-              <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+              <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
                 Description
               </h3>
               {editMode ? (
@@ -257,12 +257,12 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
                 />
               ) : (
-                <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
+                <p className="text-(--text-secondary) text-sm leading-relaxed">
                   {task.description || (
-                    <span className="text-[var(--text-muted)] italic">No description</span>
+                    <span className="text-(--text-muted) italic">No description</span>
                   )}
                 </p>
               )}
@@ -271,7 +271,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Meta info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
                   Assigned To
                 </h3>
                 <div className="flex items-center gap-2">
@@ -280,17 +280,17 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     url={task.assignedToUser?.avatarUrl}
                   />
                   <div>
-                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                    <p className="text-sm font-medium text-(--text-primary)">
                       {task.assignedToUser?.name ?? '—'}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-(--text-muted)">
                       {task.assignedToUser?.position ?? ''}
                     </p>
                   </div>
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
                   Assigned By
                 </h3>
                 <div className="flex items-center gap-2">
@@ -299,24 +299,24 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     url={task.assignedByUser?.avatarUrl}
                   />
                   <div>
-                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                    <p className="text-sm font-medium text-(--text-primary)">
                       {task.assignedByUser?.name ?? '—'}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-(--text-muted)">
                       {task.assignedByUser?.role ?? ''}
                     </p>
                   </div>
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
                   Priority
                 </h3>
                 {editMode ? (
                   <select
                     value={editPriority}
                     onChange={(e) => setEditPriority(e.target.value as Priority)}
-                    className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-1.5 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     <option value="low">↓ Low</option>
                     <option value="medium">→ Medium</option>
@@ -332,7 +332,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 )}
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
                   Deadline
                 </h3>
                 {editMode ? (
@@ -340,11 +340,11 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     type="date"
                     value={editDeadline}
                     onChange={(e) => setEditDeadline(e.target.value)}
-                    className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-1.5 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 ) : task.deadline ? (
                   <p
-                    className={`text-sm font-medium ${deadlinePassed ? 'text-rose-400' : 'text-[var(--text-primary)]'}`}
+                    className={`text-sm font-medium ${deadlinePassed ? 'text-rose-400' : 'text-(--text-primary)'}`}
                   >
                     {deadlinePassed ? '⏰ ' : '📅 '}
                     {new Date(task.deadline).toLocaleDateString('en-GB', {
@@ -354,7 +354,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     })}
                   </p>
                 ) : (
-                  <p className="text-sm text-[var(--text-muted)] italic">No deadline</p>
+                  <p className="text-sm text-(--text-muted) italic">No deadline</p>
                 )}
               </div>
             </div>
@@ -362,7 +362,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Tags */}
             {task.tags && task.tags.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
                   Tags
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -381,7 +381,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Status transitions */}
             {transitions.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
                   Move To
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -414,24 +414,24 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
 
             {/* Comments */}
             <div>
-              <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+              <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-3">
                 Comments {comments ? `(${comments.length})` : ''}
               </h3>
               <div className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-1">
                 {comments?.length === 0 && (
-                  <p className="text-sm text-[var(--text-muted)] italic text-center py-3">
+                  <p className="text-sm text-(--text-muted) italic text-center py-3">
                     No comments yet
                   </p>
                 )}
                 {comments?.map((c) => (
                   <div key={c._id} className="flex gap-3">
                     <Avatar name={c.author?.name ?? '?'} url={(c.author as any)?.avatarUrl} />
-                    <div className="flex-1 bg-[var(--background-subtle)] rounded-2xl px-4 py-3">
+                    <div className="flex-1 bg-(--background-subtle) rounded-2xl px-4 py-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold text-[var(--text-primary)]">
+                        <span className="text-xs font-semibold text-(--text-primary)">
                           {c.author?.name}
                         </span>
-                        <span className="text-xs text-[var(--text-muted)]">
+                        <span className="text-xs text-(--text-muted)">
                           {new Date(c.createdAt).toLocaleDateString('en-GB', {
                             day: '2-digit',
                             month: 'short',
@@ -440,7 +440,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                           })}
                         </span>
                       </div>
-                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      <p className="text-sm text-(--text-secondary) leading-relaxed">
                         {c.content}
                       </p>
                     </div>
@@ -454,12 +454,12 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder={t('placeholders.addAComment')}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-[var(--text-muted)]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-(--text-muted)"
                 />
                 <button
                   type="submit"
                   disabled={submitting || !comment.trim()}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white text-sm font-semibold disabled:opacity-50 hover:from-blue-700 hover:to-sky-700 transition-all shadow-sm"
+                  className="px-4 py-2.5 rounded-xl bg-linear-to-r from-blue-600 to-sky-500 text-white text-sm font-semibold disabled:opacity-50 hover:from-blue-700 hover:to-sky-700 transition-all shadow-sm"
                 >
                   {t('buttons.send')}
                 </button>

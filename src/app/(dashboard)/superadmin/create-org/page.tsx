@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '../../../../../convex/_generated/api';
+// cspell:disable
 import { useAuthStore } from '@/store/useAuthStore';
+// cspell:enable
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -33,8 +35,6 @@ export default function SuperadminCreateOrgPage() {
 
   const isSuperadmin =
     user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
-
-  console.log('🔍 [Create Org] User check:', { email: user.email, role: user.role, isSuperadmin });
 
   if (!isSuperadmin) {
     return (
@@ -68,8 +68,8 @@ export default function SuperadminCreateOrgPage() {
     try {
       toast.info(`Creating ${formData.name} organization...`);
 
-      const result = await createOrg({
-        superadminUserId: user.id as any,
+      await createOrg({
+        superadminUserId: user.id as never,
         name: formData.name,
         slug: formData.slug,
         plan: formData.plan,
@@ -91,9 +91,10 @@ export default function SuperadminCreateOrgPage() {
         industry: '',
         adminEmail: '',
       });
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create organization';
       console.error('Full error:', error);
-      toast.error(error.message || 'Failed to create organization');
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -205,7 +206,12 @@ export default function SuperadminCreateOrgPage() {
                 </label>
                 <select
                   value={formData.plan}
-                  onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      plan: e.target.value as 'starter' | 'professional' | 'enterprise',
+                    })
+                  }
                   className="w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
                   style={{
                     background: 'var(--background-subtle)',
@@ -300,7 +306,7 @@ export default function SuperadminCreateOrgPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity py-3 px-4 text-white font-semibold rounded-xl transition-all disabled:opacity-50 hover:opacity-90"
+              className="w-full bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-all py-3 px-4 text-white font-semibold rounded-xl disabled:opacity-50"
             >
               {loading
                 ? t('superadmin.organizations.creating')

@@ -15,11 +15,11 @@ import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 
 function SidebarSkeleton() {
   return (
-    <aside className="hidden lg:flex flex-col w-60 h-screen shrink-0 border-r bg-[var(--sidebar-bg)] border-[var(--sidebar-border)] animate-pulse">
-      <div className="h-16 border-b border-[var(--sidebar-border)]" />
+    <aside className="hidden lg:flex flex-col w-60 h-screen shrink-0 border-r bg-(--sidebar-bg) border-(--sidebar-border) animate-pulse">
+      <div className="h-16 border-b border-(--sidebar-border)" />
       <div className="flex-1 py-4 space-y-1">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="h-9 mx-2 rounded-lg bg-[var(--background-subtle)]/50" />
+          <div key={i} className="h-9 mx-2 rounded-lg bg-(--background-subtle)/50" />
         ))}
       </div>
     </aside>
@@ -39,7 +39,7 @@ const MobileSidebar = dynamic(
 const Navbar = dynamic(() => import('@/components/layout/Navbar').then((m) => m.Navbar), {
   ssr: false,
   loading: () => (
-    <div className="h-16 border-b border-[var(--border)] bg-[var(--navbar-bg)] fixed top-0 left-0 right-0 z-[60]" />
+    <div className="h-16 border-b border-(--border) bg-(--navbar-bg) fixed top-0 left-0 right-0 z-60" />
   ),
 });
 
@@ -90,9 +90,6 @@ const StatusUpdateBanner = dynamic(
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
-  const needsOnboarding = useAuthStore(
-    useShallow((state: { needsOnboarding: boolean }) => state.needsOnboarding),
-  );
   const { status } = useSession();
   const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
@@ -144,7 +141,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const isOAuthSyncing = status === 'authenticated' && !user;
   if (!hydrated || isOAuthSyncing) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+      <div className="flex h-screen items-center justify-center bg-(--background)">
         <ShieldLoader size="lg" />
       </div>
     );
@@ -153,7 +150,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Block dashboard access if user has no organization (onboarding required)
   if (user && !user.organizationId && !isOnboardingPage) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+      <div className="flex h-screen items-center justify-center bg-(--background)">
         <ShieldLoader size="lg" />
       </div>
     );
@@ -163,7 +160,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <ReactQueryProvider>
-        <div className="flex h-screen bg-[var(--background)] overflow-hidden">
+        <div className="flex h-screen bg-(--background) overflow-hidden">
           {/* Desktop Sidebar — ssr:false prevents localStorage persist mismatch */}
           <Sidebar />
 

@@ -136,7 +136,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
 
           <div className="space-y-1.5 text-xs">
             <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
-              <Mail className="w-3 h-3 flex-shrink-0" />
+              <Mail className="w-3 h-3 shrink-0" />
               <span className="truncate">{emp.email}</span>
             </div>
             {emp.phone && (
@@ -153,7 +153,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
             )}
             {emp.supervisorId && (
               <div className="flex items-center gap-2">
-                <UserCog className="w-3 h-3 flex-shrink-0 text-blue-400" />
+                <UserCog className="w-3 h-3 shrink-0 text-blue-400" />
                 <span className="truncate text-blue-500 font-medium">
                   {supervisor?.name ?? t('employees.noSupervisor')}
                 </span>
@@ -216,12 +216,12 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
         exit={{ opacity: 0, x: -20 }}
         transition={{ delay: index * 0.02 }}
         onClick={() => router.push(`/employees/${emp._id}`)}
-        className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-[var(--background-subtle)] relative"
+        className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-(--background-subtle) relative"
         style={{ borderColor: 'var(--border)', opacity: emp.isActive ? 1 : 0.5 }}
       >
         {/* Employee name + avatar */}
         <div className="sm:col-span-4 flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full overflow-hidden bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-9 h-9 rounded-full overflow-hidden bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 shrink-0 flex items-center justify-center text-white text-xs font-bold">
             {emp.avatarUrl ? (
               <img
                 src={emp.avatarUrl}
@@ -254,7 +254,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           </div>
           {/* Mobile-only action chevron */}
           <ChevronRight
-            className="w-4 h-4 sm:hidden flex-shrink-0"
+            className="w-4 h-4 sm:hidden shrink-0"
             style={{ color: 'var(--text-muted)' }}
           />
         </div>
@@ -351,7 +351,7 @@ export const EmployeeMenu = React.memo<{
   return (
     <>
       <div className="fixed inset-0 z-10" onClick={onClose} />
-      <div className="relative flex-shrink-0">
+      <div className="relative shrink-0">
         <button
           onClick={(e) => {
             e.stopPropagation();

@@ -50,7 +50,7 @@ export function PollCreator({
         value={pollQuestion}
         onChange={(e) => setPollQuestion(e.target.value)}
         placeholder={t('chat.pollQuestion')}
-        className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none mb-2"
+        className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) outline-none mb-2"
       />
       {pollOptions.map((opt, i) => (
         <div key={i} className="flex items-center gap-1 mb-1">
@@ -62,7 +62,7 @@ export function PollCreator({
               setPollOptions(o);
             }}
             placeholder={`${t('chat.option')} ${i + 1}`}
-            className="flex-1 px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
+            className="flex-1 px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) outline-none"
           />
           {pollOptions.length > 2 && (
             <button

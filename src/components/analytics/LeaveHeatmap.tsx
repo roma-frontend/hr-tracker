@@ -40,8 +40,8 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
   };
 
   return (
-    <div className="bg-[var(--background)] rounded-2xl p-6 shadow-lg border border-[var(--border)]">
-      <h3 className="text-xl font-bold mb-4 text-[var(--text-primary)]">
+    <div className="bg-(--background) rounded-2xl p-6 shadow-lg border border-(--border)">
+      <h3 className="text-xl font-bold mb-4 text-(--text-primary)">
         📅 {t('leaveHeatmap.title')} - {format(month, 'MMMM yyyy')}
       </h3>
 
@@ -55,7 +55,7 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
           t('leaveHeatmap.daysFri'),
           t('leaveHeatmap.daysSat'),
         ].map((day) => (
-          <div key={day} className="text-xs font-medium text-[var(--text-muted)] text-center">
+          <div key={day} className="text-xs font-medium text-(--text-muted) text-center">
             {day}
           </div>
         ))}
@@ -78,7 +78,7 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
         })}
       </div>
 
-      <div className="flex items-center gap-4 mt-4 text-xs text-[var(--text-muted)]">
+      <div className="flex items-center gap-4 mt-4 text-xs text-(--text-muted)">
         <span>{t('leaveHeatmap.less')}</span>
         <div className="flex gap-1">
           <div className="w-4 h-4 rounded bg-[var(--background-subtle-calendar)]" />

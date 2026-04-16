@@ -107,10 +107,10 @@ export default function SubscriptionsManagementPage() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
         <div className="w-full">
-          <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
+          <h1 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
             {t('superadmin.subscriptions.title')}
           </h1>
-          <p className="text-sm md:text-base text-[var(--text-muted)] mt-1">
+          <p className="text-sm md:text-base text-(--text-muted) mt-1">
             {t('superadmin.subscriptions.subtitle')}
           </p>
         </div>
@@ -124,10 +124,10 @@ export default function SubscriptionsManagementPage() {
 
       {/* Create Manual Subscription Form - Using Wizard */}
       {showForm && (
-        <Card className="border-[var(--primary)]/20 bg-[var(--card)]">
+        <Card className="border-(--primary)/20 bg-(--card)">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-[var(--primary)]" />
+              <Shield className="w-5 h-5 text-(--primary)" />
               {t('superadmin.subscriptions.createManualSubscription')}
             </CardTitle>
             <CardDescription>{t('superadmin.subscriptions.createManualSubDesc')}</CardDescription>
@@ -145,7 +145,7 @@ export default function SubscriptionsManagementPage() {
       )}
 
       {/* Subscriptions List */}
-      <Card className="bg-[var(--card)]">
+      <Card className="bg-(--card)">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
@@ -157,29 +157,29 @@ export default function SubscriptionsManagementPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                <tr className="border-b border-(--border)">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.organization')}
                   </th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.employees')}
                   </th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.plan')}
                   </th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.status')}
                   </th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.type')}
                   </th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.price')}
                   </th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.expires')}
                   </th>
-                  <th className="text-left py-3 px-2 text-[var(--text-muted)] font-semibold">
+                  <th className="text-left py-3 px-2 text-(--text-muted) font-semibold">
                     {t('superadmin.subscriptions.actions')}
                   </th>
                 </tr>
@@ -188,24 +188,24 @@ export default function SubscriptionsManagementPage() {
                 {subscriptions?.map((sub: any) => (
                   <tr
                     key={sub._id}
-                    className="border-b border-[var(--border)] hover:bg-[var(--background-subtle)] transition-colors"
+                    className="border-b border-(--border) hover:bg-(--background-subtle) transition-colors"
                   >
                     <td className="py-3 px-2">
                       <div>
-                        <p className="font-medium text-[var(--text-primary)]">
+                        <p className="font-medium text-(--text-primary)">
                           {sub.organizationName || 'Unknown'}
                         </p>
-                        <p className="text-xs text-[var(--text-muted)]">{sub.organizationSlug}</p>
+                        <p className="text-xs text-(--text-muted)">{sub.organizationSlug}</p>
                       </div>
                     </td>
                     <td className="py-3 px-2">
-                      <div className="flex items-center gap-1 text-[var(--text-muted)]">
+                      <div className="flex items-center gap-1 text-(--text-muted)">
                         <Users className="w-3 h-3" />
                         <span>{sub.employeeCount || 0}</span>
                       </div>
                     </td>
                     <td className="py-3 px-2">
-                      <span className="capitalize font-semibold text-[var(--text-primary)]">
+                      <span className="capitalize font-semibold text-(--text-primary)">
                         {sub.plan === 'enterprise' && '🏢 '}
                         {sub.plan === 'professional' && '💼 '}
                         {sub.plan === 'starter' && '⚡ '}
@@ -230,7 +230,7 @@ export default function SubscriptionsManagementPage() {
                         </Badge>
                       )}
                     </td>
-                    <td className="py-3 px-2 text-[var(--text-primary)]">
+                    <td className="py-3 px-2 text-(--text-primary)">
                       $
                       {(sub as any).metadata?.customPrice ||
                         (sub.plan === 'professional'
@@ -239,7 +239,7 @@ export default function SubscriptionsManagementPage() {
                             ? 'Custom'
                             : '0')}
                     </td>
-                    <td className="py-3 px-2 text-[var(--text-muted)] text-sm">
+                    <td className="py-3 px-2 text-(--text-muted) text-sm">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {new Date(sub.currentPeriodEnd ?? 0).toLocaleDateString()}

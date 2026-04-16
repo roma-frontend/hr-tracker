@@ -329,7 +329,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
     <Card className="p-6 bg-[var(--surface-base)] border-[var(--border-primary)]">
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+          <h3 className="text-lg font-semibold text-(--text-primary)">
             {t('faceRegistration.title', 'Register Face ID')}
           </h3>
           <p className="text-sm text-[var(--text-tertiary)] mt-1">
@@ -391,13 +391,13 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
         {/* Camera Selection */}
         {!isWebcamActive && !capturedImage && cameras.length > 1 && (
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">
+            <label className="text-sm font-medium text-(--text-secondary)">
               {t('faceRegistration.selectCamera', 'Select Camera:')}
             </label>
             <select
               value={selectedCamera}
               onChange={(e) => setSelectedCamera(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-base)] text-[var(--text-primary)]"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-base)] text-(--text-primary)"
             >
               {cameras.map((camera) => (
                 <option key={camera.deviceId} value={camera.deviceId}>
@@ -454,7 +454,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
           <h4 className="text-sm font-medium text-blue-400 mb-2">
             {t('faceRegistration.instructions', 'Instructions:')}
           </h4>
-          <ul className="text-xs text-[var(--text-secondary)] space-y-1 list-disc list-inside">
+          <ul className="text-xs text-(--text-secondary) space-y-1 list-disc list-inside">
             <li>{t('faceRegistration.positionFace', 'Position your face within the frame')}</li>
             <li>{t('faceRegistration.goodLighting', 'Ensure good lighting on your face')}</li>
             <li>{t('faceRegistration.lookAtCamera', 'Look directly at the camera')}</li>

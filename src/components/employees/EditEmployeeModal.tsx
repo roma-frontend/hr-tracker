@@ -348,7 +348,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
       <DialogContent className="max-w-lg max-h-[90vh] p-0">
         {/* Header with progress */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70" />
+          <div className="absolute inset-0 bg-linear-to-br from-(--primary) to-(--primary)/70" />
           <div className="relative z-10 px-6 pt-6 pb-4">
             <div className="flex items-center gap-3 mb-4">
               <AvatarUpload
@@ -441,7 +441,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                   <h3 className="text-sm font-semibold mb-1">
                     {t('wizard.personalInfo') || 'Personal Information'}
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-(--text-muted)">
                     {t('wizard.personalInfoDesc') || 'Basic details about the employee'}
                   </p>
                 </div>
@@ -520,7 +520,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                   <h3 className="text-sm font-semibold mb-1">
                     {t('wizard.workDetails') || 'Work Details'}
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-(--text-muted)">
                     {t('wizard.workDetailsDesc') || 'Department and position information'}
                   </p>
                 </div>
@@ -686,7 +686,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                   <h3 className="text-sm font-semibold mb-1">
                     {t('wizard.review') || 'Review Changes'}
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-(--text-muted)">
                     {t('wizard.reviewDesc') || 'Confirm the details before saving'}
                   </p>
                 </div>
@@ -720,8 +720,8 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                       : []),
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between text-sm">
-                      <span className="text-[var(--text-muted)]">{label}</span>
-                      <span className="font-medium text-[var(--text-primary)]">{value}</span>
+                      <span className="text-(--text-muted)">{label}</span>
+                      <span className="font-medium text-(--text-primary)">{value}</span>
                     </div>
                   ))}
                 </div>

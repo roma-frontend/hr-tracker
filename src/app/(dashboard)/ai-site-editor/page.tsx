@@ -38,9 +38,10 @@ export default function AISiteEditorPage() {
     user?.id ? { userId: user.id as Id<'users'> } : 'skip',
   );
 
-  // Only superadmin can access AI Site Editor
+  // Only superadmin can access AI Site Editor // cspell:disable-line
   React.useEffect(() => {
     if (user && user.role !== 'superadmin') {
+      // cspell:disable-line
       // Don't redirect, just show Coming Soon
     }
   }, [user, router]);
@@ -49,20 +50,19 @@ export default function AISiteEditorPage() {
     return null; // Providers.tsx will show ShieldLoader during loading
   }
 
-  // Show Coming Soon for non-superadmin users
+  // Show Coming Soon for non-superadmin users // cspell:disable-line
   if (user.role !== 'superadmin') {
+    // cspell:disable-line
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-6 text-center px-4">
-        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center animate-pulse">
+        <div className="w-24 h-24 rounded-3xl bg-linear-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center animate-pulse">
           <Sparkles className="w-12 h-12 text-purple-500" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">
+          <h1 className="text-3xl font-bold text-(--text-primary)">
             {t('aiSiteEditor.comingSoon')}
           </h1>
-          <p className="text-lg text-[var(--text-muted)] max-w-md">
-            {t('aiSiteEditor.comingSoonDesc')}
-          </p>
+          <p className="text-lg text-(--text-muted) max-w-md">{t('aiSiteEditor.comingSoonDesc')}</p>
           <div className="flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
             <Crown className="w-5 h-5 text-amber-500" />
             <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
@@ -72,7 +72,7 @@ export default function AISiteEditorPage() {
         </div>
         <Button
           onClick={() => router.push('/dashboard')}
-          className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg"
+          className="mt-4 px-6 py-3 bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg"
         >
           {t('common.backToDashboard')}
         </Button>
@@ -83,7 +83,7 @@ export default function AISiteEditorPage() {
   const isProfessionalOrHigher = plan === 'professional' || plan === 'enterprise';
 
   return (
-    <PlanGate feature={'aiSiteEditor' as any}>
+    <PlanGate feature="aiSiteEditor">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -133,7 +133,7 @@ export default function AISiteEditorPage() {
           </TabsList>
 
           {/* Chat Tab */}
-          <TabsContent value="chat" className="min-h-[600px]">
+          <TabsContent value="chat" className="min-h-150">
             <SiteEditorChat userId={currentUser._id} organizationId={currentUser.organizationId!} />
           </TabsContent>
 
@@ -244,7 +244,7 @@ export default function AISiteEditorPage() {
                 className={`p-6 md:col-span-2 ${!features.aiSiteEditorFullControl ? 'opacity-60' : ''}`}
               >
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-700/50 dark:to-pink-700/50 rounded-lg">
+                  <div className="p-3 bg-linear-to-br from-purple-600 to-pink-600 dark:from-purple-700/50 dark:to-pink-700/50 rounded-lg">
                     <Crown className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
@@ -287,7 +287,7 @@ export default function AISiteEditorPage() {
               <div className="space-y-8">
                 {/* Step 1 */}
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
+                  <div className="shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
                     1
                   </div>
                   <div>
@@ -304,7 +304,7 @@ export default function AISiteEditorPage() {
 
                 {/* Step 2 */}
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
+                  <div className="shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
                     2
                   </div>
                   <div>
@@ -315,7 +315,7 @@ export default function AISiteEditorPage() {
 
                 {/* Step 3 */}
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
+                  <div className="shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
                     3
                   </div>
                   <div>
@@ -326,7 +326,7 @@ export default function AISiteEditorPage() {
 
                 {/* Step 4 */}
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
+                  <div className="shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
                     4
                   </div>
                   <div>

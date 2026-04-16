@@ -8,7 +8,7 @@ import { useTheme } from '@/components/ThemeProvider';
 
 export function AppearanceSettings() {
   const { t } = useTranslation();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
@@ -42,7 +42,7 @@ export function AppearanceSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Palette className="w-5 h-5 text-[var(--primary)]" />
+            <Palette className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsExtended.appearance')}</CardTitle>
           </div>
           <CardDescription>{t('settingsExtended.customizeInterface')}</CardDescription>
@@ -50,24 +50,24 @@ export function AppearanceSettings() {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-[var(--text-primary)] mb-3">
+              <p className="text-sm font-medium text-(--text-primary) mb-3">
                 {t('settingsExtended.theme')}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {themes.map((t) => (
                   <div
                     key={t.value}
-                    className="relative px-4 py-4 rounded-lg border-2 border-[var(--border)] text-left"
+                    className="relative px-4 py-4 rounded-lg border-2 border-(--border) text-left"
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 rounded-lg bg-[var(--surface-hover)]">
-                        <t.icon className="w-5 h-5 text-[var(--text-muted)]" />
+                      <div className="p-2 rounded-lg bg-(--surface-hover)">
+                        <t.icon className="w-5 h-5 text-(--text-muted)" />
                       </div>
-                      <span className="text-sm font-medium text-[var(--text-muted)]">
+                      <span className="text-sm font-medium text-(--text-muted)">
                         {t.label}
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--text-muted)]">{t.description}</p>
+                    <p className="text-xs text-(--text-muted)">{t.description}</p>
                   </div>
                 ))}
               </div>
@@ -84,7 +84,7 @@ export function AppearanceSettings() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Palette className="w-5 h-5 text-[var(--primary)]" />
+          <Palette className="w-5 h-5 text-(--primary)" />
           <CardTitle>{t('settingsExtended.appearance')}</CardTitle>
         </div>
         <CardDescription>{t('settingsExtended.customizeInterface')}</CardDescription>
@@ -92,7 +92,7 @@ export function AppearanceSettings() {
       <CardContent>
         <div className="space-y-4">
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)] mb-3">
+            <p className="text-sm font-medium text-(--text-primary) mb-3">
               {t('settingsExtended.theme')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -105,30 +105,30 @@ export function AppearanceSettings() {
                     onClick={() => setTheme(t.value)}
                     className={`relative px-4 py-4 rounded-lg border-2 text-left transition-colors ${
                       isActive
-                        ? 'border-[var(--primary)] bg-[var(--primary)]/10'
-                        : 'border-[var(--border)] hover:border-[var(--primary)]/30'
+                        ? 'border-(--primary) bg-(--primary)/10'
+                        : 'border-(--border) hover:border-(--primary)/30'
                     }`}
                   >
                     {isActive && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center">
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-(--primary) flex items-center justify-center">
                         <span className="text-white text-xs">✓</span>
                       </div>
                     )}
                     <div className="flex items-center gap-3 mb-2">
                       <div
-                        className={`p-2 rounded-lg ${isActive ? 'bg-[var(--primary)]/20' : 'bg-[var(--surface-hover)]'}`}
+                        className={`p-2 rounded-lg ${isActive ? 'bg-(--primary)/20' : 'bg-(--surface-hover)'}`}
                       >
                         <Icon
-                          className={`w-5 h-5 ${isActive ? 'text-[var(--primary)]' : 'text-[var(--text-muted)]'}`}
+                          className={`w-5 h-5 ${isActive ? 'text-(--primary)' : 'text-(--text-muted)'}`}
                         />
                       </div>
                       <span
-                        className={`text-sm font-medium ${isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}
+                        className={`text-sm font-medium ${isActive ? 'text-(--text-primary)' : 'text-(--text-muted)'}`}
                       >
                         {t.label}
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--text-muted)]">{t.description}</p>
+                    <p className="text-xs text-(--text-muted)">{t.description}</p>
                   </button>
                 );
               })}
@@ -136,21 +136,21 @@ export function AppearanceSettings() {
           </div>
 
           {/* Color Accent (Future feature) */}
-          <div className="pt-4 border-t border-[var(--border)]">
-            <p className="text-sm font-medium text-[var(--text-primary)] mb-3">
+          <div className="pt-4 border-t border-(--border)">
+            <p className="text-sm font-medium text-(--text-primary) mb-3">
               {t('settingsExtended.accentColor')}
             </p>
             <div className="flex gap-3">
               {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map((color) => (
                 <button
                   key={color}
-                  className="w-10 h-10 rounded-full border-2 border-[var(--border)] hover:scale-110 transition-transform"
+                  className="w-10 h-10 rounded-full border-2 border-(--border) hover:scale-110 transition-transform"
                   style={{ backgroundColor: color }}
                   title={color}
                 />
               ))}
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-2">
+            <p className="text-xs text-(--text-muted) mt-2">
               {t('settingsExtended.chooseAccentColor')}
             </p>
           </div>

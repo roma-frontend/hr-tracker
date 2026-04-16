@@ -11,7 +11,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +55,22 @@ import {
 } from '@/components/ui/dialog';
 
 type Priority = 'high' | 'medium' | 'low';
+
+interface CompanyEvent {
+  _id: Id<'companyEvents'>;
+  name: string;
+  description?: string;
+  startDate: number;
+  endDate: number;
+  priority?: Priority;
+  eventType: string;
+  location?: string;
+  requiredDepartments?: string[];
+  creatorName?: string;
+  _creationTime?: number;
+  isAllDay?: boolean;
+  [key: string]: unknown;
+}
 const PRIORITY_CONFIG: Record<
   Priority,
   { color: string; bg: string; label: string; icon: string }
@@ -97,7 +113,7 @@ export default function CompanyEventsPage() {
   const { t } = useTranslation();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CompanyEvent | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'conflicts'>('events');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState<string>('all');
@@ -105,17 +121,17 @@ export default function CompanyEventsPage() {
 
   const { user: authUser } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
-  const isSuperadmin = authUser?.role === 'superadmin';
-  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : authUser?.organizationId;
+  const isSuperadmin = authUser?.role === 'superadmin'; // cspell:disable-line
+  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : authUser?.organizationId; // cspell:disable-line
   const userId = authUser?.id as Id<'users'> | undefined;
 
   const events = useQuery(
     api.events.getCompanyEvents,
-    effectiveOrgId ? { organizationId: effectiveOrgId as any } : 'skip',
+    effectiveOrgId ? { organizationId: effectiveOrgId as Id<'organizations'> } : 'skip',
   );
   const pendingLeaves = useQuery(
     api.leaves.getLeavesForOrganization,
-    effectiveOrgId ? { organizationId: effectiveOrgId as any } : 'skip',
+    effectiveOrgId ? { organizationId: effectiveOrgId as Id<'organizations'> } : 'skip',
   );
 
   const updateEvent = useMutation(api.events.updateCompanyEvent);
@@ -126,10 +142,10 @@ export default function CompanyEventsPage() {
 
   const stats = useMemo(() => {
     if (!events) return null;
-    const now = Date.now();
-    const upcoming = events.filter((e: any) => e.startDate >= now);
-    const highPriority = upcoming.filter((e: any) => e.priority === 'high');
-    const thisMonth = upcoming.filter((e: any) => daysUntil(e.startDate) <= 30);
+    const now = new Date().setHours(0, 0, 0, 0);
+    const upcoming = events.filter((e) => e.startDate >= now);
+    const highPriority = upcoming.filter((e) => e.priority === 'high');
+    const thisMonth = upcoming.filter((e) => daysUntil(e.startDate) <= 30);
     return {
       total: events.length,
       upcoming: upcoming.length,
@@ -140,29 +156,29 @@ export default function CompanyEventsPage() {
 
   const filteredEvents = useMemo(() => {
     if (!events) return [];
-    let list = [...events] as any[];
+    let list = [...events];
     list.sort((a, b) => a.startDate - b.startDate);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
-        (e: any) =>
+        (e) =>
           e.name.toLowerCase().includes(q) ||
           e.description?.toLowerCase().includes(q) ||
           e.requiredDepartments?.some((d: string) => d.toLowerCase().includes(q)),
       );
     }
     if (filterPriority !== 'all') {
-      list = list.filter((e: any) => e.priority === filterPriority);
+      list = list.filter((e) => e.priority === filterPriority);
     }
     if (filterType !== 'all') {
-      list = list.filter((e: any) => e.eventType === filterType);
+      list = list.filter((e) => e.eventType === filterType);
     }
     return list;
   }, [events, searchQuery, filterPriority, filterType]);
 
   const handleCheckConflicts = async () => {
     let totalConflicts = 0;
-    const pendingList = (pendingLeaves as any[]).filter((l) => l.status === 'pending');
+    const pendingList = (pendingLeaves ?? []).filter((l) => l.status === 'pending');
     for (const leave of pendingList) {
       try {
         const result = await checkConflicts({
@@ -170,10 +186,10 @@ export default function CompanyEventsPage() {
           userId: leave.userId,
           startDate: new Date(leave.startDate).getTime(),
           endDate: new Date(leave.endDate).getTime(),
-          organizationId: effectiveOrgId as any,
+          organizationId: effectiveOrgId as Id<'organizations'>,
         });
         totalConflicts += result.conflictsFound;
-      } catch (e: any) {
+      } catch (e) {
         console.error('Conflict check failed:', e);
       }
     }
@@ -322,7 +338,7 @@ export default function CompanyEventsPage() {
             {tab.label}
             {tab.key === 'conflicts' && pendingLeaves && (
               <Badge variant="destructive" className="ml-1 text-[10px] px-1.5 py-0">
-                {(pendingLeaves as any[]).filter((l) => l.status === 'pending').length}
+                {(pendingLeaves ?? []).filter((l) => l.status === 'pending').length}
               </Badge>
             )}
           </button>
@@ -419,7 +435,7 @@ export default function CompanyEventsPage() {
           ) : (
             <div className="space-y-3">
               <AnimatePresence>
-                {filteredEvents.map((event: any) => {
+                {filteredEvents.map((event) => {
                   const days = daysUntil(event.startDate);
                   const priorityCfg =
                     event.priority === 'high'
@@ -448,7 +464,7 @@ export default function CompanyEventsPage() {
                         <CardContent className="p-4">
                           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                             {/* Date Badge */}
-                            <div className="flex-shrink-0 w-14 text-center">
+                            <div className="shrink-0 w-14 text-center">
                               <div
                                 className={cn(
                                   'text-lg font-bold',
@@ -474,7 +490,7 @@ export default function CompanyEventsPage() {
                               <div className="flex flex-wrap items-center gap-2 mb-1">
                                 <span className="text-lg">{typeIcon}</span>
                                 <h3 className="font-semibold text-base truncate">{event.name}</h3>
-                                <Badge variant="outline" className="flex-shrink-0 text-[10px]">
+                                <Badge variant="outline" className="shrink-0 text-[10px]">
                                   {priorityCfg.icon} {priorityCfg.label}
                                 </Badge>
                               </div>
@@ -491,17 +507,18 @@ export default function CompanyEventsPage() {
                                   {event.requiredDepartments?.slice(0, 3).join(', ')}
                                   {event.requiredDepartments?.length > 3 && ' + more'}
                                 </span>
-                                {event.location && (
+                                {'location' in event && (
                                   <span className="flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />
-                                    {event.location}
+                                    {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */}
+                                    {(event as any).location}
                                   </span>
                                 )}
                               </div>
                             </div>
 
                             {/* Actions */}
-                            <div className="flex items-center gap-1 flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -528,10 +545,15 @@ export default function CompanyEventsPage() {
                                     try {
                                       await deleteEvent({ eventId: event._id, userId: userId! });
                                       toast.success(t('events.eventDeleted', 'Event deleted'));
-                                    } catch (error: any) {
+                                    } catch (error) {
+                                      console.error(
+                                        'Delete failed:',
+                                        error instanceof Error ? error.message : 'Unknown error',
+                                      );
                                       toast.error(
-                                        error.message ||
-                                          t('events.deleteFailed', 'Failed to delete event'),
+                                        error instanceof Error
+                                          ? error.message
+                                          : t('events.deleteFailed', 'Failed to delete event'),
                                       );
                                     }
                                   }
@@ -554,7 +576,10 @@ export default function CompanyEventsPage() {
 
       {/* Conflicts Tab Content */}
       {activeTab === 'conflicts' && (
-        <LeaveConflictAlerts organizationId={effectiveOrgId as any} userId={userId!} />
+        <LeaveConflictAlerts
+          organizationId={effectiveOrgId as Id<'organizations'>}
+          userId={userId!}
+        />
       )}
 
       {/* Create Event Dialog */}
@@ -570,7 +595,7 @@ export default function CompanyEventsPage() {
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-y-auto">
             <CreateEventWizard
-              organizationId={effectiveOrgId as any}
+              organizationId={effectiveOrgId as Id<'organizations'>}
               userId={userId!}
               onComplete={() => {
                 setShowCreateModal(false);
@@ -658,7 +683,12 @@ export default function CompanyEventsPage() {
                     <button
                       key={key}
                       type="button"
-                      onClick={() => setSelectedEvent({ ...selectedEvent, priority: key })}
+                      onClick={() =>
+                        setSelectedEvent({
+                          ...selectedEvent,
+                          priority: key as 'high' | 'medium' | 'low',
+                        })
+                      }
                       className={`p-3 rounded-lg border-2 transition-all text-center ${
                         (selectedEvent.priority || 'medium') === key
                           ? 'border-(--primary) bg-(--primary)/5'
@@ -696,9 +726,15 @@ export default function CompanyEventsPage() {
                       });
                       setShowEditModal(false);
                       toast.success(t('events.eventUpdated', 'Event updated successfully'));
-                    } catch (error: any) {
+                    } catch (error) {
+                      console.error(
+                        'Update failed:',
+                        error instanceof Error ? error.message : 'Unknown error',
+                      );
                       toast.error(
-                        error.message || t('events.updateFailed', 'Failed to update event'),
+                        error instanceof Error
+                          ? error.message
+                          : t('events.updateFailed', 'Failed to update event'),
                       );
                     }
                   }}

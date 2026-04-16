@@ -24,7 +24,7 @@ export function withOnboardingCheck<P extends object>(WrappedComponent: React.Co
 
       // Show loader during redirect
       return (
-        <div className="flex h-screen items-center justify-center bg-[var(--background)]">
+        <div className="flex h-screen items-center justify-center bg-(--background)">
           <ShieldLoader size="lg" />
         </div>
       );

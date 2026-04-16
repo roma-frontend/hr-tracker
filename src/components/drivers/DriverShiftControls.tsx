@@ -147,7 +147,7 @@ export function DriverShiftControls({
           {currentShift ? (
             <div className="space-y-4">
               {/* Shift Timer */}
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-linear-to-r from-primary/10 to-primary/5 rounded-lg">
                 <div>
                   <p className="text-sm text-muted-foreground">
                     {t('driver.shift.duration', 'Duration')}

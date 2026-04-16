@@ -90,13 +90,13 @@ export function TripDetailsModal({
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className="max-w-4xl w-full mx-auto"
     >
-      <div className="bg-[var(--card)] rounded-2xl shadow-2xl overflow-hidden">
+      <div className="bg-(--card) rounded-2xl shadow-2xl overflow-hidden">
         {/* Header with gradient */}
         <div
           className={`relative p-6 ${
             isTrip
-              ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80'
-              : 'bg-gradient-to-r from-amber-500 to-orange-500'
+              ? 'bg-linear-to-r from-(--primary) to-(--primary)/80'
+              : 'bg-linear-to-r from-amber-500 to-orange-500'
           }`}
         >
           {/* Close button */}
@@ -147,7 +147,7 @@ export function TripDetailsModal({
               {/* Route */}
               <div className="rounded-xl bg-muted/30 p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <Navigation2 className="w-4 h-4 text-[var(--primary)]" />
+                  <Navigation2 className="w-4 h-4 text-(--primary)" />
                   <span className="text-sm font-semibold text-foreground">
                     {t('driver.route', 'Route')}
                   </span>
@@ -183,7 +183,7 @@ export function TripDetailsModal({
               {schedule.userName && (
                 <div className="rounded-xl bg-muted/30 p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <Users className="w-4 h-4 text-[var(--primary)]" />
+                    <Users className="w-4 h-4 text-(--primary)" />
                     <span className="text-sm font-semibold text-foreground">
                       {t('driver.passenger', 'Passenger')}
                     </span>
@@ -214,7 +214,7 @@ export function TripDetailsModal({
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-muted/30 p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-4 h-4 text-[var(--primary)]" />
+                    <Clock className="w-4 h-4 text-(--primary)" />
                     <p className="text-xs text-muted-foreground">{t('driver.time', 'Time')}</p>
                   </div>
                   <p className="text-lg font-bold text-foreground">
@@ -225,7 +225,7 @@ export function TripDetailsModal({
                 {schedule.tripInfo.distanceKm && (
                   <div className="rounded-xl bg-muted/30 p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <MapPin className="w-4 h-4 text-[var(--primary)]" />
+                      <MapPin className="w-4 h-4 text-(--primary)" />
                       <p className="text-xs text-muted-foreground">
                         {t('driver.distance', 'Distance')}
                       </p>
@@ -241,7 +241,7 @@ export function TripDetailsModal({
               {schedule.tripInfo.notes && (
                 <div className="rounded-xl bg-muted/30 p-5">
                   <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-4 h-4 text-[var(--primary)]" />
+                    <MessageSquare className="w-4 h-4 text-(--primary)" />
                     <span className="text-sm font-semibold text-foreground">
                       {t('driver.notes', 'Notes')}
                     </span>

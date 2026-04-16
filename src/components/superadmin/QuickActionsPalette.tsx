@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,13 +19,10 @@ import {
   X,
   Command,
   ArrowRight,
-  HelpCircle,
   HelpCircleIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { GlobalSearch } from './GlobalSearch';
-import type { Id } from '@/convex/_generated/dataModel';
 
 interface QuickAction {
   id: string;
@@ -293,22 +288,17 @@ export function QuickActionsPalette() {
     { action: [] as QuickAction[], navigation: [] as QuickAction[], user: [] as QuickAction[] },
   );
 
-  const allGroupedActions = [
-    ...groupedActions.action,
-    ...groupedActions.navigation,
-    ...groupedActions.user,
-  ];
 
   return (
     <>
       {/* Trigger button (optional, can also use keyboard shortcut) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+        className="flex items-center gap-2 px-3 py-2 text-sm text-(--muted-foreground) hover:text-(--foreground) transition-colors"
       >
         <Command className="w-4 h-4" />
         <span className="hidden md:inline">{t('superadmin.quickActions.title') || 'Команды'}</span>
-        <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-[var(--background-subtle)] border border-[var(--border)] rounded text-[10px] font-medium text-[var(--muted-foreground)]">
+        <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-(--background-subtle) border border-(--border) rounded text-[10px] font-medium text-(--muted-foreground)">
           <span>⌘K</span>
         </kbd>
       </button>
@@ -324,11 +314,11 @@ export function QuickActionsPalette() {
       {/* Palette */}
       {isOpen && (
         <div className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 animate-in fade-in zoom-in duration-200">
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-(--card) border border-(--border) rounded-xl shadow-2xl overflow-hidden">
             {/* Header with search */}
-            <div className="border-b border-[var(--border)] p-4 bg-[var(--background-subtle)]/50">
+            <div className="border-b border-(--border) p-4 bg-(--background-subtle)/50">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)] opacity-60" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--muted-foreground) opacity-60" />
                 <Input
                   ref={inputRef}
                   type="text"
@@ -340,14 +330,14 @@ export function QuickActionsPalette() {
                     setSearchQuery(e.target.value);
                     setSelectedIndex(-1);
                   }}
-                  className="pl-9 pr-12 h-11 bg-[var(--input)] border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+                  className="pl-9 pr-12 h-11 bg-(--input) border-(--input-border) text-(--text-primary) placeholder-(--text-muted)"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-[var(--background-subtle)] rounded-full transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-(--background-subtle) rounded-full transition-colors"
                   >
-                    <X className="w-3 h-3 text-[var(--muted-foreground)]" />
+                    <X className="w-3 h-3 text-(--muted-foreground)" />
                   </button>
                 )}
               </div>
@@ -400,22 +390,22 @@ export function QuickActionsPalette() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-[var(--border)] p-3 text-xs text-[var(--muted-foreground)] flex items-center justify-between bg-[var(--background-subtle)]/50">
+            <div className="border-t border-(--border) p-3 text-xs text-(--muted-foreground) flex items-center justify-between bg-(--background-subtle)/50">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">
+                  <kbd className="px-1.5 py-0.5 bg-(--background) border border-(--border) rounded text-[10px] font-medium">
                     ↑↓
                   </kbd>
                   {t('superadmin.quickActions.navigate')}
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">
+                  <kbd className="px-1.5 py-0.5 bg-(--background) border border-(--border) rounded text-[10px] font-medium">
                     ↵
                   </kbd>
                   {t('superadmin.quickActions.select')}
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 bg-[var(--background)] border border-[var(--border)] rounded text-[10px] font-medium">
+                  <kbd className="px-1.5 py-0.5 bg-(--background) border border-(--border) rounded text-[10px] font-medium">
                     esc
                   </kbd>
                   {t('superadmin.quickActions.close')}
@@ -439,19 +429,17 @@ function ActionGroup({
   title,
   actions,
   selectedIndex,
-  setSelectedIndex,
 }: {
   title: string;
   actions: QuickAction[];
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
 }) {
-  const router = useRouter();
   const groupRef = useRef<HTMLDivElement>(null);
 
   return (
     <div ref={groupRef} className="mb-4">
-      <h3 className="px-3 py-2 text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
+      <h3 className="px-3 py-2 text-xs font-semibold text-(--muted-foreground) uppercase tracking-wider">
         {title}
       </h3>
       <div className="space-y-1">
@@ -491,14 +479,14 @@ function ActionButton({
       className={cn(
         'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left',
         isSelected
-          ? 'bg-[var(--primary)]/10 text-[var(--foreground)]'
-          : 'hover:bg-[var(--background-subtle)]/50 text-[var(--foreground)]',
+          ? 'bg-(--primary)/10 text-(--foreground)'
+          : 'hover:bg-(--background-subtle)/50 text-(--foreground)',
       )}
     >
       <span
         className={cn(
           'shrink-0',
-          isSelected ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]',
+          isSelected ? 'text-(--primary)' : 'text-(--muted-foreground)',
         )}
       >
         {action.icon}
@@ -509,8 +497,8 @@ function ActionButton({
           className={cn(
             'px-1.5 py-0.5 rounded text-[10px] font-mono border',
             isSelected
-              ? 'bg-[var(--primary)]/20 border-[var(--primary)]/30 text-[var(--primary)]'
-              : 'bg-[var(--background-subtle)] border-[var(--border)] text-[var(--muted-foreground)]',
+              ? 'bg-(--primary)/20 border-(--primary)/30 text-(--primary)'
+              : 'bg-(--background-subtle) border-(--border) text-(--muted-foreground)',
           )}
         >
           {action.shortcut}

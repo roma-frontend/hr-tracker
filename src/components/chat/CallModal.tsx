@@ -490,7 +490,7 @@ export function CallModal({
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <Avatar className="w-20 h-20 mx-auto mb-3 ring-4 ring-white/20">
-                    <AvatarFallback className="text-2xl font-bold text-white bg-gradient-to-br from-purple-600 to-blue-600">
+                    <AvatarFallback className="text-2xl font-bold text-white bg-linear-to-br from-purple-600 to-blue-600">
                       {getInitials(call.remoteUserName ?? '?')}
                     </AvatarFallback>
                   </Avatar>
@@ -521,7 +521,7 @@ export function CallModal({
           <div className="flex flex-col items-center py-10 gap-4">
             <div className={cn('relative', callStatus === 'active' && 'animate-pulse')}>
               <Avatar className="w-24 h-24 ring-4 ring-white/20">
-                <AvatarFallback className="text-3xl font-bold text-white bg-gradient-to-br from-purple-600 to-blue-600">
+                <AvatarFallback className="text-3xl font-bold text-white bg-linear-to-br from-purple-600 to-blue-600">
                   {getInitials(call.remoteUserName ?? '?')}
                 </AvatarFallback>
               </Avatar>

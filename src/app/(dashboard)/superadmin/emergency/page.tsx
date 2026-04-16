@@ -22,6 +22,7 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -182,7 +183,7 @@ export default function EmergencyDashboardPage() {
                 variant="outline"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="text-[var(--foreground)] w-full sm:w-auto"
+                className="text-(--foreground) w-full sm:w-auto"
               >
                 {isRefreshing ? (
                   <ShieldLoader size="xs" variant="inline" />
@@ -192,7 +193,7 @@ export default function EmergencyDashboardPage() {
               </Button>
               <Button
                 onClick={() => setCreateIncidentOpen(true)}
-                className="gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white w-full sm:w-auto"
+                className="gap-2 bg-(--primary) hover:bg-(--primary-hover) text-white w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('superadmin.emergency.createIncident')}</span>
@@ -307,7 +308,7 @@ export default function EmergencyDashboardPage() {
                           </Badge>
                           <Badge
                             variant="outline"
-                            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-xs"
+                            className="border-(--border) bg-(--background) text-(--foreground) text-xs"
                           >
                             {ticket.status}
                           </Badge>
@@ -332,7 +333,7 @@ export default function EmergencyDashboardPage() {
                         onClick={() =>
                           (window.location.href = `/superadmin/support?ticket=${ticket._id}`)
                         }
-                        className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)] flex-shrink-0 self-start"
+                        className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) shrink-0 self-start"
                       >
                         {t('superadmin.emergency.actions.open')}
                       </Button>
@@ -384,7 +385,7 @@ export default function EmergencyDashboardPage() {
                           </Badge>
                           <Badge
                             variant="outline"
-                            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-xs"
+                            className="border-(--border) bg-(--background) text-(--foreground) text-xs"
                           >
                             {incident.status}
                           </Badge>
@@ -410,19 +411,19 @@ export default function EmergencyDashboardPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0 sm:self-start">
+                      <div className="flex items-center gap-2 shrink-0 sm:self-start">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleResolveIncident(incident._id)}
-                          className="border-[var(--border)] bg-[var(--background)] hover:bg-[var(--background-subtle)] text-[var(--foreground)] text-xs"
+                          className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) text-xs"
                         >
                           {t('superadmin.emergency.actions.resolve')}
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="hover:bg-[var(--background-subtle)] text-[var(--muted-foreground)] h-8 w-8"
+                          className="hover:bg-(--background-subtle) text-(--muted-foreground) h-8 w-8"
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -539,11 +540,11 @@ export default function EmergencyDashboardPage() {
           <DialogTitle className="sr-only">{t('superadmin.emergency.createIncident')}</DialogTitle>
           <DialogDescription className="sr-only">Создание нового инцидента</DialogDescription>
           <div className="flex-1 min-h-0 overflow-y-auto">
-          <CreateIncidentWizard
-            userId={user.id as Id<'users'>}
-            onComplete={() => setCreateIncidentOpen(false)}
-            onCancel={() => setCreateIncidentOpen(false)}
-          />
+            <CreateIncidentWizard
+              userId={user.id as Id<'users'>}
+              onComplete={() => setCreateIncidentOpen(false)}
+              onCancel={() => setCreateIncidentOpen(false)}
+            />
           </div>
         </DialogContent>
       </Dialog>

@@ -31,10 +31,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
 import { CreateTicketWizard } from '@/components/help/CreateTicketWizard';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
-import { t } from 'i18next';
 
 export default function HelpSupportPage() {
   const { t } = useTranslation();
@@ -136,7 +134,7 @@ export default function HelpSupportPage() {
                 </p>
               )}
               {userOrg?.plan === 'professional' && (
-                <p className="text-xs md:text-sm text-blue-600 mt-2">
+                <p className="text-xs md:text-sm text-orange-600 mt-2">
                   📊{' '}
                   {t('help.planLimit.professional', {
                     used: currentMonthTickets,
@@ -313,7 +311,7 @@ function StatCard({
       <CardContent className="p-3 md:p-4">
         <div className="flex items-center justify-between mb-1 md:mb-2">
           <p className="text-[10px] md:text-xs text-muted-foreground truncate">{title}</p>
-          <Icon className={`w-3 h-3 md:w-4 md:h-4 flex-shrink-0 ${colorClasses[color]}`} />
+          <Icon className={`w-3 h-3 md:w-4 md:h-4 shrink-0 ${colorClasses[color]}`} />
         </div>
         <p className="text-lg md:text-2xl font-bold">{value}</p>
       </CardContent>
@@ -425,87 +423,6 @@ function QuickHelpCard({
   );
 }
 
-// Plan Limit Dialog
-function PlanLimitDialog({
-  open,
-  onOpenChange,
-  userOrg,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  userOrg: any;
-}) {
-  const { t } = useTranslation();
-  const router = useRouter();
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-base md:text-lg">{t('help.planLimit.title')}</DialogTitle>
-          <DialogDescription className="text-xs md:text-sm">
-            {t('help.planLimit.description')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            <PlanCard
-              name="Starter"
-              price="$0"
-              features={[
-                { text: t('help.plans.starter.support'), included: false },
-                { text: t('help.plans.starter.docs'), included: true },
-                { text: t('help.plans.starter.community'), included: true },
-              ]}
-              current={userOrg?.plan === 'starter'}
-            />
-            <PlanCard
-              name={t('superadmin.professional')}
-              price="$79"
-              features={[
-                { text: t('help.plans.professional.tickets'), included: true },
-                { text: t('help.plans.professional.limit'), included: true },
-                { text: t('help.plans.professional.email'), included: true },
-                { text: t('help.plans.professional.sla'), included: false },
-              ]}
-              current={userOrg?.plan === 'professional'}
-              recommended
-            />
-            <PlanCard
-              name={t('superadmin.enterprise')}
-              price="$99"
-              features={[
-                { text: t('help.plans.enterprise.unlimited'), included: true },
-                { text: t('help.plans.enterprise.priority'), included: true },
-                { text: t('help.plans.enterprise.sla'), included: true },
-                { text: t('help.plans.enterprise.manager'), included: true },
-              ]}
-              current={userOrg?.plan === 'enterprise'}
-            />
-          </div>
-        </div>
-
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="w-full sm:w-auto"
-          >
-            {t('actions.close')}
-          </Button>
-          <Button
-            onClick={() => router.push('/superadmin/subscriptions')}
-            className="w-full sm:w-auto"
-          >
-            {t('help.upgradePlan')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 // Plan Card Component
 function PlanCard({
@@ -521,6 +438,9 @@ function PlanCard({
   current?: boolean;
   recommended?: boolean;
 }) {
+
+  const { t } = useTranslation();
+
   return (
     <div
       className={`p-3 md:p-4 rounded-lg border ${

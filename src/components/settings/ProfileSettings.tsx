@@ -30,14 +30,14 @@ export function ProfileSettings({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-[var(--primary)]" />
+          <Shield className="w-5 h-5 text-(--primary)" />
           <CardTitle>{t('settingsProfile.profileInformation')}</CardTitle>
         </div>
         <CardDescription>{t('settingsProfile.updateDetails')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Avatar Section */}
-        <div className="flex items-center gap-6 pb-6 border-b border-[var(--border)]">
+        <div className="flex items-center gap-6 pb-6 border-b border-(--border)">
           <AvatarUpload
             userId={user?.id ?? ''}
             currentUrl={user?.avatar}
@@ -48,13 +48,13 @@ export function ProfileSettings({
             }}
           />
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-(--text-primary)">
               {t('settingsProfile.profilePicture')}
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p className="text-xs text-(--text-muted) mt-1">
               {t('settingsProfile.clickToUpload')}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">{t('settingsProfile.fileTypes')}</p>
+            <p className="text-xs text-(--text-muted)">{t('settingsProfile.fileTypes')}</p>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export function ProfileSettings({
                 id="role"
                 value={user?.role || ''}
                 disabled
-                className="opacity-60 bg-[var(--surface-hover)]"
+                className="opacity-60 bg-(--surface-hover)"
               />
             </div>
             <div className="space-y-2">
@@ -98,7 +98,7 @@ export function ProfileSettings({
                 id="department"
                 defaultValue={user?.department ?? t('settingsProfile.notAssigned')}
                 disabled
-                className="opacity-60 bg-[var(--surface-hover)]"
+                className="opacity-60 bg-(--surface-hover)"
               />
             </div>
           </div>

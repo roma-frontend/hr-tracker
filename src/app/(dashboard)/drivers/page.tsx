@@ -19,6 +19,67 @@ import {
 } from '@/components/drivers/modals';
 import { toast } from 'sonner';
 
+interface VehicleInfo {
+  model: string;
+  plateNumber: string;
+  capacity: number;
+  color?: string;
+  year?: number;
+}
+
+interface _DriverRecord {
+  _id: Id<'drivers'>;
+  userName: string;
+  userAvatar?: string;
+  userPosition?: string;
+  rating: number;
+  totalTrips: number;
+  isOnShift?: boolean;
+  isAvailable: boolean;
+  vehicleInfo: VehicleInfo;
+}
+
+interface TripRequest {
+  _id: Id<'driverRequests'>;
+  status: 'pending' | 'approved' | 'declined' | 'cancelled' | 'completed';
+  startTime: number;
+  endTime: number;
+  tripInfo?: {
+    from: string;
+    to: string;
+    purpose: string;
+    passengerCount: number;
+    notes?: string;
+  };
+  assignedDriver?: {
+    userName: string;
+  };
+}
+
+interface _RecurringTrip {
+  _id: Id<'recurringTrips'>;
+  isActive: boolean;
+  driverName?: string;
+  driverVehicle?: VehicleInfo;
+  tripInfo?: {
+    from: string;
+    to: string;
+    purpose: string;
+    passengerCount: number;
+    notes?: string;
+  };
+  schedule: {
+    daysOfWeek: number[];
+    startTime: string;
+    endTime: string;
+  };
+  userId: Id<'users'>;
+  driverId: Id<'drivers'>;
+  organizationId: Id<'organizations'>;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export default function DriversPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -36,7 +97,7 @@ export default function DriversPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [showTripDetails, setShowTripDetails] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<TripRequest | null>(null);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
 
   const userId = user?.id as Id<'users'> | undefined;
@@ -77,18 +138,11 @@ export default function DriversPage() {
     userId ? { userId } : 'skip',
   );
 
-  // Optimistic favorite IDs state
-  const [optimisticFavoriteIds, setOptimisticFavoriteIds] = useState<Set<string>>(() => new Set());
-  const [initialized, setInitialized] = useState(false);
-
-  // Initialize optimistic state ONCE when query first loads
-  useEffect(() => {
-    if (favoriteDrivers && !initialized) {
-      // getFavoriteDrivers returns enriched driver objects with _id = driver._id
-      setOptimisticFavoriteIds(new Set((favoriteDrivers as any[]).map((f: any) => f._id)));
-      setInitialized(true);
-    }
-  }, [favoriteDrivers, initialized]);
+  // Optimistic favorite IDs state - initialized from query when available
+  const [optimisticFavoriteIds, setOptimisticFavoriteIds] = useState<Set<string>>(() => {
+    // This will be updated by the effect below when data loads
+    return new Set();
+  });
 
   const recurringTrips = useQuery(
     api.drivers.recurring_trips.getRecurringTrips,
@@ -107,48 +161,71 @@ export default function DriversPage() {
 
   const drivers = useMemo(
     () =>
-      (availableDrivers ?? []).map((d: any) => ({
-        _id: d._id,
-        userName: d.userName,
-        userAvatar: d.userAvatar,
-        userPosition: d.userPosition,
-        rating: d.rating ?? 5.0,
-        totalTrips: d.totalTrips ?? 0,
-        isOnShift: d.isOnShift,
-        vehicleInfo: d.vehicleInfo ?? { model: 'Unknown', capacity: 4, plateNumber: 'N/A' },
+      (availableDrivers ?? []).filter(Boolean).map((d) => ({
+        _id: String((d as { _id: string })._id),
+        userName: (d as { userName: string }).userName,
+        userAvatar: (d as { userAvatar?: string }).userAvatar,
+        userPosition: (d as { userPosition?: string }).userPosition,
+        rating: (d as { rating?: number }).rating ?? 5.0,
+        totalTrips: (d as { totalTrips?: number }).totalTrips ?? 0,
+        isOnShift: (d as { isOnShift?: boolean }).isOnShift,
+        vehicleInfo: (d as { vehicleInfo?: VehicleInfo }).vehicleInfo ?? {
+          model: 'Unknown',
+          capacity: 4,
+          plateNumber: 'N/A',
+        },
       })),
     [availableDrivers],
   );
 
   const activeRequests = useMemo(
-    () => (myRequests ?? []).filter((r: any) => r.status === 'pending' || r.status === 'approved'),
+    () =>
+      (myRequests ?? []).filter(
+        (r) =>
+          (r as { status: string }).status === 'pending' ||
+          (r as { status: string }).status === 'approved',
+      ),
     [myRequests],
   );
 
   const historyRequests = useMemo(
     () =>
-      (myRequests ?? []).filter((r: any) => r.status === 'completed' || r.status === 'cancelled'),
+      (myRequests ?? []).filter(
+        (r) =>
+          (r as { status: string }).status === 'completed' ||
+          (r as { status: string }).status === 'cancelled',
+      ),
     [myRequests],
   );
 
   const recurringData = useMemo(
     () =>
-      (recurringTrips ?? []).map((trip: any) => ({
-        _id: trip._id,
-        isActive: trip.isActive ?? true,
-        days: trip.days ?? [1, 2, 3, 4, 5],
-        startTime: trip.startTime ?? '08:00',
-        endTime: trip.endTime ?? '09:00',
-        tripInfo: { from: trip.tripInfo?.from ?? 'Unknown', to: trip.tripInfo?.to ?? 'Unknown' },
+      (recurringTrips ?? []).map((trip) => ({
+        _id: String((trip as { _id: string })._id),
+        isActive: (trip as { isActive: boolean }).isActive ?? true,
+        days: (trip as { schedule: { daysOfWeek: number[] } }).schedule?.daysOfWeek ?? [
+          1, 2, 3, 4, 5,
+        ],
+        startTime: (trip as { schedule: { startTime: string } }).schedule?.startTime ?? '08:00',
+        endTime: (trip as { schedule: { endTime: string } }).schedule?.endTime ?? '09:00',
+        tripInfo: {
+          from: (trip as { tripInfo?: { from?: string } }).tripInfo?.from ?? 'Unknown',
+          to: (trip as { tripInfo?: { to?: string } }).tripInfo?.to ?? 'Unknown',
+        },
       })),
     [recurringTrips],
   );
 
   const stats = useMemo(
     () => ({
-      availableDrivers: (availableDrivers ?? []).filter((d: any) => d.isAvailable).length,
-      pendingRequests: (myRequests ?? []).filter((r: any) => r.status === 'pending').length,
-      totalTrips: (myRequests ?? []).filter((r: any) => r.status === 'approved').length,
+      availableDrivers: (availableDrivers ?? []).filter(
+        (d) => (d as { isAvailable?: boolean }).isAvailable,
+      ).length,
+      pendingRequests: (myRequests ?? []).filter(
+        (r) => (r as { status: string }).status === 'pending',
+      ).length,
+      totalTrips: (myRequests ?? []).filter((r) => (r as { status: string }).status === 'approved')
+        .length,
     }),
     [availableDrivers, myRequests],
   );
@@ -210,10 +287,9 @@ export default function DriversPage() {
           await addFavorite({ organizationId: orgId, userId, driverId: id as Id<'drivers'> });
           toast.success(t('driver.addedToFavorites', 'Added to favorites'));
         }
-      } catch (e: any) {
-        // Revert on error
+      } catch (e: unknown) {
         setOptimisticFavoriteIds(optimisticFavoriteIds);
-        toast.error(e.message || t('driver.failed', 'Failed'));
+        toast.error(e instanceof Error ? e.message : t('driver.failed', 'Failed'));
       }
     },
     [userId, orgId, optimisticFavoriteIds, addFavorite, removeFavorite, t],
@@ -225,7 +301,26 @@ export default function DriversPage() {
   }, []);
 
   const handleRegisterSubmit = useCallback(
-    async (data: any) => {
+    async (data: {
+      vehicleMake: string;
+      vehicleModel: string;
+      vehicleYear: string;
+      vehicleColor: string;
+      licensePlate: string;
+      maxPassengers: number;
+      vehicleType: string;
+      notes?: string;
+      availability: {
+        monday: boolean;
+        tuesday: boolean;
+        wednesday: boolean;
+        thursday: boolean;
+        friday: boolean;
+        saturday: boolean;
+        sunday: boolean;
+      };
+      maxTripsPerDay?: number;
+    }) => {
       if (!userId || !orgId) return;
       try {
         await registerAsDriver({
@@ -247,8 +342,10 @@ export default function DriversPage() {
         });
         toast.success(t('driver.registered', 'Registered as driver!'));
         setShowRegisterModal(false);
-      } catch (e: any) {
-        toast.error(e.message || t('driver.failedToRegister', 'Failed to register'));
+      } catch (e: unknown) {
+        toast.error(
+          e instanceof Error ? e.message : t('driver.failedToRegister', 'Failed to register'),
+        );
       }
     },
     [userId, orgId, registerAsDriver, t],
@@ -265,6 +362,10 @@ export default function DriversPage() {
   // NOW EARLY RETURNS ARE SAFE (all hooks are above)
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // Use effect to set current time once (avoids impure function in render)
+  const [currentTime] = useState(() => Date.now());
+  const tripModalTime = currentTime;
+
   if (
     !isAuthenticated ||
     !userId ||
@@ -276,7 +377,7 @@ export default function DriversPage() {
     recurringTrips === undefined
   ) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px]">
+      <div className="flex items-center justify-center h-full min-h-100">
         <ShieldLoader size="lg" />
       </div>
     );
@@ -312,7 +413,7 @@ export default function DriversPage() {
         onToggleFavorite={handleToggleFavorite}
         onRequestDriver={handleRequestDriver}
         onViewRequestDetails={(request) => {
-          setSelectedRequest(request);
+          setSelectedRequest(request as unknown as TripRequest | null);
           setShowTripDetails(true);
         }}
         onRateRequest={noOp}
@@ -326,13 +427,13 @@ export default function DriversPage() {
       />
 
       {showRequestWizard && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-2xl">
-            <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-(--card) rounded-2xl border border-(--border) shadow-2xl">
+            <div className="p-6 border-b border-(--border) flex items-center justify-between">
               <h2 className="text-xl font-bold">{t('driver.requestDriver', 'Request Driver')}</h2>
               <button
                 onClick={closeModal}
-                className="p-2 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                className="p-2 rounded-lg hover:bg-(--background-subtle) transition-colors"
               >
                 ✕
               </button>
@@ -353,7 +454,7 @@ export default function DriversPage() {
       )}
 
       {showCalendarDialog && orgId && (
-        <div className="fixed inset-0 z-[9999]">
+        <div className="fixed inset-0 z-9999">
           <DriverCalendarDialog
             open={showCalendarDialog}
             onClose={() => setShowCalendarDialog(false)}
@@ -365,7 +466,7 @@ export default function DriversPage() {
 
       {showTripDetails && selectedRequest && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto overscroll-contain"
+          className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto overscroll-contain"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowTripDetails(false);
@@ -378,14 +479,14 @@ export default function DriversPage() {
               schedule={{
                 type: 'trip',
                 status: selectedRequest.status,
-                startTime: selectedRequest.startTime || Date.now(),
+                startTime: selectedRequest.startTime || tripModalTime,
                 endTime: selectedRequest.startTime
                   ? selectedRequest.startTime + 3600000
-                  : Date.now() + 3600000,
+                  : tripModalTime + 3600000,
                 tripInfo: selectedRequest.tripInfo || {},
                 userName: selectedRequest.assignedDriver?.userName,
               }}
-              currentTime={Date.now()}
+              currentTime={tripModalTime}
               onClose={() => {
                 setShowTripDetails(false);
                 setSelectedRequest(null);

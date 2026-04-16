@@ -53,7 +53,7 @@ export function NotificationSettings({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-[var(--warning)]" />
+          <Bell className="w-5 h-5 text-(--warning)" />
           <CardTitle>{t('settingsNotifications.title')}</CardTitle>
         </div>
         <CardDescription>{t('settingsNotifications.description')}</CardDescription>
@@ -65,14 +65,14 @@ export function NotificationSettings({
               <div className="flex items-start gap-3">
                 <span className="text-2xl">{item.icon}</span>
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">{item.label}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{item.desc}</p>
+                  <p className="text-sm font-medium text-(--text-primary)">{item.label}</p>
+                  <p className="text-xs text-(--text-muted) mt-0.5">{item.desc}</p>
                 </div>
               </div>
               <Switch checked={item.value} onCheckedChange={item.onChange} />
             </div>
             {idx < notifications.length - 1 && (
-              <div className="border-b border-[var(--border)] mt-3" />
+              <div className="border-b border-(--border) mt-3" />
             )}
           </div>
         ))}

@@ -7,8 +7,7 @@ import { api } from '../../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, LogIn, LogOut, Calendar, TrendingUp, AlertCircle } from 'lucide-react';
-import { motion } from '@/lib/cssMotion';
+import { Clock, LogIn, LogOut, TrendingUp, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { format } from 'date-fns';
@@ -67,7 +66,7 @@ export function CheckInOutWidget() {
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg text-white">
+      <CardHeader className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-white">
             <Clock className="w-5 h-5" />
@@ -81,9 +80,9 @@ export function CheckInOutWidget() {
 
       <CardContent className="p-6 space-y-4">
         {/* Current Status */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--background-subtle)]">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-(--background-subtle)">
           <div>
-            <p className="text-sm text-[var(--text-muted)]">{t('attendance.status')}</p>
+            <p className="text-sm text-(--text-muted)">{t('attendance.status')}</p>
             <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
               {!todayStatus && t('attendance.notCheckedIn')}
               {isCheckedIn && t('attendance.atWork')}
@@ -108,7 +107,7 @@ export function CheckInOutWidget() {
             <div className="p-3 rounded-lg border" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <LogIn className="w-4 h-4 text-green-500" />
-                <span className="text-xs text-[var(--text-muted)]">{t('attendance.checkIn')}</span>
+                <span className="text-xs text-(--text-muted)">{t('attendance.checkIn')}</span>
               </div>
               <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {formatTime(todayStatus.checkInTime)}
@@ -123,7 +122,7 @@ export function CheckInOutWidget() {
             <div className="p-3 rounded-lg border" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <LogOut className="w-4 h-4 text-blue-500" />
-                <span className="text-xs text-[var(--text-muted)]">{t('attendance.checkOut')}</span>
+                <span className="text-xs text-(--text-muted)">{t('attendance.checkOut')}</span>
               </div>
               <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {todayStatus.checkOutTime ? formatTime(todayStatus.checkOutTime) : '—'}
@@ -139,7 +138,7 @@ export function CheckInOutWidget() {
 
         {/* Work Duration */}
         {todayStatus && todayStatus.totalWorkedMinutes && (
-          <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950">
+          <div className="p-4 rounded-lg bg-linear-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />

@@ -535,7 +535,7 @@ export const MessageBubble = React.memo(function MessageBubble({
       {/* Image lightbox */}
       {lightboxSrc && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-200 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in"
           onClick={() => setLightboxSrc(null)}
         >
           <Button
@@ -558,7 +558,7 @@ export const MessageBubble = React.memo(function MessageBubble({
 
       {/* Delete dialog */}
       {showDeleteDialog && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
           <div
             className="rounded-2xl shadow-2xl border p-5 w-72 flex flex-col gap-3 animate-slide-up"
             style={{ background: 'var(--background)', borderColor: 'var(--border)' }}
@@ -626,7 +626,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               title={`View ${message.sender?.name}'s profile`}
               onClick={(e) => e.stopPropagation()}
             >
-              <Avatar className="w-7 h-7 ring-2 ring-transparent hover:ring-[var(--primary)] transition-all duration-200">
+              <Avatar className="w-7 h-7 ring-2 ring-transparent hover:ring-(--primary) transition-all duration-200">
                 {message.sender?.avatarUrl && <AvatarImage src={message.sender.avatarUrl} />}
                 <AvatarFallback
                   className="text-[10px] font-bold text-white"
@@ -692,7 +692,7 @@ export const MessageBubble = React.memo(function MessageBubble({
 
           {/* Bubble */}
           <div
-            className="relative rounded-2xl px-3 py-2 text-sm break-words transition-all duration-200 hover:brightness-105 max-w-[260px] xs:max-w-[280px] sm:max-w-[320px] md:max-w-[360px] w-full min-w-[180px]"
+            className="relative rounded-2xl px-3 py-2 text-sm wrap-break-words transition-all duration-200 hover:brightness-105 max-w-65 xs:max-w-[280px] sm:max-w-[320px] md:max-w-90 w-full min-w-45"
             style={{
               background: isOwn
                 ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)'
@@ -703,7 +703,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             }}
           >
             {editing ? (
-              <div className="flex items-end gap-2 min-w-[180px]">
+              <div className="flex items-end gap-2 min-w-45">
                 <textarea
                   autoFocus
                   value={editContent}
@@ -753,14 +753,14 @@ export const MessageBubble = React.memo(function MessageBubble({
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-2 p-2 rounded-xl min-w-[200px] max-w-[280px]"
+                        className="flex items-center gap-2 p-2 rounded-xl min-w-50 max-w-70"
                         style={{
                           background: isOwn ? 'rgba(255,255,255,0.15)' : 'var(--background-subtle)',
                         }}
                       >
                         {/* Play icon */}
                         <button
-                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
+                          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 hover:scale-105 transition-transform"
                           style={{
                             background: isOwn ? 'rgba(255,255,255,0.2)' : 'var(--primary)',
                             color: 'white',
@@ -816,7 +816,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         <img
                           src={att.url}
                           alt={att.name}
-                          className="rounded-xl max-w-[28vw] xs:max-w-[180px] sm:max-w-[200px] max-h-[200px] object-cover cursor-pointer transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
+                          className="rounded-xl max-w-[28vw] xs:max-w-[180px] sm:max-w-50 max-h-50 object-cover cursor-pointer transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
                           onClick={() => setLightboxSrc(att.url)}
                         />
                         <a
@@ -829,7 +829,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         >
                           <Download className="w-3.5 h-3.5 text-white" />
                         </a>
-                        <p className="text-[9px] xs:text-[10px] mt-0.5 opacity-70 truncate max-w-[28vw] xs:max-w-[180px] sm:max-w-[200px]">
+                        <p className="text-[9px] xs:text-[10px] mt-0.5 opacity-70 truncate max-w-[28vw] xs:max-w-[180px] sm:max-w-50">
                           {att.name}
                         </p>
                       </div>
@@ -839,7 +839,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                     return (
                       <div
                         key={i}
-                        className="rounded-xl overflow-hidden w-full max-w-[200px] xs:max-w-[220px] sm:max-w-[240px]"
+                        className="rounded-xl overflow-hidden w-full max-w-50 xs:max-w-55 sm:max-w-60"
                       >
                         <div
                           className="flex items-center gap-2 px-2 py-1.5 text-xs"
@@ -909,7 +909,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           {/* Poll UI */}
           {message.poll && (
             <div
-              className="mt-1 rounded-xl overflow-hidden border w-full min-w-[180px] xs:min-w-[200px] sm:min-w-[220px] max-w-[260px] xs:max-w-[280px] sm:max-w-[320px] animate-fade-in"
+              className="mt-1 rounded-xl overflow-hidden border w-full min-w-45 xs:min-w-[200px] sm:min-w-55 max-w-65 xs:max-w-[280px] sm:max-w-[320px] animate-fade-in"
               style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
             >
               <div
@@ -917,7 +917,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                 style={{ borderColor: 'var(--border)' }}
               >
                 <p
-                  className="text-xs xs:text-sm font-semibold break-words"
+                  className="text-xs xs:text-sm font-semibold wrap-break-words"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   📊 {message.poll.question}
@@ -965,7 +965,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                             opacity: 0.25,
                           }}
                         />
-                        <div className="relative flex items-center justify-between px-2.5 xs:px-3 py-2 min-h-[36px] xs:min-h-[32px]">
+                        <div className="relative flex items-center justify-between px-2.5 xs:px-3 py-2 min-h-9 xs:min-h-[32px]">
                           <span
                             className="text-[10px] xs:text-[11px] font-medium flex items-center gap-1 truncate max-w-[75%]"
                             style={{ color: isVoted ? 'var(--primary)' : 'var(--text-primary)' }}
@@ -1074,7 +1074,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                   <button
                     key={emojiKey}
                     onClick={() => handleReaction(displayEmoji)}
-                    className="flex items-center gap-0.5 sm:px-1.5 px-2 sm:py-0.5 py-1 rounded-full sm:text-xs text-sm border transition-all duration-200 hover:scale-110 min-h-[28px] sm:min-h-auto"
+                    className="flex items-center gap-0.5 sm:px-1.5 px-2 sm:py-0.5 py-1 rounded-full sm:text-xs text-sm border transition-all duration-200 hover:scale-110 min-h-7 sm:min-h-auto"
                     style={{
                       background: users.includes(currentUserId)
                         ? 'var(--primary)'
@@ -1116,7 +1116,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               <button
                 key={emoji}
                 onClick={() => handleReaction(emoji)}
-                className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-sm sm:text-xs hover:scale-125 transition-transform duration-150 min-h-[36px]"
+                className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-sm sm:text-xs hover:scale-125 transition-transform duration-150 min-h-9"
                 style={{ background: 'var(--background-subtle)' }}
               >
                 {emoji}
@@ -1126,7 +1126,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               onClick={() =>
                 onReply(message._id, message.content, message.sender?.name ?? 'Someone')
               }
-              className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-150 min-h-[36px]"
+              className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-150 min-h-9"
               style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
               title={L.reply}
             >
@@ -1149,7 +1149,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                   }
                   setShowMenu((prev) => !prev);
                 }}
-                className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-150 min-h-[36px]"
+                className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-150 min-h-9"
                 style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
               >
                 <MoreHorizontal className="sm:w-3 sm:h-3 w-4 h-4" />
@@ -1237,7 +1237,7 @@ function MessageMenuPortal({
   if (!open || !position || typeof document === 'undefined') return null;
   return createPortal(
     <div
-      className="fixed z-[120] rounded-xl shadow-2xl border py-1 min-w-[160px] animate-slide-up"
+      className="fixed z-120 rounded-xl shadow-2xl border py-1 min-w-40 animate-slide-up"
       style={{
         top: position.top,
         left: position.left,

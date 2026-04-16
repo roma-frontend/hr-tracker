@@ -76,7 +76,7 @@ export function ShieldLoader({
         {/* Optional message */}
         {message && (
           <p
-            className="text-sm text-[var(--text-muted)] mt-2 animate-fade-in"
+            className="text-sm text-(--text-muted) mt-2 animate-fade-in"
             style={{ animationDelay: '0.3s' }}
           >
             {message}

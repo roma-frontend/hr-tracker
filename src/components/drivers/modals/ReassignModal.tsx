@@ -66,7 +66,7 @@ export function ReassignModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="w-full max-w-lg bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden"
+        className="w-full max-w-lg bg-(--card) rounded-2xl border border-(--border) shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -95,8 +95,8 @@ export function ReassignModal({
         {/* Content */}
         <div className="p-6 space-y-4">
           {/* Current Driver */}
-          <div className="p-4 rounded-xl bg-[var(--background-subtle)] border border-[var(--border)]">
-            <p className="text-xs font-medium text-[var(--text-muted)] mb-2">
+          <div className="p-4 rounded-xl bg-(--background-subtle) border border-(--border)">
+            <p className="text-xs font-medium text-(--text-muted) mb-2">
               {t('driver.currentDriver', 'Current Driver')}
             </p>
             <div className="flex items-center gap-3">
@@ -112,26 +112,26 @@ export function ReassignModal({
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate">{currentDriverName}</p>
               </div>
-              <X className="w-4 h-4 text-[var(--text-muted)]" />
+              <X className="w-4 h-4 text-(--text-muted)" />
             </div>
           </div>
 
           {/* Arrow */}
           <div className="flex justify-center">
-            <div className="p-2 rounded-full bg-[var(--primary)]/10">
-              <CheckCircle2 className="w-5 h-5 text-[var(--primary)]" />
+            <div className="p-2 rounded-full bg-(--primary)/10">
+              <CheckCircle2 className="w-5 h-5 text-(--primary)" />
             </div>
           </div>
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
             <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('driver.searchDrivers', 'Search drivers...')}
-              className="pl-10 border-[var(--border)] bg-[var(--input)]"
+              className="pl-10 border-(--border) bg-(--input)"
             />
           </div>
 
@@ -148,8 +148,8 @@ export function ReassignModal({
                   onClick={() => setSelectedDriverId(driver._id)}
                   className={`w-full p-3 rounded-xl border transition-all duration-200 text-left ${
                     selectedDriverId === driver._id
-                      ? 'border-[var(--primary)] bg-[var(--primary)]/5 shadow-sm'
-                      : 'border-[var(--border)] bg-[var(--background-subtle)] hover:border-[var(--primary)]/50'
+                      ? 'border-(--primary) bg-(--primary)/5 shadow-sm'
+                      : 'border-(--border) bg-(--background-subtle) hover:border-(--primary)/50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -164,13 +164,13 @@ export function ReassignModal({
                         </AvatarFallback>
                       </Avatar>
                       {driver.isAvailable && (
-                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[var(--card)]" />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-(--card)" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{driver.userName}</p>
                       {driver.vehicleInfo && (
-                        <p className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+                        <p className="text-xs text-(--text-muted) flex items-center gap-1">
                           <Car className="w-3 h-3" />
                           {driver.vehicleInfo}
                         </p>
@@ -187,7 +187,7 @@ export function ReassignModal({
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center"
+                          className="w-5 h-5 rounded-full bg-(--primary) flex items-center justify-center"
                         >
                           <CheckCircle2 className="w-3 h-3 text-white" />
                         </motion.div>
@@ -200,7 +200,7 @@ export function ReassignModal({
           </div>
 
           {filteredDrivers.length === 0 && (
-            <div className="text-center py-6 text-[var(--text-muted)]">
+            <div className="text-center py-6 text-(--text-muted)">
               <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p className="text-sm">{t('driver.noDriversFound', 'No drivers found')}</p>
             </div>

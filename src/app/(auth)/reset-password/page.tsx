@@ -35,7 +35,7 @@ function ResetPasswordForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: 'auth:verifyResetToken', args: { token } }),
     })
-      .then((r) => r.json())
+      .then((r) => r.json() as Promise<{ value?: { valid?: boolean } }>)
       .then((d) => setTokenValid(d.value?.valid === true))
       .catch(() => setTokenValid(false));
   }, [token]);
@@ -59,7 +59,7 @@ function ResetPasswordForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token, newPassword: password }),
         });
-        const data = await res.json();
+        const data = (await res.json()) as { error?: string };
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
         setSuccess(true);
         setTimeout(() => router.push('/login'), 3000);
@@ -97,7 +97,7 @@ function ResetPasswordForm() {
         >
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center shadow-lg">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -269,7 +269,7 @@ function ResetPasswordForm() {
                         className="flex items-center gap-2 p-3 rounded-xl text-sm"
                         style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
                       >
-                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <AlertCircle className="w-4 h-4 shrink-0" />
                         {error}
                       </motion.div>
                     )}

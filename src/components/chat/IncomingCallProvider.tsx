@@ -99,7 +99,7 @@ export function IncomingCallProvider() {
           >
             {/* Animated ring */}
             <div className="relative">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center bg-linear-to-br from-purple-600 to-blue-600">
                 <span className="text-white text-2xl font-bold">
                   {incomingCall.remoteUserName?.[0]?.toUpperCase() ?? '?'}
                 </span>

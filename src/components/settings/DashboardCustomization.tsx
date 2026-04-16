@@ -69,7 +69,7 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Home className="w-5 h-5 text-[var(--primary)]" />
+            <Home className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsDashboard.defaultLandingPage')}</CardTitle>
           </div>
           <CardDescription>{t('settingsDashboard.defaultLandingPageDesc')}</CardDescription>
@@ -90,7 +90,7 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
                 <SelectItem value="analytics">📈 Analytics</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xs text-(--text-muted)">
               {t('settingsDashboard.redirectAfterLogin')}
             </p>
           </div>
@@ -101,7 +101,7 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-[var(--primary)]" />
+            <LayoutDashboard className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsDashboard.dashboardWidgets')}</CardTitle>
           </div>
           <CardDescription>{t('settingsDashboard.dashboardWidgetsDesc')}</CardDescription>
@@ -150,10 +150,10 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">{widget.emoji}</span>
                     <div>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                      <p className="text-sm font-medium text-(--text-primary)">
                         {widget.name}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5">{widget.desc}</p>
+                      <p className="text-xs text-(--text-muted) mt-0.5">{widget.desc}</p>
                     </div>
                   </div>
                   <Switch
@@ -161,7 +161,7 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
                     onCheckedChange={() => toggleWidget(key as keyof typeof widgets)}
                   />
                 </div>
-                {key !== 'analytics' && <div className="border-b border-[var(--border)] mt-3" />}
+                {key !== 'analytics' && <div className="border-b border-(--border) mt-3" />}
               </div>
             );
           })}
@@ -172,20 +172,20 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Eye className="w-5 h-5 text-[var(--primary)]" />
+            <Eye className="w-5 h-5 text-(--primary)" />
             <CardTitle>{t('settingsDashboard.displayPerformance')}</CardTitle>
           </div>
           <CardDescription>{t('settingsDashboard.displayPerformanceDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-(--surface-hover) border border-(--border)">
             <div className="flex items-start gap-3">
               <span className="text-2xl">📐</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-(--text-primary)">
                   {t('settingsDashboard.compactMode')}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-(--text-muted) mt-0.5">
                   {t('settingsDashboard.compactModeDesc')}
                 </p>
               </div>
@@ -211,7 +211,7 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xs text-(--text-muted)">
               {refreshRate === 'realtime'
                 ? t('settingsDashboard.dataUpdatesInstantly')
                 : refreshRate === 'manual'

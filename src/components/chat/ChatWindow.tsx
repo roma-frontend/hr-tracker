@@ -732,7 +732,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('chat.searchInConversation')}
-              className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) outline-none"
             />
             {searchResults && searchResults.length > 0 && (
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
@@ -995,7 +995,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               value={pollQuestion}
               onChange={(e) => setPollQuestion(e.target.value)}
               placeholder={t('chat.pollQuestion')}
-              className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none mb-2"
+              className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) outline-none mb-2"
             />
             {pollOptions.map((opt: any, i: any) => (
               <div key={i} className="flex items-center gap-1 mb-1">
@@ -1007,7 +1007,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                     setPollOptions(o);
                   }}
                   placeholder={`${t('chat.option')} ${i + 1}`}
-                  className="flex-1 px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] outline-none"
+                  className="flex-1 px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) outline-none"
                 />
                 {pollOptions.length > 2 && (
                   <button

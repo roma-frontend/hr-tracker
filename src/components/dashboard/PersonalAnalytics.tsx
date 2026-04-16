@@ -41,7 +41,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
     <div className="space-y-6">
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-90">{t('dashboard.daysTaken')}</p>
@@ -51,7 +51,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl p-6 text-white">
+        <div className="bg-linear-to-br from-yellow-500 to-orange-600 rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-90">{t('dashboard.pending')}</p>
@@ -61,7 +61,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
+        <div className="bg-linear-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-90">{t('dashboard.remaining')}</p>

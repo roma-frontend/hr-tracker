@@ -35,10 +35,10 @@ const STATUS_CONFIG: Record<
 > = {
   pending: {
     labelKey: 'tasks.status.pending',
-    color: 'text-[var(--text-muted)]',
-    bg: 'bg-[var(--background-subtle)]',
-    border: 'border-[var(--border)]',
-    dot: 'bg-[var(--text-muted)]',
+    color: 'text-(--text-muted)',
+    bg: 'bg-(--background-subtle)',
+    border: 'border-(--border)',
+    dot: 'bg-(--text-muted)',
   },
   in_progress: {
     labelKey: 'tasks.status.inProgress',
@@ -76,8 +76,8 @@ const PRIORITY_CONFIG: Record<
 > = {
   low: {
     labelKey: 'tasks.priority.low',
-    color: 'text-[var(--text-muted)]',
-    bg: 'bg-[var(--background-subtle)]',
+    color: 'text-(--text-muted)',
+    bg: 'bg-(--background-subtle)',
     icon: '',
   },
   medium: {
@@ -121,7 +121,7 @@ function Avatar({
     .slice(0, 2);
   return (
     <div
-      className={`${dim} rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-white bg-gradient-to-br from-blue-500 to-sky-500`}
+      className={`${dim} rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold text-white bg-linear-to-br from-blue-500 to-sky-500`}
     >
       {url ? (
         <img
@@ -163,7 +163,7 @@ function DeadlineBadge({ deadline, status }: { deadline?: number; status: Status
         ⚡ {dateStr}
       </span>
     );
-  return <span className="text-xs text-[var(--text-muted)]">📅 {dateStr}</span>;
+  return <span className="text-xs text-(--text-muted)">📅 {dateStr}</span>;
 }
 
 // ── Task Card (base content, reused in both draggable and overlay) ──────────
@@ -173,10 +173,10 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
   const priorityCfg = PRIORITY_CONFIG[task.priority as Priority];
   return (
     <div
-      className={`group bg-[var(--card)] rounded-2xl border shadow-sm p-4 space-y-3 transition-all duration-200 ${
+      className={`group bg-(--card) rounded-2xl border shadow-sm p-4 space-y-3 transition-all duration-200 ${
         isDragging
           ? 'border-blue-400 shadow-2xl rotate-2 scale-105 opacity-90'
-          : 'border-[var(--border)] hover:shadow-md hover:border-blue-400/50'
+          : 'border-(--border) hover:shadow-md hover:border-blue-400/50'
       }`}
     >
       <div className="flex items-center justify-between">
@@ -192,12 +192,12 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
         </span>
       </div>
       <p
-        className={`font-semibold text-sm leading-snug line-clamp-2 ${isDragging ? 'text-blue-400' : 'text-[var(--text-primary)]'}`}
+        className={`font-semibold text-sm leading-snug line-clamp-2 ${isDragging ? 'text-blue-400' : 'text-(--text-primary)'}`}
       >
         {task.title}
       </p>
       {task.description && (
-        <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">
+        <p className="text-xs text-(--text-muted) line-clamp-2 leading-relaxed">
           {task.description}
         </p>
       )}
@@ -218,38 +218,38 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
           {task.attachments.slice(0, 3).map((att: any, idx: number) => (
             <div
               key={idx}
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-[var(--background-subtle)] text-[var(--text-secondary)] border border-[var(--border)]"
+              className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-(--background-subtle) text-(--text-secondary) border border-(--border)"
             >
               <span>📎</span>
               <span className="truncate max-w-[80px]">{att.name}</span>
             </div>
           ))}
           {task.attachments.length > 3 && (
-            <span className="text-xs text-[var(--text-muted)] px-2 py-1">
+            <span className="text-xs text-(--text-muted) px-2 py-1">
               +{task.attachments.length - 3} more
             </span>
           )}
         </div>
       )}
-      <div className="flex items-center justify-between pt-1 border-t border-[var(--border)]">
+      <div className="flex items-center justify-between pt-1 border-t border-(--border)">
         <div className="flex items-center gap-2">
           <Avatar
             name={task.assignedToUser?.name ?? '?'}
             url={task.assignedToUser?.avatarUrl}
             size="sm"
           />
-          <span className="text-xs text-[var(--text-muted)] truncate max-w-[100px]">
+          <span className="text-xs text-(--text-muted) truncate max-w-[100px]">
             {task.assignedToUser?.name ?? '—'}
           </span>
         </div>
         <div className="flex items-center gap-2">
           {task.attachments && task.attachments.length > 0 && (
-            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+            <span className="text-xs text-(--text-muted) flex items-center gap-1">
               📎 {task.attachments.length}
             </span>
           )}
           {task.commentCount > 0 && (
-            <span className="text-xs text-[var(--text-muted)]">💬 {task.commentCount}</span>
+            <span className="text-xs text-(--text-muted)">💬 {task.commentCount}</span>
           )}
           <DeadlineBadge deadline={task.deadline} status={task.status as Status} />
         </div>
@@ -277,11 +277,11 @@ function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) 
     >
       {/* Drag indicator icon - visible on hover */}
       <div
-        className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-[var(--background-subtle)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+        className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-(--background-subtle) opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
         title={t('ariaLabels.dragToMove')}
       >
         <svg
-          className="w-3.5 h-3.5 text-[var(--text-muted)]"
+          className="w-3.5 h-3.5 text-(--text-muted)"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -334,7 +334,7 @@ function DroppableKanbanColumn({
           <div
             className={`rounded-2xl border-2 border-dashed ${cfg.border} p-6 text-center transition-colors ${isOver ? 'bg-blue-500/5' : ''}`}
           >
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xs text-(--text-muted)">
               {isOver ? t('tasksClient.dropHere') : t('tasksClient.noTasksFound')}
             </p>
           </div>
@@ -355,12 +355,12 @@ function TaskRow({ task, onOpen }: { task: any; onOpen: () => void }) {
       {/* Desktop table row */}
       <tr
         onClick={onOpen}
-        className="group hidden sm:table-row hover:bg-[var(--background-subtle)] cursor-pointer transition-colors border-b border-[var(--border)] last:border-0"
+        className="group hidden sm:table-row hover:bg-(--background-subtle) cursor-pointer transition-colors border-b border-(--border) last:border-0"
       >
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
-            <span className="font-medium text-[var(--text-primary)] text-sm group-hover:text-blue-400 transition-colors line-clamp-1">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${statusCfg.dot}`} />
+            <span className="font-medium text-(--text-primary) text-sm group-hover:text-blue-400 transition-colors line-clamp-1">
               {task.title}
             </span>
           </div>
@@ -372,7 +372,7 @@ function TaskRow({ task, onOpen }: { task: any; onOpen: () => void }) {
               url={task.assignedToUser?.avatarUrl}
               size="sm"
             />
-            <span className="text-sm text-[var(--text-secondary)]">
+            <span className="text-sm text-(--text-secondary)">
               {task.assignedToUser?.name ?? '—'}
             </span>
           </div>
@@ -394,7 +394,7 @@ function TaskRow({ task, onOpen }: { task: any; onOpen: () => void }) {
         <td className="px-4 py-3">
           <DeadlineBadge deadline={task.deadline} status={task.status as Status} />
         </td>
-        <td className="px-4 py-3 text-xs text-[var(--text-muted)]">
+        <td className="px-4 py-3 text-xs text-(--text-muted)">
           {task.commentCount > 0 && `💬 ${task.commentCount}`}
         </td>
       </tr>
@@ -404,18 +404,18 @@ function TaskRow({ task, onOpen }: { task: any; onOpen: () => void }) {
         <td colSpan={6} className="p-0">
           <div
             onClick={onOpen}
-            className="p-4 border-b border-[var(--border)] last:border-0 bg-[var(--card)] active:bg-[var(--background-subtle)]"
+            className="p-4 border-b border-(--border) last:border-0 bg-(--card) active:bg-(--background-subtle)"
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
-                  <span className={`font-semibold text-sm text-[var(--text-primary)] line-clamp-2`}>
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${statusCfg.dot}`} />
+                  <span className={`font-semibold text-sm text-(--text-primary) line-clamp-2`}>
                     {task.title}
                   </span>
                 </div>
                 {task.description && (
-                  <p className="text-xs text-[var(--text-muted)] line-clamp-2 mb-2">
+                  <p className="text-xs text-(--text-muted) line-clamp-2 mb-2">
                     {task.description}
                   </p>
                 )}
@@ -439,7 +439,7 @@ function TaskRow({ task, onOpen }: { task: any; onOpen: () => void }) {
               </span>
               <DeadlineBadge deadline={task.deadline} status={task.status as Status} />
               {task.commentCount > 0 && (
-                <span className="text-xs text-[var(--text-muted)]">💬 {task.commentCount}</span>
+                <span className="text-xs text-(--text-muted)">💬 {task.commentCount}</span>
               )}
             </div>
           </div>
@@ -573,7 +573,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
             {userRole === 'admin' && (
               <button
                 onClick={() => setShowAssign(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--background-subtle)] transition-colors font-medium text-sm w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-(--border) text-(--text-secondary) hover:bg-(--background-subtle) transition-colors font-medium text-sm w-full sm:w-auto"
               >
                 {t('tasksClient.assignSupervisor')}
               </button>
@@ -625,14 +625,14 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           ].map((s) => (
             <div
               key={s.label}
-              className="bg-[var(--card)] rounded-xl sm:rounded-2xl border border-[var(--border)] shadow-sm p-3 sm:p-4 text-center"
+              className="bg-(--card) rounded-xl sm:rounded-2xl border border-(--border) shadow-sm p-3 sm:p-4 text-center"
             >
               <p
-                className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${s.color} bg-clip-text text-transparent`}
+                className={`text-xl sm:text-2xl font-bold bg-linear-to-r ${s.color} bg-clip-text text-transparent`}
               >
                 {s.value}
               </p>
-              <p className="text-[10px] sm:text-xs text-[var(--text-muted)] mt-0.5">{s.label}</p>
+              <p className="text-[10px] sm:text-xs text-(--text-muted) mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
@@ -642,14 +642,14 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
         {/* Search */}
         <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-muted) text-sm">
             🔍
           </span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('placeholders.searchTasks')}
-            className="w-full pl-9 pr-4 py-2 sm:py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-[var(--text-muted)]"
+            className="w-full pl-9 pr-4 py-2 sm:py-2.5 rounded-xl border border-(--input-border) bg-(--input) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-(--text-muted)"
           />
         </div>
 
@@ -657,7 +657,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         <select
           value={filterPriority}
           onChange={(e) => setFilterPriority(e.target.value as any)}
-          className="px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-[var(--input-border)] bg-[var(--input)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 flex-shrink-0"
+          className="px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-(--input-border) bg-(--input) text-(--text-secondary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shrink-0"
         >
           <option value="all">{t('tasksClient.allPriorities')}</option>
           <option value="urgent">{t('tasksClient.urgent')}</option>
@@ -670,7 +670,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as any)}
-          className="px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 flex-shrink-0"
+          className="px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-(--border) bg-(--card) text-(--text-secondary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shrink-0"
         >
           <option value="all">{t('tasksClient.allStatuses')}</option>
           <option value="pending">{t('statuses.pending')}</option>
@@ -681,16 +681,16 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         </select>
 
         {/* View toggle */}
-        <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-xl p-1 ml-auto flex-shrink-0">
+        <div className="flex items-center bg-(--card) border border-(--border) rounded-xl p-1 ml-auto shrink-0">
           <button
             onClick={() => setViewMode('kanban')}
-            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'kanban' ? 'bg-blue-600 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'kanban' ? 'bg-blue-600 text-white shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
           >
             {t('tasksClient.kanban')}
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
           >
             {t('tasksClient.list')}
           </button>
@@ -751,37 +751,37 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
           </DragOverlay>
         </DndContext>
       ) : (
-        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-x-auto">
+        <div className="bg-(--card) rounded-2xl border border-(--border) shadow-sm overflow-x-auto">
           {tasks.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-4xl mb-3">📋</p>
-              <p className="text-[var(--text-secondary)] font-medium">
+              <p className="text-(--text-secondary) font-medium">
                 {t('tasksClient.noTasksFound')}
               </p>
-              <p className="text-[var(--text-muted)] text-sm mt-1">
+              <p className="text-(--text-muted) text-sm mt-1">
                 {canManage ? t('tasksClient.createNewTask') : t('tasksClient.noTasksAssigned')}
               </p>
             </div>
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-[var(--background-subtle)] border-b border-[var(--border)]">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                <tr className="bg-(--background-subtle) border-b border-(--border)">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-(--text-muted) uppercase tracking-wide">
                     {t('tasksClient.task')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-(--text-muted) uppercase tracking-wide">
                     {t('tasksClient.assignee')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-(--text-muted) uppercase tracking-wide">
                     {t('tasksClient.priority')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-(--text-muted) uppercase tracking-wide">
                     {t('common.status')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-(--text-muted) uppercase tracking-wide">
                     {t('tasksClient.deadline')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"></th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-(--text-muted) uppercase tracking-wide"></th>
                 </tr>
               </thead>
               <tbody>

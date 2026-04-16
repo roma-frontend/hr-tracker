@@ -217,7 +217,7 @@ export function Wizard({
       </div>
 
       {/* Navigation Buttons - Fixed at bottom */}
-      <div className="flex-shrink-0 px-4 py-4 md:px-6 md:py-5 border-t border-(--border) bg-(--background)">
+      <div className="shrink-0 px-4 py-4 md:px-6 md:py-5 border-t border-(--border) bg-(--background)">
         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
           <Button
             variant="outline"

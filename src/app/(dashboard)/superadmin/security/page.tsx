@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +19,6 @@ import {
   Camera,
   Lock,
   Bell,
-  RefreshCw,
   ChevronRight,
   ChevronLeft,
   Activity,
@@ -700,7 +698,7 @@ export default function SecurityDashboard() {
                   className="rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 border"
                   style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
                 >
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     {attempt.success ? (
                       <CheckCircle
                         className="w-4 h-4 sm:w-5 sm:h-5"

@@ -85,8 +85,8 @@ export default function JoinRequestsPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
-          <AlertCircle className="w-8 h-8 text-[var(--text-muted)] mx-auto" />
-          <p className="text-[var(--text-muted)]">{t('ui.adminAccessRequired')}</p>
+          <AlertCircle className="w-8 h-8 text-(--text-muted) mx-auto" />
+          <p className="text-(--text-muted)">{t('ui.adminAccessRequired')}</p>
         </div>
       </div>
     );
@@ -98,7 +98,7 @@ export default function JoinRequestsPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
           <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
-          <p className="text-[var(--text-muted)]">{t('joinRequestsPage.orgNotAssigned')}</p>
+          <p className="text-(--text-muted)">{t('joinRequestsPage.orgNotAssigned')}</p>
         </div>
       </div>
     );
@@ -170,7 +170,7 @@ export default function JoinRequestsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-(--text-primary) flex items-center gap-2">
             {t('joinRequestsPage.title')}
             {(pendingCount ?? 0) > 0 && (
               <span className="ml-1 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white">
@@ -178,7 +178,7 @@ export default function JoinRequestsPage() {
               </span>
             )}
           </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">{t('joinRequestsPage.subtitle')}</p>
+          <p className="text-sm text-(--text-muted) mt-1">{t('joinRequestsPage.subtitle')}</p>
         </div>
 
         {/* Generate invite link */}
@@ -202,16 +202,16 @@ export default function JoinRequestsPage() {
               <input
                 readOnly
                 value={inviteLink}
-                className="text-xs px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-[var(--text-muted)] w-48 truncate"
+                className="text-xs px-2 py-1.5 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-muted) w-48 truncate"
               />
               <button
                 onClick={handleCopyLink}
-                className="p-1.5 rounded-lg hover:bg-[var(--background-subtle)] transition-colors"
+                className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
               >
                 {inviteCopied ? (
                   <Check className="w-4 h-4 text-emerald-500" />
                 ) : (
-                  <Copy className="w-4 h-4 text-[var(--text-muted)]" />
+                  <Copy className="w-4 h-4 text-(--text-muted)" />
                 )}
               </button>
             </div>
@@ -226,7 +226,7 @@ export default function JoinRequestsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all flex-shrink-0"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all shrink-0"
               style={{
                 background: filter === f ? 'var(--primary)' : 'var(--background-subtle)',
                 color: filter === f ? '#fff' : 'var(--text-muted)',
@@ -237,27 +237,27 @@ export default function JoinRequestsPage() {
           ))}
         </div>
         <div className="relative flex-1 max-w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('placeholders.searchByNameOrEmail')}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background-subtle)] text-sm text-[var(--text-primary)] outline-none"
+            className="w-full pl-9 pr-4 py-2 rounded-lg border border-(--border) bg-(--background-subtle) text-sm text-(--text-primary) outline-none"
           />
         </div>
       </div>
 
       {/* Request cards */}
       {requests === undefined ? (
-        <div className="flex items-center justify-center py-16 gap-2 text-[var(--text-muted)]">
+        <div className="flex items-center justify-center py-16 gap-2 text-(--text-muted)">
           <ShieldLoader size="md" message={t('joinRequestsPage.loadingRequests')} />
         </div>
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
-            <Users className="w-10 h-10 text-[var(--text-muted)] opacity-40" />
+            <Users className="w-10 h-10 text-(--text-muted) opacity-40" />
             <div className="text-center space-y-2">
-              <p className="text-[var(--text-muted)] font-medium">
+              <p className="text-(--text-muted) font-medium">
                 {filter === 'pending'
                   ? t('joinRequestsPage.noPendingRequests')
                   : t('joinRequestsPage.noFilteredRequests', {
@@ -266,11 +266,11 @@ export default function JoinRequestsPage() {
                       ).toLowerCase(),
                     })}
               </p>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-(--text-muted)">
                 {t('joinRequestsPage.shareInviteLink')}
               </p>
               {filter === 'pending' && (
-                <p className="text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
+                <p className="text-xs text-(--text-muted) pt-2 border-t border-(--border)">
                   {t('joinRequestsPage.tipCheckFilters')}
                 </p>
               )}
@@ -297,17 +297,17 @@ export default function JoinRequestsPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       {/* Info */}
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center flex-shrink-0 text-[var(--primary)] font-bold text-sm">
+                        <div className="w-10 h-10 rounded-full bg-(--primary)/10 border border-(--primary)/20 flex items-center justify-center shrink-0 text-(--primary) font-bold text-sm">
                           {req.requestedByName.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-semibold text-[var(--text-primary)]">
+                          <p className="font-semibold text-(--text-primary)">
                             {req.requestedByName}
                           </p>
-                          <p className="text-sm text-[var(--text-muted)] flex items-center gap-1">
+                          <p className="text-sm text-(--text-muted) flex items-center gap-1">
                             <Mail className="w-3 h-3" /> {req.requestedByEmail}
                           </p>
-                          <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
+                          <p className="text-xs text-(--text-muted) flex items-center gap-1 mt-0.5">
                             <Calendar className="w-3 h-3" />
                             {new Date(req.requestedAt).toLocaleDateString('en-US', {
                               year: 'numeric',
@@ -342,7 +342,7 @@ export default function JoinRequestsPage() {
                                   value={rejectReason}
                                   onChange={(e) => setRejectReason(e.target.value)}
                                   placeholder={t('placeholders.reasonOptional')}
-                                  className="text-xs px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--input)] text-[var(--text-primary)] outline-none w-36"
+                                  className="text-xs px-2 py-1.5 rounded-lg border border-(--border) bg-(--input) text-(--text-primary) outline-none w-36"
                                 />
                                 <Button
                                   size="sm"
@@ -395,7 +395,7 @@ export default function JoinRequestsPage() {
                         )}
 
                         {req.status === 'rejected' && req.rejectionReason && (
-                          <p className="text-xs text-[var(--text-muted)] italic">
+                          <p className="text-xs text-(--text-muted) italic">
                             {t('joinRequestsPage.reason')}: {req.rejectionReason}
                           </p>
                         )}

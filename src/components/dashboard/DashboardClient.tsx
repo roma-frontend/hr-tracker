@@ -253,10 +253,10 @@ export default function DashboardClient() {
         <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
           <TrendingUp className="w-8 h-8 text-amber-500" />
         </div>
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+        <h2 className="text-xl font-semibold text-(--text-primary)">
           {t('dashboard.convexNotDeployed')}
         </h2>
-        <p className="text-[var(--text-muted)] text-sm max-w-sm">
+        <p className="text-(--text-muted) text-sm max-w-sm">
           {t('dashboard.convexNotDeployed')}
         </p>
       </div>
@@ -284,7 +284,7 @@ export default function DashboardClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-[var(--text-muted)] text-xs sm:text-sm"
+            className="text-(--text-muted) text-xs sm:text-sm"
           >
             {format(today, 'EEEE, MMMM d, yyyy')}
           </motion.p>
@@ -296,7 +296,7 @@ export default function DashboardClient() {
                 asChild
                 size="sm"
                 variant="outline"
-                className="hover:text-[var(--text-primary)] transition-colors"
+                className="hover:text-(--text-primary) transition-colors"
               >
                 <Link href="/superadmin/organizations">
                   <Building2 className="w-4 h-4" />
@@ -354,7 +354,7 @@ export default function DashboardClient() {
             asChild
             size="sm"
             variant="outline"
-            className="hover:text-[var(--text-primary)] transition-colors"
+            className="hover:text-(--text-primary) transition-colors"
           >
             <Link href="/calendar">
               <CalendarDays className="w-4 h-4" />
@@ -430,7 +430,7 @@ export default function DashboardClient() {
             >
               {/* Icon */}
               <div
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0"
                 style={{
                   background:
                     (securityStats?.highRisk ?? 0) >= 10
@@ -529,7 +529,7 @@ export default function DashboardClient() {
 
               {/* Arrow */}
               <ArrowRight
-                className="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
                 style={{ color: 'var(--text-muted)' }}
               />
             </div>
@@ -545,11 +545,11 @@ export default function DashboardClient() {
               <div className="flex items-center justify-between">
                 <CardTitle
                   as="h2"
-                  className="text-xs sm:text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                  className="text-xs sm:text-sm font-semibold text-(--text-muted) uppercase tracking-wider"
                 >
                   {t('dashboard.monthlyLeaveTrend')}
                 </CardTitle>
-                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--text-muted)]" />
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-(--text-muted)" />
               </div>
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
@@ -608,7 +608,7 @@ export default function DashboardClient() {
             <CardHeader className="pb-2">
               <CardTitle
                 as="h2"
-                className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                className="text-sm font-semibold text-(--text-muted) uppercase tracking-wider"
               >
                 {t('dashboard.leaveDistribution')}
               </CardTitle>
@@ -644,8 +644,8 @@ export default function DashboardClient() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full gap-2">
-                  <CalendarDays className="w-6 h-6 text-[var(--text-muted)]" />
-                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noLeaveData')}</p>
+                  <CalendarDays className="w-6 h-6 text-(--text-muted)" />
+                  <p className="text-sm text-(--text-muted)">{t('dashboard.noLeaveData')}</p>
                 </div>
               )}
             </CardContent>
@@ -659,10 +659,10 @@ export default function DashboardClient() {
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                <CardTitle className="text-sm font-semibold text-(--text-muted) uppercase tracking-wider">
                   {t('dashboard.recentLeaves')}
                 </CardTitle>
-                <ArrowRight className="w-4 h-4 text-[var(--text-muted)]" />
+                <ArrowRight className="w-4 h-4 text-(--text-muted)" />
               </div>
             </CardHeader>
             <CardContent>
@@ -671,8 +671,8 @@ export default function DashboardClient() {
                   {recentLeaves.map((leave) => (
                     <li key={leave._id} className="flex items-center justify-between text-sm">
                       <div>
-                        <p className="font-medium text-[var(--text-primary)]">{leave.userName}</p>
-                        <p className="text-[var(--text-muted)]">
+                        <p className="font-medium text-(--text-primary)">{leave.userName}</p>
+                        <p className="text-(--text-muted)">
                           {formatDate(leave.startDate, 'MMM d')} -{' '}
                           {formatDate(leave.endDate, 'MMM d')}
                         </p>
@@ -692,8 +692,8 @@ export default function DashboardClient() {
                 </ul>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full gap-2">
-                  <Clock className="w-6 h-6 text-[var(--text-muted)]" />
-                  <p className="text-sm text-[var(--text-muted)]">
+                  <Clock className="w-6 h-6 text-(--text-muted)" />
+                  <p className="text-sm text-(--text-muted)">
                     {t('dashboard.noRecentLeaves')}
                   </p>
                 </div>

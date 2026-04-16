@@ -79,12 +79,12 @@ export function StatusUpdateBanner() {
 
   return (
     <div
-      className={`w-full ${config.bg} border-b ${config.border} shadow-sm dark:bg-gradient-to-r`}
+      className={`w-full ${config.bg} border-b ${config.border} shadow-sm dark:bg-linear-to-r`}
     >
       <div className="max-w-full mx-auto px-4 py-3 flex items-start justify-between gap-3">
         {/* Left: Icon and Message */}
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          <div className="flex-shrink-0 mt-0.5">
+          <div className="shrink-0 mt-0.5">
             <Icon className={`w-5 h-5 ${config.iconColor}`} />
           </div>
           <div className="min-w-0 flex-1">
@@ -102,7 +102,7 @@ export function StatusUpdateBanner() {
         {/* Right: Close Button */}
         <button
           onClick={hideNotification}
-          className={`flex-shrink-0 p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${config.subtitle}`}
+          className={`shrink-0 p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${config.subtitle}`}
           aria-label={t('common.close', 'Close')}
         >
           <X className="w-4 h-4" />
