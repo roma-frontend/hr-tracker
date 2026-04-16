@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function ReportsPage() {
   const { t } = useTranslation();
@@ -289,8 +290,8 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent>
                       {pieData.length === 0 ? (
-                        <div className="h-[220px] flex items-center justify-center text-[var(--text-muted)] text-sm">
-                          {t('emptyStates.noDataYet')}
+                        <div className="h-[220px] flex items-center justify-center">
+                          <ShieldLoader size="sm" message={t('emptyStates.noDataYet')} />
                         </div>
                       ) : (
                         <ResponsiveContainer width="100%" height={220}>
