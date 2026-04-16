@@ -26,7 +26,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 interface TeamSidebarProps {
@@ -133,12 +133,9 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
   });
 
   // Блокировка скролла страницы при открытии панели на мобильных
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isMobile && !isPanelCollapsed) {
-      // Немедленно блокируем скролл
       const scrollY = window.scrollY;
-
-      // Применяем стили синхронно
       document.documentElement.style.overflow = 'hidden';
       document.documentElement.style.height = '100vh';
       document.body.style.overflow = 'hidden';
@@ -148,13 +145,9 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
       document.body.style.top = `-${scrollY}px`;
       document.body.style.left = '0';
       document.body.style.right = '0';
-
-      // Сохраняем позицию для восстановления
       sessionStorage.setItem('scrollY', scrollY.toString());
     } else {
-      // Восстанавливаем скролл
       const scrollY = sessionStorage.getItem('scrollY');
-
       document.documentElement.style.overflow = '';
       document.documentElement.style.height = '';
       document.body.style.overflow = '';
@@ -164,7 +157,6 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
       document.body.style.top = '';
       document.body.style.left = '';
       document.body.style.right = '';
-
       if (scrollY) {
         window.scrollTo(0, parseInt(scrollY));
         sessionStorage.removeItem('scrollY');
