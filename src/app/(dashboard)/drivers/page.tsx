@@ -518,7 +518,7 @@ export default function DriversPage() {
 
       {showTripDetails && selectedRequest && (
         <div
-          className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-9999 flex items-start justify-center pt-20 pb-8 px-4 bg-black/70 backdrop-blur-md"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowTripDetails(false);
@@ -526,7 +526,7 @@ export default function DriversPage() {
             }
           }}
         >
-          <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-5xl">
             <TripDetailsModal
               schedule={{
                 type: 'trip',

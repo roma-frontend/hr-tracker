@@ -94,13 +94,13 @@ export function TripDetailsModal({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="max-w-4xl w-full mx-auto"
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: 20 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="w-full max-h-[85vh] flex flex-col"
     >
-      <div className="bg-(--card) rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+      <div className="bg-(--card) rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full w-full">
         {/* Header with gradient */}
         <div
           className={`relative p-6 ${
