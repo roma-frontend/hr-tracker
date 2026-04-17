@@ -12,8 +12,21 @@ import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+const WizardContext = React.createContext<{
+  stepData: Record<string, string | number | boolean | null | string[]>;
+  updateStepData: (key: string, value: string | number | boolean | null | string[]) => void;
+} | null>(null);
+
+export function useWizardContext() {
+  const context = React.useContext(WizardContext);
+  if (!context) {
+    throw new Error('useWizardContext must be used within a Wizard');
+  }
+  return context;
+}
+
 interface StepContent {
-  stepData: Record<string, string | number | boolean | null>;
+  stepData: Record<string, string | number | boolean | null | string[]>;
   updateStepData: (key: string, value: unknown) => void;
 }
 
@@ -23,18 +36,18 @@ export interface WizardStep {
   description?: string;
   icon?: React.ReactNode;
   content: React.ReactElement;
-  validation?: (data: Record<string, string | number | boolean | null>) => boolean;
+  validation?: (data: Record<string, string | number | boolean | null | string[]>) => boolean;
 }
 
 interface WizardProps {
   steps: WizardStep[];
-  onComplete?: (data: Record<string, string | number | boolean | null>) => void;
+  onComplete?: (data: Record<string, string | number | boolean | null | string[]>) => void;
   onCancel?: () => void;
   submitLabel?: string;
   cancelLabel?: string;
   showStepper?: boolean;
   className?: string;
-  defaultStepData?: Record<string, string | number | boolean | null>;
+  defaultStepData?: Record<string, string | number | boolean | null | string[]>;
 }
 
 export function Wizard({
@@ -50,7 +63,7 @@ export function Wizard({
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] =
-    useState<Record<string, string | number | boolean | null>>(defaultStepData);
+    useState<Record<string, string | number | boolean | null | string[]>>(defaultStepData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentStepData = steps[currentStep];
@@ -83,7 +96,7 @@ export function Wizard({
     }
   };
 
-  const updateStepData = (key: string, value: string | number | boolean | null) => {
+  const updateStepData = (key: string, value: string | number | boolean | null | string[]) => {
     setStepData((prev) => ({
       ...prev,
       [key]: value,
@@ -194,24 +207,9 @@ export function Wizard({
               )}
             </div>
 
-            <div className="space-y-3 md:space-y-4">
-              {React.isValidElement(currentStepData?.content) &&
-              typeof currentStepData.content.type !== 'string'
-                ? React.cloneElement(
-                    currentStepData.content as React.ReactElement<{
-                      stepData: Record<string, string | number | boolean | null>;
-                      updateStepData: (
-                        key: string,
-                        value: string | number | boolean | null,
-                      ) => void;
-                    }>,
-                    {
-                      stepData,
-                      updateStepData,
-                    },
-                  )
-                : currentStepData?.content}
-            </div>
+            <WizardContext.Provider value={{ stepData, updateStepData }}>
+              <div className="space-y-3 md:space-y-4">{currentStepData?.content}</div>
+            </WizardContext.Provider>
           </motion.div>
         </AnimatePresence>
       </div>

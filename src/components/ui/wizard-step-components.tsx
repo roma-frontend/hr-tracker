@@ -21,13 +21,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { useWizardContext } from '@/components/ui/wizard';
 
 // ═══════════════════════════════════════════════════════════════
 // Text Input Step
 // ═══════════════════════════════════════════════════════════════
 interface TextInputStepProps {
-  stepData: Record<string, string | number | boolean | null>;
-  updateStepData: (key: string, value: string | number | boolean | null) => void;
+  stepData?: Record<string, string | number | boolean | null>;
+  updateStepData?: (key: string, value: string | number | boolean | null) => void;
   field: string;
   label: string;
   placeholder?: string;
@@ -48,7 +49,10 @@ export function TextInputStep({
   type = 'text',
   defaultValue,
 }: TextInputStepProps) {
-  const value = (stepData[field] as string | number | undefined) ?? defaultValue;
+  const context = useWizardContext();
+  const data = stepData ?? context.stepData;
+  const update = updateStepData ?? context.updateStepData;
+  const value = (data[field] as string | number | undefined) ?? defaultValue;
   return (
     <div className="space-y-2">
       <Label htmlFor={field} className="text-(--text-primary)">
@@ -59,7 +63,7 @@ export function TextInputStep({
         name={field}
         type={type}
         value={value ?? ''}
-        onChange={(e) => updateStepData(field, e.target.value)}
+        onChange={(e) => update(field, e.target.value)}
         placeholder={placeholder}
         className="bg-(--input) border-(--input-border) text-(--text-primary) placeholder-(--text-muted)"
         required={required}
@@ -73,8 +77,8 @@ export function TextInputStep({
 // Textarea Step
 // ═══════════════════════════════════════════════════════════════
 interface TextareaStepProps {
-  stepData: Record<string, string | number | boolean | null>;
-  updateStepData: (key: string, value: string | number | boolean | null) => void;
+  stepData?: Record<string, string | number | boolean | null>;
+  updateStepData?: (key: string, value: string | number | boolean | null) => void;
   field: string;
   label: string;
   placeholder?: string;
@@ -93,7 +97,10 @@ export function TextareaStep({
   required = false,
   rows = 4,
 }: TextareaStepProps) {
-  const value = stepData[field] as string | number | undefined;
+  const context = useWizardContext();
+  const data = stepData ?? context.stepData;
+  const update = updateStepData ?? context.updateStepData;
+  const value = data[field] as string | number | undefined;
   return (
     <div className="space-y-2">
       <Label htmlFor={field} className="text-(--text-primary)">
@@ -103,7 +110,7 @@ export function TextareaStep({
         id={field}
         name={field}
         value={value ?? ''}
-        onChange={(e) => updateStepData(field, e.target.value)}
+        onChange={(e) => update(field, e.target.value)}
         placeholder={placeholder}
         rows={rows}
         className="bg-(--input) border-(--input-border) text-(--text-primary) placeholder-(--text-muted) resize-none"
@@ -118,8 +125,8 @@ export function TextareaStep({
 // Select Step
 // ═══════════════════════════════════════════════════════════════
 interface SelectStepProps {
-  stepData: Record<string, string | number | boolean | null>;
-  updateStepData: (key: string, value: string | number | boolean | null) => void;
+  stepData?: Record<string, string | number | boolean | null>;
+  updateStepData?: (key: string, value: string | number | boolean | null) => void;
   field: string;
   label: string;
   options: { value: string; label: string; icon?: React.ReactNode }[];
@@ -139,7 +146,10 @@ export function SelectStep({
   description,
   required = false,
 }: SelectStepProps) {
-  const value = stepData[field] as string | undefined;
+  const context = useWizardContext();
+  const data = stepData ?? context.stepData;
+  const update = updateStepData ?? context.updateStepData;
+  const value = data[field] as string | undefined;
   return (
     <div className="space-y-2">
       <Label htmlFor={field} className="text-(--text-primary)">
@@ -147,7 +157,7 @@ export function SelectStep({
       </Label>
       <Select
         value={value ?? ''}
-        onValueChange={(value) => updateStepData(field, value)}
+        onValueChange={(value) => update(field, value)}
         required={required}
       >
         <SelectTrigger className="bg-(--input) border-(--input-border) text-(--text-primary)">
@@ -155,11 +165,7 @@ export function SelectStep({
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              className="text-(--text-primary)"
-            >
+            <SelectItem key={option.value} value={option.value} className="text-(--text-primary)">
               <div className="flex items-center gap-2">
                 {option.icon}
                 {option.label}
@@ -177,8 +183,8 @@ export function SelectStep({
 // Card Selection Step
 // ═══════════════════════════════════════════════════════════════
 interface CardSelectionStepProps {
-  stepData: Record<string, string | number | boolean | null>;
-  updateStepData: (key: string, value: string | number | boolean | null) => void;
+  stepData?: Record<string, string | number | boolean | null>;
+  updateStepData?: (key: string, value: string | number | boolean | null) => void;
   field: string;
   label: string;
   options: {
@@ -203,7 +209,10 @@ export function CardSelectionStep({
   required = false,
   columns = 2,
 }: CardSelectionStepProps) {
-  const selectedValue = stepData[field];
+  const context = useWizardContext();
+  const data = stepData ?? context.stepData;
+  const update = updateStepData ?? context.updateStepData;
+  const selectedValue = data[field];
 
   return (
     <div className="space-y-2 md:space-y-3">
@@ -211,7 +220,9 @@ export function CardSelectionStep({
         <Label className="text-(--text-primary) text-sm md:text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>}
+        {description && (
+          <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>
+        )}
       </div>
 
       <div
@@ -234,7 +245,7 @@ export function CardSelectionStep({
                   ? 'border-(--primary) bg-(--primary)/5 shadow-md'
                   : 'border-(--border) bg-(--background) hover:bg-(--background-subtle)',
               )}
-              onClick={() => updateStepData(field, option.value)}
+              onClick={() => update(field, option.value)}
             >
               <CardContent className="p-3 md:p-5 flex flex-col items-center text-center gap-2 md:gap-3">
                 <div
@@ -245,7 +256,11 @@ export function CardSelectionStep({
                       : option.color || 'bg-(--background-subtle) text-(--text-muted)',
                   )}
                 >
-                  {React.isValidElement(option.icon) ? React.cloneElement(option.icon as React.ReactElement<any>, { className: 'w-4 h-4 md:w-6 md:h-6' }) : option.icon}
+                  {React.isValidElement(option.icon)
+                    ? React.cloneElement(option.icon as React.ReactElement<any>, {
+                        className: 'w-4 h-4 md:w-6 md:h-6',
+                      })
+                    : option.icon}
                 </div>
                 <div className="space-y-1 md:space-y-1.5">
                   <p
@@ -256,9 +271,15 @@ export function CardSelectionStep({
                   >
                     {option.title}
                   </p>
-                  <p className="text-[10px] md:text-xs text-(--text-muted) leading-relaxed line-clamp-2">{option.description}</p>
+                  <p className="text-[10px] md:text-xs text-(--text-muted) leading-relaxed line-clamp-2">
+                    {option.description}
+                  </p>
                 </div>
-                {isSelected && <Badge className="bg-(--primary) text-white text-[10px] md:text-xs px-2 py-0.5">✓ Выбрано</Badge>}
+                {isSelected && (
+                  <Badge className="bg-(--primary) text-white text-[10px] md:text-xs px-2 py-0.5">
+                    ✓ Выбрано
+                  </Badge>
+                )}
               </CardContent>
             </Card>
           );
@@ -272,8 +293,8 @@ export function CardSelectionStep({
 // Radio Group Step
 // ═══════════════════════════════════════════════════════════════
 interface RadioGroupStepProps {
-  stepData: Record<string, string | number | boolean | null>;
-  updateStepData: (key: string, value: string | number | boolean | null) => void;
+  stepData?: Record<string, string | number | boolean | null>;
+  updateStepData?: (key: string, value: string | number | boolean | null) => void;
   field: string;
   label: string;
   options: { value: string; label: string; description?: string }[];
@@ -292,26 +313,31 @@ export function RadioGroupStep({
   required = false,
   defaultValue,
 }: RadioGroupStepProps) {
-  const value = (stepData[field] as string | undefined) ?? defaultValue;
+  const context = useWizardContext();
+  const data = stepData ?? context.stepData;
+  const update = updateStepData ?? context.updateStepData;
+  const value = (data[field] as string | undefined) ?? defaultValue;
   return (
     <div className="space-y-2 md:space-y-3">
       <div>
         <Label className="text-(--text-primary) text-sm md:text-base">
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
-        {description && <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>}
+        {description && (
+          <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>
+        )}
       </div>
 
       <RadioGroup
         value={value ?? ''}
-        onValueChange={(value) => updateStepData(field, value)}
+        onValueChange={(value) => update(field, value)}
         className="space-y-2"
       >
         {options.map((option) => (
           <div
             key={option.value}
             className="flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border border-(--border) bg-(--background) hover:bg-(--background-subtle) transition-colors cursor-pointer"
-            onClick={() => updateStepData(field, option.value)}
+            onClick={() => update(field, option.value)}
           >
             <RadioGroupItem
               value={option.value}
@@ -319,9 +345,13 @@ export function RadioGroupStep({
               className="mt-0.5 shrink-0"
             />
             <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
-              <p className="font-medium text-sm md:text-base text-(--text-primary)">{option.label}</p>
+              <p className="font-medium text-sm md:text-base text-(--text-primary)">
+                {option.label}
+              </p>
               {option.description && (
-                <p className="text-[10px] md:text-xs text-(--text-muted) mt-0.5 md:mt-1">{option.description}</p>
+                <p className="text-[10px] md:text-xs text-(--text-muted) mt-0.5 md:mt-1">
+                  {option.description}
+                </p>
               )}
             </Label>
           </div>
@@ -335,8 +365,8 @@ export function RadioGroupStep({
 // Checkbox Step
 // ═══════════════════════════════════════════════════════════════
 interface CheckboxStepProps {
-  stepData: Record<string, string | number | boolean | null | string[]>;
-  updateStepData: (key: string, value: string | number | boolean | null | string[]) => void;
+  stepData?: Record<string, string | number | boolean | null | string[]>;
+  updateStepData?: (key: string, value: string | number | boolean | null | string[]) => void;
   field: string;
   label: string;
   options: { value: string; label: string; description?: string }[];
@@ -351,20 +381,25 @@ export function CheckboxStep({
   options,
   description,
 }: CheckboxStepProps) {
-  const values = (stepData[field] as string[] | undefined) || [];
+  const context = useWizardContext();
+  const data = stepData ?? context.stepData;
+  const update = updateStepData ?? context.updateStepData;
+  const values = (data[field] as string[] | undefined) || [];
 
   const toggleValue = (value: string) => {
     const newValues = values.includes(value)
       ? values.filter((v: string) => v !== value)
       : [...values, value];
-    updateStepData(field, newValues);
+    update(field, newValues);
   };
 
   return (
     <div className="space-y-2 md:space-y-3">
       <div>
         <Label className="text-(--text-primary) text-sm md:text-base">{label}</Label>
-        {description && <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>}
+        {description && (
+          <p className="text-[10px] md:text-xs text-(--text-muted) mt-1">{description}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -384,9 +419,13 @@ export function CheckboxStep({
                 className="shrink-0 mt-0.5"
               />
               <Label htmlFor={`${field}-${option.value}`} className="flex-1 cursor-pointer">
-                <p className="font-medium text-sm md:text-base text-(--text-primary)">{option.label}</p>
+                <p className="font-medium text-sm md:text-base text-(--text-primary)">
+                  {option.label}
+                </p>
                 {option.description && (
-                  <p className="text-[10px] md:text-xs text-(--text-muted) mt-0.5 md:mt-1">{option.description}</p>
+                  <p className="text-[10px] md:text-xs text-(--text-muted) mt-0.5 md:mt-1">
+                    {option.description}
+                  </p>
                 )}
               </Label>
             </div>

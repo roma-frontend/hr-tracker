@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
@@ -27,13 +27,11 @@ import type { FunctionReference } from 'convex/server';
 import {
   ChevronLeft,
   ChevronRight,
-  MapPin,
   Clock,
   Calendar as CalendarIcon,
   Car,
   Coffee,
   Shield,
-  ArrowRight,
   Play,
   CheckCircle2,
   Wrench,
@@ -173,12 +171,6 @@ function TripCard({
 
   const config = getStatusConfig();
 
-  const getTypeIcon = () => {
-    if (isTimeOff) return <Coffee className="w-3 h-3" />;
-    if (isBlocked) return <Shield className="w-3 h-3" />;
-    if (isMaintenance) return <Wrench className="w-3 h-3" />;
-    return <Car className="w-3 h-3" />;
-  };
 
   const getTypeLabel = () => {
     if (isTimeOff) return t('driverCalendar.timeOff');
@@ -746,7 +738,7 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
         selectedTrip &&
         createPortal(
           <div
-            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            className="fixed inset-0 z-999999 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
             style={{ pointerEvents: 'auto' }}
             onClick={() => {
               setShowTripModal(false);

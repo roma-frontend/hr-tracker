@@ -5,7 +5,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wizard, WizardStep } from '@/components/ui/wizard';
 import {
@@ -59,8 +59,6 @@ export function CreateEventWizard({
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <CardSelectionStep
-          stepData={{}}
-          updateStepData={() => {}}
           field="type"
           label={t('eventWizard.steps.type.typeLabel')}
           options={[
@@ -106,16 +104,12 @@ export function CreateEventWizard({
       content: (
         <div className="space-y-4">
           <TextInputStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="title"
             label={t('eventWizard.steps.details.titleLabel')}
             placeholder={t('eventWizard.steps.details.titlePlaceholder')}
             required
           />
           <TextareaStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="description"
             label={t('eventWizard.steps.details.descriptionLabel')}
             placeholder={t('eventWizard.steps.details.descriptionPlaceholder')}
@@ -133,16 +127,12 @@ export function CreateEventWizard({
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TextInputStep
-              stepData={{}}
-              updateStepData={() => {}}
               field="startDate"
               label={t('eventWizard.steps.datetime.startLabel')}
               type="date"
               required
             />
             <TextInputStep
-              stepData={{}}
-              updateStepData={() => {}}
               field="endDate"
               label={t('eventWizard.steps.datetime.endLabel')}
               type="date"
@@ -150,8 +140,6 @@ export function CreateEventWizard({
             />
           </div>
           <TextInputStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="location"
             label={t('eventWizard.steps.datetime.locationLabel')}
             placeholder={t('eventWizard.steps.datetime.locationPlaceholder')}
@@ -166,8 +154,6 @@ export function CreateEventWizard({
       icon: <AlertCircle className="w-5 h-5" />,
       content: (
         <RadioGroupStep
-          stepData={{}}
-          updateStepData={() => {}}
           field="priority"
           label={t('eventWizard.steps.priority.priorityLabel')}
           options={[
@@ -199,8 +185,6 @@ export function CreateEventWizard({
       content: (
         <div className="space-y-4">
           <CheckboxStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="departments"
             label={t('eventWizard.steps.departments.departmentsLabel')}
             options={DEPARTMENTS}
@@ -209,8 +193,6 @@ export function CreateEventWizard({
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-(--muted-foreground)" />
               <TextInputStep
-                stepData={{}}
-                updateStepData={() => {}}
                 field="notifyDays"
                 label={t('eventWizard.steps.departments.notifyLabel')}
                 type="number"
@@ -223,12 +205,19 @@ export function CreateEventWizard({
     },
   ];
 
-  const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
+  const handleSubmit = async (
+    data: Record<string, string | number | boolean | null | string[]>,
+  ) => {
     try {
-      const departments = ((data.departments as unknown) as string[]) || [];
-      
+      const departments = (data.departments as unknown as string[]) || [];
+
       if (departments.length === 0) {
         toast.error(t('eventWizard.toast.selectDepartments'));
+        return;
+      }
+
+      if (!data.title || !data.startDate || !data.endDate || !data.type) {
+        toast.error(t('eventWizard.toast.error'));
         return;
       }
 
@@ -248,6 +237,7 @@ export function CreateEventWizard({
 
       toast.success(t('eventWizard.toast.success'));
       onComplete?.();
+      onCancel?.();
     } catch (error) {
       toast.error(t('eventWizard.toast.error'));
       console.error(error);
