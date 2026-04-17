@@ -14,6 +14,7 @@ import { DriverBookingPage } from '@/components/drivers/sections';
 import { RequestDriverWizard } from '@/components/drivers/RequestDriverWizard';
 import {
   RegisterDriverModal,
+  SelectDriverModal,
   DriverCalendarDialog,
   TripDetailsModal,
 } from '@/components/drivers/modals';
@@ -94,7 +95,14 @@ export default function DriversPage() {
   const [capacityFilter, setCapacityFilter] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'rating' | 'name' | 'availability'>('rating');
   const [showRequestWizard, setShowRequestWizard] = useState(false);
+  const [showSelectDriverModal, setShowSelectDriverModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [selectedDriverCandidate, setSelectedDriverCandidate] = useState<{
+    _id: Id<'users'>;
+    name: string;
+    email: string;
+    phone?: string;
+  } | null>(null);
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [showTripDetails, setShowTripDetails] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<TripRequest | null>(null);
@@ -147,6 +155,12 @@ export default function DriversPage() {
   const recurringTrips = useQuery(
     api.drivers.recurring_trips.getRecurringTrips,
     userId ? { userId } : 'skip',
+  );
+
+  // Get all employees with driver role for registration
+  const driverCandidates = useQuery(
+    api.users.queries.getUsersByRole,
+    orgId ? { organizationId: orgId, role: 'driver' } : 'skip',
   );
 
   // 5. Redirect effect
@@ -300,6 +314,19 @@ export default function DriversPage() {
     setShowRequestWizard(true);
   }, []);
 
+  const handleOpenRegisterModal = useCallback(() => {
+    setShowSelectDriverModal(true);
+  }, []);
+
+  const handleSelectDriver = useCallback(
+    (driver: { _id: Id<'users'>; name: string; email: string; phone?: string }) => {
+      setSelectedDriverCandidate(driver);
+      setShowSelectDriverModal(false);
+      setShowRegisterModal(true);
+    },
+    [],
+  );
+
   const handleRegisterSubmit = useCallback(
     async (data: {
       vehicleMake: string;
@@ -321,12 +348,12 @@ export default function DriversPage() {
       };
       maxTripsPerDay?: number;
     }) => {
-      if (!userId || !orgId) return;
+      if (!userId || !orgId || !selectedDriverCandidate) return;
       try {
         await registerAsDriver({
-          userId,
+          userId: selectedDriverCandidate._id,
           organizationId: orgId,
-          adminId: userId, // User is registering themselves
+          adminId: userId, // Admin is registering the driver
           vehicleInfo: {
             model: data.vehicleMake || '',
             year: data.vehicleYear ? parseInt(data.vehicleYear) : 2024,
@@ -343,13 +370,14 @@ export default function DriversPage() {
         });
         toast.success(t('driver.registered', 'Registered as driver!'));
         setShowRegisterModal(false);
+        setSelectedDriverCandidate(null);
       } catch (e: unknown) {
         toast.error(
           e instanceof Error ? e.message : t('driver.failedToRegister', 'Failed to register'),
         );
       }
     },
-    [userId, orgId, registerAsDriver, t],
+    [userId, orgId, selectedDriverCandidate, registerAsDriver, t],
   );
 
   const noOp = useCallback(() => {}, []);
@@ -423,7 +451,7 @@ export default function DriversPage() {
         onCancelRequest={noOp}
         onToggleRecurring={noOp}
         onDeleteRecurring={noOp}
-        onRegisterAsDriver={() => setShowRegisterModal(true)}
+        onRegisterAsDriver={handleOpenRegisterModal}
         canRegisterDrivers={user?.role === 'admin'}
       />
 
@@ -444,11 +472,26 @@ export default function DriversPage() {
         </div>
       )}
 
-      {showRegisterModal && (
+      {showSelectDriverModal && (
+        <SelectDriverModal
+          candidates={(driverCandidates ?? []).map((c) => ({
+            _id: c._id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone,
+            department: c.department,
+            position: c.position,
+          }))}
+          onSelect={handleSelectDriver}
+          onClose={() => setShowSelectDriverModal(false)}
+        />
+      )}
+
+      {showRegisterModal && selectedDriverCandidate && (
         <RegisterDriverModal
-          userName={user?.name ?? ''}
-          userEmail={user?.email ?? ''}
-          userPhone={user?.phone}
+          userName={selectedDriverCandidate.name}
+          userEmail={selectedDriverCandidate.email}
+          userPhone={selectedDriverCandidate.phone}
           onSubmit={handleRegisterSubmit}
           onClose={closeRegisterModal}
         />

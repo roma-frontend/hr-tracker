@@ -240,6 +240,32 @@ export const getSupervisors = query({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET USERS BY ROLE — scoped to org, for driver registration
+// ─────────────────────────────────────────────────────────────────────────────
+export const getUsersByRole = query({
+  args: {
+    organizationId: v.id('organizations'),
+    role: v.string(),
+  },
+  handler: async (ctx, { organizationId, role }) => {
+    const users = await ctx.db
+      .query('users')
+      .withIndex('by_org_role', (q) => q.eq('organizationId', organizationId).eq('role', role))
+      .filter((q) => q.eq(q.field('isActive'), true))
+      .collect();
+
+    return users.map((u) => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      department: u.department,
+      position: u.position,
+    }));
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // GET PENDING APPROVAL USERS — scoped to org
 // ─────────────────────────────────────────────────────────────────────────────
 export const getPendingApprovalUsers = query({
