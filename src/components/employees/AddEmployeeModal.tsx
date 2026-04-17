@@ -199,7 +199,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
   } as const;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()} modal={false}>
       <DialogContent className="max-w-lg max-h-[90vh] p-0">
         {/* Header with progress */}
         <div className="relative overflow-hidden">
@@ -440,7 +440,6 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                     <Select
                       value={role}
                       onValueChange={(v) => setRole(v as 'admin' | 'supervisor' | 'employee')}
-                      modal={false}
                     >
                       <SelectTrigger>
                         <SelectValue />
