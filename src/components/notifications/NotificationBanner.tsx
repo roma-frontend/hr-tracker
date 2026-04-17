@@ -107,6 +107,14 @@ export function NotificationBanner() {
               newNotification.type === 'leave_rejected'
             ) {
               router.push('/leaves');
+            } else if (
+              newNotification.type === 'ticket_created' ||
+              newNotification.type === 'ticket_updated' ||
+              newNotification.type === 'ticket' ||
+              newNotification.message?.toLowerCase().includes('ticket') ||
+              newNotification.title?.toLowerCase().includes('ticket')
+            ) {
+              router.push('/help');
             } else {
               router.push('/dashboard');
             }
