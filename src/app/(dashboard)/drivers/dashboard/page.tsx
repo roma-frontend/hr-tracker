@@ -217,8 +217,10 @@ export default function DriverDashboardPage() {
         />
       </div>
 
-      {/* Shift Management */}
-      <DriverShiftControls driverId={driver._id} userId={userId!} organizationId={orgId!} />
+      {/* Shift Management - Only for drivers, not admins */}
+      {user?.role !== 'admin' && user?.role !== 'superadmin' && (
+        <DriverShiftControls driverId={driver._id} userId={userId!} organizationId={orgId!} />
+      )}
 
       {/* Pending Requests */}
       <Card className="mb-8 border-(--border)">
