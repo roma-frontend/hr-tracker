@@ -26,24 +26,6 @@ interface CreateTicketWizardProps {
   onCancel?: () => void;
 }
 
-// Wrapper component to accept stepData and updateStepData props
-const StepWrapper = ({
-  stepData,
-  updateStepData,
-  children,
-}: {
-  stepData?: Record<string, string | number | boolean | null>;
-  updateStepData?: (key: string, value: string | number | boolean | null) => void;
-  children: (props: {
-    stepData: Record<string, string | number | boolean | null>;
-    updateStepData: (key: string, value: string | number | boolean | null) => void;
-  }) => React.ReactNode;
-}) => {
-  return (
-    <>{children({ stepData: stepData || {}, updateStepData: updateStepData || (() => {}) })}</>
-  );
-};
-
 export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicketWizardProps) {
   const { t } = useTranslation();
   const createTicket = useMutation(api.tickets.createTicket);
@@ -56,8 +38,6 @@ export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicke
       icon: <Ticket className="w-5 h-5" />,
       content: (
         <CardSelectionStep
-          stepData={{}}
-          updateStepData={() => {}}
           field="type"
           label={t('help.wizard.step1.typeLabel')}
           options={[
@@ -87,7 +67,6 @@ export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicke
           required
         />
       ),
-      validation: () => true, // Will be validated by component
     },
     {
       id: 'details',
@@ -95,29 +74,21 @@ export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicke
       description: t('help.wizard.step2.description'),
       icon: <FileText className="w-5 h-5" />,
       content: (
-        <StepWrapper>
-          {({ stepData, updateStepData }) => (
-            <div className="space-y-4">
-              <TextInputStep
-                stepData={stepData}
-                updateStepData={updateStepData}
-                field="title"
-                label={t('help.wizard.step2.titleLabel')}
-                placeholder={t('help.wizard.step2.titlePlaceholder')}
-                required
-              />
-              <TextareaStep
-                stepData={stepData}
-                updateStepData={updateStepData}
-                field="description"
-                label={t('help.wizard.step2.descriptionLabel')}
-                placeholder={t('help.wizard.step2.descriptionPlaceholder')}
-                rows={6}
-                required
-              />
-            </div>
-          )}
-        </StepWrapper>
+        <div className="space-y-4">
+          <TextInputStep
+            field="title"
+            label={t('help.wizard.step2.titleLabel')}
+            placeholder={t('help.wizard.step2.titlePlaceholder')}
+            required
+          />
+          <TextareaStep
+            field="description"
+            label={t('help.wizard.step2.descriptionLabel')}
+            placeholder={t('help.wizard.step2.descriptionPlaceholder')}
+            rows={6}
+            required
+          />
+        </div>
       ),
     },
     {
@@ -126,56 +97,51 @@ export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicke
       description: t('help.wizard.step3.description'),
       icon: <AlertCircle className="w-5 h-5" />,
       content: (
-        <StepWrapper>
-          {({ stepData, updateStepData }) => (
-            <div className="space-y-4">
-              <SelectStep
-                stepData={stepData}
-                updateStepData={updateStepData}
-                field="priority"
-                label={t('help.wizard.step3.priorityLabel')}
-                options={[
-                  { value: 'low', label: t('priority.low') },
-                  { value: 'medium', label: t('priority.medium') },
-                  { value: 'high', label: t('priority.high') },
-                  { value: 'critical', label: t('priority.critical') },
-                ]}
-                placeholder={t('help.wizard.step3.priorityPlaceholder')}
-                required
-              />
-              <SelectStep
-                stepData={stepData}
-                updateStepData={updateStepData}
-                field="category"
-                label={t('help.wizard.step3.categoryLabel')}
-                options={[
-                  { value: 'technical', label: t('help.categories.technical') },
-                  { value: 'billing', label: t('help.categories.billing') },
-                  { value: 'account', label: t('help.categories.account') },
-                  { value: 'feature', label: t('help.categories.feature') },
-                  { value: 'other', label: t('help.categories.other') },
-                ]}
-                placeholder={t('help.wizard.step3.categoryPlaceholder')}
-              />
-            </div>
-          )}
-        </StepWrapper>
+        <div className="space-y-4">
+          <SelectStep
+            field="priority"
+            label={t('help.wizard.step3.priorityLabel')}
+            options={[
+              { value: 'low', label: t('priority.low') },
+              { value: 'medium', label: t('priority.medium') },
+              { value: 'high', label: t('priority.high') },
+              { value: 'critical', label: t('priority.critical') },
+            ]}
+            placeholder={t('help.wizard.step3.priorityPlaceholder')}
+            required
+          />
+          <SelectStep
+            field="category"
+            label={t('help.wizard.step3.categoryLabel')}
+            options={[
+              { value: 'technical', label: t('help.categories.technical') },
+              { value: 'billing', label: t('help.categories.billing') },
+              { value: 'account', label: t('help.categories.account') },
+              { value: 'feature', label: t('help.categories.feature') },
+              { value: 'other', label: t('help.categories.other') },
+            ]}
+            placeholder={t('help.wizard.step3.categoryPlaceholder')}
+          />
+        </div>
       ),
     },
   ];
 
-  const handleSubmit = async (data: Record<string, string | number | boolean | null>) => {
+  const handleSubmit = async (
+    data: Record<string, string | number | boolean | null | string[]>,
+  ) => {
     try {
       await createTicket({
         createdBy: userId as any,
         title: String(data.title),
         description: String(data.description),
-        category: (String(data.category) || 'other') as 'technical' | 'billing' | 'access' | 'feature_request' | 'bug' | 'other',
-        priority: (String(data.priority) || 'medium') as 'low' | 'medium' | 'high' | 'critical',
+        category: (String(data.category) || 'other') as any,
+        priority: (String(data.priority) || 'medium') as any,
       });
 
       toast.success(t('help.alerts.ticketCreated'));
       onComplete?.();
+      onCancel?.();
     } catch (error) {
       toast.error(t('help.alerts.errorCreatingTicket'));
       console.error(error);
