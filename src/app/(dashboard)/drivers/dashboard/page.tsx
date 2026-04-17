@@ -490,7 +490,12 @@ export default function DriverDashboardPage() {
           <h2 className="text-xl font-semibold">{t('driver.weeklySchedule', 'Weekly Schedule')}</h2>
         </CardHeader>
         <CardContent>
-          <DriverCalendar driverId={driver._id} organizationId={orgId!} role="driver" />
+          <DriverCalendar
+            driverId={driver._id}
+            organizationId={orgId!}
+            userId={userId}
+            role="driver"
+          />
         </CardContent>
       </Card>
 
