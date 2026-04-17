@@ -279,6 +279,17 @@ export default function DriversPage() {
     }
   }, []);
 
+  const handleViewRequestDetails = useCallback((request: TripRequest) => {
+    setSelectedRequest(request);
+    setShowTripDetails(true);
+    const mainEl = document.querySelector<HTMLElement>('main');
+    if (mainEl) {
+      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
   const handleToggleFavorite = useCallback(
     async (id: string) => {
       if (!userId || !orgId) return;
@@ -441,10 +452,7 @@ export default function DriversPage() {
         }}
         onToggleFavorite={handleToggleFavorite}
         onRequestDriver={handleRequestDriver}
-        onViewRequestDetails={(request) => {
-          setSelectedRequest(request as unknown as TripRequest | null);
-          setShowTripDetails(true);
-        }}
+        onViewRequestDetails={handleViewRequestDetails}
         onRateRequest={noOp}
         onEditRequest={noOp}
         onDeleteRequest={noOp}
