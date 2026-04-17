@@ -2920,7 +2920,8 @@
     "noDeadline": "Без срока",
     "total": "Всего",
     "allPriorities": "Все приоритеты",
-    "allStatuses": "Все статусы"
+    "allStatuses": "Все статусы",
+    "deleteTask": "Удалить задачу"
   },
   "attendanceExtra": {
     "daysWorked": "Отработано дней",

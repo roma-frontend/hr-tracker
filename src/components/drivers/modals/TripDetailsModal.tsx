@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { motion } from '@/lib/cssMotion';
 import {
   Car,
@@ -47,32 +46,6 @@ export function TripDetailsModal({
   const { t, i18n } = useTranslation();
 
   const dateFnsLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
-
-  // Block body scroll when modal is open
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    const originalOverscroll = document.body.style.overscrollBehavior;
-    const mainEl = document.querySelector<HTMLElement>('main');
-    const originalMainOverflow = mainEl?.style.overflow;
-
-    document.body.style.overflow = 'hidden';
-    document.body.style.overscrollBehavior = 'none';
-    document.documentElement.style.overflow = 'hidden';
-    document.documentElement.style.overscrollBehavior = 'none';
-    if (mainEl) {
-      mainEl.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.overscrollBehavior = originalOverscroll;
-      document.documentElement.style.overflow = '';
-      document.documentElement.style.overscrollBehavior = '';
-      if (mainEl) {
-        mainEl.style.overflow = originalMainOverflow || '';
-      }
-    };
-  }, []);
 
   if (!schedule) return null;
 

@@ -231,7 +231,7 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
           )}
         </div>
       )}
-      <div className="flex items-center justify-between pt-1 border-t border-(--border)">
+      <div className="flex flex-wrap gap-2 items-center justify-between pt-1 border-t border-(--border)">
         <div className="flex items-center gap-2">
           <Avatar
             name={task.assignedToUser?.name ?? '?'}

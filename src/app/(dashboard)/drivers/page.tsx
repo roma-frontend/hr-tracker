@@ -248,8 +248,7 @@ export default function DriversPage() {
   useEffect(() => {
     if (showRequestWizard || showTripDetails || showCalendarDialog) {
       const mainEl = document.querySelector<HTMLElement>('main');
-      const originalMainOverflow = mainEl?.style.overflow;
-      const originalBodyOverflow = document.body.style.overflow;
+      const scrollY = mainEl ? mainEl.scrollTop : window.scrollY;
 
       document.body.style.overflow = 'hidden';
       if (mainEl) {
@@ -258,10 +257,11 @@ export default function DriversPage() {
       }
 
       return () => {
-        document.body.style.overflow = originalBodyOverflow;
+        document.body.style.overflow = '';
         if (mainEl) {
-          mainEl.style.overflow = originalMainOverflow || '';
+          mainEl.style.overflow = '';
           mainEl.style.paddingRight = '';
+          mainEl.scrollTo({ top: scrollY, behavior: 'instant' });
         }
       };
     }
@@ -513,7 +513,10 @@ export default function DriversPage() {
 
       {showTripDetails && selectedRequest && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="w-full max-w-3xl rounded-2xl bg-(--card) shadow-2xl flex flex-col max-h-[90vh]">
+          <div
+            className="w-full max-w-3xl rounded-2xl bg-(--card) shadow-2xl flex flex-col overflow-hidden"
+            style={{ maxHeight: '85vh' }}
+          >
             <TripDetailsModal
               schedule={{
                 type: 'trip',

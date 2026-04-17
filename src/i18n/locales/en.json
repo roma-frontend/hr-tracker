@@ -2884,7 +2884,8 @@
     "newTask": "New Task",
     "total": "Total",
     "allPriorities": "All Priorities",
-    "allStatuses": "All Statuses"
+    "allStatuses": "All Statuses",
+    "deleteTask": "Delete Task"
   },
   "attendanceExtra": {
     "daysWorked": "Days Worked",

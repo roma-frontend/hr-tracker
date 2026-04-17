@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../../convex/_generated/api';
@@ -114,6 +114,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   const [editDeadline, setEditDeadline] = useState(
     task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : '',
   );
+  const modalBodyRef = useRef<HTMLDivElement>(null);
 
   const canManage = userRole === 'admin' || userRole === 'supervisor';
   const isAssignee = task.assignedTo === currentUserId;
@@ -133,12 +134,26 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   React.useEffect(() => {
     markRead({ userId: currentUserId }).catch(() => {});
 
-    // Disable body scroll when modal is open
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    // Scroll modal body to top
+    if (modalBodyRef.current) {
+      modalBodyRef.current.scrollTop = 0;
+    }
+
+    // Scroll main element to top and disable its scroll
+    const mainElement = document.querySelector('main');
+    const originalScrollTop = mainElement?.scrollTop ?? 0;
+    const originalOverflow = mainElement?.style.overflow;
+
+    if (mainElement) {
+      mainElement.scrollTop = 0;
+      mainElement.style.overflow = 'hidden';
+    }
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      if (mainElement) {
+        mainElement.style.overflow = originalOverflow || '';
+        mainElement.scrollTop = originalScrollTop;
+      }
     };
   }, []);
 
@@ -193,7 +208,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-(--card) rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-(--border)">
+      <div className="relative bg-(--card) rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden border border-(--border)">
         {/* Header */}
         <div className="px-6 py-5 shrink-0">
           <div className="flex items-start justify-between gap-3">

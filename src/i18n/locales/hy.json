@@ -2867,7 +2867,8 @@
     "noDeadline": "Անժամկետ",
     "total": "Ընդամենը",
     "allPriorities": "Առաջնահերթությունները",
-    "allStatuses": "Բոլոր կարգավիճակները"
+    "allStatuses": "Բոլոր կարգավիճակները",
+    "deleteTask": "Ջնջել առաջադրանքը"
   },
   "attendanceExtra": {
     "daysWorked": "Աշխատանքային օրեր",
