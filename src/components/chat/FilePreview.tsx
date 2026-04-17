@@ -67,7 +67,7 @@ export function FilePreview({ files, onRemove }: FilePreviewProps) {
           )}
           <div className="absolute -bottom-5 left-0 right-0 text-center">
             <span
-              className="text-[8px] xs:text-[9px] truncate block"
+              className="text-[10px] truncate block"
               style={{ color: 'var(--text-disabled)' }}
             >
               {formatFileSize(pf.file.size)}
@@ -82,7 +82,7 @@ export function FilePreview({ files, onRemove }: FilePreviewProps) {
         </div>
       ))}
       <p
-        className="w-full text-[9px] xs:text-[10px] mt-5"
+        className="w-full text-[11px] mt-5"
         style={{ color: 'var(--text-disabled)' }}
       >
         {files.length} {files.length > 1 ? t('chat.filesReadyToSend') : t('chat.fileReadyToSend')}

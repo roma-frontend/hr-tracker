@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from 'convex/react';
@@ -14,7 +13,6 @@ import {
   Search,
   Pin,
   Info,
-  Send,
   Paperclip,
   Smile,
   X,
@@ -28,7 +26,6 @@ import Link from 'next/link';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ThreadPanel } from './ThreadPanel';
 import { ConversationInfoPanel } from './ConversationInfoPanel';
-import { format, isToday, isYesterday } from 'date-fns';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 import EmojiPicker from './EmojiPicker';
@@ -914,7 +911,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                 {/* File name tooltip & size */}
                 <div className="absolute -bottom-5 left-0 right-0 text-center">
                   <span
-                    className="text-[8px] xs:text-[9px] truncate block"
+                    className="text-[10px] truncate block"
                     style={{ color: 'var(--text-disabled)' }}
                   >
                     {formatFileSize(pf.file.size)}
@@ -930,7 +927,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               </div>
             ))}
             <p
-              className="w-full text-[9px] xs:text-[10px] mt-5"
+              className="w-full text-[11px] mt-5"
               style={{ color: 'var(--text-disabled)' }}
             >
               {pendingFiles.length}{' '}

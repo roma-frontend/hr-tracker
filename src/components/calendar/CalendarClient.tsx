@@ -172,9 +172,7 @@ function DayCell({
   const totalItems = leaves.length + googleEvents.length + driverEvents.length;
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
+    <button
       onClick={onClick}
       className={[
         'relative w-full min-h-10 sm:min-h-22.5 rounded-xl p-1.5 text-left transition-all duration-200 border',
@@ -271,7 +269,7 @@ function DayCell({
           )}
         </div>
       )}
-    </motion.button>
+    </button>
   );
 }
 
@@ -522,10 +520,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* -- Calendar Panel -- */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.05 }}
+        <div
           className="xl:col-span-3 space-y-4"
         >
           <Card className="overflow-hidden">
@@ -596,12 +591,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
               {/* Day grid */}
               <AnimatePresence mode="wait">
-                <motion.div
+                <div
                   key={format(currentMonth, 'yyyy-MM')}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
                   className="grid grid-cols-7 gap-1.5"
                 >
                   {calendarDays.map((date, i) => {
@@ -622,16 +613,13 @@ export const CalendarClient = React.memo(function CalendarClient() {
                       />
                     );
                   })}
-                </motion.div>
+                </div>
               </AnimatePresence>
             </CardContent>
           </Card>
 
           {/* Legend */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+          <div
             className="flex flex-wrap gap-3 px-1"
           >
             {(Object.entries(LEAVE_TYPE_COLORS) as [LeaveType, string][]).map(([type, color]) => (
@@ -667,8 +655,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
               <span className="w-3 h-3 rounded-full border-2 border-(--primary) bg-(--primary)/10 shrink-0" />
               <span className="text-xs text-(--text-muted)">{t('timePeriods.today')}</span>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* -- Side Panel -- */}
         <motion.div
