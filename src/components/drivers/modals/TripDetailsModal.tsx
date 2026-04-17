@@ -100,7 +100,7 @@ export function TripDetailsModal({
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className="max-w-4xl w-full mx-auto"
     >
-      <div className="bg-(--card) rounded-2xl shadow-2xl overflow-hidden">
+      <div className="bg-(--card) rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
         {/* Header with gradient */}
         <div
           className={`relative p-6 ${
@@ -151,7 +151,7 @@ export function TripDetailsModal({
         </div>
 
         {/* Content - No borders, clean design */}
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 overflow-y-auto flex-1">
           {isTrip && schedule.tripInfo && (
             <>
               {/* Route */}

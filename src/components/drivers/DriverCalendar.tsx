@@ -235,7 +235,7 @@ function TripCard({
               e.stopPropagation();
               onUpdateStatus(item._id, 'in_progress');
             }}
-            className={`w-full mt-1.5 h-6 text-[10px] font-semibold rounded-md ${config.btnBg} ${config.btnText} transition-colors flex items-center justify-center gap-1`}
+            className={`w-full mt-1.5 p-2 text-[10px] font-semibold rounded-md ${config.btnBg} ${config.btnText} transition-colors flex items-center justify-center gap-1`}
           >
             <Play className="w-2.5 h-2.5" />
             {t('driverCalendar.startTrip', 'Start')}
@@ -247,7 +247,7 @@ function TripCard({
               e.stopPropagation();
               onUpdateStatus(item._id, 'completed');
             }}
-            className="w-full mt-1.5 h-6 text-[10px] font-semibold rounded-md bg-emerald-500 hover:bg-emerald-600 text-white transition-colors flex items-center justify-center gap-1"
+            className="w-full mt-1.5 p-2 text-[10px] font-semibold rounded-md bg-emerald-500 hover:bg-emerald-600 text-white transition-colors flex items-center justify-center gap-1"
           >
             <CheckCircle2 className="w-2.5 h-2.5" />
             {t('driverCalendar.completeTrip', 'Complete')}
