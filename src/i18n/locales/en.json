@@ -4135,6 +4135,13 @@
     "filterArchived": "Archived",
     "noMessagesYet": "No messages yet"
   },
+  "aiAssistant": {
+    "hints": {
+      "help": "Need help? I'm here! 💡",
+      "leaveRequest": "Try /leave to request time off",
+      "reports": "Ask me about team reports"
+    }
+  },
   "superadminStripe": {
     "accessDenied": "Access Denied",
     "totalSubscriptions": "Total Subscriptions",

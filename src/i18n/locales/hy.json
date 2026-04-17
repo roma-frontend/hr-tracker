@@ -4122,6 +4122,13 @@
     "filterArchived": "Արխիվ",
     "noMessagesYet": "Հաղորդագրություններ դեռ չկան"
   },
+  "aiAssistant": {
+    "hints": {
+      "help": "Օգնությա՞ն կարիք կա: Ես այստեղ եմ! 💡",
+      "leaveRequest": "Փորձեք /leave արձակուրդի հայտ ներկայացնելու համար",
+      "reports": "Հարցրեք ինձ թիմի հաշվետվությունների մասին"
+    }
+  },
   "superadminStripe": {
     "accessDenied": "Մուտքը արգելված է",
     "totalSubscriptions": "Ընդամենը բաժանորդագրություններ",

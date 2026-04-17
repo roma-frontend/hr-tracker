@@ -4180,6 +4180,13 @@
     "filterArchived": "Архив",
     "noMessagesYet": "Сообщений пока нет"
   },
+  "aiAssistant": {
+    "hints": {
+      "help": "Нужна помощь? Я здесь! 💡",
+      "leaveRequest": "Используйте /leave для заявки на отпуск",
+      "reports": "Спросите про отчеты команды"
+    }
+  },
   "superadminStripe": {
     "accessDenied": "Доступ запрещен",
     "totalSubscriptions": "Всего подписок",

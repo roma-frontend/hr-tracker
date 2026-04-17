@@ -224,6 +224,15 @@ export function ChatWidget() {
   const [wakeWordActive, setWakeWordActive] = useState(false);
   const [voiceInput, setVoiceInput] = useState('');
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+
+  // AI button hint system
+  const [hintIndex, setHintIndex] = useState(0);
+  const [showHint, setShowHint] = useState(false);
+  const [lastActivityTime, setLastActivityTime] = useState(Date.now());
+  const [hintsShownCount, setHintsShownCount] = useState(0);
+  const MAX_HINTS_PER_SESSION = 3;
+  const HINT_INTERVAL_MS = 20000; // 20 seconds between hints
+  const INACTIVITY_THRESHOLD_MS = 15000; // 15 seconds of inactivity
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const user = useAuthStore((s) => s.user);
@@ -255,6 +264,66 @@ export function ChatWidget() {
       }, 300);
     }
   }, [isOpen]);
+
+  // ── AI Button hint system ───────────────────────────────────────
+  const getHintText = useCallback(
+    (index: number): string => {
+      const hints = [
+        t('aiAssistant.hints.help', { defaultValue: "Need help? I'm here! 💡" }),
+        t('aiAssistant.hints.leaveRequest', { defaultValue: 'Try /leave to request time off' }),
+        t('aiAssistant.hints.reports', { defaultValue: 'Ask me about team reports' }),
+      ];
+      return hints[index % hints.length] ?? '';
+    },
+    [t],
+  );
+
+  // Track user activity
+  const trackActivity = useCallback(() => {
+    setLastActivityTime(Date.now());
+    setShowHint(false);
+  }, []);
+
+  // Show hint after inactivity
+  useEffect(() => {
+    if (isOpen || hintsShownCount >= MAX_HINTS_PER_SESSION) return;
+
+    const checkInactivity = () => {
+      const now = Date.now();
+      const inactive = now - lastActivityTime > INACTIVITY_THRESHOLD_MS;
+
+      if (inactive && !showHint) {
+        setShowHint(true);
+        setHintsShownCount((prev) => prev + 1);
+
+        // Hide hint after 5 seconds
+        setTimeout(() => {
+          setShowHint(false);
+          // Rotate to next hint
+          setHintIndex((prev) => (prev + 1) % 3);
+        }, 5000);
+      }
+    };
+
+    const interval = setInterval(checkInactivity, HINT_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [isOpen, lastActivityTime, showHint, hintsShownCount]);
+
+  // Listen for user activity
+  useEffect(() => {
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    const handler = trackActivity;
+
+    events.forEach((event) => {
+      window.addEventListener(event, handler, { passive: true });
+    });
+
+    return () => {
+      events.forEach((event) => {
+        window.removeEventListener(event, handler);
+      });
+    };
+  }, [trackActivity]);
 
   // ── Detect language of text (EN / RU / HY) ──────────────────────
   const detectLanguage = useCallback((text: string): 'ru' | 'en' | 'hy' => {
@@ -870,47 +939,85 @@ export function ChatWidget() {
 
       {/* Toggle Button - Hidden on /ai-chat page */}
       {pathname !== '/ai-chat' && (
-        <motion.button
-          aria-label={t('chatWidget.openAssistant', { defaultValue: 'Open AI assistant' })}
-          onClick={() => {
-            if (!hasAiChat) {
-              openModal({
-                featureTitle: 'AI HR Assistant',
-                featureDescription:
-                  'AI-powered leave assistant, smart suggestions, and voice commands are available on the Professional plan.',
-                recommendedPlan: 'professional',
-              });
-              return;
-            }
-            setIsOpen((o) => !o);
-          }}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center gap-2 justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
-          whileTap={{ scale: 0.95 }}
-        >
-          <AnimatePresence mode="wait">
-            {isOpen ? (
+        <>
+          {/* Pulsing animation background */}
+          <motion.div
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary/20"
+            animate={{
+              scale: [1, 1.2, 1] as any,
+              opacity: [0.7, 0, 0.7] as any,
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+
+          {/* Rotating hints tooltip */}
+          <AnimatePresence>
+            {showHint && hintIndex < MAX_HINTS_PER_SESSION && (
               <motion.div
-                key="x"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="fixed bottom-24 right-6 z-50 max-w-[200px] px-3 py-2 rounded-lg text-xs font-medium shadow-lg"
+                style={{
+                  background: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                }}
               >
-                <X className="w-6 h-6" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="chat"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Sparkles className="w-6 h-6" />
+                {getHintText(hintIndex)}
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.button>
+
+          {/* Main button */}
+          <motion.button
+            aria-label={t('chatWidget.openAssistant', { defaultValue: 'Open AI assistant' })}
+            onClick={() => {
+              if (!hasAiChat) {
+                openModal({
+                  featureTitle: 'AI HR Assistant',
+                  featureDescription:
+                    'AI-powered leave assistant, smart suggestions, and voice commands are available on the Professional plan.',
+                  recommendedPlan: 'professional',
+                });
+                return;
+              }
+              setIsOpen((o) => !o);
+              // Reset hint timer when user opens chat
+              setLastActivityTime(Date.now());
+            }}
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center gap-2 justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+            whileTap={{ scale: 0.95 }}
+          >
+            <AnimatePresence mode="wait">
+              {isOpen ? (
+                <motion.div
+                  key="x"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <X className="w-6 h-6" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="chat"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Sparkles className="w-6 h-6" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+        </>
       )}
 
       {/* Chat Window */}
@@ -1254,10 +1361,7 @@ export function ChatWidget() {
             )}
 
             {/* Input */}
-            <form
-              onSubmit={handleSubmit}
-              className="p-4 border-t border-(--border) shrink-0"
-            >
+            <form onSubmit={handleSubmit} className="p-4 border-t border-(--border) shrink-0">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <input
