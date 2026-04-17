@@ -282,6 +282,12 @@ export default function DriversPage() {
   const handleViewRequestDetails = useCallback((request: any) => {
     setSelectedRequest(request);
     setShowTripDetails(true);
+    const mainEl = document.querySelector<HTMLElement>('main');
+    if (mainEl) {
+      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, []);
 
   const handleToggleFavorite = useCallback(
