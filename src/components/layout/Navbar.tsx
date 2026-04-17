@@ -67,7 +67,6 @@ import { FocusMode } from '@/components/productivity/FocusMode';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useStatusUpdate } from '@/context/StatusUpdateContext';
 
-
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -76,7 +75,6 @@ function getInitials(name: string) {
     .toUpperCase()
     .slice(0, 2);
 }
-
 
 export function Navbar() {
   const { t } = useTranslation();
@@ -161,7 +159,6 @@ export function Navbar() {
     notifications.forEach((n: any) => prevNotifIds.current.add(n._id));
     prevUnreadCount.current = unreadCount;
   }, [notifications, unreadCount, user]);
-
 
   const handleLogout = async () => {
     try {
@@ -329,6 +326,14 @@ export function Navbar() {
                                 (n.title?.includes('Task') || n.title?.includes('task'))
                               ) {
                                 router.push('/tasks');
+                              } else if (
+                                n.type === 'ticket_created' ||
+                                n.type === 'ticket_updated' ||
+                                n.type === 'ticket' ||
+                                n.message?.toLowerCase().includes('ticket') ||
+                                n.title?.toLowerCase().includes('ticket')
+                              ) {
+                                router.push('/help');
                               }
                               setShowNotifications(false);
                             }}
@@ -392,7 +397,13 @@ export function Navbar() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setTheme('system')}
-                className={theme === 'system' ? (resolvedTheme === 'dark' ? 'bg-[#0ea5e9]/10' : 'bg-[#38bdf8]/10') : ''}
+                className={
+                  theme === 'system'
+                    ? resolvedTheme === 'dark'
+                      ? 'bg-[#0ea5e9]/10'
+                      : 'bg-[#38bdf8]/10'
+                    : ''
+                }
               >
                 <Monitor className="w-4 h-4 mr-2" />
                 {t('settings.systemMode', { defaultValue: 'System' })}
