@@ -245,7 +245,13 @@ export const getSupervisors = query({
 export const getUsersByRole = query({
   args: {
     organizationId: v.id('organizations'),
-    role: v.string(),
+    role: v.union(
+      v.literal('superadmin'),
+      v.literal('admin'),
+      v.literal('supervisor'),
+      v.literal('employee'),
+      v.literal('driver'),
+    ),
   },
   handler: async (ctx, { organizationId, role }) => {
     const users = await ctx.db
