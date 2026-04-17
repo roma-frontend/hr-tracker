@@ -70,7 +70,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
     const validFiles = files
       .filter((f) => {
         if (f.size > 10 * 1024 * 1024) {
-          toast.error(`${f.name} is too large (max 10MB)`);
+          toast.error(t('toasts.fileTooLarge', { name: f.name }));
           return false;
         }
         return true;
@@ -102,7 +102,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
           });
         }),
       );
-      toast.success(`${validFiles.length} file${validFiles.length > 1 ? 's' : ''} uploaded ✓`);
+      toast.success(t('toasts.uploadSuccess', { count: validFiles.length }));
     } catch {
       toast.error(t('toasts.uploadFailed'));
     } finally {
@@ -112,7 +112,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
   };
 
   const handleRemove = async (url: string, name: string) => {
-    if (!confirm(`Remove "${name}"?`)) return;
+    if (!confirm(t('toasts.confirmRemove', { name }))) return;
     try {
       await removeAttachment({ taskId, url });
       toast.success(t('toasts.removed'));
@@ -130,7 +130,9 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-(--text-secondary)">📎 Attachments</span>
+          <span className="text-sm font-semibold text-(--text-secondary)">
+            📎 {t('taskAttachments.title')}
+          </span>
           {attachments.length > 0 && (
             <span className="text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-medium">
               {attachments.length}
@@ -143,7 +145,11 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
             disabled={uploading}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl text-white disabled:opacity-50 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
           >
-            {uploading ? <ShieldLoader size="xs" variant="inline" /> : <>+ Attach File</>}
+            {uploading ? (
+              <ShieldLoader size="xs" variant="inline" />
+            ) : (
+              <>{t('taskAttachments.attachFile')}</>
+            )}
           </button>
         )}
         <input
@@ -166,7 +172,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
         >
           <p className="text-2xl mb-1">📎</p>
           <p className="text-sm text-(--text-muted)">
-            {canUpload ? 'Click to attach files (PDF, images, docs...)' : 'No attachments'}
+            {canUpload ? t('taskAttachments.clickToAttach') : t('taskAttachments.noAttachments')}
           </p>
         </div>
       ) : (
@@ -243,9 +249,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{getFileIcon(preview.type)}</span>
                   <div>
-                    <p className="font-semibold text-(--text-primary) text-sm">
-                      {preview.name}
-                    </p>
+                    <p className="font-semibold text-(--text-primary) text-sm">{preview.name}</p>
                     <p className="text-xs text-(--text-muted)">{formatSize(preview.size)}</p>
                   </div>
                 </div>
@@ -258,7 +262,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                     className="text-xs font-medium px-3 py-1.5 rounded-xl text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    ⬇ Download
+                    ⬇ {t('taskAttachments.download')}
                   </a>
                   <button
                     onClick={() => setPreview(null)}
@@ -288,7 +292,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                     <p className="text-6xl">{getFileIcon(preview.type)}</p>
                     <p className="text-(--text-secondary) font-medium">{preview.name}</p>
                     <p className="text-(--text-muted) text-sm">
-                      Preview not available for this file type
+                      {t('taskAttachments.previewNotAvailable')}
                     </p>
                     <a
                       href={preview.url}
@@ -297,7 +301,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
                     >
-                      ⬇ Download to view
+                      ⬇ {t('taskAttachments.downloadToView')}
                     </a>
                   </div>
                 )}

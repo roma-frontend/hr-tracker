@@ -2924,7 +2924,21 @@
     "noDeadline": "No deadline",
     "noComments": "No comments yet",
     "comments": "Comments",
-    "deleteConfirm": "Delete this task? This cannot be undone."
+    "deleteConfirm": "Delete this task? This cannot be undone.",
+    "noDescription": "No description",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "taskAttachments": {
+    "title": "Attachments",
+    "attachFile": "+ Attach File",
+    "clickToAttach": "Click to attach files (max 10MB)",
+    "noAttachments": "No attachments",
+    "download": "Download",
+    "downloadToView": "Download to view",
+    "previewNotAvailable": "Preview not available for this file type"
   },
   "cookies": {
     "title": "We value your privacy",
@@ -5473,6 +5487,9 @@
     "pleaseSelectImage": "Please select an image file",
     "imageTooLarge": "Image must be smaller than 5MB",
     "uploadFailed": "Upload failed",
+    "uploadSuccess": "{{count}} file(s) uploaded successfully",
+    "fileTooLarge": "{{name}} is too large (max 10MB)",
+    "confirmRemove": "Remove \"{{name}}\"?",
     "removed": "Removed",
     "removeFailed": "Failed to remove",
     "messageSentToDriver": "Message sent to driver",

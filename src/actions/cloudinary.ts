@@ -11,14 +11,19 @@ cloudinary.config({
 
 // Upload any file (PDF, image, doc, etc.) for task attachments
 export async function uploadTaskAttachment(base64File: string, fileName: string): Promise<string> {
-  const publicId = `task_${Date.now()}_${fileName.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)}`;
-  const result = await cloudinary.uploader.upload(base64File, {
-    folder: 'hr-office/task-attachments',
-    public_id: publicId,
-    resource_type: 'auto', // auto-detect: image, video, raw (pdf, doc, etc.)
-    overwrite: false,
-  });
-  return result.secure_url;
+  try {
+    const publicId = `task_${Date.now()}_${fileName.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)}`;
+    const result = await cloudinary.uploader.upload(base64File, {
+      folder: 'hr-office/task-attachments',
+      public_id: publicId,
+      resource_type: 'auto', // auto-detect: image, video, raw (pdf, doc, etc.)
+      overwrite: false,
+    });
+    return result.secure_url;
+  } catch (error) {
+    console.error('❌ Attachment upload error:', error);
+    throw new Error(error instanceof Error ? error.message : 'Upload failed');
+  }
 }
 
 export async function uploadAvatarToCloudinary(

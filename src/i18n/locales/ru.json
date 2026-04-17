@@ -2951,7 +2951,7 @@
     "rate": "ставка"
   },
   "taskDetail": {
-    "description": "",
+    "description": "Описание",
     "assignedTo": "Назначено на",
     "assignedBy": "Назначено",
     "priority": "Приоритет",
@@ -2962,7 +2962,21 @@
     "noDeadline": "Нет срока",
     "noComments": "Пока нет комментариев",
     "comments": "Комментарии",
-    "deleteConfirm": "Удалить эту задачу? Это действие нельзя отменить."
+    "deleteConfirm": "Удалить эту задачу? Это действие нельзя отменить.",
+    "noDescription": "Нет описания",
+    "low": "Низкий",
+    "medium": "Средний",
+    "high": "Высокий",
+    "urgent": "Срочный"
+  },
+  "taskAttachments": {
+    "title": "Вложения",
+    "attachFile": "+ Прикрепить файл",
+    "clickToAttach": "Нажмите, чтобы прикрепить файлы (макс. 10 МБ)",
+    "noAttachments": "Нет вложений",
+    "download": "Скачать",
+    "downloadToView": "Скачать для просмотра",
+    "previewNotAvailable": "Предпросмотр недоступен для этого типа файла"
   },
   "cookies": {
     "title": "Мы ценим вашу конфиденциальность",
@@ -5697,6 +5711,9 @@
     "pleaseSelectImage": "Пожалуйста, выберите файл изображения",
     "imageTooLarge": "Изображение должно быть меньше 5 МБ",
     "uploadFailed": "Загрузка не удалась",
+    "uploadSuccess": "{{count}} файл(ов) успешно загружено",
+    "fileTooLarge": "{{name}} слишком большой (макс. 10 МБ)",
+    "confirmRemove": "Удалить \"{{name}}\"?",
     "removed": "Удалено",
     "removeFailed": "Не удалось удалить",
     "messageSentToDriver": "Сообщение отправлено водителю",

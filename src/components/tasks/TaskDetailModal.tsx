@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
@@ -7,6 +7,7 @@ import { api } from '../../../convex/_generated/api';
 import { TaskAttachments } from './TaskAttachments';
 import { Button } from '@/components/ui/button';
 import type { Id } from '../../../convex/_generated/dataModel';
+import Image from 'next/image';
 
 type Status = 'pending' | 'in_progress' | 'review' | 'completed' | 'cancelled';
 type Priority = 'low' | 'medium' | 'high' | 'urgent';
@@ -78,7 +79,7 @@ function Avatar({ name, url }: { name: string; url?: string | null }) {
   return (
     <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold text-white text-xs bg-linear-to-br from-blue-500 to-sky-500">
       {url ? (
-        <img
+        <Image
           src={url}
           alt={name}
           className="w-full h-full object-cover"
@@ -123,6 +124,14 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   // Mark task notifications as read when modal opens
   React.useEffect(() => {
     markRead({ userId: currentUserId }).catch(() => {});
+
+    // Disable body scroll when modal is open
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
   }, []);
 
   const statusCfg = STATUS_STYLES[task.status as Status];
@@ -194,7 +203,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 </span>
                 {deadlinePassed && (
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/80 text-white">
-                    ⏰ Overdue
+                    ⏰ {t('taskDetail.overdue')}
                   </span>
                 )}
               </div>
@@ -250,7 +259,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Description */}
             <div>
               <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
-                Description
+                {t('taskDetail.description')}
               </h3>
               {editMode ? (
                 <textarea
@@ -262,7 +271,9 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               ) : (
                 <p className="text-(--text-secondary) text-sm leading-relaxed">
                   {task.description || (
-                    <span className="text-(--text-muted) italic">No description</span>
+                    <span className="text-(--text-muted) italic">
+                      {t('taskDetail.noDescription')}
+                    </span>
                   )}
                 </p>
               )}
@@ -272,7 +283,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
-                  Assigned To
+                  {t('taskDetail.assignedTo')}
                 </h3>
                 <div className="flex items-center gap-2">
                   <Avatar
@@ -291,7 +302,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               </div>
               <div>
                 <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
-                  Assigned By
+                  {t('taskDetail.assignedBy')}
                 </h3>
                 <div className="flex items-center gap-2">
                   <Avatar
@@ -302,15 +313,13 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     <p className="text-sm font-medium text-(--text-primary)">
                       {task.assignedByUser?.name ?? '—'}
                     </p>
-                    <p className="text-xs text-(--text-muted)">
-                      {task.assignedByUser?.role ?? ''}
-                    </p>
+                    <p className="text-xs text-(--text-muted)">{task.assignedByUser?.role ?? ''}</p>
                   </div>
                 </div>
               </div>
               <div>
                 <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
-                  Priority
+                  {t('taskDetail.priority')}
                 </h3>
                 {editMode ? (
                   <select
@@ -318,10 +327,10 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     onChange={(e) => setEditPriority(e.target.value as Priority)}
                     className="px-3 py-1.5 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
-                    <option value="low">↓ Low</option>
-                    <option value="medium">→ Medium</option>
-                    <option value="high">↑ High</option>
-                    <option value="urgent">⚡ Urgent</option>
+                    <option value="low">↓ {t('taskDetail.low')}</option>
+                    <option value="medium">→ {t('taskDetail.medium')}</option>
+                    <option value="high">↑ {t('taskDetail.high')}</option>
+                    <option value="urgent">⚡ {t('taskDetail.urgent')}</option>
                   </select>
                 ) : (
                   <span
@@ -333,7 +342,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
               </div>
               <div>
                 <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
-                  Deadline
+                  {t('taskDetail.deadline')}
                 </h3>
                 {editMode ? (
                   <input
@@ -354,7 +363,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     })}
                   </p>
                 ) : (
-                  <p className="text-sm text-(--text-muted) italic">No deadline</p>
+                  <p className="text-sm text-(--text-muted) italic">{t('taskDetail.noDeadline')}</p>
                 )}
               </div>
             </div>
@@ -363,7 +372,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {task.tags && task.tags.length > 0 && (
               <div>
                 <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
-                  Tags
+                  {t('taskDetail.tags')}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {task.tags.map((tag: any) => (
@@ -382,7 +391,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {transitions.length > 0 && (
               <div>
                 <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-2">
-                  Move To
+                  {t('taskDetail.moveTo')}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {transitions.map((st) => {
@@ -415,12 +424,12 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Comments */}
             <div>
               <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wide mb-3">
-                Comments {comments ? `(${comments.length})` : ''}
+                {t('taskDetail.comments')} {comments ? `(${comments.length})` : ''}
               </h3>
               <div className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-1">
                 {comments?.length === 0 && (
                   <p className="text-sm text-(--text-muted) italic text-center py-3">
-                    No comments yet
+                    {t('taskDetail.noComments')}
                   </p>
                 )}
                 {comments?.map((c) => (
@@ -440,9 +449,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                           })}
                         </span>
                       </div>
-                      <p className="text-sm text-(--text-secondary) leading-relaxed">
-                        {c.content}
-                      </p>
+                      <p className="text-sm text-(--text-secondary) leading-relaxed">{c.content}</p>
                     </div>
                   </div>
                 ))}
@@ -459,7 +466,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 <button
                   type="submit"
                   disabled={submitting || !comment.trim()}
-                  className="px-4 py-2.5 rounded-xl bg-linear-to-r from-blue-600 to-sky-500 text-white text-sm font-semibold disabled:opacity-50 hover:from-blue-700 hover:to-sky-700 transition-all shadow-sm"
+                  className="px-4 py-2.5 rounded-xl bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white text-sm font-semibold disabled:opacity-50 shadow-sm"
                 >
                   {t('buttons.send')}
                 </button>
