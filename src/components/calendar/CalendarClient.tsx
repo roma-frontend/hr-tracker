@@ -281,6 +281,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
   const [mounted, setMounted] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showDriverModal, setShowDriverModal] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
+  const [selectedGoogleEvent, setSelectedGoogleEvent] = useState<GoogleCalendarEvent | null>(null);
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
 
@@ -492,31 +494,29 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
   return (
     <div className="space-y-6">
-      {/* -- Header -- */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-      >
-        <div>
-          <h2 className="text-2xl font-bold text-(--text-primary)">
-            {t('calendarExtended.leaveCalendar')}
-          </h2>
-          <p className="text-(--text-muted) text-sm mt-1">
-            {t('calendarExtended.visualOverview')}
-          </p>
+      {/* -- Sticky Header -- */}
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-(--text-primary)">
+              {t('calendarExtended.leaveCalendar')}
+            </h2>
+            <p className="text-(--text-muted) text-sm mt-1">
+              {t('calendarExtended.visualOverview')}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <Button variant="outline" size="sm" onClick={goToday} className="w-full sm:w-auto">
+              <CalendarDays className="w-4 h-4" />
+              {t('buttons.today')}
+            </Button>
+            <Button size="sm" onClick={() => setShowLeaveModal(true)} className='flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg'>
+              <Plus className="w-4 h-4" />
+              {t('calendar.newLeave')}
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToday} className="w-full sm:w-auto">
-            <CalendarDays className="w-4 h-4" />
-            {t('buttons.today')}
-          </Button>
-          <Button size="sm" onClick={() => setShowLeaveModal(true)} className='flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg'>
-            <Plus className="w-4 h-4" />
-            {t('calendar.newLeave')}
-          </Button>
-        </div>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* -- Calendar Panel -- */}
@@ -704,7 +704,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.04 }}
-                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-(--border) bg-(--background-subtle)"
+                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-(--border) bg-(--background-subtle) cursor-pointer hover:border-(--primary)/50 transition-colors"
+                        onClick={() => setSelectedLeave(leave)}
                       >
                         <Avatar className="w-8 h-8 shrink-0">
                           <AvatarFallback
@@ -753,7 +754,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: (selectedDayLeaves.length + i) * 0.04 }}
-                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-(--border) bg-(--background-subtle)"
+                        className="flex items-start gap-2.5 p-2.5 rounded-lg border border-(--border) bg-(--background-subtle) cursor-pointer hover:border-(--primary)/50 transition-colors"
+                        onClick={() => setSelectedGoogleEvent(evt)}
                       >
                         <div
                           className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold text-white"
@@ -964,6 +966,207 @@ export const CalendarClient = React.memo(function CalendarClient() {
         selectedDate={selectedDay ?? undefined}
       />
 
+      {/* Leave Event Detail Modal - Modern Design */}
+      <AnimatePresence>
+        {selectedLeave && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              onClick={() => setSelectedLeave(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+              className="relative z-10 w-full max-w-lg bg-(--card) rounded-3xl shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Hero Header */}
+              <div className="relative px-6 pt-8 pb-12 overflow-hidden">
+                <div
+                  className="absolute inset-0 opacity-15"
+                  style={{
+                    background: `linear-gradient(135deg, ${LEAVE_TYPE_BG[selectedLeave.type]} 0%, transparent 70%)`,
+                  }}
+                />
+                <div className="absolute top-0 right-0 w-40 h-40 rounded-full -mr-20 -mt-20 opacity-10 blur-3xl"
+                  style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
+                />
+                
+                <div className="relative flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg"
+                        style={{
+                          background: `linear-gradient(135deg, ${LEAVE_TYPE_BG[selectedLeave.type]}, ${LEAVE_TYPE_BG[selectedLeave.type]}dd)`,
+                        }}
+                      >
+                        {getInitials(selectedLeave.userName ?? '?')}
+                      </div>
+                      <div
+                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-(--card) flex items-center justify-center"
+                        style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
+                      >
+                        {selectedLeave.status === 'approved' ? (
+                          <CheckCircle className="w-3.5 h-3.5 text-white" />
+                        ) : selectedLeave.status === 'rejected' ? (
+                          <XCircle className="w-3.5 h-3.5 text-white" />
+                        ) : (
+                          <Clock className="w-3.5 h-3.5 text-white" />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-(--text-primary) leading-tight">
+                        {selectedLeave.userName ?? 'Unknown'}
+                      </h3>
+                      <p className="text-sm text-(--text-muted) mt-0.5">
+                        {selectedLeave.userDepartment ?? ''}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedLeave(null)}
+                    className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-2 rounded-full hover:bg-(--background-subtle) shrink-0"
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Leave Type Badge */}
+                <div className="relative mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                  style={{
+                    background: `${LEAVE_TYPE_BG[selectedLeave.type]}15`,
+                    border: `1px solid ${LEAVE_TYPE_BG[selectedLeave.type]}30`,
+                  }}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
+                  />
+                  <span className="text-sm font-semibold" style={{ color: LEAVE_TYPE_BG[selectedLeave.type] }}>
+                    {getLeaveTypeLabel(selectedLeave.type as LeaveType, t)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="px-6 pb-6 -mt-6 relative">
+                <div className="bg-(--card) rounded-2xl border border-(--border) shadow-lg p-5 space-y-5">
+                  {/* Date Timeline */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 text-center">
+                      <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
+                        {t('driver.from', 'From')}
+                      </p>
+                      <p className="text-3xl font-bold text-(--text-primary) leading-none">
+                        {safeFormat(selectedLeave.startDate, 'd')}
+                      </p>
+                      <p className="text-xs text-(--text-muted) mt-1">
+                        {safeFormat(selectedLeave.startDate, 'MMM')}
+                      </p>
+                      <p className="text-[10px] text-(--text-muted) mt-0.5">
+                        {safeFormat(selectedLeave.startDate, 'yyyy')}
+                      </p>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col items-center px-4">
+                      <div className="w-10 h-px bg-(--border) mb-2" />
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-(--background-subtle) border border-(--border)">
+                        <CalendarDays className="w-3.5 h-3.5 text-(--text-muted)" />
+                        <span className="text-sm font-bold text-(--text-primary)">
+                          {selectedLeave.days}
+                        </span>
+                        <span className="text-[10px] text-(--text-muted) uppercase">
+                          {t('common.daysShort', 'd')}
+                        </span>
+                      </div>
+                      <div className="w-10 h-px bg-(--border) mt-2" />
+                    </div>
+
+                    <div className="flex-1 text-center">
+                      <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
+                        {t('driver.to', 'To')}
+                      </p>
+                      <p className="text-3xl font-bold text-(--text-primary) leading-none">
+                        {safeFormat(selectedLeave.endDate, 'd')}
+                      </p>
+                      <p className="text-xs text-(--text-muted) mt-1">
+                        {safeFormat(selectedLeave.endDate, 'MMM')}
+                      </p>
+                      <p className="text-[10px] text-(--text-muted) mt-0.5">
+                        {safeFormat(selectedLeave.endDate, 'yyyy')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Reason */}
+                  {selectedLeave.comment && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                          {t('leave.reason', 'Reason')}
+                        </span>
+                        <div className="flex-1 h-px bg-(--border)" />
+                      </div>
+                      <p className="text-sm text-(--text-secondary) leading-relaxed bg-(--background-subtle) rounded-xl p-4 border border-(--border)">
+                        {selectedLeave.comment}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Status */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                        {t('common.status', 'Status')}
+                      </span>
+                      <div className="flex-1 h-px bg-(--border)" />
+                    </div>
+                    <div
+                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl"
+                      style={{
+                        background: selectedLeave.status === 'approved'
+                          ? '#10b98115'
+                          : selectedLeave.status === 'rejected'
+                            ? '#ef444415'
+                            : '#f59e0b15',
+                        border: `1px solid ${selectedLeave.status === 'approved'
+                          ? '#10b98130'
+                          : selectedLeave.status === 'rejected'
+                            ? '#ef444430'
+                            : '#f59e0b30'}`,
+                      }}
+                    >
+                      {selectedLeave.status === 'approved' ? (
+                        <CheckCircle className="w-5 h-5 text-emerald-500" />
+                      ) : selectedLeave.status === 'rejected' ? (
+                        <XCircle className="w-5 h-5 text-red-500" />
+                      ) : (
+                        <Clock className="w-5 h-5 text-amber-500" />
+                      )}
+                      <span className="text-sm font-semibold text-(--text-primary)">
+                        {selectedLeave.status === 'approved'
+                          ? t('leave.approved')
+                          : selectedLeave.status === 'rejected'
+                            ? t('leave.rejected')
+                            : t('leave.pending')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Driver Event Detail Modal */}
       <AnimatePresence>
         {selectedDriverEvent && (
@@ -1115,6 +1318,152 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     {t(`driver.status.${selectedDriverEvent.status}`, selectedDriverEvent.status)}
                   </Badge>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Google Calendar Event Detail Modal */}
+      <AnimatePresence>
+        {selectedGoogleEvent && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setSelectedGoogleEvent(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+              className="relative z-10 w-full max-w-md rounded-2xl border border-(--border) bg-(--card) shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header with gradient */}
+              <div
+                className="px-5 pt-5 pb-4 flex items-center justify-between relative"
+                style={{
+                  background: `linear-gradient(135deg, ${GOOGLE_EVENT_COLOR}22 0%, ${GOOGLE_EVENT_COLOR}08 100%)`,
+                  borderBottom: `2px solid ${GOOGLE_EVENT_COLOR}33`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
+                    style={{
+                      background: `linear-gradient(135deg, ${GOOGLE_EVENT_COLOR}, ${GOOGLE_EVENT_COLOR}cc)`,
+                    }}
+                  >
+                    <span className="text-lg font-bold">G</span>
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-bold text-(--text-primary) truncate">
+                      {selectedGoogleEvent.title}
+                    </h3>
+                    <p className="text-xs text-(--text-muted)">Google Calendar</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedGoogleEvent(null)}
+                  className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-1.5 rounded-full hover:bg-(--background-subtle) shrink-0"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="px-5 pb-5 space-y-4">
+                {/* Date & Time */}
+                <div className="rounded-xl border border-(--border) bg-(--background-subtle) p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-(--text-muted) shrink-0" />
+                    <span className="text-sm font-semibold text-(--text-primary)">
+                      {safeFormat(selectedGoogleEvent.startDate, 'EEEE, MMMM d, yyyy')}
+                    </span>
+                  </div>
+                  {selectedGoogleEvent.startTime ? (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
+                      <span className="text-sm text-(--text-secondary)">
+                        {format(new Date(selectedGoogleEvent.startTime), 'h:mm a')}
+                        {selectedGoogleEvent.endTime &&
+                          ` – ${format(new Date(selectedGoogleEvent.endTime), 'h:mm a')}`}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
+                      <span className="text-sm text-(--text-secondary)">
+                        {t('calendar.allDay', 'All day')}
+                      </span>
+                    </div>
+                  )}
+                  {/* Multi-day range */}
+                  {selectedGoogleEvent.endDate &&
+                    selectedGoogleEvent.startDate !==
+                      (selectedGoogleEvent.allDay
+                        ? format(addDays(new Date(selectedGoogleEvent.endDate), -1), 'yyyy-MM-dd')
+                        : selectedGoogleEvent.endDate) && (
+                      <div className="flex items-center gap-2 pt-1 border-t border-(--border)">
+                        <CalendarDays className="w-4 h-4 text-(--text-muted) shrink-0" />
+                        <span className="text-xs text-(--text-secondary)">
+                          {safeFormat(selectedGoogleEvent.startDate, 'MMM d')} &ndash;{' '}
+                          {safeFormat(
+                            selectedGoogleEvent.allDay
+                              ? format(
+                                  addDays(new Date(selectedGoogleEvent.endDate), -1),
+                                  'yyyy-MM-dd',
+                                )
+                              : selectedGoogleEvent.endDate,
+                            'MMM d, yyyy',
+                          )}
+                        </span>
+                      </div>
+                    )}
+                </div>
+
+                {/* Location */}
+                {selectedGoogleEvent.location && (
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-sm">📍</span>
+                      {t('calendar.location', 'Location')}
+                    </span>
+                    <p className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border)">
+                      {selectedGoogleEvent.location}
+                    </p>
+                  </div>
+                )}
+
+                {/* Description */}
+                {selectedGoogleEvent.description && (
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                      {t('calendar.description', 'Description')}
+                    </span>
+                    <div className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border) leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
+                      {selectedGoogleEvent.description}
+                    </div>
+                  </div>
+                )}
+
+                {/* Open in Google Calendar */}
+                {selectedGoogleEvent.htmlLink && (
+                  <a
+                    href={selectedGoogleEvent.htmlLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-sm font-medium text-(--text-primary) hover:bg-(--background) hover:border-(--primary)/50 transition-all"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    {t('calendar.openInGoogle', 'Open in Google Calendar')}
+                  </a>
+                )}
               </div>
             </motion.div>
           </div>

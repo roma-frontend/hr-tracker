@@ -230,36 +230,38 @@ export default function CompanyEventsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            {t('events.title', 'Company Events')}
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-            {t('events.subtitle', 'Manage events and review leave conflicts')}
-          </p>
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
-          <Button
-            variant="outline"
-            onClick={handleCheckConflicts}
-            className="gap-2 w-full sm:w-auto"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {t('events.checkConflicts', 'Check Conflicts')}
-            </span>
-            <span className="sm:hidden">{t('events.checkConflictsShort', 'Conflicts')}</span>
-          </Button>
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">{t('events.createEvent', 'Create Event')}</span>
-            <span className="sm:hidden">{t('events.createEventShort', 'Create')}</span>
-          </Button>
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              {t('events.title', 'Company Events')}
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+              {t('events.subtitle', 'Manage events and review leave conflicts')}
+            </p>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
+            <Button
+              variant="outline"
+              onClick={handleCheckConflicts}
+              className="gap-2 w-full sm:w-auto"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span className="hidden sm:inline">
+                {t('events.checkConflicts', 'Check Conflicts')}
+              </span>
+              <span className="sm:hidden">{t('events.checkConflictsShort', 'Conflicts')}</span>
+            </Button>
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">{t('events.createEvent', 'Create Event')}</span>
+              <span className="sm:hidden">{t('events.createEventShort', 'Create')}</span>
+            </Button>
+          </div>
         </div>
       </div>
 

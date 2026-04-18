@@ -167,55 +167,57 @@ export default function JoinRequestsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-(--text-primary) flex items-center gap-2">
-            {t('joinRequestsPage.title')}
-            {(pendingCount ?? 0) > 0 && (
-              <span className="ml-1 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white">
-                {pendingCount}
-              </span>
-            )}
-          </h1>
-          <p className="text-sm text-(--text-muted) mt-1">{t('joinRequestsPage.subtitle')}</p>
-        </div>
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-(--text-primary) flex items-center gap-2">
+              {t('joinRequestsPage.title')}
+              {(pendingCount ?? 0) > 0 && (
+                <span className="ml-1 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white">
+                  {pendingCount}
+                </span>
+              )}
+            </h1>
+            <p className="text-sm text-(--text-muted) mt-1">{t('joinRequestsPage.subtitle')}</p>
+          </div>
 
-        {/* Generate invite link */}
-        <div className="flex flex-col gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleGenerateInviteLink}
-            disabled={generatingLink}
-            className="gap-1.5"
-          >
-            {generatingLink ? (
-              <ShieldLoader size="xs" variant="inline" />
-            ) : (
-              <Link2 className="w-4 h-4" />
+          {/* Generate invite link */}
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateInviteLink}
+              disabled={generatingLink}
+              className="gap-1.5"
+            >
+              {generatingLink ? (
+                <ShieldLoader size="xs" variant="inline" />
+              ) : (
+                <Link2 className="w-4 h-4" />
+              )}
+              {t('joinRequestsPage.generateInviteLink')}
+            </Button>
+            {inviteLink && (
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value={inviteLink}
+                  className="text-xs px-2 py-1.5 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-muted) w-48 truncate"
+                />
+                <button
+                  onClick={handleCopyLink}
+                  className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
+                >
+                  {inviteCopied ? (
+                    <Check className="w-4 h-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-(--text-muted)" />
+                  )}
+                </button>
+              </div>
             )}
-            {t('joinRequestsPage.generateInviteLink')}
-          </Button>
-          {inviteLink && (
-            <div className="flex items-center gap-2">
-              <input
-                readOnly
-                value={inviteLink}
-                className="text-xs px-2 py-1.5 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-muted) w-48 truncate"
-              />
-              <button
-                onClick={handleCopyLink}
-                className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
-              >
-                {inviteCopied ? (
-                  <Check className="w-4 h-4 text-emerald-500" />
-                ) : (
-                  <Copy className="w-4 h-4 text-(--text-muted)" />
-                )}
-              </button>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { useTranslation } from 'react-i18next';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { DriverBookingPage } from '@/components/drivers/sections';
@@ -85,6 +86,7 @@ export default function DriversPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
+  const { selectedOrgId: storeSelectedOrgId } = useOrgSelectorStore();
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ALL HOOKS MUST BE CALLED UNCONDITIONALLY, IN SAME ORDER, EVERY RENDER
@@ -110,6 +112,10 @@ export default function DriversPage() {
 
   const userId = user?.id as Id<'users'> | undefined;
   const orgId = user?.organizationId as Id<'organizations'> | undefined;
+  const isSuperadmin = user?.role === 'superadmin';
+  
+  // For superadmin, use selected org from store, otherwise use user's org
+  const effectiveOrgId = isSuperadmin ? (storeSelectedOrgId as Id<'organizations'> | undefined) : orgId;
 
   // 2. Mutation hooks
   const addFavorite = useMutation(api.drivers.driver_registration.addFavoriteDriver);
@@ -133,7 +139,7 @@ export default function DriversPage() {
 
   const availableDrivers = useQuery(
     api.drivers.queries.getAvailableDrivers,
-    orgId ? { organizationId: orgId } : 'skip',
+    effectiveOrgId ? { organizationId: effectiveOrgId } : 'skip',
   );
 
   const myRequests = useQuery(
@@ -160,7 +166,7 @@ export default function DriversPage() {
   // Get all employees with driver role for registration
   const driverCandidates = useQuery(
     api.users.queries.getUsersByRole,
-    orgId ? { organizationId: orgId, role: 'driver' } : 'skip',
+    effectiveOrgId ? { organizationId: effectiveOrgId, role: 'driver' } : 'skip',
   );
 
   // 5. Redirect effect
@@ -292,7 +298,7 @@ export default function DriversPage() {
 
   const handleToggleFavorite = useCallback(
     async (id: string) => {
-      if (!userId || !orgId) return;
+      if (!userId || !effectiveOrgId) return;
 
       // Optimistic update
       const wasFavorite = optimisticFavoriteIds.has(id);
@@ -309,7 +315,7 @@ export default function DriversPage() {
           await removeFavorite({ userId, driverId: id as Id<'drivers'> });
           toast.success(t('driver.removedFromFavorites', 'Removed from favorites'));
         } else {
-          await addFavorite({ organizationId: orgId, userId, driverId: id as Id<'drivers'> });
+          await addFavorite({ organizationId: effectiveOrgId, userId, driverId: id as Id<'drivers'> });
           toast.success(t('driver.addedToFavorites', 'Added to favorites'));
         }
       } catch (e: unknown) {
@@ -317,7 +323,7 @@ export default function DriversPage() {
         toast.error(e instanceof Error ? e.message : t('driver.failed', 'Failed'));
       }
     },
-    [userId, orgId, optimisticFavoriteIds, addFavorite, removeFavorite, t],
+    [userId, effectiveOrgId, optimisticFavoriteIds, addFavorite, removeFavorite, t],
   );
 
   const handleRequestDriver = useCallback(() => {
@@ -359,11 +365,11 @@ export default function DriversPage() {
       };
       maxTripsPerDay?: number;
     }) => {
-      if (!userId || !orgId || !selectedDriverCandidate) return;
+      if (!userId || !effectiveOrgId || !selectedDriverCandidate) return;
       try {
         await registerAsDriver({
           userId: selectedDriverCandidate._id,
-          organizationId: orgId,
+          organizationId: effectiveOrgId,
           adminId: userId, // Admin is registering the driver
           vehicleInfo: {
             model: data.vehicleMake || '',
@@ -388,7 +394,7 @@ export default function DriversPage() {
         );
       }
     },
-    [userId, orgId, selectedDriverCandidate, registerAsDriver, t],
+    [userId, effectiveOrgId, selectedDriverCandidate, registerAsDriver, t],
   );
 
   const noOp = useCallback(() => {}, []);
@@ -409,7 +415,7 @@ export default function DriversPage() {
   if (
     !isAuthenticated ||
     !userId ||
-    !orgId ||
+    !effectiveOrgId ||
     driverRecord === undefined ||
     availableDrivers === undefined ||
     myRequests === undefined ||
@@ -505,13 +511,13 @@ export default function DriversPage() {
         />
       )}
 
-      {showCalendarDialog && orgId && (
+      {showCalendarDialog && effectiveOrgId && (
         <div className="fixed inset-0 z-[9999]">
           <DriverCalendarDialog
             open={showCalendarDialog}
             onClose={() => setShowCalendarDialog(false)}
             driverId={selectedDriverId}
-            organizationId={orgId}
+            organizationId={effectiveOrgId}
             role={user?.role as 'admin' | 'driver'}
           />
         </div>

@@ -1383,7 +1383,8 @@
       "familyDesc": "Семейные обстоятельства",
       "unpaid": "Без оплаты",
       "unpaidDesc": "Отпуск без содержания"
-    }
+    },
+    "reason": "Причина"
   },
   "leaveRequest": {
     "newLeaveRequest": "Новая заявка на отпуск",
@@ -2049,7 +2050,9 @@
     "noEvents": "Нет запланированных событий",
     "addToCalendar": "Добавить в календарь",
     "selectADay": "Выберите день",
-    "unknown": "Неизвестно"
+    "unknown": "Неизвестно",
+    "openInGoogle": "Открыть в Google Календаре",
+    "description": "Описание"
   },
   "labels": {
     "fullName": "Полное имя",
@@ -6089,7 +6092,7 @@
     "totalCompleted": "Всего выполнено",
     "rating": "Рейтинг"
   },
-  "emptyStates": {
+  "driverEmptyStates": {
     "noRequests": {
       "title": "Запросов пока нет",
       "description": "Вы еще не запрашивали водителей.",

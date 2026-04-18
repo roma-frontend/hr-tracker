@@ -105,21 +105,23 @@ export default function SubscriptionsManagementPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-        <div className="w-full">
-          <h1 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
-            {t('superadmin.subscriptions.title')}
-          </h1>
-          <p className="text-sm md:text-base text-(--text-muted) mt-1">
-            {t('superadmin.subscriptions.subtitle')}
-          </p>
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+          <div className="w-full">
+            <h1 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
+              {t('superadmin.subscriptions.title')}
+            </h1>
+            <p className="text-sm md:text-base text-(--text-muted) mt-1">
+              {t('superadmin.subscriptions.subtitle')}
+            </p>
+          </div>
+          <Button onClick={() => setShowForm(!showForm)} variant="ghost" className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
+            <Plus className="w-4 h-4" />
+            {showForm
+              ? t('superadmin.subscriptions.cancelButtonText')
+              : t('superadmin.subscriptions.addManualSubscription')}
+          </Button>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} variant="ghost" className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
-          <Plus className="w-4 h-4" />
-          {showForm
-            ? t('superadmin.subscriptions.cancelButtonText')
-            : t('superadmin.subscriptions.addManualSubscription')}
-        </Button>
       </div>
 
       {/* Create Manual Subscription Form - Using Wizard */}

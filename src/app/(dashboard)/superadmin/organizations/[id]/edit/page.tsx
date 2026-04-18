@@ -145,26 +145,28 @@ export default function EditOrganizationPage() {
     <div className="min-h-screen p-6" style={{ background: 'var(--background)' }}>
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => router.push('/superadmin/organizations')}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('ui.backToOrganizations')}
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white">
-              <Building2 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {t('organization.editPageTitle')}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {t('organization.slugLabel')}:{' '}
-                <span className="font-mono">{organization.slug}</span>
-              </p>
+        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+          <div className="mb-8">
+            <button
+              onClick={() => router.push('/superadmin/organizations')}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {t('ui.backToOrganizations')}
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                  {t('organization.editPageTitle')}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {t('organization.slugLabel')}:{' '}
+                  <span className="font-mono">{organization.slug}</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

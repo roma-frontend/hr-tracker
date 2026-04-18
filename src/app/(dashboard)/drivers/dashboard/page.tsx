@@ -151,36 +151,38 @@ export default function DriverDashboardPage() {
   return (
     <div className="max-w-400 mx-auto">
       {/* Header */}
-      <div
-        className="relative p-6 mb-6 rounded-2xl overflow-hidden"
-        style={{
-          background:
-            'linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 80%, black) 100%)',
-        }}
-      >
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div
-          className="absolute top-[-50%] right-[-10%] w-125 h-125 rounded-full pointer-events-none"
+          className="relative p-6 rounded-2xl overflow-hidden"
           style={{
-            background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%)',
+            background:
+              'linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 80%, black) 100%)',
           }}
-        />
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
-          <div>
-            <h1
-              className="text-2xl sm:text-3xl font-bold text-white"
-              style={{ textShadow: '0 2px 20px rgba(0,0,0,0.15)' }}
-            >
-              {t('driver.dashboard', 'Driver Dashboard')}
-            </h1>
-            <p className="text-sm sm:text-base mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              {t('driver.dashboardDesc', 'Manage your trips and availability')}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-white/80">
-              {driver.isAvailable ? t('driver.available') : t('driver.busy')}
-            </span>
-            <Switch checked={driver.isAvailable} onCheckedChange={handleToggleAvailability} />
+        >
+          <div
+            className="absolute top-[-50%] right-[-10%] w-125 h-125 rounded-full pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%)',
+            }}
+          />
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+            <div>
+              <h1
+                className="text-2xl sm:text-3xl font-bold text-white"
+                style={{ textShadow: '0 2px 20px rgba(0,0,0,0.15)' }}
+              >
+                {t('driver.dashboard', 'Driver Dashboard')}
+              </h1>
+              <p className="text-sm sm:text-base mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                {t('driver.dashboardDesc', 'Manage your trips and availability')}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-white/80">
+                {driver.isAvailable ? t('driver.available') : t('driver.busy')}
+              </span>
+              <Switch checked={driver.isAvailable} onCheckedChange={handleToggleAvailability} />
+            </div>
           </div>
         </div>
       </div>

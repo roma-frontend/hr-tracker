@@ -199,24 +199,26 @@ export default function ManageAdminsPage() {
     <div className="min-h-screen p-6" style={{ background: 'var(--background)' }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => router.push('/superadmin/organizations')}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('ui.backToOrganizations')}
-          </button>
+        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+          <div className="mb-8">
+            <button
+              onClick={() => router.push('/superadmin/organizations')}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition mb-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {t('ui.backToOrganizations')}
+            </button>
 
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {organization.name}
-            </h1>
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              {organization.plan.toUpperCase()}
-            </span>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                {organization.name}
+              </h1>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                {organization.plan.toUpperCase()}
+              </span>
+            </div>
+            <p className="text-muted-foreground">{t('manageAdmins.manageDesc')}</p>
           </div>
-          <p className="text-muted-foreground">{t('manageAdmins.manageDesc')}</p>
         </div>
 
         {/* Stats Overview */}

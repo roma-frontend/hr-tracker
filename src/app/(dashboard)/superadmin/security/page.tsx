@@ -292,32 +292,34 @@ export default function SecurityDashboard() {
   return (
     <div style={{ color: 'var(--text-primary)' }}>
       {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div
-            className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl border shrink-0"
-            style={{ background: 'rgba(37,99,235,0.1)', borderColor: 'rgba(37,99,235,0.3)' }}
-          >
-            <Shield className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: 'var(--primary)' }} />
-          </div>
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {t('superadminSecurity.securityControl')}
-            </h1>
-            <p
-              className="text-xs sm:text-sm hidden sm:block"
-              style={{ color: 'var(--text-muted)' }}
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div
+              className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl border shrink-0"
+              style={{ background: 'rgba(37,99,235,0.1)', borderColor: 'rgba(37,99,235,0.3)' }}
             >
-              {t('superadminSecurity.manageIdentityVerification')}
-            </p>
+              <Shield className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: 'var(--primary)' }} />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                {t('superadminSecurity.securityControl')}
+              </h1>
+              <p
+                className="text-xs sm:text-sm hidden sm:block"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {t('superadminSecurity.manageIdentityVerification')}
+              </p>
+            </div>
           </div>
-        </div>
-        <div
-          className="flex items-center gap-2 text-xs sm:text-sm"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          <Activity className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: 'var(--success)' }} />
-          {t('superadmin.security.liveMonitoring')}
+          <div
+            className="flex items-center gap-2 text-xs sm:text-sm"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            <Activity className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: 'var(--success)' }} />
+            {t('superadmin.security.liveMonitoring')}
+          </div>
         </div>
       </div>
 

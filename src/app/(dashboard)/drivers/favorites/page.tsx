@@ -124,40 +124,42 @@ export default function FavoritesPage() {
   return (
     <div className="max-w-350 mx-auto p-4 md:p-6 space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-      >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-xl hover:bg-muted/50"
-            onClick={() => _router.push('/drivers')}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-red-500/10">
-              <Heart className="w-5 h-5 text-red-500" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">
-                {t('driver.favorites.title', 'Favorite Drivers')}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {t('driver.favorites.subtitle', 'Your preferred drivers for quick booking')}
-              </p>
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-xl hover:bg-muted/50"
+              onClick={() => _router.push('/drivers')}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-red-500/10">
+                <Heart className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">
+                  {t('driver.favorites.title', 'Favorite Drivers')}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {t('driver.favorites.subtitle', 'Your preferred drivers for quick booking')}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        <Badge variant="outline" className="text-xs h-7 px-3 rounded-full">
-          <Shield className="w-3 h-3 mr-1" />
-          {drivers.length} {t('driver.favorites.count', 'saved')}
-        </Badge>
-      </motion.div>
+          <Badge variant="outline" className="text-xs h-7 px-3 rounded-full">
+            <Shield className="w-3 h-3 mr-1" />
+            {drivers.length} {t('driver.favorites.count', 'saved')}
+          </Badge>
+        </motion.div>
+      </div>
 
       {/* Search */}
       <motion.div

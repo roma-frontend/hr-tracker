@@ -117,26 +117,28 @@ export default function AutomationPage() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
-            {t('superadmin.automation.title') || 'Automation Dashboard'}
-          </h1>
-          <p className="text-sm text-(--text-muted) mt-1">
-            {t('superadmin.automation.description') ||
-              'Monitor and manage your automation workflows'}
-          </p>
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
+              {t('superadmin.automation.title') || 'Automation Dashboard'}
+            </h1>
+            <p className="text-sm text-(--text-muted) mt-1">
+              {t('superadmin.automation.description') ||
+                'Monitor and manage your automation workflows'}
+            </p>
+          </div>
+          <Button
+            onClick={handleRunAutomation}
+            disabled={isRunning}
+            className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+          >
+            {isRunning ? <ShieldLoader size="xs" variant="inline" /> : <Play className="w-4 h-4" />}
+            {isRunning
+              ? t('automation.running') || 'Running...'
+              : t('automation.runNow') || 'Run Now'}
+          </Button>
         </div>
-        <Button
-          onClick={handleRunAutomation}
-          disabled={isRunning}
-          className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
-        >
-          {isRunning ? <ShieldLoader size="xs" variant="inline" /> : <Play className="w-4 h-4" />}
-          {isRunning
-            ? t('automation.running') || 'Running...'
-            : t('automation.runNow') || 'Run Now'}
-        </Button>
       </div>
 
       {/* Stats Cards */}

@@ -89,103 +89,105 @@ export default function UserProfile360Page() {
         </div>
 
         {/* Header - User Profile */}
-        <Card className="mb-6" style={{ background: 'var(--card)' }}>
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4">
-                <Avatar className="w-20 h-20">
-                  <AvatarImage src={user.avatarUrl} />
-                  <AvatarFallback className="text-2xl">
-                    {user.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                      {user.name}
-                    </h1>
-                    <Badge className={getRoleBadgeColor(user.role)}>
-                      <Shield className="w-3 h-3 mr-1" />
-                      {user.role}
-                    </Badge>
-                    {user.isActive ? (
-                      <Badge variant="outline" className="text-green-600 border-green-500/30">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        {t('superadmin.users.active')}
+        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+          <Card className="mb-6" style={{ background: 'var(--card)' }}>
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
+                  <Avatar className="w-20 h-20">
+                    <AvatarImage src={user.avatarUrl} />
+                    <AvatarFallback className="text-2xl">
+                      {user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                        {user.name}
+                      </h1>
+                      <Badge className={getRoleBadgeColor(user.role)}>
+                        <Shield className="w-3 h-3 mr-1" />
+                        {user.role}
                       </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-red-600 border-red-500/30">
-                        <XCircle className="w-3 h-3 mr-1" />
-                        {t('superadmin.users.inactive')}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Mail className="w-4 h-4" />
-                      {user.email}
+                      {user.isActive ? (
+                        <Badge variant="outline" className="text-green-600 border-green-500/30">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          {t('superadmin.users.active')}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-red-600 border-red-500/30">
+                          <XCircle className="w-3 h-3 mr-1" />
+                          {t('superadmin.users.inactive')}
+                        </Badge>
+                      )}
                     </div>
-                    {user.phone && (
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="w-4 h-4" />
-                        {user.phone}
+                        <Mail className="w-4 h-4" />
+                        {user.email}
                       </div>
-                    )}
-                    {user.location && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        {user.location}
-                      </div>
-                    )}
-                    {user.dateOfBirth && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        {user.dateOfBirth}
-                      </div>
-                    )}
-                    {user.position && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Briefcase className="w-4 h-4" />
-                        {user.position}
-                      </div>
-                    )}
-                    {organization && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Building2 className="w-4 h-4" />
-                        {organization.name}
-                      </div>
-                    )}
+                      {user.phone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="w-4 h-4" />
+                          {user.phone}
+                        </div>
+                      )}
+                      {user.location && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <MapPin className="w-4 h-4" />
+                          {user.location}
+                        </div>
+                      )}
+                      {user.dateOfBirth && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="w-4 h-4" />
+                          {user.dateOfBirth}
+                        </div>
+                      )}
+                      {user.position && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Briefcase className="w-4 h-4" />
+                          {user.position}
+                        </div>
+                      )}
+                      {organization && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Building2 className="w-4 h-4" />
+                          {organization.name}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    {t('superadmin.users.writeMessage')}
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Key className="w-4 h-4" />
+                    {t('superadmin.users.impersonate')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 text-red-600 hover:text-red-700"
+                  >
+                    <Ban className="w-4 h-4" />
+                    {t('superadmin.users.blockUser')}
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  {t('superadmin.users.writeMessage')}
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Key className="w-4 h-4" />
-                  {t('superadmin.users.impersonate')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 text-red-600 hover:text-red-700"
-                >
-                  <Ban className="w-4 h-4" />
-                  {t('superadmin.users.blockUser')}
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">

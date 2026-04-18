@@ -210,28 +210,30 @@ export default function StripeDashboardPage() {
   return (
     <div className="mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <Button variant="ghost" onClick={() => router.back()} className="mb-4 -ml-2 text-sm">
-            {t('stripe.backToDashboard')}
-          </Button>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{t('stripe.dashboard')}</h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-2">
-            {t('stripe.realTimeAnalytics')}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => router.push('/superadmin/stripe-dashboard/data-studio')}
-          >
-            📊 Data Studio
-          </Button>
-          <Button variant="outline" onClick={() => fetchStripeData(true)} disabled={refreshing}>
-            {refreshing && <ShieldLoader size="xs" variant="inline" />}
-            {!refreshing && <RefreshCw className="w-4 h-4 mr-2" />}
-            {t('stripe.refresh')}
-          </Button>
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <Button variant="ghost" onClick={() => router.back()} className="mb-4 -ml-2 text-sm">
+              {t('stripe.backToDashboard')}
+            </Button>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{t('stripe.dashboard')}</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-2">
+              {t('stripe.realTimeAnalytics')}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/superadmin/stripe-dashboard/data-studio')}
+            >
+              📊 Data Studio
+            </Button>
+            <Button variant="outline" onClick={() => fetchStripeData(true)} disabled={refreshing}>
+              {refreshing && <ShieldLoader size="xs" variant="inline" />}
+              {!refreshing && <RefreshCw className="w-4 h-4 mr-2" />}
+              {t('stripe.refresh')}
+            </Button>
+          </div>
         </div>
       </div>
 

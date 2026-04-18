@@ -172,29 +172,27 @@ export default function ReportsPage() {
     >
       <WidgetErrorBoundary name="ReportsPage">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-          >
-            <div>
-              <h2 className="text-2xl font-bold text-(--text-primary)">
-                {t('reportsAnalytics.reportsAnalytics')}
-              </h2>
-              <p className="text-(--text-muted) text-sm mt-1">
-                {t('ui.comprehensiveAnalysis')}
-              </p>
+          {/* Sticky Header */}
+          <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-(--text-primary)">
+                  {t('reportsAnalytics.reportsAnalytics')}
+                </h2>
+                <p className="text-(--text-muted) text-sm mt-1">
+                  {t('ui.comprehensiveAnalysis')}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleExport}
+                disabled={isLoading}
+                className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+              >
+                <Download className="w-4 h-4" /> Export CSV
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              onClick={handleExport}
-              disabled={isLoading}
-              className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
-            >
-              <Download className="w-4 h-4" /> Export CSV
-            </Button>
-          </motion.div>
+          </div>
 
           {/* KPI Cards */}
           <motion.div
@@ -418,7 +416,7 @@ export default function ReportsPage() {
                     <CardContent>
                       {deptData.length === 0 ? (
                         <div className="h-62.5 flex items-center justify-center text-(--text-muted) text-sm">
-                          No department data yet
+                          {t('common.noDepartmentData')}
                         </div>
                       ) : (
                         <ResponsiveContainer width="100%" height={250}>

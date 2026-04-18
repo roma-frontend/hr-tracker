@@ -554,11 +554,11 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <div className="mb-6 sm:mb-8">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
               {userRole === 'employee' || userRole === 'driver'
                 ? t('tasksClient.myTasks')
                 : t('tasksClient.taskManager')}
@@ -588,9 +588,10 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Stats row - scrollable on mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mt-4 sm:mt-6">
+      {/* Stats row - scrollable on mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mt-4 sm:mt-6">
           {[
             {
               label: t('tasksClient.total'),
@@ -636,7 +637,6 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
             </div>
           ))}
         </div>
-      </div>
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">

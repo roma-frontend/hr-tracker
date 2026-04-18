@@ -2051,7 +2051,9 @@
     "addToCalendar": "Ավելացնել օրացույցում",
     "selectADay": "Օր զտիչ",
     "unknown": "Անհայտ",
-    "newLeave": "Նոր արձակուրդ"
+    "newLeave": "Նոր արձակուրդ",
+    "openInGoogle": "Բացել Google Օրացույցում",
+    "description": "Նկարագրություն"
   },
   "labels": {
     "fullName": "Լրիվ անուն",
@@ -5836,10 +5838,10 @@
   "driverStats": {
     "todaysTrips": "Այսօրվա ուղևորություններ",
     "pendingRequests": "Սպասող հայտեր",
-    "totalCompleted": "Ընդհանուր կատարված",
+    "totalCompleted": "Ընդհանուր ավարտված",
     "rating": "Վարկանիշ"
   },
-  "emptyStates": {
+  "driverEmptyStates": {
     "noRequests": {
       "title": "Դեռևս հայտեր չ կան",
       "description": "Դուք դեռևս վարորդ չեք պատվիրել:",
