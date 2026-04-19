@@ -359,7 +359,7 @@ export default function ContactClient() {
                   style={{ color: 'var(--landing-text-secondary)', opacity: 0.8 }}
                 >
                   <Mail size={15} className="contact-link-icon" />
-                  <span>{t('contact.salesEmail')}</span>
+                  <span>sales@hroffice.io</span>
                 </a>
                 <a
                   href="tel:+18005550199"
@@ -445,7 +445,7 @@ export default function ContactClient() {
                       <Field label={t('contact.email') + ' *'} icon={<Mail size={14} />}>
                         <input
                           type="email"
-                          placeholder={t('placeholders.johnDoeEmail')}
+                          placeholder="john@company.com"
                           required
                           value={form.email}
                           onChange={(e) => handleInputChange('email', e.target.value)}

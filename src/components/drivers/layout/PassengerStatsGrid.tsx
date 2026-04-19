@@ -21,7 +21,7 @@ export const PassengerStatsGrid = memo(function PassengerStatsGrid({
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 mb-6 sm:mb-8 drivers-stagger">
       <StatCard
-        label={t('driver.availableDrivers', t('drivers.availableDrivers'))}
+        label={t('driver.availableDrivers', 'Available Drivers')}
         value={availableDrivers}
         icon={Car}
         gradientFrom="#22c55e"
@@ -29,7 +29,7 @@ export const PassengerStatsGrid = memo(function PassengerStatsGrid({
         iconBgColor="rgba(34, 197, 94, 0.1)"
       />
       <StatCard
-        label={t('driver.pendingRequests', t('drivers.pendingRequests'))}
+        label={t('driver.pendingRequests', 'Pending Requests')}
         value={pendingRequests}
         icon={Clock}
         gradientFrom="#f59e0b"
@@ -37,7 +37,7 @@ export const PassengerStatsGrid = memo(function PassengerStatsGrid({
         iconBgColor="rgba(245, 158, 11, 0.1)"
       />
       <StatCard
-        label={t('driver.totalTrips', t('drivers.totalTrips'))}
+        label={t('driver.totalTrips', 'Total Trips')}
         value={totalTrips}
         icon={CheckCircle}
         gradientFrom="#3b82f6"

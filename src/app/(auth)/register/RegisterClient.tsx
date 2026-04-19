@@ -154,7 +154,7 @@ function OrgSearch({ onSelect }: { onSelect: (org: OrgResult) => void }) {
               </div>
             ) : results.length === 0 ? (
               <div className="p-3 text-sm text-(--text-muted) text-center">
-                {t('auth.noOrgFound', t('register.noOrgFound'))} &ldquo;{debouncedQuery}&rdquo;
+                {t('auth.noOrgFound', 'No organization found for')} &ldquo;{debouncedQuery}&rdquo;
                 <p className="text-xs mt-1">{t('auth.askAdmin')}</p>
               </div>
             ) : (
@@ -472,7 +472,7 @@ function RegisterPageContent() {
                       value={formData.email}
                       onChange={(val) => setFormData((p) => ({ ...p, email: val }))}
                       label={t('auth.emailAddress')}
-                        placeholder={t('placeholders.email')}
+                      placeholder="you@company.com"
                     />
                     {isSuperadmin && (
                       <p className="text-xs text-blue-500 flex items-center gap-1 px-1 mt-2">
@@ -492,7 +492,7 @@ function RegisterPageContent() {
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-                        placeholder={t('placeholders.phoneArmenia')}
+                        placeholder="+374 XX XXX XXX"
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                         style={{
                           background: 'var(--input)',

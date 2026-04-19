@@ -25,7 +25,7 @@ async function fetchOrg<T>(action: string, params?: Record<string, string>): Pro
     });
   }
 
-  const res = await fetch(url.toString(), { credentials: 'include' });
+  const res = await fetch(url.toString());
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: 'Request failed' }));
     throw new Error(error.error || 'Request failed');
@@ -39,7 +39,6 @@ async function mutateOrg<T>(action: string, body: Record<string, unknown>): Prom
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    credentials: 'include',
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: 'Mutation failed' }));

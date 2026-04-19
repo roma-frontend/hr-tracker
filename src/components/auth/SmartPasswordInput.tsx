@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Eye, EyeOff, Lock, Copy, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -33,7 +32,6 @@ export function SmartPasswordInput({
   autoFocus = false,
   forgotPasswordLink,
 }: SmartPasswordInputProps) {
-  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -114,7 +112,7 @@ export function SmartPasswordInput({
                 onClick={handleCopyPassword}
                 type="button"
                 className="p-1.5 rounded-md hover:bg-(--background-subtle) transition-colors"
-                title={t('auth.copyPassword')}
+                title="Копировать пароль"
               >
                 {copied ? (
                   <motion.div

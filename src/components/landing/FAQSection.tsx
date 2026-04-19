@@ -166,7 +166,7 @@ export default function FAQSection() {
               borderColor: 'var(--landing-card-border)',
               color: 'var(--landing-text-primary)',
             }}
-            aria-label={t('landing.contactSupportAriaLabel')}
+            aria-label="Contact support via email"
           >
             {t('faq.contactSupport')}
           </a>

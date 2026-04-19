@@ -192,7 +192,7 @@ export default function EmergencyDashboardPage() {
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('superadmin.emergency.createIncident')}</span>
-                <span className="sm:hidden">{t('common.create')}</span>
+                <span className="sm:hidden">Create</span>
               </Button>
             </div>
           </div>

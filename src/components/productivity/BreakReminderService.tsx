@@ -105,7 +105,7 @@ export default function BreakReminderService({
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
         </div>
         <div className="flex-1">
-          <p className="font-semibold text-(--foreground) text-base">{t('productivity.timeForBreak')}</p>
+          <p className="font-semibold text-(--foreground) text-base">Time for a Break! ☕</p>
           <p className="text-sm text-(--text-muted) mt-0.5 leading-relaxed">
             {intervalMinutes === 1
               ? 'Testing mode: Time to take a quick break!'

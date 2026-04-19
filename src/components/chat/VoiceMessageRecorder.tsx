@@ -159,7 +159,7 @@ export function VoiceMessageRecorder({
           <button
             onClick={cancelRecording}
             className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
-            title={t('chat.cancelRecording')}
+            title="Cancel recording"
           >
             <Trash2 className="w-4 h-4 text-red-500" />
           </button>
@@ -168,7 +168,7 @@ export function VoiceMessageRecorder({
           <button
             onClick={stopRecording}
             className="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors"
-            title={t('chat.stopRecording')}
+            title="Stop recording"
           >
             <Square className="w-4 h-4" />
           </button>
@@ -212,12 +212,12 @@ export function VoiceMessageRecorder({
                 : 'hover:bg-red-100 dark:hover:bg-red-900/20',
             )}
             style={{ background: 'transparent' }}
-            title={t('chat.recordVoiceMessage')}
+            title="Record voice message"
           >
             <Mic className={cn('w-4 h-4', disabled ? '' : 'text-red-500')} />
           </button>
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            {t('chat.voiceMessage')}
+            Voice message
           </span>
         </>
       )}

@@ -65,12 +65,12 @@ export default function CreateStarterOrgClient() {
     setError(null);
 
     if (formData.password.length < 8) {
-      setError(t('validation.passwordMin8'));
+      setError('Password must be at least 8 characters');
       return;
     }
 
     if (!formData.slug) {
-      setError(t('validation.orgSlugRequired'));
+      setError('Organization slug is required');
       return;
     }
 
@@ -89,7 +89,7 @@ export default function CreateStarterOrgClient() {
           industry: formData.industry || undefined,
         });
 
-        toast.success(t('toasts.orgCreatedSuccess'));
+        toast.success('🎉 Organization created successfully!');
 
         setTimeout(() => {
           router.push('/login?message=Organization created! Please log in.');
@@ -191,7 +191,7 @@ export default function CreateStarterOrgClient() {
                       slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
                     }))
                   }
-                  placeholder={t('placeholders.acmeIncSlug')}
+                  placeholder="acme-inc"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: 'var(--input)',
@@ -371,7 +371,7 @@ export default function CreateStarterOrgClient() {
                     e.currentTarget.style.color = 'var(--text-muted)';
                     e.currentTarget.style.background = 'transparent';
                   }}
-                  aria-label={showPassword ? t('accessibility.hidePassword') : t('accessibility.showPassword')}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>

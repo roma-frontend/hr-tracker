@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -556,7 +555,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lightboxSrc}
-            alt={t('chat.preview')}
+            alt="Preview"
             className="max-w-[90vw] max-h-[90vh] rounded-xl object-contain shadow-2xl transition-all duration-300 scale-100"
             onClick={(e) => e.stopPropagation()}
           />
@@ -906,7 +905,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             {urlInContent && !message.poll && <LinkPreview url={urlInContent} isOwn={isOwn} />}
 
             {message.isEdited && (
-              <span className="sm:text-[9px] text-xs opacity-60 ml-1">{t('chat.edited')}</span>
+              <span className="sm:text-[9px] text-xs opacity-60 ml-1">(edited)</span>
             )}
             {message.isPinned && (
               <span className="absolute -top-2 -right-1 sm:text-[10px] text-xs">📌</span>

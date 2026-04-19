@@ -270,7 +270,7 @@ export default function DriverDashboardPage() {
           ) : (
             <div className="text-center py-6 sm:py-8 text-(--text-muted)">
               <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-              <p className="text-sm">{t('driver.noRequests', t('drivers.noPendingRequests'))}</p>
+              <p className="text-sm">{t('driver.noRequests', 'No pending requests')}</p>
             </div>
           )}
         </CardContent>
@@ -328,7 +328,7 @@ export default function DriverDashboardPage() {
           ) : (
             <div className="text-center py-6 sm:py-8 text-(--text-muted)">
               <Calendar className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-              <p className="text-sm">{t('driver.noSchedule', t('drivers.noTripsToday'))}</p>
+              <p className="text-sm">{t('driver.noSchedule', 'No trips scheduled for today')}</p>
             </div>
           )}
         </CardContent>

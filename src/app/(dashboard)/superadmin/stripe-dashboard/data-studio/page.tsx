@@ -77,7 +77,7 @@ export default function StripeSupportStudio() {
       const response = await fetch('/api/stripe/transactions');
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.error || t('errors.failedToFetch'));
+      if (!response.ok) throw new Error(result.error || 'Failed to fetch');
 
       // Calculate success rate
       const txs = result.recentTransactions || [];
@@ -179,14 +179,14 @@ export default function StripeSupportStudio() {
       </div>
     );
 
-  if (!user) return <div className="p-6">{t('auth.pleaseLogin')}</div>;
+  if (!user) return <div className="p-6">Please log in</div>;
 
   return (
     <div className="min-h-screen p-6 space-y-6">
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-1">{t('stripe.supportStudio')}</h1>
+          <h1 className="text-3xl font-bold mb-1">Stripe Support Studio</h1>
           <p className="text-muted-foreground">Поиск транзакций, данные карт и поддержка</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
@@ -194,7 +194,8 @@ export default function StripeSupportStudio() {
             📊 Дашборд
           </Button>
           <Button variant="outline" onClick={handleExport} disabled={filteredData.length === 0}>
-            <FileSpreadsheet className="w-4 h-4 mr-2" />{t('stripe.excel')}</Button>
+            <FileSpreadsheet className="w-4 h-4 mr-2" /> Excel
+          </Button>
           <Button onClick={() => fetchStripeData(true)} disabled={refreshing}>
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Обновить

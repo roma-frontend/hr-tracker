@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -77,7 +76,7 @@ export default function ContinuousFaceVerification({
         setStatus('warning');
         setShowWarning(true);
         if (failCountRef.current >= 2) {
-          await handleVerificationFailed(t('security.noFaceDetected'));
+          await handleVerificationFailed('No face detected in continuous check');
         }
         return;
       }

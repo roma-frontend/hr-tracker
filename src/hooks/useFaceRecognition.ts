@@ -22,7 +22,7 @@ export function useAllFaceDescriptors() {
     queryFn: async () => {
       const response = await fetch('/api/face-recognition/descriptors');
       if (!response.ok) {
-        throw new Error(t('faceRecognition.fetchDescriptorsFailed'));
+        throw new Error('Failed to fetch face descriptors');
       }
       return response.json() as Promise<FaceDescriptor[]>;
     },
@@ -30,14 +30,13 @@ export function useAllFaceDescriptors() {
 }
 
 export function useFaceIdStatus(email: string | null) {
-  const { t } = useTranslation();
   return useQuery({
     queryKey: ['face-id-status', email],
     queryFn: async () => {
-      if (!email) throw new Error(t('faceRecognition.emailRequired'));
+      if (!email) throw new Error('Email is required');
       const response = await fetch(`/api/face-recognition/status?email=${encodeURIComponent(email)}`);
       if (!response.ok) {
-        throw new Error(t('faceRecognition.fetchStatusFailed'));
+        throw new Error('Failed to fetch face ID status');
       }
       return response.json() as Promise<FaceIdStatus>;
     },
@@ -65,17 +64,17 @@ export function useRegisterFace() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || t('faceRecognition.registerFailed'));
+        throw new Error(error.error || 'Failed to register face');
       }
 
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['face-descriptors'] });
-      toast.success(t('faceRecognition.registered', t('faceRecognition.registered')));
+      toast.success(t('faceRecognition.registered', 'Face registered successfully!'));
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('faceRecognition.registerFailed', t('faceRecognition.registerFailed')));
+      toast.error(error.message || t('faceRecognition.registerFailed', 'Failed to register face'));
     },
   });
 }
@@ -95,7 +94,7 @@ export function useRecordFaceIdAttempt() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || t('faceRecognition.recordAttemptFailed'));
+        throw new Error(error.error || 'Failed to record attempt');
       }
 
       return response.json() as Promise<{ attempts: number; blocked: boolean }>;

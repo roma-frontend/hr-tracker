@@ -194,7 +194,7 @@ function PlanCard({
               {tier.price}
             </span>
             {tier.priceMonthly && (
-              <span className="text-xs text-(--text-muted) pb-0.5">{t('subscription.perMonth')}</span>
+              <span className="text-xs text-(--text-muted) pb-0.5">/mo</span>
             )}
           </div>
           {tier.priceMonthly && (

@@ -64,7 +64,7 @@ export function ShiftHistory({ driverId }: ShiftHistoryProps) {
         {shifts.length === 0 ? (
           <div className="text-center py-6 sm:py-8 text-muted-foreground">
             <History className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-            <p className="text-sm">{t('driver.shift.noHistory', t('drivers.noShiftHistory'))}</p>
+            <p className="text-sm">{t('driver.shift.noHistory', 'No shift history yet')}</p>
           </div>
         ) : (
           <div className="space-y-3">

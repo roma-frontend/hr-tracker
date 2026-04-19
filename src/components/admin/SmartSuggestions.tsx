@@ -39,11 +39,11 @@ export default function SmartSuggestions() {
   const getImpactBadge = (impact: string) => {
     switch (impact) {
       case 'high':
-        return <Badge variant="destructive">{t('impact.high')}</Badge>;
+        return <Badge variant="destructive">High Impact</Badge>;
       case 'medium':
-        return <Badge variant="secondary">{t('impact.medium')}</Badge>;
+        return <Badge variant="secondary">Medium Impact</Badge>;
       case 'low':
-        return <Badge variant="outline">{t('impact.low')}</Badge>;
+        return <Badge variant="outline">Low Impact</Badge>;
       default:
         return null;
     }

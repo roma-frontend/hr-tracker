@@ -169,24 +169,16 @@ function getFollowUpSuggestions(
     return [t('chatWidget.showBalance'), t('chatWidget.viewUpcoming'), t('chatWidget.whoOnLeave')];
   }
   if (lower.includes('balance') || lower.includes('days left') || lower.includes('remaining')) {
-    return [
-      t('chatWidget.bookVacation'),
-      t('chatWidget.requestSickLeave'),
-      t('chatWidget.showLeaveHistory'),
-    ];
+    return ['📆 Book a vacation', '🤒 Request sick leave', '📊 Show my leave history'];
   }
   if (lower.includes('sick') || lower.includes('doctor') || lower.includes('medical')) {
-    return [
-      t('chatWidget.bookSickLeaveToday'),
-      t('chatWidget.bookDoctorVisit'),
-      t('chatWidget.showBalance'),
-    ];
+    return ['🤒 Book sick leave for today', '👨‍⚕️ Book a doctor visit', t('chatWidget.showBalance')];
   }
   if (lower.includes('team') || lower.includes('colleague') || lower.includes('who is')) {
-    return [t('chatWidget.showTeamCalendar'), t('chatWidget.myLeaveBalance'), t('chatWidget.bookTimeOff')];
+    return ['📅 Show team calendar', '📋 My leave balance', '📆 Book time off'];
   }
   if (lower.includes('cancel') || lower.includes('delete') || lower.includes('removed')) {
-    return [t('chatWidget.showPendingLeaves'), t('chatWidget.bookNewLeave'), t('chatWidget.myLeaveBalance')];
+    return ['📋 Show my pending leaves', '📆 Book new leave', '📊 My leave balance'];
   }
   if (userRole === 'admin' || userRole === 'supervisor') {
     return [
@@ -195,7 +187,7 @@ function getFollowUpSuggestions(
       t('chatWidget.pendingApprovals'),
     ];
   }
-  return [t('chatWidget.bookVacation'), t('chatWidget.showBalance'), t('chatWidget.whoOnLeaveThisWeek')];
+  return ['📆 Book a vacation', t('chatWidget.showBalance'), '👥 Who is on leave this week?'];
 }
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
@@ -1045,7 +1037,7 @@ export function ChatWidget() {
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-(--text-primary)">{t('chat.shieldHrAi')}</p>
+                <p className="text-sm font-semibold text-(--text-primary)">Shield HR AI</p>
                 <p className="text-[10px] text-(--text-muted)">
                   {t('chatWidget.subtitle', { defaultValue: 'Your intelligent HR assistant' })}
                 </p>
@@ -1057,8 +1049,8 @@ export function ChatWidget() {
                     setIsOpen(false);
                   }}
                   className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
-                  aria-label={t('chat.openFullScreenChat')}
-                  title={t('chat.openFullScreenChat')}
+                  aria-label="Open full screen chat"
+                  title="Открыть на весь экран"
                 >
                   <Maximize2 className="w-4 h-4 text-(--text-muted)" />
                 </button>

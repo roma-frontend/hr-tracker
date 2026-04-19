@@ -176,7 +176,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                   <div className="flex-1 rounded-lg p-3 bg-white dark:bg-gray-900">
                     <div className="flex items-center gap-2 mb-1">
                       <LogIn className="w-4 h-4 text-green-500" />
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{t('attendance.checkIn')}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Check In</span>
                     </div>
                     <p className="text-lg font-bold text-green-500">
                       {record.checkInTime ? formatTime(record.checkInTime) : '—'}
@@ -202,7 +202,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                   <div className="flex-1 rounded-lg p-3 bg-white dark:bg-gray-900">
                     <div className="flex items-center gap-2 mb-1">
                       <LogOut className="w-4 h-4 text-blue-500" />
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{t('attendance.checkOut')}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Check Out</span>
                     </div>
                     <p className="text-lg font-bold text-blue-500">
                       {record.checkOutTime ? formatTime(record.checkOutTime) : '—'}
@@ -220,7 +220,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                       </p>
                     )}
                     {!record.checkOutTime && record.status === 'checked_in' && (
-                      <p className="text-xs text-green-500 mt-1">{t('attendance.stillWorking')}</p>
+                      <p className="text-xs text-green-500 mt-1">Still working...</p>
                     )}
                   </div>
                 </div>

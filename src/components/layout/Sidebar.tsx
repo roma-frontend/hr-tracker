@@ -227,8 +227,8 @@ export function Sidebar() {
   // Update browser tab title with unread chat count
   React.useEffect(() => {
     const count = chatUnreadCount ?? 0;
-    document.title = count > 0 ? `(${count}) ${t('sidebar.documentTitle')}` : t('sidebar.documentTitle');
-  }, [chatUnreadCount, t]);
+    document.title = count > 0 ? `(${count}) Shield HR` : 'Shield HR';
+  }, [chatUnreadCount]);
 
   if (!mounted) return null;
 
@@ -270,7 +270,7 @@ export function Sidebar() {
                     'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
                 }}
               >
-                <span className="text-white font-bold text-sm">{t('hr.hr')}</span>
+                <span className="text-white font-bold text-sm">HR</span>
               </div>
               <div
                 className="overflow-hidden whitespace-nowrap"
@@ -578,7 +578,7 @@ export function MobileSidebar() {
                   'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
               }}
             >
-              <span className="text-white font-bold text-sm">{t('hr.hr')}</span>
+              <span className="text-white font-bold text-sm">HR</span>
             </div>
             <div>
               <h1 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>

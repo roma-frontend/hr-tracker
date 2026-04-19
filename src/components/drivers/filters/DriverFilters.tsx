@@ -39,10 +39,10 @@ export const DriverFilters = memo(function DriverFilters({
         onValueChange={(v) => onCapacityChange(v === '0' ? null : Number(v))}
       >
         <SelectTrigger className="w-[140px] h-8 text-xs" style={{ borderRadius: '0.75rem' }}>
-          <SelectValue placeholder={t('driver.minSeats', t('drivers.minSeats'))} />
+          <SelectValue placeholder={t('driver.minSeats', 'Min seats')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="0">{t('driver.anyCapacity', t('drivers.anyCapacity'))}</SelectItem>
+          <SelectItem value="0">{t('driver.anyCapacity', 'Any capacity')}</SelectItem>
           <SelectItem value="2">{t('driver.seats2Plus', '2+ seats')}</SelectItem>
           <SelectItem value="4">{t('driver.seats4Plus', '4+ seats')}</SelectItem>
           <SelectItem value="6">{t('driver.seats6Plus', '6+ seats')}</SelectItem>
@@ -52,13 +52,13 @@ export const DriverFilters = memo(function DriverFilters({
       <Select value={sortBy} onValueChange={onSortChange}>
         <SelectTrigger className="w-[130px] h-8 text-xs" style={{ borderRadius: '0.75rem' }}>
           <SortAsc className="w-3 h-3 mr-1" />
-          <SelectValue placeholder={t('driver.sortBy', t('drivers.sortBy'))} />
+          <SelectValue placeholder={t('driver.sortBy', 'Sort by')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="rating">{t('driver.byRating', t('drivers.byRating'))}</SelectItem>
-          <SelectItem value="name">{t('driver.byName', t('drivers.byName'))}</SelectItem>
+          <SelectItem value="rating">{t('driver.byRating', 'By Rating')}</SelectItem>
+          <SelectItem value="name">{t('driver.byName', 'By Name')}</SelectItem>
           <SelectItem value="availability">
-            {t('driver.byAvailability', t('drivers.byAvailability'))}
+            {t('driver.byAvailability', 'By Availability')}
           </SelectItem>
         </SelectContent>
       </Select>

@@ -30,7 +30,7 @@ export default function CostAnalysis() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-green-500" />
-            {t('admin.costAnalysis')}
+            Cost Analysis
           </CardTitle>
           <div className="flex gap-2">
             <Button
@@ -38,21 +38,21 @@ export default function CostAnalysis() {
               size="sm"
               onClick={() => setPeriod('month')}
             >
-              {t('common.month')}
+              Month
             </Button>
             <Button
               variant={period === 'quarter' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setPeriod('quarter')}
             >
-              {t('common.quarter')}
+              Quarter
             </Button>
             <Button
               variant={period === 'year' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setPeriod('year')}
             >
-              {t('common.year')}
+              Year
             </Button>
           </div>
         </div>

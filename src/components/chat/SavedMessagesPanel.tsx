@@ -112,7 +112,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
                   <button
                     onClick={(e) => handleUnsave(e, saved.id)}
                     className="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--background)"
-                    title={t('chat.removeFromSaved')}
+                    title="Remove from saved"
                   >
                     <X className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
                   </button>

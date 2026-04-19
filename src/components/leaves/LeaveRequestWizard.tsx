@@ -154,7 +154,7 @@ export function LeaveRequestWizard({
     type: { title: t('labels.leaveType', 'Leave Type'), icon: <Calendar className="w-5 h-5" /> },
     dates: { title: t('labels.dates', 'Dates'), icon: <CalendarDays className="w-5 h-5" /> },
     details: {
-      title: t('leaveWizard.confirm', t('common.confirm')),
+      title: t('leaveWizard.confirm', 'Confirm'),
       icon: <CheckCircle className="w-5 h-5" />,
     },
   };
@@ -292,7 +292,7 @@ export function LeaveRequestWizard({
                 disabled={isSubmitting}
                 className="w-full sm:w-auto text-sm"
               >
-                {t('wizard.cancel', t('common.cancel'))}
+                {t('wizard.cancel', 'Cancel')}
               </Button>
             )}
             <Button

@@ -85,7 +85,7 @@ export function IncomingCallProvider() {
                   setIncomingCall(null);
                 }}
                 className="w-14 h-14 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 transition-all hover:scale-110 shadow-lg shadow-red-500/30"
-                title={t('call.decline')}
+                title="Отклонить"
               >
                 <PhoneOff className="w-6 h-6 text-white" />
               </button>
@@ -97,7 +97,7 @@ export function IncomingCallProvider() {
                   setIncomingCall(null);
                 }}
                 className="w-14 h-14 rounded-full flex items-center justify-center bg-green-500 hover:bg-green-600 transition-all hover:scale-110 shadow-lg shadow-green-500/30"
-                title={t('call.accept')}
+                title="Принять"
               >
                 <Phone className="w-6 h-6 text-white" />
               </button>

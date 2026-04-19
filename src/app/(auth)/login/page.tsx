@@ -254,6 +254,28 @@ export default function LoginPage() {
     return () => window.removeEventListener('popstate', handleUrlChange);
   }, []);
 
+  // Check maintenance mode on initial load if org parameter is present
+  useEffect(() => {
+    const checkMaintenanceMode = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const orgId = params.get('org');
+      
+      if (orgId && !showMaintenanceBanner) {
+        try {
+          const response = await fetch(`/api/maintenance/check?org=${orgId}`);
+          const data = await response.json();
+          if (data.isActive) {
+            // Redirect to maintenance mode URL
+            window.location.href = `/login?maintenance=true&org=${orgId}`;
+          }
+        } catch (error) {
+          console.error('Failed to check maintenance mode:', error);
+        }
+      }
+    };
+
+    checkMaintenanceMode();
+  }, [showMaintenanceBanner]);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const deviceFingerprintRef = useRef<string | undefined>(undefined);
   const { getSample, reset } = useKeystrokeDynamics();
@@ -278,41 +300,35 @@ export default function LoginPage() {
       return;
     }
 
-    // Check if redirect flag is set
-    const shouldRedirect = sessionStorage.getItem('redirect_after_login');
-    
-    if (isAuthenticated && !isRedirecting && shouldRedirect) {
+    if (isAuthenticated && !isRedirecting) {
       setIsRedirecting(true);
-      sessionStorage.removeItem('redirect_after_login');
 
       // Получаем параметр from из URL
       const from = params.get('from');
-      const nextUrl = params.get('next');
-      
+
       // Редиректим на нужную страницу
-      const destination = nextUrl || (from && from.startsWith('/') ? from : '/dashboard');
-      console.error('🔄 useEffect redirect to:', destination);
-      
-      // Use setTimeout to ensure state is committed
-      setTimeout(() => {
-        window.location.href = destination;
-      }, 100);
+      const destination = from && from.startsWith('/') ? from : '/dashboard';
+      router.push(destination);
     }
-  }, [isAuthenticated, isRedirecting]);
+  }, [isAuthenticated, isRedirecting, router]);
 
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-        console.error('📝 Form submitted, email:', formData.email);
-        setError(null);
+    setError(null);
+    const fd = new FormData();
+    fd.append('email', formData.email);
+    fd.append('password', formData.password);
 
-        try {
-            // Collect keystroke sample and device fingerprint
-            const keystrokeSample = getSample();
-            const deviceFingerprint = deviceFingerprintRef.current;
-        
+    startTransition(async () => {
+      try {
+        console.error('🔐 Attempting login...');
+
+        // Collect keystroke sample and device fingerprint
+        const keystrokeSample = getSample();
+        const deviceFingerprint = deviceFingerprintRef.current;
+
         // Use API route instead of Server Action
         const response = await fetch('/api/auth/login', {
           method: 'POST',
@@ -324,120 +340,100 @@ export default function LoginPage() {
             keystrokeSample,
           }),
         });
-        
-            console.log('📥 Response status:', response.status);
 
-            if (!response.ok) {
-              const errorData = (await response.json()) as { error?: string; organizationId?: string };
-              // If maintenance mode is active, redirect to maintenance screen
-              if (errorData.error === 'maintenance') {
-                window.location.href = `/login?maintenance=true${errorData.organizationId ? `&org=${errorData.organizationId}` : ''}`;
-                return;
-              }
-              throw new Error(errorData.error || 'Login failed');
-            }
-
-            const result = (await response.json()) as {
-              requiresTwoFactor?: boolean;
-              tempToken?: string;
-              user?: {
-                id: string;
-                name: string;
-                email: string;
-                role: string;
-                organizationId: string;
-                department?: string;
-                position?: string;
-                employeeType?: string;
-                avatar?: string;
-                isApproved?: boolean;
-                phone?: string;
-                presenceStatus?: string;
-                organizationSlug?: string;
-                organizationName?: string;
-              };
-              session?: any;
-              riskLevel?: string;
-              error?: string;
-            };
-
-            // Check if 2FA is required
-            if (result.requiresTwoFactor) {
-              setTwoFactorPending(true);
-              setTempToken(result.tempToken ?? null);
-              // Focus TOTP input after render
-              setTimeout(() => totpInputRef.current?.focus(), 100);
-              return;
-            }
-
-            console.log('✅ Login successful:', result);
-
-            if (!result.user) {
-              throw new Error('No user data in response');
-            }
-
-            const userData: import('@/store/useAuthStore').UserProfile = {
-              id: result.user.id,
-              name: result.user.name,
-              email: result.user.email,
-              role: result.user.role as 'admin' | 'supervisor' | 'employee' | 'superadmin' | 'driver',
-              organizationId: result.user.organizationId,
-              department: result.user.department,
-              position: result.user.position,
-              employeeType: result.user.employeeType as 'staff' | 'contractor' | undefined,
-              avatar: result.user.avatar,
-              isApproved: result.user.isApproved,
-              phone: result.user.phone,
-              presenceStatus: result.user.presenceStatus as any,
-              organizationSlug: result.user.organizationSlug,
-              organizationName: result.user.organizationName,
-            };
-
-            console.log('💾 Saving user to store:', userData);
-            login(userData);
-            
-            // Verify store was updated
-            const storeState = useAuthStore.getState();
-            console.log('🔍 Store state after login:', {
-              isAuthenticated: storeState.isAuthenticated,
-              user: storeState.user?.id,
-              userOrgId: storeState.user?.organizationId,
-            });
-            
-            reset(); // clear keystroke buffer after successful login
-
-            // Set flag for welcome banner on dashboard
-            sessionStorage.setItem('just_logged_in', 'true');
-
-            // If login had elevated risk, flag it for the suspicious login banner
-            if (result.riskLevel === 'high' || result.riskLevel === 'critical') {
-              sessionStorage.setItem(
-                'suspicious_login',
-                'Login from a new device or unusual location detected. Risk level: ' + result.riskLevel,
-              );
-            }
-
-            // Check cookies before redirect
-            const cookies = document.cookie.split(';').map(c => c.trim().split('=')[0]);
-            console.log('🍪 Cookies set:', cookies);
-            const hasAccessToken = cookies.some(c => c.startsWith('sb-fprtklhpngvtpuozypdj-access-token'));
-            console.log('🍪 Has access token cookie:', hasAccessToken);
-
-            // Redirect to dashboard or callback URL
-            console.log('🔄 Redirecting to dashboard...');
-            const params = new URLSearchParams(window.location.search);
-            const nextUrl = params.get('next');
-            const redirectUrl = nextUrl || '/dashboard';
-            console.log('🔄 Redirect URL:', redirectUrl);
-            
-            // Reload page - middleware will see cookies and redirect to dashboard
-            console.log('🚀 Reloading page, middleware will redirect...');
-            window.location.reload();
+        if (!response.ok) {
+          const errorData = (await response.json()) as { error?: string; organizationId?: string };
+          // If maintenance mode is active, redirect to maintenance screen
+          if (errorData.error === 'maintenance') {
+            window.location.href = `/login?maintenance=true${errorData.organizationId ? `&org=${errorData.organizationId}` : ''}`;
             return;
-          } catch (err) {
-            console.log('❌ Login failed:', err);
-            setError(err instanceof Error ? err.message : 'Login failed');
           }
+          throw new Error(errorData.error || 'Login failed');
+        }
+
+        const result = (await response.json()) as {
+          requiresTwoFactor?: boolean;
+          tempToken?: string;
+          user?: {
+            id: string;
+            name: string;
+            email: string;
+            role: string;
+            organizationId: string;
+            department?: string;
+            position?: string;
+            employeeType?: string;
+            avatar?: string;
+            isApproved?: boolean;
+            phone?: string;
+            presenceStatus?: string;
+            organizationSlug?: string;
+            organizationName?: string;
+          };
+          session?: any;
+          riskLevel?: string;
+          error?: string;
+        };
+
+        // Check if 2FA is required
+        if (result.requiresTwoFactor) {
+          setTwoFactorPending(true);
+          setTempToken(result.tempToken ?? null);
+          // Focus TOTP input after render
+          setTimeout(() => totpInputRef.current?.focus(), 100);
+          return;
+        }
+
+        console.error('✅ Login successful:', result);
+
+        if (!result.user) {
+          throw new Error('No user data in response');
+        }
+
+        const userData: import('@/store/useAuthStore').UserProfile = {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          role: result.user.role as 'admin' | 'supervisor' | 'employee' | 'superadmin' | 'driver',
+          organizationId: result.user.organizationId,
+          department: result.user.department,
+          position: result.user.position,
+          employeeType: result.user.employeeType as 'staff' | 'contractor' | undefined,
+          avatar: result.user.avatar,
+          isApproved: result.user.isApproved,
+          phone: result.user.phone,
+          presenceStatus: result.user.presenceStatus as any,
+          organizationSlug: result.user.organizationSlug,
+          organizationName: result.user.organizationName,
+        };
+
+        console.error('💾 Saving user to store:', userData);
+        login(userData);
+        reset(); // clear keystroke buffer after successful login
+
+        // Set flag for welcome banner on dashboard
+        sessionStorage.setItem('just_logged_in', 'true');
+
+        // If login had elevated risk, flag it for the suspicious login banner
+        if (result.riskLevel === 'high' || result.riskLevel === 'critical') {
+          sessionStorage.setItem(
+            'suspicious_login',
+            'Login from a new device or unusual location detected. Risk level: ' + result.riskLevel,
+          );
+        }
+
+        // Redirect to dashboard or callback URL
+        console.error('🔄 Redirecting to dashboard...');
+        const params = new URLSearchParams(window.location.search);
+        const nextUrl = params.get('next');
+        const redirectUrl = nextUrl || '/dashboard';
+        console.error('🔄 Redirect URL:', redirectUrl);
+        window.location.href = redirectUrl;
+      } catch (err) {
+        console.error('❌ Login failed:', err);
+        setError(err instanceof Error ? err.message : 'Login failed');
+      }
+    });
   };
 
   const handleWebAuthnSuccess = async (_credentialId: string) => {
@@ -471,7 +467,7 @@ export default function LoginPage() {
       const redirectUrl = nextUrl || '/dashboard';
       router.push(redirectUrl);
     } catch (err) {
-      console.log('❌ WebAuthn login failed:', err);
+      console.error('❌ WebAuthn login failed:', err);
       setError(err instanceof Error ? err.message : 'WebAuthn login failed');
     }
   };
@@ -668,7 +664,7 @@ export default function LoginPage() {
                             setTotpCode(val);
                             setTwoFactorError(null);
                           }}
-                          placeholder={isBackupCode ? t('placeholders.backupCode') : t('placeholders.totpCode')}
+                          placeholder={isBackupCode ? 'XXXXXXXX' : '000000'}
                           className="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 px-4 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500"
                           style={{
                             background: 'var(--surface-hover)',
@@ -783,7 +779,7 @@ export default function LoginPage() {
                         }}
                       >
                         <Fingerprint className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">{t('auth.touchId')}</span>
+                        <span className="hidden sm:inline">Touch ID</span>
                       </button>
                     </div>
 
@@ -831,7 +827,7 @@ export default function LoginPage() {
                           value={formData.email}
                           onChange={(val) => setFormData((p) => ({ ...p, email: val }))}
                           label={t('auth.emailAddress')}
-                          placeholder={t('placeholders.email')}
+                          placeholder="you@company.com"
                           autoFocus={true}
                         />
 
@@ -841,7 +837,7 @@ export default function LoginPage() {
                             value={formData.password}
                             onChange={(val) => setFormData((p) => ({ ...p, password: val }))}
                             label={t('auth.password')}
-                            placeholder={t('placeholders.password')}
+                            placeholder="••••••••"
                             showStrength={false}
                             showGenerator={false}
                             forgotPasswordLink={

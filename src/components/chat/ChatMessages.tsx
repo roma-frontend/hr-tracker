@@ -56,7 +56,7 @@ export function ChatMessages({
 
   if (isLoading) {
     return (
-      <div className="space-y-3 animate-pulse" role="status" aria-label={t('chat.loadingMessages')}>
+      <div className="space-y-3 animate-pulse" role="status" aria-label="Loading messages">
         {[...Array(5)].map((_, i) => (
           <div key={i} className={`flex gap-3 ${i % 2 === 0 ? '' : 'flex-row-reverse'}`}>
             <div className="w-8 h-8 rounded-full bg-white/5 shrink-0" />
@@ -89,7 +89,7 @@ export function ChatMessages({
       >
         <div
           role="log"
-          aria-label={t('chat.chatMessages')}
+          aria-label="Chat messages"
           aria-live="polite"
           aria-relevant="additions"
           style={{

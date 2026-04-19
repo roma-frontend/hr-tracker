@@ -24,7 +24,7 @@ export const NoRequestsEmptyState = memo(function NoRequestsEmptyState({
 }: NoRequestsEmptyStateProps) {
   const { t } = useTranslation();
 
-  const defaultTitle = t('emptyStates.noRequests.title', t('drivers.noRequestsYet'));
+  const defaultTitle = t('emptyStates.noRequests.title', 'No Requests Yet');
   const defaultDescription = t(
     'emptyStates.noRequests.description',
     "You haven't requested any drivers yet.",

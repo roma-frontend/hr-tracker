@@ -1,7 +1,6 @@
 // Server Component — renders instantly without waiting for JS hydration
 import HeroCTA from './HeroCTA';
 import { getServerTranslation } from '@/lib/i18n/server-translation';
-import { useTranslation } from 'react-i18next';
 
 // Static trusted companies list
 const TRUSTED = ['Acme Corp', 'GlobalTech', 'NovaSoft', 'Meridian Co.', 'Apex Industries'];
@@ -27,7 +26,7 @@ export default async function HeroSection() {
     <div
       className="relative flex flex-col items-center text-center pb-20 px-6 min-h-screen justify-center"
       role="banner"
-      aria-label={t('landing.heroSectionAriaLabel')}
+      aria-label="Hero section"
     >
       {/* Skip to content link for accessibility */}
       <a
@@ -49,7 +48,7 @@ export default async function HeroSection() {
           background: 'var(--landing-card-bg)',
         }}
         role="status"
-        aria-label={t('landing.premiumHRAriaLabel')}
+        aria-label="Premium HR platform"
       >
         <div className="badge-shimmer absolute inset-0" aria-hidden="true" />
         <div

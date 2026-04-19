@@ -91,7 +91,7 @@ export function RatingModal({
             </Avatar>
             <div>
               <h2 className="text-xl font-bold text-white">
-                {t('driver.rateDriver', t('drivers.rateDriver'))}
+                {t('driver.rateDriver', 'Rate Driver')}
               </h2>
               <p className="text-white/80 text-sm mt-0.5">{driverName}</p>
             </div>
@@ -151,12 +151,12 @@ export function RatingModal({
           {/* Comment */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-(--text-primary)">
-              {t('driver.comment', t('drivers.comment'))} ({t('driver.optional', t('common.optional'))})
+              {t('driver.comment', 'Comment')} ({t('driver.optional', 'Optional')})
             </label>
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder={t('driver.commentPlaceholder', t('drivers.experiencePlaceholder'))}
+              placeholder={t('driver.commentPlaceholder', 'Tell us about your experience...')}
               className="resize-none border-(--border) bg-(--input)"
               rows={3}
             />
@@ -165,7 +165,7 @@ export function RatingModal({
           {/* Actions */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
-              {t('driver.cancel', t('common.cancel'))}
+              {t('driver.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSubmit}

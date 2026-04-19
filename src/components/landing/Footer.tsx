@@ -63,7 +63,8 @@ export default function Footer() {
               <span
                 className="font-bold text-lg transition-colors"
                 style={{ color: 'var(--landing-text-primary)' }}
-              >{t('landing.hr')}<span style={{ color: 'var(--primary)' }}>{t('landing.office')}</span>
+              >
+                HR<span style={{ color: 'var(--primary)' }}>Office</span>
               </span>
             </Link>
             <p
@@ -92,9 +93,9 @@ export default function Footer() {
                       style={{ color: 'var(--landing-text-secondary)' }}
                       aria-label={
                         link.href === '/privacy'
-                          ? 'View our privacy policy and data protection information'
+                          ? t('landingExtra.footerPrivacyDesc', { defaultValue: 'View our privacy policy and data protection information' })
                           : link.href === '/terms'
-                            ? 'Read our terms of service and conditions'
+                            ? t('landingExtra.footerTermsDesc', { defaultValue: 'Read our terms of service and conditions' })
                             : undefined
                       }
                     >

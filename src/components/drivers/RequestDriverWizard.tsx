@@ -181,7 +181,7 @@ export function RequestDriverWizard({
               field="date"
               label={t('driverWizard.steps.datetime.dateLabel')}
               type="text"
-              placeholder={t('placeholders.datePlaceholder')}
+              placeholder="YYYY-MM-DD"
               required
             />
             <TextInputStep
@@ -190,7 +190,7 @@ export function RequestDriverWizard({
               field="time"
               label={t('driverWizard.steps.datetime.timeLabel')}
               type="text"
-              placeholder={t('placeholders.timePlaceholder')}
+              placeholder="HH:MM"
               required
             />
           </div>
@@ -223,7 +223,7 @@ export function RequestDriverWizard({
 
       if (!dateStr || !timeStr) {
         toast.error(
-          t('validation.fillDateAndTime'),
+          t('driverWizard.toast.fillDateAndTime', 'Please fill in both date and time fields.'),
         );
         return;
       }
@@ -233,7 +233,10 @@ export function RequestDriverWizard({
 
       if (isNaN(startTime)) {
         toast.error(
-          t('validation.invalidDateTime'),
+          t(
+            'driverWizard.toast.invalidDateTime',
+            'Invalid date or time. Please use YYYY-MM-DD and HH:MM formats.',
+          ),
         );
         return;
       }

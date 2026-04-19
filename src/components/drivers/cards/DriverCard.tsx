@@ -74,7 +74,7 @@ export const DriverCard = memo(function DriverCard({
                 {driver.rating.toFixed(1)}
               </span>
               <span className="text-xs text-(--text-muted)">
-                ({driver.totalTrips} {t('driver.trips', t('drivers.trips'))})
+                ({driver.totalTrips} {t('driver.trips', 'trips')})
               </span>
             </div>
           </div>
@@ -89,7 +89,7 @@ export const DriverCard = memo(function DriverCard({
           <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-(--background-subtle)/50">
             <Users className="w-4 h-4 text-(--primary)" />
             <span>
-              {driver.vehicleInfo.capacity} {t('driver.seats', t('drivers.seats'))}
+              {driver.vehicleInfo.capacity} {t('driver.seats', 'seats')}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-(--background-subtle)/50">
@@ -105,7 +105,7 @@ export const DriverCard = memo(function DriverCard({
             onClick={() => onBook(driver.id)}
             className="flex-1 drivers-btn-hover bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
           >
-            {t('driver.book', t('drivers.book'))}
+            {t('driver.book', 'Book')}
           </Button>
           <div className="flex gap-2">
             <Button

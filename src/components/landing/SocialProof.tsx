@@ -71,7 +71,7 @@ function MetricItem({
       ref={ref}
       className="flex flex-col items-center text-center gap-3"
       role="group"
-      aria-label={t('landing.metricAriaLabel', { value })}
+      aria-label={`${value} ${t(labelKey)}`}
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? 'scale(1)' : 'scale(0.88)',
@@ -101,12 +101,11 @@ function MetricItem({
 }
 
 export default function SocialProof() {
-  const { t } = useTranslation();
   return (
     <section
       className="relative z-10 py-12 border-y"
       style={{ borderColor: 'var(--landing-card-border)' }}
-      aria-label={t('landing.platformMetricsAriaLabel')}
+      aria-label="Platform metrics"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">

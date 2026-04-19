@@ -343,7 +343,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       <Input
                         id="emp-email"
                         type="email"
-                        placeholder={t('placeholders.employeeEmail')}
+                        placeholder="john.smith@company.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className={`pl-10 ${errors.email ? 'border-(--destructive)' : ''}`}
@@ -401,7 +401,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       <Label htmlFor="emp-position">{t('employees.position')} *</Label>
                       <Input
                         id="emp-position"
-                        placeholder={t('placeholders.employeePosition')}
+                        placeholder="e.g. Developer"
                         value={position}
                         onChange={(e) => setPosition(e.target.value)}
                         className={errors.position ? 'border-(--destructive)' : ''}
@@ -482,7 +482,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                       <Input
                         id="emp-phone"
-                        placeholder={t('placeholders.phoneNumber')}
+                        placeholder="+374 91 123456"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="pl-10"

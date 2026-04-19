@@ -14,7 +14,7 @@ async function fetchUser(userId: string) {
     userId,
   });
   const res = await fetch(`/api/users?${params}`);
-  if (!res.ok) throw new Error(t('profile.fetchUserFailed'));
+  if (!res.ok) throw new Error('Failed to fetch user');
   const json = await res.json();
   return json.data;
 }
@@ -25,7 +25,7 @@ async function fetchUserStats(userId: string) {
     userId,
   });
   const res = await fetch(`/api/users?${params}`);
-  if (!res.ok) throw new Error(t('profile.fetchStatsFailed'));
+  if (!res.ok) throw new Error('Failed to fetch user stats');
   const json = await res.json();
   return json.data;
 }
@@ -39,7 +39,6 @@ export function useUserProfile(userId?: string) {
 }
 
 export function useUserStats(userId?: string) {
-  const { t } = useTranslation();
   return useQuery({
     queryKey: PROFILE_QUERY_KEYS.stats(userId || ''),
     queryFn: () => fetchUserStats(userId!),
@@ -69,7 +68,7 @@ export function useUpdateOwnProfile() {
       });
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || t('profile.updateFailed'));
+        throw new Error(error.error || 'Failed to update profile');
       }
       return res.json();
     },
@@ -79,10 +78,10 @@ export function useUpdateOwnProfile() {
       }
       queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEYS.user(user?.id || '') });
       queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEYS.stats(user?.id || '') });
-      toast.success(t('profile.updated', t('profile.updated')));
+      toast.success(t('profile.updated', 'Profile updated successfully'));
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('profile.updateFailed', t('profile.updateFailed')));
+      toast.error(error.message || t('profile.updateFailed', 'Failed to update profile'));
     },
   });
 }

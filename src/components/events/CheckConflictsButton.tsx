@@ -6,7 +6,6 @@
 'use client';
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { useCheckLeaveConflictsManual } from '@/hooks/useEvents';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
@@ -74,7 +73,7 @@ export function CheckConflictsButton({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={handleCheck}>{t('events.checkForLeaveRequest')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleCheck}>Check for this leave request</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

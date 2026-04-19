@@ -196,7 +196,7 @@ export function TripDetailsModal({
                       <span className="hidden sm:inline">
                         {t('driver.openInMap', 'Open in Map')}
                       </span>
-                      <span className="sm:hidden">{t('drivers.map')}</span>
+                      <span className="sm:hidden">Map</span>
                       <ChevronDown
                         className={`w-3.5 h-3.5 transition-transform ${showMapMenu ? 'rotate-180' : ''}`}
                       />

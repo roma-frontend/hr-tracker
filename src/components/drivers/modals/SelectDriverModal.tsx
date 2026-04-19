@@ -92,7 +92,7 @@ export function SelectDriverModal({ candidates, onSelect, onClose }: SelectDrive
             <div className="text-center py-8 text-(--text-muted)">
               <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p className="text-sm">
-                {t('driver.noDriverCandidates', t('drivers.noDriverEmployees'))}
+                {t('driver.noDriverCandidates', 'No employees with driver role found')}
               </p>
               <p className="text-xs mt-1">
                 {t('driver.createDriverFirst', 'Create an employee with driver role first')}

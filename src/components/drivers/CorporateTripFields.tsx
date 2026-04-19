@@ -137,7 +137,7 @@ export function CorporateTripFields({
         <Input
           value={costCenter}
           onChange={(e) => onCostCenterChange(e.target.value)}
-          placeholder={t('placeholders.projectCode')}
+          placeholder="e.g., MKTG-001, ENG-002"
         />
       </div>
 
@@ -150,7 +150,7 @@ export function CorporateTripFields({
         <Textarea
           value={businessJustification}
           onChange={(e) => onBusinessJustificationChange(e.target.value)}
-          placeholder={t('placeholders.briefDescription')}
+          placeholder="Brief description..."
           rows={3}
         />
       </div>

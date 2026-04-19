@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 import { useRouter } from 'next/navigation';
 import {
@@ -78,11 +77,10 @@ type SearchResult = {
 };
 
 export function GlobalSearch({
-  placeholder,
+  placeholder = 'Поиск по всей системе...',
   autoFocus = false,
   onSelect,
 }: GlobalSearchProps) {
-  const { t } = useTranslation();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -210,7 +208,7 @@ export function GlobalSearch({
         ...(results.driverRequests || []).map((d: DriverRequest) => ({
           id: d.id,
           type: 'driver' as const,
-          title: `${d.requesterName || t('globalSearch.unknown')}`,
+          title: `${d.requesterName || 'Unknown'}`,
           subtitle: `${d.tripInfo?.from} → ${d.tripInfo?.to}`,
           icon: '🚗',
           status: d.status,
@@ -240,18 +238,18 @@ export function GlobalSearch({
   const hasQuery = query.length >= 2;
 
   const typeFilters = [
-    { id: null, label: t('globalSearch.all'), icon: Search, count: results?.total || 0 },
-    { id: 'user', label: t('globalSearch.users'), icon: Users, count: results?.users?.length || 0 },
+    { id: null, label: 'Все', icon: Search, count: results?.total || 0 },
+    { id: 'user', label: 'Пользователи', icon: Users, count: results?.users?.length || 0 },
     {
       id: 'organization',
-      label: t('globalSearch.organizations'),
+      label: 'Организации',
       icon: Building2,
       count: results?.organizations?.length || 0,
     },
-    { id: 'leave', label: t('globalSearch.leaves'), icon: Calendar, count: results?.leaveRequests?.length || 0 },
-    { id: 'task', label: t('globalSearch.tasks'), icon: CheckSquare, count: results?.tasks?.length || 0 },
-    { id: 'driver', label: t('globalSearch.drivers'), icon: Car, count: results?.driverRequests?.length || 0 },
-    { id: 'ticket', label: t('globalSearch.tickets'), icon: Ticket, count: results?.supportTickets?.length || 0 },
+    { id: 'leave', label: 'Отпуска', icon: Calendar, count: results?.leaveRequests?.length || 0 },
+    { id: 'task', label: 'Задачи', icon: CheckSquare, count: results?.tasks?.length || 0 },
+    { id: 'driver', label: 'Водители', icon: Car, count: results?.driverRequests?.length || 0 },
+    { id: 'ticket', label: 'Тикеты', icon: Ticket, count: results?.supportTickets?.length || 0 },
   ];
 
   return (
@@ -262,7 +260,7 @@ export function GlobalSearch({
         <Input
           id="global-search-input"
           type="text"
-          placeholder={placeholder || t('globalSearch.searchPlaceholder')}
+          placeholder={placeholder}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -314,18 +312,18 @@ export function GlobalSearch({
 
           {/* Results */}
           <div className="overflow-y-auto flex-1 p-2">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8 text-muted-foreground">
-              <div className="animate-pulse">{t('globalSearch.searching')}</div>
-            </div>
-          ) : !hasResults ? (
-            <div className="flex items-center justify-center py-8 text-muted-foreground">
-              <div className="text-center">
-                <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                <p>{t('globalSearch.noResults')}</p>
-                <p className="text-xs mt-1">{t('globalSearch.noResultsDesc')}</p>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8 text-muted-foreground">
+                <div className="animate-pulse">Поиск...</div>
               </div>
-            </div>
+            ) : !hasResults ? (
+              <div className="flex items-center justify-center py-8 text-muted-foreground">
+                <div className="text-center">
+                  <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p>Ничего не найдено</p>
+                  <p className="text-xs mt-1">Попробуйте другой запрос</p>
+                </div>
+              </div>
             ) : (
               <div className="space-y-1">
                 {flatResults.map((item) => (
@@ -371,7 +369,9 @@ export function GlobalSearch({
 
           {/* Footer */}
           <div className="p-2 border-t text-xs text-muted-foreground text-center">
-            {t('globalSearch.pressEnter')} <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Enter</kbd> {t('globalSearch.toNavigate')} <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> {t('globalSearch.toClose')}
+            Нажмите <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Enter</kbd> чтобы
+            перейти, <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> чтобы
+            закрыть
           </div>
         </div>
       )}

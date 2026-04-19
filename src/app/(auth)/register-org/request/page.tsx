@@ -78,17 +78,17 @@ export default function RequestOrgPage() {
     setError(null);
 
     if (formData.password.length < 8) {
-      setError(t('validation.passwordMin8'));
+      setError('Password must be at least 8 characters');
       return;
     }
 
     if (!formData.slug) {
-      setError(t('validation.orgSlugRequired'));
+      setError('Organization slug is required');
       return;
     }
 
     if (!plan) {
-      setError(t('validation.planNotSelected'));
+      setError('Plan not selected');
       return;
     }
 
@@ -112,12 +112,12 @@ export default function RequestOrgPage() {
           description: formData.description || undefined,
         });
 
-        toast.success(t('toasts.requestSubmitted'));
+        toast.success('🎉 Request submitted successfully!');
 
         // Redirect to confirmation page
         router.push('/register-org/pending');
       } catch (_err) {
-        const errorMessage = _err instanceof Error ? _err.message : t('errors.submitRequestFailed');
+        const errorMessage = _err instanceof Error ? _err.message : 'Failed to submit request';
         setError(errorMessage);
         toast.error(errorMessage);
       }
@@ -168,11 +168,13 @@ export default function RequestOrgPage() {
               <h1
                 className="text-2xl font-bold capitalize"
                 style={{ color: 'var(--text-primary)' }}
-              >{t('registerOrg.requestPlan', { plan })}</h1>
+              >
+                Request {plan} Plan
+              </h1>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 {plan === 'enterprise'
-                  ? t('registerOrg.customPricing')
-                  : t('registerOrg.pricing79')}{' '}
+                  ? 'Custom pricing • 100+ employees'
+                  : '$79/mo • Up to 50 employees'}{' '}
                 • Approved within 24h
               </p>
             </div>
@@ -185,10 +187,14 @@ export default function RequestOrgPage() {
               className="space-y-4 p-4 rounded-xl"
               style={{ background: 'rgba(37,99,235,0.05)' }}
             >
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.orgDetails')}</h3>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Organization Details
+              </h3>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.orgName')}</label>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  Organization Name
+                </label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
@@ -220,7 +226,9 @@ export default function RequestOrgPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.orgUrl')}</label>
+                <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  Organization URL
+                </label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                   <input
@@ -233,7 +241,7 @@ export default function RequestOrgPage() {
                         slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
                       }))
                     }
-                    placeholder={t('placeholders.acmeCorp')}
+                    placeholder="acme-corp"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: 'var(--input)',
@@ -247,13 +255,15 @@ export default function RequestOrgPage() {
                   />
                 </div>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  yourteam.officehub.com/<strong>{formData.slug || t('placeholders.yourOrg')}</strong>
+                  yourteam.officehub.com/<strong>{formData.slug || 'your-org'}</strong>
                 </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.industry')}</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Industry
+                  </label>
                   <div className="relative">
                     <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <input
@@ -276,7 +286,9 @@ export default function RequestOrgPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.teamSize')}</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Team Size
+                  </label>
                   <div className="relative">
                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <select
@@ -293,9 +305,11 @@ export default function RequestOrgPage() {
                       }
                       onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                     >
-                      <option value="">{t('registerOrg.selectSize')}</option>
+                      <option value="">Select size</option>
                       {TEAM_SIZES.map((size) => (
-                        <option key={size} value={size}>{t('registerOrg.sizeEmployees', { size })}</option>
+                        <option key={size} value={size}>
+                          {size} employees
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -305,11 +319,15 @@ export default function RequestOrgPage() {
 
             {/* Your Details */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.yourDetails')}</h3>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Your Details (Admin Account)
+              </h3>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.yourName')}</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Your Name
+                  </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <input
@@ -343,7 +361,7 @@ export default function RequestOrgPage() {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                      placeholder={t('placeholders.youAtCompany')}
+                      placeholder="you@company.com"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
                         background: 'var(--input)',
@@ -361,14 +379,16 @@ export default function RequestOrgPage() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.phone')}</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Phone
+                  </label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-                      placeholder={t('placeholders.phone')}
+                      placeholder="+1 234 567 890"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                       style={{
                         background: 'var(--input)',
@@ -384,7 +404,9 @@ export default function RequestOrgPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.country')}</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Country
+                  </label>
                   <input
                     type="text"
                     value={formData.country}
@@ -464,7 +486,9 @@ export default function RequestOrgPage() {
 
             {/* Additional Info */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('registerOrg.tellUsNeeds')}</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                Tell us about your needs (optional)
+              </label>
               <div className="relative">
                 <MessageSquare className="absolute left-3 top-3 w-4 h-4 text-(--text-muted)" />
                 <textarea
@@ -507,14 +531,18 @@ export default function RequestOrgPage() {
             >
               {isPending ? (
                 <>
-                  <ShieldLoader size="xs" variant="inline" className="mr-2" />{t('registerOrg.submitting')}</>
+                  <ShieldLoader size="xs" variant="inline" className="mr-2" /> Submitting request...
+                </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />{t('registerOrg.submitRequest')}</>
+                  <CheckCircle2 className="w-4 h-4" /> Submit Request
+                </>
               )}
             </button>
 
-            <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>{t('registerOrg.reviewMessage')}</p>
+            <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+              We'll review your request and get back to you within 24 hours.
+            </p>
           </form>
         </div>
 

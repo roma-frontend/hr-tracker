@@ -1,4 +1,4 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/supabase/database.types';
 
 type Organization = Database['public']['Tables']['organizations']['Row'];
@@ -13,17 +13,10 @@ const PLAN_EMPLOYEE_LIMITS: Record<string, number> = {
   enterprise: 999999,
 } as const;
 
-function createServiceClient() {
-  return createSupabaseClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 async function verifySuperadmin(userId: string): Promise<User> {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error } = await supabase
     .from('users')
     .select('*')
@@ -31,14 +24,14 @@ async function verifySuperadmin(userId: string): Promise<User> {
     .single();
 
   if (error || !user) throw new Error('User not found');
-  if (user.role !== 'superadmin' && user.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+  if (user.email.toLowerCase() !== SUPERADMIN_EMAIL) {
     throw new Error('Only the superadmin can perform this action');
   }
   return user;
 }
 
 async function verifyOrgAdmin(userId: string): Promise<User> {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error } = await supabase
     .from('users')
     .select('*')
@@ -76,7 +69,7 @@ export async function createOrganization(args: {
   const slug = normalizeSlug(args.slug);
   if (!slug) throw new Error('Invalid organization slug');
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   const { data: existing } = await supabase
     .from('organizations')
@@ -111,7 +104,7 @@ export async function createOrganization(args: {
 // ── SUPERADMIN: List All Organizations ───────────────────────────────────────
 
 export async function listAllOrganizations(callerUserId: string) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: caller } = await supabase
     .from('users')
     .select('*')
@@ -152,7 +145,7 @@ export async function getAllOrganizations(superadminUserId?: string) {
     await verifySuperadmin(superadminUserId);
   }
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: orgs, error } = await supabase
     .from('organizations')
     .select('*');
@@ -199,7 +192,7 @@ export async function updateOrganization(args: {
 }) {
   await verifySuperadmin(args.superadminUserId);
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const updates: any = {
     updated_at: Math.floor(Date.now() / 1000),
   };
@@ -234,7 +227,7 @@ export async function assignOrgAdmin(args: {
 }) {
   await verifySuperadmin(args.superadminUserId);
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
@@ -263,7 +256,7 @@ export async function getOrganizationById(args: {
   callerUserId: string;
   organizationId: string;
 }) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: caller, error: callerError } = await supabase
     .from('users')
     .select('*')
@@ -317,7 +310,7 @@ export async function getOrgMembers(args: {
 
   await verifySuperadmin(args.superadminUserId);
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: org, error: orgError } = await supabase
     .from('organizations')
     .select('*')
@@ -356,7 +349,7 @@ export async function removeOrgAdmin(args: {
 }) {
   await verifySuperadmin(args.superadminUserId);
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
@@ -381,7 +374,7 @@ export async function searchOrganizations(searchQuery: string) {
   if (!searchQuery || searchQuery.trim().length < 2) return [];
 
   const q = searchQuery.toLowerCase().trim();
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   const { data: bySlug } = await supabase
     .from('organizations')
@@ -412,7 +405,7 @@ export async function searchOrganizations(searchQuery: string) {
 // ── PUBLIC: Get Organization By Slug ─────────────────────────────────────────
 
 export async function getOrganizationBySlug(slug: string) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: org, error } = await supabase
     .from('organizations')
     .select('id, name, slug, industry, plan, is_active')
@@ -437,7 +430,7 @@ export async function requestToJoinOrganization(args: {
   requestedByEmail: string;
   requestedByName: string;
 }) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   const { data: org, error: orgError } = await supabase
     .from('organizations')
@@ -523,7 +516,7 @@ export async function getJoinRequests(args: {
   status?: 'pending' | 'approved' | 'rejected';
 }) {
   const admin = await verifyOrgAdmin(args.adminId);
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   if (!admin.organizationId && admin.role === 'admin') {
     return [];
@@ -560,7 +553,7 @@ export async function approveJoinRequest(args: {
   passwordHash: string;
 }) {
   const admin = await verifyOrgAdmin(args.adminId);
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   const { data: invite, error: inviteError } = await supabase
     .from('organization_invites')
@@ -693,7 +686,7 @@ export async function rejectJoinRequest(args: {
   reason?: string;
 }) {
   const admin = await verifyOrgAdmin(args.adminId);
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   const { data: invite, error: inviteError } = await supabase
     .from('organization_invites')
@@ -750,7 +743,7 @@ export async function generateInviteToken(args: {
   const expiry = Date.now() + expiryHours * 60 * 60 * 1000;
   const now = Math.floor(Date.now() / 1000);
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('organization_invites')
     .insert({
@@ -774,7 +767,7 @@ export async function generateInviteToken(args: {
 // ── PUBLIC: Validate Invite Token ────────────────────────────────────────────
 
 export async function validateInviteToken(token: string) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: invite, error } = await supabase
     .from('organization_invites')
     .select('*')
@@ -814,7 +807,7 @@ export async function validateInviteToken(token: string) {
 // ── Get My Organization ──────────────────────────────────────────────────────
 
 export async function getMyOrganization(userId: string) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
@@ -836,7 +829,7 @@ export async function getMyOrganization(userId: string) {
 // ── Get Pending Join Request Count ───────────────────────────────────────────
 
 export async function getPendingJoinRequestCount(adminId: string) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: admin, error: adminError } = await supabase
     .from('users')
     .select('*')
@@ -871,7 +864,7 @@ export async function removeMemberFromOrganization(args: {
 }) {
   await verifySuperadmin(args.superadminUserId);
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
@@ -902,7 +895,7 @@ export async function removeMemberFromOrganization(args: {
 // ── Get Organizations For Picker ─────────────────────────────────────────────
 
 export async function getOrganizationsForPicker(userId: string) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
@@ -942,7 +935,7 @@ export async function assignUserAsOrgAdmin(args: {
 }) {
   await verifySuperadmin(args.superadminUserId);
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
@@ -996,7 +989,7 @@ export async function requestOrganization(args: {
   teamSize?: string;
   description?: string;
 }) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   const { data: existing } = await supabase
     .from('organization_requests')
@@ -1040,7 +1033,7 @@ export async function createStarterOrganization(args: {
   country?: string;
   industry?: string;
 }) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   const slug = normalizeSlug(args.slug);
   if (!slug) throw new Error('Invalid organization slug');

@@ -127,21 +127,28 @@ function isProtectedPath(pathname: string): boolean {
 }
 
 async function hasValidSession(request: NextRequest): Promise<boolean> {
-  const projectRef = 'fprtklhpngvtpuozypdj';
-  const accessToken = request.cookies.get(`sb-${projectRef}-access-token`)?.value;
-  const refreshToken = request.cookies.get(`sb-${projectRef}-refresh-token`)?.value;
-  
-  console.log('[middleware] Checking session for:', request.nextUrl.pathname);
-  console.log('[middleware] Cookies:', {
-    access: !!accessToken,
-    refresh: !!refreshToken,
-    allCookies: request.cookies.getAll().map(c => c.name)
-  });
-  
-  const hasSession = !!accessToken && !!refreshToken;
-  console.log('[middleware] Session check:', hasSession ? 'valid' : 'invalid');
-  
-  return hasSession;
+  const response = NextResponse.next();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          response.cookies.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  return !!session;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -228,10 +235,7 @@ export async function middleware(request: NextRequest) {
     const isMaintenance = request.nextUrl.searchParams.get('maintenance') === 'true';
     const hasSession = await hasValidSession(request);
 
-    // Don't redirect away from login if we're in the middle of OAuth flow
-    const isCallback = request.nextUrl.searchParams.has('code') || pathname === '/auth/callback';
-    
-    if (AUTH_PATHS.some((prefix) => pathname.startsWith(prefix)) && hasSession && !isMaintenance && !isCallback) {
+    if (AUTH_PATHS.some((prefix) => pathname.startsWith(prefix)) && hasSession && !isMaintenance) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     const response = NextResponse.next();

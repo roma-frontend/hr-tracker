@@ -46,7 +46,6 @@ import { useAuthStore } from '@/store/useAuthStore';
 import type { UserProfile as UserType } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { logoutAction } from '@/actions/auth';
-import { supabase } from '@/lib/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -153,26 +152,22 @@ export function Navbar() {
 
   const handleLogout = async () => {
     try {
-      // Clear Supabase session
-      await supabase.auth.signOut();
-
       // Logout from server session
       await logoutAction();
 
       // Logout from useAuthStore
       logout();
 
-      // Clear auth cookies
+      // Clear auth cookie
       document.cookie = 'hr-auth-token=; path=/; max-age=0';
-      document.cookie = 'hr-session-token=; path=/; max-age=0';
 
-      // Force redirect to home
-      window.location.href = '/';
+      // Redirect to home
+      router.push('/');
     } catch (error) {
       console.error('Logout error:', error);
       // Force logout even if error
       logout();
-      window.location.href = '/';
+      router.push('/');
     }
   };
 
@@ -452,7 +447,7 @@ export function Navbar() {
                 className="sm:hidden absolute top-3 right-3 p-1.5 rounded-lg text-(--text-muted) hover:text-(--text-primary) hover:bg-(--background-subtle) transition-colors"
                 style={{ zIndex: 999 }}
                 onClick={() => setMenuOpen(false)}
-                aria-label={t('landing.close')}
+                aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </button>

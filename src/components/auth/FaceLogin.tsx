@@ -667,10 +667,10 @@ export function FaceLogin() {
             <ScanFace className="w-8 h-8 text-blue-500" />
           </div>
           <h3 className="text-lg font-semibold text-(--text-primary)">
-            {t('faceLogin.title', t('faceLogin.title'))}
+            {t('faceLogin.title', 'Face ID Login')}
           </h3>
           <p className="text-sm text-[var(--text-tertiary)] mt-1">
-            {t('faceLogin.subtitle', t('faceLogin.subtitle'))}
+            {t('faceLogin.subtitle', 'Position your face in the camera to login')}
           </p>
         </div>
 
@@ -679,7 +679,7 @@ export function FaceLogin() {
           {!isWebcamActive && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
               <Camera className="w-16 h-16 mb-4" />
-              <p className="text-sm">{t('faceLogin.cameraNotActive', t('faceLogin.cameraNotActive'))}</p>
+              <p className="text-sm">{t('faceLogin.cameraNotActive', 'Camera not active')}</p>
             </div>
           )}
 
@@ -698,12 +698,12 @@ export function FaceLogin() {
                 {faceDetected ? (
                   <div className="flex items-center gap-2 bg-green-500/90 text-white px-3 py-1.5 rounded-full text-sm animate-pulse">
                     <CheckCircle className="w-4 h-4" />
-                    {t('faceLogin.faceDetected', t('faceLogin.faceDetected'))}
+                    {t('faceLogin.faceDetected', 'Face Detected')}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 bg-red-500/90 text-white px-3 py-1.5 rounded-full text-sm">
                     <XCircle className="w-4 h-4" />
-                    {t('faceLogin.noFace', t('faceLogin.noFace'))}
+                    {t('faceLogin.noFace', 'No Face')}
                   </div>
                 )}
 
@@ -731,19 +731,19 @@ export function FaceLogin() {
                   {matchStatus === 'searching' && (
                     <div className="flex items-center gap-2 bg-blue-500/90 text-white px-4 py-2 rounded-full text-sm">
                       <ShieldLoader size="xs" variant="inline" />
-                      {t('faceLogin.searchingForMatch', t('faceLogin.searching'))}
+                      {t('faceLogin.searchingForMatch', 'Searching for match...')}
                     </div>
                   )}
                   {matchStatus === 'found' && matchedUser && (
                     <div className="flex items-center gap-2 bg-green-500/90 text-white px-4 py-2 rounded-full text-sm">
                       <CheckCircle className="w-4 h-4" />
-                      {t('faceLogin.welcomeUser', t('faceLogin.welcome', { name: userName }), { name: matchedUser })}
+                      {t('faceLogin.welcomeUser', 'Welcome, {{name}}!', { name: matchedUser })}
                     </div>
                   )}
                   {matchStatus === 'not_found' && (
                     <div className="flex items-center gap-2 bg-red-500/90 text-white px-4 py-2 rounded-full text-sm">
                       <XCircle className="w-4 h-4" />
-                      {t('faceLogin.faceNotRecognizedTitle', t('faceLogin.notRecognized'))}
+                      {t('faceLogin.faceNotRecognizedTitle', 'Face not recognized')}
                     </div>
                   )}
                 </div>
@@ -784,7 +784,7 @@ export function FaceLogin() {
                   {faceDetected && scanningProgress > 0 && (
                     <div className="absolute -bottom-8 left-0 right-0 text-center">
                       <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
-                        {t('faceLogin.scanning', t('faceLogin.scanning'))}: {scanningProgress}%
+                        {t('faceLogin.scanning', 'Scanning')}: {scanningProgress}%
                       </div>
                     </div>
                   )}
@@ -830,7 +830,7 @@ export function FaceLogin() {
               {t('faceLogin.faceIdBlockedTitle', '🚫 Face ID Blocked')}
             </p>
             <p className="text-xs text-red-600/80 dark:text-red-400/80 text-center mt-1">
-              {t('faceLogin.faceIdBlockedDesc', t('faceLogin.blockedMessage'))}
+              {t('faceLogin.faceIdBlockedDesc', 'Too many failed attempts. Please use email/password login.')}
             </p>
           </div>
         )}
@@ -840,7 +840,7 @@ export function FaceLogin() {
           {!isWebcamActive && !isBlocked && (
             <Button onClick={startWebcam} className="flex-1">
               <Camera className="w-4 h-4 mr-2" />
-              {t('faceLogin.start', t('faceLogin.startButton'))}
+              {t('faceLogin.start', 'Start Face Login')}
             </Button>
           )}
 
@@ -850,7 +850,7 @@ export function FaceLogin() {
                 <div className="flex-1 flex items-center justify-center gap-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 px-4 py-3 rounded-lg border border-blue-500/20">
                   <ShieldLoader size="xs" variant="inline" />
                   <span className="text-sm font-medium">
-                    {t('faceLogin.authenticating', t('faceLogin.authenticating'))}
+                    {t('faceLogin.authenticating', 'Authenticating...')}
                   </span>
                 </div>
               ) : (
@@ -859,12 +859,12 @@ export function FaceLogin() {
                   <span className="text-sm font-medium">
                     {scanningProgress >= 100
                       ? t('faceLogin.ready', 'Ready to login...')
-                      : `${t('faceLogin.scanning', t('faceLogin.scanning'))}... ${scanningProgress}%`}
+                      : `${t('faceLogin.scanning', 'Scanning')}... ${scanningProgress}%`}
                   </span>
                 </div>
               )}
               <Button onClick={stopWebcam} variant="outline">
-                {t('common.cancel', t('common.cancel'))}
+                {t('common.cancel', 'Cancel')}
               </Button>
             </>
           )}
@@ -872,7 +872,7 @@ export function FaceLogin() {
           {/* Alternative login button when blocked */}
           {isBlocked && (
             <Button onClick={() => router.push('/login')} className="flex-1" variant="default">
-              {t('faceLogin.useEmailPassword', t('faceLogin.usePassword'))}
+              {t('faceLogin.useEmailPassword', 'Use Email/Password Login')}
             </Button>
           )}
         </div>
@@ -884,7 +884,7 @@ export function FaceLogin() {
               {t('faceLogin.noRegisteredFacesTitle', '⚠️ No Registered Faces')}
             </p>
             <p className="text-xs text-orange-600/80 dark:text-orange-400/80 text-center mt-1">
-              {t('faceLogin.noUsersRegistered', t('faceLogin.noFacesMessage'))}.{' '}
+              {t('faceLogin.noUsersRegistered', 'No users have registered their face yet')}.{' '}
               {t(
                 'faceLogin.registerFaceFirst',
                 'Please register your face in your profile settings first',
@@ -903,9 +903,9 @@ export function FaceLogin() {
             )}
             {allFaceDescriptors !== undefined && (
               <span className="block mt-1 text-[var(--text-tertiary)]">
-                📊 {allFaceDescriptors.length} {t('faceLogin.registeredFace', t('faceLogin.registeredFace'))}
+                📊 {allFaceDescriptors.length} {t('faceLogin.registeredFace', 'registered face')}
                 {allFaceDescriptors.length !== 1 ? 's' : ''}{' '}
-                {t('faceLogin.inSystem', t('faceLogin.inSystem'))}
+                {t('faceLogin.inSystem', 'in the system')}
               </span>
             )}
           </p>

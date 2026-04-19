@@ -175,7 +175,7 @@ export function ThreadPanel({
                 handleSend();
               }
             }}
-            placeholder={t('chat.replyInThread')}
+            placeholder="Reply in thread…"
             className="flex-1 bg-transparent outline-none text-xs"
             style={{ color: 'var(--text-primary)' }}
           />

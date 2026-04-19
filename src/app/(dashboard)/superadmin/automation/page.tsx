@@ -207,7 +207,7 @@ export default function AutomationPage() {
             </div>
           ) : (
             <p className="text-sm text-(--text-muted) text-center py-4">
-              {t('automation.noWorkflows') || t('automation.noActiveWorkflows')}
+              {t('automation.noWorkflows') || 'No active workflows'}
             </p>
           )}
         </CardContent>
@@ -254,7 +254,7 @@ export default function AutomationPage() {
             </div>
           ) : (
             <p className="text-sm text-(--text-muted) text-center py-4">
-              {t('automation.noTasks') || t('automation.noRecentTasks')}
+              {t('automation.noTasks') || 'No recent tasks'}
             </p>
           )}
         </CardContent>

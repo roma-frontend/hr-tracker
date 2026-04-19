@@ -24,10 +24,10 @@ export const NoDriversEmptyState = memo(function NoDriversEmptyState({
 }: NoDriversEmptyStateProps) {
   const { t } = useTranslation();
 
-  const defaultTitle = t('emptyStates.noDrivers.title', t('drivers.noDriversAvailable'));
+  const defaultTitle = t('emptyStates.noDrivers.title', 'No Drivers Available');
   const defaultDescription = t(
     'emptyStates.noDrivers.description',
-    t('drivers.noDriversMessage'),
+    'There are no drivers available right now. Try again later.',
   );
   const defaultAction = t('emptyStates.noDrivers.action', 'Request Driver');
 
