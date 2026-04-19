@@ -169,16 +169,24 @@ function getFollowUpSuggestions(
     return [t('chatWidget.showBalance'), t('chatWidget.viewUpcoming'), t('chatWidget.whoOnLeave')];
   }
   if (lower.includes('balance') || lower.includes('days left') || lower.includes('remaining')) {
-    return ['📆 Book a vacation', '🤒 Request sick leave', '📊 Show my leave history'];
+    return [
+      t('chatWidget.bookVacation'),
+      t('chatWidget.requestSickLeave'),
+      t('chatWidget.showLeaveHistory'),
+    ];
   }
   if (lower.includes('sick') || lower.includes('doctor') || lower.includes('medical')) {
-    return ['🤒 Book sick leave for today', '👨‍⚕️ Book a doctor visit', t('chatWidget.showBalance')];
+    return [
+      t('chatWidget.bookSickLeaveToday'),
+      t('chatWidget.bookDoctorVisit'),
+      t('chatWidget.showBalance'),
+    ];
   }
   if (lower.includes('team') || lower.includes('colleague') || lower.includes('who is')) {
-    return ['📅 Show team calendar', '📋 My leave balance', '📆 Book time off'];
+    return [t('chatWidget.showTeamCalendar'), t('chatWidget.myLeaveBalance'), t('chatWidget.bookTimeOff')];
   }
   if (lower.includes('cancel') || lower.includes('delete') || lower.includes('removed')) {
-    return ['📋 Show my pending leaves', '📆 Book new leave', '📊 My leave balance'];
+    return [t('chatWidget.showPendingLeaves'), t('chatWidget.bookNewLeave'), t('chatWidget.myLeaveBalance')];
   }
   if (userRole === 'admin' || userRole === 'supervisor') {
     return [
@@ -187,7 +195,7 @@ function getFollowUpSuggestions(
       t('chatWidget.pendingApprovals'),
     ];
   }
-  return ['📆 Book a vacation', t('chatWidget.showBalance'), '👥 Who is on leave this week?'];
+  return [t('chatWidget.bookVacation'), t('chatWidget.showBalance'), t('chatWidget.whoOnLeaveThisWeek')];
 }
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
