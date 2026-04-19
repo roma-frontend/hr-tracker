@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 export function useMonthlyAttendanceStats(month?: string) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const currentMonth = month || new Date().toISOString().slice(0, 7);
 
@@ -15,7 +16,7 @@ export function useMonthlyAttendanceStats(month?: string) {
       url.searchParams.set('month', currentMonth);
 
       const res = await fetch(url.toString());
-      if (!res.ok) throw new Error('Failed to fetch monthly attendance stats');
+      if (!res.ok) throw new Error(t('attendance.fetchMonthlyFailed'));
       return res.json();
     },
     enabled: !!user?.id,
@@ -23,6 +24,7 @@ export function useMonthlyAttendanceStats(month?: string) {
 }
 
 export function useAttendanceHistory(limit: number = 10) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
 
   return useQuery({
@@ -33,7 +35,7 @@ export function useAttendanceHistory(limit: number = 10) {
       url.searchParams.set('limit', String(limit));
 
       const res = await fetch(url.toString());
-      if (!res.ok) throw new Error('Failed to fetch attendance history');
+      if (!res.ok) throw new Error(t('attendance.fetchHistoryFailed'));
       return res.json();
     },
     enabled: !!user?.id,
@@ -41,6 +43,7 @@ export function useAttendanceHistory(limit: number = 10) {
 }
 
 export function useEmployeeAttendanceHistory(userId: string | undefined, month?: string) {
+  const { t } = useTranslation();
   const currentMonth = month || new Date().toISOString().slice(0, 7);
 
   return useQuery({
@@ -52,7 +55,7 @@ export function useEmployeeAttendanceHistory(userId: string | undefined, month?:
       url.searchParams.set('month', currentMonth);
 
       const res = await fetch(url.toString());
-      if (!res.ok) throw new Error('Failed to fetch employee attendance history');
+      if (!res.ok) throw new Error(t('attendance.fetchEmployeeHistoryFailed'));
       return res.json();
     },
     enabled: !!userId,
@@ -60,6 +63,7 @@ export function useEmployeeAttendanceHistory(userId: string | undefined, month?:
 }
 
 export function useTodayStatus(enabled = true) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
 
   return useQuery({
@@ -69,7 +73,7 @@ export function useTodayStatus(enabled = true) {
       url.searchParams.set('type', 'today-status');
 
       const res = await fetch(url.toString());
-      if (!res.ok) throw new Error('Failed to fetch today status');
+      if (!res.ok) throw new Error(t('attendance.fetchTodayStatusFailed'));
       const json = await res.json();
       return json.data;
     },
@@ -78,9 +82,9 @@ export function useTodayStatus(enabled = true) {
 }
 
 export function useCheckIn() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async () => {
@@ -92,7 +96,7 @@ export function useCheckIn() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to check in');
+        throw new Error(error.error || t('attendance.checkInFailed'));
       }
 
       return res.json();
@@ -101,18 +105,18 @@ export function useCheckIn() {
       queryClient.invalidateQueries({ queryKey: ['attendance', 'today-status', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['attendance', 'today-summary', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['attendance', 'today-all', user?.id] });
-      toast.success(t('attendance.checkedIn', 'Checked in successfully'));
+      toast.success(t('attendance.checkedIn', t('attendance.checkedIn')));
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('attendance.checkInFailed', 'Failed to check in'));
+      toast.error(error.message || t('attendance.checkInFailed', t('attendance.checkInFailed')));
     },
   });
 }
 
 export function useCheckOut() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async () => {
@@ -124,7 +128,7 @@ export function useCheckOut() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to check out');
+        throw new Error(error.error || t('attendance.checkOutFailed'));
       }
 
       return res.json();
@@ -133,10 +137,10 @@ export function useCheckOut() {
       queryClient.invalidateQueries({ queryKey: ['attendance', 'today-status', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['attendance', 'today-summary', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['attendance', 'today-all', user?.id] });
-      toast.success(t('attendance.checkedOut', 'Checked out successfully'));
+      toast.success(t('attendance.checkedOut', t('attendance.checkedOut')));
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('attendance.checkOutFailed', 'Failed to check out'));
+      toast.error(error.message || t('attendance.checkOutFailed', t('attendance.checkOutFailed')));
     },
   });
 }

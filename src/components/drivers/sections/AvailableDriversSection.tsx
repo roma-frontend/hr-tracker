@@ -170,8 +170,8 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
                 <SelectValue placeholder={t('driver.sortBy', 'Sort by')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="rating">{t('driver.byRating', 'By Rating')}</SelectItem>
-                <SelectItem value="name">{t('driver.byName', 'By Name')}</SelectItem>
+                <SelectItem value="rating">{t('driver.byRating', t('drivers.byRating'))}</SelectItem>
+                <SelectItem value="name">{t('driver.byName', t('drivers.byName'))}</SelectItem>
                 <SelectItem value="availability">
                   {t('driver.byAvailability', 'By Availability')}
                 </SelectItem>

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/supabase/database.types';
 import {
   createOrganization,
   listAllOrganizations,
@@ -29,18 +31,49 @@ import {
   cancelSubscription,
 } from '@/lib/server/subscriptions';
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const projectRef = 'fprtklhpngvtpuozypdj';
+
+function createServiceClient() {
+  return createSupabaseClient<Database>(supabaseUrl, supabaseServiceKey);
+}
+
+async function getUserFromRequest(request: NextRequest) {
+  const accessTokenCookie = request.cookies.get(`sb-${projectRef}-access-token`)?.value;
+  
+  if (!accessTokenCookie) {
+    return { user: null, error: 'No access token cookie' };
+  }
+
+  // The cookie should contain the raw access token string
+  const accessToken = accessTokenCookie;
+
+  const supabase = createSupabaseClient<Database>(supabaseUrl, supabaseServiceKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });
+
+  const { data, error } = await supabase.auth.getUser();
+  return { user: data.user, error: error?.message };
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { user, error: authError } = await getUserFromRequest(request);
+    console.log('[org/GET] Auth result:', { user: user?.id, error: authError });
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: userProfile } = await supabase
+    // Use service role to bypass RLS for profile lookup
+    const supabaseService = createServiceClient();
+
+    const { data: userProfile } = await supabaseService
       .from('users')
       .select('*')
       .eq('id', user.id)
@@ -161,16 +194,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { user, error: authError } = await getUserFromRequest(request);
+    console.log('[org/POST] Auth result:', { user: user?.id, error: authError });
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: userProfile } = await supabase
+    // Use service role to bypass RLS for profile lookup
+    const supabaseService = createServiceClient();
+
+    const { data: userProfile } = await supabaseService
       .from('users')
       .select('*')
       .eq('id', user.id)

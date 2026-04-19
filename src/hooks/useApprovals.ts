@@ -18,13 +18,14 @@ export interface PendingUser {
 }
 
 export function usePendingApprovals(enabled = true) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
 
   return useQuery({
     queryKey: ['approvals', 'pending', user?.id],
     queryFn: async () => {
       const res = await fetch('/api/users?action=get-pending-approvals');
-      if (!res.ok) throw new Error('Failed to fetch pending approvals');
+      if (!res.ok) throw new Error(t('approvals.fetchPendingFailed'));
       const json = await res.json();
       return json.data as PendingUser[];
     },
@@ -33,6 +34,7 @@ export function usePendingApprovals(enabled = true) {
 }
 
 export function useApproveUser() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const { t } = useTranslation();
@@ -47,7 +49,7 @@ export function useApproveUser() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to approve user');
+        throw new Error(error.error || t('approvals.approveFailed'));
       }
 
       return res.json();
@@ -57,12 +59,13 @@ export function useApproveUser() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('approvals.approveFailed', 'Failed to approve user'));
+      toast.error(error.message || t('approvals.approveFailed', t('approvals.approveFailed')));
     },
   });
 }
 
 export function useRejectUser() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const { t } = useTranslation();
@@ -77,7 +80,7 @@ export function useRejectUser() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to reject user');
+        throw new Error(error.error || t('approvals.rejectFailed'));
       }
 
       return res.json();
@@ -87,7 +90,7 @@ export function useRejectUser() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('approvals.rejectFailed', 'Failed to reject user'));
+      toast.error(error.message || t('approvals.rejectFailed', t('approvals.rejectFailed')));
     },
   });
 }

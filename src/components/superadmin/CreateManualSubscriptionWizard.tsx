@@ -113,7 +113,7 @@ export function CreateManualSubscriptionWizard({
             field="customPrice"
             label={t('subscriptionWizard.steps.pricing.priceLabel')}
             type="number"
-            placeholder="0"
+            placeholder={t('common.zero')}
             description={t('subscriptionWizard.steps.pricing.priceDescription')}
           />
           <TextareaStep

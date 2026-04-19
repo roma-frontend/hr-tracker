@@ -22,9 +22,30 @@ export async function GET(request: Request) {
 
         const { data: existingProfile } = await supabaseService
           .from('users')
-          .select('*')
+          .select(`
+            id,
+            name,
+            email,
+            role,
+            employee_type,
+            department,
+            position,
+            phone,
+            avatar_url,
+            presence_status,
+            is_active,
+            is_approved,
+            "organizationId",
+            organizations (
+              id,
+              name,
+              slug
+            )
+          `)
           .eq('id', user.id)
-          .single();
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
         if (!existingProfile) {
           const { data: org } = await supabaseService
@@ -33,24 +54,44 @@ export async function GET(request: Request) {
             .limit(1)
             .single();
 
+          const userName = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+
           if (org) {
             await supabaseService.from('users').insert({
               id: user.id,
-              organizationid: org.id,
-              name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-              email: user.email,
-              password_hash: '',
-              role: 'superadmin',
+              "organizationId": org.id,
+              name: userName,
+              email: user.email?.toLowerCase(),
+              password_hash: 'oauth',
+              role: 'employee',
+              employee_type: 'staff',
               is_active: true,
-              is_approved: true,
-              presence_status: 'available',
+              is_approved: false,
+              travel_allowance: 0,
+              paid_leave_balance: 20,
+              sick_leave_balance: 10,
+              family_leave_balance: 5,
+              created_at: Math.floor(Date.now() / 1000),
+              updated_at: Math.floor(Date.now() / 1000),
+            });
+          } else {
+            await supabaseService.from('users').insert({
+              id: user.id,
+              name: userName,
+              email: user.email?.toLowerCase(),
+              password_hash: 'oauth',
+              role: 'employee',
+              employee_type: 'staff',
+              is_active: true,
+              is_approved: false,
+              travel_allowance: 0,
+              paid_leave_balance: 20,
+              sick_leave_balance: 10,
+              family_leave_balance: 5,
+              created_at: Math.floor(Date.now() / 1000),
+              updated_at: Math.floor(Date.now() / 1000),
             });
           }
-        } else if (existingProfile.role !== 'superadmin') {
-          await supabaseService
-            .from('users')
-            .update({ role: 'superadmin' })
-            .eq('id', user.id);
         }
       }
 

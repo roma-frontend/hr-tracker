@@ -169,7 +169,7 @@ export function ServiceBroadcastsManager({
                     size="sm"
                     className="gap-2"
                     disabled
-                    title="Редактирование объявлений вскоре"
+                    title={t('broadcast.editComingSoon')}
                     style={{
                       backgroundColor: 'var(--background-subtle)',
                       borderColor: 'var(--border)',

@@ -261,17 +261,17 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
     status: 'in_progress' | 'completed' | 'cancelled',
   ) => {
     if (!userId) {
-      toast.error(t('driverCalendar.userIdRequired', 'User ID is required'));
+      toast.error(t('validation.userIdRequired'));
       return;
     }
     try {
       await updateTripStatus.mutateAsync({ scheduleId, status });
       toast.success(
-        t('driverCalendar.tripStatusUpdated', 'Trip status updated to {{status}}', { status }),
+        t('toasts.tripStatusUpdated', { status }),
       );
     } catch (error: any) {
       toast.error(
-        error.message || t('driverCalendar.failedToUpdateStatus', 'Failed to update status'),
+        error.message || t('errors.failedToUpdateStatus'),
       );
     }
   };

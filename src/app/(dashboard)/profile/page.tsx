@@ -260,7 +260,7 @@ export default function ProfilePage() {
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   className="pl-10"
-                  placeholder="john@example.com"
+                  placeholder={t('placeholders.johnExampleEmail')}
                 />
               </div>
             </div>
@@ -275,7 +275,7 @@ export default function ProfilePage() {
                   onChange={(e) => setPhone(e.target.value)}
                   type="tel"
                   className="pl-10"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder={t('placeholders.phoneFormat')}
                 />
               </div>
             </div>

@@ -96,7 +96,7 @@ export default function PendingApprovalClient() {
                 </CardTitle>
               </div>
               <CardDescription className="text-red-600 dark:text-red-300">
-                {rejectedRequest.rejectionReason || t('onboarding.noReason', 'No reason provided')}
+                {rejectedRequest.rejectionReason || t('onboarding.noReason', t('onboarding.noReason'))}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -161,7 +161,7 @@ export default function PendingApprovalClient() {
           <Card>
             <CardContent className="py-8 text-center">
               <p className="text-gray-500">
-                {t('onboarding.noRequest', 'No pending requests found')}
+                {t('onboarding.noRequest', t('onboarding.noPendingRequests'))}
               </p>
               <Button onClick={handleSignOut} className="mt-4">
                 {t('onboarding.backToLogin', 'Back to Login')}

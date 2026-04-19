@@ -113,9 +113,9 @@ export function SupervisorRatingForm({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>{t('rating.performanceRating', 'Performance Rating')}</CardTitle>
+            <CardTitle>{t('rating.performanceRating', t('performance.ratingTitle'))}</CardTitle>
             <CardDescription>
-              {t('rating.evaluatePerformance', "Evaluate {{name}}'s performance", { name: employeeName })}
+              {t('rating.evaluatePerformance', "{t('performance.evaluate', { name: employeeName })}", { name: employeeName })}
             </CardDescription>
           </div>
           {onClose && (
@@ -176,7 +176,7 @@ export function SupervisorRatingForm({
         <div className="p-4 rounded-lg bg-(--input)">
           <div className="flex items-center justify-between">
             <span className="font-medium text-black/70 dark:text-white/70">
-              {t('rating.overallAverage', 'Overall Average')}
+              {t('rating.overallAverage', t('performance.overallAverage'))}
             </span>
             <div className="flex items-center gap-2">
               <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
@@ -218,7 +218,7 @@ export function SupervisorRatingForm({
           <div className="space-y-2">
             <Label>{t('labels.generalComments')}</Label>
             <Textarea
-              placeholder={t('placeholders.additionalFeedbackNotes', 'Any additional feedback or notes...')}
+              placeholder={t('placeholders.additionalFeedbackNotes', t('performance.additionalFeedbackPlaceholder'))}
               value={generalComments}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setGeneralComments(e.target.value)
@@ -231,7 +231,7 @@ export function SupervisorRatingForm({
         <div className="flex gap-3 pt-4">
           {onClose && (
             <Button variant="outline" onClick={onClose} className="flex-1">
-              {t('common.cancel', 'Cancel')}
+              {t('common.cancel', t('common.cancel'))}
             </Button>
           )}
           <Button
@@ -245,7 +245,7 @@ export function SupervisorRatingForm({
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                {t('rating.submitRating', 'Submit Rating')}
+                {t('rating.submitRating', t('performance.submitRating'))}
               </>
             )}
           </Button>

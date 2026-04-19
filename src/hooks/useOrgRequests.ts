@@ -23,6 +23,7 @@ export interface OrganizationRequest {
 }
 
 export function useOrgRequests(statusFilter?: string, enabled = true) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const status = statusFilter || 'all';
 
@@ -34,7 +35,7 @@ export function useOrgRequests(statusFilter?: string, enabled = true) {
         params.set('status', status);
       }
       const res = await fetch(`/api/org-requests?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch organization requests');
+      if (!res.ok) throw new Error(t('orgRequests.fetchFailed'));
       const json = await res.json();
       return json.data as OrganizationRequest[];
     },
@@ -56,17 +57,17 @@ export function useApproveOrgRequest() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to approve request');
+        throw new Error(error.error || t('orgRequests.approveFailed'));
       }
 
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org-requests'] });
-      toast.success(t('orgRequests.approved', 'Organization request approved'));
+      toast.success(t('orgRequests.approved', t('orgRequests.approved')));
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('orgRequests.approveFailed', 'Failed to approve request'));
+      toast.error(error.message || t('orgRequests.approveFailed', t('orgRequests.approveFailed')));
     },
   });
 }
@@ -85,17 +86,17 @@ export function useRejectOrgRequest() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to reject request');
+        throw new Error(error.error || t('orgRequests.rejectFailed'));
       }
 
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org-requests'] });
-      toast.success(t('orgRequests.rejected', 'Organization request rejected'));
+      toast.success(t('orgRequests.rejected', t('orgRequests.rejected')));
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('orgRequests.rejectFailed', 'Failed to reject request'));
+      toast.error(error.message || t('orgRequests.rejectFailed', t('orgRequests.rejectFailed')));
     },
   });
 }

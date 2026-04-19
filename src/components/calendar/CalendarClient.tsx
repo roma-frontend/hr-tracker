@@ -678,7 +678,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 style={{ background: DRIVER_EVENT_COLOR }}
               />
               <span className="text-xs text-(--text-muted)">
-                {t('driver.driverBookings', 'Driver Bookings')}
+                {t('driver.driverBookings', t('calendar.driverBookings'))}
               </span>
             </div>
             {googleConnected && (
@@ -687,7 +687,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   className="w-3 h-3 rounded-full shrink-0"
                   style={{ background: GOOGLE_EVENT_COLOR }}
                 />
-                <span className="text-xs text-(--text-muted)">Google Calendar</span>
+                <span className="text-xs text-(--text-muted)">{t('calendar.googleCalendar')}</span>
               </div>
             )}
             <div className="flex items-center gap-2">
@@ -826,7 +826,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                             </p>
                           )}
                           {!evt.startTime && (
-                            <p className="text-[10px] text-(--text-muted) mt-0.5">All day</p>
+                            <p className="text-[10px] text-(--text-muted) mt-0.5">{t('calendar.allDay')}</p>
                           )}
                           {evt.location && (
                             <p className="text-[10px] text-(--text-muted) mt-0.5 truncate">
@@ -839,7 +839,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                               style={{ background: GOOGLE_EVENT_COLOR }}
                             />
                             <span className="text-[10px] text-(--text-secondary)">
-                              Google Calendar
+                              {t('calendar.googleCalendar')}
                             </span>
                           </div>
                         </div>
@@ -888,7 +888,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                               style={{ background: DRIVER_EVENT_COLOR }}
                             />
                             <span className="text-[10px] text-(--text-secondary)">
-                              {t('driver.driverBookings', 'Driver Booking')}
+                              {t('driver.driverBookings', t('calendar.driverBooking'))}
                             </span>
                           </div>
                         </div>
@@ -1101,10 +1101,10 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 text-center">
                       <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.from', 'From')}
+                        {t('driver.from', t('calendar.from'))}
                       </p>
                       <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {safeFormat(selectedLeave.startDate, 'd')}
+                        {safeFormat(selectedLeave.startDate, t('calendar.day'))}
                       </p>
                       <p className="text-xs text-(--text-muted) mt-0.5">
                         {safeFormat(selectedLeave.startDate, 'MMM')}
@@ -1122,7 +1122,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                           {selectedLeave.days}
                         </span>
                         <span className="text-[10px] text-(--text-muted) uppercase">
-                          {t('common.daysShort', 'd')}
+                          {t('common.daysShort', t('calendar.day'))}
                         </span>
                       </div>
                       <div className="w-8 h-px bg-(--border) mt-1.5" />
@@ -1130,10 +1130,10 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
                     <div className="flex-1 text-center">
                       <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.to', 'To')}
+                        {t('driver.to', t('calendar.to'))}
                       </p>
                       <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {safeFormat(selectedLeave.endDate, 'd')}
+                        {safeFormat(selectedLeave.endDate, t('calendar.day'))}
                       </p>
                       <p className="text-xs text-(--text-muted) mt-0.5">
                         {safeFormat(selectedLeave.endDate, 'MMM')}
@@ -1149,7 +1149,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('leave.reason', 'Reason')}
+                          {t('leave.reason', t('calendar.reason'))}
                         </span>
                         <div className="flex-1 h-px bg-(--border)" />
                       </div>
@@ -1163,7 +1163,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                        {t('common.status', 'Status')}
+                        {t('common.status', t('common.status'))}
                       </span>
                       <div className="flex-1 h-px bg-(--border)" />
                     </div>
@@ -1311,10 +1311,10 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 text-center">
                       <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.from', 'From')}
+                        {t('driver.from', t('calendar.from'))}
                       </p>
                       <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {format(new Date(selectedDriverEvent.startTime), 'd')}
+                        {format(new Date(selectedDriverEvent.startTime), t('calendar.day'))}
                       </p>
                       <p className="text-xs text-(--text-muted) mt-1">
                         {format(new Date(selectedDriverEvent.startTime), 'MMM')}
@@ -1338,10 +1338,10 @@ export const CalendarClient = React.memo(function CalendarClient() {
 
                     <div className="flex-1 text-center">
                       <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.to', 'To')}
+                        {t('driver.to', t('calendar.to'))}
                       </p>
                       <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {format(new Date(selectedDriverEvent.endTime), 'd')}
+                        {format(new Date(selectedDriverEvent.endTime), t('calendar.day'))}
                       </p>
                       <p className="text-xs text-(--text-muted) mt-1">
                         {format(new Date(selectedDriverEvent.endTime), 'MMM')}
@@ -1357,7 +1357,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.route', 'Route')}
+                          {t('driver.route', t('calendar.route'))}
                         </span>
                         <div className="flex-1 h-px bg-(--border)" />
                       </div>
@@ -1366,7 +1366,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                           <div className="w-3 h-3 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
                           <div>
                             <p className="text-[10px] text-(--text-muted) uppercase tracking-wider">
-                              {t('driver.pickup', 'Pickup')}
+                              {t('driver.pickup', t('calendar.pickup'))}
                             </p>
                             <p className="text-sm font-semibold text-(--text-primary) mt-0.5">
                               {selectedDriverEvent.tripInfo.from}
@@ -1378,7 +1378,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                           <div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 shrink-0" />
                           <div>
                             <p className="text-[10px] text-(--text-muted) uppercase tracking-wider">
-                              {t('driver.dropoff', 'Dropoff')}
+                              {t('driver.dropoff', t('calendar.dropoff'))}
                             </p>
                             <p className="text-sm font-semibold text-(--text-primary) mt-0.5">
                               {selectedDriverEvent.tripInfo.to}
@@ -1394,7 +1394,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.purpose', 'Purpose')}
+                          {t('driver.purpose', t('calendar.purpose'))}
                         </span>
                         <div className="flex-1 h-px bg-(--border)" />
                       </div>
@@ -1409,7 +1409,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.passengers', 'Passengers')}
+                          {t('driver.passengers', t('calendar.passengers'))}
                         </span>
                         <div className="flex-1 h-px bg-(--border)" />
                       </div>
@@ -1427,7 +1427,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.notes', 'Notes')}
+                          {t('driver.notes', t('calendar.notes'))}
                         </span>
                         <div className="flex-1 h-px bg-(--border)" />
                       </div>
@@ -1442,7 +1442,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.vehicle', 'Vehicle')}
+                          {t('driver.vehicle', t('calendar.vehicle'))}
                         </span>
                         <div className="flex-1 h-px bg-(--border)" />
                       </div>
@@ -1464,7 +1464,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                        {t('common.status', 'Status')}
+                        {t('common.status', t('common.status'))}
                       </span>
                       <div className="flex-1 h-px bg-(--border)" />
                     </div>
@@ -1549,7 +1549,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <h3 className="text-lg font-bold text-(--text-primary) truncate">
                       {selectedGoogleEvent.title}
                     </h3>
-                    <p className="text-xs text-(--text-muted)">Google Calendar</p>
+                    <p className="text-xs text-(--text-muted)">{t('calendar.googleCalendar')}</p>
                   </div>
                 </div>
                 <button
@@ -1583,7 +1583,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
                       <span className="text-sm text-(--text-secondary)">
-                        {t('calendar.allDay', 'All day')}
+                        {t('calendar.allDay', t('calendar.allDay'))}
                       </span>
                     </div>
                   )}
@@ -1616,7 +1616,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   <div className="space-y-1.5">
                     <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider flex items-center gap-1.5">
                       <span className="text-sm">📍</span>
-                      {t('calendar.location', 'Location')}
+                      {t('calendar.location', t('calendar.location'))}
                     </span>
                     <p className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border)">
                       {selectedGoogleEvent.location}
@@ -1628,7 +1628,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 {selectedGoogleEvent.description && (
                   <div className="space-y-1.5">
                     <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                      {t('calendar.description', 'Description')}
+                      {t('calendar.description', t('common.description'))}
                     </span>
                     <div className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border) leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
                       {selectedGoogleEvent.description}
@@ -1645,7 +1645,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-sm font-medium text-(--text-primary) hover:bg-(--background) hover:border-(--primary)/50 transition-all"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    {t('calendar.openInGoogle', 'Open in Google Calendar')}
+                    {t('calendar.openInGoogle', t('calendar.openInGoogle'))}
                   </a>
                 )}
               </div>

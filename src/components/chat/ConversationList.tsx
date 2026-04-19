@@ -297,7 +297,7 @@ export function ConversationList({
                 {f === 'all' && t('chat.filterAll', 'All')}
                 {f === 'chat' && t('chat.filterChat', 'Chat')}
                 {f === 'unread' &&
-                  `${t('chat.filterUnread', 'Unread')} ${unreadCount > 0 ? `(${unreadCount})` : ''}`}
+                  `${t('chat.filterUnread', t('chat.unread'))} ${unreadCount > 0 ? `(${unreadCount})` : ''}`}
                 {f === 'groups' && t('chat.filterGroups', 'Groups')}
                 {f === 'pinned' && t('chat.filterPinned', 'Pinned')}
                 {f === 'archived' && t('chat.filterArchived', 'Archived')}

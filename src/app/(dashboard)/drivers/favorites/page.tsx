@@ -183,8 +183,8 @@ export default function FavoritesPage() {
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-1">
             {searchQuery
-              ? t('driver.favorites.noResults', 'No drivers found')
-              : t('driver.favorites.empty', 'No favorites yet')}
+              ? t('driver.favorites.noResults', t('drivers.noDriversFound'))
+              : t('driver.favorites.empty', t('drivers.noFavorites'))}
           </h3>
           <p className="text-sm text-muted-foreground max-w-sm mb-6">
             {searchQuery

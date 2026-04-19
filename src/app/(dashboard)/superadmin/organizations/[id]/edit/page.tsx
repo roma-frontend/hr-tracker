@@ -79,7 +79,7 @@ export default function EditOrganizationPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">{t('ui.accessDenied')}</h1>
-          <p className="text-muted-foreground">You can only manage your own organization</p>
+          <p className="text-muted-foreground">{t('superadmin.onlyOwnOrg')}</p>
           <p className="text-xs text-muted-foreground mt-2">
             {t('common.superadmin')}: {user.role} | {t('common.organization')}: {user.organizationId} | {t('common.requestedBy')}: {orgId}
           </p>

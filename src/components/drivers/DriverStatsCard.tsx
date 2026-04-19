@@ -175,7 +175,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
             <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-(--warning)" />
           </CardHeader>
           <CardContent className="px-3 py-2 pb-3">
-            <div className="text-xl sm:text-2xl font-bold text-(--text-primary)">N/A</div>
+            <div className="text-xl sm:text-2xl font-bold text-(--text-primary)">{t('drivers.na')}</div>
             <p className="text-[10px] sm:text-xs text-(--text-muted) mt-1">
               Distance tracking coming soon
             </p>

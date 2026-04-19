@@ -133,7 +133,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         }}
         role="dialog"
         aria-modal="true"
-        aria-label="Mobile navigation menu"
+        aria-label={t('landing.mobileMenuAriaLabel')}
       >
         {/* Gradient Header */}
         <div
@@ -159,7 +159,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                     'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
                 }}
               >
-                <span className="text-white font-bold text-sm">HR</span>
+                <span className="text-white font-bold text-sm">{t('landing.hr')}</span>
               </div>
               <div>
                 <h2
@@ -183,7 +183,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               backgroundColor: 'var(--landing-card-bg)',
               color: 'var(--landing-text-primary)',
             }}
-            aria-label="Close menu"
+            aria-label={t('landing.closeMenuAriaLabel')}
           >
             <X size={20} />
           </button>
@@ -192,7 +192,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         {/* Navigation Links */}
         <nav
           className="flex-1 overflow-y-auto px-4 py-6 custom-scrollbar"
-          aria-label="Mobile navigation"
+          aria-label={t('landing.mobileNavigationAriaLabel')}
           style={{ minHeight: 0 }}
         >
           <div className="space-y-2">

@@ -91,7 +91,7 @@ export function useChatConversations(userId: string, organizationId?: string) {
         organizationId: organizationId || '',
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch conversations');
+      if (!res.ok) throw new Error(t('chat.fetchConversationsFailed'));
       const json = await res.json();
       return json.data as ChatConversation[];
     },
@@ -111,7 +111,7 @@ export function useChatMessages(conversationId: string, userId: string, limit = 
         limit: limit.toString(),
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch messages');
+      if (!res.ok) throw new Error(t('chat.fetchMessagesFailed'));
       const json = await res.json();
       return json.data as ChatMessage[];
     },
@@ -129,7 +129,7 @@ export function useChatMembers(conversationId: string) {
         conversationId,
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch members');
+      if (!res.ok) throw new Error(t('chat.fetchMembersFailed'));
       const json = await res.json();
       return json.data as ChatMember[];
     },
@@ -138,6 +138,7 @@ export function useChatMembers(conversationId: string) {
 }
 
 export function usePinnedMessages(conversationId: string) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: ['chat-pinned-messages', conversationId],
     queryFn: async () => {
@@ -146,7 +147,7 @@ export function usePinnedMessages(conversationId: string) {
         conversationId,
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch pinned messages');
+      if (!res.ok) throw new Error(t('chat.fetchPinnedFailed'));
       const json = await res.json();
       return json.data as ChatMessage[];
     },
@@ -155,6 +156,7 @@ export function usePinnedMessages(conversationId: string) {
 }
 
 export function useTypingUsers(conversationId: string, currentUserId: string) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: ['chat-typing', conversationId, currentUserId],
     queryFn: async () => {
@@ -164,7 +166,7 @@ export function useTypingUsers(conversationId: string, currentUserId: string) {
         currentUserId,
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch typing users');
+      if (!res.ok) throw new Error(t('chat.fetchTypingFailed'));
       const json = await res.json();
       return json.data as ChatUser[];
     },
@@ -174,6 +176,7 @@ export function useTypingUsers(conversationId: string, currentUserId: string) {
 }
 
 export function useThreadReplies(parentMessageId: string) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: ['chat-thread-replies', parentMessageId],
     queryFn: async () => {
@@ -182,7 +185,7 @@ export function useThreadReplies(parentMessageId: string) {
         parentMessageId,
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch thread replies');
+      if (!res.ok) throw new Error(t('chat.fetchThreadFailed'));
       const json = await res.json();
       return json.data as ChatMessage[];
     },
@@ -191,6 +194,7 @@ export function useThreadReplies(parentMessageId: string) {
 }
 
 export function useSearchMessages(conversationId: string, userId: string, query: string) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: ['chat-search-messages', conversationId, query],
     queryFn: async () => {
@@ -201,7 +205,7 @@ export function useSearchMessages(conversationId: string, userId: string, query:
         query,
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to search messages');
+      if (!res.ok) throw new Error(t('chat.searchFailed'));
       const json = await res.json();
       return json.data as ChatMessage[];
     },
@@ -233,7 +237,7 @@ export function useSendMessage() {
       });
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Failed to send message');
+        throw new Error(error.error || t('chat.sendMessageFailed'));
       }
       return res.json();
     },
@@ -242,13 +246,14 @@ export function useSendMessage() {
       queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
     },
     onError: (error) => {
-      toast.error(t('chat.sendMessageFailed', 'Failed to send message'));
+      toast.error(t('chat.sendMessageFailed', t('chat.sendMessageFailed')));
       console.error('Send message error:', error);
     },
   });
 }
 
 export function useMarkAsRead() {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (data: { conversationId: string; userId: string }) => {
       const res = await fetch('/api/chat?action=mark-as-read', {
@@ -256,13 +261,14 @@ export function useMarkAsRead() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to mark as read');
+      if (!res.ok) throw new Error(t('chat.markReadFailed'));
       return res.json();
     },
   });
 }
 
 export function useSetTyping() {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (data: {
       conversationId: string;
@@ -275,13 +281,14 @@ export function useSetTyping() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to set typing');
+      if (!res.ok) throw new Error(t('chat.setTypingFailed'));
       return res.json();
     },
   });
 }
 
 export function useToggleReaction() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -291,7 +298,7 @@ export function useToggleReaction() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to toggle reaction');
+      if (!res.ok) throw new Error(t('chat.reactionFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -301,6 +308,7 @@ export function useToggleReaction() {
 }
 
 export function useEditMessage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -310,7 +318,7 @@ export function useEditMessage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to edit message');
+      if (!res.ok) throw new Error(t('chat.editMessageFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -320,6 +328,7 @@ export function useEditMessage() {
 }
 
 export function useDeleteMessage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -329,7 +338,7 @@ export function useDeleteMessage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to delete message');
+      if (!res.ok) throw new Error(t('chat.deleteMessageFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -339,6 +348,7 @@ export function useDeleteMessage() {
 }
 
 export function useDeleteMessageForMe() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -348,7 +358,7 @@ export function useDeleteMessageForMe() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to delete message for me');
+      if (!res.ok) throw new Error(t('chat.deleteForMeFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -358,6 +368,7 @@ export function useDeleteMessageForMe() {
 }
 
 export function usePinMessage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -368,7 +379,7 @@ export function usePinMessage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to pin/unpin message');
+      if (!res.ok) throw new Error(t('chat.pinFailed'));
       return res.json();
     },
     onSuccess: () => {
@@ -379,6 +390,7 @@ export function usePinMessage() {
 }
 
 export function useVotePoll() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -388,7 +400,7 @@ export function useVotePoll() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to vote in poll');
+      if (!res.ok) throw new Error(t('chat.voteFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -398,6 +410,7 @@ export function useVotePoll() {
 }
 
 export function useClosePoll() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -407,7 +420,7 @@ export function useClosePoll() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to close poll');
+      if (!res.ok) throw new Error(t('chat.closePollFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -417,6 +430,7 @@ export function useClosePoll() {
 }
 
 export function useSendThreadReply() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -432,7 +446,7 @@ export function useSendThreadReply() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to send thread reply');
+      if (!res.ok) throw new Error(t('chat.threadReplyFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -443,6 +457,7 @@ export function useSendThreadReply() {
 }
 
 export function useScheduleMessage() {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (data: {
       conversationId: string;
@@ -456,7 +471,7 @@ export function useScheduleMessage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to schedule message');
+      if (!res.ok) throw new Error(t('chat.scheduleFailed'));
       return res.json();
     },
   });
@@ -472,7 +487,7 @@ export function useTogglePinConversation() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to toggle pin');
+      if (!res.ok) throw new Error(t('chat.togglePinFailed'));
       return res.json();
     },
     onSuccess: () => {
@@ -482,6 +497,7 @@ export function useTogglePinConversation() {
 }
 
 export function useDeleteConversation() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -491,7 +507,7 @@ export function useDeleteConversation() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to delete conversation');
+      if (!res.ok) throw new Error(t('chat.deleteConversationFailed'));
       return res.json();
     },
     onSuccess: () => {
@@ -501,6 +517,7 @@ export function useDeleteConversation() {
 }
 
 export function useRestoreConversation() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -510,7 +527,7 @@ export function useRestoreConversation() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to restore conversation');
+      if (!res.ok) throw new Error(t('chat.restoreConversationFailed'));
       return res.json();
     },
     onSuccess: () => {
@@ -520,6 +537,7 @@ export function useRestoreConversation() {
 }
 
 export function useToggleArchive() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -529,7 +547,7 @@ export function useToggleArchive() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to toggle archive');
+      if (!res.ok) throw new Error(t('chat.toggleArchiveFailed'));
       return res.json();
     },
     onSuccess: () => {
@@ -539,6 +557,7 @@ export function useToggleArchive() {
 }
 
 export function useToggleMute() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -548,7 +567,7 @@ export function useToggleMute() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to toggle mute');
+      if (!res.ok) throw new Error(t('chat.toggleMuteFailed'));
       return res.json();
     },
     onSuccess: () => {
@@ -558,6 +577,7 @@ export function useToggleMute() {
 }
 
 export function useCreateGroup() {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (data: {
       organizationId: string;
@@ -570,7 +590,7 @@ export function useCreateGroup() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to create group');
+      if (!res.ok) throw new Error(t('chat.createGroupFailed'));
       return res.json();
     },
   });
@@ -588,13 +608,14 @@ export function useGetOrCreateDM() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to get or create DM');
+      if (!res.ok) throw new Error(t('chat.getOrCreateDmFailed'));
       return res.json();
     },
   });
 }
 
 export function useTotalUnreadCount(userId?: string, organizationId?: string) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: ['chat-total-unread', userId, organizationId],
     queryFn: async () => {
@@ -604,7 +625,7 @@ export function useTotalUnreadCount(userId?: string, organizationId?: string) {
         organizationId: organizationId || '',
       });
       const res = await fetch(`/api/chat?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch total unread count');
+      if (!res.ok) throw new Error(t('chat.fetchUnreadFailed'));
       const json = await res.json();
       return json.data?.totalUnread || 0;
     },

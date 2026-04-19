@@ -63,12 +63,12 @@ export function RatingDialog({
         rating,
         comment: comment || undefined,
       });
-      toast.success(t('driver.ratingSubmitted', 'Rating submitted! Thank you.'));
+      toast.success(t('toasts.ratingSubmitted'));
       onOpenChange(false);
       setRating(5);
       setComment('');
     } catch (error: any) {
-      toast.error(error.message || t('driver.failedToSubmitRating', 'Failed to submit rating'));
+      toast.error(error.message || t('errors.failedToSubmitRating'));
     } finally {
       setSubmitting(false);
     }
@@ -124,7 +124,7 @@ export function RatingDialog({
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t('cancel', 'Cancel')}
+              {t('cancel', t('common.cancel'))}
             </Button>
             <Button onClick={handleSubmit} disabled={submitting}>
               {submitting ? '...' : t('driver.submitRating', 'Submit Rating')}
@@ -215,7 +215,7 @@ export function ReassignDriverDialog({
           </Select>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t('cancel', 'Cancel')}
+              {t('cancel', t('common.cancel'))}
             </Button>
             <Button onClick={handleReassign} disabled={submitting || !selectedNewDriver}>
               {submitting ? '...' : t('driver.reassign', 'Send Request')}

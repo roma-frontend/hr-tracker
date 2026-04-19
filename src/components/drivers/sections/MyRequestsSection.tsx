@@ -216,7 +216,7 @@ const RecurringTripItem = memo(function RecurringTripItem({
             </p>
             <Badge variant={trip.isActive ? 'default' : 'secondary'} className="text-xs">
               {trip.isActive
-                ? t('driver.status.active', 'Active')
+                ? t('driver.status.active', t('drivers.active'))
                 : t('driver.status.inactive', 'Inactive')}
             </Badge>
           </div>
@@ -281,15 +281,15 @@ export const MyRequestsSection = memo(function MyRequestsSection({
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="active" className="gap-2 flex items-center justify-center">
               <Clock className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">{t('driver.active', 'Active')}</span>
+              <span className="hidden sm:inline">{t('driver.active', t('drivers.active'))}</span>
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2 flex items-center justify-center">
               <History className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">{t('driver.history', 'History')}</span>
+              <span className="hidden sm:inline">{t('driver.history', t('drivers.history'))}</span>
             </TabsTrigger>
             <TabsTrigger value="recurring" className="gap-2 flex items-center justify-center">
               <Repeat className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">{t('driver.recurring', 'Recurring')}</span>
+              <span className="hidden sm:inline">{t('driver.recurring', t('drivers.recurring'))}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -308,7 +308,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
             ) : (
               <div className="text-center py-8 text-(--text-muted)">
                 <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>{t('driver.noActiveRequests', 'No active requests')}</p>
+                <p>{t('driver.noActiveRequests', t('drivers.noActiveRequests'))}</p>
               </div>
             )}
           </TabsContent>
@@ -326,7 +326,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
             ) : (
               <div className="text-center py-8 text-(--text-muted)">
                 <History className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>{t('driver.noHistory', 'No history yet')}</p>
+                <p>{t('driver.noHistory', t('drivers.noHistory'))}</p>
               </div>
             )}
           </TabsContent>
@@ -344,7 +344,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
             ) : (
               <div className="text-center py-8 text-(--text-muted)">
                 <Repeat className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>{t('driver.noRecurringTrips', 'No recurring trips')}</p>
+                <p>{t('driver.noRecurringTrips', t('drivers.noRecurring'))}</p>
               </div>
             )}
           </TabsContent>

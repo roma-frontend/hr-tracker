@@ -492,7 +492,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                   <input
                     value={form.phone}
                     onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                    placeholder="+374 XX XXX XXX"
+                    placeholder={t('placeholders.phoneArmenia')}
                     className="w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all"
                     style={{
                       background: 'var(--input)',
@@ -629,7 +629,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                     <input
                       value={form.position}
                       onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
-                      placeholder="e.g. Engineer"
+                      placeholder={t('placeholders.engineerPosition')}
                       className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all ${
                         errors.position ? 'border-red-500' : ''
                       }`}

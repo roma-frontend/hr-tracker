@@ -36,40 +36,28 @@ interface MessageTemplatesProps {
 const TEMPLATES = [
   {
     id: 'arrived',
-    labelKey: 'messageTemplates.arrived.label',
-    messageKey: 'messageTemplates.arrived.message',
-    label: "I've Arrived",
-    message: "Hi! I've arrived at the pickup location. Ready when you are! 🚗",
+    labelKey: 'messageTemplates.arrivedLabel',
+    messageKey: 'messageTemplates.arrivedMessage',
   },
   {
     id: 'delayed',
-    labelKey: 'messageTemplates.delayed.label',
-    messageKey: 'messageTemplates.delayed.message',
-    label: 'Running Late',
-    message:
-      "Hi! I'm running about 5 minutes late due to traffic. Apologies for the inconvenience! ⏰",
+    labelKey: 'messageTemplates.runningLateLabel',
+    messageKey: 'messageTemplates.runningLateMessage',
   },
   {
     id: 'waiting',
-    labelKey: 'messageTemplates.waiting.label',
-    messageKey: 'messageTemplates.waiting.message',
-    label: 'Waiting',
-    message: "Hi! I'm waiting at the pickup point. Please let me know when you're ready. 👋",
+    labelKey: 'messageTemplates.waitingLabel',
+    messageKey: 'messageTemplates.waitingMessage',
   },
   {
     id: 'confirming',
-    labelKey: 'messageTemplates.confirming.label',
-    messageKey: 'messageTemplates.confirming.message',
-    label: 'Confirming Trip',
-    message: 'Hi! Confirming your trip from {from} to {to}. See you soon! ✅',
+    labelKey: 'messageTemplates.confirmingTripLabel',
+    messageKey: 'messageTemplates.confirmingTripMessage',
   },
   {
     id: 'completed',
-    labelKey: 'messageTemplates.completed.label',
-    messageKey: 'messageTemplates.completed.message',
-    label: 'Trip Completed',
-    message:
-      'Thank you for choosing our service! Hope you had a great trip. Please rate your experience. ⭐',
+    labelKey: 'messageTemplates.tripCompletedLabel',
+    messageKey: 'messageTemplates.tripCompletedMessage',
   },
 ];
 
@@ -106,7 +94,7 @@ export function MessageTemplates({
     }
 
     navigator.clipboard.writeText(message);
-    toast.success(t('messageTemplates.copiedToClipboard', 'Message copied to clipboard'));
+    toast.success(t('errors.messageCopied'));
     setOpen(false);
   };
 
@@ -114,7 +102,7 @@ export function MessageTemplates({
     if (passengerPhone) {
       window.open(`tel:${passengerPhone}`);
     } else {
-      toast.error(t('messageTemplates.noPhoneAvailable', 'No phone number available'));
+      toast.error(t('errors.noPhoneAvailable'));
     }
   }, [passengerPhone]);
 
@@ -126,9 +114,9 @@ export function MessageTemplates({
             <Button variant="outline" size="sm" className="text-xs sm:text-sm">
               <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">
-                {t('messageTemplates.quickMessages', 'Quick Messages')}
+                {t('messageTemplates.quickMessages')}
               </span>
-              <span className="sm:hidden">{t('messageTemplates.message', 'Message')}</span>
+              <span className="sm:hidden">{t('messageTemplates.message')}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-72">
@@ -156,7 +144,7 @@ export function MessageTemplates({
           onClick={handleCall}
         >
           <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-          {t('messageTemplates.call', 'Call')}
+          {t('messageTemplates.call')}
         </Button>
       </div>
     </>

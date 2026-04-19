@@ -88,7 +88,7 @@ export default function StripeDashboardPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch data');
+        throw new Error(result.error || t('errors.failedToFetchData'));
       }
 
       setData(result);

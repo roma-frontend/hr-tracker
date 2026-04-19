@@ -82,12 +82,12 @@ export function DashboardCustomization({ user, onSettingsChange }: DashboardCust
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="dashboard">📊 Dashboard</SelectItem>
-                <SelectItem value="tasks">✓ Tasks</SelectItem>
-                <SelectItem value="calendar">📅 Calendar</SelectItem>
-                <SelectItem value="leaves">📋 Leaves</SelectItem>
-                <SelectItem value="attendance">⏰ Attendance</SelectItem>
-                <SelectItem value="analytics">📈 Analytics</SelectItem>
+                <SelectItem value="dashboard">{t('settings.dashboard')}</SelectItem>
+                <SelectItem value="tasks">{t('settings.tasks')}</SelectItem>
+                <SelectItem value="calendar">{t('settings.calendar')}</SelectItem>
+                <SelectItem value="leaves">{t('settings.leaves')}</SelectItem>
+                <SelectItem value="attendance">{t('settings.attendance')}</SelectItem>
+                <SelectItem value="analytics">{t('settings.analytics')}</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-(--text-muted)">

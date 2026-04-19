@@ -57,7 +57,7 @@ export default function ScrollToTop() {
       onMouseLeave={(e) => {
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(37, 99, 235, 0.3)';
       }}
-      aria-label="Scroll to top"
+      aria-label={t('landing.scrollToTopAriaLabel')}
     >
       <ArrowUp
         size={22}

@@ -328,7 +328,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
       <div className="space-y-6">
         <div>
           <h3 className="text-lg font-semibold text-(--text-primary)">
-            {t('faceRegistration.title', 'Register Face ID')}
+            {t('faceRegistration.title', t('faceRegistration.title'))}
           </h3>
           <p className="text-sm text-[var(--text-tertiary)] mt-1">
             {t(
@@ -344,7 +344,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
               <Camera className="w-16 h-16 mb-4" />
               <p className="text-sm">
-                {t('faceRegistration.cameraNotActive', 'Camera not active')}
+                {t('faceRegistration.cameraNotActive', t('faceRegistration.cameraNotActive'))}
               </p>
             </div>
           )}
@@ -364,12 +364,12 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
                 {faceDetected ? (
                   <div className="flex items-center gap-2 bg-green-500/90 text-white px-3 py-1.5 rounded-full text-sm">
                     <CheckCircle className="w-4 h-4" />
-                    {t('faceRegistration.faceDetected', 'Face Detected')}
+                    {t('faceRegistration.faceDetected', t('faceRegistration.faceDetected'))}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 bg-red-500/90 text-white px-3 py-1.5 rounded-full text-sm">
                     <XCircle className="w-4 h-4" />
-                    {t('faceRegistration.noFace', 'No Face')}
+                    {t('faceRegistration.noFace', t('faceRegistration.noFace'))}
                   </div>
                 )}
               </div>
@@ -382,7 +382,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
           )}
 
           {capturedImage && (
-            <img src={capturedImage} alt="Captured face" className="w-full h-full object-cover" />
+            <img src={capturedImage} alt={t('auth.faceDetected')} className="w-full h-full object-cover" />
           )}
         </div>
 
@@ -390,7 +390,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
         {!isWebcamActive && !capturedImage && cameras.length > 1 && (
           <div className="space-y-2">
             <label className="text-sm font-medium text-(--text-secondary)">
-              {t('faceRegistration.selectCamera', 'Select Camera:')}
+              {t('faceRegistration.selectCamera', t('faceRegistration.selectCamera'))}
             </label>
             <select
               value={selectedCamera}
@@ -411,7 +411,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
           {!isWebcamActive && !capturedImage && (
             <Button onClick={startWebcam} className="flex-1">
               <Camera className="w-4 h-4 mr-2" />
-              {t('faceRegistration.startCamera', 'Start Camera')}
+              {t('faceRegistration.startCamera', t('faceRegistration.startCamera'))}
             </Button>
           )}
 
@@ -425,24 +425,24 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
                 {isProcessing ? (
                   <>
                     <ShieldLoader size="xs" variant="inline" className="mr-2" />
-                    {t('common.processing', 'Processing...')}
+                    {t('common.processing', t('faceRegistration.processing'))}
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    {t('faceRegistration.captureAndRegister', 'Capture & Register')}
+                    {t('faceRegistration.captureAndRegister', t('faceRegistration.captureAndRegister'))}
                   </>
                 )}
               </Button>
               <Button onClick={stopWebcam} variant="outline">
-                {t('common.cancel', 'Cancel')}
+                {t('common.cancel', t('common.cancel'))}
               </Button>
             </>
           )}
 
           {capturedImage && onCancel && (
             <Button onClick={onCancel} variant="outline" className="flex-1">
-              {t('common.close', 'Close')}
+              {t('common.close', t('common.close'))}
             </Button>
           )}
         </div>
@@ -450,14 +450,14 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
         {/* Instructions */}
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
           <h4 className="text-sm font-medium text-blue-400 mb-2">
-            {t('faceRegistration.instructions', 'Instructions:')}
+            {t('faceRegistration.instructions', t('faceRegistration.instructions'))}
           </h4>
           <ul className="text-xs text-(--text-secondary) space-y-1 list-disc list-inside">
-            <li>{t('faceRegistration.positionFace', 'Position your face within the frame')}</li>
-            <li>{t('faceRegistration.goodLighting', 'Ensure good lighting on your face')}</li>
-            <li>{t('faceRegistration.lookAtCamera', 'Look directly at the camera')}</li>
-            <li>{t('faceRegistration.removeGlasses', 'Remove glasses or hats if possible')}</li>
-            <li>{t('faceRegistration.waitForDetection', 'Wait for "Face Detected" indicator')}</li>
+            <li>{t('faceRegistration.positionFace', t('faceRegistration.instruction1'))}</li>
+            <li>{t('faceRegistration.goodLighting', t('faceRegistration.instruction2'))}</li>
+            <li>{t('faceRegistration.lookAtCamera', t('faceRegistration.instruction3'))}</li>
+            <li>{t('faceRegistration.removeGlasses', t('faceRegistration.instruction4'))}</li>
+            <li>{t('faceRegistration.waitForDetection', 'Wait for "{t('faceRegistration.faceDetected')}" indicator')}</li>
           </ul>
         </div>
       </div>

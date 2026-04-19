@@ -118,7 +118,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
     return (
       <Card>
         <CardContent className="p-8 text-center">
-          <p className="text-(--text-muted)">Loading employee profile...</p>
+          <p className="text-(--text-muted)">{t('employees.loadingProfile')}</p>
         </CardContent>
       </Card>
     );
@@ -382,7 +382,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             )}
             {latestRating.generalComments && (
               <div className="mt-2 p-3 rounded-lg bg-(--background-subtle)">
-                <p className="text-xs font-semibold text-(--text-muted) mb-1">💬 Comments</p>
+                <p className="text-xs font-semibold text-(--text-muted) mb-1">💬 {t('employees.comments')}</p>
                 <p className="text-sm text-(--text-primary)">{latestRating.generalComments}</p>
               </div>
             )}
@@ -599,7 +599,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                   onClick={() => setShowDeleteDialog(false)}
                   disabled={deleting}
                 >
-                  {t('common.cancel', 'Cancel')}
+                  {t('common.cancel', t('common.cancel'))}
                 </Button>
                 <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                   {deleting ? (
@@ -610,7 +610,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                   ) : (
                     <>
                       <Trash2 className="w-4 h-4 mr-2" />
-                      {t('common.delete', 'Delete')}
+                      {t('common.delete', t('common.delete'))}
                     </>
                   )}
                 </Button>

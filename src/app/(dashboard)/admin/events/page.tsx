@@ -203,7 +203,7 @@ export default function CompanyEventsPage() {
         },
       );
     } else {
-      toast.info(t('events.noConflicts', 'No conflicts found'), {
+      toast.info(t('events.noConflicts', t('events.noConflicts')), {
         description: t('events.allClear', 'All leave requests are clear'),
         duration: 3000,
       });
@@ -423,8 +423,8 @@ export default function CompanyEventsPage() {
                 <Calendar className="w-12 h-12 mx-auto mb-3 opacity-20" />
                 <p className="font-medium">
                   {searchQuery || filterPriority !== 'all' || filterType !== 'all'
-                    ? t('events.noResults', 'No events match your filters')
-                    : t('events.noEvents', 'No events created yet')}
+                    ? t('events.noResults', t('events.noMatchFilters'))
+                    : t('events.noEvents', t('events.noEventsCreated'))}
                 </p>
                 <Button variant="link" onClick={() => setShowCreateModal(true)}>
                   {t('events.createFirst', 'Create your first event')}
@@ -494,7 +494,7 @@ export default function CompanyEventsPage() {
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
-                                {event.description || t('events.noDescription', 'No description')}
+                                {event.description || t('events.noDescription', t('events.noDescription'))}
                               </p>
                               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1">
@@ -633,7 +633,7 @@ export default function CompanyEventsPage() {
                 <Input
                   defaultValue={selectedEvent.name}
                   id="edit-name"
-                  placeholder="Event name..."
+                  placeholder={t('placeholders.eventName')}
                 />
               </div>
               <div>
@@ -644,7 +644,7 @@ export default function CompanyEventsPage() {
                   defaultValue={selectedEvent.description || ''}
                   id="edit-description"
                   rows={3}
-                  placeholder="Brief description..."
+                  placeholder={t('placeholders.briefDescription')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">

@@ -94,7 +94,7 @@ export default function AdminPage() {
               type="email"
               value={assignEmail}
               onChange={(e) => setAssignEmail(e.target.value)}
-              placeholder="user@example.com"
+              placeholder={t('placeholders.userExampleEmail')}
               className="w-full px-3 py-2 rounded-lg border border-(--border) bg-(--background-subtle) text-(--text-primary) outline-none focus:ring-2 focus:ring-[var(--primary)]"
             />
             <p className="text-xs text-(--text-muted)">{t('admin.emailDescription')}</p>

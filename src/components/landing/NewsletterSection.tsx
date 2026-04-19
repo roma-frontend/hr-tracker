@@ -122,7 +122,7 @@ export default function NewsletterSection() {
                   color: 'var(--landing-text-primary)',
                 }}
                 disabled={isLoading}
-                aria-label={t('ariaLabels.emailAddress')}
+                aria-label={t('landing.newsletterSignupAriaLabel')}
                 aria-invalid={hasError ? 'true' : 'false'}
                 aria-describedby={hasError ? errorId : undefined}
               />

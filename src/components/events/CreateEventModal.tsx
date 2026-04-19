@@ -176,17 +176,17 @@ export function CreateEventModal({
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Annual IT Conference 2025"
+                placeholder={t('placeholders.eventTitle')}
                 required
               />
             </div>
 
             <div>
-              <Label>Description</Label>
+              <Label>{t('events.description')}</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Brief description of the event..."
+                placeholder={t('placeholders.eventDescription')}
                 rows={3}
               />
             </div>
@@ -220,7 +220,7 @@ export function CreateEventModal({
 
           {/* Event Type */}
           <div>
-            <Label>Event Type</Label>
+            <Label>{t('events.eventType')}</Label>
             <Select value={eventType} onValueChange={(v) => setEventType(v as any)}>
               <SelectTrigger>
                 <SelectValue />
@@ -237,7 +237,7 @@ export function CreateEventModal({
 
           {/* Priority */}
           <div>
-            <Label>Priority Level</Label>
+            <Label>{t('events.priorityLevel')}</Label>
             <div className="grid grid-cols-3 gap-2 mt-2">
               {PRIORITY_LEVELS.map((level) => (
                 <button
@@ -287,7 +287,7 @@ export function CreateEventModal({
 
           {/* Notifications */}
           <div>
-            <Label>Notify Days Before</Label>
+            <Label>{t('events.notifyDaysBefore')}</Label>
             <div className="flex items-center gap-2 mt-2">
               <Input
                 type="number"
@@ -297,7 +297,7 @@ export function CreateEventModal({
                 onChange={(e) => setNotifyDaysBefore(parseInt(e.target.value) || 3)}
                 className="w-24"
               />
-              <span className="text-sm text-muted-foreground">days before the event</span>
+              <span className="text-sm text-muted-foreground">{t('events.daysBefore')}</span>
             </div>
           </div>
 
@@ -307,7 +307,7 @@ export function CreateEventModal({
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-semibold text-blue-900">Event Summary</p>
+                  <p className="font-semibold text-blue-900">{t('events.eventSummary')}</p>
                   <p className="text-blue-700 mt-1">
                     <strong>{name}</strong> will require attendance from:{' '}
                     <span className="font-medium">{requiredDepartments.join(', ')}</span>

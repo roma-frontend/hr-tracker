@@ -119,8 +119,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Redirect to onboarding if user needs it (and not already on onboarding page)
+  // Superadmin doesn't need an organization
   useEffect(() => {
-    if (hydrated && user && !user.organizationId && !isOnboardingPage && !redirectedRef.current) {
+    if (hydrated && user && user.role !== 'superadmin' && !user.organizationId && !isOnboardingPage && !redirectedRef.current) {
       redirectedRef.current = true;
       window.location.href = '/onboarding/select-organization';
     }
@@ -142,7 +143,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   // Block dashboard access if user has no organization (onboarding required)
-  if (user && !user.organizationId && !isOnboardingPage) {
+  // Superadmin doesn't need an organization
+  if (user && user.role !== 'superadmin' && !user.organizationId && !isOnboardingPage) {
     return (
       <div className="flex h-screen items-center justify-center bg-(--background)">
         <ShieldLoader size="lg" />

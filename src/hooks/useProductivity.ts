@@ -42,6 +42,7 @@ export interface PomodoroSession {
 }
 
 export function useTodayStats(userId: string, enabled = true) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: PRODUCTIVITY_QUERY_KEYS.todayStats(userId),
     queryFn: async () => {
@@ -50,7 +51,7 @@ export function useTodayStats(userId: string, enabled = true) {
         userId,
       });
       const res = await fetch(`/api/productivity?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch today stats');
+      if (!res.ok) throw new Error(t('productivity.fetchTodayStatsFailed'));
       const json = await res.json();
       return json.data as TodayStats;
     },
@@ -60,6 +61,7 @@ export function useTodayStats(userId: string, enabled = true) {
 }
 
 export function useTodayTasks(userId: string, enabled = true) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: PRODUCTIVITY_QUERY_KEYS.todayTasks(userId),
     queryFn: async () => {
@@ -68,7 +70,7 @@ export function useTodayTasks(userId: string, enabled = true) {
         userId,
       });
       const res = await fetch(`/api/productivity?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch today tasks');
+      if (!res.ok) throw new Error(t('productivity.fetchTodayTasksFailed'));
       const json = await res.json();
       return json.data as any[];
     },
@@ -78,6 +80,7 @@ export function useTodayTasks(userId: string, enabled = true) {
 }
 
 export function useTeamPresence(organizationId: string, enabled = true) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: PRODUCTIVITY_QUERY_KEYS.teamPresence(organizationId),
     queryFn: async () => {
@@ -86,7 +89,7 @@ export function useTeamPresence(organizationId: string, enabled = true) {
         organizationId,
       });
       const res = await fetch(`/api/productivity?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch team presence');
+      if (!res.ok) throw new Error(t('productivity.fetchTeamPresenceFailed'));
       const json = await res.json();
       return json.data as TeamMember[];
     },
@@ -96,6 +99,7 @@ export function useTeamPresence(organizationId: string, enabled = true) {
 }
 
 export function useActivePomodoro(userId: string, enabled = true) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: PRODUCTIVITY_QUERY_KEYS.activePomodoro(userId),
     queryFn: async () => {
@@ -104,7 +108,7 @@ export function useActivePomodoro(userId: string, enabled = true) {
         userId,
       });
       const res = await fetch(`/api/productivity?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch active pomodoro');
+      if (!res.ok) throw new Error(t('productivity.fetchActivePomodoroFailed'));
       const json = await res.json();
       return json.data as PomodoroSession | null;
     },
@@ -124,17 +128,17 @@ export function useStartPomodoro() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to start pomodoro session');
+      if (!res.ok) throw new Error(t('productivity.startPomodoroFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: PRODUCTIVITY_QUERY_KEYS.activePomodoro(variables.userId),
       });
-      toast.success(t('productivity.pomodoroStarted', 'Pomodoro session started'));
+      toast.success(t('productivity.pomodoroStarted', t('productivity.pomodoroStarted')));
     },
     onError: (error) => {
-      toast.error(t('productivity.pomodoroStartFailed', 'Failed to start pomodoro session'));
+      toast.error(t('productivity.pomodoroStartFailed', t('productivity.startPomodoroFailed')));
       console.error('Start pomodoro error:', error);
     },
   });
@@ -151,15 +155,15 @@ export function useCompletePomodoro() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to complete pomodoro session');
+      if (!res.ok) throw new Error(t('productivity.completePomodoroFailed'));
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productivity'] });
-      toast.success(t('productivity.pomodoroCompleted', 'Pomodoro session completed'));
+      toast.success(t('productivity.pomodoroCompleted', t('productivity.pomodoroCompleted')));
     },
     onError: (error) => {
-      toast.error(t('productivity.pomodoroCompleteFailed', 'Failed to complete pomodoro session'));
+      toast.error(t('productivity.pomodoroCompleteFailed', t('productivity.completePomodoroFailed')));
       console.error('Complete pomodoro error:', error);
     },
   });
@@ -176,15 +180,15 @@ export function useInterruptPomodoro() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to interrupt pomodoro session');
+      if (!res.ok) throw new Error(t('productivity.interruptPomodoroFailed'));
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productivity'] });
-      toast.info(t('productivity.pomodoroInterrupted', 'Pomodoro session interrupted'));
+      toast.info(t('productivity.pomodoroInterrupted', t('productivity.pomodoroInterrupted')));
     },
     onError: (error) => {
-      toast.error(t('productivity.pomodoroInterruptFailed', 'Failed to interrupt pomodoro session'));
+      toast.error(t('productivity.pomodoroInterruptFailed', t('productivity.interruptPomodoroFailed')));
       console.error('Interrupt pomodoro error:', error);
     },
   });
@@ -201,7 +205,7 @@ export function useUpdatePresence() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to update presence');
+      if (!res.ok) throw new Error(t('productivity.updatePresenceFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -229,7 +233,7 @@ export function useUpdateTaskStatus() {
           status: data.status,
         }),
       });
-      if (!res.ok) throw new Error('Failed to update task status');
+      if (!res.ok) throw new Error(t('productivity.updateTaskStatusFailed'));
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -238,7 +242,7 @@ export function useUpdateTaskStatus() {
       queryClient.invalidateQueries({ queryKey: ['org-tasks'] });
     },
     onError: (error) => {
-      toast.error(t('productivity.updateTaskStatusFailed', 'Failed to update task status'));
+      toast.error(t('productivity.updateTaskStatusFailed', t('productivity.updateTaskStatusFailed')));
       console.error('Update task status error:', error);
     },
   });

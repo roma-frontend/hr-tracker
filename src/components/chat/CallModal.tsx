@@ -673,7 +673,7 @@ export function CallModal({
           <button
             onClick={handleEnd}
             className="w-14 h-14 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 transition-all hover:scale-110 shadow-lg shadow-red-500/30"
-            title="End call"
+            title={t('call.endCall')}
           >
             <PhoneOff className="w-6 h-6 text-white" />
           </button>

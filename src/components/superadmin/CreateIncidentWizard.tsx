@@ -115,7 +115,7 @@ export function CreateIncidentWizard({ userId, onComplete, onCancel }: CreateInc
               field="affectedUsers"
               label={t('incidentWizard.steps.impact.affectedUsersLabel')}
               type="number"
-              placeholder="0"
+              placeholder={t('common.zero')}
             />
             <TextInputStep
               stepData={{}}
@@ -123,7 +123,7 @@ export function CreateIncidentWizard({ userId, onComplete, onCancel }: CreateInc
               field="affectedOrgs"
               label={t('incidentWizard.steps.impact.affectedOrgsLabel')}
               type="number"
-              placeholder="0"
+              placeholder={t('common.zero')}
             />
           </div>
           <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">

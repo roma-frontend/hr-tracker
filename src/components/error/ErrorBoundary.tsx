@@ -1,9 +1,10 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Bug, Home, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   children: ReactNode;
@@ -85,9 +86,9 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8 text-destructive" />
               </div>
-              <CardTitle className="text-xl">Oops! Something went wrong</CardTitle>
+              <CardTitle className="text-xl">{t('errors.oopsSomethingWentWrong')}</CardTitle>
               <CardDescription className="text-muted-foreground">
-                We&apos;re sorry for the inconvenience. Please try refreshing the page.
+                {t('errors.inconvenienceMessage')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -96,7 +97,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <div className="p-4 rounded-lg bg-muted/50 text-xs font-mono text-muted-foreground overflow-auto max-h-48">
                   <div className="flex items-start gap-2 mb-2">
                     <Bug className="w-4 h-4 mt-0.5 shrink-0" />
-                    <span className="font-semibold">Error Details:</span>
+                    <span className="font-semibold">{t('errors.errorDetails')}</span>
                   </div>
                   <p>{this.state.error.toString()}</p>
                   {this.state.errorInfo && (
@@ -115,18 +116,18 @@ export class ErrorBoundary extends Component<Props, State> {
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button onClick={this.handleReload} className="flex-1">
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Reload Page
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  {t('errors.reloadPage')}
                 </Button>
                 <Button onClick={this.handleGoHome} variant="outline" className="flex-1">
                   <Home className="w-4 h-4 mr-2" />
-                  Go Home
+                  {t('errors.goHome')}
                 </Button>
               </div>
 
               {/* Support link */}
               <div className="text-center text-xs text-muted-foreground">
-                <p>If the problem persists, please contact support.</p>
+                <p>{t('errors.contactSupportIfPersists')}</p>
               </div>
             </CardContent>
           </Card>
@@ -146,7 +147,9 @@ interface ErrorBoundaryFallbackProps {
   resetError?: () => void;
 }
 
-export function ErrorBoundaryFallback({ error, resetError }: ErrorBoundaryFallbackProps) {
+function ErrorBoundaryFallbackContent({ error, resetError }: ErrorBoundaryFallbackProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-[400px] flex items-center justify-center p-6">
       <Card className="max-w-md w-full border-destructive/50 shadow-lg">
@@ -154,20 +157,24 @@ export function ErrorBoundaryFallback({ error, resetError }: ErrorBoundaryFallba
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-8 h-8 text-destructive" />
           </div>
-          <CardTitle className="text-xl">Something went wrong</CardTitle>
+          <CardTitle className="text-xl">{t('errors.somethingWentWrong')}</CardTitle>
           <CardDescription className="text-muted-foreground">
-            {error?.message || 'An unexpected error occurred'}
+            {error?.message || t('errors.defaultError')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={resetError} className="w-full">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Try Again
+            {t('errors.tryAgain')}
           </Button>
         </CardContent>
       </Card>
     </div>
   );
+}
+
+export function ErrorBoundaryFallback({ error, resetError }: ErrorBoundaryFallbackProps) {
+  return <ErrorBoundaryFallbackContent error={error} resetError={resetError} />;
 }
 
 export default ErrorBoundary;

@@ -1037,7 +1037,7 @@ export function ChatWidget() {
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-(--text-primary)">Shield HR AI</p>
+                <p className="text-sm font-semibold text-(--text-primary)">{t('chat.shieldHrAi')}</p>
                 <p className="text-[10px] text-(--text-muted)">
                   {t('chatWidget.subtitle', { defaultValue: 'Your intelligent HR assistant' })}
                 </p>
@@ -1049,8 +1049,8 @@ export function ChatWidget() {
                     setIsOpen(false);
                   }}
                   className="p-1.5 rounded-lg hover:bg-(--background-subtle) transition-colors"
-                  aria-label="Open full screen chat"
-                  title="Открыть на весь экран"
+                  aria-label={t('chat.openFullScreenChat')}
+                  title={t('chat.openFullScreenChat')}
                 >
                   <Maximize2 className="w-4 h-4 text-(--text-muted)" />
                 </button>

@@ -56,7 +56,7 @@ export default function HeroCTA() {
           variant="cta"
           size="2xl"
           className="gap-3"
-          aria-label={t('landing.goToDashboard')}
+          aria-label={t('landing.goToDashboardAriaLabel')}
         >
           <ActivityIcon />
           {t('landing.goToDashboard')}
@@ -67,7 +67,7 @@ export default function HeroCTA() {
           variant="ctaSecondary"
           size="2xl"
           className="gap-3"
-          aria-label={t('landing.viewAnalytics')}
+          aria-label={t('landing.viewAnalyticsAriaLabel')}
         >
           <BarChartIcon />
           {t('landing.viewAnalytics')}
@@ -79,7 +79,7 @@ export default function HeroCTA() {
   return (
     <div className="hero-fade-2 flex flex-col sm:flex-row items-center gap-4 mb-16">
       <Link href="/register">
-        <Button variant="cta" size="2xl" className="gap-3" aria-label={t('landing.getStartedFree')}>
+        <Button variant="cta" size="2xl" className="gap-3"           aria-label={t('landing.getStartedFreeAriaLabel')}>
           <ZapIcon />
           {t('landing.getStartedFree')}
           <ArrowRightIcon />
@@ -90,7 +90,7 @@ export default function HeroCTA() {
           variant="ctaSecondary"
           size="2xl"
           className="gap-3"
-          aria-label={t('landing.signIn')}
+          aria-label={t('landing.signInAriaLabel')}
         >
           {t('landing.signIn')}
           <ArrowRightIcon />

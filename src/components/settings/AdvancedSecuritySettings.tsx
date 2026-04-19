@@ -305,7 +305,7 @@ export function AdvancedSecuritySettings() {
                 </p>
                 <div className="flex justify-center mb-4">
                   <div className="bg-white p-3 rounded-lg">
-                    <img src={qrCodeUrl} alt="TOTP QR Code" width={200} height={200} />
+                    <img src={qrCodeUrl} alt={t('accessibility.totpQrCode')} width={200} height={200} />
                   </div>
                 </div>
                 <div className="text-center">
@@ -375,7 +375,7 @@ export function AdvancedSecuritySettings() {
                     setVerifyCode(e.target.value.replace(/\D/g, ''));
                     setVerifyError(null);
                   }}
-                  placeholder="000000"
+                  placeholder={t('placeholders.totpCode')}
                   className="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 px-4 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{
                     background: 'var(--surface-hover)',

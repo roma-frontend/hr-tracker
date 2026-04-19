@@ -81,7 +81,7 @@ export default function Navbar() {
           scrolled ? 'py-2 md:py-3 shadow-lg' : 'py-3 md:py-4'
         }`}
         role="navigation"
-        aria-label="Main navigation"
+        aria-label={t('landing.navigationAriaLabel')}
         style={{
           borderColor: 'var(--landing-card-border)',
           willChange: 'padding, box-shadow',
@@ -113,8 +113,7 @@ export default function Navbar() {
           <span
             className="font-bold text-lg tracking-tight transition-colors"
             style={{ color: 'var(--landing-text-primary)' }}
-          >
-            HR<span style={{ color: 'var(--primary)' }}>Office</span>
+          >{t('landing.hr')}<span style={{ color: 'var(--primary)' }}>{t('landing.office')}</span>
           </span>
         </Link>
 
@@ -132,7 +131,7 @@ export default function Navbar() {
               style={{ color: 'var(--landing-navbar-text)' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--landing-navbar-text-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--landing-navbar-text)')}
-              aria-label={`Navigate to ${item.name}`}
+
             >
               {item.name}
             </a>
@@ -158,7 +157,7 @@ export default function Navbar() {
                 background: 'var(--landing-card-bg)',
                 border: '1px solid var(--landing-card-border)',
               }}
-              aria-label={theme === 'dark' ? t('landingExtra.switchToLight') : t('landingExtra.switchToDark')}
+              aria-label={theme === 'dark' ? t('accessibility.switchToLight') : t('accessibility.switchToDark')}
             >
               {theme === 'dark' ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -232,7 +231,7 @@ export default function Navbar() {
                 onClick={() => setIsMobileMenuOpen(true)}
                 className="lg:hidden w-10 h-10 rounded-xl transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 style={{ backgroundColor: 'var(--landing-card-bg)', border: '1px solid var(--landing-card-border)' }}
-                aria-label="Open mobile menu"
+                aria-label={t('landing.openMobileMenuAriaLabel')}
               >
                 <svg className="w-6 h-6" style={{ color: 'var(--landing-text-primary)' }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path d="M4 6h16M4 12h16M4 18h16"/>

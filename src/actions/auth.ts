@@ -329,28 +329,13 @@ export async function loginAction(
 
 export async function logoutAction() {
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('hr-session-token')?.value;
-  const jwt = cookieStore.get('hr-auth-token')?.value;
-
-  if (jwt) {
-    try {
-      const payload = await verifyJWT(jwt);
-      if (payload && sessionToken) {
-        // Update session expiry in Supabase
-        const supabase = await createClient();
-        await supabase
-          .from('users')
-          .update({
-            session_token: null,
-            session_expiry: null,
-          })
-          .eq('id', payload.userId);
-      }
-    } catch {}
-  }
 
   cookieStore.delete('hr-auth-token');
   cookieStore.delete('hr-session-token');
+
+  // Also clear Supabase auth cookies if they exist
+  cookieStore.delete(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('.')[0].split('//')[1]}-access-token`);
+  cookieStore.delete(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('.')[0].split('//')[1]}-refresh-token`);
 }
 
 export async function getSessionAction() {

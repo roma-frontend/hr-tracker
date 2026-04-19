@@ -101,7 +101,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
                     {faceData.faceImageUrl ? (
                       <img
                         src={faceData.faceImageUrl}
-                        alt="Registered face"
+                        alt={t('accessibility.registeredFace')}
                         className="w-full h-full object-cover"
                       />
                     ) : (

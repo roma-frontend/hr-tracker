@@ -48,9 +48,9 @@ export function DriverShiftControls({
         organizationId,
         startTime: Date.now(),
       });
-      toast.success(t('driver.shift.started', 'Shift started successfully!'));
+      toast.success(t('toasts.shiftStarted'));
     } catch (error: any) {
-      toast.error(error.message || t('driver.shift.startFailed', 'Failed to start shift'));
+      toast.error(error.message || t('errors.failedToStartShift'));
     }
   };
 
@@ -61,12 +61,12 @@ export function DriverShiftControls({
         shiftId: currentShift.id,
         endTime: new Date().toISOString(),
       });
-      toast.success(t('driver.shift.ended', 'Shift ended successfully!'));
+      toast.success(t('toasts.shiftEnded'));
       setShowEndShiftModal(false);
       setBreakTime('');
       setDriverNotes('');
     } catch (error: any) {
-      toast.error(error.message || t('driver.shift.endFailed', 'Failed to end shift'));
+      toast.error(error.message || t('errors.failedToEndShift'));
     }
   };
 
@@ -174,7 +174,7 @@ export function DriverShiftControls({
             <div className="text-center py-6 sm:py-8">
               <Clock className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-(--text-muted) opacity-50" />
               <p className="text-xs sm:text-sm text-(--text-muted) mb-4">
-                {t('driver.shift.notStarted', 'No active shift')}
+                {t('driver.shift.notStarted', t('drivers.noActiveShift'))}
               </p>
               <Button onClick={handleStartShift} size="sm" className="text-xs">
                 <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
@@ -214,7 +214,7 @@ export function DriverShiftControls({
                 max="480"
                 value={breakTime}
                 onChange={(e) => setBreakTime(e.target.value)}
-                placeholder="0"
+                placeholder={t('placeholders.zero')}
                 className="mt-2 text-sm"
               />
             </div>
@@ -237,7 +237,7 @@ export function DriverShiftControls({
               onClick={() => setShowEndShiftModal(false)}
               className="w-full sm:w-auto text-xs"
             >
-              {t('common.cancel', 'Cancel')}
+              {t('common.cancel', t('common.cancel'))}
             </Button>
             <Button
               variant="destructive"

@@ -153,7 +153,7 @@ export default function JoinRequestsPage() {
           <Card>
             <CardContent className="py-8 text-center text-gray-500">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>{t('joinRequests.noRequests', 'No join requests yet')}</p>
+              <p>{t('joinRequests.noRequests', t('joinRequests.noRequests'))}</p>
             </CardContent>
           </Card>
         ) : (

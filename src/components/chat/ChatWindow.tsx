@@ -774,7 +774,7 @@ export const ChatWindow = React.memo(function ChatWindow({
           style={{ background: 'var(--background)' }}
         >
           {dedupedMessages === undefined ? (
-            <div className="space-y-3 animate-pulse" role="status" aria-label="Loading messages">
+            <div className="space-y-3 animate-pulse" role="status" aria-label={t('chat.loadingMessages')}>
               {[...Array(5)].map((_: any, i: any) => (
                 <div key={i} className={cn('flex gap-3', i % 2 === 0 ? '' : 'flex-row-reverse')}>
                   <div className="w-8 h-8 rounded-full bg-white/5 shrink-0" />
@@ -794,7 +794,7 @@ export const ChatWindow = React.memo(function ChatWindow({
           ) : (
             <div
               role="log"
-              aria-label="Chat messages"
+              aria-label={t('chat.chatMessages')}
               aria-live="polite"
               aria-relevant="additions"
               style={{
@@ -1176,7 +1176,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                   color:
                     showVoiceRecorder || isRecording ? 'var(--primary)' : 'var(--text-disabled)',
                 }}
-                title="Voice message"
+                title={t('chat.voiceMessage')}
               >
                 <Mic className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
               </button>

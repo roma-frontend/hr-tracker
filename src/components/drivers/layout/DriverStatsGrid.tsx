@@ -27,7 +27,7 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mb-8 drivers-stagger">
       <StatCard
-        label={t('driverStats.todaysTrips', "Today's Trips")}
+        label={t('driverStats.todaysTrips', "{t('drivers.todayTrips')}")}
         value={todayTrips}
         icon={Calendar}
         gradientFrom="#3b82f6"
@@ -35,7 +35,7 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
         iconBgColor="rgba(59, 130, 246, 0.1)"
       />
       <StatCard
-        label={t('driverStats.pendingRequests', 'Pending Requests')}
+        label={t('driverStats.pendingRequests', t('drivers.pendingRequests'))}
         value={pendingRequests}
         icon={Clock}
         gradientFrom="#f59e0b"
@@ -43,7 +43,7 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
         iconBgColor="rgba(245, 158, 11, 0.1)"
       />
       <StatCard
-        label={t('driverStats.totalCompleted', 'Total Completed')}
+        label={t('driverStats.totalCompleted', t('drivers.totalCompleted'))}
         value={totalCompleted}
         icon={TrendingUp}
         gradientFrom="#22c55e"
@@ -51,7 +51,7 @@ export const DriverStatsGrid = memo(function DriverStatsGrid({
         iconBgColor="rgba(34, 197, 94, 0.1)"
       />
       <StatCard
-        label={t('driverStats.rating', 'Rating')}
+        label={t('driverStats.rating', t('drivers.rating'))}
         value={rating.toFixed(1)}
         icon={Star}
         gradientFrom="#eab308"

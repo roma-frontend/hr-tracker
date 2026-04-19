@@ -115,7 +115,7 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
           {alerts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <CheckCircle className="w-12 h-12 mx-auto mb-3 opacity-20" />
-              <p>{t('events.noPendingConflicts', 'No pending conflict alerts')}</p>
+              <p>{t('events.noPendingConflicts', t('events.noPendingConflicts'))}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -171,7 +171,7 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
         <CardContent>
           {reviewedAlerts.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {t('events.noReviewedAlerts', 'No reviewed alerts yet')}
+              {t('events.noReviewedAlerts', t('events.noReviewedAlerts'))}
             </p>
           ) : (
             <div className="space-y-2">

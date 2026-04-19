@@ -202,14 +202,14 @@ export function ReassignModal({
           {filteredDrivers.length === 0 && (
             <div className="text-center py-6 text-(--text-muted)">
               <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">{t('driver.noDriversFound', 'No drivers found')}</p>
+              <p className="text-sm">{t('driver.noDriversFound', t('drivers.noDriversFound'))}</p>
             </div>
           )}
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
-              {t('driver.cancel', 'Cancel')}
+              {t('driver.cancel', t('common.cancel'))}
             </Button>
             <Button
               onClick={handleReassign}

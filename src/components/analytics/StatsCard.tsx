@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { LucideIcon } from 'lucide-react';
 import { motion } from '@/lib/cssMotion';
@@ -52,7 +52,7 @@ export function StatsCard({ title, value, icon: Icon, trend, color = 'blue' }: S
                 >
                   {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                 </span>
-                <span className="text-xs text-(--text-muted)">vs last month</span>
+                <span className="text-xs text-(--text-muted)">{t('stats.vsLastMonth')}</span>
               </div>
             )}
           </div>

@@ -24,6 +24,7 @@ export interface User {
 }
 
 export function useOrgUsers(organizationId: string) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: ['org-users', organizationId],
     queryFn: async () => {
@@ -32,7 +33,7 @@ export function useOrgUsers(organizationId: string) {
         organizationId,
       });
       const res = await fetch(`/api/users?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch org users');
+      if (!res.ok) throw new Error(t('users.fetchOrgFailed'));
       const json = await res.json();
       return json.data as User[];
     },
@@ -41,6 +42,7 @@ export function useOrgUsers(organizationId: string) {
 }
 
 export function useMyEmployees(supervisorId?: string) {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: ['my-employees', supervisorId],
     queryFn: async () => {
@@ -50,7 +52,7 @@ export function useMyEmployees(supervisorId?: string) {
         supervisorId,
       });
       const res = await fetch(`/api/users?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch my employees');
+      if (!res.ok) throw new Error(t('users.fetchEmployeesFailed'));
       const json = await res.json();
       return json.data as User[];
     },
@@ -67,7 +69,7 @@ export function useUserById(userId: string) {
         userId,
       });
       const res = await fetch(`/api/users?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch user');
+      if (!res.ok) throw new Error(t('users.fetchUserFailed'));
       const json = await res.json();
       return json.data as User | null;
     },
@@ -91,7 +93,7 @@ export function useSuspendUser() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to suspend user');
+      if (!res.ok) throw new Error(t('users.suspendFailed'));
       const json = await res.json();
       return json.data;
     },
@@ -100,7 +102,7 @@ export function useSuspendUser() {
       queryClient.invalidateQueries({ queryKey: ['superadmin', 'user-360'] });
     },
     onError: (error: any) => {
-      toast.error(error.message || t('users.suspendFailed', 'Failed to suspend user'));
+      toast.error(error.message || t('users.suspendFailed', t('users.suspendFailed')));
     },
   });
 }
@@ -116,7 +118,7 @@ export function useUnsuspendUser() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to unsuspend user');
+      if (!res.ok) throw new Error(t('users.unsuspendFailed'));
       const json = await res.json();
       return json.data;
     },
@@ -125,12 +127,13 @@ export function useUnsuspendUser() {
       queryClient.invalidateQueries({ queryKey: ['superadmin', 'user-360'] });
     },
     onError: (error: any) => {
-      toast.error(error.message || t('users.unsuspendFailed', 'Failed to unsuspend user'));
+      toast.error(error.message || t('users.unsuspendFailed', t('users.unsuspendFailed')));
     },
   });
 }
 
 export function useUpdatePresenceStatus() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: { userId: string; presenceStatus: string }) => {
@@ -140,7 +143,7 @@ export function useUpdatePresenceStatus() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to update presence status');
+      if (!res.ok) throw new Error(t('users.updatePresenceFailed'));
       const json = await res.json();
       return json.data;
     },

@@ -70,14 +70,14 @@ export default function ForgotPasswordPage() {
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p
+                <p
                 className="font-bold text-base leading-tight"
                 style={{ color: 'var(--text-primary)' }}
               >
-                HR Office
+                {t('auth.hrOffice')}
               </p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                HR Management System
+                {t('auth.hrManagementSystem')}
               </p>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
                         autoFocus
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@company.com"
+                        placeholder={t('placeholders.youAtCompany')}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
                         style={{
                           background: 'var(--input)',

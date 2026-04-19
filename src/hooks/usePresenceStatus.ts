@@ -20,7 +20,7 @@ export function usePresenceStatus(userId?: string) {
     queryKey: ['user', effectiveUserId, 'current'],
     queryFn: async () => {
       const res = await fetch(`/api/users?action=get-current-user`);
-      if (!res.ok) throw new Error('Failed to fetch current user');
+      if (!res.ok) throw new Error(t('presence.fetchUserFailed'));
       const json = await res.json();
       return json.data;
     },
@@ -34,7 +34,7 @@ export function usePresenceStatus(userId?: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to update status');
+      if (!res.ok) throw new Error(t('presence.updateFailed'));
       return res.json();
     },
     onSuccess: () => {
@@ -54,7 +54,7 @@ export function usePresenceStatus(userId?: string) {
   const updateStatus = useCallback(
     async (status: string, message?: string) => {
       if (!effectiveUserId) {
-        toast.error(t('presence.userIdNotFound', 'User ID not found'));
+        toast.error(t('presence.userIdNotFound', t('presence.userIdNotFound')));
         return;
       }
 
@@ -67,7 +67,7 @@ export function usePresenceStatus(userId?: string) {
       ];
 
       if (!validStatuses.includes(status as PresenceStatus)) {
-        toast.error(t('presence.invalidStatus', 'Invalid status'));
+        toast.error(t('presence.invalidStatus', t('presence.invalidStatus')));
         return;
       }
 
@@ -80,7 +80,7 @@ export function usePresenceStatus(userId?: string) {
         return true;
       } catch (error) {
         console.error('Failed to update status:', error);
-        toast.error(t('presence.updateFailed', 'Failed to update status'));
+        toast.error(t('presence.updateFailed', t('presence.updateFailed')));
         return false;
       }
     },

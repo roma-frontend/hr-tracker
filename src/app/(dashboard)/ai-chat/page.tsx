@@ -660,7 +660,7 @@ export default function AIChatPage() {
                   animate={{ opacity: 1 }}
                   className="text-center py-8 text-(--text-muted) text-sm"
                 >
-                  {t('aiChat.noConversations') || 'No conversations yet'}
+                  {t('aiChat.noConversations') || t('aiChat.noConversations')}
                 </motion.div>
               ) : (
                 conversations.map((conv) => (

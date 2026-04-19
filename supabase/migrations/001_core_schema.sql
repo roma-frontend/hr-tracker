@@ -1,4 +1,4 @@
-﻿-- =====================================================
+-- =====================================================
 -- HR Platform - Core Schema Migration
 -- Day 1: Organizations, Users, Auth, RLS Policies
 -- =====================================================
@@ -97,7 +97,7 @@ CREATE TABLE organization_requests (
     reviewed_by UUID REFERENCES users(id),
     reviewed_at BIGINT,
     rejection_reason TEXT,
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     userid UUID REFERENCES users(id),
     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
@@ -109,7 +109,7 @@ CREATE INDEX idx_org_requests_slug ON organization_requests(requested_slug);
 -- Organization Invites
 CREATE TABLE organization_invites (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     requested_by_email VARCHAR(255) NOT NULL,
     requested_by_name VARCHAR(255) NOT NULL,
     requested_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
@@ -124,10 +124,10 @@ CREATE TABLE organization_invites (
     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
-CREATE INDEX idx_org_invites_org ON organization_invites(organizationId);
+CREATE INDEX idx_org_invites_org ON organization_invites("organizationId");
 CREATE INDEX idx_org_invites_email ON organization_invites(requested_by_email);
 CREATE INDEX idx_org_invites_status ON organization_invites(status);
-CREATE INDEX idx_org_invites_org_status ON organization_invites(organizationId, status);
+CREATE INDEX idx_org_invites_org_status ON organization_invites("organizationId", status);
 CREATE INDEX idx_org_invites_token ON organization_invites(invite_token);
 
 -- =====================================================
@@ -136,7 +136,7 @@ CREATE INDEX idx_org_invites_token ON organization_invites(invite_token);
 
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -205,16 +205,16 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_org ON users(organizationId);
-CREATE INDEX idx_users_org_role ON users(organizationId, role);
-CREATE INDEX idx_users_org_active ON users(organizationId, is_active);
-CREATE INDEX idx_users_org_approval ON users(organizationId, is_approved);
+CREATE INDEX idx_users_org ON users("organizationId");
+CREATE INDEX idx_users_org_role ON users("organizationId", role);
+CREATE INDEX idx_users_org_active ON users("organizationId", is_active);
+CREATE INDEX idx_users_org_approval ON users("organizationId", is_approved);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_supervisor ON users(supervisorid);
 CREATE INDEX idx_users_approval ON users(is_approved);
 CREATE INDEX idx_users_clerkid ON users(clerkid);
-CREATE INDEX idx_users_org_email ON users(organizationId, email);
-CREATE INDEX idx_users_org_created ON users(organizationId, created_at);
+CREATE INDEX idx_users_org_email ON users("organizationId", email);
+CREATE INDEX idx_users_org_created ON users("organizationId", created_at);
 CREATE INDEX idx_users_session_token ON users(session_token);
 CREATE INDEX idx_users_reset_token ON users(reset_password_token);
 
@@ -239,7 +239,7 @@ CREATE INDEX idx_webauthn_credential ON webauthn_credentials(credentialid);
 
 CREATE TABLE leave_requests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     userid UUID NOT NULL REFERENCES users(id),
     type leave_type NOT NULL,
     start_date DATE NOT NULL,
@@ -256,14 +256,14 @@ CREATE TABLE leave_requests (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
-CREATE INDEX idx_leaves_org ON leave_requests(organizationId);
+CREATE INDEX idx_leaves_org ON leave_requests("organizationId");
 CREATE INDEX idx_leaves_user ON leave_requests(userid);
-CREATE INDEX idx_leaves_org_status ON leave_requests(organizationId, status);
+CREATE INDEX idx_leaves_org_status ON leave_requests("organizationId", status);
 CREATE INDEX idx_leaves_status ON leave_requests(status);
 CREATE INDEX idx_leaves_created ON leave_requests(created_at);
 CREATE INDEX idx_leaves_status_created ON leave_requests(status, created_at);
 CREATE INDEX idx_leaves_user_status ON leave_requests(userid, status);
-CREATE INDEX idx_leaves_org_created ON leave_requests(organizationId, created_at);
+CREATE INDEX idx_leaves_org_created ON leave_requests("organizationId", created_at);
 
 -- =====================================================
 -- NOTIFICATIONS
@@ -271,7 +271,7 @@ CREATE INDEX idx_leaves_org_created ON leave_requests(organizationId, created_at
 
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     userid UUID NOT NULL REFERENCES users(id),
     type notification_type NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -283,10 +283,10 @@ CREATE TABLE notifications (
 );
 
 CREATE INDEX idx_notifications_user ON notifications(userid);
-CREATE INDEX idx_notifications_org ON notifications(organizationId);
+CREATE INDEX idx_notifications_org ON notifications("organizationId");
 CREATE INDEX idx_notifications_user_unread ON notifications(userid, is_read);
 CREATE INDEX idx_notifications_unread_date ON notifications(userid, is_read, created_at);
-CREATE INDEX idx_notifications_org_created ON notifications(organizationId, created_at);
+CREATE INDEX idx_notifications_org_created ON notifications("organizationId", created_at);
 
 -- =====================================================
 -- TICKETS
@@ -294,7 +294,7 @@ CREATE INDEX idx_notifications_org_created ON notifications(organizationId, crea
 
 CREATE TABLE support_tickets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     ticket_number VARCHAR(50) NOT NULL UNIQUE,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
@@ -318,7 +318,7 @@ CREATE TABLE support_tickets (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
-CREATE INDEX idx_tickets_org ON support_tickets(organizationId);
+CREATE INDEX idx_tickets_org ON support_tickets("organizationId");
 CREATE INDEX idx_tickets_status ON support_tickets(status);
 CREATE INDEX idx_tickets_priority ON support_tickets(priority);
 CREATE INDEX idx_tickets_created_by ON support_tickets(created_by);
@@ -330,7 +330,7 @@ CREATE INDEX idx_tickets_number ON support_tickets(ticket_number);
 CREATE TABLE ticket_comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     ticketid UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     authorid UUID NOT NULL REFERENCES users(id),
     message TEXT NOT NULL,
     is_internal BOOLEAN NOT NULL DEFAULT false,
@@ -340,7 +340,7 @@ CREATE TABLE ticket_comments (
 );
 
 CREATE INDEX idx_ticket_comments_ticket ON ticket_comments(ticketid);
-CREATE INDEX idx_ticket_comments_org ON ticket_comments(organizationId);
+CREATE INDEX idx_ticket_comments_org ON ticket_comments("organizationId");
 CREATE INDEX idx_ticket_comments_created ON ticket_comments(created_at);
 
 -- =====================================================
@@ -349,7 +349,7 @@ CREATE INDEX idx_ticket_comments_created ON ticket_comments(created_at);
 
 CREATE TABLE automation_rules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     trigger_type automation_trigger NOT NULL,
@@ -363,7 +363,7 @@ CREATE TABLE automation_rules (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
-CREATE INDEX idx_automation_org ON automation_rules(organizationId);
+CREATE INDEX idx_automation_org ON automation_rules("organizationId");
 CREATE INDEX idx_automation_active ON automation_rules(is_active);
 CREATE INDEX idx_automation_trigger ON automation_rules(trigger_type);
 
@@ -400,7 +400,7 @@ CREATE TABLE impersonation_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     superadminid UUID NOT NULL REFERENCES users(id),
     target_userid UUID NOT NULL REFERENCES users(id),
-    organizationId UUID NOT NULL REFERENCES organizations(id),
+    "organizationId" UUID NOT NULL REFERENCES organizations(id),
     reason TEXT NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
     expires_at BIGINT NOT NULL,
@@ -416,7 +416,7 @@ CREATE INDEX idx_impersonation_active ON impersonation_sessions(is_active);
 
 CREATE TABLE emergency_incidents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     severity incident_severity NOT NULL DEFAULT 'medium',
@@ -434,12 +434,12 @@ CREATE TABLE emergency_incidents (
 
 CREATE INDEX idx_incidents_status ON emergency_incidents(status);
 CREATE INDEX idx_incidents_severity ON emergency_incidents(severity);
-CREATE INDEX idx_incidents_org ON emergency_incidents(organizationId);
+CREATE INDEX idx_incidents_org ON emergency_incidents("organizationId");
 CREATE INDEX idx_incidents_created ON emergency_incidents(created_at);
 
 CREATE TABLE audit_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     userid UUID NOT NULL REFERENCES users(id),
     action VARCHAR(255) NOT NULL,
     target VARCHAR(255),
@@ -448,7 +448,7 @@ CREATE TABLE audit_logs (
     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
-CREATE INDEX idx_audit_org ON audit_logs(organizationId);
+CREATE INDEX idx_audit_org ON audit_logs("organizationId");
 CREATE INDEX idx_audit_user ON audit_logs(userid);
 
 CREATE TABLE security_settings (
@@ -466,7 +466,7 @@ CREATE TABLE login_attempts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) NOT NULL,
     userid UUID REFERENCES users(id),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     success BOOLEAN NOT NULL DEFAULT false,
     method login_method NOT NULL,
     ip VARCHAR(45),
@@ -482,7 +482,7 @@ CREATE TABLE login_attempts (
 
 CREATE INDEX idx_login_attempts_email ON login_attempts(email);
 CREATE INDEX idx_login_attempts_user ON login_attempts(userid);
-CREATE INDEX idx_login_attempts_org ON login_attempts(organizationId);
+CREATE INDEX idx_login_attempts_org ON login_attempts("organizationId");
 CREATE INDEX idx_login_attempts_created ON login_attempts(created_at);
 CREATE INDEX idx_login_attempts_success ON login_attempts(success);
 
@@ -520,7 +520,7 @@ CREATE INDEX idx_keystroke_user ON keystroke_profiles(userid);
 
 CREATE TABLE sla_config (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id) UNIQUE,
+    "organizationId" UUID REFERENCES organizations(id) UNIQUE,
     target_response_time INTEGER NOT NULL DEFAULT 4,
     warning_threshold INTEGER NOT NULL DEFAULT 2,
     critical_threshold INTEGER NOT NULL DEFAULT 1,
@@ -535,11 +535,11 @@ CREATE TABLE sla_config (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
-CREATE INDEX idx_sla_config_org ON sla_config(organizationId);
+CREATE INDEX idx_sla_config_org ON sla_config("organizationId");
 
 CREATE TABLE sla_metrics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organizationId UUID REFERENCES organizations(id),
+    "organizationId" UUID REFERENCES organizations(id),
     leave_requestid UUID NOT NULL REFERENCES leave_requests(id),
     submitted_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
     responded_at BIGINT,
@@ -552,7 +552,7 @@ CREATE TABLE sla_metrics (
     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
 
-CREATE INDEX idx_sla_metrics_org ON sla_metrics(organizationId);
+CREATE INDEX idx_sla_metrics_org ON sla_metrics("organizationId");
 CREATE INDEX idx_sla_metrics_leave ON sla_metrics(leave_requestid);
 CREATE INDEX idx_sla_metrics_status ON sla_metrics(status);
 CREATE INDEX idx_sla_metrics_submitted ON sla_metrics(submitted_at);
@@ -587,7 +587,7 @@ ALTER TABLE sla_metrics ENABLE ROW LEVEL SECURITY;
 -- Organization policies
 CREATE POLICY "Users can view their own organization" ON organizations
     FOR SELECT USING (
-        id IN (SELECT organizationId FROM users WHERE id = auth.uid())
+        id IN (SELECT "organizationId" FROM users WHERE id = auth.uid())
     );
 
 CREATE POLICY "Superadmins can view all organizations" ON organizations
@@ -601,7 +601,7 @@ CREATE POLICY "Users can view their own profile" ON users
 
 CREATE POLICY "Users can view others in same organization" ON users
     FOR SELECT USING (
-        organizationId IN (SELECT organizationId FROM users WHERE id = auth.uid())
+        "organizationId" IN (SELECT "organizationId" FROM users WHERE id = auth.uid())
     );
 
 CREATE POLICY "Admins can manage users in their organization" ON users
@@ -615,7 +615,7 @@ CREATE POLICY "Users can view their own leaves" ON leave_requests
 
 CREATE POLICY "Users can view leaves in their organization" ON leave_requests
     FOR SELECT USING (
-        organizationId IN (SELECT organizationId FROM users WHERE id = auth.uid())
+        "organizationId" IN (SELECT "organizationId" FROM users WHERE id = auth.uid())
     );
 
 CREATE POLICY "Users can create their own leaves" ON leave_requests
@@ -636,7 +636,7 @@ CREATE POLICY "Users can update their own notifications" ON notifications
 -- Ticket policies
 CREATE POLICY "Users can view tickets in their organization" ON support_tickets
     FOR SELECT USING (
-        organizationId IN (SELECT organizationId FROM users WHERE id = auth.uid())
+        "organizationId" IN (SELECT "organizationId" FROM users WHERE id = auth.uid())
         OR created_by = auth.uid()
         OR assigned_to = auth.uid()
     );

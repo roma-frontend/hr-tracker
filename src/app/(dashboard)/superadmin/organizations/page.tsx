@@ -268,9 +268,9 @@ export default function OrganizationsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('filters.allPlans')}</SelectItem>
-                    <SelectItem value="starter">Starter</SelectItem>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                    <SelectItem value="starter">{t('plan.starter')}</SelectItem>
+                    <SelectItem value="professional">{t('plan.professional')}</SelectItem>
+                    <SelectItem value="enterprise">{t('plan.enterprise')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>

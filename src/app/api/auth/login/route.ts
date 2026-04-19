@@ -3,16 +3,12 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {
-    console.log('[auth/login] Login attempt started');
     const body = await request.json();
     const { email, password } = body;
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    console.log('[auth/login] Email (normalized):', normalizedEmail);
-
     if (!normalizedEmail || !password) {
-      console.error('[auth/login] Missing email or password');
       return NextResponse.json(
         { error: 'Email and password are required' },
         { status: 400 }
@@ -24,30 +20,26 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    console.log('[auth/login] Calling Supabase signInWithPassword...');
     const { data, error } = await supabase.auth.signInWithPassword({
       email: normalizedEmail,
       password,
     });
 
-    console.log('[auth/login] Supabase response:', { hasSession: !!data.session, hasError: !!error, error: error?.message });
-
     if (error) {
-      console.error('[auth/login] Supabase auth error:', error.message);
       return NextResponse.json(
         { error: error.message },
         { status: 401 }
       );
     }
 
-    // Use service role to bypass RLS for profile lookup after successful auth
+    // Use service role to bypass RLS for profile lookup
     const supabaseService = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    console.log('[auth/login] Querying user profile for email:', normalizedEmail);
-    const { data: userProfiles, error: profileError } = await supabaseService
+    // Query user profile by auth user ID (most reliable)
+    const { data: userProfiles } = await supabaseService
       .from('users')
       .select(`
         id,
@@ -62,29 +54,51 @@ export async function POST(request: Request) {
         presence_status,
         is_active,
         is_approved,
-        "organizationId",
+        organizationid,
         organizations (
           id,
           name,
           slug
         )
       `)
-      .eq('email', normalizedEmail)
-      .order('created_at', { ascending: false })
+      .eq('id', data.session.user.id)
       .limit(1);
-
-    console.log('[auth/login] Profile query result:', { 
-      count: userProfiles?.length ?? 0, 
-      profileError,
-      firstProfile: userProfiles?.[0]
-    });
 
     let userProfile = userProfiles?.[0];
 
-    // If no profile exists, create one from Supabase Auth user
+    // If no profile found by ID, try by email as fallback
+    if (!userProfile) {
+      const { data: emailProfiles } = await supabaseService
+        .from('users')
+        .select(`
+          id,
+          name,
+          email,
+          role,
+          employee_type,
+          department,
+          position,
+          phone,
+          avatar_url,
+          presence_status,
+          is_active,
+          is_approved,
+          organizationid,
+          organizations (
+            id,
+            name,
+            slug
+          )
+        `)
+        .eq('email', normalizedEmail)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      userProfile = emailProfiles?.[0];
+    }
+
+    // If still no profile, create one from Supabase Auth user
     if (!userProfile && data.session?.user) {
-      console.log('[auth/login] No profile found, creating one for auth user:', data.session.user.id);
-      
       const authUser = data.session.user;
       const userName = authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User';
       
@@ -92,7 +106,7 @@ export async function POST(request: Request) {
         .from('users')
         .insert({
           id: authUser.id,
-          organizationId: authUser.user_metadata?.organization_id || null,
+          organizationid: authUser.user_metadata?.organization_id || null,
           name: userName,
           email: normalizedEmail,
           password_hash: 'auth_managed',
@@ -122,7 +136,7 @@ export async function POST(request: Request) {
           presence_status,
           is_active,
           is_approved,
-          "organizationId",
+          organizationid,
           organizations (
             id,
             name,
@@ -132,31 +146,22 @@ export async function POST(request: Request) {
         .single();
 
       if (insertError) {
-        console.error('[auth/login] Failed to create user profile:', insertError);
+        console.error('[auth/login] Insert error:', insertError);
         return NextResponse.json(
-          { error: 'Failed to create user profile. Please contact support.' },
+          { error: 'Failed to create user profile: ' + insertError.message },
           { status: 500 }
         );
       }
 
-      console.log('[auth/login] Profile created successfully:', newProfile);
       userProfile = newProfile;
     }
 
     if (!userProfile) {
-      console.error('[auth/login] No user profile found for email:', normalizedEmail);
       return NextResponse.json(
-        { error: 'User profile not found. Please contact support.', details: profileError?.message },
+        { error: 'User profile not found. Please contact support.' },
         { status: 404 }
       );
     }
-
-    console.log('[auth/login] User profile found:', { 
-      id: userProfile.id, 
-      name: userProfile.name, 
-      role: userProfile.role,
-      organizationId: userProfile.organizationId 
-    });
 
     const response = NextResponse.json({
       user: {
@@ -168,7 +173,7 @@ export async function POST(request: Request) {
         department: userProfile.department,
         position: userProfile.position,
         employeeType: userProfile.employee_type,
-        organizationId: userProfile.organizationId,
+        organizationId: userProfile.organizationid,
         organizationSlug: userProfile.organizations?.slug,
         organizationName: userProfile.organizations?.name,
         isApproved: userProfile.is_approved,
@@ -178,31 +183,31 @@ export async function POST(request: Request) {
       session: data.session,
     });
 
-    // Set Supabase auth cookies with correct names
-    if (data.session) {
-      const projectRef = 'fprtklhpngvtpuozypdj';
-      const expiresAt = new Date(data.session.expires_at! * 1000);
-      
-      response.cookies.set({
-        name: `sb-${projectRef}-access-token`,
-        value: data.session.access_token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        expires: expiresAt,
-      });
-      
-      response.cookies.set({
-        name: `sb-${projectRef}-refresh-token`,
-        value: data.session.refresh_token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 30,
-      });
-    }
+    // Set Supabase SSR cookies so server-side routes can access the session
+    const projectRef = 'fprtklhpngvtpuozypdj';
+    
+    // @supabase/ssr expects the raw access token as the cookie value, not JSON
+    response.cookies.set(`sb-${projectRef}-access-token`, data.session.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: data.session.expires_in,
+      path: '/',
+    });
+    
+    response.cookies.set(`sb-${projectRef}-refresh-token`, data.session.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 31536000,
+      path: '/',
+    });
+
+    console.log('[auth/login] Cookies set:', {
+      accessCookie: `sb-${projectRef}-access-token`,
+      refreshCookie: `sb-${projectRef}-refresh-token`,
+      userId: data.session.user.id,
+    });
 
     return response;
   } catch (error) {

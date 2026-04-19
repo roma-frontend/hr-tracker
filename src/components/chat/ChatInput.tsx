@@ -125,7 +125,7 @@ export function ChatInput({
           style={{
             color: showVoiceRecorder ? 'var(--primary)' : 'var(--text-disabled)',
           }}
-          title="Voice message"
+          title={t('chat.voiceMessage')}
         >
           <Mic className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
         </button>

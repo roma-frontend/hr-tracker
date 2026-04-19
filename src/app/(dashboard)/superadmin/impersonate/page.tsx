@@ -151,7 +151,7 @@ export default function ImpersonationPage() {
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('superadmin.impersonate.exitMode')}</span>
-                <span className="sm:hidden">Exit</span>
+                <span className="sm:hidden">{t('common.exit')}</span>
               </Button>
             )}
           </div>

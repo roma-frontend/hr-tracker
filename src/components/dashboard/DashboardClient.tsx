@@ -266,8 +266,8 @@ export default function DashboardClient() {
       {/* Smart Banners - only render if there are active banners */}
       <DashboardBanners />
 
-      {/* Welcome header - now hidden since we have sticky header */}
-      <motion.div variants={itemVariants} className="hidden">
+      {/* Welcome header with Superadmin quick actions */}
+      <motion.div variants={itemVariants} className="mb-6">
         <div>
           <motion.p
             initial={{ opacity: 0 }}

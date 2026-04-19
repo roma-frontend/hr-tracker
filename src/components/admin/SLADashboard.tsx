@@ -43,12 +43,12 @@ export function SLADashboard() {
       {/* Average Response Time */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('sla.avgResponseTime')}</CardTitle>
           <Timer className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{avgResponseTime.toFixed(1)}h</div>
-          <p className="text-xs text-muted-foreground">Target: {targetHours}h</p>
+          <p className="text-xs text-muted-foreground">{t('sla.target', { hours: targetHours })}</p>
           {avgResponseTime <= targetHours ? (
             <div className="flex items-center text-green-600 text-xs mt-1">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -66,7 +66,7 @@ export function SLADashboard() {
       {/* SLA Compliance Rate */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">SLA Compliance</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('sla.slaCompliance')}</CardTitle>
           <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -88,7 +88,7 @@ export function SLADashboard() {
       {/* Pending Requests */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('sla.pendingRequests')}</CardTitle>
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -107,18 +107,18 @@ export function SLADashboard() {
       {/* Alerts */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Alerts</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('sla.alerts')}</CardTitle>
           <AlertTriangle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <div>
               <div className="text-2xl font-bold text-yellow-600">{warningCount}</div>
-              <p className="text-xs text-muted-foreground">Warnings</p>
+              <p className="text-xs text-muted-foreground">{t('sla.warnings')}</p>
             </div>
             <div>
               <div className="text-2xl font-bold text-red-600">{criticalCount}</div>
-              <p className="text-xs text-muted-foreground">Critical</p>
+              <p className="text-xs text-muted-foreground">{t('sla.critical')}</p>
             </div>
           </div>
           {(warningCount > 0 || criticalCount > 0) && (
@@ -132,14 +132,14 @@ export function SLADashboard() {
       {/* Detailed SLA Breakdown */}
       <Card className="md:col-span-2 lg:col-span-4">
         <CardHeader>
-          <CardTitle>SLA Performance Breakdown</CardTitle>
-          <CardDescription>Response time distribution for the last 30 days</CardDescription>
+          <CardTitle>{t('sla.performanceBreakdown')}</CardTitle>
+          <CardDescription>{t('sla.distributionDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {/* On-time requests */}
             <div className="flex items-center gap-4">
-              <div className="w-32 text-sm font-medium">On Time</div>
+              <div className="w-32 text-sm font-medium">{t('sla.onTime')}</div>
               <div className="flex-1">
                 <Progress value={complianceRate} className="h-2" />
               </div>
@@ -151,7 +151,7 @@ export function SLADashboard() {
 
             {/* Breached requests */}
             <div className="flex items-center gap-4">
-              <div className="w-32 text-sm font-medium">Breached</div>
+              <div className="w-32 text-sm font-medium">{t('sla.breached')}</div>
               <div className="flex-1">
                 <Progress value={100 - complianceRate} className="h-2 [&>div]:bg-destructive" />
               </div>
@@ -163,7 +163,7 @@ export function SLADashboard() {
 
             {/* Pending requests */}
             <div className="flex items-center gap-4">
-              <div className="w-32 text-sm font-medium">Pending</div>
+              <div className="w-32 text-sm font-medium">{t('sla.pending')}</div>
               <div className="flex-1">
                 <Progress
                   value={(pendingMetrics / totalMetrics) * 100}
@@ -183,7 +183,7 @@ export function SLADashboard() {
             <div className="mt-6 p-4 bg-muted rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">SLA Configuration</p>
+                  <p className="text-sm font-medium">{t('sla.slaConfiguration')}</p>
                   <p className="text-xs text-muted-foreground">
                     Target response time: {slaConfig.targetResponseTimeHours}h
                   </p>
