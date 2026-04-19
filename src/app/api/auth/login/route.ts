@@ -92,7 +92,7 @@ export async function POST(request: Request) {
         .from('users')
         .insert({
           id: authUser.id,
-          organizationId: authUser.user_metadata?.organization_id || null,
+          "organizationId": authUser.user_metadata?.organization_id || null,
           name: userName,
           email: normalizedEmail,
           password_hash: 'auth_managed',
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
           paid_leave_balance: 0,
           sick_leave_balance: 0,
           family_leave_balance: 0,
-          created_at: Date.now(),
+          created_at: Math.floor(Date.now() / 1000),
         })
         .select(`
           id,
