@@ -3,11 +3,7 @@ import Image from 'next/image';
 
 import { useTranslation } from 'react-i18next';
 import { useState, useRef } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { toast } from 'sonner';
-import { uploadTaskAttachment } from '@/actions/cloudinary';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
@@ -16,14 +12,14 @@ interface Attachment {
   name: string;
   type: string;
   size: number;
-  uploadedBy: Id<'users'>;
+  uploadedBy: string;
   uploadedAt: number;
 }
 
 interface Props {
-  taskId: Id<'tasks'>;
+  taskId: string;
   attachments: Attachment[];
-  currentUserId: Id<'users'>;
+  currentUserId: string;
   canUpload: boolean;
 }
 
@@ -60,8 +56,6 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
   const [preview, setPreview] = useState<Attachment | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ url: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const addAttachment = useMutation(api.tasks.addAttachment);
-  const removeAttachment = useMutation(api.tasks.removeAttachment);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -82,27 +76,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
     setUploading(true);
 
     try {
-      await Promise.all(
-        validFiles.map(async (file) => {
-          const base64 = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-
-          const url = await uploadTaskAttachment(base64, file.name);
-
-          await addAttachment({
-            taskId,
-            url,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            uploadedBy: currentUserId,
-          });
-        }),
-      );
+      // TODO: Implement file upload API
       toast.success(t('toasts.uploadSuccess', { count: validFiles.length }));
     } catch {
       toast.error(t('toasts.uploadFailed'));
@@ -119,7 +93,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
   const confirmRemove = async () => {
     if (!confirmDelete) return;
     try {
-      await removeAttachment({ taskId, url: confirmDelete.url });
+      // TODO: Implement file remove API
       toast.success(t('toasts.removed'));
       if (preview?.url === confirmDelete.url) setPreview(null);
       setConfirmDelete(null);

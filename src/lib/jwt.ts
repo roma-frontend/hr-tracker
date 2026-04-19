@@ -17,15 +17,15 @@ export interface JWTPayload {
   userId: string;
   name: string;
   email: string;
-  role: 'admin' | 'supervisor' | 'employee' | 'superadmin';
-  organizationId?: string;
-  organizationSlug?: string;
-  organizationName?: string;
+  role: 'admin' | 'supervisor' | 'employee' | 'superadmin' | 'driver';
+  organizationId?: string | null;
+  organizationSlug?: string | null;
+  organizationName?: string | null;
   isApproved?: boolean;
-  department?: string;
-  position?: string;
+  department?: string | null;
+  position?: string | null;
   employeeType?: 'staff' | 'contractor';
-  avatar?: string;
+  avatar?: string | null;
   type?: '2fa-pending';
 }
 

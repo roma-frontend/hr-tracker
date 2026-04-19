@@ -25,7 +25,7 @@ export async function uploadTaskAttachment(base64File: string, fileName: string)
     }
     const result = await cloudinary.uploader.upload(base64File, {
       folder: 'hr-office/task-attachments',
-      public_id: publicId,
+      publicid: publicId,
       resource_type: 'auto', // auto-detect: image, video, raw (pdf, doc, etc.)
       overwrite: false,
     });
@@ -58,7 +58,7 @@ export async function uploadAvatarToCloudinary(
 
     const result = await cloudinary.uploader.upload(base64Image, {
       folder: 'hr-office/avatars',
-      public_id: userId,
+      publicid: userId,
       overwrite: true,
       transformation: [
         { width: 200, height: 200, crop: 'fill', gravity: 'face' },
@@ -133,7 +133,7 @@ export async function uploadChatAttachment(
   try {
     const result = await cloudinary.uploader.upload(uploadData, {
       folder: 'hr-office/chat-attachments',
-      public_id: publicId,
+      publicid: publicId,
       resource_type: resourceType,
       overwrite: false,
       unique_filename: true,
@@ -187,7 +187,7 @@ export async function deleteTaskAttachmentFromCloudinary(url: string): Promise<v
   console.log('🔗 URL:', url);
 
   try {
-    // Extract public_id from URL
+    // Extract publicid from URL
     // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/v1234567890/hr-office/task-attachments/task_1234567890_filename.pdf
     const urlParts = url.split('/');
     const folderIndex = urlParts.findIndex((part) => part === 'task-attachments');
@@ -195,7 +195,7 @@ export async function deleteTaskAttachmentFromCloudinary(url: string): Promise<v
       throw new Error('Invalid task attachment URL');
     }
 
-    // Get the public_id (folder/filename without extension and version)
+    // Get the publicid (folder/filename without extension and version)
     const folder = urlParts[folderIndex];
     const filenameWithVersion = urlParts[folderIndex + 1];
     if (!filenameWithVersion) {

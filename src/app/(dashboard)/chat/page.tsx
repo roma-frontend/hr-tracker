@@ -24,7 +24,7 @@ export default function ChatPage() {
         userId={user?.id ?? ''}
         organizationId={user?.organizationId ?? ''}
         userName={user?.name ?? ''}
-        userAvatar={user?.avatar}
+        userAvatar={user?.avatar ?? undefined}
         userRole={user?.role ?? 'employee'}
       />
     </div>

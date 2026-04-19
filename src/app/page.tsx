@@ -2,6 +2,7 @@
 // HeroSection is now a Server Component (renders without JS).
 // Client islands handle interactivity (auth, theme, animations).
 
+import { Suspense } from 'react';
 import {
   SoftwareApplicationJsonLd,
   OrganizationJsonLd,
@@ -18,14 +19,13 @@ export default function RootPage() {
       <OrganizationJsonLd />
       <FAQPageJsonLd />
 
-      {/* Navigation — sticky at top */}
       <NavbarWrapper />
 
-      {/* Hero renders immediately, no JS required */}
       <HeroSection />
 
-      {/* Below-fold sections loaded with Suspense boundaries */}
-      <LandingBelowFold />
+      <Suspense fallback={null}>
+        <LandingBelowFold />
+      </Suspense>
     </div>
   );
 }

@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { useMutation } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,9 +25,6 @@ import {
 } from '@/components/ui/select';
 import { DEPARTMENTS, getTravelAllowance } from '@/lib/types';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useQuery } from 'convex/react';
-import type { Id } from '../../../convex/_generated/dataModel';
-import type { FunctionReference } from 'convex/server';
 import {
   UserPlus,
   User,
@@ -42,6 +37,7 @@ import {
   Building2,
   Shield,
 } from 'lucide-react';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
 
 const ADMIN_EMAIL = 'romangulanyan@gmail.com';
 
@@ -61,12 +57,11 @@ const TOTAL_STEPS = 4;
 
 export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
   const { t } = useTranslation();
-  const createUser = useMutation(api.users.mutations.createUser as FunctionReference<'mutation'>);
   const currentUser = useAuthStore((s) => s.user);
   const isActualAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
   const isSuperadmin = currentUser?.role === 'superadmin';
 
-  const organizations = useQuery(api.organizations.getAllOrganizations, isSuperadmin ? {} : 'skip');
+  const { data: organizations } = useAllOrganizations(isSuperadmin);
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -159,20 +154,25 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
 
     setSubmitting(true);
     try {
-      await createUser({
-        adminId: currentUser.id as any,
-        name,
-        email,
-        passwordHash: 'temp-password-will-be-changed',
-        role,
-        department,
-        position,
-        employeeType: type,
-        phone: phone || undefined,
-        ...(isSuperadmin && selectedOrgId
-          ? { organizationId: selectedOrgId as Id<'organizations'> }
-          : {}),
+      const res = await fetch('/api/users?action=create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminId: currentUser.id,
+          name,
+          email,
+          passwordHash: 'temp-password-will-be-changed',
+          role,
+          department,
+          position,
+          employeeType: type,
+          phone: phone || undefined,
+          ...(isSuperadmin && selectedOrgId
+            ? { organizationId: selectedOrgId }
+            : {}),
+        }),
       });
+      if (!res.ok) throw new Error('Failed to create user');
       toast.success(t('success.created'));
       onClose();
     } catch (err: unknown) {
@@ -287,7 +287,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
                       </SelectTrigger>
                       <SelectContent>
                         {organizations?.map((org: any) => (
-                          <SelectItem key={org._id} value={org._id}>
+                          <SelectItem key={org.id} value={org.id}>
                             {org.name}
                           </SelectItem>
                         ))}

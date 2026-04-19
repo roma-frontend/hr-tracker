@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Play, Pause, RotateCcw, Coffee, Timer, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import {
+  useActivePomodoro,
+  useStartPomodoro,
+  useCompletePomodoro,
+  useInterruptPomodoro,
+} from '@/hooks/useProductivity';
 
 const DURATIONS = {
   pomodoro: 25 * 60, // 25 minutes
@@ -22,32 +25,29 @@ export function PomodoroTimer() {
   const [mode, setMode] = useState<'pomodoro' | 'shortBreak' | 'longBreak'>('pomodoro');
   const [timeLeft, setTimeLeft] = useState(DURATIONS.pomodoro);
   const [isRunning, setIsRunning] = useState(false);
-  const [sessionId, setSessionId] = useState<Id<'pomodoroSessions'> | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout>(null);
 
-  const startSession = useMutation(api.productivity.startPomodoroSession);
-  const completeSession = useMutation(api.productivity.completePomodoroSession);
-  const interruptSession = useMutation(api.productivity.interruptPomodoroSession);
-  const activeSession = useQuery(
-    api.productivity.getActivePomodoroSession,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const startSession = useStartPomodoro();
+  const completeSession = useCompletePomodoro();
+  const interruptSession = useInterruptPomodoro();
+  const activeSession = useActivePomodoro(user?.id || '');
 
   // Sync with active session from DB
   useEffect(() => {
-    if (activeSession && !sessionId) {
-      const remaining = Math.max(0, Math.floor((activeSession.endTime - Date.now()) / 1000));
+    if (activeSession.data && !sessionId) {
+      const remaining = Math.max(0, Math.floor((activeSession.data.end_time - Date.now()) / 1000));
       setTimeLeft(remaining);
-      setSessionId(activeSession._id);
+      setSessionId(activeSession.data.id);
       setIsRunning(remaining > 0);
     }
-  }, [activeSession, sessionId]);
+  }, [activeSession.data, sessionId]);
 
   const handleTimerComplete = async () => {
     setIsRunning(false);
 
     if (sessionId) {
-      await completeSession({ sessionId });
+      await completeSession.mutateAsync({ sessionId });
     }
 
     // Browser Notification
@@ -127,11 +127,11 @@ export function PomodoroTimer() {
       }
 
       const duration = mode === 'pomodoro' ? 25 : mode === 'shortBreak' ? 5 : 15;
-      const id = await startSession({
-        userId: user.id as Id<'users'>,
+      const result = await startSession.mutateAsync({
+        userId: user.id,
         duration,
       });
-      setSessionId(id);
+      setSessionId(result.data.id);
       setIsRunning(true);
       toast.success(t('pomodoro.sessionStarted'));
     } catch (error) {
@@ -149,7 +149,7 @@ export function PomodoroTimer() {
 
   const handleReset = async () => {
     if (sessionId && isRunning) {
-      await interruptSession({ sessionId });
+      await interruptSession.mutateAsync({ sessionId });
     }
     setIsRunning(false);
     setTimeLeft(DURATIONS[mode]);
@@ -158,7 +158,7 @@ export function PomodoroTimer() {
 
   const handleModeChange = (newMode: typeof mode) => {
     if (isRunning) {
-      toast.error('Stop the current session first');
+      toast.error(t('pomodoro.stopCurrentSession', 'Stop the current session first'));
       return;
     }
     setMode(newMode);

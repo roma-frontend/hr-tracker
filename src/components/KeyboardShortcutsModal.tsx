@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 
@@ -71,10 +71,10 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-(--foreground)">
-                        Keyboard Shortcuts
+                        {t('keyboard.modalTitle')}
                       </h2>
                       <p className="text-sm text-(--text-muted) mt-0.5">
-                        Work faster with keyboard shortcuts
+                        {t('keyboard.modalSubtitle')}
                       </p>
                     </div>
                   </div>
@@ -135,10 +135,10 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
               <div className="border-t border-(--border) bg-(--background-subtle) px-6 py-4">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-(--text-muted)">
-                    t(&quot;keyboard.closeHint&quot;)
+                    {t('keyboard.closeHint')}
                   </p>
                   <Button onClick={onClose} variant="secondary" size="sm">
-                    Got it!
+                    {t('buttons.gotIt')}
                   </Button>
                 </div>
               </div>

@@ -1,153 +1,147 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useEffect, useRef } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 export function useSyncOAuthUser() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const { login, isAuthenticated } = useAuthStore();
-  const createOAuthUser = useMutation(api.users.auth.createOAuthUser);
   const syncingRef = useRef(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const syncUser = async () => {
-      console.log(
-        '[useSyncOAuthUser] Status:',
-        status,
-        'IsAuthenticated:',
-        isAuthenticated,
-        'Syncing:',
-        syncingRef.current,
-      );
-
-      // Already syncing or already authenticated — skip
       if (syncingRef.current || isAuthenticated) {
-        console.log(
-          '[useSyncOAuthUser] ⏭️  Skipping (syncing=' +
-            syncingRef.current +
-            ' or authenticated=' +
-            isAuthenticated +
-            ')',
-        );
         return;
       }
 
-      // Only run when Google OAuth session is ready
-      if (status !== 'authenticated' || !session?.user?.email) {
-        console.log(
-          '[useSyncOAuthUser] ⏳ Waiting for auth (status=' +
-            status +
-            ', email=' +
-            session?.user?.email +
-            ')',
-        );
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session?.user?.email) {
         return;
       }
-
-      console.log('[useSyncOAuthUser] 🔄 Starting OAuth user sync...');
-      console.log('[useSyncOAuthUser]   Session user:', {
-        email: session.user.email,
-        name: session.user.name,
-        image: session.user.image,
-      });
 
       syncingRef.current = true;
+      setIsProcessing(true);
+
       try {
-        // 1. Ensure user exists in Convex (create or update)
-        console.log('[useSyncOAuthUser] 📝 Calling createOAuthUser mutation...');
-        // Ensure name ALWAYS has a value
-        const finalName = session.user.name?.trim() || session.user.email.split('@')[0] || 'User';
-        await createOAuthUser({
-          email: session.user.email,
-          name: finalName,
-          avatarUrl: session.user.image ?? undefined,
-        });
-        console.log('[useSyncOAuthUser] ✅ User synced to Convex with name:', finalName);
+        const finalName = session.user.user_metadata?.name?.trim()
+          || session.user.email.split('@')[0]
+          || 'User';
 
-        // 2. Create JWT session via our API endpoint
-        console.log('[useSyncOAuthUser] 📡 Calling /api/auth/oauth-session...');
-        const res = await fetch('/api/auth/oauth-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: session.user.email,
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id, email, name, role, employee_type, department, position, avatar_url, is_approved, organizationId')
+          .eq('email', session.user.email)
+          .single();
+
+        if (!existingUser) {
+          const { data: newUser, error } = await supabase
+            .from('users')
+            .insert({
+              email: session.user.email,
+              name: finalName,
+              password_hash: 'oauth',
+              role: 'employee',
+              employee_type: 'staff',
+              is_active: true,
+              is_approved: false,
+              travel_allowance: 0,
+              paid_leave_balance: 20,
+              sick_leave_balance: 10,
+              family_leave_balance: 5,
+              created_at: Math.floor(Date.now() / 1000),
+              updated_at: Math.floor(Date.now() / 1000),
+            })
+            .select()
+            .single();
+
+          if (error) {
+            console.error('[useSyncOAuthUser] Error creating user:', error);
+            syncingRef.current = false;
+            setIsProcessing(false);
+            return;
+          }
+
+          login({
+            id: newUser.id,
             name: finalName,
-            avatarUrl: session.user.image ?? undefined,
-          }),
-        });
-
-        if (!res.ok && res.status === 503) {
-          const errorData = await res.json();
-          if (errorData.error === 'maintenance') {
-            window.location.href = `/login?maintenance=true${errorData.organizationId ? `&org=${errorData.organizationId}` : ''}`;
-            return;
-          }
-        }
-
-        if (res.ok) {
-          const data = await res.json();
-          console.log('[useSyncOAuthUser] ✅ OAuth session created:', {
-            userId: data.session?.userId,
-            name: data.session?.name,
-            email: data.session?.email,
-            role: data.session?.role,
+            email: newUser.email,
+            role: newUser.role,
+            avatar: newUser.avatar_url || session.user.user_metadata?.avatar_url || undefined,
+            department: newUser.department || undefined,
+            position: newUser.position || undefined,
+            employeeType: newUser.employee_type || undefined,
+            organizationId: newUser.organizationId || undefined,
+            isApproved: newUser.is_approved,
           });
-
-          if (data.session) {
-            // 3. Save to auth store — no reload needed!
-            console.log('[useSyncOAuthUser] 💾 Logging into Zustand store...');
-            login({
-              id: data.session.userId,
-              name: data.session.name,
-              email: data.session.email,
-              role: data.session.role,
-              organizationId: data.session.organizationId,
-              organizationSlug: data.session.organizationSlug,
-              organizationName: data.session.organizationName,
-              department: data.session.department,
-              position: data.session.position,
-              employeeType: data.session.employeeType,
-              avatar: data.session.avatar,
-            });
-            console.log('[useSyncOAuthUser] ✅ User logged into Zustand:', {
-              name: data.session.name,
-              email: data.session.email,
-              role: data.session.role,
-            });
-
-            // 4. Navigate to dashboard or callback URL — use window.location to avoid SSL issues on localhost
-            const params = new URLSearchParams(window.location.search);
-            const nextUrl = params.get('next');
-            const redirectUrl = nextUrl || '/dashboard';
-            console.log('[useSyncOAuthUser] 🎯 Redirecting to', redirectUrl);
-            window.location.href = redirectUrl;
-            return;
-          }
+        } else {
+          login({
+            id: existingUser.id,
+            name: existingUser.name || finalName,
+            email: existingUser.email,
+            role: existingUser.role,
+            avatar: existingUser.avatar_url || session.user.user_metadata?.avatar_url || undefined,
+            department: existingUser.department || undefined,
+            position: existingUser.position || undefined,
+            employeeType: existingUser.employee_type || undefined,
+            organizationId: existingUser.organizationId || undefined,
+            isApproved: existingUser.is_approved,
+          });
         }
 
-        // Fallback if API failed
-        console.error(
-          '[useSyncOAuthUser] ❌ OAuth session API failed:',
-          res.status,
-          await res.text(),
-        );
         const params = new URLSearchParams(window.location.search);
+        const isMaintenance = params.get('maintenance') === 'true';
+        const path = window.location.pathname;
+
+        if (isMaintenance) {
+          window.location.href = `/login?maintenance=true`;
+          return;
+        }
+
         const nextUrl = params.get('next');
         const redirectUrl = nextUrl || '/dashboard';
-        window.location.href = redirectUrl;
+
+        if (!isDashboardPage(path)) {
+          window.location.href = redirectUrl;
+        }
       } catch (error) {
-        console.error('[useSyncOAuthUser] ❌ Error syncing OAuth user:', error);
+        console.error('[useSyncOAuthUser] Error syncing OAuth user:', error);
         syncingRef.current = false;
+      } finally {
+        setIsProcessing(false);
       }
     };
 
     syncUser();
-  }, [status, session, isAuthenticated, login, router, createOAuthUser]);
+  }, [isAuthenticated, login, router]);
 
-  return { session, status };
+  function isDashboardPage(path: string): boolean {
+    const dashboardPrefixes = [
+      '/dashboard',
+      '/superadmin',
+      '/admin',
+      '/employees',
+      '/tasks',
+      '/calendar',
+      '/leaves',
+      '/attendance',
+      '/settings',
+      '/chat',
+      '/analytics',
+      '/reports',
+      '/join-requests',
+      '/org-requests',
+      '/approvals',
+      '/profile',
+      '/ai-site-editor',
+      '/drivers',
+      '/events',
+    ];
+    return dashboardPrefixes.some((prefix) => path === prefix || path.startsWith(prefix + '/'));
+  }
+
+  return { isProcessing };
 }

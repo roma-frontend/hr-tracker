@@ -1,22 +1,17 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Clock, CheckCircle2, Calendar, TrendingUp } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useTodayStats } from '@/hooks/useProductivity';
 
 export function QuickStatsWidget() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const stats = useQuery(
-    api.productivity.getTodayStats,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const stats = useTodayStats(user?.id || '');
 
-  if (!stats) {
+  if (!stats.data) {
     return (
       <div className="flex items-center justify-center py-8">
         <ShieldLoader size="md" />
@@ -28,31 +23,31 @@ export function QuickStatsWidget() {
     {
       icon: Clock,
       label: t('quickStats.today'),
-      value: `${stats.hoursWorkedToday}h`,
-      subtext: t('quickStats.thisWeek', { hours: stats.hoursWorkedWeek }),
+      value: `${stats.data.hoursWorkedToday}h`,
+      subtext: t('quickStats.thisWeek', { hours: stats.data.hoursWorkedWeek }),
       color: 'text-(--primary)',
       bgColor: 'bg-(--primary)/10',
     },
     {
       icon: CheckCircle2,
       label: t('quickStats.tasks'),
-      value: `${stats.completedTasksToday}/${stats.totalTasksWeek}`,
-      subtext: t('quickStats.doneThisWeek', { completed: stats.completedTasksWeek }),
+      value: `${stats.data.completedTasksToday}/${stats.data.totalTasksWeek}`,
+      subtext: t('quickStats.doneThisWeek', { completed: stats.data.completedTasksWeek }),
       color: 'text-(--primary)',
       bgColor: 'bg-(--primary)/10',
     },
     {
       icon: Calendar,
       label: t('quickStats.deadlines'),
-      value: stats.todayDeadlines,
+      value: stats.data.todayDeadlines,
       subtext: t('quickStats.dueToday'),
-      color: stats.todayDeadlines > 0 ? 'text-orange-500' : 'text-(--text-muted)',
-      bgColor: stats.todayDeadlines > 0 ? 'bg-orange-500/10' : 'bg-(--background-subtle)',
+      color: stats.data.todayDeadlines > 0 ? 'text-orange-500' : 'text-(--text-muted)',
+      bgColor: stats.data.todayDeadlines > 0 ? 'bg-orange-500/10' : 'bg-(--background-subtle)',
     },
     {
       icon: TrendingUp,
       label: t('quickStats.weeklyGoal'),
-      value: `${stats.weeklyGoalProgress}%`,
+      value: `${stats.data.weeklyGoalProgress}%`,
       subtext: t('quickStats.target', { hours: 40 }),
       color: 'text-(--primary)',
       bgColor: 'bg-(--primary)/10',
@@ -65,7 +60,7 @@ export function QuickStatsWidget() {
         <h3 className="text-xs font-semibold text-(--text-muted)">
           {t('quickStats.todaysOverview')}
         </h3>
-        {stats.isClockedIn && (
+        {stats.data.isClockedIn && (
           <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-(--primary) opacity-75"></span>
@@ -106,13 +101,13 @@ export function QuickStatsWidget() {
             {t('quickStats.weeklyProgress')}
           </span>
           <span className="text-[10px] font-semibold text-(--text-primary)">
-            {stats.weeklyGoalProgress}%
+            {stats.data?.weeklyGoalProgress}%
           </span>
         </div>
         <div className="h-1.5 rounded-full bg-(--background-subtle) overflow-hidden">
-          <div
+          <span
             className="h-full bg-(--primary) transition-all duration-500"
-            style={{ width: `${Math.min(100, stats.weeklyGoalProgress)}%` }}
+            style={{ width: `${Math.min(100, stats.data.weeklyGoalProgress)}%` }}
           />
         </div>
       </div>

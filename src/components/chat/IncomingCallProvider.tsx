@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { CallModal } from './CallModal';
@@ -15,61 +12,16 @@ export function IncomingCallProvider() {
   const { user } = useAuthStore();
   const { selectedOrgId } = useOrgSelectorStore();
 
-  const uid = user?.id as Id<'users'> | undefined;
-  const orgId = user?.organizationId as Id<'organizations'> | undefined;
-  const effectiveOrgId = selectedOrgId ? (selectedOrgId as Id<'organizations'>) : orgId;
+  const uid = user?.id as string | undefined;
+  const orgId = user?.organizationId as string | undefined;
+  const effectiveOrgId = selectedOrgId ?? orgId;
 
   const [activeCall, setActiveCall] = useState<ActiveCall | null>(null);
   const [incomingCall, setIncomingCall] = useState<ActiveCall | null>(null);
 
-  const conversations = useQuery(
-    api.chat.queries.getMyConversations,
-    uid ? { userId: uid, organizationId: effectiveOrgId } : 'skip',
-  );
-
-  const incomingCallData = useQuery(
-    api.chat.calls.getIncomingCalls,
-    uid && effectiveOrgId ? { userId: uid, organizationId: effectiveOrgId } : 'skip',
-  );
-
-  const answerCallMutation = useMutation(api.chat.calls.answerCall);
-  const declineCallMutation = useMutation(api.chat.calls.declineCall);
-
-  // Detect incoming calls globally
-  useEffect(() => {
-    if (!uid) return;
-
-    if (incomingCallData && incomingCallData.status === 'ringing') {
-      let initiatorName = 'Someone';
-
-      if (conversations) {
-        const conv = conversations.find((c) => c && c._id === incomingCallData.conversationId);
-        if (conv) {
-          const initiatorMember = (conv as any).members?.find(
-            (m: any) => m.userId === incomingCallData.initiatorId,
-          );
-          initiatorName = initiatorMember?.user?.name ?? (conv as any).otherUser?.name ?? 'Someone';
-        }
-      }
-
-      setIncomingCall({
-        callId: incomingCallData._id,
-        conversationId: incomingCallData.conversationId,
-        type: incomingCallData.type,
-        isInitiator: false,
-        remoteUserId: incomingCallData.initiatorId,
-        remoteUserName: initiatorName,
-      });
-
-      if (!activeCall) {
-        playChatMessageSound();
-      }
-    } else {
-      if (!activeCall) {
-        setIncomingCall(null);
-      }
-    }
-  }, [incomingCallData, conversations, uid, activeCall]);
+  // TODO: Implement real-time call signaling via Supabase Realtime or WebSocket
+  // For now, this component is stubbed and won't show incoming calls
+  // The ChatClient handles call initiation locally
 
   const handleEndCall = useCallback(() => {
     setActiveCall(null);
@@ -85,12 +37,12 @@ export function IncomingCallProvider() {
           call={activeCall}
           currentUserId={uid}
           currentUserName={user?.name ?? ''}
-          currentUserAvatar={user?.avatar}
+          currentUserAvatar={user?.avatar ?? undefined}
           onEnd={handleEndCall}
         />
       )}
 
-      {/* Incoming Call Modal — shown globally on any page */}
+      {/* Incoming Call Modal — stubbed until real-time signaling is implemented */}
       {incomingCall && !activeCall && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in">
           <div
@@ -129,10 +81,7 @@ export function IncomingCallProvider() {
             <div className="flex items-center gap-6 mt-2">
               {/* Decline */}
               <button
-                onClick={async () => {
-                  try {
-                    await declineCallMutation({ callId: incomingCall.callId, userId: uid });
-                  } catch {}
+                onClick={() => {
                   setIncomingCall(null);
                 }}
                 className="w-14 h-14 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 transition-all hover:scale-110 shadow-lg shadow-red-500/30"
@@ -143,12 +92,7 @@ export function IncomingCallProvider() {
 
               {/* Accept */}
               <button
-                onClick={async () => {
-                  try {
-                    await answerCallMutation({ callId: incomingCall.callId, userId: uid });
-                  } catch (e) {
-                    console.error('[IncomingCallProvider] Error answering call:', e);
-                  }
+                onClick={() => {
                   setActiveCall(incomingCall);
                   setIncomingCall(null);
                 }}

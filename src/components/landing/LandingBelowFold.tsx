@@ -29,7 +29,7 @@ const PricingPreview = dynamic(() => import('./PricingPreview'), {
   loading: () => (
     <div className="h-96 animate-pulse rounded-3xl" style={{ backgroundColor: 'var(--landing-card-bg)' }} />
   ),
-  ssr: false, // Uses Convex useQuery hook — can't SSR before ConvexProvider activates
+  ssr: false,
 });
 
 const SocialProof = dynamic(() => import('./SocialProof'), {

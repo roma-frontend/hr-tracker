@@ -6,9 +6,6 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,11 +50,18 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  useCompanyEvents,
+  usePendingLeaves,
+  useUpdateCompanyEvent,
+  useDeleteCompanyEvent,
+  useCheckLeaveConflicts,
+} from '@/hooks/useAdminEvents';
 
 type Priority = 'high' | 'medium' | 'low';
 
 interface CompanyEvent {
-  _id: Id<'companyEvents'>;
+  id: string;
   name: string;
   description?: string;
   startDate: number;
@@ -67,9 +71,8 @@ interface CompanyEvent {
   location?: string;
   requiredDepartments?: string[];
   creatorName?: string;
-  _creationTime?: number;
+  createdAt?: number;
   isAllDay?: boolean;
-  [key: string]: unknown;
 }
 const PRIORITY_CONFIG: Record<
   Priority,
@@ -121,22 +124,16 @@ export default function CompanyEventsPage() {
 
   const { user: authUser } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
-  const isSuperadmin = authUser?.role === 'superadmin'; // cspell:disable-line
-  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : authUser?.organizationId; // cspell:disable-line
-  const userId = authUser?.id as Id<'users'> | undefined;
+  const isSuperadmin = authUser?.role === 'superadmin';
+  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : authUser?.organizationId;
+  const userId = authUser?.id;
 
-  const events = useQuery(
-    api.events.getCompanyEvents,
-    effectiveOrgId ? { organizationId: effectiveOrgId as Id<'organizations'> } : 'skip',
-  );
-  const pendingLeaves = useQuery(
-    api.leaves.getLeavesForOrganization,
-    effectiveOrgId ? { organizationId: effectiveOrgId as Id<'organizations'> } : 'skip',
-  );
+  const { data: events, isLoading: isLoadingEvents } = useCompanyEvents(effectiveOrgId);
+  const { data: pendingLeaves } = usePendingLeaves(effectiveOrgId);
 
-  const updateEvent = useMutation(api.events.updateCompanyEvent);
-  const deleteEvent: typeof updateEvent = useMutation(api.events.deleteCompanyEvent);
-  const checkConflicts = useMutation(api.events.checkLeaveConflictsManual);
+  const updateEvent = useUpdateCompanyEvent();
+  const deleteEvent = useDeleteCompanyEvent();
+  const checkConflicts = useCheckLeaveConflicts();
 
   const isAdmin = authUser?.role === 'admin' || authUser?.role === 'superadmin';
 
@@ -181,12 +178,12 @@ export default function CompanyEventsPage() {
     const pendingList = (pendingLeaves ?? []).filter((l) => l.status === 'pending');
     for (const leave of pendingList) {
       try {
-        const result = await checkConflicts({
-          leaveRequestId: leave._id,
+        const result = await checkConflicts.mutateAsync({
+          leaveRequestId: leave.id,
           userId: leave.userId,
           startDate: new Date(leave.startDate).getTime(),
           endDate: new Date(leave.endDate).getTime(),
-          organizationId: effectiveOrgId as Id<'organizations'>,
+          organizationId: effectiveOrgId!,
         });
         totalConflicts += result.conflictsFound;
       } catch (e) {
@@ -414,7 +411,7 @@ export default function CompanyEventsPage() {
           </div>
 
           {/* Events List */}
-          {!events ? (
+          {isLoadingEvents || !events ? (
             <Card>
               <CardContent className="flex items-center justify-center py-12">
                 <ShieldLoader size="sm" variant="inline" />
@@ -450,7 +447,7 @@ export default function CompanyEventsPage() {
 
                   return (
                     <motion.div
-                      key={event._id}
+                      key={event.id}
                       layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -507,7 +504,7 @@ export default function CompanyEventsPage() {
                                 <span className="flex items-center gap-1">
                                   <Users className="w-3 h-3" />
                                   {event.requiredDepartments?.slice(0, 3).join(', ')}
-                                  {event.requiredDepartments?.length > 3 && ' + more'}
+                                  {event.requiredDepartments && event.requiredDepartments.length > 3 && ' + more'}
                                 </span>
                                 {'location' in event && (
                                   <span className="flex items-center gap-1">
@@ -545,7 +542,7 @@ export default function CompanyEventsPage() {
                                     )
                                   ) {
                                     try {
-                                      await deleteEvent({ eventId: event._id, userId: userId! });
+                                      await deleteEvent.mutateAsync({ eventId: event.id, userId: userId ?? '' });
                                       toast.success(t('events.eventDeleted', 'Event deleted'));
                                     } catch (error) {
                                       console.error(
@@ -577,10 +574,10 @@ export default function CompanyEventsPage() {
       )}
 
       {/* Conflicts Tab Content */}
-      {activeTab === 'conflicts' && (
+      {activeTab === 'conflicts' && effectiveOrgId && userId && (
         <LeaveConflictAlerts
-          organizationId={effectiveOrgId as Id<'organizations'>}
-          userId={userId!}
+          organizationId={effectiveOrgId}
+          userId={userId}
         />
       )}
 
@@ -597,8 +594,8 @@ export default function CompanyEventsPage() {
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-y-auto">
             <CreateEventWizard
-              organizationId={effectiveOrgId as Id<'organizations'>}
-              userId={userId!}
+              organizationId={effectiveOrgId ?? ''}
+              userId={userId ?? ''}
               onComplete={() => {
                 setShowCreateModal(false);
                 toast.success(t('events.eventCreated', 'Event created successfully'));
@@ -711,8 +708,8 @@ export default function CompanyEventsPage() {
                   className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
                   onClick={async () => {
                     try {
-                      await updateEvent({
-                        eventId: selectedEvent._id,
+                      await updateEvent.mutateAsync({
+                        eventId: selectedEvent.id,
                         userId: userId!,
                         name: (document.getElementById('edit-name') as HTMLInputElement).value,
                         description: (

@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Id } from '../../../convex/_generated/dataModel';
 import { SmartBanner } from '@/components/ui/SmartBanner';
 import { useRouter } from 'next/navigation';
 import { MessageSquare } from 'lucide-react';
 import { playNotificationSound } from '@/lib/notificationSound';
 import { useTranslation } from 'react-i18next';
+import { useNotifications } from '@/hooks/useNotifications';
 
 /**
  * Real-time notification banner that slides in from top
@@ -22,13 +20,7 @@ export function NotificationBanner() {
   const router = useRouter();
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
-  // Only admin users see the banner and hear the sound
-  if (!isAdmin) return null;
-
-  const notifications = useQuery(
-    api.notifications.getUserNotifications,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: notifications } = useNotifications(user?.id);
 
   const [lastSeenCount, setLastSeenCount] = useState<number | null>(null);
   const [newNotification, setNewNotification] = useState<{
@@ -38,9 +30,9 @@ export function NotificationBanner() {
   } | null>(null);
 
   useEffect(() => {
-    if (!notifications) return;
+    if (!isAdmin || !notifications) return;
 
-    const unread = notifications.filter((n) => !n.isRead);
+    const unread = notifications.filter((n: any) => !n.isRead);
     const currentCount = unread.length;
 
     // On first load, just record the count
@@ -70,11 +62,14 @@ export function NotificationBanner() {
     }
 
     setLastSeenCount(currentCount);
-  }, [notifications, lastSeenCount]);
+  }, [notifications, lastSeenCount, isAdmin]);
 
   const handleDismiss = useCallback(() => {
     setNewNotification(null);
   }, []);
+
+  // Only admin users see the banner and hear the sound
+  if (!isAdmin) return null;
 
   if (!newNotification) return null;
 

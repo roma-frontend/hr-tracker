@@ -1,19 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
-
-async function convexMutation(path: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
-  return data.value;
-}
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * Verify JWT auth token.
@@ -48,17 +36,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing userId or event' }, { status: 400 });
     }
 
-    await convexMutation('security:logLoginAttempt', {
+    const supabase = await createClient();
+    const { error } = await supabase.from('login_attempts').insert({
       email: '',
-      userId,
+      userid: userId,
       success: false,
       method: 'password',
-      blockedReason: `${event}: ${details ?? ''}`,
+      blocked_reason: `${event}: ${details ?? ''}`,
       ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown',
-      userAgent: req.headers.get('user-agent') ?? undefined,
-      riskScore: 90,
-      riskFactors: [event],
+      user_agent: req.headers.get('user-agent') ?? undefined,
+      risk_score: 90,
+      risk_factors: [event],
+      created_at: Date.now(),
     });
+
+    if (error) {
+      throw new Error(error.message);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

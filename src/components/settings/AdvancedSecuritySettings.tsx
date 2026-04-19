@@ -96,7 +96,7 @@ export function AdvancedSecuritySettings() {
       setBackupCodes(data.backupCodes);
       setSetupStep('qr');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to start 2FA setup');
+      toast.error(err.message || t('toasts.failedToStart2fa'));
       setSetupStep('idle');
     }
   };
@@ -257,12 +257,12 @@ export function AdvancedSecuritySettings() {
                 <div>
                   <p className="text-sm font-medium text-(--text-primary)">
                     {twoFactorEnabled
-                      ? 'Two-factor authentication is active'
+                      ? t('settingsAdvancedSecurity.twoFactorActive')
                       : t('settingsAdvancedSecurity.enable2fa')}
-                  </p>
-                  <p className="text-xs text-(--text-muted) mt-0.5">
-                    {twoFactorEnabled
-                      ? 'Your account is protected with an authenticator app'
+                    </p>
+                    <p className="text-xs text-(--text-muted) mt-0.5">
+                      {twoFactorEnabled
+                        ? t('settingsAdvancedSecurity.twoFactorActiveDesc')
                       : t('settingsAdvancedSecurity.enable2faDesc')}
                   </p>
                 </div>
@@ -274,12 +274,12 @@ export function AdvancedSecuritySettings() {
                   className="text-red-500 hover:text-red-600 border-red-200"
                   onClick={() => setShowDisableConfirm(true)}
                 >
-                  Disable
+                  {t('buttons.disable')}
                 </Button>
               ) : (
                 <Button variant="default" size="sm" onClick={handleStartSetup} disabled={loading}>
                   {loading && <ShieldLoader size="xs" variant="inline" />}
-                  {!loading && 'Enable'}
+                  {!loading && t('buttons.enable')}
                 </Button>
               )}
             </div>
@@ -289,7 +289,7 @@ export function AdvancedSecuritySettings() {
           {setupStep === 'loading' && (
             <div className="flex items-center justify-center py-8">
               <ShieldLoader size="sm" variant="inline" />
-              <span className="ml-2 text-sm text-(--text-muted)">Setting up 2FA...</span>
+              <span className="ml-2 text-sm text-(--text-muted)">{t('settingsAdvancedSecurity.settingUp2fa')}</span>
             </div>
           )}
 
@@ -298,10 +298,10 @@ export function AdvancedSecuritySettings() {
             <div className="space-y-4">
               <div className="p-4 rounded-lg border border-(--primary)/20 bg-(--primary)/5">
                 <p className="text-sm font-medium text-(--text-primary) mb-3">
-                  Step 1: Scan QR Code
+                  {t('settingsAdvancedSecurity.step1ScanQr')}
                 </p>
                 <p className="text-xs text-(--text-muted) mb-4">
-                  Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+                  {t('settingsAdvancedSecurity.step1ScanQrDesc')}
                 </p>
                 <div className="flex justify-center mb-4">
                   <div className="bg-white p-3 rounded-lg">
@@ -309,9 +309,9 @@ export function AdvancedSecuritySettings() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-(--text-muted) mb-1">
-                    Or enter this code manually:
-                  </p>
+                    <p className="text-xs text-(--text-muted) mb-1">
+                      {t('settingsAdvancedSecurity.orEnterManually')}
+                    </p>
                   <div className="flex items-center justify-center gap-2">
                     <code className="text-sm font-mono bg-(--surface-hover) px-3 py-1.5 rounded border border-(--border)">
                       {totpSecret}
@@ -340,7 +340,7 @@ export function AdvancedSecuritySettings() {
                     setTotpSecret('');
                   }}
                 >
-                  Cancel
+                  {t('buttons.cancel')}
                 </Button>
                 <Button
                   className="flex-1"
@@ -349,7 +349,7 @@ export function AdvancedSecuritySettings() {
                     setTimeout(() => verifyInputRef.current?.focus(), 100);
                   }}
                 >
-                  Next: Verify Code
+                  {t('buttons.nextVerifyCode')}
                 </Button>
               </div>
             </div>
@@ -360,10 +360,10 @@ export function AdvancedSecuritySettings() {
             <div className="space-y-4">
               <div className="p-4 rounded-lg border border-(--primary)/20 bg-(--primary)/5">
                 <p className="text-sm font-medium text-(--text-primary) mb-2">
-                  Step 2: Verify Code
+                  {t('settingsAdvancedSecurity.step2VerifyCode')}
                 </p>
                 <p className="text-xs text-(--text-muted) mb-4">
-                  Enter the 6-digit code from your authenticator app to verify setup
+                  {t('settingsAdvancedSecurity.step2VerifyCodeDesc')}
                 </p>
                 <input
                   ref={verifyInputRef}
@@ -393,14 +393,14 @@ export function AdvancedSecuritySettings() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setSetupStep('qr')}>
-                  Back
+                  {t('buttons.back')}
                 </Button>
                 <Button
                   className="flex-1"
                   onClick={handleVerifySetup}
                   disabled={verifyCode.length !== 6}
                 >
-                  Verify & Enable
+                  {t('buttons.verifyEnable')}
                 </Button>
               </div>
             </div>
@@ -412,11 +412,10 @@ export function AdvancedSecuritySettings() {
               <div className="p-4 rounded-lg border border-green-500/20 bg-green-500/5">
                 <div className="flex items-center gap-2 mb-3">
                   <ShieldCheck className="w-5 h-5 text-green-600" />
-                  <p className="text-sm font-medium text-green-600">2FA Enabled Successfully!</p>
+                  <p className="text-sm font-medium text-green-600">{t('settingsAdvancedSecurity.twoFactorEnabledSuccess')}</p>
                 </div>
                 <p className="text-xs text-(--text-muted) mb-4">
-                  Save these backup codes in a safe place. Each code can only be used once. If you
-                  lose access to your authenticator app, you can use these codes to sign in.
+                  {t('settingsAdvancedSecurity.backupCodesDesc')}
                 </p>
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   {backupCodes.map((code, i) => (
@@ -436,27 +435,27 @@ export function AdvancedSecuritySettings() {
                 >
                   {copiedCodes ? (
                     <>
-                      <Check className="w-4 h-4 mr-2 text-green-500" /> Copied!
+                      <Check className="w-4 h-4 mr-2 text-green-500" /> {t('buttons.copied')}
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4 mr-2" /> Copy All Codes
+                      <Copy className="w-4 h-4 mr-2" /> {t('buttons.copyAllCodes')}
                     </>
                   )}
                 </Button>
               </div>
-              <Button
-                className="w-full"
-                onClick={() => {
-                  setSetupStep('idle');
-                  setQrCodeUrl('');
-                  setTotpSecret('');
-                  setBackupCodes([]);
-                  setVerifyCode('');
-                }}
-              >
-                Done
-              </Button>
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    setSetupStep('idle');
+                    setQrCodeUrl('');
+                    setTotpSecret('');
+                    setBackupCodes([]);
+                    setVerifyCode('');
+                  }}
+                >
+                  {t('buttons.done')}
+                </Button>
             </div>
           )}
 
@@ -465,10 +464,10 @@ export function AdvancedSecuritySettings() {
             <div className="space-y-4">
               <div className="p-4 rounded-lg border border-red-500/20 bg-red-500/5">
                 <p className="text-sm font-medium text-red-600 mb-2">
-                  Disable Two-Factor Authentication
+                  {t('settingsAdvancedSecurity.disable2fa')}
                 </p>
                 <p className="text-xs text-(--text-muted) mb-4">
-                  Enter your password to confirm. This will remove 2FA protection from your account.
+                  {t('settingsAdvancedSecurity.disable2faDesc')}
                 </p>
                 <input
                   type="password"
@@ -477,7 +476,7 @@ export function AdvancedSecuritySettings() {
                     setDisablePassword(e.target.value);
                     setDisableError(null);
                   }}
-                  placeholder="Enter your password"
+                  placeholder={t('settingsAdvancedSecurity.enterPassword')}
                   className="w-full py-2 px-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
                   style={{
                     background: 'var(--surface-hover)',
@@ -497,7 +496,7 @@ export function AdvancedSecuritySettings() {
                     setDisableError(null);
                   }}
                 >
-                  Cancel
+                  {t('buttons.cancel')}
                 </Button>
                 <Button
                   variant="destructive"
@@ -506,7 +505,7 @@ export function AdvancedSecuritySettings() {
                   disabled={!disablePassword || disableLoading}
                 >
                   {disableLoading && <ShieldLoader size="xs" variant="inline" />}
-                  {!disableLoading && 'Disable 2FA'}
+                  {!disableLoading && t('settingsAdvancedSecurity.disable2fa')}
                 </Button>
               </div>
             </div>

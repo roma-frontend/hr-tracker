@@ -1,19 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
-
-async function convexQuery(path: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') return null;
-  return data.value;
-}
+import { createClient } from '@/lib/supabase/server';
 
 function euclideanDistance(a: number[], b: number[]): number {
   if (a.length !== b.length) return 999;
@@ -59,15 +47,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden. You can only verify your own face data.' }, { status: 403 });
     }
 
-    // Get stored face descriptor
-    const profile = await convexQuery('faceRecognition:getFaceDescriptor', { userId });
+    // Get stored face descriptor from Supabase
+    const supabase = await createClient();
+    const { data: profile } = await supabase
+      .from('users')
+      .select('face_descriptor')
+      .eq('id', userId)
+      .single();
 
-    if (!profile?.faceDescriptor) {
+    if (!profile?.face_descriptor) {
       // No face registered → skip verification (allow)
       return NextResponse.json({ match: true, reason: 'no_face_registered' });
     }
 
-    const distance = euclideanDistance(descriptor, profile.faceDescriptor);
+    const storedDescriptor = profile.face_descriptor as number[];
+    const distance = euclideanDistance(descriptor, storedDescriptor);
     const THRESHOLD = 0.5; // lower = stricter. 0.4-0.6 is typical
 
     return NextResponse.json({

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,7 @@ export default function Loading() {
       className="min-h-screen flex items-center justify-center"
       style={{ background: 'var(--background)' }}
     >
-      <ShieldLoader size="xl" message="Loading your workspace..." />
+      <ShieldLoader size="xl" message={t('common.loadingWorkspace')} />
     </div>
   );
 }

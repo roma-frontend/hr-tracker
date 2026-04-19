@@ -34,7 +34,7 @@ import { DriverCard } from '../cards/DriverCard';
 import { NoDriversEmptyState } from '../empty-states/NoDriversEmptyState';
 
 interface Driver {
-  _id: string;
+  id: string;
   userName: string;
   userAvatar?: string;
   userPosition?: string;
@@ -185,9 +185,9 @@ export const AvailableDriversSection = memo(function AvailableDriversSection({
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 drivers-stagger">
             {filteredDrivers.map((driver) => (
               <DriverCard
-                key={driver._id}
+                key={driver.id}
                 driver={driver}
-                isFavorite={favoriteIds.has(driver._id)}
+                isFavorite={favoriteIds.has(driver.id)}
                 onBook={onBook}
                 onCalendar={onCalendar}
                 onToggleFavorite={onToggleFavorite}

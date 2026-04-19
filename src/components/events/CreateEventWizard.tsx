@@ -17,14 +17,12 @@ import {
   CheckboxStep,
 } from '@/components/ui/wizard-step-components';
 import { Calendar, Clock, Users, MapPin, Bell, AlertCircle } from 'lucide-react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useCreateCompanyEvent } from '@/hooks/useEvents';
 import { toast } from 'sonner';
 
 interface CreateEventWizardProps {
-  organizationId: Id<'organizations'>;
-  userId: Id<'users'>;
+  organizationId: string;
+  userId: string;
   onComplete?: () => void;
   onCancel?: () => void;
 }
@@ -49,7 +47,7 @@ export function CreateEventWizard({
   onCancel,
 }: CreateEventWizardProps) {
   const { t } = useTranslation();
-  const createEvent = useMutation(api.events.createCompanyEvent);
+  const { mutateAsync: createEvent } = useCreateCompanyEvent();
 
   const steps: WizardStep[] = [
     {

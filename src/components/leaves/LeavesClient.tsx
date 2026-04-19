@@ -6,9 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Search, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { LeaveRequestModal } from '@/components/leaves/LeaveRequestModal';
 import { LeaveRequestWizard } from '@/components/leaves/LeaveRequestWizard';
-import { useAuthStore, type User } from '@/store/useAuthStore';
+import { useAuthStore, type UserProfile } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import {
   LEAVE_TYPE_LABELS,
@@ -34,6 +31,14 @@ import dynamic from 'next/dynamic';
 import { playNotificationSound, sendBrowserNotification } from '@/lib/notificationSound';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { ShieldLoader } from '../ui/ShieldLoader';
+import {
+  useLeaves,
+  useUnreadLeavesCount,
+  useApproveLeave,
+  useRejectLeave,
+  useDeleteLeave,
+  useMarkLeaveAsRead,
+} from '@/hooks/useLeaves';
 
 const AILeaveAssistant = dynamic(() => import('@/components/leaves/AILeaveAssistant'), {
   ssr: false,
@@ -84,7 +89,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
 
 export function LeavesClient() {
   const { t } = useTranslation();
-  const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
+  const user = useAuthStore(useShallow((state: { user: UserProfile | null }) => state.user));
   const selectedOrgId = useSelectedOrganization();
   const [wizardOpen, setWizardOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -94,28 +99,28 @@ export function LeavesClient() {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [previousUnreadCount, setPreviousUnreadCount] = useState(0);
 
-  // Determine which query to use based on selectedOrgId
   const shouldUseOrgQuery = selectedOrgId && user?.id;
   const queryParams = shouldUseOrgQuery
-    ? { organizationId: selectedOrgId as Id<'organizations'> }
+    ? { organizationId: selectedOrgId }
     : user?.id
-      ? { requesterId: user.id as Id<'users'> }
+      ? { requesterId: user.id }
       : null;
 
-  // Use organization-specific query if superadmin has selected an org, otherwise use default
-  const leaves = useQuery(
-    shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    user?.id && queryParams !== null ? queryParams : 'skip',
-  );
-  const unreadCount = useQuery(
-    api.leaves.getUnreadCount,
-    user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: leavesData, isLoading: leavesLoading, isError: leavesError } = useLeaves({
+    organizationId: shouldUseOrgQuery ? selectedOrgId : undefined,
+    requesterId: (!shouldUseOrgQuery && user?.id) ? user.id : undefined,
+    enabled: !!user?.id,
+  });
 
-  const approveLeave = useMutation(api.leaves.approveLeave);
-  const rejectLeave = useMutation(api.leaves.rejectLeave);
-  const deleteLeave = useMutation(api.leaves.deleteLeave);
-  const markLeaveAsRead = useMutation(api.leaves.markLeaveAsRead);
+  const leaves = leavesData || [];
+
+  const { data: unreadCountData } = useUnreadLeavesCount(user?.id);
+  const unreadCount = unreadCountData || 0;
+
+  const approveLeaveMutation = useApproveLeave();
+  const rejectLeaveMutation = useRejectLeave();
+  const deleteLeaveMutation = useDeleteLeave();
+  const markLeaveAsReadMutation = useMarkLeaveAsRead();
 
   // Play notification sound when new unread requests appear (only for admin, once per request)
   useEffect(() => {
@@ -136,7 +141,7 @@ export function LeavesClient() {
 
   const filtered = useMemo(() => {
     if (!leaves) return [];
-    return leaves.filter((l) => {
+    return leaves.filter((l: any) => {
       if (!search) return true;
       return (
         (l.userName ?? '').toLowerCase().includes(search.toLowerCase()) ||
@@ -146,18 +151,16 @@ export function LeavesClient() {
     });
   }, [leaves, search]);
 
-  const handleApprove = async (id: Id<'leaveRequests'>, comment?: string) => {
+  const handleApprove = async (id: string, comment?: string) => {
     if (!user?.id) {
       toast.error(t('toasts.pleaseLoginAgain'));
       return;
     }
     try {
-      // Mark as read first
-      await markLeaveAsRead({ leaveId: id });
-
-      await approveLeave({
+      await markLeaveAsReadMutation.mutateAsync(id);
+      await approveLeaveMutation.mutateAsync({
         leaveId: id,
-        reviewerId: user.id as Id<'users'>,
+        reviewedBy: user.id,
         comment,
       });
 
@@ -169,18 +172,16 @@ export function LeavesClient() {
     }
   };
 
-  const handleReject = async (id: Id<'leaveRequests'>, comment?: string) => {
+  const handleReject = async (id: string, comment?: string) => {
     if (!user?.id) {
       toast.error(t('errors.unauthorized'));
       return;
     }
     try {
-      // Mark as read first
-      await markLeaveAsRead({ leaveId: id });
-
-      await rejectLeave({
+      await markLeaveAsReadMutation.mutateAsync(id);
+      await rejectLeaveMutation.mutateAsync({
         leaveId: id,
-        reviewerId: user.id as Id<'users'>,
+        reviewedBy: user.id,
         comment,
       });
 
@@ -192,13 +193,13 @@ export function LeavesClient() {
     }
   };
 
-  const handleDelete = async (id: Id<'leaveRequests'>) => {
+  const handleDelete = async (id: string) => {
     if (!user?.id) {
       toast.error(t('errors.unauthorized'));
       return;
     }
     try {
-      await deleteLeave({ leaveId: id, requesterId: user.id as Id<'users'> });
+      await deleteLeaveMutation.mutateAsync(id);
       toast.success(t('leave.deletedSuccess'));
     } catch (err) {
       console.error('Delete error:', err);
@@ -206,26 +207,22 @@ export function LeavesClient() {
     }
   };
 
-  const isLoading = leaves === undefined;
-  const isError = leaves === null;
   const isSuperadmin = user?.role === 'superadmin';
   const isAdmin = !isSuperadmin && (user?.role === 'admin' || user?.role === 'supervisor');
+  const isLoading = leavesLoading;
+  const isError = leavesError;
 
   if (isError)
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-          <Plus className="w-8 h-8 text-amber-500" />
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
+          <XCircle className="w-8 h-8 text-red-500" />
         </div>
         <h2 className="text-xl font-bold text-(--text-primary)">
-          {t('dashboard.convexNotDeployed')}
+          {t('leave.errorLoading')}
         </h2>
         <p className="text-(--text-muted) text-sm max-w-sm">
-          Run{' '}
-          <code className="bg-(--background-subtle) px-2 py-0.5 rounded text-[#2563eb]">
-            npx convex dev
-          </code>{' '}
-          in the terminal to connect to the database.
+          {t('leave.errorLoadingDesc')}
         </p>
       </div>
     );
@@ -347,15 +344,15 @@ export function LeavesClient() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-(--border)">
-                    {filtered.map((req, i) => (
-                      <React.Fragment key={req._id}>
+                    {filtered.map((req: any, i: number) => (
+                      <React.Fragment key={req.id}>
                         <tr
                           className="hover:bg-(--background-subtle) transition-colors cursor-pointer animate-fade-in"
                           style={{ animationDelay: `${i * 30}ms` }}
                           onClick={() =>
                             isAdmin &&
                             req.status === 'pending' &&
-                            setExpandedRow(expandedRow === req._id ? null : req._id)
+                            setExpandedRow(expandedRow === req.id ? null : req.id)
                           }
                         >
                           <td className="px-6 py-3">
@@ -399,7 +396,7 @@ export function LeavesClient() {
                                       className="text-emerald-500 hover:text-emerald-400"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleApprove(req._id);
+                                        handleApprove(req.id);
                                       }}
                                     >
                                       <CheckCircle className="w-4 h-4" />
@@ -410,7 +407,7 @@ export function LeavesClient() {
                                       className="text-red-500 hover:text-red-400"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleReject(req._id);
+                                        handleReject(req.id);
                                       }}
                                     >
                                       <XCircle className="w-4 h-4" />
@@ -423,7 +420,7 @@ export function LeavesClient() {
                                   className="text-(--text-muted) hover:text-red-400"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDelete(req._id);
+                                    handleDelete(req.id);
                                   }}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -434,14 +431,14 @@ export function LeavesClient() {
                         </tr>
 
                         {/* AI Assistant Expandable Row */}
-                        {isAdmin && req.status === 'pending' && expandedRow === req._id && (
+                        {isAdmin && req.status === 'pending' && expandedRow === req.id && (
                           <tr className="animate-fade-in">
                             <td colSpan={7} className="px-6 py-4 bg-(--background-subtle)">
                               <AILeaveAssistant
-                                leaveRequestId={req._id}
+                                leaveRequestId={req.id}
                                 userId={req.userId}
-                                onApprove={(comment?: string) => handleApprove(req._id, comment)}
-                                onReject={(comment?: string) => handleReject(req._id, comment)}
+                                onApprove={(comment?: string) => handleApprove(req.id, comment)}
+                                onReject={(comment?: string) => handleReject(req.id, comment)}
                               />
                             </td>
                           </tr>
@@ -459,9 +456,9 @@ export function LeavesClient() {
       {/* Leave Request Wizard (New) */}
       {wizardOpen && user?.id && (
         <LeaveRequestWizard
-          userId={user.id as Id<'users'>}
+          userId={user.id}
           isSuperadmin={isSuperadmin}
-          selectedOrgId={selectedOrgId as Id<'organizations'> | undefined}
+          selectedOrgId={selectedOrgId || undefined}
           onComplete={() => setWizardOpen(false)}
           onCancel={() => setWizardOpen(false)}
         />

@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,46 +19,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate IDs are proper Convex IDs
-    if (!userId || !userId.startsWith('jn')) {
-      console.error('[book-driver] Invalid userId:', userId);
-      return NextResponse.json({ error: 'Invalid userId format' }, { status: 400 });
-    }
-    if (!organizationId || (!organizationId.startsWith('jn') && !organizationId.startsWith('n5'))) {
-      console.error('[book-driver] Invalid organizationId:', organizationId);
-      return NextResponse.json({ error: 'Invalid organizationId format' }, { status: 400 });
-    }
-    if (!driverId || !driverId.startsWith('jn')) {
-      console.error('[book-driver] Invalid driverId:', driverId);
-      return NextResponse.json(
-        { error: `Invalid driverId format. Must start with "jn", got: "${driverId}"` },
-        { status: 400 },
-      );
-    }
+    const supabase = await createClient();
 
     // ═══════════════════════════════════════════════════════════════
     // CONFLICT DETECTION — Check driver availability
     // ═══════════════════════════════════════════════════════════════
-    const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<'organizations'>,
-      requestType: 'driver' as const,
-      userId: userId as Id<'users'>,
-      startDate: new Date(startTime).getTime(),
-      endDate: new Date(endTime).getTime(),
-      metadata: { driverId: driverId as Id<'drivers'> },
-    });
+    const { data: existingSchedules } = await supabase
+      .from('driver_schedules')
+      .select('*')
+      .eq('driverid', driverId)
+      .eq('status', 'scheduled')
+      .or(`start_time.lte.${new Date(endTime).getTime()},end_time.gte.${new Date(startTime).getTime()}`);
 
-    // Если есть критические конфликты (водитель занят)
-    if (conflictResult.hasCritical) {
-      const criticalConflicts = conflictResult.conflicts.filter((c) => c.severity === 'critical');
+    const hasConflict = existingSchedules && existingSchedules.length > 0;
+
+    if (hasConflict) {
+      const conflictMessages = existingSchedules.map((s: any) => ({
+        type: 'driver_schedule_conflict',
+        severity: 'critical',
+        message: `Driver is already scheduled from ${new Date(s.start_time).toLocaleString()} to ${new Date(s.end_time).toLocaleString()}`,
+      }));
 
       return NextResponse.json({
         success: false,
         conflict: true,
         hasCriticalConflicts: true,
-        conflictCount: conflictResult.conflicts.length,
-        message: buildDriverConflictMessage(criticalConflicts, startTime, endTime),
-        conflicts: conflictResult.conflicts,
+        conflictCount: conflictMessages.length,
+        message: buildDriverConflictMessage(conflictMessages, startTime, endTime),
+        conflicts: conflictMessages,
         suggestion: 'Please choose a different time or select another driver.',
       });
     }
@@ -70,28 +54,35 @@ export async function POST(req: NextRequest) {
     // ═══════════════════════════════════════════════════════════════
     // CREATE DRIVER REQUEST
     // ═══════════════════════════════════════════════════════════════
-    const requestId = await convex.mutation(api.drivers.requests_mutations.requestDriver, {
-      organizationId: organizationId as Id<'organizations'>,
-      requesterId: userId as Id<'users'>,
-      driverId: driverId as Id<'drivers'>,
-      startTime,
-      endTime,
-      tripInfo: {
-        from: tripInfo.from || 'Not specified',
-        to: tripInfo.to || 'Not specified',
-        purpose: tripInfo.purpose || 'AI Booking',
-        passengerCount: tripInfo.passengerCount || 1,
-        notes: tripInfo.notes || 'Booked via AI Assistant',
-      },
-    });
+    const { data: request, error } = await supabase
+      .from('driver_requests')
+      .insert({
+        organizationId,
+        requesterid: userId,
+        driverid: driverId,
+        start_time: new Date(startTime).getTime(),
+        end_time: new Date(endTime).getTime(),
+        trip_from: tripInfo.from || 'Not specified',
+        trip_to: tripInfo.to || 'Not specified',
+        trip_purpose: tripInfo.purpose || 'AI Booking',
+        passenger_count: tripInfo.passengerCount || 1,
+        trip_notes: tripInfo.notes || 'Booked via AI Assistant',
+        status: 'pending',
+      })
+      .select()
+      .single();
 
-    console.log('[book-driver] Request created:', requestId);
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log('[book-driver] Request created:', request.id);
 
     return NextResponse.json({
       message: '✅ Driver request submitted successfully!',
       success: true,
-      requestId,
-      hasWarnings: conflictResult.conflicts.filter((c) => c.severity === 'warning').length > 0,
+      requestId: request.id,
+      hasWarnings: false,
     });
   } catch (error: any) {
     console.error('[book-driver] Error:', error);
@@ -111,9 +102,9 @@ function buildDriverConflictMessage(conflicts: any[], startTime: string, endTime
   let message = `🚨 **Driver unavailable for requested time** (${startDate} → ${endDate}):\n\n`;
 
   conflicts.forEach((conflict, i) => {
-    message += `${i + 1}. **${conflict.title}**\n`;
+    message += `${i + 1}. **${conflict.type}**\n`;
     message += `   ${conflict.message}\n`;
-    message += `   💡 ${conflict.suggestion}\n\n`;
+    message += `   💡 Choose a different time or select another driver.\n\n`;
   });
 
   return message;

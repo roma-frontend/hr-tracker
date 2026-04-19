@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { applyRateLimit, PASSWORD_RESET_RATE_LIMIT } from '@/lib/rate-limit';
-
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
-
-async function convexMutation(name: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path: name, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
-  return data.value;
-}
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   // Rate limiting: 3 requests per hour
@@ -31,11 +19,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convex handles hashing internally (same as login/register)
-    await convexMutation('auth:resetPassword', {
-      token,
-      newPassword,
+    // Verify the token is valid and not expired
+    const supabase = await createClient();
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, reset_password_token, reset_password_expiry')
+      .eq('reset_password_token', token)
+      .single();
+
+    if (error || !user) {
+      return NextResponse.json({ error: 'Invalid or expired reset token' }, { status: 400 });
+    }
+
+    if (!user.reset_password_expiry || Date.now() > user.reset_password_expiry) {
+      return NextResponse.json({ error: 'Reset token has expired' }, { status: 400 });
+    }
+
+    // Update password using Supabase Auth
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
     });
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    // Clear the reset token
+    await supabase
+      .from('users')
+      .update({
+        reset_password_token: null,
+        reset_password_expiry: null,
+      })
+      .eq('id', user.id);
 
     return NextResponse.json({ success: true });
   } catch (err) {

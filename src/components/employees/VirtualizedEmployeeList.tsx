@@ -6,7 +6,7 @@ import { EmployeeCard } from './EmployeeCard';
 import { Users } from 'lucide-react';
 
 interface Employee {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   position?: string;
@@ -40,7 +40,7 @@ interface VirtualizedEmployeeListProps {
   roleConfig: Record<string, RoleConfig>;
   typeConfig: Record<string, TypeConfig>;
   getPresenceBadge: (status: string | undefined) => { labelKey: string; cls: string };
-  supervisors?: Array<{ _id: string; name: string }>;
+  supervisors?: Array<{ id: string; name: string }>;
   canManage: boolean;
   isAdmin: boolean;
   openMenuId: string | null;
@@ -124,7 +124,7 @@ export function VirtualizedEmployeeList({
 
             return (
               <div
-                key={emp._id}
+                key={emp.id}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -176,7 +176,7 @@ export function VirtualizedEmployeeList({
 
           return (
             <div
-              key={emp._id}
+              key={emp.id}
               style={{
                 position: 'absolute',
                 top: 0,

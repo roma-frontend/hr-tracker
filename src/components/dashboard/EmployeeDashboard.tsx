@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { Suspense, useMemo, memo } from 'react';
 import dynamic from 'next/dynamic';
@@ -14,9 +14,7 @@ import {
   Star,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
+import { useUserLeaves, useUserData, useLatestRating, useMonthlyStats } from '@/hooks/useDashboard';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -84,35 +82,23 @@ export function EmployeeDashboard() {
   // ═══════════════════════════════════════════════════════════════
   // HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   // ═══════════════════════════════════════════════════════════════
-  const leaves = useQuery(
-    api.leaves.getAllLeaves,
-    user?.id && user.organizationId ? { requesterId: user.id as Id<'users'> } : 'skip',
-  );
-  const userData = useQuery(
-    api.users.queries.getUserById,
-    user?.id ? { userId: user.id as any } : 'skip',
-  );
-  const latestRating = useQuery(
-    api.supervisorRatings.getLatestRating,
-    user?.id ? { employeeId: user.id as any } : 'skip',
-  );
-  const monthlyStats = useQuery(
-    api.timeTracking.getMonthlyStats,
-    user?.id ? { userId: user.id as any, month: new Date().toISOString().slice(0, 7) } : 'skip',
-  );
+  const { data: leaves, isLoading: leavesLoading } = useUserLeaves();
+  const { data: userData, isLoading: userDataLoading } = useUserData();
+  const { data: latestRating, isLoading: ratingLoading } = useLatestRating();
+  const { data: monthlyStats, isLoading: statsLoading } = useMonthlyStats();
 
   // ═══════════════════════════════════════════════════════════════
   // OPTIMIZED: Memoize all data transformations
   // ═══════════════════════════════════════════════════════════════
   const leaveStats = useMemo(() => {
-    const myLeaves = leaves?.filter((l) => l.userId === user?.id) ?? [];
+    const myLeaves = leaves ?? [];
     return {
       myLeaves,
-      pendingLeaves: myLeaves.filter((l) => l.status === 'pending'),
-      approvedLeaves: myLeaves.filter((l) => l.status === 'approved'),
-      rejectedLeaves: myLeaves.filter((l) => l.status === 'rejected'),
+      pendingLeaves: myLeaves.filter((l: any) => l.status === 'pending'),
+      approvedLeaves: myLeaves.filter((l: any) => l.status === 'approved'),
+      rejectedLeaves: myLeaves.filter((l: any) => l.status === 'rejected'),
     };
-  }, [leaves, user?.id]);
+  }, [leaves]);
 
   // Don't render anything if user is not loaded (Providers handles onboarding redirect)
   if (!user) {
@@ -124,6 +110,16 @@ export function EmployeeDashboard() {
   }
 
   const today = new Date();
+
+  const isLoading = leavesLoading || userDataLoading || ratingLoading || statsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-(--background)">
+        <ShieldLoader size="lg" />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -425,7 +421,7 @@ export function EmployeeDashboard() {
               <div className="space-y-3">
                 {leaveStats.myLeaves.slice(0, 5).map((leave: any) => (
                   <div
-                    key={leave._id}
+                    key={leave.id}
                     className="flex items-center justify-between p-3 rounded-lg border border-(--border) hover:bg-(--background-subtle) transition-colors"
                   >
                     <div className="flex-1">

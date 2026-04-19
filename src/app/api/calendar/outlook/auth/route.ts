@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'No authorization code' }, { status: 400 });
   }
 
-  const clientId = process.env.MICROSOFT_CLIENT_ID;
+  const clientId = process.env.MICROSOFT_CLIENTid;
   const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/outlook/auth`;
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         },
         body: new URLSearchParams({
           code,
-          client_id: clientId,
+          clientid: clientId,
           client_secret: clientSecret,
           redirect_uri: redirectUri,
           grant_type: 'authorization_code',

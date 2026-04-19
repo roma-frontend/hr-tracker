@@ -8,9 +8,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
@@ -32,6 +29,13 @@ import { PlaceAutocomplete } from '@/components/drivers/PlaceAutocomplete';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuthStore } from '@/store/useAuthStore';
+import {
+  useAvailableDrivers,
+  useCreateDriverRequest,
+  useIsDriverOnLeave,
+  useAlternativeDrivers,
+} from '@/hooks/useDrivers';
 
 interface DriverRequestModalProps {
   open: boolean;
@@ -41,19 +45,13 @@ interface DriverRequestModalProps {
 
 export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverRequestModalProps) {
   const { t } = useTranslation();
-  const currentUser = useQuery(api.users.queries.getCurrentUser, { email: undefined });
-  const userId = currentUser?._id as Id<'users'> | undefined;
+  const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
-  const organizationId = (selectedOrgId ?? currentUser?.organizationId) as
-    | Id<'organizations'>
-    | undefined;
+  const organizationId = selectedOrgId ?? user?.organizationId;
 
-  const availableDrivers = useQuery(
-    api.drivers.queries.getAvailableDrivers,
-    organizationId ? { organizationId } : 'skip',
-  );
+  const availableDrivers = useAvailableDrivers(organizationId ?? undefined);
 
-  const requestDriver = useMutation(api.drivers.requests_mutations.requestDriver);
+  const requestDriver = useCreateDriverRequest();
 
   const [leaveWarning, setLeaveWarning] = useState<{
     type: string;
@@ -64,7 +62,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
     reason: string;
   } | null>(null);
 
-  const [selectedDriver, setSelectedDriver] = useState<Id<'drivers'> | ''>('');
+  const [selectedDriver, setSelectedDriver] = useState<string | ''>('');
   const [tripInfo, setTripInfo] = useState({
     from: '',
     to: '',
@@ -81,17 +79,22 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
   const [startTime, setStartTime] = useState<string>('');
   const [endTime, setEndTime] = useState<string>('');
 
-  // Get alternative drivers when current driver is on leave
-  const alternativeDrivers = useQuery(
-    api.drivers.queries.getAlternativeDrivers,
-    selectedDriver && startTime && endTime && leaveWarning
-      ? {
-          organizationId: organizationId!,
-          startTime: new Date(startTime).getTime(),
-          endTime: new Date(endTime).getTime(),
-          excludeDriverId: selectedDriver as Id<'drivers'>,
-        }
-      : 'skip',
+  const startTimeMs = startTime ? new Date(startTime).getTime() : undefined;
+  const endTimeMs = endTime ? new Date(endTime).getTime() : undefined;
+
+  const isDriverOnLeave = useIsDriverOnLeave(
+    selectedDriver || undefined,
+    startTimeMs,
+    endTimeMs,
+    !!selectedDriver && !!startTime && !!endTime,
+  );
+
+  const alternativeDrivers = useAlternativeDrivers(
+    organizationId ?? undefined,
+    startTimeMs,
+    endTimeMs,
+    selectedDriver || undefined,
+    !!selectedDriver && !!startTime && !!endTime && !!leaveWarning,
   );
 
   // Geocode search state
@@ -244,37 +247,25 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
     }
   }, [selectedDate, open]);
 
-  // Check if driver is on leave when driver or time changes
-  const isDriverOnLeave = useQuery(
-    api.drivers.queries.isDriverOnLeave,
-    selectedDriver && startTime && endTime
-      ? {
-          driverId: selectedDriver as Id<'drivers'>,
-          startTime: new Date(startTime).getTime(),
-          endTime: new Date(endTime).getTime(),
-        }
-      : 'skip',
-  );
-
-  const isCheckingLeave = selectedDriver && startTime && endTime && isDriverOnLeave === undefined;
+  const isCheckingLeave = selectedDriver && startTime && endTime && isDriverOnLeave.isLoading;
 
   React.useEffect(() => {
-    if (isDriverOnLeave?.onLeave && isDriverOnLeave.leave) {
+    if (isDriverOnLeave.data?.onLeave && isDriverOnLeave.data.leave) {
       setLeaveWarning({
         type: 'driver_on_leave',
-        message: `Водитель находится в отпуске с ${isDriverOnLeave.leave.startDate} по ${isDriverOnLeave.leave.endDate}`,
-        leaveType: isDriverOnLeave.leave.type,
-        startDate: isDriverOnLeave.leave.startDate,
-        endDate: isDriverOnLeave.leave.endDate,
-        reason: isDriverOnLeave.leave.reason,
+        message: t('driver.driverOnLeaveMessage', { startDate: isDriverOnLeave.data.leave.startDate, endDate: isDriverOnLeave.data.leave.endDate }),
+        leaveType: isDriverOnLeave.data.leave.type,
+        startDate: isDriverOnLeave.data.leave.startDate,
+        endDate: isDriverOnLeave.data.leave.endDate,
+        reason: isDriverOnLeave.data.leave.reason,
       });
     } else {
       setLeaveWarning(null);
     }
-  }, [isDriverOnLeave]);
+  }, [isDriverOnLeave.data]);
 
   const handleSubmit = async () => {
-    if (!userId || !organizationId) {
+    if (!user?.id || !organizationId) {
       toast.error(t('toasts.pleaseLogin'));
       return;
     }
@@ -295,14 +286,14 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
     }
 
     // Double check: also check isDriverOnLeave directly, not just leaveWarning
-    if (isDriverOnLeave?.onLeave || leaveWarning) {
-      const leaveInfo = isDriverOnLeave?.leave || leaveWarning;
+    if (isDriverOnLeave.data?.onLeave || leaveWarning) {
+      const leaveInfo = isDriverOnLeave.data?.leave || leaveWarning;
       toast.error(
-        t('driver.driverOnLeaveBlock', 'Невозможно заказать водителя: он находится в отпуске'),
+        t('driver.driverOnLeaveBlock'),
         {
           description:
             (leaveInfo as any).message ||
-            `Отпуск с ${(leaveInfo as any).startDate} по ${(leaveInfo as any).endDate}`,
+            t('driver.onLeaveFromTo', { startDate: (leaveInfo as any).startDate, endDate: (leaveInfo as any).endDate }),
           duration: 6000,
         },
       );
@@ -310,34 +301,21 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
     }
 
     try {
-      const result = await requestDriver({
+      await requestDriver.mutateAsync({
         organizationId,
-        requesterId: userId,
-        driverId: selectedDriver as Id<'drivers'>,
+        driverId: selectedDriver,
         startTime: new Date(startTime).getTime(),
         endTime: new Date(endTime).getTime(),
         tripInfo: {
-          ...tripInfo,
-          pickupCoords: pickupCoords ? { lat: pickupCoords.lat, lng: pickupCoords.lng } : undefined,
-          dropoffCoords: dropoffCoords
-            ? { lat: dropoffCoords.lat, lng: dropoffCoords.lng }
-            : undefined,
+          from: tripInfo.from,
+          to: tripInfo.to,
+          purpose: tripInfo.purpose,
+          passengerCount: tripInfo.passengerCount,
+          notes: tripInfo.notes,
         },
       });
 
-      // Handle error from server (driver on leave)
-      if (result?.error) {
-        toast.error(
-          t('driver.driverOnLeaveBlock', 'Невозможно заказать водителя: он находится в отпуске'),
-          {
-            description: result.error.message,
-            duration: 6000,
-          },
-        );
-        return;
-      }
-
-      toast.success(t('driver.requestSubmitted', 'Driver request submitted!'));
+      toast.success(t('driver.requestSubmitted'));
       onOpenChange(false);
 
       // Reset form
@@ -353,12 +331,12 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
       setDropoffCoords(undefined);
     } catch (error: any) {
       toast.error(
-        error.message || t('driver.failedToRequestDriver', 'Не удалось запросить водителя'),
+        error.message || t('driver.failedToRequestDriver'),
       );
     }
   };
 
-  if (!currentUser) return null;
+  if (!user) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -366,33 +344,33 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Car className="w-5 h-5" />
-            {t('driver.requestDriver', 'Request Driver')}
+            {t('driver.requestDriver')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4" style={{ overflow: 'visible' }}>
           {/* Select Driver */}
           <div>
-            <Label>{t('driver.selectDriver', 'Select Driver')}</Label>
+            <Label>{t('driver.selectDriver')}</Label>
             <Select
               value={selectedDriver}
-              onValueChange={(v: Id<'drivers'> | '') => setSelectedDriver(v)}
+              onValueChange={(v: string) => setSelectedDriver(v as any)}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t('driver.chooseDriver', 'Choose a driver')} />
+                <SelectValue placeholder={t('driver.chooseDriver')} />
               </SelectTrigger>
               <SelectContent>
-                {availableDrivers?.filter(Boolean).map((driver: any) => (
-                  <SelectItem key={driver!._id} value={driver!._id}>
+                {availableDrivers.data?.filter(Boolean).map((driver: any) => (
+                  <SelectItem key={driver!.id} value={driver!.id}>
                     {driver!.userName} - {driver!.vehicleInfo.model} (
                     {driver!.vehicleInfo.plateNumber})
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {availableDrivers && availableDrivers.length === 0 && (
+            {availableDrivers.data && availableDrivers.data.length === 0 && (
               <p className="text-sm text-muted-foreground mt-1">
-                {t('driver.noDriversFound', 'No drivers available')}
+                {t('driver.noDriversFound')}
               </p>
             )}
           </div>
@@ -402,42 +380,42 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
             <Alert variant="warning" className="border-amber-500 bg-amber-50 dark:bg-amber-950">
               <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertTitle className="text-amber-800 dark:text-amber-200">
-                {t('driver.driverOnLeave', 'Driver on leave')}
+                {t('driver.driverOnLeave')}
               </AlertTitle>
               <AlertDescription className="text-amber-700 dark:text-amber-300">
                 <p className="font-semibold mb-2">
-                  ⛔ {t('driver.bookingUnavailable', 'Booking unavailable')}
+                  ⛔ {t('driver.bookingUnavailable')}
                 </p>
-                {t('driver.onLeaveFrom', 'On leave from')} {leaveWarning.startDate}{' '}
-                {t('driver.to', 'to')} {leaveWarning.endDate}
+                {t('driver.onLeaveFrom')} {leaveWarning.startDate}{' '}
+                {t('driver.to')} {leaveWarning.endDate}
                 <div className="mt-2 text-sm">
-                  <strong>{t('driver.leaveType', 'Leave type')}:</strong>{' '}
+                  <strong>{t('driver.leaveType')}:</strong>{' '}
                   {leaveWarning.leaveType === 'paid'
-                    ? t('leave.types.paid', 'Paid')
+                    ? t('leave.types.paid')
                     : leaveWarning.leaveType === 'sick'
-                      ? t('leave.types.sick', 'Sick')
+                      ? t('leave.types.sick')
                       : leaveWarning.leaveType === 'family'
-                        ? t('leave.types.family', 'Family')
+                        ? t('leave.types.family')
                         : leaveWarning.leaveType === 'unpaid'
-                          ? t('leave.types.unpaid', 'Unpaid')
+                          ? t('leave.types.unpaid')
                           : leaveWarning.leaveType}
                 </div>
                 {leaveWarning.reason && (
                   <div className="text-sm mt-1">
-                    <strong>{t('driver.reason', 'Reason')}:</strong> {leaveWarning.reason}
+                    <strong>{t('driver.reason')}:</strong> {leaveWarning.reason}
                   </div>
                 )}
                 {/* Alternative Drivers */}
-                {alternativeDrivers && alternativeDrivers.length > 0 && (
+                {alternativeDrivers.data && alternativeDrivers.data.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-800">
                     <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      {t('driver.alternativeDrivers', 'Доступные водители:')}
+                      {t('driver.alternativeDrivers')}
                     </p>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {alternativeDrivers.map((driver: any) => (
+                      {alternativeDrivers.data.map((driver: any) => (
                         <div
-                          key={driver._id}
+                          key={driver.id}
                           className="flex items-center justify-between p-2 rounded-md bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-700"
                         >
                           <div className="flex items-center gap-2">
@@ -452,7 +430,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
                               <p className="text-xs text-amber-700 dark:text-amber-300">
                                 {driver.vehicleInfo?.model} • {driver.vehicleInfo?.plateNumber}
                                 {driver.vehicleInfo?.capacity &&
-                                  ` • ${driver.vehicleInfo.capacity} ${t('driver.seats', 'мест')}`}
+                                  ` • ${driver.vehicleInfo.capacity} ${t('driver.seats')}`}
                               </p>
                             </div>
                           </div>
@@ -461,26 +439,23 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
                             variant="outline"
                             className="h-8 text-xs border-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
                             onClick={() => {
-                              setSelectedDriver(driver._id);
+                              setSelectedDriver(driver.id);
                               toast.success(
-                                `${t('driver.driverSelected', 'Выбран водитель')}: ${driver.userName}`,
+                                t('driver.driverSelected', { name: driver.userName }),
                               );
                             }}
                           >
-                            {t('driver.select', 'Выбрать')}
+                            {t('driver.select')}
                           </Button>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-                {(!alternativeDrivers || alternativeDrivers.length === 0) && (
+                {(!alternativeDrivers.data || alternativeDrivers.data.length === 0) && (
                   <p className="text-sm mt-3 text-amber-800 dark:text-amber-200">
                     💡{' '}
-                    {t(
-                      'driver.noAlternativeDrivers',
-                      'Нет доступных водителей. Измените даты бронирования или обратитесь к администратору.',
-                    )}
+                    {t('driver.noAlternativeDrivers')}
                   </p>
                 )}
               </AlertDescription>
@@ -493,7 +468,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
             <div>
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-emerald-500" />
-                {t('driver.pickupLocation', 'Pickup Location')}
+                {t('driver.pickupLocation')}
               </Label>
               <PlaceAutocomplete
                 value={pickupQuery || tripInfo.from}
@@ -507,7 +482,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
                   setTripInfo((prev) => ({ ...prev, from: place.address }));
                   setPickupQuery(place.address);
                 }}
-                placeholder={t('driver.fromPlaceholder', 'e.g., Office')}
+                placeholder={t('driver.fromPlaceholder')}
               />
             </div>
 
@@ -515,7 +490,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
             <div>
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-red-500" />
-                {t('driver.dropoffLocation', 'Dropoff Location')}
+                {t('driver.dropoffLocation')}
               </Label>
               <PlaceAutocomplete
                 value={dropoffQuery || tripInfo.to}
@@ -529,7 +504,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
                   setTripInfo((prev) => ({ ...prev, to: place.address }));
                   setDropoffQuery(place.address);
                 }}
-                placeholder={t('driver.toPlaceholder', 'e.g., Airport')}
+                placeholder={t('driver.toPlaceholder')}
               />
             </div>
           </div>
@@ -539,10 +514,10 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                {t('driver.selectOnMap', 'Select on Map')}
+                {t('driver.selectOnMap')}
               </Label>
               <Badge variant="secondary" className="text-xs">
-                Click to pick location
+                {t('driver.clickToPickLocation')}
               </Badge>
             </div>
             <div className="rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600">
@@ -561,11 +536,11 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
 
           {/* Purpose */}
           <div>
-            <Label>{t('driver.tripPurpose', 'Trip Purpose')}</Label>
+            <Label>{t('driver.tripPurpose')}</Label>
             <Input
               value={tripInfo.purpose}
               onChange={(e) => setTripInfo({ ...tripInfo, purpose: e.target.value })}
-              placeholder={t('driver.purposePlaceholder', 'e.g., Airport transfer, Client meeting')}
+              placeholder={t('driver.purposePlaceholder')}
             />
           </div>
 
@@ -574,7 +549,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
             <div>
               <Label className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                {t('driver.startTime', 'Start Time')}
+                {t('driver.startTime')}
               </Label>
               <Input
                 type="datetime-local"
@@ -585,7 +560,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
             <div>
               <Label className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                {t('driver.endTime', 'End Time')}
+                {t('driver.endTime')}
               </Label>
               <Input
                 type="datetime-local"
@@ -599,7 +574,7 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
           <div>
             <Label className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              {t('driver.passengerCount', 'Passengers')}
+              {t('driver.passengerCount')}
             </Label>
             <Input
               type="number"
@@ -615,12 +590,12 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
           {/* Notes */}
           <div>
             <Label>
-              {t('driver.notes', 'Notes')} ({t('optional', 'Optional')})
+              {t('driver.notes')} ({t('common.optional')})
             </Label>
             <Textarea
               value={tripInfo.notes}
               onChange={(e) => setTripInfo({ ...tripInfo, notes: e.target.value })}
-              placeholder={t('driver.notesPlaceholder', 'Additional information for the driver...')}
+              placeholder={t('driver.notesPlaceholder')}
               rows={3}
             />
           </div>
@@ -628,17 +603,17 @@ export function DriverRequestModal({ open, onOpenChange, selectedDate }: DriverR
           {/* Actions */}
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t('cancel', 'Cancel')}
+              {t('buttons.cancel')}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={Boolean(leaveWarning) || Boolean(isCheckingLeave)}
             >
               {isCheckingLeave
-                ? t('driver.checking', 'Проверка...')
+                ? t('driver.checking')
                 : leaveWarning
-                  ? t('driver.driverOnLeave', 'Водитель в отпуске')
-                  : t('driver.submitRequest', 'Submit Request')}
+                  ? t('driver.driverOnLeave')
+                  : t('driver.submitRequest')}
             </Button>
           </div>
         </div>

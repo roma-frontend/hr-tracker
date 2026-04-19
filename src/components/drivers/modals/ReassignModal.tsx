@@ -13,7 +13,7 @@ interface ReassignModalProps {
   currentDriverName: string;
   currentDriverAvatar?: string;
   availableDrivers: Array<{
-    _id: string;
+    id: string;
     userName: string;
     avatarUrl?: string;
     rating?: number;
@@ -140,14 +140,14 @@ export function ReassignModal({
             <AnimatePresence>
               {filteredDrivers.map((driver) => (
                 <motion.button
-                  key={driver._id}
+                  key={driver.id}
                   layout
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  onClick={() => setSelectedDriverId(driver._id)}
+                  onClick={() => setSelectedDriverId(driver.id)}
                   className={`w-full p-3 rounded-xl border transition-all duration-200 text-left ${
-                    selectedDriverId === driver._id
+                    selectedDriverId === driver.id
                       ? 'border-(--primary) bg-(--primary)/5 shadow-sm'
                       : 'border-(--border) bg-(--background-subtle) hover:border-(--primary)/50'
                   }`}
@@ -183,7 +183,7 @@ export function ReassignModal({
                           {driver.rating.toFixed(1)}
                         </Badge>
                       )}
-                      {selectedDriverId === driver._id && (
+                      {selectedDriverId === driver.id && (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}

@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { AlertOctagon, RefreshCw, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function GlobalError({
   error,
@@ -10,6 +12,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     console.error('Global error:', error);
   }, [error]);
@@ -21,13 +25,13 @@ export default function GlobalError({
       </div>
 
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Oops! Something broke</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('error.global.title')}</h1>
         <p className="text-muted-foreground max-w-lg">
-          An unexpected error occurred. Our team has been notified. Please try refreshing the page.
+          {t('error.global.description')}
         </p>
         {error.digest && (
           <p className="text-xs text-muted-foreground/50 font-mono mt-4">
-            Reference: {error.digest}
+            {t('error.global.reference')}: {error.digest}
           </p>
         )}
       </div>
@@ -38,15 +42,15 @@ export default function GlobalError({
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
         >
           <RefreshCw className="h-4 w-4" />
-          Refresh page
+          {t('error.global.refreshPage')}
         </button>
-        <a
+        <Link
           href="/"
           className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-6 py-3 text-sm font-medium shadow transition-colors hover:bg-accent"
         >
           <Home className="h-4 w-4" />
-          Go home
-        </a>
+          {t('error.global.goHome')}
+        </Link>
       </div>
     </div>
   );

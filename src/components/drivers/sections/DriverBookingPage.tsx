@@ -9,7 +9,7 @@ import { AvailableDriversSection } from './AvailableDriversSection';
 import { MyRequestsSection } from './MyRequestsSection';
 
 interface Driver {
-  _id: string;
+  id: string;
   userName: string;
   userAvatar?: string;
   userPosition?: string;
@@ -24,7 +24,7 @@ interface Driver {
 }
 
 interface Request {
-  _id: string;
+  id: string;
   status: string;
   startTime?: number;
   tripInfo?: {
@@ -37,7 +37,7 @@ interface Request {
 }
 
 interface RecurringTrip {
-  _id: string;
+  id: string;
   isActive: boolean;
   days: number[];
   startTime: string;

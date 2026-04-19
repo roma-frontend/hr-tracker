@@ -47,7 +47,7 @@ export function getSharePointAuthUrl(redirectUri: string): string {
   if (!tenantId) throw new Error('Microsoft Tenant ID not configured');
 
   const params = new URLSearchParams({
-    client_id: clientId,
+    clientid: clientId,
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'Sites.Read.All offline_access User.Read',
@@ -65,8 +65,8 @@ export async function exchangeSharePointCode(code: string): Promise<{
   refresh_token?: string;
   expires_in?: number;
 }> {
-  const tenantId = process.env.MICROSOFT_TENANT_ID;
-  const clientId = process.env.MICROSOFT_CLIENT_ID;
+  const tenantId = process.env.MICROSOFT_TENANTid;
+  const clientId = process.env.MICROSOFT_CLIENTid;
   const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/sharepoint/callback`;
 
@@ -79,7 +79,7 @@ export async function exchangeSharePointCode(code: string): Promise<{
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       code,
-      client_id: clientId,
+      clientid: clientId,
       client_secret: clientSecret,
       redirect_uri: redirectUri,
       grant_type: 'authorization_code',
@@ -103,8 +103,8 @@ export async function refreshSharePointToken(refreshToken: string): Promise<{
   refresh_token?: string;
   expires_in?: number;
 }> {
-  const tenantId = process.env.MICROSOFT_TENANT_ID;
-  const clientId = process.env.MICROSOFT_CLIENT_ID;
+  const tenantId = process.env.MICROSOFT_TENANTid;
+  const clientId = process.env.MICROSOFT_CLIENTid;
   const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
 
   if (!tenantId || !clientId || !clientSecret) {
@@ -115,7 +115,7 @@ export async function refreshSharePointToken(refreshToken: string): Promise<{
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: clientId,
+      clientid: clientId,
       client_secret: clientSecret,
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
@@ -137,8 +137,8 @@ export async function refreshSharePointToken(refreshToken: string): Promise<{
  * Fetch all items from the SharePoint List (with pagination)
  */
 export async function fetchSharePointListItems(accessToken: string): Promise<SharePointEmployee[]> {
-  const siteId = process.env.SHAREPOINT_SITE_ID;
-  const listId = process.env.SHAREPOINT_LIST_ID;
+  const siteId = process.env.SHAREPOINT_SITEid;
+  const listId = process.env.SHAREPOINT_LISTid;
 
   if (!siteId || !listId) {
     throw new Error('SharePoint site/list IDs not configured');

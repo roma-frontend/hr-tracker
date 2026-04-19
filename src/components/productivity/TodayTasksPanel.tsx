@@ -1,27 +1,22 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { CheckCircle2, Circle, Clock, AlertCircle } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
+import { useTodayTasks, useUpdateTaskStatus } from '@/hooks/useProductivity';
 
 export function TodayTasksPanel() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const tasks = useQuery(
-    api.productivity.getTodayTasks,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
-  const updateTaskStatus = useMutation(api.tasks.updateTaskStatus);
+  const tasks = useTodayTasks(user?.id || '');
+  const updateTaskStatus = useUpdateTaskStatus();
 
-  const handleToggleTask = async (taskId: Id<'tasks'>, currentStatus: string) => {
+  const handleToggleTask = async (taskId: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
-      await updateTaskStatus({ taskId, status: newStatus, userId: user!.id as Id<'users'> });
+      await updateTaskStatus.mutateAsync({ taskId, status: newStatus, userId: user!.id });
       toast.success(newStatus === 'completed' ? t('tasks.taskCompleted') : t('tasks.taskReopened'));
     } catch (error) {
       toast.error(t('errors.taskUpdateFailed'));
@@ -29,7 +24,7 @@ export function TodayTasksPanel() {
   };
 
   // Hide section when loading or no tasks
-  if (!tasks || tasks.length === 0) {
+  if (!tasks.data || tasks.data.length === 0) {
     return null;
   }
 
@@ -72,14 +67,14 @@ export function TodayTasksPanel() {
       </div>
 
       <div className="space-y-2">
-        {tasks.map((task: any) => {
+        {tasks.data.map((task: any) => {
           const isCompleted = task.status === 'completed';
           const dueText = formatDueDate(task.deadline);
           const isOverdue = task.deadline && task.deadline < Date.now();
 
           return (
             <div
-              key={task._id}
+              key={task.id}
               className={`group rounded-lg border p-3 transition-all hover:border-(--primary)/50 ${
                 isCompleted
                   ? 'border-(--border) bg-(--background-subtle)/50 opacity-60'
@@ -88,7 +83,7 @@ export function TodayTasksPanel() {
             >
               <div className="flex items-start gap-2">
                 <button
-                  onClick={() => handleToggleTask(task._id, task.status)}
+                  onClick={() => handleToggleTask(task.id, task.status)}
                   className="mt-0.5 shrink-0 transition-transform hover:scale-110"
                 >
                   {isCompleted ? (

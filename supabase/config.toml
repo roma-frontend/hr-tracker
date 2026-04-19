@@ -1,0 +1,14 @@
+# For use with Supabase CLI
+project_id = "hr-platform"
+
+[api]
+port = 3001
+
+[db]
+port = 5432
+
+[studio]
+port = 3002
+
+[inbucket]
+port = 2500

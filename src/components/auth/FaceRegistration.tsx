@@ -2,8 +2,6 @@
 
 import { useTranslation } from 'react-i18next';
 import { useRef, useState, useEffect } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Camera, CheckCircle, XCircle } from 'lucide-react';
@@ -11,10 +9,10 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
 import { detectFace, loadFaceApiModels, createCanvasFromVideo, canvasToBlob } from '@/lib/faceApi';
 import { uploadAvatarToCloudinary } from '@/actions/cloudinary';
-import { Id } from '../../../convex/_generated/dataModel';
+import { useRegisterFace } from '@/hooks/useFaceRecognition';
 
 interface FaceRegistrationProps {
-  userId: Id<'users'>;
+  userId: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -30,7 +28,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>('');
 
-  const registerFace = useMutation(api.faceRecognition.registerFace);
+  const registerFaceMutation = useRegisterFace();
 
   useEffect(() => {
     // Load models on mount
@@ -299,7 +297,7 @@ export function FaceRegistration({ userId, onSuccess, onCancel }: FaceRegistrati
       const imageUrl = await uploadAvatarToCloudinary(base64Image, `face-${userId}`);
 
       // Save to database
-      await registerFace({
+      await registerFaceMutation.mutateAsync({
         userId,
         faceDescriptor: descriptor,
         faceImageUrl: imageUrl,

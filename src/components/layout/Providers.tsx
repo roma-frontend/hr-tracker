@@ -2,9 +2,7 @@
 
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore, type User } from '@/store/useAuthStore';
+import { useAuthStore, type UserProfile as User } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { usePathname } from 'next/navigation';
@@ -90,8 +88,6 @@ const StatusUpdateBanner = dynamic(
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
-  const { status } = useSession();
-  const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
   const isAIChatPage = pathname?.startsWith('/ai-chat');
@@ -126,9 +122,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (hydrated && user && !user.organizationId && !isOnboardingPage && !redirectedRef.current) {
       redirectedRef.current = true;
-      router.push('/onboarding/select-organization');
+      window.location.href = '/onboarding/select-organization';
     }
-  }, [hydrated, user, isOnboardingPage, router]);
+  }, [hydrated, user, isOnboardingPage]);
 
   // Don't redirect to login if user is on onboarding page
   if (isOnboardingPage) {
@@ -137,9 +133,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Show Shield HR loader while:
   // 1. Stores haven't hydrated from localStorage yet
-  // 2. OAuth session is active (Google login) but user data hasn't been synced from Convex yet
-  const isOAuthSyncing = status === 'authenticated' && !user;
-  if (!hydrated || isOAuthSyncing) {
+  if (!hydrated) {
     return (
       <div className="flex h-screen items-center justify-center bg-(--background)">
         <ShieldLoader size="lg" />

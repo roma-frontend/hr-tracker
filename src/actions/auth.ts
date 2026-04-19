@@ -3,109 +3,93 @@
 import { cookies } from 'next/headers';
 import { signJWT, verifyJWT } from '@/lib/jwt';
 import { log } from '@/lib/logger';
+import { createClient } from '@/lib/supabase/server';
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
+async function registerUser(name: string, email: string, password: string, phone?: string, organizationId?: string, inviteToken?: string) {
+  const supabase = await createClient();
+  
+  // Sign up user with Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { 
+        name,
+        phone: phone || undefined,
+        organization_id: organizationId || undefined,
+        invite_token: inviteToken || undefined,
+      },
+    },
+  });
 
-async function convexMutation(name: string, args: Record<string, unknown>) {
-  try {
-    console.log('🔧 convexMutation called', { name, CONVEX_URL, hasURL: !!CONVEX_URL });
-    log.debug('convexMutation called', { name });
-
-    if (!CONVEX_URL) {
-      console.error('❌ CONVEX_URL is undefined!');
-      console.error(
-        'Available env vars:',
-        Object.keys(process.env).filter((k) => k.includes('CONVEX')),
-      );
-      throw new Error('NEXT_PUBLIC_CONVEX_URL environment variable is not set');
-    }
-
-    const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: name, args }),
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    if (data.status === 'error') {
-      throw new Error(data.errorMessage ?? 'Convex error');
-    }
-
-    log.debug('convexMutation returning value', {
-      resultKeys: data.value ? Object.keys(data.value) : null,
-    });
-
-    return data.value;
-  } catch (error: any) {
-    log.error('convexMutation failed', error, {
-      name,
-      errorMessage: error?.message,
-      errorType: error?.name,
-      errorStack: error?.stack,
-    });
-
-    // Provide better error messages
-    if (error?.name === 'AbortError') {
-      throw new Error('Request timeout - server is not responding');
-    } else if (error?.message?.includes('fetch')) {
-      throw new Error('Network error - cannot reach Convex server');
-    }
-
-    throw error;
+  if (authError) {
+    throw new Error(authError.message);
   }
+
+  if (!authData.user) {
+    throw new Error('Failed to create user');
+  }
+
+  // All users are auto-approved in Supabase (approval flow handled separately)
+  const needsApproval = !inviteToken;
+
+  return {
+    userId: authData.user.id,
+    name,
+    email,
+    role: 'employee',
+    organizationId: organizationId || null,
+    organizationSlug: null,
+    organizationName: null,
+    department: null,
+    position: null,
+    employeeType: 'staff',
+    avatarUrl: null,
+    needsApproval,
+  };
 }
 
-async function convexQuery(name: string, args: Record<string, unknown>) {
-  try {
-    log.debug('convexQuery called', { name });
+async function loginUser(email: string, password: string, isFaceLogin: boolean = false) {
+  const supabase = await createClient();
+  
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (!CONVEX_URL) {
-      throw new Error('NEXT_PUBLIC_CONVEX_URL environment variable is not set');
-    }
-
-    const res = await fetch(`${CONVEX_URL}/api/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: name, args }),
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    if (data.status === 'error') {
-      throw new Error(data.errorMessage ?? 'Convex error');
-    }
-
-    log.debug('convexQuery data parsed', { result: data.value });
-
-    return data.value;
-  } catch (error: any) {
-    log.error('convexQuery failed', error, {
-      name,
-      errorMessage: error?.message,
-      errorType: error?.name,
-      errorStack: error?.stack,
-    });
-
-    // Provide better error messages
-    if (error?.name === 'AbortError') {
-      throw new Error('Request timeout - server is not responding');
-    } else if (error?.message?.includes('fetch')) {
-      throw new Error('Network error - cannot reach Convex server');
-    }
-
-    throw error;
+  if (authError) {
+    throw new Error(authError.message);
   }
+
+  if (!authData.user) {
+    throw new Error('Authentication failed');
+  }
+
+  // Get user profile from database
+  const { data: user } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', authData.user.id)
+    .single();
+
+  if (!user) {
+    throw new Error('User profile not found');
+  }
+
+  return {
+    userId: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    organizationId: user.organizationId,
+    organizationSlug: null, // TODO: Get from organizations table
+    organizationName: null, // TODO: Get from organizations table
+    department: user.department,
+    position: user.position,
+    employeeType: user.employee_type,
+    avatarUrl: user.avatar_url,
+    isApproved: user.is_approved,
+  };
 }
 
 export async function registerAction(formData: FormData) {
@@ -119,28 +103,10 @@ export async function registerAction(formData: FormData) {
   if (!name || !email || !password) throw new Error('All fields required');
   if (password.length < 8) throw new Error('Password must be at least 8 characters');
 
-  const result = await convexMutation('auth:register', {
-    name,
-    email,
-    password,
-    phone: phone || undefined,
-    organizationId: organizationId || undefined,
-    inviteToken: inviteToken || undefined,
-  });
+  const result = await registerUser(name, email, password, phone, organizationId, inviteToken);
 
   // If user needs approval, don't auto-login
   if (result.needsApproval) {
-    // Still try to link subscription even if pending approval
-    if (result.userId) {
-      try {
-        await convexMutation('subscriptions:linkSubscriptionToUser', {
-          email,
-          userId: result.userId,
-        });
-      } catch {
-        // Non-critical — subscription linking can fail silently
-      }
-    }
     return {
       success: true,
       role: result.role,
@@ -154,22 +120,7 @@ export async function registerAction(formData: FormData) {
   const sessionToken = crypto.randomUUID();
   const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
-  const loginResult = await convexMutation('auth:login', {
-    email,
-    password,
-    sessionToken,
-    sessionExpiry,
-  });
-
-  // Link subscription to user (non-critical, fails silently)
-  try {
-    await convexMutation('subscriptions:linkSubscriptionToUser', {
-      email,
-      userId: loginResult.userId,
-    });
-  } catch {
-    // Subscription linking is optional — user can still register
-  }
+  const loginResult = await loginUser(email, password);
 
   const jwt = await signJWT({
     userId: loginResult.userId,
@@ -257,15 +208,9 @@ export async function loginAction(
 
     let result;
     try {
-      result = await convexMutation('auth:login', {
-        email,
-        password: password || '', // Empty password for Face ID login
-        sessionToken,
-        sessionExpiry,
-        isFaceLogin, // Pass Face ID login flag
-      });
+      result = await loginUser(email, password, isFaceLogin);
 
-      log.debug('Raw Convex login result', {
+      log.debug('Raw Supabase login result', {
         result,
         keys: Object.keys(result),
         types: Object.fromEntries(Object.entries(result).map(([k, v]) => [k, typeof v])),
@@ -275,15 +220,15 @@ export async function loginAction(
         userId: result.userId,
         role: result.role,
       });
-    } catch (convexError: any) {
-      log.error('Convex auth:login mutation failed', convexError, {
+    } catch (loginError: any) {
+      log.error('Supabase auth:login failed', loginError, {
         email,
         isFaceLogin,
-        errorMessage: convexError?.message,
-        errorName: convexError?.name,
+        errorMessage: loginError?.message,
+        errorName: loginError?.name,
       });
       // Re-throw with a cleaner message
-      throw new Error(convexError?.message || 'Authentication failed');
+      throw new Error(loginError?.message || 'Authentication failed');
     }
 
     log.debug('Creating JWT token', { userId: result.userId, name: result.name });
@@ -343,9 +288,15 @@ export async function loginAction(
     if (!isFaceLogin) {
       try {
         log.debug('Auto-unlocking Face ID after password login', { userId: result.userId });
-        await convexMutation('users:autoUnblockFaceId', {
-          userId: result.userId,
-        });
+        const supabase = await createClient();
+        await supabase
+          .from('users')
+          .update({
+            faceid_blocked: false,
+            faceid_blocked_at: null,
+            faceid_failed_attempts: 0,
+          })
+          .eq('id', result.userId);
         log.info('Face ID auto-unlocked successfully', { userId: result.userId });
       } catch (error) {
         log.error(
@@ -362,7 +313,7 @@ export async function loginAction(
     endTimer();
 
     // Return ONLY success flag to avoid serialization issues
-    // The client will get user data from the JWT cookie via getSessionAction
+    // Client will get user data from the JWT cookie via getSessionAction
     log.debug('Login successful, cookies set');
 
     return { success: true };
@@ -385,7 +336,15 @@ export async function logoutAction() {
     try {
       const payload = await verifyJWT(jwt);
       if (payload && sessionToken) {
-        await convexMutation('auth:logout', { userId: payload.userId });
+        // Update session expiry in Supabase
+        const supabase = await createClient();
+        await supabase
+          .from('users')
+          .update({
+            session_token: null,
+            session_expiry: null,
+          })
+          .eq('id', payload.userId);
       }
     } catch {}
   }
@@ -488,4 +447,85 @@ export async function updateSessionAvatarAction(userId: string, avatarUrl: strin
   });
 
   return { success: true, avatar: avatarUrl };
+}
+
+/**
+ * Ensures the superadmin account always exists in the database.
+ * Call this on app startup or during first-time setup.
+ */
+export async function ensureSuperadminExists() {
+  const supabase = await createClient();
+  const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
+
+  // Check if superadmin user exists
+  const { data: superadmin } = await supabase
+    .from('users')
+    .select('id, email, role, is_active, is_approved')
+    .eq('email', SUPERADMIN_EMAIL)
+    .single();
+
+  if (!superadmin) {
+    // Create superadmin user via Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: SUPERADMIN_EMAIL,
+      password: 'SuperAdmin123!@#', // Change this immediately after first login
+      options: {
+        data: {
+          name: 'Roman Gulanyan',
+          role: 'superadmin',
+        },
+      },
+    });
+
+    if (authError) {
+      console.error('[ensureSuperadminExists] Failed to create superadmin auth:', authError);
+      return { success: false, error: authError.message };
+    }
+
+    if (authData.user) {
+      // Update the user profile with superadmin role
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          organizationId: null,
+          role: 'superadmin',
+          employee_type: 'staff',
+          is_active: true,
+          is_approved: true,
+          travel_allowance: 9999,
+          paid_leave_balance: 999,
+          sick_leave_balance: 999,
+          family_leave_balance: 999,
+        })
+        .eq('id', authData.user.id);
+
+      if (updateError) {
+        console.error('[ensureSuperadminExists] Failed to update superadmin profile:', updateError);
+        return { success: false, error: updateError.message };
+      }
+
+      console.log('[ensureSuperadminExists] Superadmin account created successfully');
+      return { success: true, userId: authData.user.id };
+    }
+  }
+
+  // Superadmin already exists, ensure it has correct permissions
+  if (superadmin && superadmin.role !== 'superadmin') {
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        role: 'superadmin',
+        is_active: true,
+        is_approved: true,
+      })
+      .eq('email', SUPERADMIN_EMAIL);
+
+    if (updateError) {
+      console.error('[ensureSuperadminExists] Failed to update superadmin role:', updateError);
+      return { success: false, error: updateError.message };
+    }
+  }
+
+  console.log('[ensureSuperadminExists] Superadmin account already exists');
+  return { success: true, userId: superadmin?.id };
 }

@@ -6,9 +6,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useLeaveConflictAlerts, useReviewConflictAlert } from '@/hooks/useEvents';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,8 +33,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 interface LeaveConflictAlertsProps {
-  organizationId: Id<'organizations'>;
-  userId: Id<'users'>;
+  organizationId: string;
+  userId: string;
 }
 
 export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAlertsProps) {
@@ -45,17 +43,9 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
   const [reviewNotes, setReviewNotes] = useState('');
   const [isReviewing, setIsReviewing] = useState(false);
 
-  const alerts = useQuery(api.events.getLeaveConflictAlerts, {
-    organizationId,
-    isReviewed: false,
-  });
-
-  const reviewedAlerts = useQuery(api.events.getLeaveConflictAlerts, {
-    organizationId,
-    isReviewed: true,
-  });
-
-  const reviewAlert = useMutation(api.events.reviewConflictAlert);
+  const { data: alerts } = useLeaveConflictAlerts(organizationId as string, false);
+  const { data: reviewedAlerts } = useLeaveConflictAlerts(organizationId as string, true);
+  const { mutateAsync: reviewAlert } = useReviewConflictAlert();
 
   const handleReview = async (isApproved: boolean) => {
     if (!selectedAlert) return;
@@ -63,7 +53,7 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
     setIsReviewing(true);
     try {
       await reviewAlert({
-        alertId: selectedAlert._id,
+        alertId: selectedAlert.id,
         adminId: userId,
         isApproved,
         reviewNotes: reviewNotes || undefined,
@@ -131,7 +121,7 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
             <div className="space-y-3">
               {alerts.map((alert: any) => (
                 <div
-                  key={alert._id}
+                  key={alert.id}
                   className="p-4 border rounded-lg transition-colors cursor-pointer"
                   onClick={() => setSelectedAlert(alert)}
                 >
@@ -186,7 +176,7 @@ export function LeaveConflictAlerts({ organizationId, userId }: LeaveConflictAle
           ) : (
             <div className="space-y-2">
               {reviewedAlerts.slice(0, 5).map((alert: any) => (
-                <div key={alert._id} className="flex items-center gap-3 text-sm p-2 rounded">
+                <div key={alert.id} className="flex items-center gap-3 text-sm p-2 rounded">
                   {alert.reviewNotes?.includes('Approved') ? (
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   ) : (

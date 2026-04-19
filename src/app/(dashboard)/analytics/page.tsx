@@ -2,17 +2,13 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { Id } from '../../../../convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { StatsCard } from '@/components/analytics/StatsCard';
 import dynamic from 'next/dynamic';
 import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
+import { useAnalyticsOverview } from '@/hooks/useAnalytics';
 
-// Recharts is ~500KB — lazy load chart components so they don't block
-// the initial analytics page render
 const ChartSkeleton = () => (
   <div className="h-96 bg-(--background-subtle) animate-pulse rounded-2xl" />
 );
@@ -58,6 +54,7 @@ const LeaveHeatmap = dynamic(
 import { Users, Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PlanGate } from '@/components/subscription/PlanGate';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 export default function AnalyticsPage() {
   const { t } = useTranslation();
@@ -65,28 +62,17 @@ export default function AnalyticsPage() {
   const selectedOrgId = useSelectedOrganization();
   const router = useRouter();
 
-  // Only admin and supervisor can access
   React.useEffect(() => {
     if (user && user.role === 'employee') {
       router.replace('/dashboard');
     }
   }, [user, router]);
 
-  // Determine organizationId to query
-  // - For admin: ALWAYS use their organizationId (not selectedOrgId)
-  // - For superadmin: use selectedOrgId if available, otherwise no filter
   const orgIdToQuery = user?.role === 'admin' ? user?.organizationId : selectedOrgId;
 
-  const analytics = useQuery(
-    api.analytics.getAnalyticsOverview,
-    user?.id
-      ? orgIdToQuery
-        ? { organizationId: orgIdToQuery as Id<'organizations'> }
-        : {}
-      : 'skip',
-  );
+  const { data: analytics, isLoading } = useAnalyticsOverview(orgIdToQuery || undefined);
 
-  if (!analytics) {
+  if (isLoading || !analytics) {
     return (
       <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
         <div className="h-10 bg-(--background-subtle) animate-pulse rounded-lg w-64" />

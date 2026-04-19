@@ -1,9 +1,7 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -11,12 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 
 import { Star, Send, X } from 'lucide-react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '../../../convex/_generated/dataModel';
+import { useCreateRating } from '@/hooks/useAttendanceAdmin';
 
 interface SupervisorRatingFormProps {
-  employeeId: Id<'users'>;
+  employeeId: string;
   employeeName: string;
   onClose?: () => void;
   onSuccess?: () => void;
@@ -69,7 +66,7 @@ export function SupervisorRatingForm({
     },
   ];
   const { user } = useAuthStore();
-  const createRating = useMutation(api.supervisorRatings.createRating);
+  const createRatingMutation = useCreateRating();
 
   const [ratings, setRatings] = useState<Record<string, number>>({
     qualityOfWork: 3,
@@ -83,7 +80,6 @@ export function SupervisorRatingForm({
   const [strengths, setStrengths] = useState('');
   const [areasForImprovement, setAreasForImprovement] = useState('');
   const [generalComments, setGeneralComments] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRatingChange = (category: string, value: number) => {
     setRatings((prev) => ({ ...prev, [category]: value }));
@@ -92,30 +88,22 @@ export function SupervisorRatingForm({
   const handleSubmit = async () => {
     if (!user?.id) return;
 
-    setIsSubmitting(true);
-    try {
-      await createRating({
-        employeeId,
-        supervisorId: user.id as any,
-        qualityOfWork: ratings.qualityOfWork ?? 3,
-        efficiency: ratings.efficiency ?? 3,
-        teamwork: ratings.teamwork ?? 3,
-        initiative: ratings.initiative ?? 3,
-        communication: ratings.communication ?? 3,
-        reliability: ratings.reliability ?? 3,
-        strengths: strengths || undefined,
-        areasForImprovement: areasForImprovement || undefined,
-        generalComments: generalComments || undefined,
-      });
+    await createRatingMutation.mutateAsync({
+      employeeId,
+      qualityOfWork: ratings.qualityOfWork ?? 3,
+      efficiency: ratings.efficiency ?? 3,
+      teamwork: ratings.teamwork ?? 3,
+      initiative: ratings.initiative ?? 3,
+      communication: ratings.communication ?? 3,
+      reliability: ratings.reliability ?? 3,
+      strengths: strengths || undefined,
+      areasForImprovement: areasForImprovement || undefined,
+      generalComments: generalComments || undefined,
+      ratingPeriod: new Date().toISOString().slice(0, 7),
+    });
 
-      toast.success(t('rating.submittedSuccess', 'Rating submitted for {{name}}!', { name: employeeName }));
-      onSuccess?.();
-      onClose?.();
-    } catch (error: any) {
-      toast.error(error.message || t('rating.submitFailed', 'Failed to submit rating'));
-    } finally {
-      setIsSubmitting(false);
-    }
+    onSuccess?.();
+    onClose?.();
   };
 
   const averageRating = Object.values(ratings).reduce((sum, r) => sum + r, 0) / 6;
@@ -144,7 +132,6 @@ export function SupervisorRatingForm({
       </CardHeader>
 
       <CardContent className="p-6 space-y-6">
-        {/* Rating Categories */}
         <div className="space-y-4">
           <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>
             {t('rating.ratePerformance', 'Rate Performance (1-5)')}
@@ -186,7 +173,6 @@ export function SupervisorRatingForm({
           ))}
         </div>
 
-        {/* Average Score */}
         <div className="p-4 rounded-lg bg-(--input)">
           <div className="flex items-center justify-between">
             <span className="font-medium text-black/70 dark:text-white/70">
@@ -202,7 +188,6 @@ export function SupervisorRatingForm({
           </div>
         </div>
 
-        {/* Text Feedback */}
         <div className="space-y-4">
           <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>
             {t('rating.writtenFeedback', 'Written Feedback (Optional)')}
@@ -243,7 +228,6 @@ export function SupervisorRatingForm({
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="flex gap-3 pt-4">
           {onClose && (
             <Button variant="outline" onClick={onClose} className="flex-1">
@@ -252,11 +236,11 @@ export function SupervisorRatingForm({
           )}
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={createRatingMutation.isPending}
             className="flex-1"
             variant="info"
           >
-            {isSubmitting ? (
+            {createRatingMutation.isPending ? (
               t('rating.submitting', 'Submitting...')
             ) : (
               <>

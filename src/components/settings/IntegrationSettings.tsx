@@ -171,20 +171,19 @@ export function IntegrationSettings() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          adminId: user._id,
+          adminId: user.id,
           organizationId: user.organizationId,
         }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || 'Sync failed');
+        toast.error(data.error || t('toasts.syncFailed'));
         return;
       }
 
       toast.success(
-        `Sync complete: ${data.created} created, ${data.updated} updated, ${data.deactivated} deactivated` +
-          (data.errors?.length ? `, ${data.errors.length} errors` : ''),
+        t('toasts.syncComplete', { created: data.created, updated: data.updated, deactivated: data.deactivated, errors: data.errors?.length || 0 }),
       );
     } catch {
       toast.error(t('toasts.sharePointSyncFailed'));
@@ -338,7 +337,7 @@ export function IntegrationSettings() {
                       ) : (
                         <RefreshCw className="w-3 h-3 mr-1" />
                       )}
-                      Sync Employees
+                      {t('settingsIntegration.syncEmployees')}
                     </Button>
                     <Button
                       variant="outline"

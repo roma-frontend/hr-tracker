@@ -1,17 +1,14 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { Camera, X, User } from 'lucide-react';
 import { ShieldLoader } from './ShieldLoader';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { uploadAvatarToCloudinary } from '@/actions/cloudinary';
 import { updateSessionAvatarAction } from '@/actions/auth';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { Id } from '../../../convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
 import { log } from '@/lib/logger';
 
@@ -42,7 +39,6 @@ export function AvatarUpload({
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const updateAvatar = useMutation(api.users.mutations.updateAvatar);
   const { user, setUser } = useAuthStore();
 
   const initials = name
@@ -103,15 +99,24 @@ export function AvatarUpload({
 
       log.info('Cloudinary upload complete', { url, userId });
 
-      log.debug('Saving avatar URL to Convex', { userId });
+      log.debug('Saving avatar URL to database', { userId });
 
-      // Save URL to Convex
-      await updateAvatar({
-        userId: userId as Id<'users'>,
-        avatarUrl: url,
+      // Save URL to database via API
+      const response = await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-avatar',
+          userId,
+          avatarUrl: url,
+        }),
       });
 
-      log.debug('Avatar URL saved to Convex', { userId });
+      if (!response.ok) {
+        throw new Error('Failed to update avatar');
+      }
+
+      log.debug('Avatar URL saved to database', { userId });
 
       log.debug('Updating session cookie', { userId });
 

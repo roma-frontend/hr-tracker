@@ -2,8 +2,6 @@
 
 import { useTranslation } from 'react-i18next';
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Camera, CheckCircle, XCircle, ScanFace } from 'lucide-react';
@@ -11,8 +9,8 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
 import { detectFace, loadFaceApiModels, findBestMatch, isFaceMatch } from '@/lib/faceApi';
 import { useAuthStore } from '@/store/useAuthStore';
-// Removed loginAction import - using API route instead
 import { useRouter } from 'next/navigation';
+import { useAllFaceDescriptors, useFaceIdStatus, useRecordFaceIdAttempt } from '@/hooks/useFaceRecognition';
 
 export function FaceLogin() {
   const { t } = useTranslation();
@@ -36,21 +34,15 @@ export function FaceLogin() {
   const [lastAttemptTime, setLastAttemptTime] = useState(0);
 
   const setUser = useAuthStore((state) => state.setUser);
-  const allFaceDescriptors = useQuery(api.faceRecognition.getAllFaceDescriptors);
-  const verifyFaceLogin = useMutation(api.faceRecognition.verifyFaceLogin);
-  const recordFaceIdAttempt = useMutation(api.users.auth.recordFaceIdAttempt);
-  const checkFaceIdStatus = useQuery(
-    api.users.queries.checkFaceIdStatus,
-    matchedUser ? { email: matchedUser } : 'skip',
-  );
+  const { data: allFaceDescriptors = [] } = useAllFaceDescriptors();
+  const { mutateAsync: recordFaceIdAttempt } = useRecordFaceIdAttempt();
+  const { data: faceIdStatus } = useFaceIdStatus(matchedUser);
 
   // Debug: Log face descriptors count
   useEffect(() => {
-    if (allFaceDescriptors !== undefined) {
-      console.log(`📊 Face descriptors loaded: ${allFaceDescriptors.length} registered faces`);
-      if (allFaceDescriptors.length === 0) {
-        console.warn('⚠️ No registered faces in the database');
-      }
+    console.log(`📊 Face descriptors loaded: ${allFaceDescriptors.length} registered faces`);
+    if (allFaceDescriptors.length === 0) {
+      console.warn('⚠️ No registered faces in the database');
     }
   }, [allFaceDescriptors]);
 
@@ -98,7 +90,7 @@ export function FaceLogin() {
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         toast.error(
-          'Camera access is not supported in this browser. Please use Chrome, Edge, or Firefox.',
+          t('faceLogin.cameraNotSupported', 'Camera access is not supported in this browser. Please use Chrome, Edge, or Firefox.'),
         );
         return;
       }
@@ -224,24 +216,24 @@ export function FaceLogin() {
 
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         toast.error(
-          'Camera permission denied. Please allow camera access in your browser settings.',
+          t('faceLogin.cameraPermissionDenied', 'Camera permission denied. Please allow camera access in your browser settings.'),
           {
             duration: 6000,
-            description: 'Click the lock icon in the address bar and allow camera access.',
+            description: t('faceLogin.cameraPermissionDesc', 'Click the lock icon in the address bar and allow camera access.'),
           },
         );
       } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        toast.error('No camera found. Please connect a camera and try again.');
+        toast.error(t('faceLogin.noCameraFound', 'No camera found. Please connect a camera and try again.'));
       } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
         toast.error(
-          'Camera is already in use by another application. Please close other apps using the camera.',
+          t('faceLogin.cameraInUse', 'Camera is already in use by another application. Please close other apps using the camera.'),
         );
       } else if (
         error.name === 'OverconstrainedError' ||
         error.name === 'ConstraintNotSatisfiedError'
       ) {
         console.log('🔄 Camera constraint error, retrying with basic settings...');
-        toast.error("Selected camera doesn't support required settings. Trying basic settings...");
+        toast.error(t('faceLogin.cameraConstraintError', "Selected camera doesn't support required settings. Trying basic settings..."));
 
         // Retry with minimal constraints
         try {
@@ -250,14 +242,14 @@ export function FaceLogin() {
           });
           setStream(basicStream);
           setIsWebcamActive(true);
-          toast.success('Camera started successfully!');
+          toast.success(t('faceLogin.cameraStarted', 'Camera started successfully!'));
         } catch (retryError: any) {
           console.error('❌ Retry failed:', retryError);
-          toast.error(`Still unable to access camera: ${retryError.message}`);
+          toast.error(t('faceLogin.cameraRetryFailed', 'Still unable to access camera: {{message}}', { message: retryError.message }));
         }
       } else {
-        toast.error(`Unable to access camera: ${error.message || 'Unknown error'}`, {
-          description: `Error type: ${error.name || 'Unknown'}`,
+        toast.error(t('faceLogin.cameraAccessError', 'Unable to access camera: {{message}}', { message: error.message || 'Unknown error' }), {
+          description: t('faceLogin.cameraErrorType', 'Error type: {{type}}', { type: error.name || 'Unknown' }),
         });
       }
     }
@@ -281,7 +273,7 @@ export function FaceLogin() {
   const resetFaceIdBlock = () => {
     setIsBlocked(false);
     setFailedAttempts(0);
-    toast.success('Face ID has been unlocked. You can try again.');
+    toast.success(t('faceLogin.faceIdUnlocked', 'Face ID has been unlocked. You can try again.'));
   };
 
   const detectFaceLoop = (forceStart = false) => {
@@ -385,7 +377,7 @@ export function FaceLogin() {
               console.warn('⚠️ Cannot auto-trigger login - no registered faces');
               setScanningProgress(0);
               setAutoLoginTriggered(false);
-              toast.error('No registered faces found. Please register your face first.', {
+              toast.error(t('faceLogin.noRegisteredFaces', 'No registered faces found. Please register your face first.'), {
                 id: 'no-faces',
               });
               return;
@@ -428,7 +420,7 @@ export function FaceLogin() {
       console.warn('⚠️ No registered faces found in the system');
       // Only show toast once, not repeatedly
       if (!isProcessing) {
-        toast.error('No registered faces found in the system. Please register your face first.');
+        toast.error(t('faceLogin.noRegisteredFacesSystem', 'No registered faces found in the system. Please register your face first.'));
         setAutoLoginTriggered(false); // Reset to prevent infinite loop
       }
       return;
@@ -460,7 +452,7 @@ export function FaceLogin() {
         if (newAttempts >= 3) {
           setIsBlocked(true);
           toast.error(
-            'Too many failed attempts. Face ID is now blocked. Please use email/password login.',
+            t('faceLogin.faceIdBlocked', 'Too many failed attempts. Face ID is now blocked. Please use email/password login.'),
           );
           stopWebcam();
         }
@@ -491,7 +483,7 @@ export function FaceLogin() {
 
       if (!bestMatch) {
         console.error('❌ No matching face found');
-        toast.error('No matching face found.');
+        toast.error(t('faceLogin.noMatchingFace', 'No matching face found.'));
         setMatchStatus('not_found');
         setTimeout(() => setMatchStatus('idle'), 2000);
         setIsProcessing(false);
@@ -520,22 +512,22 @@ export function FaceLogin() {
             if (result.blocked) {
               setIsBlocked(true);
               toast.error(
-                'Too many failed attempts. Face ID is now blocked. Please use email/password login.',
+                t('faceLogin.faceIdBlocked', 'Too many failed attempts. Face ID is now blocked. Please use email/password login.'),
               );
               stopWebcam();
             } else {
-              toast.error(`Face not recognized. Attempt ${result.attempts} of 3.`);
+              toast.error(t('faceLogin.faceNotRecognized', 'Face not recognized. Attempt {{attempts}} of 3.', { attempts: result.attempts }));
             }
           } catch (error) {
             console.error('Failed to record attempt:', error);
             // Фоллбэк на локальное увеличение
             const newAttempts = failedAttempts + 1;
             setFailedAttempts(newAttempts);
-            toast.error(`Face not recognized. Attempt ${newAttempts} of 3.`);
+            toast.error(t('faceLogin.faceNotRecognized', 'Face not recognized. Attempt {{attempts}} of 3.', { attempts: newAttempts }));
 
             if (newAttempts >= 3) {
               setIsBlocked(true);
-              toast.error('Too many failed attempts. Face ID is now blocked.');
+              toast.error(t('faceLogin.tooManyFailedAttempts', 'Too many failed attempts. Face ID is now blocked.'));
               stopWebcam();
             }
           }
@@ -643,11 +635,11 @@ export function FaceLogin() {
       console.error('Error stack:', error?.stack);
 
       // Determine specific error message
-      let errorMessage = 'Failed to login with Face ID. Please try again.';
+      let errorMessage = t('faceLogin.loginFailed', 'Failed to login with Face ID. Please try again.');
       if (error?.message?.includes('Failed to fetch')) {
-        errorMessage = 'Network error: Cannot connect to server. Please check your connection.';
+        errorMessage = t('faceLogin.networkError', 'Network error: Cannot connect to server. Please check your connection.');
       } else if (error?.message?.includes('Login action failed')) {
-        errorMessage = 'Server error: ' + error.message.replace('Login action failed: ', '');
+        errorMessage = t('faceLogin.serverError', 'Server error: {{message}}', { message: error.message.replace('Login action failed: ', '') });
       } else if (error?.message) {
         errorMessage = error.message;
       }
@@ -665,7 +657,7 @@ export function FaceLogin() {
     } finally {
       setIsProcessing(false);
     }
-  }, [isBlocked, allFaceDescriptors, recordFaceIdAttempt, failedAttempts, setUser, isProcessing]);
+  }, [isBlocked, allFaceDescriptors, recordFaceIdAttempt, failedAttempts, setUser, isProcessing, t]);
 
   return (
     <Card className="p-6 bg-[var(--surface-base)] border-[var(--border-primary)]">
@@ -706,12 +698,12 @@ export function FaceLogin() {
                 {faceDetected ? (
                   <div className="flex items-center gap-2 bg-green-500/90 text-white px-3 py-1.5 rounded-full text-sm animate-pulse">
                     <CheckCircle className="w-4 h-4" />
-                    Face Detected
+                    {t('faceLogin.faceDetected', 'Face Detected')}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 bg-red-500/90 text-white px-3 py-1.5 rounded-full text-sm">
                     <XCircle className="w-4 h-4" />
-                    No Face
+                    {t('faceLogin.noFace', 'No Face')}
                   </div>
                 )}
 
@@ -726,9 +718,9 @@ export function FaceLogin() {
                           : 'bg-orange-600/90'
                     }`}
                   >
-                    {detectionQuality === 'excellent' && '✓ Excellent'}
-                    {detectionQuality === 'good' && '◐ Good'}
-                    {detectionQuality === 'poor' && '⚠ Move Closer'}
+                    {detectionQuality === 'excellent' && t('faceLogin.excellent', '✓ Excellent')}
+                    {detectionQuality === 'good' && t('faceLogin.good', '◐ Good')}
+                    {detectionQuality === 'poor' && t('faceLogin.moveCloser', '⚠ Move Closer')}
                   </div>
                 )}
               </div>
@@ -739,19 +731,19 @@ export function FaceLogin() {
                   {matchStatus === 'searching' && (
                     <div className="flex items-center gap-2 bg-blue-500/90 text-white px-4 py-2 rounded-full text-sm">
                       <ShieldLoader size="xs" variant="inline" />
-                      Searching for match...
+                      {t('faceLogin.searchingForMatch', 'Searching for match...')}
                     </div>
                   )}
                   {matchStatus === 'found' && matchedUser && (
                     <div className="flex items-center gap-2 bg-green-500/90 text-white px-4 py-2 rounded-full text-sm">
                       <CheckCircle className="w-4 h-4" />
-                      Welcome, {matchedUser}!
+                      {t('faceLogin.welcomeUser', 'Welcome, {{name}}!', { name: matchedUser })}
                     </div>
                   )}
                   {matchStatus === 'not_found' && (
                     <div className="flex items-center gap-2 bg-red-500/90 text-white px-4 py-2 rounded-full text-sm">
                       <XCircle className="w-4 h-4" />
-                      Face not recognized
+                      {t('faceLogin.faceNotRecognizedTitle', 'Face not recognized')}
                     </div>
                   )}
                 </div>
@@ -826,7 +818,7 @@ export function FaceLogin() {
         {failedAttempts > 0 && !isBlocked && (
           <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
             <p className="text-sm text-orange-600 dark:text-orange-400 text-center">
-              ⚠️ Failed attempts: {failedAttempts} of 3
+              {t('faceLogin.failedAttempts', '⚠️ Failed attempts: {{attempts}} of 3', { attempts: failedAttempts })}
             </p>
           </div>
         )}
@@ -835,10 +827,10 @@ export function FaceLogin() {
         {isBlocked && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
             <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
-              🚫 Face ID Blocked
+              {t('faceLogin.faceIdBlockedTitle', '🚫 Face ID Blocked')}
             </p>
             <p className="text-xs text-red-600/80 dark:text-red-400/80 text-center mt-1">
-              Too many failed attempts. Please use email/password login.
+              {t('faceLogin.faceIdBlockedDesc', 'Too many failed attempts. Please use email/password login.')}
             </p>
           </div>
         )}

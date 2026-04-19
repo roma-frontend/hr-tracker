@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
@@ -25,11 +23,15 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { Id } from '@/convex/_generated/dataModel';
+import {
+  useJoinRequests,
+  usePendingJoinRequestCount,
+  useApproveJoinRequest,
+  useRejectJoinRequest,
+  useGenerateInviteToken,
+} from '@/hooks/useOrganizations';
 
 type FilterStatus = 'pending' | 'approved' | 'rejected' | 'all';
-
-// Status badges will be rendered with translation in component
 
 export default function JoinRequestsPage() {
   const { t } = useTranslation();
@@ -44,31 +46,18 @@ export default function JoinRequestsPage() {
   const [generatingLink, setGeneratingLink] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
-  const userId = user?.id as Id<'users'> | undefined;
+  const userId = user?.id;
 
-  const requests = useQuery(
-    api.organizations.getJoinRequests,
-    userId ? { adminId: userId, status: filter === 'all' ? undefined : filter } : 'skip',
+  const { data: requests, isLoading: loadingRequests } = useJoinRequests(
+    filter === 'all' ? undefined : filter,
+    !!userId
   );
 
-  const pendingCount = useQuery(
-    api.organizations.getPendingJoinRequestCount,
-    userId ? { adminId: userId } : 'skip',
-  );
+  const { data: pendingCount } = usePendingJoinRequestCount(!!userId);
 
-  // Debug logging
-  if (requests) {
-    console.log(`[JOIN REQUESTS] Retrieved ${requests.length} requests for status="${filter}"`, {
-      userId,
-      userRole: user?.role,
-      userOrg: user?.organizationId,
-      requestsData: requests,
-    });
-  }
-
-  const approveRequest = useMutation(api.organizations.approveJoinRequest);
-  const rejectRequest = useMutation(api.organizations.rejectJoinRequest);
-  const generateToken = useMutation(api.organizations.generateInviteToken);
+  const approveMutation = useApproveJoinRequest();
+  const rejectMutation = useRejectJoinRequest();
+  const generateMutation = useGenerateInviteToken();
 
   // Check admin access — allow if admin OR superadmin (even without org)
   if (!user) {
@@ -105,17 +94,16 @@ export default function JoinRequestsPage() {
   }
 
   const filtered = (requests ?? []).filter(
-    (r) =>
+    (r: any) =>
       r.requestedByName.toLowerCase().includes(search.toLowerCase()) ||
       r.requestedByEmail.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleApprove = async (inviteId: Id<'organizationInvites'>) => {
+  const handleApprove = async (inviteId: string) => {
     if (!userId) return;
     setApproving(inviteId);
     try {
-      await approveRequest({
-        adminId: userId,
+      await approveMutation.mutateAsync({
         inviteId,
         role: 'employee',
         passwordHash: Math.random().toString(36).slice(2) + Date.now().toString(36),
@@ -128,11 +116,11 @@ export default function JoinRequestsPage() {
     }
   };
 
-  const handleReject = async (inviteId: Id<'organizationInvites'>) => {
+  const handleReject = async (inviteId: string) => {
     if (!userId) return;
     setRejecting(inviteId);
     try {
-      await rejectRequest({ adminId: userId, inviteId, reason: rejectReason || undefined });
+      await rejectMutation.mutateAsync({ inviteId, reason: rejectReason || undefined });
       toast.success(t('joinRequestsPage.requestRejected'));
       setRejectingId(null);
       setRejectReason('');
@@ -147,7 +135,7 @@ export default function JoinRequestsPage() {
     if (!userId) return;
     setGeneratingLink(true);
     try {
-      const result = await generateToken({ adminId: userId, expiryHours: 72 });
+      const result = await generateMutation.mutateAsync({ expiryHours: 72 });
       const link = `${window.location.origin}/register?invite=${result.token}`;
       setInviteLink(link);
     } catch (e) {
@@ -250,7 +238,7 @@ export default function JoinRequestsPage() {
       </div>
 
       {/* Request cards */}
-      {requests === undefined ? (
+      {loadingRequests ? (
         <div className="flex items-center justify-center py-16 gap-2 text-(--text-muted)">
           <ShieldLoader size="md" message={t('joinRequestsPage.loadingRequests')} />
         </div>
@@ -289,7 +277,7 @@ export default function JoinRequestsPage() {
           <AnimatePresence>
             {filtered.map((req: any) => (
               <motion.div
-                key={req._id}
+                key={req.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
@@ -311,7 +299,7 @@ export default function JoinRequestsPage() {
                           </p>
                           <p className="text-xs text-(--text-muted) flex items-center gap-1 mt-0.5">
                             <Calendar className="w-3 h-3" />
-                            {new Date(req.requestedAt).toLocaleDateString('en-US', {
+                            {new Date(req.requested_at * 1000).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',
@@ -338,7 +326,7 @@ export default function JoinRequestsPage() {
 
                         {req.status === 'pending' && (
                           <div className="flex items-center gap-2">
-                            {rejectingId === req._id ? (
+                            {rejectingId === req.id ? (
                               <div className="flex items-center gap-2">
                                 <input
                                   value={rejectReason}
@@ -349,10 +337,10 @@ export default function JoinRequestsPage() {
                                 <Button
                                   size="sm"
                                   variant="destructive"
-                                  onClick={() => handleReject(req._id as Id<'organizationInvites'>)}
-                                  disabled={rejecting === req._id}
+                                  onClick={() => handleReject(req.id)}
+                                  disabled={rejecting === req.id}
                                 >
-                                  {rejecting === req._id ? (
+                                  {rejecting === req.id ? (
                                     <ShieldLoader size="xs" variant="inline" />
                                   ) : (
                                     t('joinRequestsPage.confirm')
@@ -372,19 +360,17 @@ export default function JoinRequestsPage() {
                                   size="sm"
                                   variant="outline"
                                   className="gap-1 text-red-500 border-red-200 hover:bg-red-50"
-                                  onClick={() => setRejectingId(req._id)}
+                                  onClick={() => setRejectingId(req.id)}
                                 >
                                   <XCircle className="w-3.5 h-3.5" /> {t('ui.reject')}
                                 </Button>
                                 <Button
                                   size="sm"
                                   className="gap-1"
-                                  onClick={() =>
-                                    handleApprove(req._id as Id<'organizationInvites'>)
-                                  }
-                                  disabled={approving === req._id}
+                                  onClick={() => handleApprove(req.id)}
+                                  disabled={approving === req.id}
                                 >
-                                  {approving === req._id ? (
+                                  {approving === req.id ? (
                                     <ShieldLoader size="xs" variant="inline" />
                                   ) : (
                                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -396,9 +382,9 @@ export default function JoinRequestsPage() {
                           </div>
                         )}
 
-                        {req.status === 'rejected' && req.rejectionReason && (
+                        {req.status === 'rejected' && req.rejection_reason && (
                           <p className="text-xs text-(--text-muted) italic">
-                            {t('joinRequestsPage.reason')}: {req.rejectionReason}
+                            {t('joinRequestsPage.reason')}: {req.rejection_reason}
                           </p>
                         )}
                       </div>

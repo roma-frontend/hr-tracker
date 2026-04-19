@@ -3,19 +3,14 @@
  * Real-time unread requests counter with blinking effect
  */
 
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+import { useUnreadLeavesCount } from '@/hooks/useLeaves';
 import { useEffect, useState } from 'react';
-import type { Id } from '@/convex/_generated/dataModel';
 
-export function useUnreadRequestsCount(userId?: Id<'users'> | null) {
+export function useUnreadRequestsCount(userId?: string | null) {
   const [isBlinking, setIsBlinking] = useState(false);
 
-  // Get unread count from Convex
-  const unreadCount = useQuery(
-    api.leaves.getUnreadCount,
-    userId ? { requesterId: userId } : 'skip',
-  );
+  // Get unread count from leaves
+  const { data: unreadCount } = useUnreadLeavesCount(userId || undefined);
 
   // Reset blinking when component mounts and unread changes
   useEffect(() => {

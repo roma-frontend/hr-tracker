@@ -7,10 +7,9 @@ import { UserPlus, Search, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import type { Id } from '@/convex/_generated/dataModel';
 
 interface DriverCandidate {
-  _id: Id<'users'>;
+  id: string;
   name: string;
   email: string;
   phone?: string;
@@ -102,7 +101,7 @@ export function SelectDriverModal({ candidates, onSelect, onClose }: SelectDrive
           ) : (
             filtered.map((candidate) => (
               <button
-                key={candidate._id}
+                key={candidate.id}
                 onClick={() => onSelect(candidate)}
                 className="w-full p-4 rounded-xl border border-(--border) bg-(--background-subtle) hover:border-(--primary) hover:bg-(--primary)/5 transition-all text-left"
               >

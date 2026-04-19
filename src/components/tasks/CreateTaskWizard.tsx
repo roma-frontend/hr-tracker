@@ -5,30 +5,30 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wizard, WizardStep } from '@/components/ui/wizard';
 import { TextInputStep, TextareaStep, SelectStep } from '@/components/ui/wizard-step-components';
 import { CheckSquare, Calendar, User, AlertCircle } from 'lucide-react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useCreateTask } from '@/hooks/useTasks';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useOrgUsers } from '@/hooks/useUsers';
 import { toast } from 'sonner';
 
 interface CreateTaskWizardProps {
-  assigneeId?: Id<'users'>;
+  assigneeId?: string;
+  organizationId?: string;
   onComplete?: () => void;
   onCancel?: () => void;
 }
 
-export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTaskWizardProps) {
+export function CreateTaskWizard({ assigneeId, organizationId, onComplete, onCancel }: CreateTaskWizardProps) {
   const { t } = useTranslation();
-  const createTask = useMutation(api.tasks.createTask);
-  const user = useQuery(api.users.queries.getCurrentUser, {});
+  const createTask = useCreateTask();
+  const { user } = useAuthStore();
 
   // Получаем список сотрудников для назначения
-  const employees =
-    useQuery(api.users.queries.getAllUsers, user?._id ? { requesterId: user._id } : 'skip') || [];
+  const { data: employees = [] } = useOrgUsers(organizationId || user?.organizationId || '');
 
   const steps: WizardStep[] = [
     {
@@ -39,16 +39,12 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
       content: (
         <div className="space-y-4">
           <TextInputStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="title"
             label={t('taskWizard.steps.details.titleLabel')}
             placeholder={t('taskWizard.steps.details.titlePlaceholder')}
             required
           />
           <TextareaStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="description"
             label={t('taskWizard.steps.details.descriptionLabel')}
             placeholder={t('taskWizard.steps.details.descriptionPlaceholder')}
@@ -65,8 +61,6 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
       content: (
         <div className="space-y-4">
           <SelectStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="priority"
             label={t('taskWizard.steps.priority.priorityLabel')}
             options={[
@@ -78,8 +72,6 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
             defaultValue="medium"
           />
           <TextInputStep
-            stepData={{}}
-            updateStepData={() => {}}
             field="deadline"
             label={t('taskWizard.steps.priority.deadlineLabel')}
             type="date"
@@ -95,19 +87,17 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
       icon: <User className="w-5 h-5" />,
       content: (
         <SelectStep
-          stepData={{}}
-          updateStepData={() => {}}
           field="assigneeId"
           label={t('taskWizard.steps.assignee.assigneeLabel')}
           options={employees
-            .filter((e: any) => e._id !== user?._id)
+            .filter((e: any) => e.id !== user?.id)
             .map((e: any) => ({
-              value: e._id,
+              value: e.id,
               label: e.name,
               description: e.email,
             }))}
           placeholder={t('taskWizard.steps.assignee.assigneePlaceholder')}
-          defaultValue={assigneeId || user?._id}
+          defaultValue={assigneeId || user?.id}
           required
         />
       ),
@@ -118,9 +108,10 @@ export function CreateTaskWizard({ assigneeId, onComplete, onCancel }: CreateTas
     data: Record<string, string | number | boolean | string[] | null>,
   ) => {
     try {
-      await createTask({
-        assignedTo: String(data.assigneeId) as Id<'users'>,
-        assignedBy: user?._id as Id<'users'>,
+      await createTask.mutateAsync({
+        organizationId: organizationId || user?.organizationId || '',
+        assignedTo: String(data.assigneeId),
+        assignedBy: user?.id || '',
         title: String(data.title),
         description: String(data.description) || '',
         priority: (String(data.priority) || 'medium') as 'low' | 'medium' | 'high' | 'urgent',

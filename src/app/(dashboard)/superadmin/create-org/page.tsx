@@ -1,18 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
-// cspell:disable
 import { useAuthStore } from '@/store/useAuthStore';
-// cspell:enable
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { useCreateOrganization } from '@/hooks/useOrganizations';
 
 export default function SuperadminCreateOrgPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const createOrg = useMutation(api.organizations.createOrganization);
+  const createOrgMutation = useCreateOrganization();
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -66,10 +63,9 @@ export default function SuperadminCreateOrgPage() {
     setLoading(true);
 
     try {
-      toast.info(`Creating ${formData.name} organization...`);
+      toast.info(t('superadmin.creatingOrg', 'Creating {{name}} organization...', { name: formData.name }));
 
-      await createOrg({
-        superadminUserId: user.id as never,
+      await createOrgMutation.mutateAsync({
         name: formData.name,
         slug: formData.slug,
         plan: formData.plan,
@@ -78,10 +74,9 @@ export default function SuperadminCreateOrgPage() {
         industry: formData.industry,
       });
 
-      toast.success(`Organization "${formData.name}" created successfully!`);
-      toast.info(`Admin invitation will be sent to ${formData.adminEmail}`);
+      toast.success(t('superadmin.orgCreated', 'Organization "{{name}}" created successfully!', { name: formData.name }));
+      toast.info(t('superadmin.adminInvitationSent', 'Admin invitation will be sent to {{email}}', { email: formData.adminEmail }));
 
-      // Reset form
       setFormData({
         name: '',
         slug: '',

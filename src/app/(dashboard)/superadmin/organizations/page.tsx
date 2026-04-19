@@ -1,9 +1,6 @@
 'use client';
 
 // cspell:disable
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { useRouter } from 'next/navigation';
@@ -35,16 +32,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
 
 interface Organization {
-  _id: Id<'organizations'>;
+  id: string;
   name: string;
   slug: string;
   plan: 'starter' | 'professional' | 'enterprise';
-  isActive: boolean;
+  is_active: boolean;
   totalEmployees: number;
   activeEmployees: number;
-  employeeLimit: number;
+  employee_limit: number;
   industry?: string;
   adminNames?: string[];
 }
@@ -61,26 +59,23 @@ export default function OrganizationsPage() {
   const [planFilter, setPlanFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const organizations = useQuery(
-    api.organizations.getAllOrganizations,
-    user?.id ? { superadminUserId: user.id as Id<'users'> } : 'skip',
-  ) as Organization[] | undefined;
+  const isSuperadmin =
+    user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
+
+  const { data: organizations, isLoading } = useAllOrganizations(isSuperadmin);
 
   // Filter organizations
-  const filteredOrgs = organizations?.filter((org) => {
+  const filteredOrgs = organizations?.filter((org: Organization) => {
     const matchesSearch =
       org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       org.slug.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPlan = planFilter === 'all' || org.plan === planFilter;
     const matchesStatus =
       statusFilter === 'all' ||
-      (statusFilter === 'active' && org.isActive) ||
-      (statusFilter === 'inactive' && !org.isActive);
+      (statusFilter === 'active' && org.is_active) ||
+      (statusFilter === 'inactive' && !org.is_active);
     return matchesSearch && matchesPlan && matchesStatus;
   });
-
-  const isSuperadmin =
-    user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
 
   // Debug logging
   useEffect(() => {
@@ -115,7 +110,7 @@ export default function OrganizationsPage() {
     );
   }
 
-  if (organizations === undefined) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <ShieldLoader size="lg" />
@@ -213,7 +208,7 @@ export default function OrganizationsPage() {
                   </p>
                 </div>
                 <p className="text-2xl font-bold text-green-500">
-                  {filteredOrgs?.filter((o) => o.isActive).length || 0}
+                  {filteredOrgs?.filter((o: Organization) => o.is_active).length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {t('superadmin.organizations.stats.working')}
@@ -247,7 +242,7 @@ export default function OrganizationsPage() {
                   </p>
                 </div>
                 <p className="text-2xl font-bold text-red-500">
-                  {filteredOrgs?.filter((o) => !o.isActive).length || 0}
+                  {filteredOrgs?.filter((o: Organization) => !o.is_active).length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {t('superadmin.organizations.stats.suspended')}
@@ -303,7 +298,7 @@ export default function OrganizationsPage() {
                 <Eye className="w-4 h-4 text-blue-500" />
                 <span className="text-sm text-blue-500 font-medium">
                   {t('superadmin.viewingOrganization')}:{' '}
-                  {organizations?.find((o) => o._id === selectedOrgId)?.name}
+                  {organizations?.find((o: Organization) => o.id === selectedOrgId)?.name}
                 </span>
               </div>
             )}
@@ -319,9 +314,9 @@ export default function OrganizationsPage() {
                 </p>
               </div>
 
-              {organizations?.map((org) => (
+              {organizations?.map((org: Organization) => (
                 <div
-                  key={org._id}
+                  key={org.id}
                   className="p-4 rounded-lg border hover:border-blue-400/50 transition-all hover:shadow-md"
                   style={{ background: 'var(--card)' }}
                 >
@@ -344,7 +339,7 @@ export default function OrganizationsPage() {
                       >
                         {org.plan.toUpperCase()}
                       </span>
-                      {org.isActive ? (
+                      {org.is_active ? (
                         <span className="px-2 py-1 rounded text-xs font-semibold bg-green-500/10 text-green-500 border border-green-500/30">
                           {t('superadmin.organizations.card.statusActive')}
                         </span>
@@ -377,7 +372,7 @@ export default function OrganizationsPage() {
                       <p className="text-xs text-muted-foreground">
                         {t('superadmin.organizations.card.employeeLimit')}
                       </p>
-                      <p className="font-bold">{org.employeeLimit}</p>
+                      <p className="font-bold">{org.employee_limit}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-xs text-muted-foreground">
@@ -406,7 +401,7 @@ export default function OrganizationsPage() {
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() =>
-                          router.push(`/superadmin/organizations/${org._id}/manage-admins`)
+                          router.push(`/superadmin/organizations/${org.id}/manage-admins`)
                         }
                         className="p-2 rounded hover:bg-blue-500/10 text-blue-500 transition-colors"
                         title={t('superadmin.organizations.card.manageAdmins')}
@@ -414,7 +409,7 @@ export default function OrganizationsPage() {
                         <Shield className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => router.push(`/superadmin/organizations/${org._id}/edit`)}
+                        onClick={() => router.push(`/superadmin/organizations/${org.id}/edit`)}
                         className="p-2 rounded transition-colors"
                         style={{ color: 'var(--text-primary)' }}
                         onMouseEnter={(e) =>
@@ -456,8 +451,8 @@ export default function OrganizationsPage() {
           <TabsContent value="announcements" className="space-y-6">
             <div className="rounded-xl border p-6" style={{ background: 'var(--card)' }}>
               <SuperadminBroadcastsPanel
-                organizationId={user?.organizationId as Id<'organizations'>}
-                userId={user?.id as Id<'users'>}
+                organizationId={user?.organizationId as any}
+                userId={user?.id as any}
               />
             </div>
           </TabsContent>
@@ -466,8 +461,8 @@ export default function OrganizationsPage() {
           <TabsContent value="maintenance" className="space-y-6">
             <div className="rounded-xl border p-6" style={{ background: 'var(--card)' }}>
               <MaintenanceModeManager
-                organizationId={user?.organizationId as Id<'organizations'>}
-                userId={user?.id as Id<'users'>}
+                organizationId={user?.organizationId as any}
+                userId={user?.id as any}
               />
             </div>
           </TabsContent>

@@ -1,12 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTranslation } from 'react-i18next';
-import type { Id } from '@/convex/_generated/dataModel';
 import {
   HelpCircle,
   Ticket,
@@ -33,6 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreateTicketWizard } from '@/components/help/CreateTicketWizard';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useMyOrganization } from '@/hooks/useOrganizations';
 
 export default function HelpSupportPage() {
   const { t } = useTranslation();
@@ -41,18 +39,12 @@ export default function HelpSupportPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [showPlanLimit, setShowPlanLimit] = useState(false);
 
-  const myTickets = (useQuery as any)(
-    (api.tickets as any).getMyTickets,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  ) as any[] | undefined;
-
-  const stats = (useQuery as any)((api.tickets as any).getTicketStats) as any;
+  // TODO: Replace with React Query once tickets API is implemented
+  const myTickets: any[] | undefined = [];
+  const stats: any = undefined;
 
   // Get organization plan
-  const userOrg = (useQuery as any)(
-    (api.organizations as any).getMyOrganization,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  ) as any;
+  const { data: userOrg } = useMyOrganization(!!user?.id);
 
   // Check plan limitations
   const canCreateTickets = userOrg?.plan === 'professional' || userOrg?.plan === 'enterprise';
@@ -165,7 +157,7 @@ export default function HelpSupportPage() {
                   </DialogHeader>
                   <div className="flex-1 min-h-0 overflow-y-auto">
                     <CreateTicketWizard
-                      userId={user.id as Id<'users'>}
+                      userId={user.id as any}
                       onComplete={() => setCreateDialogOpen(false)}
                       onCancel={() => setCreateDialogOpen(false)}
                     />
@@ -337,7 +329,7 @@ function TicketList({ tickets, emptyMessage }: { tickets: any[]; emptyMessage: s
   return (
     <div className="space-y-3">
       {tickets.map((ticket: any) => (
-        <Card key={ticket._id} style={{ background: 'var(--card)' }}>
+        <Card key={ticket.id} style={{ background: 'var(--card)' }}>
           <CardContent className="p-3 md:p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">

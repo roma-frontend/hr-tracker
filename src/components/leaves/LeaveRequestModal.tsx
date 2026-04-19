@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Leave Request Modal — Modal wrapper for LeaveRequestWizard
  * Used in Calendar and Leaves page
  */
@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { LeaveRequestWizard } from './LeaveRequestWizard';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
-import type { Id } from '@/convex/_generated/dataModel';
 
 interface LeaveRequestModalProps {
   open: boolean;
@@ -31,8 +30,8 @@ export function LeaveRequestModal({
   const selectedOrgId = useSelectedOrganization();
 
   const isSuperadmin = user?.role === 'superadmin' || false;
-  const userId = user?.id as Id<'users'> | undefined;
-  const orgId = user?.organizationId as Id<'organizations'> | undefined;
+  const userId = user?.id;
+  const orgId = user?.organizationId;
 
   if (!userId) return null;
 
@@ -51,13 +50,13 @@ export function LeaveRequestModal({
         </DialogHeader>
         <LeaveRequestWizard
           userId={userId}
-          orgId={orgId}
+          orgId={orgId || undefined}
           isSuperadmin={isSuperadmin || false}
-          selectedOrgId={selectedOrgId as Id<'organizations'> | undefined}
+          selectedOrgId={selectedOrgId || undefined}
           onComplete={onClose}
           onCancel={onClose}
-          preselectedStartDate={preselectedStartDate}
-          preselectedEndDate={preselectedEndDate}
+          preselectedStartDate={preselectedStartDate ?? undefined}
+          preselectedEndDate={preselectedEndDate ?? undefined}
         />
       </DialogContent>
     </Dialog>

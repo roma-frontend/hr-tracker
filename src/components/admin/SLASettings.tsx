@@ -1,10 +1,8 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 
 import React, { useState } from 'react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,12 +11,13 @@ import { Settings, Save, AlertCircle } from 'lucide-react';
 import { motion } from '@/lib/cssMotion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ShieldLoader } from '../ui/ShieldLoader';
+import { useSLAConfig, useUpdateSLAConfig } from '@/hooks/useAdmin';
 
 function SLASettings() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const config = useQuery(api.sla.getSLAConfig);
-  const updateConfig = useMutation(api.sla.updateSLAConfig);
+  const { data: config } = useSLAConfig();
+  const updateConfigMutation = useUpdateSLAConfig();
 
   const [targetHours, setTargetHours] = useState(24);
   const [warningThreshold, setWarningThreshold] = useState(75);
@@ -38,8 +37,7 @@ function SLASettings() {
 
     setIsSaving(true);
     try {
-      await updateConfig({
-        userId: user.id as any,
+      await updateConfigMutation.mutateAsync({
         targetResponseTime: targetHours,
         warningThreshold: warningThreshold,
         criticalThreshold: criticalThreshold,

@@ -2,13 +2,11 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Focus, Bell, BellOff, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useUpdatePresence } from '@/hooks/useProductivity';
 
 interface FocusModeProps {
   currentPresence: string;
@@ -19,7 +17,7 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [isFocusMode, setIsFocusMode] = useState(currentPresence === 'busy');
-  const updatePresence = useMutation(api.users.mutations.updatePresenceStatus);
+  const updatePresence = useUpdatePresence();
 
   const toggleFocusMode = async () => {
     if (!user?.id) return;
@@ -28,8 +26,8 @@ export function FocusMode({ currentPresence, onFocusChange }: FocusModeProps) {
       const newFocusState = !isFocusMode;
 
       // Update presence status
-      await updatePresence({
-        userId: user.id as Id<'users'>,
+      await updatePresence.mutateAsync({
+        userId: user.id,
         presenceStatus: newFocusState ? 'busy' : 'available',
       });
 

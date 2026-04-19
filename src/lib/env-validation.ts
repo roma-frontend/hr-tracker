@@ -10,8 +10,9 @@ interface EnvConfig {
 
 const ENV_CONFIG: EnvConfig = {
   required: [
-    'CONVEX_DEPLOYMENT',
-    'NEXT_PUBLIC_CONVEX_URL',
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
     // Auth.js v5 uses AUTH_* prefix
     'AUTH_SECRET',
     'AUTH_GOOGLE_ID',

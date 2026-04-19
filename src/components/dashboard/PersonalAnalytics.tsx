@@ -1,21 +1,28 @@
 'use client';
 
-import { useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
+import { useUserAnalytics } from '@/hooks/useDashboard';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Calendar, TrendingUp, Clock } from 'lucide-react';
 
 interface PersonalAnalyticsProps {
-  userId: Id<'users'>;
+  userId: string;
 }
 
 const COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'];
 
 export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
   const { t } = useTranslation();
-  const analytics = useQuery(api.analytics.getUserAnalytics, { userId });
+  const { data: analytics, isLoading } = useUserAnalytics();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl" />
+        <div className="h-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl" />
+      </div>
+    );
+  }
 
   if (!analytics) {
     return (
@@ -35,7 +42,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
   }));
 
   // Recent leaves
-  const recentLeaves = userLeaves.sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+  const recentLeaves = userLeaves.sort((a: any, b: any) => b.createdAt - a.createdAt).slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -90,7 +97,7 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                  label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
@@ -124,13 +131,13 @@ export default function PersonalAnalytics({ userId }: PersonalAnalyticsProps) {
           </h3>
           <div className="space-y-3">
             {recentLeaves.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
+              <p className="text-gray-500 dark:text-gray-400">
                 {t('dashboard.noRecentRequests')}
               </p>
             ) : (
               recentLeaves.map((leave: any) => (
                 <div
-                  key={leave._id}
+                  key={leave.id}
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"
                 >
                   <div>

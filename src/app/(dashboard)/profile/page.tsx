@@ -3,7 +3,6 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { motion } from '@/lib/cssMotion';
-import type { Id } from '../../../../convex/_generated/dataModel';
 import {
   Save,
   User as UserIcon,
@@ -34,10 +33,9 @@ import {
 import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 import { AvatarUpload } from '@/components/ui/avatar-upload';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
 import { Badge } from '@/components/ui/badge';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useUserProfile, useUserStats, useUpdateOwnProfile } from '@/hooks/useProfile';
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -50,18 +48,10 @@ export default function ProfilePage() {
   const [phone, setPhone] = useState('');
   const [location, setLocation] = useState('');
 
-  const updateOwnProfile = useMutation(api.users.mutations.updateOwnProfile);
-  const deleteAvatar = useMutation(api.users.mutations.deleteAvatar);
-  const userData = useQuery(
-    api.users.queries.getUserById,
-    user?.id ? { userId: user.id as Id<'users'>, requesterId: user.id as Id<'users'> } : 'skip',
-  );
-  const userStats = useQuery(
-    api.userStats.getUserStats,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: userData, isLoading: userLoading } = useUserProfile(user?.id);
+  const { data: userStats, isLoading: statsLoading } = useUserStats(user?.id);
+  const updateProfile = useUpdateOwnProfile();
 
-  // Sync when user loads from store or DB
   useEffect(() => {
     if (user?.name) setName(user.name);
     if (user?.email) setEmail(user.email);
@@ -80,8 +70,6 @@ export default function ProfilePage() {
       return;
     }
 
-    console.log('[Profile] Saving...', { user, name, email, phone, location });
-
     setSaving(true);
     try {
       const newName = name.trim() || user.name;
@@ -89,27 +77,12 @@ export default function ProfilePage() {
       const newPhone = phone.trim();
       const newLocation = location.trim();
 
-      console.log('[Profile] Calling updateOwnProfile...', {
-        userId: user.id,
-        name: newName,
-        email: newEmail,
-        phone: newPhone,
-        location: newLocation,
-      });
-
-      // 1. Save to Convex DB
-      await updateOwnProfile({
-        userId: user.id as any,
+      await updateProfile.mutateAsync({
         name: newName,
         email: newEmail,
         phone: newPhone || undefined,
         location: newLocation || undefined,
       });
-
-      console.log('[Profile] Convex update successful');
-
-      // 2. Update JWT cookie via API route
-      console.log('[Profile] Calling /api/profile/update...');
 
       const res = await fetch('/api/profile/update', {
         method: 'POST',
@@ -122,30 +95,15 @@ export default function ProfilePage() {
         credentials: 'include',
       });
 
-      console.log('[Profile] API response status:', res.status);
-
       if (!res.ok) {
         const error = await res.json();
-        console.error('[Profile] API error:', error);
         throw new Error(error.error || 'Failed to update session');
       }
 
-      console.log('[Profile] JWT cookie updated');
-
-      // 3. Update Zustand store (localStorage)
-      login({ ...user, name: newName, email: newEmail });
-      console.log('[Profile] Zustand store updated');
-
-      // 4. Update local state to reflect changes immediately
       setName(newName);
       setEmail(newEmail);
-
-      toast.success(t('toasts.profileUpdated'));
-
-      // Don't reload - let Convex revalidate automatically
     } catch (err) {
       console.error('[Profile] Save error:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -156,14 +114,23 @@ export default function ProfilePage() {
 
     setDeleting(true);
     try {
-      // 1. Delete from Cloudinary
       const { deleteAvatarFromCloudinary } = await import('@/actions/cloudinary');
       await deleteAvatarFromCloudinary(user.id);
 
-      // 2. Delete from database
-      await deleteAvatar({ userId: user.id as any });
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-avatar',
+          userId: user.id,
+        }),
+      });
 
-      // 3. Update local state
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to delete avatar');
+      }
+
       login({ ...user, avatar: undefined });
 
       toast.success(t('toasts.profilePictureDeleted'));
@@ -176,9 +143,8 @@ export default function ProfilePage() {
     }
   };
 
-  // Format date
-  const joinDate = userData?._creationTime
-    ? new Date(userData._creationTime).toLocaleDateString('en-US', {
+  const joinDate = userData?.created_at
+    ? new Date(userData.created_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -218,7 +184,7 @@ export default function ProfilePage() {
             <div className="relative">
               <AvatarUpload
                 userId={user?.id ?? ''}
-                currentUrl={user?.avatar}
+                currentUrl={user?.avatar ?? undefined}
                 name={user?.name ?? 'User'}
                 size="lg"
                 onSuccess={(url) => {

@@ -14,28 +14,23 @@ import {
   TextareaStep,
 } from '@/components/ui/wizard-step-components';
 import { Calendar, Sun, Heart, Users, Briefcase, CheckCircle } from 'lucide-react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import { toast } from 'sonner';
 import type { LeaveType } from '@/lib/types';
+import { useMyOrganization } from '@/hooks/useOrganizations';
+import { useCreateLeave } from '@/hooks/useLeaves';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface CreateLeaveWizardProps {
-  userId: Id<'users'>;
+  userId: string;
   onComplete?: () => void;
   onCancel?: () => void;
 }
 
 export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveWizardProps) {
   const { t } = useTranslation();
-  const createLeave = useMutation(api.leaves.createLeave);
-
-  // Загрузка данных пользователя
-  const user = useQuery(api.users.queries.getUserById, { userId });
-  const userOrg = useQuery(
-    api.organizations.getMyOrganization,
-    user?._id ? { userId: user._id as Id<'users'> } : 'skip',
-  );
+  const createLeaveMutation = useCreateLeave();
+  const { user } = useAuthStore();
+  const { data: userOrg } = useMyOrganization(!!userId);
 
   const steps: WizardStep[] = [
     {
@@ -121,7 +116,6 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
         </div>
       ),
       validation: () => {
-        // Валидация будет в родительском компоненте
         return true;
       },
     },
@@ -153,7 +147,7 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 💡{' '}
                 {t('leaveWizard.steps.details.balanceInfo', {
-                  balance: user.paidLeaveBalance ?? 24,
+                  balance: (user as any).paidLeaveBalance ?? 24,
                 })}
               </p>
             </div>
@@ -198,20 +192,28 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
     },
   ];
 
+  const calculateDays = (start: string, end: string) => {
+    if (!start || !end) return 0;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays + 1;
+  };
+
   const handleSubmit = async (
     data: Record<string, string | number | boolean | string[] | null>,
   ) => {
     try {
       const days = calculateDays(String(data.startDate), String(data.endDate));
 
-      await createLeave({
+      await createLeaveMutation.mutateAsync({
         userId,
-        type: String(data.type) as LeaveType,
+        organizationId: userOrg?.id || (user as any)?.organizationId || '',
+        leaveType: String(data.type) as LeaveType,
         startDate: String(data.startDate),
         endDate: String(data.endDate),
-        days,
         reason: String(data.reason),
-        comment: data.comment ? String(data.comment) : undefined,
       });
 
       toast.success(t('leaveWizard.toast.success'), {
@@ -222,15 +224,6 @@ export function CreateLeaveWizard({ userId, onComplete, onCancel }: CreateLeaveW
       toast.error(t('leaveWizard.toast.error'));
       console.error(error);
     }
-  };
-
-  const calculateDays = (start: string, end: string) => {
-    if (!start || !end) return 0;
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1;
   };
 
   return (

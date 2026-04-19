@@ -1,23 +1,23 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { X, Search, Users, MessageCircle, Check, Globe, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { useTranslation } from 'react-i18next';
-import type { Doc } from '@/convex/_generated/dataModel';
-import { SUPERADMIN_EMAIL } from '../../../convex/lib/auth';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
+
+const SUPERADMIN_EMAIL = 'superadmin@example.com';
+import { useQuery } from '@tanstack/react-query';
+import { useGetOrCreateDM, useCreateGroup } from '@/hooks/useChat';
 
 interface Props {
-  currentUserId: Id<'users'>;
-  organizationId?: Id<'organizations'>;
+  currentUserId: string;
+  organizationId?: string;
   userRole: string;
   onClose: () => void;
-  onCreated: (convId: Id<'chatConversations'>) => void;
+  onCreated: (convId: string) => void;
 }
 
 function getInitials(name: string) {
@@ -39,7 +39,7 @@ export function NewConversationModal({
   const { t } = useTranslation();
   const [mode, setMode] = useState<'dm' | 'group'>('dm');
   const [search, setSearch] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<Id<'users'>[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [groupName, setGroupName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
@@ -57,58 +57,64 @@ export function NewConversationModal({
   const isAllOrgs = selectedOrgId === null;
 
   // For superadmin we can fetch all organizations to power the inline org picker.
-  const organizations = useQuery(
-    api.organizations.getAllOrganizations,
-    isSuperadmin ? ({} as { superadminUserId?: Id<'users'> }) : 'skip',
-  );
+  const { data: organizations } = useAllOrganizations(isSuperadmin);
 
   // For a specific organization we keep using the lightweight chat.getOrgUsers query.
-  const orgScopedUsers = useQuery(
-    api.chat.queries.getOrgUsers,
-    isAllOrgs || !effectiveOrgId ? 'skip' : { organizationId: effectiveOrgId as any, currentUserId },
-  );
+  const { data: orgScopedUsers } = useQuery({
+    queryKey: ['chat-org-users', effectiveOrgId, currentUserId],
+    queryFn: async () => {
+      const res = await fetch(`/api/chat?action=get-org-users&organizationId=${effectiveOrgId}&currentUserId=${currentUserId}`);
+      if (!res.ok) throw new Error('Failed to fetch users');
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !isAllOrgs && !!effectiveOrgId,
+  });
 
   // In "All orgs" mode we load users via users.getAllUsers which,
   // for superadmin, returns employees from every organization.
-  const allOrgUsers = useQuery(
-    api.users.queries.getAllUsers,
-    isAllOrgs ? { requesterId: currentUserId } : 'skip',
-  );
+  const { data: allOrgUsers } = useQuery({
+    queryKey: ['all-org-users', currentUserId],
+    queryFn: async () => {
+      const res = await fetch(`/api/users?action=get-all-users&requesterId=${currentUserId}`);
+      if (!res.ok) throw new Error('Failed to fetch users');
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: isAllOrgs,
+  });
 
   // Normalized users list used by the UI (always has organizationId attached).
   const users = React.useMemo(() => {
     if (isAllOrgs) {
-      const list = (allOrgUsers ?? []) as Doc<'users'>[];
+      const list = (allOrgUsers ?? []) as any[];
       return list
         .filter(
           (u) =>
-            u._id !== currentUserId && u.isActive && u.isApproved && u.email !== SUPERADMIN_EMAIL,
+            u.id !== currentUserId && u.is_active && u.is_approved && u.email !== SUPERADMIN_EMAIL,
         )
         .map((u: any) => ({
-          _id: u._id as Id<'users'>,
+          id: u.id as string,
           name: u.name ?? '',
-          avatarUrl: u.avatarUrl,
+          avatarUrl: u.avatar_url,
           department: u.department,
           position: u.position,
-          presenceStatus: u.presenceStatus,
-          organizationId: u.organizationId as Id<'organizations'> | undefined,
+          presenceStatus: u.presence_status,
+          organizationId: u.organizationId as string | undefined,
         }));
     }
 
     // orgScopedUsers already returns the normalized shape (including organizationId)
     return (orgScopedUsers ?? []) as Array<{
-      _id: Id<'users'>;
+      id: string;
       name: string;
       avatarUrl?: string;
       department?: string;
       position?: string;
       presenceStatus?: string;
-      organizationId?: Id<'organizations'>;
+      organizationId?: string;
     }>;
   }, [isAllOrgs, allOrgUsers, orgScopedUsers, currentUserId]);
-  const getOrCreateDM = useMutation(api.chat.mutations.getOrCreateDM);
-  const createGroup = useMutation(api.chat.mutations.createGroup);
-
   const filtered = useMemo(() => {
     if (!users) return [];
     const q = search.toLowerCase();
@@ -120,7 +126,58 @@ export function NewConversationModal({
     );
   }, [users, search]);
 
-  const toggleUser = (uid: Id<'users'>) => {
+  const handleCreateDMMutation = useGetOrCreateDM();
+  const handleCreateGroupMutation = useCreateGroup();
+
+  const handleCreateDM = async (targetId: string, targetUser: any) => {
+    // For cross-org DM we host the conversation inside the target user's organization
+    // so that they can see it in their own tenant. For non-superadmin / single-org
+    // flow we fall back to the effectiveOrgId.
+    const dmOrgId =
+      isAllOrgs && targetUser?.organizationId ? targetUser.organizationId : effectiveOrgId;
+
+    const result = await handleCreateDMMutation.mutateAsync({
+      organizationId: dmOrgId,
+      currentUserId,
+      targetUserId: targetId,
+    });
+    return result.data;
+  };
+
+  const handleCreateGroup = async (groupName: string, memberIds: string[]) => {
+    // In "All orgs" mode we only support groups inside a single organization.
+    // If selected users span multiple organizations, we default the group to
+    // the first user's org and log a warning instead of failing silently.
+    let groupOrgId = effectiveOrgId;
+    if (isAllOrgs) {
+      const selected = users.filter((u) => selectedUsers.includes(u.id));
+      const orgIds = Array.from(
+        new Set(
+          selected
+            .map((u: any) => u.organizationId)
+            .filter((id): id is string => !!id),
+        ),
+      );
+      if (orgIds.length === 1) {
+        groupOrgId = orgIds[0]!;
+      } else if (orgIds.length > 1) {
+        console.warn(
+          "[NewConversationModal] Cross-organization groups are not fully supported yet; using first organization's ID for the group.",
+        );
+        groupOrgId = orgIds[0]!;
+      }
+    }
+
+    const result = await handleCreateGroupMutation.mutateAsync({
+      organizationId: groupOrgId ?? '',
+      createdBy: currentUserId,
+      name: groupName.trim(),
+      memberIds,
+    });
+    return result.data;
+  };
+
+  const toggleUser = (uid: string) => {
     if (mode === 'dm') {
       setSelectedUsers([uid]);
     } else {
@@ -136,54 +193,16 @@ export function NewConversationModal({
     try {
       if (mode === 'dm') {
         const targetId = selectedUsers[0];
-        const targetUser = users.find((u) => u._id === targetId);
-
-        // For cross-org DM we host the conversation inside the target user's organization
-        // so that they can see it in their own tenant. For non-superadmin / single-org
-        // flow we fall back to the effectiveOrgId.
-        const dmOrgId =
-          isAllOrgs && targetUser?.organizationId ? targetUser.organizationId : effectiveOrgId;
+        const targetUser = users.find((u) => u.id === targetId);
 
         if (!targetId) return;
 
-        const convId = await getOrCreateDM({
-          organizationId: dmOrgId as any,
-          currentUserId,
-          targetUserId: targetId,
-        });
+        const convId = await handleCreateDM(targetId, targetUser);
         onCreated(convId);
       } else {
         if (!groupName.trim()) return;
 
-        // In "All orgs" mode we only support groups inside a single organization.
-        // If selected users span multiple organizations, we default the group to
-        // the first user's org and log a warning instead of failing silently.
-        let groupOrgId = effectiveOrgId;
-        if (isAllOrgs) {
-          const selected = users.filter((u) => selectedUsers.includes(u._id));
-          const orgIds = Array.from(
-            new Set(
-              selected
-                .map((u: any) => u.organizationId)
-                .filter((id): id is Id<'organizations'> => !!id),
-            ),
-          );
-          if (orgIds.length === 1) {
-            groupOrgId = orgIds[0]!;
-          } else if (orgIds.length > 1) {
-            console.warn(
-              "[NewConversationModal] Cross-organization groups are not fully supported yet; using first organization's ID for the group.",
-            );
-            groupOrgId = orgIds[0]!;
-          }
-        }
-
-        const convId = await createGroup({
-          organizationId: groupOrgId as any,
-          createdBy: currentUserId,
-          name: groupName.trim(),
-          memberIds: selectedUsers,
-        });
+        const convId = await handleCreateGroup(groupName.trim(), selectedUsers);
         onCreated(convId);
       }
     } catch (err) {
@@ -234,7 +253,7 @@ export function NewConversationModal({
                   <span className="max-w-[120px] truncate">
                     {isAllOrgs
                       ? t('chat.allOrgs')
-                      : organizations?.find((o) => o._id === selectedOrgId)?.name ||
+                      : organizations?.find((o) => o.id === selectedOrgId)?.name ||
                         t('chat.allOrgs')}
                   </span>
                   <ChevronDown className="w-3 h-3" />
@@ -259,17 +278,17 @@ export function NewConversationModal({
                     </button>
                     {organizations?.map((org: any) => (
                       <button
-                        key={org._id}
+                        key={org.id}
                         onClick={() => {
-                          setSelectedOrgId(org._id as Id<'organizations'>);
+                          setSelectedOrgId(org.id as string);
                           setShowOrgDropdown(false);
                         }}
                         className="w-full text-left px-3 py-2 text-xs hover:opacity-80"
                         style={{
                           background:
-                            selectedOrgId === org._id ? 'var(--sidebar-item-hover)' : 'transparent',
+                            selectedOrgId === org.id ? 'var(--sidebar-item-hover)' : 'transparent',
                           color:
-                            selectedOrgId === org._id ? 'var(--primary)' : 'var(--text-primary)',
+                            selectedOrgId === org.id ? 'var(--primary)' : 'var(--text-primary)',
                         }}
                       >
                         {org.name}
@@ -356,7 +375,7 @@ export function NewConversationModal({
         {mode === 'group' && selectedUsers.length > 0 && (
           <div className="px-3 pb-2 flex flex-wrap gap-1">
             {selectedUsers.map((uid: any) => {
-              const u = users?.find((x) => x._id === uid);
+              const u = users?.find((x) => x.id === uid);
               return (
                 <span
                   key={uid}
@@ -376,11 +395,11 @@ export function NewConversationModal({
         {/* User list */}
         <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
           {filtered.map((u: any) => {
-            const isSelected = selectedUsers.includes(u._id);
+            const isSelected = selectedUsers.includes(u.id);
             return (
               <button
-                key={u._id}
-                onClick={() => toggleUser(u._id)}
+                key={u.id}
+                onClick={() => toggleUser(u.id)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left"
                 style={{
                   background: isSelected ? 'var(--sidebar-item-active)' : 'transparent',

@@ -1,9 +1,7 @@
 'use client';
 
-import { useQuery } from 'convex/react';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import {
@@ -27,7 +25,7 @@ import { createPortal } from 'react-dom';
 import { useLayoutEffect, useState } from 'react';
 
 interface TeamSidebarProps {
-  userId?: Id<'users'>;
+  userId?: string;
   onToggle?: (isOpen: boolean) => void;
 }
 
@@ -177,14 +175,22 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
     setCollapsedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Get all users for stats
-  const allUsers = useQuery(
-    api.users.queries.getAllUsers,
-    userId ? { requesterId: userId } : 'skip',
-  );
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ['org-users', userId],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        action: 'get-org-users',
+        organizationId: '',
+      });
+      const res = await fetch(`/api/users?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch org users');
+      const json = await res.json();
+      return json.data as any[];
+    },
+    enabled: !!userId,
+  });
 
-  // Calculate stats
-  const stats = allUsers?.reduce(
+  const stats = allUsers.reduce(
     (acc, user) => {
       // Skip superadmins from all counts
       if (user.role === 'superadmin') {
@@ -228,9 +234,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
     inactive: 0,
   };
 
-  // Recent employees (by createdAt)
-  const recentEmployees =
-    allUsers
+  const recentEmployees = allUsers
       ?.filter((u: any) => u.isActive)
       .sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0))
       .slice(0, 5) || [];
@@ -488,7 +492,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
                   <div className="space-y-1.5 sm:space-y-2">
                     {recentEmployees.map((emp: any, index) => (
                       <motion.div
-                        key={emp._id}
+                        key={emp.id}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{

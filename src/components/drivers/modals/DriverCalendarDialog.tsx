@@ -7,13 +7,12 @@
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DriverCalendar } from '../DriverCalendar';
-import type { Id } from '@/convex/_generated/dataModel';
 
 interface DriverCalendarDialogProps {
   open: boolean;
   onClose: () => void;
   driverId: string | null;
-  organizationId: Id<'organizations'>;
+  organizationId: string;
   role?: 'admin' | 'driver';
 }
 
@@ -36,7 +35,7 @@ export function DriverCalendarDialog({
         </DialogHeader>
         <div className="flex-1 overflow-y-auto min-h-0">
           <DriverCalendar
-            driverId={driverId as Id<'drivers'>}
+            driverId={driverId}
             organizationId={organizationId}
             role={role}
           />

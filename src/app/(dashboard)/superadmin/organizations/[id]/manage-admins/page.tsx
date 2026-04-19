@@ -1,8 +1,5 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../../../convex/_generated/api';
-import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
@@ -12,9 +9,7 @@ import {
   Users,
   UserCheck,
   UserX,
-  ChevronRight,
   AlertCircle,
-  CheckCircle,
   Clock,
   ShieldAlert,
   ShieldCheck,
@@ -31,18 +26,25 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { motion } from '@/lib/cssMotion';
+import { useAuthStore } from '@/store/useAuthStore';
+import {
+  useOrganizationById,
+  useOrgMembers,
+  useAssignOrgAdmin,
+  useRemoveOrgAdmin,
+} from '@/hooks/useOrganizations';
 
 interface Member {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: 'admin' | 'supervisor' | 'employee' | 'superadmin';
-  isActive: boolean;
-  isApproved: boolean;
+  is_active: boolean;
+  is_approved: boolean;
   department?: string;
   position?: string;
-  avatarUrl?: string;
-  createdAt: number;
+  avatar_url?: string;
+  created_at: number;
 }
 
 export default function ManageAdminsPage() {
@@ -54,25 +56,22 @@ export default function ManageAdminsPage() {
   const isSuperadmin =
     user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
 
-  // Check if admin is trying to access their own organization
   const isOwnOrganization = user?.organizationId === orgId;
   const canAccess = isSuperadmin || (user?.role === 'admin' && isOwnOrganization);
 
-  // Queries and Mutations
-  const organization = useQuery(
-    api.organizations.getOrganizationById,
-    user?.id && orgId ? { callerUserId: user.id as any, organizationId: orgId as any } : 'skip',
+  const { data: organization, isLoading: isLoadingOrg } = useOrganizationById(
+    orgId,
+    user?.id ?? '',
   );
 
-  const orgMembers = useQuery(
-    api.organizations.getOrgMembers,
-    user?.id && orgId ? { superadminUserId: user.id as any, organizationId: orgId as any } : 'skip',
+  const { data: orgMembers, isLoading: isLoadingMembers } = useOrgMembers(
+    orgId,
+    user?.id ?? '',
   );
 
-  const assignAdminMutation = useMutation(api.organizations.assignOrgAdmin);
-  const removeAdminMutation = useMutation(api.organizations.removeOrgAdmin);
+  const assignAdminMutation = useAssignOrgAdmin();
+  const removeAdminMutation = useRemoveOrgAdmin();
 
-  // State
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [actionType, setActionType] = useState<'promote' | 'demote' | null>(null);
@@ -94,10 +93,9 @@ export default function ManageAdminsPage() {
 
     setIsLoading(true);
     try {
-      await assignAdminMutation({
-        superadminUserId: user?.id as any,
-        userId: selectedMemberId as any,
-        organizationId: orgId as any,
+      await assignAdminMutation.mutateAsync({
+        userId: selectedMemberId,
+        organizationId: orgId,
       });
 
       toast.success(t('ui.adminAssignedSuccessfully'));
@@ -117,9 +115,8 @@ export default function ManageAdminsPage() {
 
     setIsLoading(true);
     try {
-      await removeAdminMutation({
-        superadminUserId: user?.id as any,
-        userId: selectedMemberId as any,
+      await removeAdminMutation.mutateAsync({
+        userId: selectedMemberId,
       });
 
       toast.success(t('ui.adminRemovedSuccessfully'));
@@ -140,9 +137,8 @@ export default function ManageAdminsPage() {
     setShowConfirm(true);
   };
 
-  const selectedMember = orgMembers?.find((m) => m._id === selectedMemberId);
+  const selectedMember = orgMembers?.find((m: Member) => m.id === selectedMemberId);
 
-  // Loading & Auth States
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -167,7 +163,7 @@ export default function ManageAdminsPage() {
     );
   }
 
-  if (organization === undefined || orgMembers === undefined) {
+  if (isLoadingOrg || isLoadingMembers || !organization || !orgMembers) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <ShieldLoader size="lg" />
@@ -175,30 +171,12 @@ export default function ManageAdminsPage() {
     );
   }
 
-  if (!organization) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">{t('ui.organizationNotFound')}</h1>
-          <p className="text-muted-foreground">{t('manageAdmins.notFoundDesc')}</p>
-          <button
-            onClick={() => router.push('/superadmin/organizations')}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-white hover:opacity-90 transition"
-          >
-            {t('ui.backToOrganizations')}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const admins = orgMembers.filter((m) => m.role === 'admin');
-  const employees = orgMembers.filter((m) => m.role !== 'admin');
+  const admins = orgMembers.filter((m: Member) => m.role === 'admin');
+  const employees = orgMembers.filter((m: Member) => m.role !== 'admin');
 
   return (
     <div className="min-h-screen p-6" style={{ background: 'var(--background)' }}>
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
           <div className="mb-8">
             <button
@@ -221,7 +199,6 @@ export default function ManageAdminsPage() {
           </div>
         </div>
 
-        {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="p-4 rounded-xl border" style={{ background: 'var(--card)' }}>
             <div className="flex items-center gap-3">
@@ -254,13 +231,12 @@ export default function ManageAdminsPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t('manageAdmins.active')}</p>
-                <p className="text-2xl font-bold">{orgMembers.filter((m) => m.isActive).length}</p>
+                <p className="text-2xl font-bold">{orgMembers.filter((m: Member) => m.is_active).length}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Admins Section */}
         <div className="mb-8">
           <div className="mb-4">
             <h2
@@ -274,21 +250,21 @@ export default function ManageAdminsPage() {
 
           {admins.length > 0 ? (
             <div className="space-y-3 mb-6">
-              {admins.map((admin: any) => (
+              {admins.map((admin: Member) => (
                 <div
-                  key={admin._id}
+                  key={admin.id}
                   className="p-4 rounded-xl border flex items-center justify-between hover:shadow-md transition-all"
                   style={{ background: 'var(--card)' }}
                 >
                   <div className="flex items-center gap-4 flex-1">
-                    {admin.avatarUrl && (
+                    {admin.avatar_url && (
                       <img
-                        src={admin.avatarUrl}
+                        src={admin.avatar_url}
                         alt={admin.name}
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     )}
-                    {!admin.avatarUrl && (
+                    {!admin.avatar_url && (
                       <div className="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
                         <Shield className="w-6 h-6 text-purple-500" />
                       </div>
@@ -314,8 +290,8 @@ export default function ManageAdminsPage() {
                   </div>
 
                   <button
-                    onClick={() => handleAction(admin._id, 'demote')}
-                    disabled={isLoading}
+                    onClick={() => handleAction(admin.id, 'demote')}
+                    disabled={isLoading || assignAdminMutation.isPending || removeAdminMutation.isPending}
                     className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors disabled:opacity-50"
                     title={t('superadmin.removeAdminRole')}
                   >
@@ -338,7 +314,6 @@ export default function ManageAdminsPage() {
           )}
         </div>
 
-        {/* Employees Section */}
         <div>
           <h2
             className="text-2xl font-bold flex items-center gap-2 mb-4"
@@ -350,21 +325,21 @@ export default function ManageAdminsPage() {
 
           {employees.length > 0 ? (
             <div className="space-y-3">
-              {employees.map((employee: any) => (
+              {employees.map((employee: Member) => (
                 <div
-                  key={employee._id}
+                  key={employee.id}
                   className="p-4 rounded-xl border flex items-center justify-between hover:shadow-md transition-all group"
                   style={{ background: 'var(--card)' }}
                 >
                   <div className="flex items-center gap-4 flex-1">
-                    {employee.avatarUrl && (
+                    {employee.avatar_url && (
                       <img
-                        src={employee.avatarUrl}
+                        src={employee.avatar_url}
                         alt={employee.name}
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     )}
-                    {!employee.avatarUrl && (
+                    {!employee.avatar_url && (
                       <div className="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center">
                         <Users className="w-6 h-6 text-blue-500" />
                       </div>
@@ -381,13 +356,13 @@ export default function ManageAdminsPage() {
                             {employee.position && ` • ${employee.position}`}
                           </p>
                         )}
-                        {!employee.isApproved && (
+                        {!employee.is_approved && (
                           <span className="px-2 py-0.5 rounded text-xs font-semibold bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {t('manageAdmins.pendingApproval')}
                           </span>
                         )}
-                        {!employee.isActive && (
+                        {!employee.is_active && (
                           <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-500/10 text-red-600 dark:text-red-400">
                             {t('manageAdmins.inactive')}
                           </span>
@@ -397,13 +372,13 @@ export default function ManageAdminsPage() {
                   </div>
 
                   <button
-                    onClick={() => handleAction(employee._id, 'promote')}
-                    disabled={isLoading || !employee.isApproved || !employee.isActive}
+                    onClick={() => handleAction(employee.id, 'promote')}
+                    disabled={isLoading || assignAdminMutation.isPending || removeAdminMutation.isPending || !employee.is_approved || !employee.is_active}
                     className="p-2 rounded-lg hover:bg-green-500/10 text-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title={
-                      !employee.isApproved
+                      !employee.is_approved
                         ? t('manageAdmins.cannotPromoteUnapproved')
-                        : !employee.isActive
+                        : !employee.is_active
                           ? t('manageAdmins.cannotPromoteInactive')
                           : t('manageAdmins.makeAdmin')
                     }
@@ -428,7 +403,6 @@ export default function ManageAdminsPage() {
         </div>
       </div>
 
-      {/* Confirmation Dialog */}
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
         <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
           <motion.div
@@ -438,7 +412,6 @@ export default function ManageAdminsPage() {
             transition={{ duration: 0.2 }}
           >
             <DialogHeader className="pb-4">
-              {/* Icon Badge */}
               <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center mb-3"
                 style={{
                   background: actionType === 'promote'
@@ -487,14 +460,14 @@ export default function ManageAdminsPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowConfirm(false)}
-                disabled={isLoading}
+                disabled={isLoading || assignAdminMutation.isPending || removeAdminMutation.isPending}
                 className="flex-1"
               >
                 {isLoading ? t('ui.processing') : t('ui.cancel')}
               </Button>
               <Button
                 onClick={actionType === 'promote' ? handlePromoteAdmin : handleRemoveAdmin}
-                disabled={isLoading}
+                disabled={isLoading || assignAdminMutation.isPending || removeAdminMutation.isPending}
                 className="flex-1"
                 style={{
                   background: actionType === 'promote'
@@ -502,7 +475,7 @@ export default function ManageAdminsPage() {
                     : 'linear-gradient(135deg, #dc2626, #b91c1c)',
                 }}
               >
-                {isLoading ? (
+                {isLoading || assignAdminMutation.isPending || removeAdminMutation.isPending ? (
                   <>
                     <ShieldLoader size="xs" variant="inline" className="mr-2" />
                     {t('ui.processing')}

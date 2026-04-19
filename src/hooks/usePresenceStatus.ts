@@ -1,17 +1,47 @@
+'use client';
+
 import { useState, useCallback } from 'react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from 'react-i18next';
 
 type PresenceStatus = 'available' | 'in_meeting' | 'in_call' | 'out_of_office' | 'busy';
 
-export function usePresenceStatus(userId?: Id<'users'>) {
+export function usePresenceStatus(userId?: string) {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const { t } = useTranslation();
 
-  const currentUser = useQuery(api.users.queries.getCurrentUser, userId ? {} : 'skip');
+  const effectiveUserId = userId || user?.id;
 
-  const updateStatusMutation = useMutation(api.users.mutations.updatePresenceStatus);
+  const { data: currentUser } = useQuery({
+    queryKey: ['user', effectiveUserId, 'current'],
+    queryFn: async () => {
+      const res = await fetch(`/api/users?action=get-current-user`);
+      if (!res.ok) throw new Error('Failed to fetch current user');
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!effectiveUserId,
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async (data: { userId: string; presenceStatus: string; outOfOfficeMessage?: string }) => {
+      const res = await fetch('/api/users?action=update-presence-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to update status');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', effectiveUserId, 'current'] });
+      queryClient.invalidateQueries({ queryKey: ['productivity', 'team-presence'] });
+    },
+  });
 
   const openStatusModal = useCallback(() => {
     setIsStatusModalOpen(true);
@@ -23,12 +53,11 @@ export function usePresenceStatus(userId?: Id<'users'>) {
 
   const updateStatus = useCallback(
     async (status: string, message?: string) => {
-      if (!userId) {
-        toast.error('User ID not found');
+      if (!effectiveUserId) {
+        toast.error(t('presence.userIdNotFound', 'User ID not found'));
         return;
       }
 
-      // Validate status is one of the allowed types
       const validStatuses: PresenceStatus[] = [
         'available',
         'in_meeting',
@@ -38,24 +67,24 @@ export function usePresenceStatus(userId?: Id<'users'>) {
       ];
 
       if (!validStatuses.includes(status as PresenceStatus)) {
-        toast.error('Invalid status');
+        toast.error(t('presence.invalidStatus', 'Invalid status'));
         return;
       }
 
       try {
-        await updateStatusMutation({
-          userId,
+        await updateStatusMutation.mutateAsync({
+          userId: effectiveUserId,
           presenceStatus: status as PresenceStatus,
           outOfOfficeMessage: message,
         });
         return true;
       } catch (error) {
         console.error('Failed to update status:', error);
-        toast.error('Failed to update status');
+        toast.error(t('presence.updateFailed', 'Failed to update status'));
         return false;
       }
     },
-    [userId, updateStatusMutation],
+    [effectiveUserId, updateStatusMutation],
   );
 
   return {
@@ -63,6 +92,6 @@ export function usePresenceStatus(userId?: Id<'users'>) {
     openStatusModal,
     closeStatusModal,
     updateStatus,
-    currentStatus: currentUser?.presenceStatus,
+    currentStatus: currentUser?.presence_status,
   };
 }

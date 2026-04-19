@@ -1,17 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
-
-async function convexQuery(path: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') return null;
-  return data.value;
-}
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,11 +10,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ isActive: false });
     }
 
-    const maintenanceData = await convexQuery('admin:getMaintenanceMode', {
-      organizationId: orgId,
-    });
+    const supabase = await createClient();
+    const { data: maintenanceData } = await supabase
+      .from('maintenance_modes')
+      .select('*')
+      .eq('organization_id', orgId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    const isActive = maintenanceData?.isActive && maintenanceData.startTime <= Date.now();
+    const isActive = maintenanceData?.is_active === true && 
+      maintenanceData.start_time <= Date.now();
 
     return NextResponse.json({ isActive });
   } catch (error) {

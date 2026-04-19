@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
@@ -22,13 +20,12 @@ import {
   Crown,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Id } from '../../../../convex/_generated/dataModel';
+import { useOrgRequests, useApproveOrgRequest, useRejectOrgRequest } from '@/hooks/useOrgRequests';
 
 type Status = 'pending' | 'approved' | 'rejected';
 
-interface OrganizationRequest {
-  _id: Id<'organizationRequests'>;
-  _creationTime: number;
+interface OrgRequestDisplay {
+  id: string;
   status: Status;
   requestedName: string;
   requestedSlug: string;
@@ -49,24 +46,14 @@ export default function OrgRequestsPage() {
   const _router = useRouter();
   const { user } = useAuthStore();
   const [statusFilter, setStatusFilter] = useState<Status | 'all'>('pending');
-  const [selectedRequest, setSelectedRequest] = useState<Id<'organizationRequests'> | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
 
-  const requests = useQuery(
-    api.organizationRequests.getOrganizationRequests,
-    user
-      ? {
-          superadminUserId: user.id as Id<'users'>,
-          status: statusFilter === 'all' ? undefined : statusFilter,
-        }
-      : 'skip',
-  );
+  const { data: requests, isLoading } = useOrgRequests(statusFilter === 'all' ? undefined : statusFilter);
+  const approveMutation = useApproveOrgRequest();
+  const rejectMutation = useRejectOrgRequest();
 
-  const approveRequest = useMutation(api.organizationRequests.approveOrganizationRequest);
-  const rejectRequest = useMutation(api.organizationRequests.rejectOrganizationRequest);
-
-  // Only admins can see organization requests
   const isAdmin = user?.role === 'admin';
 
   if (!user || !isAdmin) {
@@ -80,36 +67,21 @@ export default function OrgRequestsPage() {
     );
   }
 
-  const handleApprove = async (requestId: Id<'organizationRequests'>) => {
+  const handleApprove = async (requestId: string) => {
     if (!user) return;
-    try {
-      await approveRequest({ superadminUserId: user.id as Id<'users'>, requestId });
-      toast.success(t('toasts.orgApprovedCreated'));
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to approve request';
-      toast.error(message);
-    }
+    await approveMutation.mutateAsync(requestId);
+    toast.success(t('toasts.orgApprovedCreated'));
   };
 
   const handleReject = async () => {
     if (!user || !selectedRequest) return;
-    try {
-      await rejectRequest({
-        superadminUserId: user.id as Id<'users'>,
-        requestId: selectedRequest,
-        reason: rejectionReason || undefined,
-      });
-      toast.success(t('toasts.requestRejected'));
-      setShowRejectModal(false);
-      setRejectionReason('');
-      setSelectedRequest(null);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to reject request';
-      toast.error(message);
-    }
+    await rejectMutation.mutateAsync({ requestId: selectedRequest, reason: rejectionReason || undefined });
+    setShowRejectModal(false);
+    setRejectionReason('');
+    setSelectedRequest(null);
   };
 
-  const openRejectModal = (requestId: Id<'organizationRequests'>) => {
+  const openRejectModal = (requestId: string) => {
     setSelectedRequest(requestId);
     setShowRejectModal(true);
   };
@@ -164,11 +136,11 @@ export default function OrgRequestsPage() {
       </div>
 
       {/* Requests List */}
-      {!requests ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <ShieldLoader size="lg" />
         </div>
-      ) : requests.length === 0 ? (
+      ) : requests && requests.length === 0 ? (
         <div className="text-center py-12">
           <Building2 className="w-16 h-16 mx-auto mb-4 opacity-20" />
           <p className="text-lg font-medium" style={{ color: 'var(--text-muted)' }}>
@@ -177,7 +149,7 @@ export default function OrgRequestsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {requests.map((request: OrganizationRequest) => {
+          {(requests as OrgRequestDisplay[] | undefined)?.map((request) => {
             const Icon = request.requestedPlan === 'enterprise' ? Crown : Building2;
             const planColor =
               request.requestedPlan === 'enterprise'
@@ -186,7 +158,7 @@ export default function OrgRequestsPage() {
 
             return (
               <motion.div
-                key={request._id}
+                key={request.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-2xl p-6 border"
@@ -338,22 +310,24 @@ export default function OrgRequestsPage() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => handleApprove(request._id)}
-                      className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2"
+                      onClick={() => handleApprove(request.id)}
+                      disabled={approveMutation.isPending}
+                      className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-50"
                       style={{ background: 'linear-gradient(135deg, #10b981, #22c55e)' }}
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      Approve & Create
+                      {approveMutation.isPending ? 'Approving...' : 'Approve & Create'}
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => openRejectModal(request._id)}
-                      className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2"
+                      onClick={() => openRejectModal(request.id)}
+                      disabled={rejectMutation.isPending}
+                      className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-50"
                       style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
                     >
                       <XCircle className="w-4 h-4" />
-                      Reject
+                      {rejectMutation.isPending ? 'Rejecting...' : 'Reject'}
                     </motion.button>
                   </div>
                 )}
@@ -415,10 +389,11 @@ export default function OrgRequestsPage() {
                 </button>
                 <button
                   onClick={handleReject}
-                  className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white"
+                  disabled={rejectMutation.isPending}
+                  className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white disabled:opacity-50"
                   style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
                 >
-                  Confirm Reject
+                  {rejectMutation.isPending ? 'Rejecting...' : 'Confirm Reject'}
                 </button>
               </div>
             </motion.div>

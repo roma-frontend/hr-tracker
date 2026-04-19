@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
@@ -108,7 +108,6 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-6 space-y-1 mt-3">
               <li>{t('legal.encryption')}</li>
               <li>{t('legal.https')}</li>
-              <li>{t('legal.convex')}</li>
               <li>{t('legal.vectors')}</li>
               <li>{t('legal.audits')}</li>
             </ul>

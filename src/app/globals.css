@@ -305,6 +305,22 @@ html.light {
   --landing-orb-1: rgba(37, 99, 235, 0.15);
   --landing-orb-2: rgba(96, 165, 250, 0.12);
   --landing-orb-3: rgba(56, 189, 248, 0.1);
+
+  /* Contact page input fields - Light Theme */
+  --contact-input-bg: rgba(240, 246, 255, 0.9);
+  --contact-input-border: rgba(37, 99, 235, 0.25);
+  --contact-input-hover-bg: rgba(255, 255, 255, 0.95);
+  --contact-input-hover-border: rgba(37, 99, 235, 0.45);
+  --contact-input-focus-bg: #ffffff;
+  --contact-input-focus-border: rgba(37, 99, 235, 0.7);
+  --contact-input-focus-ring: rgba(37, 99, 235, 0.12);
+
+  /* Contact page form card - Light Theme */
+  --contact-form-bg: rgba(255, 255, 255, 0.85);
+  --contact-form-border: rgba(37, 99, 235, 0.15);
+  --contact-form-shadow: 0 4px 24px rgba(37, 99, 235, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --contact-form-hover-border: rgba(37, 99, 235, 0.3);
+  --contact-form-hover-shadow: 0 8px 32px rgba(37, 99, 235, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 /* ── Dark Theme ────────────────────────────────────────────────── */
@@ -471,6 +487,22 @@ html.light {
   --landing-orb-1: rgba(37, 99, 235, 0.25);
   --landing-orb-2: rgba(96, 165, 250, 0.2);
   --landing-orb-3: rgba(56, 189, 248, 0.15);
+
+  /* Contact page input fields - Dark Theme */
+  --contact-input-bg: rgba(13, 30, 56, 0.8);
+  --contact-input-border: rgba(56, 189, 248, 0.2);
+  --contact-input-hover-bg: rgba(17, 35, 68, 0.9);
+  --contact-input-hover-border: rgba(56, 189, 248, 0.4);
+  --contact-input-focus-bg: rgba(17, 35, 68, 1);
+  --contact-input-focus-border: rgba(56, 189, 248, 0.6);
+  --contact-input-focus-ring: rgba(56, 189, 248, 0.15);
+
+  /* Contact page form card - Dark Theme */
+  --contact-form-bg: rgba(13, 30, 56, 0.6);
+  --contact-form-border: rgba(56, 189, 248, 0.15);
+  --contact-form-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --contact-form-hover-border: rgba(56, 189, 248, 0.3);
+  --contact-form-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(56, 189, 248, 0.1);
 }
 
 /* ── Base Styles ───────────────────────────────────────────────── */

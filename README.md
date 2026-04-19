@@ -3,7 +3,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://typescriptlang.org)
-[![Convex](https://img.shields.io/badge/Convex-Backend-orange)](https://convex.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ecf8e?logo=supabase)](https://supabase.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com)
 
 > Modern HR management platform with real-time attendance tracking, AI-powered analytics, leave management, task boards, face recognition check-in, and an intelligent HR assistant.
@@ -32,7 +32,7 @@
 | **Framework** | Next.js 16 (App Router, Turbopack) |
 | **UI** | React 19, Tailwind CSS v4, Radix UI, shadcn/ui |
 | **State** | Zustand, React Query |
-| **Backend** | Convex (real-time database) |
+| **Backend** | Supabase (PostgreSQL + Realtime) |
 | **Auth** | NextAuth.js + Custom JWT |
 | **AI** | OpenAI, Groq, Google Generative AI |
 | **Payments** | Stripe |
@@ -49,7 +49,7 @@
 
 - **Node.js** ≥ 20
 - **npm** ≥ 10
-- **Convex CLI** — `npm install -g convex`
+- **Supabase CLI** — `npm install -g supabase` (optional for local dev)
 
 ### Installation
 
@@ -65,8 +65,8 @@ npm install
 cp .env.example .env.local
 # Fill in your API keys in .env.local
 
-# Start Convex development server
-npx convex dev
+# Start Supabase (optional, or use cloud instance)
+npx supabase start
 
 # In another terminal, start Next.js
 npm run dev
@@ -90,7 +90,6 @@ npm run dev
 
 ```
 hr-project/
-├── convex/              # Convex backend (schema, queries, mutations)
 ├── public/              # Static assets, face-api models
 ├── scripts/             # Utility scripts (Stripe, test data)
 ├── src/

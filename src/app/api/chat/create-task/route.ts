@@ -10,11 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,10 +44,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const supabase = await createClient();
+
     // ═══════════════════════════════════════════════════════════════
     // CONFLICT DETECTION — Check task conflicts
     // ═══════════════════════════════════════════════════════════════
-    let conflictResult: { hasCritical: boolean; hasWarnings: boolean; conflicts: any[] } = {
+    const conflictResult: { hasCritical: boolean; hasWarnings: boolean; conflicts: any[] } = {
       hasCritical: false,
       hasWarnings: false,
       conflicts: [],
@@ -59,47 +57,57 @@ export async function POST(req: NextRequest) {
 
     if (deadline) {
       // Проверяем конфликты задачи с отпусками
-      const conflictData: any = await convex.query(api.conflicts.checkConflictsForRequest, {
-        organizationId: organizationId as Id<'organizations'>,
-        requestType: 'task' as const,
-        userId: assignedTo as Id<'users'>,
-        startDate: Date.now(),
-        endDate: new Date(deadline).getTime(),
-        metadata: {
-          assigneeId: assignedTo as Id<'users'>,
-          taskId: undefined,
-        },
-      });
-      // Merge conflict data
-      conflictResult = {
-        hasCritical: conflictData.hasCritical || false,
-        hasWarnings: conflictData.hasWarnings || false,
-        conflicts: conflictData.conflicts || [],
-      };
+      const { data: leaves } = await supabase
+        .from('leave_requests')
+        .select('*')
+        .eq('userid', assignedTo)
+        .eq('status', 'approved')
+        .lte('start_date', new Date(deadline).toISOString().split('T')[0])
+        .gte('end_date', new Date().toISOString().split('T')[0]);
+
+      if (leaves && leaves.length > 0) {
+        conflictResult.hasWarnings = true;
+        leaves.forEach((l: any) => {
+          conflictResult.conflicts.push({
+            type: 'leave_conflict',
+            severity: 'warning',
+            message: `Assignee is on ${l.type} leave from ${l.start_date} to ${l.end_date}`,
+          });
+        });
+      }
     }
 
     // Если есть критические конфликты — предупреждаем, но не блокируем
     const warnings: string[] = [];
     if (conflictResult.conflicts.length > 0) {
       conflictResult.conflicts.forEach((c: any) => {
-        warnings.push(`${c.title}: ${c.message}`);
+        warnings.push(`${c.type}: ${c.message}`);
       });
     }
 
     // ═══════════════════════════════════════════════════════════════
     // CREATE TASK
     // ═══════════════════════════════════════════════════════════════
-    const taskId = await convex.mutation(api.tasks.createTask, {
-      title,
-      description: description || '',
-      assignedTo: assignedTo as Id<'users'>,
-      assignedBy: assignedBy as Id<'users'>,
-      priority: priority as 'low' | 'medium' | 'high' | 'urgent',
-      deadline: deadline ? new Date(deadline).getTime() : undefined,
-      tags: tags || [],
-    });
+    const { data: task, error } = await supabase
+      .from('tasks')
+      .insert({
+        title,
+        description: description || '',
+        assigned_to: assignedTo,
+        assigned_by: assignedBy,
+        priority: priority as 'low' | 'medium' | 'high' | 'urgent',
+        deadline: deadline ? new Date(deadline).getTime() : undefined,
+        tags: tags || [],
+        organizationId,
+      })
+      .select()
+      .single();
 
-    console.log('[create-task] Task created:', taskId);
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log('[create-task] Task created:', task.id);
 
     // Формируем ответ с учётом предупреждений
     let message = `✅ Task "${title}" has been created and assigned.`;
@@ -114,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      taskId,
+      taskId: task.id,
       message,
       hasWarnings: warnings.length > 0,
       warnings,
@@ -141,26 +149,31 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required query params' }, { status: 400 });
     }
 
-    const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<'organizations'>,
-      requestType: 'task' as const,
-      userId: userId as Id<'users'>,
-      startDate: Date.now(),
-      endDate: parseInt(deadline),
-      metadata: {
-        assigneeId: assigneeId as Id<'users'>,
-      },
-    });
+    const supabase = await createClient();
 
-    const aiFriendlyMessage = formatTaskConflictsForAI(conflictResult.conflicts);
+    const { data: leaves } = await supabase
+      .from('leave_requests')
+      .select('*')
+      .eq('userid', assigneeId)
+      .eq('status', 'approved')
+      .lte('start_date', new Date(parseInt(deadline)).toISOString().split('T')[0])
+      .gte('end_date', new Date().toISOString().split('T')[0]);
+
+    const conflicts = (leaves || []).map((l: any) => ({
+      type: 'leave_conflict',
+      severity: 'warning',
+      message: `Assignee is on ${l.type} leave from ${l.start_date} to ${l.end_date}`,
+    }));
+
+    const aiFriendlyMessage = formatTaskConflictsForAI(conflicts);
 
     return NextResponse.json({
       success: true,
-      hasConflicts: conflictResult.conflicts.length > 0,
-      hasCriticalConflicts: conflictResult.hasCritical,
-      conflictCount: conflictResult.conflicts.length,
+      hasConflicts: conflicts.length > 0,
+      hasCriticalConflicts: false,
+      conflictCount: conflicts.length,
       aiMessage: aiFriendlyMessage,
-      conflicts: conflictResult.conflicts,
+      conflicts,
     });
   } catch (error: any) {
     console.error('[task-conflict-check] Error:', error);
@@ -182,9 +195,9 @@ function formatTaskConflictsForAI(conflicts: any[]): string {
   let message = '⚠️ **Обнаружены потенциальные конфликты**:\n\n';
 
   conflicts.forEach((c, i) => {
-    message += `${i + 1}. **${c.title}**\n`;
+    message += `${i + 1}. **${c.type}**\n`;
     message += `   ${c.message}\n`;
-    message += `   💡 ${c.suggestion}\n\n`;
+    message += `   💡 Consider adjusting the deadline or reassigning.\n\n`;
   });
 
   message += '\n📋 **Рекомендация AI**: ';

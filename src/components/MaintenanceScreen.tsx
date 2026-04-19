@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { Wrench, Clock, Eye } from 'lucide-react';
+import { useMaintenanceMode } from '@/hooks/useAdmin';
+import { useTranslation } from 'react-i18next';
 
 export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [countdownTime, setCountdownTime] = useState<string>('');
@@ -28,10 +29,7 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
   }, [userOrgId]);
 
   // Fetch maintenance mode status
-  const maintenance = useQuery(
-    api.admin.getMaintenanceMode,
-    organizationId ? { organizationId: organizationId as any } : 'skip',
-  );
+  const { data: maintenance } = useMaintenanceMode(organizationId || '', !!organizationId);
 
   // Update countdown timer
   useEffect(() => {
@@ -48,7 +46,7 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
             : 3600000);
 
       if (now >= endTime) {
-        setCountdownTime('Обслуживание завершено...');
+        setCountdownTime(t('maintenance.completed'));
         clearInterval(interval);
       } else {
         const remaining = endTime - now;
@@ -98,9 +96,9 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
   }
 
   const maintenanceIcon = maintenance?.icon || '🔧';
-  const maintenanceTitle = maintenance?.title || 'Техническое обслуживание';
+  const maintenanceTitle = maintenance?.title || t('maintenance.title');
   const maintenanceMessage =
-    maintenance?.message || 'Система находится на техническом обслуживании. Пожалуйста, подождите.';
+    maintenance?.message || t('maintenance.message');
 
   return (
     <div
@@ -178,7 +176,7 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
 
         {/* Title */}
         <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 16, color: '#ffffff' }}>
-          Техническое обслуживание
+          {t('maintenance.title')}
         </h1>
 
         {/* Maintenance message */}
@@ -236,7 +234,7 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
                     fontWeight: 600,
                   }}
                 >
-                  Начало
+                  {t('maintenance.startTime')}
                 </span>
               </div>
               <p style={{ fontWeight: 600, color: '#ffffff' }}>
@@ -268,11 +266,11 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
                     fontWeight: 600,
                   }}
                 >
-                  Длительность
+                  {t('maintenance.duration')}
                 </span>
               </div>
               <p style={{ fontWeight: 600, color: '#ffffff' }}>
-                {maintenance.estimatedDuration || 'Не указана'}
+                {maintenance.estimatedDuration || t('maintenance.notSpecified')}
               </p>
             </div>
           </div>
@@ -309,7 +307,7 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
                   letterSpacing: '0.05em',
                 }}
               >
-                Оставшееся время
+                {t('maintenance.remainingTime')}
               </span>
             </div>
             <p style={{ fontSize: 32, fontWeight: 700, color: '#f97316' }}>{countdownTime}</p>
@@ -338,16 +336,16 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
           >
             <Eye style={{ width: 16, height: 16 }} />
             <p style={{ fontSize: 14 }}>
-              Система на обслуживании. Страница обновится автоматически.
+              {t('maintenance.autoRefreshInfo')}
             </p>
           </div>
         </div>
 
         {/* Contact info */}
         <div style={{ color: '#94a3b8', fontSize: 14 }}>
-          <p>Спасибо за терпение</p>
+          <p>{t('maintenance.thankYou')}</p>
           <p style={{ marginTop: 8, fontSize: 12 }}>
-            Если у вас есть вопросы, обратитесь к администратору
+            {t('maintenance.contactAdmin')}
           </p>
         </div>
 
@@ -369,7 +367,7 @@ export function MaintenanceScreen({ forceShow = false }: { forceShow?: boolean }
               cursor: 'pointer',
             }}
           >
-            Выход
+            {t('auth.logout')}
           </button>
         </div>
       </div>

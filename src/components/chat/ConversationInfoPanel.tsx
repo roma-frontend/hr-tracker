@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { X, Plus, Search, Building2, ChevronDown } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTranslation } from 'react-i18next';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
+import { useQuery } from '@tanstack/react-query';
+import { useChatMembers } from '@/hooks/useChat';
 
 interface Props {
-  conversationId: Id<'chatConversations'>;
-  currentUserId: Id<'users'>;
-  organizationId?: Id<'organizations'>;
+  conversationId: string;
+  currentUserId: string;
+  organizationId?: string;
   onClose: () => void;
 }
 
@@ -33,28 +33,40 @@ export function ConversationInfoPanel({
   const { t } = useTranslation();
   const [showAddMember, setShowAddMember] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<Id<'users'>[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [adding, setAdding] = useState(false);
-  const [selectedOrgId, setSelectedOrgId] = useState<Id<'organizations'> | undefined>(organizationId);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(organizationId);
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
 
-  const members = useQuery(api.chat.queries.getConversationMembers, { conversationId });
-  const conversations = useQuery(api.chat.queries.getMyConversations, {
-    userId: currentUserId,
-    organizationId,
+  const { data: members } = useChatMembers(conversationId);
+
+  const { data: conversations } = useQuery({
+    queryKey: ['my-conversations', currentUserId, organizationId],
+    queryFn: async () => {
+      const res = await fetch(`/api/chat?action=get-my-conversations&userId=${currentUserId}&organizationId=${organizationId}`);
+      if (!res.ok) throw new Error('Failed to fetch conversations');
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!currentUserId && !!organizationId,
   });
-  const conversation = (conversations ?? []).find((c) => c && c._id === conversationId) ?? null;
+
+  const conversation = (conversations ?? []).find((c: any) => c && c.id === conversationId) ?? null;
 
   // Fetch all organizations for the dropdown (no superadmin check — just lists all orgs)
-  const allOrganizations = useQuery(api.organizations.getAllOrganizations, {});
+  const { data: allOrganizations } = useAllOrganizations(true);
 
   // Fetch users from the selected organization using getOrgUsers (no permission restrictions)
-  const orgUsers = useQuery(
-    api.chat.queries.getOrgUsers,
-    selectedOrgId ? { organizationId: selectedOrgId, currentUserId } : 'skip',
-  );
-
-  const addMember = useMutation(api.chat.mutations.addMember);
+  const { data: orgUsers } = useQuery({
+    queryKey: ['org-users', selectedOrgId, currentUserId],
+    queryFn: async () => {
+      const res = await fetch(`/api/chat?action=get-org-users&organizationId=${selectedOrgId}&currentUserId=${currentUserId}`);
+      if (!res.ok) throw new Error('Failed to fetch org users');
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!selectedOrgId,
+  });
 
   const isGroupConversation =
     conversation &&
@@ -62,16 +74,16 @@ export function ConversationInfoPanel({
     (conversation as Record<string, unknown>).type === 'group';
 
   // Find selected org name for display
-  const selectedOrg = allOrganizations?.find((org) => org._id === selectedOrgId);
+  const selectedOrg = allOrganizations?.find((org: any) => org.id === selectedOrgId);
 
   // Filter users not already in the conversation
   const availableUsers = (orgUsers ?? []).filter(
-    (user) => !members?.some((m) => m.userId === user._id),
+    (user: any) => !members?.some((m: any) => m.userId === user.id),
   );
 
   // Filter by search query
   const filteredUsers = availableUsers.filter(
-    (user) =>
+    (user: any) =>
       (user.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (user.department ?? '').toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -80,12 +92,17 @@ export function ConversationInfoPanel({
     try {
       setAdding(true);
       for (const userId of selectedUsers) {
-        await addMember({
-          conversationId,
-          requesterId: currentUserId,
-          userId,
-          organizationId: selectedOrgId,
+        const res = await fetch('/api/chat?action=add-member', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId,
+            requesterId: currentUserId,
+            userId,
+            organizationId: selectedOrgId,
+          }),
         });
+        if (!res.ok) throw new Error('Failed to add member');
       }
       setSelectedUsers([]);
       setSearchQuery('');
@@ -97,7 +114,7 @@ export function ConversationInfoPanel({
     }
   };
 
-  const toggleUserSelection = (userId: Id<'users'>) => {
+  const toggleUserSelection = (userId: string) => {
     setSelectedUsers((prev) =>
       prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
     );
@@ -219,9 +236,9 @@ export function ConversationInfoPanel({
                         <div className="max-h-40 overflow-y-auto custom-scrollbar">
                           {allOrganizations.map((org: any) => (
                             <button
-                              key={org._id}
+                              key={org.id}
                               onClick={() => {
-                                setSelectedOrgId(org._id as Id<'organizations'>);
+                                setSelectedOrgId(org.id as string);
                                 setShowOrgDropdown(false);
                                 setSearchQuery('');
                                 setSelectedUsers([]);
@@ -229,20 +246,20 @@ export function ConversationInfoPanel({
                               className="w-full flex items-center gap-2 px-2.5 py-2 text-xs transition-all hover:opacity-80"
                               style={{
                                 background:
-                                  org._id === selectedOrgId
+                                  org.id === selectedOrgId
                                     ? 'var(--sidebar-item-active)'
                                     : 'transparent',
                                 color:
-                                  org._id === selectedOrgId
+                                  org.id === selectedOrgId
                                     ? 'var(--primary)'
                                     : 'var(--text-primary)',
                               }}
                               onMouseEnter={(e) => {
-                                if (org._id !== selectedOrgId)
+                                if (org.id !== selectedOrgId)
                                   e.currentTarget.style.background = 'var(--sidebar-item-hover)';
                               }}
                               onMouseLeave={(e) => {
-                                if (org._id !== selectedOrgId)
+                                if (org.id !== selectedOrgId)
                                   e.currentTarget.style.background = 'transparent';
                               }}
                             >
@@ -251,7 +268,7 @@ export function ConversationInfoPanel({
                                 style={{ color: 'var(--text-muted)' }}
                               />
                               <span className="truncate flex-1 text-left">{org.name}</span>
-                              {org._id === selectedOrgId && (
+                              {org.id === selectedOrgId && (
                                 <span
                                   className="w-1.5 h-1.5 rounded-full shrink-0"
                                   style={{ background: 'var(--primary)' }}
@@ -284,47 +301,47 @@ export function ConversationInfoPanel({
 
               {/* User list */}
               <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user: any) => (
-                    <label
-                      key={user._id}
-                      className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                      style={{
-                        background: selectedUsers.includes(user._id)
-                          ? 'var(--sidebar-item-active)'
-                          : 'var(--background)',
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(user._id)}
-                        onChange={() => toggleUserSelection(user._id)}
-                        className="w-3.5 h-3.5 rounded accent-[var(--primary)]"
-                      />
-                      <Avatar className="w-6 h-6">
-                        {user.avatarUrl && <AvatarImage src={user.avatarUrl} />}
-                        <AvatarFallback className="text-[10px]" style={{ fontSize: '10px' }}>
-                          {getInitials(user.name ?? 'U')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user: any) => (
+                  <label
+                    key={user.id}
+                    className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                    style={{
+                      background: selectedUsers.includes(user.id)
+                        ? 'var(--sidebar-item-active)'
+                        : 'var(--background)',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(user.id)}
+                      onChange={() => toggleUserSelection(user.id)}
+                      className="w-3.5 h-3.5 rounded accent-[var(--primary)]"
+                    />
+                    <Avatar className="w-6 h-6">
+                      {user.avatar_url && <AvatarImage src={user.avatar_url} />}
+                      <AvatarFallback className="text-[10px]" style={{ fontSize: '10px' }}>
+                        {getInitials(user.name ?? 'U')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <span
+                        className="text-xs truncate block"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {user.name}
+                      </span>
+                      {user.department && (
                         <span
-                          className="text-xs truncate block"
-                          style={{ color: 'var(--text-primary)' }}
+                          className="text-[10px] truncate block"
+                          style={{ color: 'var(--text-disabled)' }}
                         >
-                          {user.name}
+                          {user.department}
                         </span>
-                        {user.department && (
-                          <span
-                            className="text-[10px] truncate block"
-                            style={{ color: 'var(--text-disabled)' }}
-                          >
-                            {user.department}
-                          </span>
-                        )}
-                      </div>
-                    </label>
-                  ))
+                      )}
+                    </div>
+                  </label>
+                ))
                 ) : (
                   <p className="text-xs text-center py-3" style={{ color: 'var(--text-muted)' }}>
                     {searchQuery ? t('chat.noUsersFound') : t('chat.allMembersAdded')}

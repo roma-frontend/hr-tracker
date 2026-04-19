@@ -1,13 +1,12 @@
-﻿'use client';
+'use client';
 import Image from 'next/image';
 
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import React from 'react';
+import { useUpdatePresence } from '@/hooks/useProductivity';
 
 type PresenceStatus = 'available' | 'in_meeting' | 'in_call' | 'out_of_office' | 'busy';
 
@@ -76,16 +75,24 @@ export function EmployeeHoverCard({
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const updatePresence = useMutation(api.users.mutations.updatePresenceStatus);
+  const updatePresenceMutation = useUpdatePresence();
 
-  // Find supervisor from allUsers list — no extra query
-  const supervisor = allUsers?.find((u: any) => u._id === employee.supervisorId);
+  const supervisor = allUsers?.find((u: any) => u.id === employee.supervisorId);
 
-  // Get task count for employee
-  const taskCount = useQuery(
-    api.tasks.getTasksForEmployee,
-    open ? { userId: employee._id as Id<'users'> } : 'skip',
-  );
+  const { data: taskCount = [] } = useQuery({
+    queryKey: ['tasks-for-employee', employee.id],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        action: 'get-tasks-for-employee',
+        userId: employee.id,
+      });
+      const res = await fetch(`/api/tasks?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch tasks');
+      const json = await res.json();
+      return json.data as any[];
+    },
+    enabled: open && !!employee.id,
+  });
 
   const activeTasks = (taskCount ?? []).filter(
     (t: any) => t.status === 'in_progress' || t.status === 'pending',
@@ -112,7 +119,7 @@ export function EmployeeHoverCard({
   useEffect(() => () => clearTimeout(timerRef.current), []);
 
   const handlePresenceChange = async (status: PresenceStatus) => {
-    await updatePresence({ userId: employee._id as Id<'users'>, presenceStatus: status });
+    await updatePresenceMutation.mutateAsync({ userId: employee.id, presenceStatus: status });
   };
 
   const initials = (employee.name ?? '?')

@@ -37,9 +37,10 @@ import { useAuthUser } from '@/store/useAuthStore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OrganizationSelector } from '@/components/layout/OrganizationSelector';
 import { QuickActionsPalette } from '@/components/superadmin/QuickActionsPalette';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
+import { useMyOrganization } from '@/hooks/useOrganizations';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useUnreadLeavesCount } from '@/hooks/useLeaves';
+import { useTotalUnreadCount } from '@/hooks/useChat';
 
 const navItems = [
   {
@@ -202,32 +203,20 @@ export function Sidebar() {
   React.useEffect(() => setMounted(true), []);
 
   // Get user's organization
-  const userOrg = useQuery(
-    api.organizations.getMyOrganization,
-    mounted && user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: userOrg } = useMyOrganization(mounted && !!user?.id);
 
   // Unread task notifications badge
-  const notifications = useQuery(
-    api.notifications.getUserNotifications,
-    mounted && user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: notifications = [] } = useNotifications(mounted && user?.id ? user.id : undefined);
 
   // Unread leaves count (only for admin role)
-  const unreadLeavesCount = useQuery(
-    api.leaves.getUnreadCount,
-    mounted && user?.id && user.role === 'admin' ? { requesterId: user.id as Id<'users'> } : 'skip',
+  const { data: unreadLeavesCount = 0 } = useUnreadLeavesCount(
+    mounted && user?.id && user.role === 'admin' ? user.id : undefined,
   );
 
   // Unread chat messages count
-  const chatUnreadCount = useQuery(
-    api.chat.queries.getTotalUnread,
-    mounted && user?.id && user?.organizationId
-      ? {
-          userId: user.id as Id<'users'>,
-          organizationId: user.organizationId as Id<'organizations'>,
-        }
-      : 'skip',
+  const { data: chatUnreadCount = 0 } = useTotalUnreadCount(
+    mounted && user?.id && user?.organizationId ? user.id : undefined,
+    mounted && user?.id && user?.organizationId ? user.organizationId : undefined,
   );
 
   const taskUnreadCount = (notifications ?? []).filter(
@@ -501,31 +490,19 @@ export function MobileSidebar() {
   React.useEffect(() => setMounted(true), []);
 
   // Get user's organization
-  const userOrg = useQuery(
-    api.organizations.getMyOrganization,
-    mounted && user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: userOrg } = useMyOrganization(mounted && !!user?.id);
 
-  const mobileNotifications = useQuery(
-    api.notifications.getUserNotifications,
-    mounted && user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: mobileNotifications = [] } = useNotifications(mounted && user?.id ? user.id : undefined);
 
   // Mobile Unread leaves count (only for admin role)
-  const mobileUnreadLeavesCount = useQuery(
-    api.leaves.getUnreadCount,
-    mounted && user?.id && user.role === 'admin' ? { requesterId: user.id as Id<'users'> } : 'skip',
+  const { data: mobileUnreadLeavesCount = 0 } = useUnreadLeavesCount(
+    mounted && user?.id && user.role === 'admin' ? user.id : undefined,
   );
 
   // Mobile unread chat count
-  const mobileChatUnreadCount = useQuery(
-    api.chat.queries.getTotalUnread,
-    mounted && user?.id && user?.organizationId
-      ? {
-          userId: user.id as Id<'users'>,
-          organizationId: user.organizationId as Id<'organizations'>,
-        }
-      : 'skip',
+  const { data: mobileChatUnreadCount = 0 } = useTotalUnreadCount(
+    mounted && user?.id && user?.organizationId ? user.id : undefined,
+    mounted && user?.id && user?.organizationId ? user.organizationId : undefined,
   );
 
   const mobileTaskBadge = (mobileNotifications ?? []).filter(

@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '../../../../../convex/_generated/api';
-import type { Id } from '../../../../../convex/_generated/dataModel';
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
   try {
@@ -13,117 +9,96 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // CONFLICT DETECTION — Unified Conflict Service
-    // ═══════════════════════════════════════════════════════════════
-    const conflictResult = await convex.query(api.conflicts.checkConflictsForRequest, {
-      organizationId: organizationId as Id<'organizations'>,
-      requestType: 'leave' as const,
-      userId: userId as Id<'users'>,
-      startDate: new Date(startDate).getTime(),
-      endDate: new Date(endDate).getTime(),
-      metadata: { leaveType: type },
-    });
-
-    // Если есть критические конфликты — возвращаем ошибку
-    if (conflictResult.hasCritical) {
-      const criticalConflicts = conflictResult.conflicts.filter((c) => c.severity === 'critical');
-
-      return NextResponse.json({
-        success: false,
-        conflict: true,
-        hasCriticalConflicts: true,
-        conflictCount: conflictResult.conflicts.length,
-        message: buildConflictMessage(criticalConflicts, type, startDate, endDate),
-        conflicts: conflictResult.conflicts,
-      });
-    }
+    const supabase = await createClient();
 
     // ═══════════════════════════════════════════════════════════════
-    // LEGACY CHECK — personal leave overlap
+    // CONFLICT DETECTION — Check for overlapping leaves
     // ═══════════════════════════════════════════════════════════════
-    const userLeaves = await convex.query(api.leaves.getUserLeaves, { userId });
-    const personalConflict = userLeaves.find((leave: any) => {
-      if (leave.status === 'rejected') return false;
-      const existStart = new Date(leave.startDate);
-      const existEnd = new Date(leave.endDate);
-      const newStart = new Date(startDate);
-      const newEnd = new Date(endDate);
-      return newStart <= existEnd && newEnd >= existStart;
-    });
+    const { data: existingLeaves } = await supabase
+      .from('leave_requests')
+      .select('*')
+      .eq('userid', userId)
+      .in('status', ['pending', 'approved'])
+      .lte('start_date', endDate)
+      .gte('end_date', startDate);
 
-    if (personalConflict) {
-      const conflictEnd = new Date(personalConflict.endDate);
-      conflictEnd.setDate(conflictEnd.getDate() + 1);
-      const suggestedStart = conflictEnd.toISOString().split('T')[0];
-      const suggestedEnd = new Date(conflictEnd);
-      suggestedEnd.setDate(suggestedEnd.getDate() + days - 1);
-      const suggestedEndStr = suggestedEnd.toISOString().split('T')[0];
+    if (existingLeaves && existingLeaves.length > 0) {
+      const personalConflict = existingLeaves[0];
+      if (personalConflict) {
+        const conflictEnd = new Date(personalConflict.end_date);
+        conflictEnd.setDate(conflictEnd.getDate() + 1);
+        const suggestedStart = conflictEnd.toISOString().split('T')[0];
+        const suggestedEnd = new Date(conflictEnd);
+        suggestedEnd.setDate(suggestedEnd.getDate() + days - 1);
+        const suggestedEndStr = suggestedEnd.toISOString().split('T')[0];
 
-      return NextResponse.json({
-        success: false,
-        conflict: true,
-        message: `You already have a ${personalConflict.type} leave (${personalConflict.startDate} → ${personalConflict.endDate}) with status: "${personalConflict.status}". 💡 Suggested alternative: ${suggestedStart} → ${suggestedEndStr}`,
-      });
+        return NextResponse.json({
+          success: false,
+          conflict: true,
+          message: `You already have a ${personalConflict.type} leave (${personalConflict.start_date} → ${personalConflict.end_date}) with status: "${personalConflict.status}". 💡 Suggested alternative: ${suggestedStart} → ${suggestedEndStr}`,
+        });
+      }
     }
 
     // ═══════════════════════════════════════════════════════════════
     // CHECK LEAVE BALANCE
     // ═══════════════════════════════════════════════════════════════
-    const user = await convex.query(api.users.queries.getUserById, { userId });
+    const { data: user } = await supabase.from('users').select('*').eq('id', userId).single();
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (type === 'paid' && (user.paidLeaveBalance ?? 0) < days) {
+    if (type === 'paid' && (user.paid_leave_balance ?? 0) < days) {
       return NextResponse.json({
         success: false,
         conflict: true,
-        message: `You don't have enough paid leave balance. Available: ${user.paidLeaveBalance ?? 0} days, requested: ${days} days.`,
+        message: `You don't have enough paid leave balance. Available: ${user.paid_leave_balance ?? 0} days, requested: ${days} days.`,
       });
     }
-    if (type === 'sick' && (user.sickLeaveBalance ?? 0) < days) {
+    if (type === 'sick' && (user.sick_leave_balance ?? 0) < days) {
       return NextResponse.json({
         success: false,
         conflict: true,
-        message: `You don't have enough sick leave balance. Available: ${user.sickLeaveBalance ?? 0} days, requested: ${days} days.`,
+        message: `You don't have enough sick leave balance. Available: ${user.sick_leave_balance ?? 0} days, requested: ${days} days.`,
       });
     }
-    if (type === 'family' && (user.familyLeaveBalance ?? 0) < days) {
+    if (type === 'family' && (user.family_leave_balance ?? 0) < days) {
       return NextResponse.json({
         success: false,
         conflict: true,
-        message: `You don't have enough family leave balance. Available: ${user.familyLeaveBalance ?? 0} days, requested: ${days} days.`,
+        message: `You don't have enough family leave balance. Available: ${user.family_leave_balance ?? 0} days, requested: ${days} days.`,
       });
     }
 
     // ═══════════════════════════════════════════════════════════════
     // CREATE LEAVE REQUEST
     // ═══════════════════════════════════════════════════════════════
-    const leaveId = await convex.mutation(api.leaves.createLeave, {
-      userId,
-      type,
-      startDate,
-      endDate,
-      days,
-      reason,
-      comment: 'Submitted via AI Assistant',
-    });
+    const { data: leave, error } = await supabase
+      .from('leave_requests')
+      .insert({
+        userid: userId,
+        organizationId,
+        type,
+        start_date: startDate,
+        end_date: endDate,
+        days,
+        reason,
+        comment: 'Submitted via AI Assistant',
+        status: 'pending',
+      })
+      .select()
+      .single();
 
-    // Формируем ответ с учётом предупреждений
-    const warnings = conflictResult.conflicts.filter((c) => c.severity === 'warning');
-    let message = `✅ Your ${type} leave request for ${days} day(s) (${startDate} → ${endDate}) has been submitted and sent to admin for approval!`;
-
-    if (warnings.length > 0) {
-      message += `\n\n⚠️ Note: ${warnings.map((w) => w.message).join(' ')}`;
+    if (error) {
+      throw new Error(error.message);
     }
 
     return NextResponse.json({
       success: true,
-      leaveId,
-      message,
-      hasWarnings: warnings.length > 0,
-      conflicts: conflictResult.conflicts,
+      leaveId: leave.id,
+      message: `✅ Your ${type} leave request for ${days} day(s) (${startDate} → ${endDate}) has been submitted and sent to admin for approval!`,
+      hasWarnings: false,
+      conflicts: [],
     });
   } catch (error) {
     console.error('Book leave error:', error);
@@ -132,28 +107,4 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
-}
-
-/**
- * Build human-readable conflict message for AI
- */
-function buildConflictMessage(
-  conflicts: any[],
-  leaveType: string,
-  startDate: string,
-  endDate: string,
-): string {
-  if (conflicts.length === 0) return '';
-
-  let message = `🚨 **Conflict detected for your ${leaveType} leave request (${startDate} → ${endDate})**:\n\n`;
-
-  conflicts.forEach((conflict, i) => {
-    message += `${i + 1}. **${conflict.title}**\n`;
-    message += `   ${conflict.message}\n`;
-    message += `   💡 ${conflict.suggestion}\n\n`;
-  });
-
-  message += 'Please consider alternative dates or discuss with your manager before proceeding.';
-
-  return message;
 }

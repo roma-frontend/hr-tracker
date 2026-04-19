@@ -19,12 +19,7 @@ export { DriverSearchBar, DriverFilters } from './filters';
 export { NoDriversEmptyState, NoRequestsEmptyState } from './empty-states';
 
 // Actions
-export {
-  NavigatorDropdown,
-  InAppCallButton,
-  DriverQuickMessage,
-  PassengerQuickMessage,
-} from './DriverActions';
+export { NavigatorDropdown } from './DriverActions';
 
 // Dialogs
 export { RatingDialog, ReassignDriverDialog } from './DriverDialogs';

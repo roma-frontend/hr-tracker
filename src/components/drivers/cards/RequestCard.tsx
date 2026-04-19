@@ -13,7 +13,7 @@ import { format } from 'date-fns';
 
 interface RequestCardProps {
   request: {
-    _id: string;
+    id: string;
     status: string;
     startTime?: number;
     tripInfo?: {

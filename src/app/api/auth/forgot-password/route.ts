@@ -1,20 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { applyRateLimit, PASSWORD_RESET_RATE_LIMIT } from '@/lib/rate-limit';
+import { createClient } from '@/lib/supabase/server';
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
-async function convexMutation(name: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path: name, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
-  return data.value;
-}
 
 export async function POST(req: NextRequest) {
   // Rate limiting: 3 requests per hour
@@ -25,14 +14,18 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
     if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 });
 
-    // Request reset token from Convex
-    const result = await convexMutation('auth:requestPasswordReset', { email });
-
-    // If user not found, still return success (security)
     // SECURITY: Add timing attack mitigation — constant delay regardless of user existence
     const startTime = Date.now();
 
-    if (!result.token) {
+    // Check if user exists
+    const supabase = await createClient();
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('email', email)
+      .single();
+
+    if (error || !user) {
       // Wait a fixed amount of time to prevent timing-based email enumeration
       const elapsed = Date.now() - startTime;
       const minDelay = 500; // minimum 500ms delay
@@ -42,7 +35,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const resetLink = `${APP_URL}/reset-password?token=${result.token}`;
+    // Generate reset token
+    const resetToken = crypto.randomUUID();
+    const resetExpiry = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    // Store reset token in database
+    await supabase
+      .from('users')
+      .update({
+        reset_password_token: resetToken,
+        reset_password_expiry: resetExpiry,
+      })
+      .eq('id', user.id);
+
+    const resetLink = `${APP_URL}/reset-password?token=${resetToken}`;
 
     // Send email via Resend
     const resendKey = process.env.RESEND_API_KEY;
@@ -52,14 +58,14 @@ export async function POST(req: NextRequest) {
       // Until adb.org DNS records are verified, send to test email (account owner).
       const isDomainVerified = process.env.RESEND_DOMAIN_VERIFIED === 'true';
       const testEmail = process.env.RESEND_TEST_EMAIL || 'romangulanyan@gmail.com';
-      const toEmail = isDomainVerified ? result.email : testEmail;
+      const toEmail = isDomainVerified ? user.email : testEmail;
       const fromEmail = isDomainVerified
         ? 'HR Office <hr@adb.org>'
         : 'HR Office <onboarding@resend.dev>';
       const subject = isDomainVerified
         ? 'Reset your HR Office password'
-        : `[For ${result.email}] Password Reset - HR Office`;
-      console.log('Sending email:', { from: fromEmail, to: toEmail, target: result.email });
+        : `[For ${user.email}] Password Reset - HR Office`;
+      console.log('Sending email:', { from: fromEmail, to: toEmail, target: user.email });
       const sendResult = await resend.emails.send({
         from: fromEmail,
         to: toEmail,
@@ -84,7 +90,7 @@ export async function POST(req: NextRequest) {
               <div style="background: #1a1a2e; border: 1px solid rgba(99,102,241,0.2); border-radius: 16px; padding: 40px 36px;">
                 <h1 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 8px;">Reset your password</h1>
                 <p style="color: #9ca3af; font-size: 15px; margin: 0 0 28px; line-height: 1.5;">
-                  Hi ${result.name},<br><br>
+                  Hi ${user.name},<br><br>
                   We received a request to reset your password. Click the button below to choose a new one.
                 </p>
 

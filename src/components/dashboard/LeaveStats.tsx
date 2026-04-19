@@ -5,26 +5,25 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
-import { Id } from '../../../convex/_generated/dataModel';
 import { Calendar, AlertTriangle, CheckCircle, TrendingUp, Award } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useMemo } from 'react';
+import { useUserAnalytics } from '@/hooks/useAnalytics';
+import { useUserById } from '@/hooks/useUsers';
 
 interface LeaveStatsProps {
-  userId: Id<'users'>;
+  userId: string;
 }
 
 export default React.memo(
   function LeaveStats({ userId }: LeaveStatsProps) {
     const { t } = useTranslation();
-    const analytics = useQuery(api.analytics.getUserAnalytics, { userId });
-    const user = useQuery(api.users.queries.getUserById, { userId });
+    const { data: analytics } = useUserAnalytics(userId);
+    const { data: user } = useUserById(userId);
 
     // ═══════════════════════════════════════════════════════════════
     // Extract data BEFORE hooks (non-hook values)

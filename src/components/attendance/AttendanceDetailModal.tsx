@@ -17,15 +17,13 @@ import {
   User,
   Building2,
 } from 'lucide-react';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { Id } from '../../../convex/_generated/dataModel';
+import { useMonthlyAttendanceStats, useAttendanceHistory } from '@/hooks/useAttendance';
 
 export interface AttendanceRecord {
-  _id: string;
-  userId: Id<'users'>;
+  id: string;
+  userId: string;
   date: string;
   checkInTime: number;
   checkOutTime?: number;
@@ -68,16 +66,9 @@ function formatDuration(minutes: number) {
 
 export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetailModalProps) {
   const { t } = useTranslation();
-  const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
-  const monthlyStats = useQuery(
-    api.timeTracking.getMonthlyStats,
-    record?.userId ? { userId: record.userId, month: currentMonth } : 'skip',
-  );
-
-  const recentRecords = useQuery(
-    api.timeTracking.getRecentAttendance,
-    record?.userId ? { userId: record.userId, limit: 7 } : 'skip',
-  );
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const { data: monthlyStats } = useMonthlyAttendanceStats(currentMonth);
+  const { data: recentRecords } = useAttendanceHistory(7);
 
   if (!record) return null;
 
@@ -321,7 +312,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                   </h3>
                   <div className="space-y-2">
                     {recentRecords.map((r: any) => (
-                      <div key={r._id} className="flex items-center justify-between text-sm">
+                      <div key={r.id} className="flex items-center justify-between text-sm">
                         <span className="text-gray-500 dark:text-gray-400">
                           {new Date(r.date).toLocaleDateString('en-GB', {
                             weekday: 'short',

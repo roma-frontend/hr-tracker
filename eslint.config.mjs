@@ -12,7 +12,6 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     // Ignore generated files
-    "convex/_generated/**",
     "analyze-translations.js",
     // Ignore config files
     "*.config.js",

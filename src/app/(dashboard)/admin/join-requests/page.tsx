@@ -7,10 +7,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import { useJoinRequests, useApproveJoinRequest, useRejectJoinRequest } from '@/hooks/useOrganizations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,25 +23,25 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 export default function JoinRequestsPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
+  const selectedOrgId = useSelectedOrganization();
+  const isSuperadmin = user?.role === 'superadmin';
+  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : user?.organizationId;
 
-  const requests = useQuery(
-    api.organizationJoinRequests.getOrgJoinRequests,
-    user?.organizationId ? { organizationId: user.organizationId as Id<'organizations'> } : 'skip',
-  );
-
-  const approveRequest = useMutation(api.organizationJoinRequests.approveJoinRequest);
-  const rejectRequest = useMutation(api.organizationJoinRequests.rejectJoinRequest);
+  const { data: requests, isLoading } = useJoinRequests(effectiveOrgId);
+  const approveMutation = useApproveJoinRequest();
+  const rejectMutation = useRejectJoinRequest();
 
   const [rejectReason, setRejectReason] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
 
-  const handleApprove = async (inviteId: Id<'organizationInvites'>) => {
+  const handleApprove = async (inviteId: string) => {
     if (!user?.id) return;
 
     try {
-      await approveRequest({
+      await approveMutation.mutateAsync({
         inviteId,
-        reviewerId: user.id as Id<'users'>,
+        role: 'employee',
+        passwordHash: 'approved-by-admin',
       });
       toast.success(t('joinRequests.approved', 'Request approved'));
     } catch (_error) {
@@ -54,7 +53,7 @@ export default function JoinRequestsPage() {
     }
   };
 
-  const handleReject = async (inviteId: Id<'organizationInvites'>) => {
+  const handleReject = async (inviteId: string) => {
     if (!user?.id) return;
 
     if (!rejectReason.trim()) {
@@ -63,9 +62,8 @@ export default function JoinRequestsPage() {
     }
 
     try {
-      await rejectRequest({
+      await rejectMutation.mutateAsync({
         inviteId,
-        reviewerId: user.id as Id<'users'>,
         reason: rejectReason,
       });
       toast.success(t('joinRequests.rejected', 'Request rejected'));
@@ -80,7 +78,7 @@ export default function JoinRequestsPage() {
     }
   };
 
-  if (!requests) {
+  if (isLoading || !requests) {
     return (
       <div className="flex items-center justify-center h-64">
         <ShieldLoader size="md" variant="inline" />
@@ -160,7 +158,7 @@ export default function JoinRequestsPage() {
           </Card>
         ) : (
           requests.map((request) => (
-            <Card key={request._id}>
+            <Card key={request.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
@@ -220,14 +218,14 @@ export default function JoinRequestsPage() {
 
                     <div className="flex gap-2">
                       <Button
-                        onClick={() => handleApprove(request._id)}
+                        onClick={() => handleApprove(request.id)}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         {t('joinRequests.approve', 'Approve')}
                       </Button>
 
-                      {rejectingId === request._id ? (
+                      {rejectingId === request.id ? (
                         <div className="flex-1 space-y-2">
                           <Textarea
                             value={rejectReason}
@@ -237,7 +235,7 @@ export default function JoinRequestsPage() {
                           />
                           <div className="flex gap-2">
                             <Button
-                              onClick={() => handleReject(request._id)}
+                              onClick={() => handleReject(request.id)}
                               variant="destructive"
                               size="sm"
                             >
@@ -258,7 +256,7 @@ export default function JoinRequestsPage() {
                       ) : (
                         <Button
                           onClick={() => {
-                            setRejectingId(request._id);
+                            setRejectingId(request.id);
                             setRejectReason('');
                           }}
                           variant="outline"

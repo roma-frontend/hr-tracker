@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import { Clock, X } from 'lucide-react';
+import { useMaintenanceMode } from '@/hooks/useAdmin';
 
 export function MaintenanceBanner() {
   const { user } = useAuthStore();
@@ -15,10 +14,7 @@ export function MaintenanceBanner() {
 
   const organizationId = user?.organizationId;
 
-  const maintenance = useQuery(
-    api.admin.getMaintenanceMode,
-    organizationId ? { organizationId: organizationId as any } : 'skip',
-  );
+  const { data: maintenance } = useMaintenanceMode(organizationId || '', !!organizationId);
 
   // Countdown timer
   useEffect(() => {
@@ -31,14 +27,14 @@ export function MaintenanceBanner() {
       // If maintenance hasn't started yet — countdown to start
       if (now < startTime) {
         const remaining = startTime - now;
-        setCountdown(formatRemaining(remaining));
+        setCountdown(formatRemaining(remaining, t));
         return;
       }
 
       // If maintenance is active — countdown to end
       const endTime =
         maintenance.endTime ||
-        startTime +
+        maintenance.startTime +
           (maintenance.estimatedDuration ? parseDuration(maintenance.estimatedDuration) : 3600000);
 
       if (now >= endTime) {
@@ -47,7 +43,7 @@ export function MaintenanceBanner() {
       }
 
       const remaining = endTime - now;
-      setCountdown(formatRemaining(remaining));
+      setCountdown(formatRemaining(remaining, t));
     };
 
     tick();
@@ -58,6 +54,7 @@ export function MaintenanceBanner() {
     maintenance?.startTime,
     maintenance?.endTime,
     maintenance?.estimatedDuration,
+    t,
   ]);
 
   // Don't show if no maintenance, dismissed, or user is superadmin (they manage it)
@@ -155,7 +152,7 @@ export function MaintenanceBanner() {
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
             }}
-            aria-label="Dismiss maintenance notice"
+            aria-label={t('maintenance.dismissNotice')}
           >
             <X className="w-4 h-4" style={{ color: 'var(--maintenance-banner-text, #92400e)' }} />
           </button>
@@ -165,14 +162,14 @@ export function MaintenanceBanner() {
   );
 }
 
-function formatRemaining(ms: number): string {
+function formatRemaining(ms: number, t: (key: string) => string): string {
   const hours = Math.floor(ms / 3600000);
   const minutes = Math.floor((ms % 3600000) / 60000);
   const seconds = Math.floor((ms % 60000) / 1000);
 
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
+  if (hours > 0) return `${hours}${t('common.hoursShort')} ${minutes}${t('common.minutesShort')}`;
+  if (minutes > 0) return `${minutes}${t('common.minutesShort')} ${seconds}${t('common.secondsShort')}`;
+  return `${seconds}${t('common.secondsShort')}`;
 }
 
 function parseDuration(duration: string): number {

@@ -2,8 +2,6 @@
 
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +16,7 @@ import {
 } from '@/lib/calendar-sync';
 import { useUpgradeModal } from '@/components/subscription/PlanGate';
 import { usePlanFeatures } from '@/hooks/usePlanFeatures';
+import { useCalendarExportData } from '@/hooks/useAdmin';
 
 export default function HolidayCalendarSync() {
   const { t } = useTranslation();
@@ -26,7 +25,7 @@ export default function HolidayCalendarSync() {
   const [isSyncingOutlook, setIsSyncingOutlook] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
-  const calendarData = useQuery(api.admin.getCalendarExportData, {});
+  const { data: calendarData, isLoading } = useCalendarExportData();
 
   // Plan gating
   const { canAccess } = usePlanFeatures();
@@ -155,7 +154,7 @@ export default function HolidayCalendarSync() {
     }
   };
 
-  if (!calendarData) {
+  if (isLoading || !calendarData) {
     return (
       <Card className="border-(--border)">
         <CardContent className="flex items-center justify-center p-8">

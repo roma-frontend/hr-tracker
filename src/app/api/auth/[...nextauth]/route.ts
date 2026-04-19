@@ -1,154 +1,106 @@
-import NextAuth from 'next-auth';
-import Google from 'next-auth/providers/google';
-import type { NextAuthConfig } from 'next-auth';
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { verifyJWT } from '@/lib/jwt';
+import { cookies } from 'next/headers';
 
-// ═══════════════════════════════════════════════════════════════
-// VALIDATE ENVIRONMENT — fail fast, not silently
-// ═══════════════════════════════════════════════════════════════
-const requiredEnvVars = ['AUTH_SECRET', 'AUTH_GOOGLE_ID', 'AUTH_GOOGLE_SECRET'];
-const missingVars = requiredEnvVars.filter((v) => !process.env[v]);
+export async function auth() {
+  const cookieStore = await cookies();
+  const jwt = cookieStore.get('hr-auth-token')?.value;
 
-if (missingVars.length > 0) {
-  console.error('[Auth.js] ❌ Missing required environment variables:', missingVars);
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(`[Auth.js] Missing required env vars: ${missingVars.join(', ')}`);
+  if (jwt) {
+    const payload = await verifyJWT(jwt);
+    if (payload) {
+      return {
+        user: {
+          id: payload.userId,
+          name: payload.name,
+          email: payload.email,
+          role: payload.role,
+          department: payload.department,
+          position: payload.position,
+          employeeType: payload.employeeType,
+          avatar: payload.avatar,
+          organizationId: payload.organizationId,
+          organizationSlug: payload.organizationSlug,
+          organizationName: payload.organizationName,
+          isApproved: payload.isApproved,
+        },
+      };
+    }
   }
+
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.user) {
+    return {
+      user: {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.user_metadata?.name,
+        role: session.user.user_metadata?.role || 'employee',
+      },
+    };
+  }
+
+  return null;
 }
 
-export const authConfig: NextAuthConfig = {
-  providers: [
-    Google({
-      profile(profile) {
-        let name = profile.name;
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const provider = searchParams.get('provider');
 
-        if (!name && (profile.given_name || profile.family_name)) {
-          name = `${profile.given_name || ''} ${profile.family_name || ''}`.trim();
-        }
-
-        if (!name && profile.email) {
-          name = profile.email.split('@')[0];
-        }
-
-        return {
-          id: profile.sub,
-          name: name || 'User',
-          email: profile.email,
-          image: profile.picture,
-        };
+  if (provider === 'google') {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
-    }),
-  ],
+    });
 
-  callbacks: {
-    async signIn({ user }) {
-      // Fetch user role from Convex on sign-in
-      const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-      const email = user.email;
+    if (error) {
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/login?error=${encodeURIComponent(error.message)}`);
+    }
 
-      if (convexUrl && email) {
-        try {
-          const apiUrl = convexUrl.replace(/\/api$/, '');
-          const queryUrl = `${apiUrl}/api/query`;
+    if (data.url) {
+      return NextResponse.redirect(data.url);
+    }
+  }
 
-          const response = await fetch(queryUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              path: 'users.queries.getUserByEmail',
-              args: { email },
-              format: 'json',
-            }),
-          });
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/login`);
+}
 
-          if (response.ok) {
-            const data = await response.json();
-            const userData = data.value || data;
+export async function POST(request: Request) {
+  const body = await request.json();
+  const { email, password } = body;
 
-            if (userData?.role) {
-              user.role = userData.role;
-            }
-            if (userData?.organizationId) {
-              (user as any).organizationId = userData.organizationId;
-            }
-            if (userData?.isApproved !== undefined) {
-              (user as any).isApproved = userData.isApproved;
-            }
-          }
-        } catch (error) {
-          console.error('[Auth.js] Error fetching user role:', error);
-        }
-      }
+  if (email && password) {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      return true;
-    },
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
 
-    async jwt({ token, user, trigger }) {
-      if (user) {
-        token.name = user.name || 'User';
-        token.email = user.email;
-        token.picture = user.image;
-        token.role = (user as any).role;
-        token.organizationId = (user as any).organizationId;
-        token.isApproved = (user as any).isApproved;
-      }
+    return NextResponse.json({
+      user: {
+        id: data.user?.id,
+        email: data.user?.email,
+        name: data.user?.user_metadata?.name,
+      },
+      session: data.session,
+    });
+  }
 
-      // Refresh role data on explicit update trigger
-      if (trigger === 'update' && token.email) {
-        try {
-          const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-          if (convexUrl) {
-            const apiUrl = convexUrl.replace(/\/api$/, '');
-            const queryUrl = `${apiUrl}/api/query`;
-
-            const response = await fetch(queryUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                path: 'users.queries.getUserByEmail',
-                args: { email: token.email },
-                format: 'json',
-              }),
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              const userData = data.value || data;
-
-              if (userData?.role) token.role = userData.role;
-              if (userData?.organizationId) token.organizationId = userData.organizationId;
-              if (userData?.isApproved !== undefined) token.isApproved = userData.isApproved;
-            }
-          }
-        } catch (error) {
-          console.error('[Auth.js] Error refreshing user role:', error);
-        }
-      }
-
-      return token;
-    },
-
-    async session({ session, token }) {
-      session.user.id = token.sub as string;
-      session.user.email = token.email as string;
-      session.user.name = (token.name as string) || token.email?.split('@')[0] || 'User';
-      session.user.image = token.picture as string | undefined;
-      (session.user as any).role = token.role;
-      (session.user as any).organizationId = token.organizationId;
-      (session.user as any).isApproved = token.isApproved;
-
-      return session;
-    },
-  },
-
-  pages: {
-    signIn: '/login',
-    error: '/login',
-  },
-
-  debug: process.env.NODE_ENV === 'development',
-};
-
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
-
-export const GET = handlers.GET;
-export const POST = handlers.POST;
+  return NextResponse.json({ error: 'Missing credentials' }, { status: 400 });
+}

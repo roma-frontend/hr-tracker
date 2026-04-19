@@ -1,13 +1,7 @@
-import { useMemo } from 'react';
-import type { Id } from '../../convex/_generated/dataModel';
+'use client';
 
-/**
- * Calculate effective presence status considering active leaves
- * If user has approved leave today → "out_of_office"
- * Otherwise → return user's current presenceStatus
- *
- * This is useful for the client side when you have leave data available
- */
+import { useMemo } from 'react';
+
 export function useEffectivePresenceStatus(
   presenceStatus: string | undefined,
   leaves?: Array<{
@@ -19,13 +13,11 @@ export function useEffectivePresenceStatus(
   return useMemo(() => {
     if (!presenceStatus) return 'available';
 
-    // If no leave data, just return the current status
     if (!leaves || leaves.length === 0) {
       return presenceStatus;
     }
 
-    // Check if user has an approved leave today
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
     if (!today) return presenceStatus;
 
     const hasActiveLeave = leaves.some((leave) => {

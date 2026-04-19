@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion } from '@/lib/cssMotion';
 import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
 import {
@@ -21,20 +21,17 @@ import {
 } from 'recharts';
 import { Download, TrendingUp, Users, CalendarDays, FileText } from 'lucide-react';
 import { PlanGate } from '@/components/subscription/PlanGate';
-import { useQuery } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { Id } from '../../../../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { LEAVE_TYPE_COLORS, DEPARTMENTS, getLeaveTypeLabel, type LeaveType } from '@/lib/types';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useReportsData } from '@/hooks/useReports';
 
 export default function ReportsPage() {
   const { t } = useTranslation();
@@ -42,93 +39,28 @@ export default function ReportsPage() {
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
 
-  // Determine which query to use based on selectedOrgId
-  const shouldUseOrgQuery = selectedOrgId && user?.id;
-  const leavesQueryParams = shouldUseOrgQuery
-    ? { organizationId: selectedOrgId as Id<'organizations'> }
-    : user?.id
-      ? { requesterId: user.id as Id<'users'> }
-      : ('skip' as const);
+  const {
+    leaves,
+    isLoading,
+    totalLeaves,
+    approvedCount,
+    pendingCount,
+    rejectedCount,
+    approvalRate,
+    avgDays,
+    staffCount,
+    contractorCount,
+    pieData,
+    deptData,
+    monthlyTrend,
+    cumulativeData,
+    getDepartment,
+    getName,
+    getStartDate,
+    users,
+  } = useReportsData(selectedOrgId, user?.id ?? null, t);
 
-  // Use organization-specific query if superadmin has selected an org, otherwise use default
-  const leaves = useQuery(
-    shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    user?.id && leavesQueryParams !== 'skip' ? leavesQueryParams : 'skip',
-  );
-  const usersQueryParams = shouldUseOrgQuery
-    ? { requesterId: user.id as Id<'users'>, organizationId: selectedOrgId as Id<'organizations'> }
-    : user?.id
-      ? { requesterId: user.id as Id<'users'> }
-      : ('skip' as const);
-  const users = useQuery(
-    shouldUseOrgQuery ? api.users.queries.getUsersByOrganizationId : api.users.queries.getAllUsers,
-    user?.id && usersQueryParams !== 'skip' ? usersQueryParams : 'skip',
-  );
-
-  const isLoading = leaves === undefined || users === undefined;
-
-  // KPI stats
-  const totalLeaves = leaves?.length ?? 0;
-  const approvedCount = leaves?.filter((r) => r.status === 'approved').length ?? 0;
-  const pendingCount = leaves?.filter((r) => r.status === 'pending').length ?? 0;
-  const rejectedCount = leaves?.filter((r) => r.status === 'rejected').length ?? 0;
-  const approvalRate = totalLeaves > 0 ? Math.round((approvedCount / totalLeaves) * 100) : 0;
-  const avgDays =
-    totalLeaves > 0 ? (leaves!.reduce((s, r) => s + r.days, 0) / totalLeaves).toFixed(1) : '0';
-  const staffCount = users?.filter((u) => u.employeeType === 'staff').length ?? 0;
-  const contractorCount = users?.filter((u) => u.employeeType === 'contractor').length ?? 0;
-
-  // Pie data
-  const pieData = useMemo(() => {
-    return (Object.keys(LEAVE_TYPE_COLORS) as LeaveType[])
-      .map((key) => ({
-        name: getLeaveTypeLabel(key as LeaveType, t),
-        value: leaves?.filter((r) => r.type === key).length ?? 0,
-        color: LEAVE_TYPE_COLORS[key as LeaveType],
-      }))
-      .filter((d) => d.value > 0);
-  }, [leaves, t]);
-
-  // Department breakdown
-  const deptData = useMemo(() => {
-    return DEPARTMENTS.map((dept) => ({
-      dept: dept.slice(0, 3),
-      fullName: dept,
-      total: leaves?.filter((r) => r.userDepartment === dept).length ?? 0,
-      approved:
-        leaves?.filter((r) => r.userDepartment === dept && r.status === 'approved').length ?? 0,
-      pending:
-        leaves?.filter((r) => r.userDepartment === dept && r.status === 'pending').length ?? 0,
-    })).filter((d) => d.total > 0);
-  }, [leaves]);
-
-  // Monthly trend (last 6 months)
-  const monthlyTrend = useMemo(() => {
-    const now = new Date();
-    const months: Record<
-      string,
-      { month: string; approved: number; pending: number; rejected: number }
-    > = {};
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = format(d, 'yyyy-MM');
-      months[key] = { month: format(d, 'MMM'), approved: 0, pending: 0, rejected: 0 };
-    }
-    leaves?.forEach((l) => {
-      const key = l.startDate.slice(0, 7);
-      if (months[key]) months[key][l.status as 'approved' | 'pending' | 'rejected']++;
-    });
-    return Object.values(months);
-  }, [leaves]);
-
-  // Cumulative
-  const cumulativeData = useMemo(() => {
-    return monthlyTrend.map((m, i, arr) => ({
-      month: m.month,
-      cumulative: arr.slice(0, i + 1).reduce((s, x) => s + x.approved, 0),
-      days: Math.round(arr.slice(0, i + 1).reduce((s, x) => s + x.approved * 1.8, 0)),
-    }));
-  }, [monthlyTrend]);
+  const getEndDate = (leave: any) => leave.endDate || leave.end_date || '';
 
   const handleExport = () => {
     if (!leaves || leaves.length === 0) {
@@ -148,14 +80,14 @@ export default function ReportsPage() {
       ].join(','),
       ...leaves.map((l) =>
         [
-          l.userName ?? '',
-          l.userDepartment ?? '',
+          getName(l) ?? '',
+          getDepartment(l) ?? '',
           l.type,
-          l.startDate,
-          l.endDate,
+          getStartDate(l),
+          getEndDate(l),
           l.days,
           l.status,
-          `"${l.reason.replace(/"/g, "'")}"`,
+          `"${(l.reason || '').replace(/"/g, "'")}"`,
         ].join(','),
       ),
     ].join('\n');
@@ -189,10 +121,10 @@ export default function ReportsPage() {
               <Button
                 variant="outline"
                 onClick={handleExport}
-                disabled={isLoading}
+                disabled={isLoading === true || isLoading === false ? isLoading : false}
                 className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
               >
-                <Download className="w-4 h-4" /> Export CSV
+                <Download className="w-4 h-4" /> {t('reports.exportCSV')}
               </Button>
             </div>
           </div>

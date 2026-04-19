@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,12 +21,14 @@ import {
 import { cn } from '@/lib/utils';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
+import { useSendServiceBroadcast, useEnableMaintenanceMode } from '@/hooks/useAdmin';
 
 interface ServiceBroadcastDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  organizationId?: Id<'organizations'> | string;
-  userId?: Id<'users'> | string;
+  organizationId?: string;
+  userId?: string;
 }
 
 const BROADCAST_ICONS = [
@@ -84,17 +83,14 @@ export function ServiceBroadcastDialog({
   const [broadcastScope, setBroadcastScope] = useState<'all' | 'specific'>('specific');
   const [selectedOrgId, setSelectedOrgId] = useState<string>(organizationId as string);
 
-  const organizations = useQuery(
-    api.organizations.getAllOrganizations,
-    userId ? { superadminUserId: userId as Id<'users'> } : 'skip',
-  );
+  const { data: organizations } = useAllOrganizations(!!userId);
 
-  const sendBroadcast = useMutation(api.admin.sendServiceBroadcast);
-  const enableMaintenanceMode = useMutation(api.admin.enableMaintenanceMode);
+  const sendBroadcastMutation = useSendServiceBroadcast();
+  const enableMaintenanceModeMutation = useEnableMaintenanceMode();
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep);
 
-  const selectedOrg = organizations?.find((o) => o._id === selectedOrgId);
+  const selectedOrg = organizations?.find((o: any) => o.id === selectedOrgId);
   const targetOrgCount = broadcastScope === 'all' ? (organizations?.length ?? 0) : 1;
 
   const canProceed = useMemo(() => {
@@ -157,8 +153,8 @@ export function ServiceBroadcastDialog({
     try {
       const targetOrgs =
         broadcastScope === 'all'
-          ? (organizations?.map((o) => o._id) ?? [])
-          : [selectedOrgId as Id<'organizations'>];
+          ? (organizations?.map((o: any) => o.id) ?? [])
+          : [selectedOrgId as string];
 
       const now = Date.now();
       const scheduledTime = scheduleDateTime ? new Date(scheduleDateTime).getTime() : now;
@@ -180,9 +176,9 @@ export function ServiceBroadcastDialog({
       }
 
       for (const orgId of targetOrgs) {
-        await sendBroadcast({
+        await sendBroadcastMutation.mutateAsync({
           organizationId: orgId,
-          userId: userId as Id<'users'>,
+          userId: userId as string,
           title: title.trim(),
           content: broadcastContent,
           icon: selectedIcon,
@@ -191,9 +187,9 @@ export function ServiceBroadcastDialog({
 
       if (scheduleMaintenance && scheduleDateTime) {
         for (const orgId of targetOrgs) {
-          await enableMaintenanceMode({
+          await enableMaintenanceModeMutation.mutateAsync({
             organizationId: orgId,
-            userId: userId as Id<'users'>,
+            userId: userId as string,
             title: title.trim(),
             message: broadcastContent,
             startTime: scheduledTime,
@@ -317,15 +313,15 @@ export function ServiceBroadcastDialog({
               }}
             >
               {organizations.map((org: any) => (
-                <option key={org._id} value={org._id}>
-                  {org.name} ({org.activeEmployees ?? org.memberCount ?? 0} сотрудников)
+                <option key={org.id} value={org.id}>
+                  {org.name} ({org.active_employees ?? org.member_count ?? 0} сотрудников)
                 </option>
               ))}
             </select>
             {selectedOrg && (
               <div className="mt-2 p-3 rounded-lg bg-(--background-subtle) border border-(--border)">
                 <p className="text-xs text-(--text-muted)">
-                  📊 {selectedOrg.activeEmployees ?? selectedOrg.memberCount ?? 0} активных
+                  📊 {selectedOrg.active_employees ?? selectedOrg.member_count ?? 0} активных
                   пользователей получат сообщение
                 </p>
               </div>

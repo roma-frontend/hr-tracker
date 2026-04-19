@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
@@ -18,27 +16,24 @@ import {
 import { Edit2, Trash2, MessageCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import type { Id } from '../../../convex/_generated/dataModel';
+import { useServiceBroadcasts, useDeleteMessage } from '@/hooks/useAdmin';
 
 interface ServiceBroadcastsManagerProps {
-  organizationId: Id<'organizations'>;
-  userId: Id<'users'>;
+  organizationId: string;
+  userId: string;
 }
 
 export function ServiceBroadcastsManager({
   organizationId,
   userId,
 }: ServiceBroadcastsManagerProps) {
-  const broadcasts = useQuery(api.chat.queries.getServiceBroadcasts, {
-    organizationId,
-  });
-
-  const deleteMessage = useMutation(api.chat.mutations.deleteMessage);
+  const { data: broadcasts, isLoading } = useServiceBroadcasts(organizationId);
+  const deleteMessageMutation = useDeleteMessage();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedBroadcastId, setSelectedBroadcastId] = useState<Id<'chatMessages'> | null>(null);
+  const [selectedBroadcastId, setSelectedBroadcastId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteClick = (broadcastId: Id<'chatMessages'>) => {
+  const handleDeleteClick = (broadcastId: string) => {
     setSelectedBroadcastId(broadcastId);
     setDeleteDialogOpen(true);
   };
@@ -51,7 +46,7 @@ export function ServiceBroadcastsManager({
       console.log(
         `[ServiceBroadcastsManager] Deleting broadcast ${selectedBroadcastId} by user ${userId}`,
       );
-      await deleteMessage({
+      await deleteMessageMutation.mutateAsync({
         messageId: selectedBroadcastId,
         userId,
         deleteForEveryone: true,
@@ -68,7 +63,7 @@ export function ServiceBroadcastsManager({
     }
   };
 
-  if (!broadcasts) {
+  if (isLoading || !broadcasts) {
     return (
       <Card>
         <CardHeader>
@@ -121,7 +116,7 @@ export function ServiceBroadcastsManager({
           <div className="space-y-3">
             {broadcasts.map((broadcast: any) => (
               <div
-                key={broadcast._id}
+                key={broadcast.id}
                 className="flex flex-col sm:flex-row  items-start justify-between gap-4 p-4 rounded-lg transition-colors"
                 style={{
                   borderColor: 'var(--border)',
@@ -197,7 +192,7 @@ export function ServiceBroadcastsManager({
                     variant="destructive"
                     size="sm"
                     className="gap-2"
-                    onClick={() => handleDeleteClick(broadcast._id)}
+                    onClick={() => handleDeleteClick(broadcast.id)}
                     style={{
                       backgroundColor: 'var(--destructive)',
                       color: 'var(--destructive-foreground)',

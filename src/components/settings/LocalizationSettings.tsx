@@ -14,15 +14,30 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { Id } from '@/convex/_generated/dataModel';
 
 interface LocalizationSettingsProps {
-  userId: Id<'users'>;
+  userId: string;
   user: any;
   onSettingsChange: (settings: any) => void;
+}
+
+async function updateLocalizationSettings(data: {
+  userId: string;
+  language: string;
+  timezone: string;
+  dateFormat: string;
+  timeFormat: string;
+  firstDayOfWeek: string;
+}) {
+  const res = await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'update-localization', ...data }),
+  });
+  if (!res.ok) throw new Error('Failed to update localization settings');
+  return res.json();
 }
 
 export function LocalizationSettings({
@@ -32,6 +47,7 @@ export function LocalizationSettings({
 }: LocalizationSettingsProps) {
   const { t, i18n } = useTranslation();
   const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
 
   const [language, setLanguage] = useState(user?.language ?? 'en');
   const [timezone, setTimezone] = useState(user?.timezone ?? 'UTC');
@@ -39,7 +55,12 @@ export function LocalizationSettings({
   const [firstDayOfWeek, setFirstDayOfWeek] = useState(user?.firstDayOfWeek ?? 'monday');
   const [timeFormat, setTimeFormat] = useState(user?.timeFormat ?? '24h');
 
-  const updateSettings = useMutation(api.settings.updateLocalizationSettings);
+  const updateSettings = useMutation({
+    mutationFn: updateLocalizationSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-by-id', userId] });
+    },
+  });
 
   // Update parent when settings change (local only)
   useEffect(() => {
@@ -66,7 +87,7 @@ export function LocalizationSettings({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await updateSettings({
+      await updateSettings.mutateAsync({
         userId,
         language,
         timezone,

@@ -1,20 +1,18 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { X, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useThreadReplies, useSendThreadReply } from '@/hooks/useChat';
 
 interface Props {
-  parentMessageId: Id<'chatMessages'>;
+  parentMessageId: string;
   parentContent: string;
-  currentUserId: Id<'users'>;
-  conversationId: Id<'chatConversations'>;
-  organizationId?: Id<'organizations'>;
+  currentUserId: string;
+  conversationId: string;
+  organizationId?: string;
   onClose: () => void;
 }
 
@@ -39,8 +37,8 @@ export function ThreadPanel({
   const [sending, setSending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
-  const replies = useQuery(api.chat.queries.getThreadReplies, { parentMessageId });
-  const sendReply = useMutation(api.chat.mutations.sendThreadReply);
+  const { data: replies } = useThreadReplies(parentMessageId);
+  const sendReplyMutation = useSendThreadReply();
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,7 +48,7 @@ export function ThreadPanel({
     if (!input.trim() || sending) return;
     setSending(true);
     try {
-      await sendReply({
+      await sendReplyMutation.mutateAsync({
         parentMessageId,
         conversationId,
         senderId: currentUserId,
@@ -116,7 +114,7 @@ export function ThreadPanel({
           const isOwn = r.senderId === currentUserId;
           return (
             <div
-              key={r._id}
+              key={r.id}
               className={`flex gap-2 animate-fade-in ${isOwn ? 'flex-row-reverse' : ''}`}
             >
               <Avatar className="sm:w-6 w-8 sm:h-6 h-8 shrink-0 mt-0.5">

@@ -1,7 +1,7 @@
+'use client';
+
 import { useEffect, useRef, useCallback } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export function useMaintenanceAutoLogout() {
@@ -10,10 +10,17 @@ export function useMaintenanceAutoLogout() {
   const logoutAttemptedRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const maintenance = useQuery(
-    api.admin.getMaintenanceMode,
-    organizationId ? { organizationId: organizationId as Id<'organizations'> } : 'skip',
-  );
+  const { data: maintenance } = useQuery({
+    queryKey: ['admin', 'maintenance', organizationId],
+    queryFn: async () => {
+      const params = new URLSearchParams({ action: 'get-maintenance-mode', organizationId: organizationId! });
+      const res = await fetch(`/api/admin?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch maintenance mode');
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!organizationId,
+  });
 
   const performLogout = useCallback(async () => {
     if (logoutAttemptedRef.current) return;

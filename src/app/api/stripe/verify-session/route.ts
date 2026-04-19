@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('session_id');
+    const sessionId = searchParams.get('sessionid');
 
     if (!sessionId) {
       return NextResponse.json({ valid: false, error: 'No session ID' }, { status: 400 });

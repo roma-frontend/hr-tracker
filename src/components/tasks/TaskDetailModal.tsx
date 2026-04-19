@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { useMutation, useQuery } from 'convex/react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
+import { useTaskById, useTaskComments, useUpdateTask, useDeleteTask, useAddComment, type TaskAttachment, type TaskComment } from '@/hooks/useTasks';
 import { TaskAttachments } from './TaskAttachments';
 import { Button } from '@/components/ui/button';
-import type { Id } from '../../../convex/_generated/dataModel';
 import Image from 'next/image';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 
@@ -97,7 +95,7 @@ function Avatar({ name, url }: { name: string; url?: string | null }) {
 
 interface Props {
   task: any;
-  currentUserId: Id<'users'>;
+  currentUserId: string;
   userRole: 'admin' | 'supervisor' | 'employee';
   onClose: () => void;
 }
@@ -116,24 +114,17 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   );
   const modalBodyRef = useRef<HTMLDivElement>(null);
 
+  // Fetch fresh task data
+  const { data: taskData } = useTaskById(task.id);
+  const { data: comments } = useTaskComments(task.id);
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+  const addCommentMutation = useAddComment();
+
   const canManage = userRole === 'admin' || userRole === 'supervisor';
-  const isAssignee = task.assignedTo === currentUserId;
+  const isAssignee = taskData?.assignedto === currentUserId;
 
-  // Fetch fresh task data (reactive to attachment changes)
-  const freshTask = useQuery(api.tasks.getTask, { taskId: task._id });
-  const taskData = freshTask ?? task;
-
-  const comments = useQuery(api.tasks.getTaskComments, { taskId: task._id });
-  const updateStatus = useMutation(api.tasks.updateTaskStatus);
-  const updateTask = useMutation(api.tasks.updateTask);
-  const deleteTask = useMutation(api.tasks.deleteTask);
-  const addComment = useMutation(api.tasks.addComment);
-  const markRead = useMutation(api.notifications.markAllAsRead);
-
-  // Mark task notifications as read when modal opens
-  React.useEffect(() => {
-    markRead({ userId: currentUserId }).catch(() => {});
-
+  useEffect(() => {
     // Scroll modal body to top
     if (modalBodyRef.current) {
       modalBodyRef.current.scrollTop = 0;
@@ -157,23 +148,34 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
     };
   }, []);
 
-  const statusCfg = STATUS_STYLES[taskData.status as Status];
-  const priorityCfg = PRIORITY_STYLES[taskData.priority as Priority];
-  const statusLabel = getStatusLabel(taskData.status as Status, t);
-  const priorityLabel = getPriorityLabel(taskData.priority as Priority, t);
+  if (!taskData) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <div className="relative bg-(--card) rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden border border-(--border) p-8">
+          <p className="text-(--text-muted) text-center">{t('taskDetail.loading')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const statusCfg = STATUS_STYLES[taskData?.status as Status];
+  const priorityCfg = PRIORITY_STYLES[taskData?.priority as Priority];
+  const statusLabel = getStatusLabel(taskData?.status as Status, t);
+  const priorityLabel = getPriorityLabel(taskData?.priority as Priority, t);
 
   const transitions = canManage
-    ? MANAGER_TRANSITIONS[taskData.status as Status]
-    : EMPLOYEE_TRANSITIONS[taskData.status as Status];
+    ? MANAGER_TRANSITIONS[taskData?.status as Status]
+    : EMPLOYEE_TRANSITIONS[taskData?.status as Status];
 
   const handleStatusChange = async (newStatus: Status) => {
-    await updateStatus({ taskId: task._id, status: newStatus, userId: currentUserId });
+    await updateTask.mutateAsync({ taskId: task.id, status: newStatus });
     onClose();
   };
 
   const handleSaveEdit = async () => {
-    await updateTask({
-      taskId: task._id,
+    await updateTask.mutateAsync({
+      taskId: task.id,
       title: editTitle.trim(),
       description: editDesc.trim() || undefined,
       priority: editPriority,
@@ -188,7 +190,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   };
 
   const confirmDeleteTaskAction = async () => {
-    await deleteTask({ taskId: task._id });
+    await deleteTask.mutateAsync({ taskId: task.id });
     setShowDeleteModal(false);
     onClose();
   };
@@ -197,7 +199,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
     e.preventDefault();
     if (!comment.trim()) return;
     setSubmitting(true);
-    await addComment({ taskId: task._id, authorId: currentUserId, content: comment.trim() });
+    await addCommentMutation.mutateAsync({ taskId: task.id, authorId: currentUserId, content: comment.trim() });
     setComment('');
     setSubmitting(false);
   };
@@ -315,15 +317,15 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 </h3>
                 <div className="flex items-center gap-2">
                   <Avatar
-                    name={taskData.assignedToUser?.name ?? '?'}
-                    url={taskData.assignedToUser?.avatarUrl}
+                    name={taskData.assigned_to?.name ?? '?'}
+                    url={taskData.assigned_to?.avatar_url}
                   />
                   <div>
                     <p className="text-sm font-medium text-(--text-primary)">
-                      {taskData.assignedToUser?.name ?? '—'}
+                      {taskData.assigned_to?.name ?? '—'}
                     </p>
                     <p className="text-xs text-(--text-muted)">
-                      {taskData.assignedToUser?.position ?? ''}
+                      {taskData.assigned_to?.position ?? ''}
                     </p>
                   </div>
                 </div>
@@ -334,15 +336,15 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 </h3>
                 <div className="flex items-center gap-2">
                   <Avatar
-                    name={taskData.assignedByUser?.name ?? '?'}
-                    url={taskData.assignedByUser?.avatarUrl}
+                    name={taskData.assigned_by?.name ?? '?'}
+                    url={taskData.assigned_by?.avatar_url}
                   />
                   <div>
                     <p className="text-sm font-medium text-(--text-primary)">
-                      {taskData.assignedByUser?.name ?? '—'}
+                      {taskData.assigned_by?.name ?? '—'}
                     </p>
                     <p className="text-xs text-(--text-muted)">
-                      {taskData.assignedByUser?.role ?? ''}
+                      {taskData.assigned_by?.department ?? ''}
                     </p>
                   </div>
                 </div>
@@ -444,8 +446,15 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
             {/* Attachments */}
             <div>
               <TaskAttachments
-                taskId={taskData._id as Id<'tasks'>}
-                attachments={taskData.attachments ?? []}
+                taskId={taskData.id}
+                attachments={(taskData.attachments ?? []).map(a => ({
+                  url: a.url,
+                  name: a.name,
+                  type: a.type,
+                  size: a.size,
+                  uploadedBy: a.uploadedBy ?? '',
+                  uploadedAt: a.uploadedAt ?? 0,
+                }))}
                 currentUserId={currentUserId}
                 canUpload={true}
               />
@@ -463,7 +472,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                   </p>
                 )}
                 {comments?.map((c) => (
-                  <div key={c._id} className="flex gap-3">
+                  <div key={c.id} className="flex gap-3">
                     <Avatar name={c.author?.name ?? '?'} url={(c.author as any)?.avatarUrl} />
                     <div className="flex-1 bg-(--background-subtle) rounded-2xl px-4 py-3">
                       <div className="flex items-center gap-2 mb-1">
@@ -471,7 +480,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                           {c.author?.name}
                         </span>
                         <span className="text-xs text-(--text-muted)">
-                          {new Date(c.createdAt).toLocaleDateString('en-GB', {
+                          {new Date(c.createdat).toLocaleDateString('en-GB', {
                             day: '2-digit',
                             month: 'short',
                             hour: '2-digit',

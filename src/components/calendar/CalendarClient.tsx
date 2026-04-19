@@ -32,9 +32,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
 import {
   LEAVE_TYPE_LABELS,
   LEAVE_TYPE_COLORS,
@@ -47,9 +44,10 @@ import { LeaveRequestModal } from '@/components/leaves/LeaveRequestModal';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { DriverRequestModal } from './DriverRequestModal';
 import { getInitials } from '@/lib/stringUtils';
+import { useLeaves, useDriverSchedules } from '@/hooks/useLeaves';
 
 type LeaveRequest = {
-  _id: string;
+  id: string;
   userId: string;
   userName?: string;
   userDepartment?: string;
@@ -63,7 +61,7 @@ type LeaveRequest = {
 };
 
 type DriverScheduleEvent = {
-  _id: string;
+  id: string;
   driverId: string;
   driverName: string;
   driverVehicle?: {
@@ -387,17 +385,18 @@ export const CalendarClient = React.memo(function CalendarClient() {
   // Determine which query to use based on selectedOrgId
   const shouldUseOrgQuery = mounted && selectedOrgId && user?.id;
   const queryParams = shouldUseOrgQuery
-    ? { organizationId: selectedOrgId as Id<'organizations'> }
+    ? { organizationId: selectedOrgId }
     : mounted && user?.id
-      ? { requesterId: user.id as Id<'users'> }
-      : ('skip' as const);
+      ? { requesterId: user.id }
+      : null;
 
   // Use organization-specific query if org selected, otherwise use default
-  const leavesData = useQuery(
-    shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    mounted && user?.id && queryParams !== 'skip' ? queryParams : 'skip',
-  );
-  const leaves: LeaveRequest[] = leavesData ?? [];
+  const { data: leavesData, isLoading: leavesLoading } = useLeaves({
+    organizationId: shouldUseOrgQuery ? selectedOrgId : undefined,
+    requesterId: (!shouldUseOrgQuery && mounted && user?.id) ? user.id : undefined,
+    enabled: mounted && !!user?.id,
+  });
+  const leaves: LeaveRequest[] = (leavesData as any) ?? [];
 
   // Debug: Log data load
   useEffect(() => {
@@ -415,21 +414,18 @@ export const CalendarClient = React.memo(function CalendarClient() {
   const monthStart = useMemo(() => startOfMonth(currentMonth).getTime(), [currentMonth]);
   const monthEnd = useMemo(() => endOfMonth(currentMonth).getTime(), [currentMonth]);
 
-  const driverSchedules = useQuery(
-    api.drivers.queries.getOrgDriverSchedules,
-    mounted && selectedOrgId
-      ? {
-          organizationId: selectedOrgId as Id<'organizations'>,
-          startTime: monthStart,
-          endTime: monthEnd,
-        }
-      : 'skip',
-  ) as DriverScheduleEvent[] | undefined;
+  const { data: driverSchedulesData } = useDriverSchedules({
+    organizationId: mounted && selectedOrgId ? selectedOrgId : '',
+    startTime: monthStart,
+    endTime: monthEnd,
+    enabled: mounted && !!selectedOrgId,
+  });
+  const driverSchedules = (driverSchedulesData as any) || [];
 
   // Build driver schedule map
   const driverDateMap = useMemo(() => {
     const map = new Map<string, DriverScheduleEvent[]>();
-    (driverSchedules ?? []).forEach((evt) => {
+    (driverSchedules ?? []).forEach((evt: DriverScheduleEvent) => {
       // A schedule can span multiple days
       const startD = new Date(evt.startTime);
       const endD = new Date(evt.endTime);
@@ -743,7 +739,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     {/* Leave requests */}
                     {selectedDayLeaves.map((leave, i) => (
                       <motion.div
-                        key={leave._id}
+                        key={leave.id}
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.04 }}
@@ -853,7 +849,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     {/* Driver booking events */}
                     {selectedDayDriverEvents.map((evt, i) => (
                       <motion.div
-                        key={evt._id}
+                        key={evt.id}
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
@@ -961,7 +957,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                 </div>
               ) : (
                 onLeaveToday.map((l) => (
-                  <div key={l._id} className="flex items-center gap-2.5">
+                  <div key={l.id} className="flex items-center gap-2.5">
                     <Avatar className="w-7 h-7 shrink-0">
                       <AvatarFallback
                         className="text-[9px] font-bold text-white"

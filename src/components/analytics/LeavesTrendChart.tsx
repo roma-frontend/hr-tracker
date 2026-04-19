@@ -66,13 +66,13 @@ export function LeavesTrendChart({ leaves }: LeavesTrendChartProps) {
       </h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-[var(--border)]" opacity={0.3} />
+          <CartesianGrid strokeDasharray="3 3" className="stroke-(--border)" opacity={0.3} />
           <XAxis
             dataKey="month"
-            className="fill-[var(--text-muted)]"
+            className="fill-(--text-muted)"
             style={{ fontSize: '12px' }}
           />
-          <YAxis className="fill-[var(--text-muted)]" style={{ fontSize: '12px' }} />
+          <YAxis className="fill-(--text-muted)" style={{ fontSize: '12px' }} />
           <Tooltip
             contentStyle={{
               backgroundColor: 'var(--background-elevated)',

@@ -9,7 +9,7 @@ import { Car, Users, MapPin, Star, Calendar, Heart } from 'lucide-react';
 
 interface DriverCardProps {
   driver: {
-    _id: string;
+    id: string;
     userName: string;
     userAvatar?: string;
     userPosition?: string;
@@ -102,7 +102,7 @@ export const DriverCard = memo(function DriverCard({
         <div className="flex flex-wrap gap-2 mt-4 ">
           <Button
             size="sm"
-            onClick={() => onBook(driver._id)}
+            onClick={() => onBook(driver.id)}
             className="flex-1 drivers-btn-hover bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
           >
             {t('driver.book', 'Book')}
@@ -111,14 +111,14 @@ export const DriverCard = memo(function DriverCard({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onCalendar(driver._id)}
+              onClick={() => onCalendar(driver.id)}
             >
               <Calendar className="w-4 h-4 text-blue-400" />
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => driver._id && onToggleFavorite(driver._id)}
+              onClick={() => driver.id && onToggleFavorite(driver.id)}
               className="relative"
             >
               <Heart

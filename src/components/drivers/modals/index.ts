@@ -7,5 +7,5 @@ export { SelectDriverModal } from './SelectDriverModal';
 export { DriverCalendarDialog } from './DriverCalendarDialog';
 
 // Re-export from parent for convenience
-export { InAppCallButton, NavigatorDropdown, DriverQuickMessage } from '../DriverActions';
+export { NavigatorDropdown } from '../DriverActions';
 export { RatingDialog, ReassignDriverDialog } from '../DriverDialogs';

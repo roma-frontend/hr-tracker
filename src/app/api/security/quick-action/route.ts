@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * Quick Security Action API
@@ -11,16 +7,22 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
  */
 export async function POST(req: NextRequest) {
   try {
-    const { action, userId, adminId, reason, duration } = await req.json();
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
 
-    if (!action || !userId || !adminId) {
+    if (!authUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { action, userId, reason, duration } = await req.json();
+
+    if (!action || !userId) {
       return NextResponse.json(
-        { error: 'Missing required fields: action, userId, adminId' },
+        { error: 'Missing required fields: action, userId' },
         { status: 400 },
       );
     }
 
-    // Validate action type
     if (!['suspend', 'unsuspend'].includes(action)) {
       return NextResponse.json(
         { error: "Invalid action. Must be 'suspend' or 'unsuspend'" },
@@ -28,36 +30,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let result;
+    if (action === 'suspend' && !reason) {
+      return NextResponse.json({ error: 'Reason is required for suspension' }, { status: 400 });
+    }
+
+    const now = Date.now();
+    const suspendedUntil = duration ? now + (duration * 60 * 60 * 1000) : null;
 
     if (action === 'suspend') {
-      if (!reason) {
-        return NextResponse.json({ error: 'Reason is required for suspension' }, { status: 400 });
-      }
+      const { data: updatedUser, error } = await supabase
+        .from('users')
+        .update({
+          is_suspended: true,
+          suspended_reason: reason,
+          suspended_until: suspendedUntil,
+          suspended_at: now,
+          suspended_by: authUser.id,
+        })
+        .eq('id', userId)
+        .select()
+        .single();
 
-      result = await convex.mutation(api.users.admin.suspendUser, {
-        adminId: adminId as Id<'users'>,
-        userId: userId as Id<'users'>,
-        reason,
-        duration: duration || 24, // Default 24 hours
-      });
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
 
       return NextResponse.json({
         success: true,
         message: `User suspended for ${duration || 24} hours`,
-        data: result,
+        data: updatedUser,
       });
     } else {
-      // unsuspend
-      result = await convex.mutation(api.users.admin.unsuspendUser, {
-        adminId: adminId as Id<'users'>,
-        userId: userId as Id<'users'>,
-      });
+      const { data: updatedUser, error } = await supabase
+        .from('users')
+        .update({
+          is_suspended: false,
+          suspended_reason: null,
+          suspended_until: null,
+          suspended_at: null,
+          suspended_by: null,
+        })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
 
       return NextResponse.json({
         success: true,
         message: 'User unsuspended successfully',
-        data: result,
+        data: updatedUser,
       });
     }
   } catch (error: any) {

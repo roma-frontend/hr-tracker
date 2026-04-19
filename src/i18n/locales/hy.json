@@ -144,7 +144,10 @@
     "starterPrice": "$29",
     "professionalPrice": "$79",
     "calendarIntegrations": "Google և Outlook օրացույցների սինխրոնիզացիա",
-    "priorityProcessing": "AI առաջնահերթ մշակում"
+    "priorityProcessing": "AI առաջնահերթ մշակում",
+    "tasks": {
+      "failedToUpdateStatus": "Չհաջողվեց թարմացնել կարգավիճակը"
+    }
   },
   "testimonials": {
     "eyebrow": "Վկայություններ",
@@ -295,11 +298,12 @@
     "close": "Փակել",
     "actions": "Գործողություններ",
     "recorded": "գրանցված",
-    "cancel": "Չեղարկել",
     "back": "Հետ",
     "next": "Հաջորդ",
     "employee": "Աշխատակից",
-    "optional": "Ոչ պարտադիր"
+    "optional": "Ոչ պարտադիր",
+    "weeksShort": "շ",
+    "loadingWorkspace": "Բեռնում է ձեր աշխատանքային տարածքը..."
   },
   "nav": {
     "home": "Գլխավոր",
@@ -454,7 +458,8 @@
       "autoLockout": "Ավտոմատ բլոկավորում",
       "autoLockoutDesc": "Բլոկավորում ձախողված փորձերից հետո",
       "newDeviceAlert": "Նոր սարքի ծանուցում",
-      "newDeviceAlertDesc": "Ծանուցել նոր սարքից մուտքի մասին"
+      "newDeviceAlertDesc": "Ծանուցել նոր սարքից մուտքի մասին",
+      "lastChanged": "Վերջին փոփոխությունը՝ {{date}}"
     },
     "viewingOrganization": "Դիտել կազմակերպությունը",
     "announcements": {
@@ -588,7 +593,6 @@
       "priorityHigh": "Բարձր",
       "priorityMedium": "Միջին",
       "priorityLow": "Ցածր",
-      "overdue": "Ժամկետը լրացած",
       "commentAdded": "Մեկնաբանությունը ավելացված է",
       "errorAddingComment": "Սխալ մեկնաբանությունը ավելացնելիս",
       "enterResolution": "Մուտքագրեք լուծումը:",
@@ -667,7 +671,6 @@
         "database": "Տվյալների բազա",
         "emailService": "Email ծառայություն",
         "stripe": "Stripe",
-        "convex": "Convex",
         "redis": "Redis",
         "cloudinary": "Cloudinary",
         "sentry": "Sentry",
@@ -933,8 +936,23 @@
       "chatDesc": "Օգտատիրոջ վերջին հաղորդագրությունները",
       "system": "Համակարգային",
       "noChatMessages": "Հաղորդագրություններ չգտնվեցին",
-      "loading": "Բեռնում..."
-    }
+      "loading": "Բեռնում...",
+      "driversFound": "{{count}} driver requests found",
+      "noDriversFound": "No driver requests found",
+      "tabLeaves": "Leaves",
+      "tabTasks": "Tasks",
+      "tabDrivers": "Drivers",
+      "tabTickets": "Tickets",
+      "tabActivity": "Activity",
+      "tabSecurity": "Security",
+      "tabChat": "Chat",
+      "ticketsTitle": "Support Tickets",
+      "notificationsAndActions": "User notifications and actions",
+      "recentLogins": "Recent login attempts"
+    },
+    "creatingOrg": "Creating {{name}} organization...",
+    "orgCreated": "Organization \"{{name}}\" created successfully!",
+    "adminInvitationSent": "Admin invitation will be sent to {{email}}"
   },
   "help": {
     "title": "Օգնություն և աջակցություն",
@@ -1060,7 +1078,26 @@
     "category": "Կատեգորիա"
   },
   "error": {
-    "fillRequiredFields": "Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը"
+    "fillRequiredFields": "Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը",
+    "global": {
+      "title": "Օհո՜! Ինչ-որ բան կոտրվեց",
+      "description": "Տեղի ունեցավ անսպասելի սխալ: Մեր թիմը տեղեկացվել է: Խնդրում ենք թարմացնել էջը:",
+      "reference": "Հղում",
+      "refreshPage": "Թարմացնել էջը",
+      "goHome": "Գլխավոր"
+    },
+    "notFound": {
+      "title": "Էջը չի գտնվել",
+      "description": "Էջը, որը փնտրում եք, գոյություն չունի կամ տեղափոխվել է:"
+    },
+    "dashboard": {
+      "description": "Տեղի ունեցավ անսպասելի սխալ: Մի անհանգստացեք - ձեր տվյալները ապահով են: Փորձեք թարմացնել կամ վերադառնալ վահանակ:",
+      "errorId": "Սխալի ID"
+    },
+    "auth": {
+      "title": "Ավտորիզացիայի սխալ",
+      "description": "Ինչ-որ բան սխալ գնաց ավտորիզացիայի ժամանակ: Խնդրում ենք կրկին փորձել:"
+    }
   },
   "actions": {
     "clearSelection": "Մաքրել ընտրությունը",
@@ -1259,7 +1296,6 @@
     "pendingApprovals": "Ընդունման Սպասում",
     "myTasks": "Իմ Առաջադրանքները",
     "announcements": "Հայտարար",
-    "convexNotDeployed": "Convex տվյալների բազան չի տեղակայված։ Նախ գործարկեք 'npm run dev' կամ 'npx convex deploy'։",
     "createOrg": "Ստեղծել կազմակերպություն",
     "monthlyLeaveTrend": "Ամսական արձակուրդի միտում",
     "leaveDistribution": "Արձակուրդի բաշխում",
@@ -1760,7 +1796,7 @@
     "createOrgWithPlan": "Ստեղծել նոր կազմակերպություն"
   },
   "placeholders": {
-    "selectEmployee": "Ընտրեք աշխատակցին...",
+    "selectEmployee": "Ընտրել աշխատակից",
     "acmeCorp": "Acme Corp",
     "acmeCorporation": "Acme Corporation",
     "acmeInc": "acme-inc",
@@ -1786,7 +1822,6 @@
     "searchPlaceholder": "Փնտրել...",
     "searchTasks": "Փնտրել առաջադրանքներ...",
     "searchYourOrganization": "Փնտրել ձեր կազմակերպությունը...",
-    "selectEmployee": "Ընտրել աշխատակից",
     "selectStatus": "Ընտրել կարգավիճակ",
     "selectType": "Ընտրել տեսակ",
     "technology": "Տեխնոլոգիաներ",
@@ -1907,7 +1942,7 @@
     "unlimited": "Անսահմանափակ",
     "aiAutoApplies": "AI-ը ավտոմատ կիրառում է փոփոխությունները ֆայլերում",
     "upgradeForUnlimited": "Անցեք Պրոֆեսիոնալ պլանին անսահմանափակ մուտքի համար",
-    "greeting": "Բարև! Ես ձեր AI օգնականն եմ կայքի խմբագրման համար",
+    "greeting": "Բարև! Ես ձեր AI օգնականն եմ կայքի խմբագրման համար: Ես կարող եմ օգնել ձեզ փոխել դիզայնը, բովանդակությունը, դասավորությունը և տրամաբանությունը: Պարզապես նկարագրեք, թե ինչ եք ուզում փոխել:",
     "inputPlaceholder": "Նկարագրեք, թե ինչ եք ուզում փոխել ձեր կայքում...",
     "recentChanges": "Վերջին փոփոխություններ",
     "changesAppliedSuccess": "Փոփոխությունները հաջողությամբ առաջարկվել են",
@@ -1933,9 +1968,9 @@
     "step1Example3": "Թարգմանել վերնագիրը ռուսերեն",
     "step1Example4": "Վերադասավորել կոմպոնենտները այլ հերթականությամբ",
     "step2Title": "AI-ն վերլուծում է հայտը",
-    "step2Desc": "Քայլ 2-ի նկարագրություն",
+    "step2Desc": "AI-ը որոշում է փոփոխության տեսակը (դիզայն, բովանդակություն, դասավորություն, տրամաբանություն) և ստուգում ձեր պլանի հասանելիությունը:",
     "step3Title": "Ստանալ առաջարկվող փոփոխություններ",
-    "step3Desc": "Քայլ 3-ի նկարագրություն",
+    "step3Desc": "AI-ը կտրամադրի ձեզ կոդի փոփոխությունները մանրամասն մեկնաբանություններով և կիրառման հրահանգներով:",
     "step4Title": "Կիրառել կամ վերադարձնել",
     "step4Desc": "Դուք կարող եք կիրառել փոփոխությունները կամ վերադարձնել դրանք ցանկացած պահի, եթե գոհ չեք արդյունքից:",
     "tipsTitle": "Խորհուրդներ լավագույն արդյունքների համար",
@@ -1943,9 +1978,22 @@
     "tip2": "Նշեք կոնկրետ կոմպոնենտներ կամ էջեր",
     "tip3": "Բարդ առաջադրանքները բաժանեք մի քանի քայլերի",
     "tip4": "Ստուգեք առաջարկվող կոդը նախքան կիրառելը",
+    "appliedChanges": "Կիրառված է {{count}} փոփոխություն: Ֆայլերը թարմացված են:",
+    "noFilesChanged": "AI-ը պատասխանեց, բայց ֆայլերը չփոփոխվեցին",
+    "rollbackSuccess": "↩️ Վերականգնում ավարտված է: {{filePath}}",
+    "rollbackError": "Վերականգնման սխալ: {{error}}",
+    "rollbackFailed": "Չհաջողվեց կատարել վերականգնում",
+    "unknownError": "Անհայտ սխալ",
+    "aiThinking": "AI-ը կարդում է ֆայլերը և կիրառում փոփոխությունները…",
+    "changedFiles": "Փոփոխված ֆայլեր:",
+    "rollback": "Վերականգնել",
+    "backupHistory": "Փոփոխությունների պատմություն ({{count}} պահուստ)",
+    "hide": "Թաքցնել",
+    "show": "Ցույց տալ",
     "comingSoon": "Շուտով",
     "comingSoonDesc": "AI Site Editor-ը հասանելի է միայն սուպեր ադմինիստրատորների համար: Այս ֆունկցիան ապագայում հասանելի կլինի բոլոր օգտվողների համար:",
-    "superadminOnly": "Միայն սուպեր ադմինիստրատոր"
+    "superadminOnly": "Միայն սուպեր ադմինիստրատոր",
+    "rollbackCompleted": "↩️ Rollback completed for file {{filePath}}"
   },
   "buttons": {
     "send": "Ուղարկել",
@@ -1963,7 +2011,16 @@
     "today": "Այսօր",
     "pause": "Կարճ",
     "resume": "Հաջորդ",
-    "start": "Սկսել"
+    "start": "Սկսել",
+    "tryAgain": "Կրկին փորձել",
+    "disable": "Անջատել",
+    "enable": "Միացնել",
+    "nextVerifyCode": "Հաջորդը: Ստուգել կոդը",
+    "verifyEnable": "Ստուգել և միացնել",
+    "copied": "Պատճենված է!",
+    "copyAllCodes": "Պատճենել բոլոր կոդերը",
+    "done": "Պատրաստ է",
+    "back": "Նախորդը"
   },
   "months": {
     "january": "Հունվար",
@@ -2627,7 +2684,9 @@
     "footerAccount": "Հաշիվ",
     "footerLegal": "Իրավաբանական",
     "footerPrivacy": "Գաղտնիության քաղաքականություն",
+    "footerPrivacyDesc": "Դիտեք մեր գաղտնիության քաղաքականությունը և տվյալների պաշտպանության տեղեկատվությունը",
     "footerTerms": "Ծառայության պայմաններ",
+    "footerTermsDesc": "Կարդացեք մեր ծառայության պայմանները",
     "footerRights": "Բոլոր իրավունքները պաշտպանված են։",
     "securityCenter": "Անվտանգության կենտրոն",
     "securityCritical": "⚠ Կրիտիկական",
@@ -2864,7 +2923,8 @@
     "googleCalendarError": "Սխալ է տեղի ունեցել Google կալենդարի հետ ինտեգրվելու ժամանակ. Խնդրում ենք փորձել կրկին.",
     "googleCalendarDisconnected": "Google կալենդարը հաջողությամբ անջատվել է",
     "googleNotConfigured": "Google կալենդարը դեռ կարգավորված չէ. Խնդրում ենք կարգավորել այն նախքան միանալը:",
-    "disconnectError": "Սխալ է տեղի ունեցել ինտեգրացիան անջատելիս. Խնդրում ենք փորձել կրկին."
+    "disconnectError": "Սխալ է տեղի ունեցել ինտեգրացիան անջատելիս. Խնդրում ենք փորձել կրկին.",
+    "syncEmployees": "Սինխրոնացնել աշխատակիցներին"
   },
   "settingsAdvancedSecurity": {
     "twoFactor": "Երկգործոն նույնականացում",
@@ -2889,7 +2949,21 @@
     "loginAlerts": "Մուտքի զգուշացումներ",
     "loginAlertsDesc": "Ստանալ ծանուցումներ, երբ որևէ մեկը մտնում է ձեր հաշիվ",
     "securityTip": "Անվտանգության խորհուրդ",
-    "securityTipDesc": "Օգտագործեք ուժեղ, եզակի գաղտնաբառ և միացրեք 2FA՝ առավելագույն անվտանգության համար: Պարբերաբար ստուգեք ձեր մուտքի պատմությունը կասկածելի գործունեության համար:"
+    "securityTipDesc": "Օգտագործեք ուժեղ, եզակի գաղտնաբառ և միացրեք 2FA՝ առավելագույն անվտանգության համար: Պարբերաբար ստուգեք ձեր մուտքի պատմությունը կասկածելի գործունեության համար:",
+    "twoFactorActive": "Երկու գործոնով նույնականացումը ակտիվ է",
+    "twoFactorActiveDesc": "Ձեր հաշիվը պաշտպանված է նույնականացման հավելվածով",
+    "failedToStart2fa": "Չհաջողվեց սկսել 2FA կարգավորումը",
+    "settingUp2fa": "2FA կարգավորում...",
+    "step1ScanQr": "Քայլ 1: Սկանավորեք QR կոդը",
+    "step1ScanQrDesc": "Սկանավորեք այս QR կոդը ձեր նույնականացման հավելվածով (Google Authenticator, Authy և այլն)",
+    "orEnterManually": "Կամ մուտքագրեք այս կոդը ձեռքով:",
+    "step2VerifyCode": "Քայլ 2: Հաստատեք կոդը",
+    "step2VerifyCodeDesc": "Մուտքագրեք 6 նիշանոց կոդը ձեր նույնականացման հավելվածից կարգավորումը հաստատելու համար",
+    "twoFactorEnabledSuccess": "2FA հաջողությամբ միացված է!",
+    "backupCodesDesc": "Պահեք այս պահուստային կոդերը անվտանգ վայրում: Յուրաքանչյուր կոդ կարող է օգտագործվել միայն մեկ անգամ: Եթե կորցնեք մուտքը ձեր նույնականացման հավելվածին, կարող եք օգտագործել այս կոդերը մուտք գործելու համար:",
+    "disable2fa": "Անջատել 2FA-ն",
+    "disable2faDesc": "Մուտքագրեք ձեր գաղտնաբառը հաստատման համար: Սա կհեռացնի 2FA պաշտպանությունը ձեր հաշվից:",
+    "enterPassword": "Մուտքագրեք ձեր գաղտնաբառը"
   },
   "tasksClient": {
     "list": "Ցուցակ",
@@ -3023,7 +3097,8 @@
     "resetConsent": "Վերականգնել համաձայնությունը",
     "savePreferences": "Պահպանել քուքիների կարգավորումները",
     "resetConfirm": "Սա կվերականգնի ձեր քուքիների համաձայնությունը և նորից ցույց կտա բանները: Շարունակել:",
-    "and": " և "
+    "and": " և ",
+    "privacyPolicyLink": "Կարդացեք մեր գաղտնիության քաղաքականությունը և տվյալների մշակման կանոնները"
   },
   "keyboard": {
     "title": "Վերնագիր",
@@ -3864,7 +3939,25 @@
     "ddosAttempt": "🚨 DDoS հարձակման հանդես տալու հայտնաբերված",
     "sqlInjectionAttempt": "🚨 SQL ներարկման փորձ հայտնաբերված",
     "reviewAndManageSuspicious": "Վերանայել և կառավարել կասկածելի ակտիվությունը",
-    "securityAlertDetails": "Անվտանգության զգուշացման մանրամասներ"
+    "securityAlertDetails": "Անվտանգության զգուշացման մանրամասներ",
+    "riskHigh": "HIGH",
+    "riskMed": "MED",
+    "riskLow": "LOW",
+    "toggleOn": "ON",
+    "toggleOff": "OFF",
+    "autoBlocked": "AUTO-BLOCKED",
+    "expiresHours": "Expires in {{hours}}h",
+    "suspendedUntil": "Until",
+    "hoursOne": "1",
+    "hoursTwentyFour": "24",
+    "riskLabelHigh": "HIGH RISK",
+    "riskLabelModerate": "MODERATE",
+    "riskLabelLow": "LOW",
+    "riskUnknown": "Անհայտ",
+    "accountSuspended": "Հաշիվը կասեցված է",
+    "investigation": "քննչություն",
+    "suspicious": "կասկածելի",
+    "breach": "անվտանգության խախտում"
   },
   "attendanceIssues": {
     "title": "Ներկայության խնդիրներ",
@@ -4223,17 +4316,20 @@
   "$79": "$79/",
   "Custom": "Անհատական",
   "maintenance": {
+    "completed": "Սպասարկումն ավարտված է...",
     "title": "Սպասարկում",
-    "systemUnavailable": "Համակարգը սպասարկման մեջ է",
-    "pleasWait": "Խնդրում ենք սպասել.",
-    "autoRefresh": "Էջը ինքնաբերաբար թարմացվելու է, երբ սպասարկումը ավարտվի",
-    "needHelp": "Եթե հարցեր ունեք, դրանք ուղղեք ձեր ադմինիստրատորին",
-    "serviceBroadcast": "Ծառայության հայտարարություն",
-    "notificationLabel": "⚠️ Սպասարկում",
-    "bannerStartsIn": "կսկսվի {{time}}-ից հետո",
-    "bannerStartsSoon": "շուտով կսկսվի",
-    "bannerInProgress": "սպասարկումն ընթացքի մեջ է",
-    "bannerDuration": "Տևողությունը"
+    "message": "Համակարգը սպասարկման մեջ է: Խնդրում ենք սպասել:",
+    "startTime": "Սկիզբ",
+    "duration": "Տևողություն",
+    "notSpecified": "Նշված չէ",
+    "remainingTime": "Մնացած ժամանակ",
+    "autoRefreshInfo": "Համակարգը սպասարկման մեջ է: Էջը կթարմացվի ավտոմատ կերպով:",
+    "thankYou": "Շնորհակալություն համբերության համար",
+    "contactAdmin": "Եթե հարցեր ունեք, դիմեք ադմինիստրատորին",
+    "bannerInProgress": "Ընթացքում",
+    "bannerStartsIn": "Կսկսվի {{time}}-ից",
+    "bannerStartsSoon": "Շուտով կսկսվի",
+    "dismissNotice": "Փակել տեխնիկական սպասարկման ծանուցումը"
   },
   "contact": {
     "company": "Ընկերության",
@@ -4267,7 +4363,6 @@
     "contactSectionDesc": "Կապվել վաճառքի թիմի հետ",
     "contactUs": "Կապվել վաճառքի թիմի հետ",
     "contactUsDesc": "Կապվել վաճառքի թիմի հետ",
-    "convex": "Convex-ի իրական տվյալների կենտրոն",
     "cookies": "Քուկիներ",
     "cookiesDesc": "Մենք օգտագործում ենք միայն անհրաժեշտ քուկիներ՝ ձեր փորձը բարելավելու և հիմնական ֆունկցիոնալությունը ապահովելու համար:",
     "cookiesNote": "Այս կայքը օգտագործում է միայն անհրաժեշտ քուկիներ՝ ձեր փորձը բարելավելու և հիմնական ֆունկցիոնալությունը ապահովելու համար. մենք չենք օգտագործում վերլուծական կամ թիրախային քուկիներ:",
@@ -4371,10 +4466,10 @@
   },
   "driver": {
     "registered": "Գրանցված է որպես վարորդ:",
-    "failedToRegister": "Չհաջողվեց գրանցել",
-    "removedFromFavorites": "Հեռացվեց նախընտրելիներից",
-    "addedToFavorites": "Ավելացվեց նախընտրելիներին",
-    "failed": "Սխալ",
+    "failedToRegister": "Չհաջողվեց գրանցվել որպես վարորդ",
+    "removedFromFavorites": "Հեռացված է նախընտրածներից",
+    "addedToFavorites": "Ավելացված է նախընտրածներին",
+    "failed": "Չհաջողվեց",
     "driverBookings": "Վարորդների ամրագրումներ",
     "booking": "Վարորդի ամրագրում",
     "bookingDesc": "Ամրագրեք վարորդ ձեր գործնական ուղևորությունների և տրանսֆերների համար",
@@ -4386,7 +4481,7 @@
     "availability": "Հասանելիություն",
     "requestDriverShort": "Պատվեր",
     "selectDriver": "Ընտրել վարորդ",
-    "chooseDriver": "Ընտրել վարորդ",
+    "chooseDriver": "Ընտրեք վարորդ",
     "available": "Հասանելի",
     "busy": "Զբաղված",
     "availableDrivers": "Հասանելի վարորդներ",
@@ -4406,7 +4501,7 @@
     "declineReason": "Մերժման պատճառ",
     "tripDetails": "Ուղևորության մանրամասներ",
     "pickupLocation": "Վայրէջքի վայր",
-    "dropoffLocation": "Վայրէջքի վայր",
+    "dropoffLocation": "Հասցե",
     "tripPurpose": "Ուղևորության նպատակ",
     "passengerCount": "Ուղևորներ",
     "vehicleInfo": "Տրանսպորտային միջոցի տեղեկատվություն",
@@ -4423,7 +4518,7 @@
     "maxTripsReached": "Հասել է առավելագույն ուղևորությունների քանակին",
     "driverNotFound": "Վարորդ չի գտնվել",
     "notWorkingDay": "Ոչ աշխատանքային օր",
-    "requestSubmitted": "Հարցումն ուղարկված է",
+    "requestSubmitted": "Վարորդի հարցումն ուղարկված է!",
     "requestApproved": "Հարցումը հաստատված է",
     "requestDeclined": "Հարցումը մերժված է",
     "requestCancelled": "Հարցումը չեղարկված է",
@@ -4459,11 +4554,11 @@
     "from": "Որտեղից",
     "to": "-ից",
     "purpose": "Նպատակ",
-    "startTime": "Սկսման ժամանակ",
-    "endTime": "Ավարտի ժամանակ",
+    "startTime": "Մեկնարկի ժամ",
+    "endTime": "Ավարտի ժամ",
     "notes": "Նշումներ",
-    "submitRequest": "Ուղարկել հարցում",
-    "selectOnMap": "Ընտրել քարտեզի վրա",
+    "submitRequest": "Ուղարկել հարցումը",
+    "selectOnMap": "Ընտրել քարտեզից",
     "geocodeError": "Չհաջողվեց գտնել վայրը քարտեզի վրա",
     "pickup": "Վայրէջք",
     "dropoff": "Նշանակետ",
@@ -4536,7 +4631,7 @@
     "vehicleType": "Տրանսպորտի տեսակ",
     "maxPassengers": "Առավելագույն ուղևորներ",
     "availabilityDesc": "Ընտրեք ձեր հասանելի օրերը",
-    "notesPlaceholder": "Լրացուցիչ տեղեկություն...",
+    "notesPlaceholder": "Լրացուցիչ տեղեկություն վարորդի համար...",
     "confirmRegistration": "Հաստատել գրանցումը",
     "vehicle": "Տրանսպորտ",
     "availableDays": "Հասանելի օրեր",
@@ -4560,7 +4655,7 @@
     "selectDriverRole": "Ընտրեք աշխատակից 'Վարորդ' դերով՝ նրա մեքենան գրանցելու համար:",
     "officePlaceholder": "օր․, Գրասենյակ",
     "airportPlaceholder": "օր․, Զվարթնոց Օդանավակայան",
-    "purposePlaceholder": "օր․, Օդանավակայանի տրանսֆեր, Հաճախորդի հանդիպում",
+    "purposePlaceholder": "օրինակ, Տրանսֆեր օդանավակայան, Հանդիպում հաճախորդի հետ",
     "tryDifferentSearch": "Փորձեք այլ որոնման հարցում",
     "registerDriverHint": "Վարորդ գրանցելու համար անցեք 'Աշխատակիցներ' բաժին և սահմանեք 'Վարորդ' դերը, ապա ավելացրեք տրանսպորտային միջոցի տեղեկատվությունը",
     "onlyAdminsCanRegister": "Միայն կազմակերպության ադմինիստրատորները կարող են վարորդներ գրանցել",
@@ -4698,12 +4793,9 @@
     "pleaseSelectDriverToRegister": "Խնդրում ենք ընտրել վարորդ գրանցելու համար",
     "pleaseFillVehicleInfo": "Խնդրում ենք լրացնել մեքենայի մոդելը և համարանիշը",
     "successfullyRegistered": "Հաջողությամբ գրանցված եք որպես վարորդ:",
-    "failedToRegister": "Չհաջողվեց գրանցվել որպես վարորդ",
     "userLoaded": "Բեռնված",
     "userNotLoaded": "Չի բեռնված",
     "goToLogin": "Անցնել մուտքին",
-    "removedFromFavorites": "Հեռացված է նախընտրածներից",
-    "addedToFavorites": "Ավելացված է նախընտրածներին",
     "favorites": {
       "title": "Սիրված վարորդներ",
       "subtitle": "Ձեր նախընտրած վարորդները արագ պատվիրելու համար",
@@ -4721,7 +4813,6 @@
     "save": "Պահպանել",
     "failedToUpdate": "Չհաջողվեց թարմացնել",
     "failedToDelete": "Չհաջողվեց ջնջել",
-    "failed": "Չհաջողվեց",
     "messageSent": "Հաղորդագրությունն ուղարկված է",
     "failedToSendMessage": "Չհաջողվեց ուղարկել հաղորդագրություն",
     "accessRequestSent": "Հասանելիության հարցումն ուղարկված է:",
@@ -4753,19 +4844,19 @@
     "dropoffLabel": "Վայրէջք",
     "availableForBooking": "Այս վարորդը հասանելի է ամրագրման համար այս շաբաթ",
     "sortBy": "Տեսակավորել",
-    "failedToRequestDriver": "Չհաջողվեց վարորդ հարցնել",
-    "driverOnLeave": "Վարորդը արձակուրդում է",
+    "failedToRequestDriver": "Չհաջողվեց պատվիրել վարորդ",
+    "driverOnLeave": "Վարորդն արձակուրդում է",
     "leaveType": "Արձակուրդի տեսակ",
-    "driverOnLeaveBlock": "Հնարավոր չէ պատվիրել վարորդին. նա արձակուրդում է",
+    "driverOnLeaveBlock": "Հնարավոր չէ պատվիրել վարորդ: նա արձակուրդում է",
     "selectAlternative": "Խնդրում ենք ընտրել այլ վարորդ ներքևի ցուցակից",
     "checking": "Ստուգում...",
-    "onLeaveFrom": "արձակուրդում է",
+    "onLeaveFrom": "Արձակուրդում է",
     "selectAnotherDriver": "Ընտրեք այլ վարորդ կամ փոխեք ամսաթվերը",
-    "bookingUnavailable": "Ամրագրումը անհասանելի է",
+    "bookingUnavailable": "Պատվիրումը անհասանելի է",
     "alternativeDrivers": "Հասանելի վարորդներ:",
-    "driverSelected": "Վարորդն ընտրված է",
+    "driverSelected": "Ընտրված վարորդ: {{name}}",
     "select": "Ընտրել",
-    "noAlternativeDrivers": "Հասանելի վարորդներ չկան. փոխեք ամրագրման ամսաթվերը կամ դիմեք ադմինիստրատորին",
+    "noAlternativeDrivers": "Հասանելի վարորդներ չկան: Փոխեք ամրագրման ամսաթվերը կամ դիմեք ադմինիստրատորին:",
     "failedToSubmitRating": "Չհաջողվեց գնահատական ուղարկել",
     "failedToReassign": "Չհաջողվեց վերանշանակել",
     "shift": {
@@ -4816,7 +4907,12 @@
       "navigate": "Ուղղություն",
       "pickupTarget": "Վայրէջք",
       "dropoffTarget": "Նշանակման վայր"
-    }
+    },
+    "onLeaveFromTo": "Արձակուրդ {{startDate}}-ից մինչև {{endDate}}",
+    "fromPlaceholder": "օրինակ, Գրասենյակ",
+    "toPlaceholder": "օրինակ, Օդանավակայան",
+    "clickToPickLocation": "Սեղմեք վայր ընտրելու համար",
+    "driverOnLeaveMessage": "Վարորդն արձակուրդում է {{startDate}}-ից մինչև {{endDate}}"
   },
   "events": {
     "title": "Ընկերության միջոցառումներ",
@@ -5109,7 +5205,19 @@
     "quickLeave": "Արձակուրդ",
     "quickTasks": "Խնդիրներ",
     "quickTeam": "Թիմ",
-    "quickAttendance": "Ներկայություն"
+    "quickAttendance": "Ներկայություն",
+    "bookVacation": "Արձակուրդ պլանավորել",
+    "requestSickLeave": "Հիվանդության արձակուրդ հարցնել",
+    "showLeaveHistory": "Ցույց տալ արձակուրդների պատմությունը",
+    "bookSickLeaveToday": "Հիվանդության արձակուրդ այսօր",
+    "bookDoctorVisit": "Բժշկի մոտ գրանցվել",
+    "showTeamCalendar": "Ցույց տալ թիմի օրացույցը",
+    "myLeaveBalance": "Իմ արձակուրդի մնացորդը",
+    "bookTimeOff": "Ազատ օր պլանավորել",
+    "showPendingLeaves": "Ցույց տալ սպասող արձակուրդները",
+    "bookNewLeave": "Նոր արձակուրդ պլանավորել",
+    "whoOnLeaveThisWeek": "Ով է արձակուրդում այս շաբաթ?",
+    "aiPowered": "AI-ով սնուցվող"
   },
   "automation": {
     "runSuccess": "Ավտոմատացումը հաջողությամբ մեկնարկեց",
@@ -5240,6 +5348,34 @@
     "userIdNotFound": "Օգտատիրոջ ID-ն չի գտնվել",
     "pleaseFillAllFields": "Խնդրում ենք լրացնել բոլոր դաշտերը",
     "timeBlockedSuccess": "Ժամանակը հաջողությամբ արգելափակվել է",
+    "taskCreated": "Խնդիրը հաջողությամբ ստեղծվել է",
+    "taskCreateFailed": "Չհաջողվեց ստեղծել խնդիրը",
+    "taskUpdated": "Խնդիրը հաջողությամբ թարմացվել է",
+    "taskUpdateFailed": "Չհաջողվեց թարմացնել խնդիրը",
+    "taskDeleted": "Խնդիրը հաջողությամբ ջնջվել է",
+    "taskDeleteFailed": "Չհաջողվեց ջնջել խնդիրը",
+    "commentAdded": "Մեկնաբանությունը ավելացվել է",
+    "commentAddFailed": "Չհաջողվեց ավելացնել մեկնաբանությունը",
+    "commentDeleted": "Մեկնաբանությունը ջնջվել է",
+    "commentDeleteFailed": "Չհաջողվեց ջնջել մեկնաբանությունը",
+    "ratingSubmitted": "Գնահատականը հաջողությամբ ուղարկվել է",
+    "ratingSubmitFailed": "Չհաջողվեց ուղարկել գնահատականը",
+    "aiEvalSubmitFailed": "Չհաջողվեց ուղարկել AI գնահատականը",
+    "employeeUpdated": "Աշխատակիցը հաջողությամբ թարմացվել է",
+    "employeeUpdateFailed": "Չհաջողվեց թարմացնել աշխատակցին",
+    "employeeDeleted": "Աշխատակիցը հաջողությամբ ջնջվել է",
+    "employeeDeleteFailed": "Չհաջողվեց ջնջել աշխատակցին",
+    "slaConfigUpdated": "SLA կոնֆիգուրացիան թարմացվել է",
+    "slaConfigUpdateFailed": "Չհաջողվեց թարմացնել SLA կոնֆիգուրացիան",
+    "broadcastSent": "Հայտարարությունը հաջողությամբ ուղարկվել է",
+    "broadcastSendFailed": "Չհաջողվեց ուղարկել հայտարարությունը",
+    "messageDeleted": "Հաղորդագրությունը հաջողությամբ ջնջվել է",
+    "messageDeleteFailed": "Չհաջողվեց ջնջել հաղորդագրությունը",
+    "maintenanceEnabled": "Սպասարկման ռեժիմը միացվել է",
+    "maintenanceEnableFailed": "Չհաջողվեց միացնել սպասարկման ռեժիմը",
+    "maintenanceDisabled": "Սպասարկման ռեժիմը անջատվել է",
+    "maintenanceDisableFailed": "Չհաջողվեց անջատել սպասարկման ռեժիմը",
+    "endTimeAfterStart": "Ավարտի ժամանակը պետք է լինի սկզբից հետո",
     "cookiePreferencesSaved": "Cookie նախապատվությունները հաջողությամբ պահպանվել են!",
     "cookieConsentReset": "Cookie համաձայնությունը վերականգնվել է: Բաններն կհայտնվեն ձեր հաջորդ էջի բեռնման ժամանակ:",
     "sharePointConnected": "SharePoint-ը հաջողությամբ միացվել է",
@@ -5247,8 +5383,8 @@
     "sharePointDisconnected": "SharePoint-ը անջատվել է",
     "sharePointDisconnectFailed": "Չհաջողվեց անջատել SharePoint-ը",
     "sharePointSyncFailed": "Չհաջողվեց սինխրոնացնել SharePoint-ը",
-    "twoFactorEnabled": "Երկգործոն նույնականացումը միացված է!",
-    "twoFactorDisabled": "Երկգործոն նույնականացումը անջատված է",
+    "twoFactorEnabled": "Երկու գործոնով նույնականացումը միացված է",
+    "twoFactorDisabled": "Երկու գործոնով նույնականացումը անջատված է",
     "avatarUpdated": "Ավատարը հաջողությամբ թարմացվել է!",
     "pleaseSelectImage": "Խնդրում ենք ընտրել պատկերի ֆայլ",
     "imageTooLarge": "Պատկերը պետք է լինի 5 ՄԲ-ից փոքր",
@@ -5274,9 +5410,18 @@
     "reportExported": "Հաշվետվությունը հաջողությամբ արտահանվել է",
     "reportExportedDesc": "CSV ֆայլը ներբեռնվել է",
     "provideReasonForSuspension": "Խնդրում ենք նշել կասեցման պատճառը",
+    "userSuspendedFor": "Օգտատերը կասեցվել է {{hours}} ժամով",
     "userUnsuspended": "Օգտատերը հաջողությամբ ապաարգելափակվել է",
+    "userSuspendFailed": "Չհաջողվեց կասեցնել օգտատիրոջը",
+    "userUnsuspendFailed": "Չհաջողվեց ապաարգելափակել օգտատիրոջը",
+    "method": "Մեթոդ",
+    "ip": "IP",
+    "riskFactors": "Ռիսկի գործոններ",
     "orgUpdated": "Կազմակերպությունը հաջողությամբ թարմացվել է!",
-    "orgUpdateFailed": "Չհաջողվեց թարմացնել կազմակերպությունը"
+    "orgUpdateFailed": "Չհաջողվեց թարմացնել կազմակերպությունը",
+    "failedToStart2fa": "Չհաջողվեց սկսել 2FA կարգավորումը",
+    "syncFailed": "Սինխրոնացումը ձախողվեց",
+    "syncComplete": "Սինխրոնացումը ավարտված է: {{created}} ստեղծված, {{updated}} թարմացված, {{deactivated}} ապաակտիվացված"
   },
   "impersonate": {
     "exit": "Ելք",
@@ -5724,67 +5869,34 @@
     }
   },
   "faceLogin": {
-    "title": "Մասնագիտացված դեմքի ճանաչում",
-    "subtitle": "Դեմքը դիրքավորեք տեսախցիկում մուտք գործելու համար",
-    "cameraNotActive": "Տեսախցիկը չի ակտիվացված",
-    "noFaceDetected": "Դեմք չի հայտնաբերվել: Խնդրում ենք դիրքավորել ձեր դեմքը շրջանակում:",
-    "noUsersRegistered": "Ոչ մի օգտվող դեռ չի գրանցել իր դեմքը",
-    "registerFaceFirst": "Խնդրում ենք նախ գրանցել ձեր դեմքը ձեր պրոֆիլում",
-    "autoLoginInfo": "🚀 Ավտոմատ մուտք: Դեմքը դիրքավորեք տեսախցիկի շրջանակում: Համակարգը ավտոմատ կերպով կհաստատի ձեզ, երբ ձեր դեմքը հայտնաբերվի և սկանավորվի (100%):",
-    "registeredFaces": "📊 {{count}} գրանցված դեմք{{plural}} համակարգում",
-    "registeredFace": "գրանցված դեմք",
-    "inSystem": "համակարգում",
-    "start": "Սկսել դեմքի մուտքը",
-    "authenticating": "Հաստատվում է...",
-    "scanning": "Սկանավորում",
-    "ready": "Պատրաստ է մուտք գործելու...",
-    "stop": "Կանգնեցնել",
-    "useEmailPassword": "Օգտագործել էլ. փոստի/գաղտնաբառի մուտք",
-    "noRegisteredFacesTitle": "⚠️ Ոչ մի գրանցված դեմք",
-    "modelsFailed": "Չհաջողվեց загрузить դեմքի ճանաչման մոդելները",
-    "faceBlocked": "Դեմքի ID-ն արգելափակված է: Խնդրում ենք օգտագործել էլ. փոստի/գաղտնաբառի մուտքը:",
-    "videoNotFound": "Տեսանյութի տարրը չի գտնվել: Խնդրում ենք փորձել կրկին:",
-    "videoPlaybackFailed": "Չհաջողվեց սկսել տեսանյութի վերարտադրությունը",
-    "noCameraFound": "Տեսախցիկ չի գտնվել: Խնդրում ենք միացնել տեսախցիկ և փորձել կրկին:",
-    "cameraSettingsFailed": "Չհաջողվեց մուտք գործել տեսախցիկ: Խնդրում ենք ստուգել թույլտվությունները և փորձել կրկին:",
-    "cameraSettingsBasic": "Ընտրված տեսախցիկը չի աջակցում անհրաժեշտ կարգավորումներին: Փորձում ենք հիմնական կարգավորումներ...",
-    "cameraStarted": "Տեսախցիկը հաջողությամբ սկսվեց!",
-    "cameraAccessError": "Չհաջողվեց մուտք գործել տեսախցիկ",
-    "faceUnlocked": "Դեմքի ID-ն բացվել է: Դուք կարող եք փորձել կրկին:",
-    "noRegisteredFaces": "Ոչ մի գրանցված դեմք չի գտնվել: Խնդրում ենք նախ գրանցել ձեր դեմքը:",
-    "noRegisteredFacesSystem": "Ոչ մի գրանցված դեմք չի գտնվել համակարգում: Խնդրում ենք նախ գրանցել ձեր դեմքը:",
-    "maxAttemptsReached": "Առավելագույն փորձերի թիվը հասել է",
-    "noMatchingFace": "Ոչ մի համապատասխան դեմք չի գտնվել:",
+    "cameraNotSupported": "Տեսախցիկի հասանելիությունը չի աջակցվում այս բրաուզերում: Խնդրում ենք օգտագործեք Chrome, Edge կամ Firefox:",
+    "cameraPermissionDenied": "Տեսախցիկի հասանելիությունը մերժված է: Խնդրում ենք թույլատրեք տեսախցիկի հասանելիությունը բրաուզերի կարգավորումներում:",
+    "noCameraFound": "Տեսախցիկ չի գտնվել: Խնդրում ենք միացրեք տեսախցիկը և փորձեք կրկին:",
+    "cameraInUse": "Տեսախցիկն արդեն օգտագործվում է այլ հավելվածի կողմից: Խնդրում ենք փակեք այլ հավելվածները, որոնք օգտագործում են տեսախցիկը:",
+    "cameraConstraintError": "Ընտրված տեսախցիկը չի աջակցում պահանջվող կարգավորումները: Փորձում եմ հիմնական կարգավորումները...",
+    "cameraRetryFailed": "Դեռ չի հաջողվում հասանելիություն ստանալ տեսախցիկին: {{message}}",
+    "cameraAccessError": "Չի հաջողվում հասանելիություն ստանալ տեսախցիկին: {{message}}",
+    "faceIdUnlocked": "Face ID-ն ապաարգելափակված է: Դուք կարող եք փորձել կրկին:",
+    "noRegisteredFaces": "Գրանցված դեմքեր չեն գտնվել: Խնդրում ենք նախ գրանցեք ձեր դեմքը:",
+    "noRegisteredFacesSystem": "Համակարգում գրանցված դեմքեր չեն գտնվել: Խնդրում ենք նախ գրանցեք ձեր դեմքը:",
+    "noMatchingFace": "Դեմքի համապատասխանություն չի գտնվել:",
+    "faceIdBlocked": "Չափազանց շատ անհաջող փորձեր: Face ID-ն արգելափակված է: Խնդրում ենք մուտք գործեք էլ. փոստով/գաղտնաբառով:",
     "faceNotRecognized": "Դեմքը չի ճանաչվել: Փորձ {{attempts}} 3-ից:",
-    "tooManyAttempts": "Շատ անհաջող փորձեր: Դեմքի ID-ն այժմ արգելափակված է:",
-    "tooManyAttemptsUseEmail": "Շատ անհաջող փորձեր: Խնդրում ենք օգտագործել էլ. փոստի/գաղտնաբառի մուտք:",
-    "tooManyAttemptsBlocked": "Շատ անհաջող փորձեր: Դեմքի ID-ն արգելափակված է: Խնդրում ենք օգտագործել էլ. փոստի/գաղտնաբառի մուտք:",
-    "noCameraFound": "Տեսախցիկ չի գտնվել: Խնդրում ենք միացնել տեսախցիկ և փորձել կրկին:",
-    "cameraAlreadyInUse": "Տեսախցիկն արդեն օգտագործվում է այլ ծրագրով:",
-    "noFaceInFrame": "Դեմք չի հայտնաբերվել: Խնդրում ենք դիրքավորել ձեր դեմքը շրջանակում:",
-    "faceRegistered": "Դեմքը հաջողությամբ գրանցված է: Դուք կարող եք օգտագործել Face ID մուտքը:",
-    "faceRegisterFailed": "Չհաջողվեց գրանցել դեմքը: Խնդրում ենք փորձել կրկին:",
-    "calendarConnectionFailed": "Չհաջողվեց միանալ օրացույցին",
-    "icalExported": "iCal ֆայլը հաջողությամբ ներբեռնվել է",
-    "calendarExportFailed": "Չհաջողվեց արտահանել օրացույցը",
-    "noEventsToSync": "Չկան իրադարձություններ համաժամեցման համար",
-    "googleCalendarSyncFailed": "Չհաջողվեց համաժամեցնել Google Calendar-ի հետ",
-    "googleCalendarNotConfigured": "Google Calendar-ը կարգավորված չէ",
-    "outlookCalendarSyncFailed": "Չհաջողվեց համաժամեցնել Outlook Calendar-ի հետ",
-    "outlookCalendarNotConfigured": "Outlook Calendar-ը կարգավորված չէ",
-    "stopSessionFirst": "Նախ դադարեցրեք ընթացիկ նիստը",
-    "userIdNotFound": "Օգտվողի ID-ն չի գտնվել",
-    "statusUpdateFailed": "Չհաջողվեց թարմացնել կարգավիճակը",
-    "fillDateAndTime": "Խնդրում ենք լրացնել երկու դաշտերը՝ ամսաթիվ և ժամ:",
-    "invalidDateTime": "Անվավեր ամսաթիվ կամ ժամ: Խնդրում ենք օգտագործել YYYY-MM-DD և HH:MM ձևաչափեր:",
-    "messageSent": "Հաղորդագրությունը ուղարկվել է Team Chat-ի միջոցով",
-    "messageCopied": "Հաղորդագրությունը պատճենված է սեղմատախտակում",
-    "callStartFailed": "Չհաջողվեց սկսել զանգը",
-    "noPhoneNumber": "Հեռախոսահամարը հասանելի չէ",
-    "fillAllRequired": "Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը",
-    "microphoneAccessDenied": "Չհաջողվեց մուտք գործել միկրոֆոն: Խնդրում ենք ստուգել թույլտվությունները:",
-    "loginFailed": "Մուտքը չհաջողվեց",
-    "loginFailedUnknown": "Մուտքը չհաջողվեց: {{error}}"
+    "tooManyFailedAttempts": "Չափազանց շատ անհաջող փորձեր: Face ID-ն արգելափակված է:",
+    "loginFailed": "Չհաջողվեց մուտք գործել Face ID-ով: Խնդրում ենք փորձեք կրկին:",
+    "networkError": "Ցանցի սխալ: Չի հաջողվում կապվել սերվերի հետ: Խնդրում ենք ստուգեք ձեր կապը:",
+    "serverError": "Սերվերի սխալ: {{message}}",
+    "faceDetected": "Դեմքը հայտնաբերված է",
+    "noFace": "Դեմք չի հայտնաբերվել",
+    "excellent": "Գերազանց",
+    "good": "Լավ",
+    "moveCloser": "Մոտեցեք",
+    "searchingForMatch": "Որոնում համապատասխանություն...",
+    "welcomeUser": "Բարի գալուստ, {{name}}!",
+    "faceNotRecognizedTitle": "Դեմքը չի ճանաչվել",
+    "failedAttempts": "Անհաջող փորձեր: {{attempts}} 3-ից:",
+    "faceIdBlockedTitle": "Face ID-ն արգելափակված է",
+    "faceIdBlockedDesc": "Չափազանց շատ անհաջող փորձեր: Խնդրում ենք մուտք գործեք էլ. փոստով/գաղտնաբառով:"
   },
   "faceRegistration": {
     "title": "Գրանցել դեմքի ID",
@@ -5953,5 +6065,90 @@
     "copiedToClipboard": "Հաղորդագրությունը պատճենված է սեղմատախտակում",
     "failedToStartCall": "Չհաջողվեց սկսել զանգը",
     "noPhoneAvailable": "Հեռախոսահամարը հասանելի չէ"
+  },
+  "smartError": {
+    "invalidCredentials": {
+      "message": "Սխալ էլ. փոստ կամ գաղտնաբառ",
+      "suggestion": "Ստուգեք ձեր մուտքը: Caps Lock-ը միացվա՞ծ է:",
+      "action": "Մոռացել եք գաղտնաբառը:"
+    },
+    "userNotFound": {
+      "message": "Օգտատերը չի գտնվել",
+      "suggestion": "Հնարավոր է, որ դուք դեռ գրանցված չեք համակարգում",
+      "action": "Ստեղծել հաշիվ"
+    },
+    "emailExists": {
+      "message": "Այս էլ. փոստն արդեն գրանցված է",
+      "suggestion": "Փորձեք մուտք գործել կամ վերականգնել գաղտնաբառը",
+      "action": "Անցնել մուտքի"
+    },
+    "weakPassword": {
+      "message": "Գաղտնաբառը բավականաչափ հուսալի չէ",
+      "suggestion": "Օգտագործեք առնվազն 8 նիշ, ներառյալ տառեր, թվեր և հատուկ նշաններ"
+    },
+    "networkError": {
+      "message": "Կապի խնդիր",
+      "suggestion": "Ստուգեք ձեր ինտերնետ կապը և փորձեք կրկին"
+    },
+    "serverError": {
+      "message": "Սերվերի սխալ",
+      "suggestion": "Մենք աշխատում ենք խնդիրը լուծելու վրա: Խնդրում ենք փորձեք մի քանի րոպեից"
+    },
+    "tooManyAttempts": {
+      "message": "Չափազանց շատ փորձեր",
+      "suggestion": "Սպասեք մի քանի րոպե նախքան կրկին փորձելը"
+    },
+    "accountBlocked": {
+      "message": "Հաշիվը արգելափակված է",
+      "suggestion": "Դիմեք ձեր ադմինիստրատորին՝ ապաարգելափակելու համար"
+    },
+    "emailNotVerified": {
+      "message": "Էլ. փոստը հաստատված չէ",
+      "suggestion": "Ստուգեք ձեր էլ. փոստը և սեղմեք հաստատման հղումը"
+    },
+    "sessionExpired": {
+      "message": "Սեսիան ժամկետանց է",
+      "suggestion": "Կրկին մուտք գործեք շարունակելու համար"
+    },
+    "defaultError": {
+      "message": "Տեղի ունեցավ սխալ",
+      "suggestion": "Փորձեք կրկին կամ դիմեք աջակցության"
+    }
+  },
+  "auth2fa": {
+    "title": "Երկգործոն նույնականացում",
+    "backupCodeDesc": "Մուտքագրեք ձեր պահուստային կոդերից մեկը",
+    "authenticatorCodeDesc": "Մուտքագրեք 6 նիշանոց կոդը ձեր նույնականացման հավելվածից",
+    "verifyBackupCode": "Հաստատել պահուստային կոդը",
+    "useAuthenticatorCode": "Օգտագործել նույնականացման կոդ",
+    "useBackupCode": "Օգտագործել պահուստային կոդ",
+    "backToLogin": "Վերադառնալ մուտքի"
+  },
+  "resetPassword": {
+    "passwordsDoNotMatch": "Գաղտնաբառերը չեն համընկնում",
+    "passwordMin8": "Գաղտնաբառը պետք է պարունակի առնվազն 8 նիշ",
+    "somethingWentWrong": "Ինչ-որ բան սխալ գնաց",
+    "verifyingLink": "Վերականգնման հղման ստուգում...",
+    "invalidOrExpiredLink": "Անվավեր կամ ժամկետանց հղում",
+    "linkExpiredDesc": "Այս վերականգնման հղմի ժամկետը լրացել է կամ անվավեր է: Խնդրում ենք պահանջեք նորը:",
+    "requestNewLink": "Պահանջել նոր հղում",
+    "passwordUpdated": "Գաղտնաբառը թարմացված է:",
+    "passwordUpdatedDesc": "Ձեր գաղտնաբառը հաջողությամբ վերականգնված է: Վերահղում դեպի մուտքի էջ...",
+    "setNewPassword": "Սահմանել նոր գաղտնաբառ",
+    "chooseStrongPassword": "Ընտրեք հուսալի գաղտնաբառ ձեր հաշվի համար:"
+  },
+  "orgRequests": {
+    "approved": "Օրգանիզացիայի հայտը հաստատված է",
+    "approveFailed": "Չհաջողվեց հաստատել հայտը",
+    "rejected": "Օրգանիզացիայի հայտը մերժված է",
+    "rejectFailed": "Չհաջողվեց մերժել հայտը"
+  },
+  "approvals": {
+    "approveFailed": "Չհաջողվեց հաստատել օգտատիրոջը",
+    "rejectFailed": "Չհաջողվեց մերժել օգտատիրոջը"
+  },
+  "users": {
+    "suspendFailed": "Չհաջողվեց կասեցնել օգտատիրոջը",
+    "unsuspendFailed": "Չհաջողվեց վերականգնել օգտատիրոջը"
   }
 }

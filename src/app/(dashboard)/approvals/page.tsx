@@ -3,8 +3,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from '@/lib/cssMotion';
 import { UserCheck, UserX, Clock, Mail, Calendar, CheckCircle } from 'lucide-react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import type { Id } from '../../../../convex/_generated/dataModel';
+import { usePendingApprovals, useApproveUser, useRejectUser } from '@/hooks/useApprovals';
 
 export default function ApprovalsPage() {
   const { t } = useTranslation();
@@ -22,36 +20,25 @@ export default function ApprovalsPage() {
   const isSuperadmin = user?.role === 'superadmin';
   const _effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : user?.organizationId;
 
-  const pendingUsers = useQuery(
-    api.users.queries.getPendingApprovalUsers,
-    user?.id ? { adminId: user.id as Id<'users'> } : 'skip',
-  );
-  const approveUser = useMutation(api.users.mutations.approveUser);
-  const rejectUser = useMutation(api.users.mutations.rejectUser);
+  const { data: pendingUsers, isLoading } = usePendingApprovals();
+  const approveUserMutation = useApproveUser();
+  const rejectUserMutation = useRejectUser();
 
-  const handleApprove = async (userId: Id<'users'>, userName: string) => {
+  const handleApprove = async (userId: string, userName: string) => {
     if (!user?.id) {
       toast.error(t('ui.pleaseLoginAgain'));
       return;
     }
-    try {
-      await approveUser({ userId, adminId: user.id as Id<'users'> });
-      toast.success(t('ui.userApproved', { name: userName }));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('ui.failedToApproveUser'));
-    }
+    await approveUserMutation.mutateAsync(userId);
+    toast.success(t('ui.userApproved', { name: userName }));
   };
 
-  const handleReject = async (userId: Id<'users'>, userName: string) => {
+  const handleReject = async (userId: string, userName: string) => {
     if (!user?.id) return;
     const message = t('ui.confirmRejectUser', { name: userName });
     if (!confirm(message)) return;
-    try {
-      await rejectUser({ userId, adminId: user.id as Id<'users'> });
-      toast.success(t('ui.userRejected', { name: userName }));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('ui.failedToRejectUser'));
-    }
+    await rejectUserMutation.mutateAsync(userId);
+    toast.success(t('ui.userRejected', { name: userName }));
   };
 
   if (user?.role !== 'admin') {
@@ -65,8 +52,6 @@ export default function ApprovalsPage() {
       </div>
     );
   }
-
-  const isLoading = pendingUsers === undefined;
 
   return (
     <motion.div
@@ -103,14 +88,14 @@ export default function ApprovalsPage() {
       ) : (
         <div className="grid gap-3 sm:gap-4">
           {pendingUsers?.map((pendingUser) => (
-            <Card key={pendingUser._id}>
+            <Card key={pendingUser.id}>
               <CardHeader className="pb-3 p-4 sm:p-6">
                 <div className="flex items-start gap-2 sm:gap-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
-                    {(pendingUser as unknown as { avatarUrl?: string }).avatarUrl ? (
+                    {pendingUser.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={(pendingUser as unknown as { avatarUrl?: string }).avatarUrl}
+                        src={pendingUser.avatarUrl}
                         alt={pendingUser.name}
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
@@ -179,20 +164,22 @@ export default function ApprovalsPage() {
                 <div className="flex gap-2 pt-2 border-t border-(--border)">
                   <Button
                     size="sm"
-                    onClick={() => handleApprove(pendingUser._id, pendingUser.name)}
+                    onClick={() => handleApprove(pendingUser.id, pendingUser.name)}
+                    disabled={approveUserMutation.isPending}
                     className="flex-1 text-xs sm:text-sm"
                   >
                     <UserCheck className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    {t('ui.approve')}
+                    {approveUserMutation.isPending ? t('common.approving', 'Approving...') : t('ui.approve')}
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleReject(pendingUser._id, pendingUser.name)}
+                    onClick={() => handleReject(pendingUser.id, pendingUser.name)}
+                    disabled={rejectUserMutation.isPending}
                     className="flex-1 text-xs sm:text-sm"
                   >
                     <UserX className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    {t('ui.reject')}
+                    {rejectUserMutation.isPending ? t('common.rejecting', 'Rejecting...') : t('ui.reject')}
                   </Button>
                 </div>
               </CardContent>

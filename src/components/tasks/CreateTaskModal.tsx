@@ -1,21 +1,20 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useMutation, useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
-import { uploadTaskAttachment } from '@/actions/cloudinary';
+import { useOrgUsers, useMyEmployees } from '@/hooks/useUsers';
+import { useCreateTask, type TaskAttachment } from '@/hooks/useTasks';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
 interface Props {
-  currentUserId: Id<'users'>;
+  currentUserId: string;
   userRole: 'admin' | 'supervisor' | 'employee';
+  organizationId?: string;
   onClose: () => void;
 }
 
-export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
+export function CreateTaskModal({ currentUserId, userRole, organizationId, onClose }: Props) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -31,19 +30,17 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const employees = useQuery(api.tasks.getUsersForAssignment, { requesterId: currentUserId });
-  const myEmployees = useQuery(
-    api.tasks.getMyEmployees,
-    userRole === 'supervisor' ? { supervisorId: currentUserId } : 'skip',
+  const { data: employees } = useOrgUsers(organizationId || '');
+  const { data: myEmployeesList } = useMyEmployees(
+    userRole === 'supervisor' ? currentUserId : undefined
   );
 
-  const createTask = useMutation(api.tasks.createTask);
-  const addAttachment = useMutation(api.tasks.addAttachment);
+  const createTask = useCreateTask();
 
   const handleFileAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files ?? []).filter((f) => {
       if (f.size > 10 * 1024 * 1024) {
-        toast.error(`${f.name} too large (max 10MB)`);
+        toast.error(t('toasts.fileTooLarge', { name: f.name }));
         return false;
       }
       return true;
@@ -56,7 +53,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const availableEmployees = userRole === 'admin' ? employees : myEmployees;
+  const availableEmployees = userRole === 'admin' ? employees : myEmployeesList;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,18 +73,9 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean);
-      const taskId = await createTask({
-        title: title.trim(),
-        description: description.trim() || undefined,
-        assignedTo: assignedTo as Id<'users'>,
-        assignedBy: currentUserId,
-        priority,
-        deadline: deadline ? new Date(deadline).getTime() : undefined,
-        tags: tags.length > 0 ? tags : undefined,
-      });
-
-      // Upload attachments if any
-      if (files.length > 0 && taskId) {
+      
+      const attachments: TaskAttachment[] = [];
+      if (files.length > 0) {
         setUploadProgress({ uploaded: 0, total: files.length });
         let uploaded = 0;
         for (const file of files) {
@@ -98,23 +86,32 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               reader.onerror = reject;
               reader.readAsDataURL(file);
             });
-            const url = await uploadTaskAttachment(base64, file.name);
-            await addAttachment({
-              taskId: taskId as Id<'tasks'>,
-              url,
+            attachments.push({
               name: file.name,
               type: file.type,
               size: file.size,
-              uploadedBy: currentUserId,
+              url: base64,
             });
             uploaded++;
             setUploadProgress({ uploaded, total: files.length });
           } catch {
-            toast.error(`Failed to upload ${file.name}`);
+            toast.error(t('toasts.uploadFailed'));
           }
         }
         setUploadProgress(null);
       }
+
+      await createTask.mutateAsync({
+        organizationId: organizationId || '',
+        title: title.trim(),
+        description: description.trim() || undefined,
+        assignedTo,
+        assignedBy: currentUserId,
+        priority,
+        deadline: deadline ? new Date(deadline).getTime() : undefined,
+        tags: tags.length > 0 ? tags : undefined,
+        attachments: attachments.length > 0 ? attachments : undefined,
+      });
 
       onClose();
     } catch (err: any) {
@@ -193,7 +190,7 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
             >
               <option value="">{t('task.selectEmployee')}</option>
               {availableEmployees?.map((emp) => (
-                <option key={emp._id} value={emp._id}>
+                <option key={emp.id} value={emp.id}>
                   {emp.name}
                   {emp.role ? ` [${t(`roles.${emp.role}`)}]` : ''}
                   {emp.position ? ` — ${emp.position}` : ''}

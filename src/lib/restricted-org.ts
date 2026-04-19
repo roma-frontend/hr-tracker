@@ -82,7 +82,9 @@ export async function validateRestrictedOrgFromRequest(
     };
   }
 
-  const validation = validateRestrictedAccess(payload.organizationId);
+  const validation = validateRestrictedAccess(
+    payload.organizationId ?? undefined,
+  );
 
   if (!validation.allowed) {
     return {

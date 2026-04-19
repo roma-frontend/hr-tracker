@@ -1,11 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '@/convex/_generated/dataModel';
 import { useTranslation } from 'react-i18next';
 import {
   CheckCircle,
@@ -32,6 +29,7 @@ import {
 } from '@/components/ui/dialog';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
+import { useAllLeaves, useBulkApproveLeaves, useBulkRejectLeaves } from '@/hooks/useBulkActions';
 
 export default function BulkActionsPage() {
   const router = useRouter();
@@ -42,13 +40,9 @@ export default function BulkActionsPage() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [comment, setComment] = useState('');
 
-  const leaves = useQuery(
-    api.leaves.getAllLeaves,
-    user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
-  );
-
-  const bulkApprove = useMutation(api.leaves.bulkApproveLeaves);
-  const bulkReject = useMutation(api.leaves.bulkRejectLeaves);
+  const { data: leaves } = useAllLeaves(user?.id || '');
+  const bulkApprove = useBulkApproveLeaves();
+  const bulkReject = useBulkRejectLeaves();
 
   const pendingLeaves = leaves?.filter((l: any) => l.status === 'pending') || [];
 
@@ -66,7 +60,7 @@ export default function BulkActionsPage() {
     if (selectedLeaves.size === pendingLeaves.length) {
       setSelectedLeaves(new Set());
     } else {
-      setSelectedLeaves(new Set(pendingLeaves.map((l: any) => l._id)));
+      setSelectedLeaves(new Set(pendingLeaves.map((l: any) => l.id)));
     }
   };
 
@@ -77,9 +71,9 @@ export default function BulkActionsPage() {
     }
 
     try {
-      const result = await bulkApprove({
-        leaveIds: Array.from(selectedLeaves) as Id<'leaveRequests'>[],
-        reviewerId: user!.id as Id<'users'>,
+      const result = await bulkApprove.mutateAsync({
+        leaveIds: Array.from(selectedLeaves),
+        reviewerId: user!.id,
         comment: comment || undefined,
       });
 
@@ -106,9 +100,9 @@ export default function BulkActionsPage() {
     }
 
     try {
-      const result = await bulkReject({
-        leaveIds: Array.from(selectedLeaves) as Id<'leaveRequests'>[],
-        reviewerId: user!.id as Id<'users'>,
+      const result = await bulkReject.mutateAsync({
+        leaveIds: Array.from(selectedLeaves),
+        reviewerId: user!.id,
         comment: comment || t('superadmin.bulkActions.rejectedInBulk'),
       });
 
@@ -225,6 +219,7 @@ export default function BulkActionsPage() {
                     variant="outline"
                     className="gap-2 text-green-600 hover:text-green-700"
                     onClick={() => setApproveDialogOpen(true)}
+                    disabled={bulkApprove.isPending}
                   >
                     <CheckCircle className="w-4 h-4" />
                     {t('superadmin.bulkActions.approveSelected')}
@@ -233,6 +228,7 @@ export default function BulkActionsPage() {
                     variant="outline"
                     className="gap-2 text-red-600 hover:text-red-700"
                     onClick={() => setRejectDialogOpen(true)}
+                    disabled={bulkReject.isPending}
                   >
                     <XCircle className="w-4 h-4" />
                     {t('superadmin.bulkActions.rejectSelected')}
@@ -262,19 +258,19 @@ export default function BulkActionsPage() {
               <div className="space-y-3">
                 {pendingLeaves.map((leave: any) => (
                   <div
-                    key={leave._id}
+                    key={leave.id}
                     className={`p-4 rounded-lg border transition-colors cursor-pointer ${
-                      selectedLeaves.has(leave._id)
+                      selectedLeaves.has(leave.id)
                         ? 'border-primary bg-primary/5'
                         : 'hover:border-primary/50'
                     }`}
                     style={{ background: 'var(--background-subtle)' }}
-                    onClick={() => toggleLeaf(leave._id)}
+                    onClick={() => toggleLeaf(leave.id)}
                   >
                     <div className="flex items-start gap-4">
                       <Checkbox
-                        checked={selectedLeaves.has(leave._id)}
-                        onCheckedChange={() => toggleLeaf(leave._id)}
+                        checked={selectedLeaves.has(leave.id)}
+                        onCheckedChange={() => toggleLeaf(leave.id)}
                         onClick={(e) => e.stopPropagation()}
                       />
                       <div className="flex-1">
@@ -344,9 +340,9 @@ export default function BulkActionsPage() {
             <Button variant="outline" onClick={() => setApproveDialogOpen(false)}>
               {t('actions.cancel')}
             </Button>
-            <Button onClick={handleBulkApprove} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={handleBulkApprove} className="bg-green-600 hover:bg-green-700" disabled={bulkApprove.isPending}>
               <CheckCircle className="w-4 h-4 mr-2" />
-              {t('superadmin.bulkActions.approve.submit', { count: selectedLeaves.size })}
+              {bulkApprove.isPending ? 'Approving...' : t('superadmin.bulkActions.approve.submit', { count: selectedLeaves.size })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -382,9 +378,9 @@ export default function BulkActionsPage() {
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
               {t('actions.cancel')}
             </Button>
-            <Button variant="destructive" onClick={handleBulkReject}>
+            <Button variant="destructive" onClick={handleBulkReject} disabled={bulkReject.isPending}>
               <XCircle className="w-4 h-4 mr-2" />
-              {t('superadmin.bulkActions.reject.submit', { count: selectedLeaves.size })}
+              {bulkReject.isPending ? 'Rejecting...' : t('superadmin.bulkActions.reject.submit', { count: selectedLeaves.size })}
             </Button>
           </DialogFooter>
         </DialogContent>

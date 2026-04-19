@@ -80,13 +80,13 @@ export function downloadICalFile(icsContent: string, filename: string) {
  * Get Google Calendar authorization URL
  */
 export function getGoogleCalendarAuthUrl(redirectUri: string): string {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENTid;
   if (!clientId) {
     throw new Error('Google Client ID not configured');
   }
 
   const params = new URLSearchParams({
-    client_id: clientId,
+    clientid: clientId,
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'https://www.googleapis.com/auth/calendar.events',
@@ -107,7 +107,7 @@ export function getOutlookAuthUrl(redirectUri: string): string {
   }
 
   const params = new URLSearchParams({
-    client_id: clientId,
+    clientid: clientId,
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'Calendars.ReadWrite offline_access',
@@ -213,7 +213,7 @@ export async function exchangeCodeForTokens(
 }> {
   if (provider === 'google') {
     const tokenEndpoint = 'https://oauth2.googleapis.com/token';
-    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientId = process.env.GOOGLE_CLIENTid;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri =
       callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`;
@@ -229,7 +229,7 @@ export async function exchangeCodeForTokens(
       },
       body: new URLSearchParams({
         code,
-        client_id: clientId,
+        clientid: clientId,
         client_secret: clientSecret,
         redirect_uri: redirectUri,
         grant_type: 'authorization_code',
@@ -245,7 +245,7 @@ export async function exchangeCodeForTokens(
   } else {
     // Outlook
     const tokenEndpoint = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
-    const clientId = process.env.MICROSOFT_CLIENT_ID;
+    const clientId = process.env.MICROSOFT_CLIENTid;
     const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
     const redirectUri =
       callbackRedirectUri || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/outlook/callback`;
@@ -261,7 +261,7 @@ export async function exchangeCodeForTokens(
       },
       body: new URLSearchParams({
         code,
-        client_id: clientId,
+        clientid: clientId,
         client_secret: clientSecret,
         redirect_uri: redirectUri,
         grant_type: 'authorization_code',

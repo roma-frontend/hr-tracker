@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useAction } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import { motion } from '@/lib/cssMotion';
@@ -14,7 +12,6 @@ import {
   Clock,
   AlertTriangle,
   TrendingUp,
-  RefreshCw as _RefreshCw,
   Play,
   Pause,
 } from 'lucide-react';
@@ -23,6 +20,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import {
+  useAutomationStats,
+  useRecentTasks,
+  useActiveWorkflows,
+  useRunAutomation,
+  useToggleWorkflow,
+} from '@/hooks/useAutomation';
 
 interface AutomationStats {
   totalTasks: number;
@@ -36,50 +40,37 @@ interface AutomationStats {
 }
 
 interface Workflow {
-  _id: string;
-  isActive: boolean;
+  id: string;
+  is_active: boolean;
   name: string;
   description: string;
 }
 
 interface Task {
-  _id: string;
+  id: string;
   status: string;
   name: string;
-  createdAt: string | number | Date;
+  created_at: number;
 }
-
-// cspell:disable
-// Isolate Convex API refs to avoid infinite type instantiation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getStatsApi: any = api.automation.getStats;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getRecentTasksApi: any = api.automation.getRecentTasks;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getActiveWorkflowsApi: any = api.automation.getActiveWorkflows;
-// cspell:enable
 
 export default function AutomationPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [isRunning, setIsRunning] = useState(false);
 
-  // Fetch automation stats (hooks must always be called unconditionally)
-  const stats = useQuery(getStatsApi) as AutomationStats | undefined;
-  const recentTasks = useQuery(getRecentTasksApi, {}) as Task[] | undefined;
-  const activeWorkflows = useQuery(getActiveWorkflowsApi) as Workflow[] | undefined;
+  const { data: stats } = useAutomationStats();
+  const { data: recentTasks } = useRecentTasks();
+  const { data: activeWorkflows } = useActiveWorkflows();
 
-  // Mutations
-  const runAutomationAction = useAction(api.automationActions.runAutomation);
-  const toggleWorkflow = useMutation(api.automationMutations.toggleWorkflow);
+  const runAutomation = useRunAutomation();
+  const toggleWorkflow = useToggleWorkflow();
 
   const isSuperadmin = user?.role === 'superadmin';
 
   const handleRunAutomation = async () => {
     setIsRunning(true);
     try {
-      await runAutomationAction();
-      toast.success(t('automation.runSuccess') || 'Automation started successfully');
+      await runAutomation.mutateAsync();
     } catch (_error) {
       toast.error(t('automation.runError') || 'Failed to run automation');
     } finally {
@@ -87,7 +78,6 @@ export default function AutomationPage() {
     }
   };
 
-  // Memoize denial UI to avoid conditional hook calls
   const denialUI = useMemo(
     () => (
       <div className="flex items-center justify-center h-full min-h-100">
@@ -97,7 +87,6 @@ export default function AutomationPage() {
             {t('common.accessDenied') || 'Access Denied'}
           </h2>
           <p className="text-(--text-muted)">
-            {/* cspell:disable-next-line */}
             {t('common.onlySuperadminAccess') || 'Only superadmin can access this page'}
           </p>
         </div>
@@ -186,13 +175,13 @@ export default function AutomationPage() {
             <div className="space-y-3">
               {activeWorkflows?.map((workflow) => (
                 <div
-                  key={workflow._id}
+                  key={workflow.id}
                   className="flex items-center justify-between p-3 rounded-lg border border-(--border)"
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-2 h-2 rounded-full ${
-                        workflow.isActive ? 'bg-green-500' : 'bg-gray-400'
+                        workflow.is_active ? 'bg-green-500' : 'bg-gray-400'
                       }`}
                     />
                     <div>
@@ -204,11 +193,10 @@ export default function AutomationPage() {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      // @ts-expect-error Convex Id type mismatch
-                      toggleWorkflow({ workflowId: workflow._id })
+                      toggleWorkflow.mutate({ workflowId: workflow.id })
                     }
                   >
-                    {workflow.isActive ? (
+                    {workflow.is_active ? (
                       <Pause className="w-4 h-4" />
                     ) : (
                       <Play className="w-4 h-4" />
@@ -238,7 +226,7 @@ export default function AutomationPage() {
             <div className="space-y-2">
               {recentTasks?.map((task) => (
                 <div
-                  key={task._id}
+                  key={task.id}
                   className="flex items-center justify-between p-2 rounded hover:bg-(--background-subtle)"
                 >
                   <div className="flex items-center gap-3">
@@ -246,7 +234,7 @@ export default function AutomationPage() {
                     <div>
                       <p className="text-sm font-medium text-(--text-primary)">{task.name}</p>
                       <p className="text-xs text-(--text-muted)">
-                        {new Date(task.createdAt).toLocaleString()}
+                        {new Date(task.created_at).toLocaleString()}
                       </p>
                     </div>
                   </div>

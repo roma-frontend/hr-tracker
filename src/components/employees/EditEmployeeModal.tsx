@@ -1,10 +1,7 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import {
   X,
@@ -39,9 +36,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
 
 interface Employee {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: 'admin' | 'supervisor' | 'employee' | 'superadmin';
@@ -106,23 +104,20 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
   const [direction, setDirection] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState(employee.organizationId ?? '');
+  const [supervisors, setSupervisors] = useState<any[]>([]);
 
   const isSuperadmin = user?.role === 'superadmin';
   const targetOrgId = isSuperadmin ? selectedOrgId : (employee.organizationId ?? '');
-  const supervisors = useQuery(
-    api.users.queries.getSupervisors,
-    user?.id && targetOrgId
-      ? {
-          requesterId: user.id as Id<'users'>,
-          organizationId: targetOrgId as Id<'organizations'>,
-        }
-      : 'skip',
-  );
-  const updateUser = useMutation(api.users.mutations.updateUser);
-  const organizations = useQuery(
-    api.organizations.getAllOrganizations,
-    user?.role === 'superadmin' ? {} : 'skip',
-  );
+  const { data: organizations } = useAllOrganizations(user?.role === 'superadmin');
+
+  React.useEffect(() => {
+    if (user?.id && targetOrgId) {
+      fetch(`/api/users?action=get-supervisors&organizationId=${targetOrgId}&requesterId=${user.id}`)
+        .then(res => res.json())
+        .then(data => setSupervisors(data.data || []))
+        .catch(() => setSupervisors([]));
+    }
+  }, [user?.id, targetOrgId]);
   const [form, setForm] = useState({
     name: employee.name,
     role: employee.role,
@@ -170,7 +165,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
   // Reset supervisorId when organization changes (can't have supervisor from another org)
   useEffect(() => {
     if (isSuperadmin && supervisors && supervisors.length > 0) {
-      const supIds = supervisors.map((s: any) => s._id);
+      const supIds = supervisors.map((s: any) => s.id);
       if (form.supervisorId && !supIds.includes(form.supervisorId)) {
         setForm((prev) => ({ ...prev, supervisorId: '' }));
       }
@@ -256,7 +251,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
     employee.role === 'admin' &&
     user?.role === 'admin' &&
     !isActualAdmin &&
-    employee._id !== user?.id
+    employee.id !== user?.id
   ) {
     return (
       <AnimatePresence>
@@ -310,21 +305,26 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
         return;
       }
 
-      await updateUser({
-        adminId: user.id as Id<'users'>,
-        userId: employee._id as Id<'users'>,
-        name: form.name,
-        role: form.role as 'admin' | 'supervisor' | 'employee' | 'driver',
-        employeeType: form.employeeType as 'staff' | 'contractor',
-        department: form.department || undefined,
-        position: form.position || undefined,
-        phone: form.phone || undefined,
-        supervisorId: form.supervisorId ? (form.supervisorId as Id<'users'>) : undefined,
-        isActive: form.isActive,
-        paidLeaveBalance: form.paidLeaveBalance,
-        sickLeaveBalance: form.sickLeaveBalance,
-        familyLeaveBalance: form.familyLeaveBalance,
+      const res = await fetch('/api/users?action=update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminId: user.id,
+          userId: employee.id,
+          name: form.name,
+          role: form.role as 'admin' | 'supervisor' | 'employee' | 'driver',
+          employeeType: form.employeeType as 'staff' | 'contractor',
+          department: form.department || undefined,
+          position: form.position || undefined,
+          phone: form.phone || undefined,
+          supervisorId: form.supervisorId || undefined,
+          isActive: form.isActive,
+          paidLeaveBalance: form.paidLeaveBalance,
+          sickLeaveBalance: form.sickLeaveBalance,
+          familyLeaveBalance: form.familyLeaveBalance,
+        }),
       });
+      if (!res.ok) throw new Error('Failed to update user');
       toast.success(t('modals.editEmployee.updatedSuccess'));
       onClose();
     } catch (err) {
@@ -352,7 +352,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
           <div className="relative z-10 px-6 pt-6 pb-4">
             <div className="flex items-center gap-3 mb-4">
               <AvatarUpload
-                userId={employee._id}
+                userId={employee.id}
                 currentUrl={employee.avatarUrl}
                 name={employee.name}
                 size="md"
@@ -413,11 +413,11 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                       <SelectValue placeholder={t('employees.selectOrganization')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {organizations?.map((org: any) => (
-                        <SelectItem key={org._id} value={org._id}>
-                          {org.name}
-                        </SelectItem>
-                      ))}
+                        {organizations?.map((org: any) => (
+                          <SelectItem key={org.id} value={org.id}>
+                            {org.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   {errors.organization && (
@@ -661,7 +661,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                       </SelectTrigger>
                       <SelectContent>
                         {supervisors.map((s: any) => (
-                          <SelectItem key={s._id} value={s._id}>
+                          <SelectItem key={s.id} value={s.id}>
                             {s.name}
                           </SelectItem>
                         ))}
@@ -714,7 +714,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
                           {
                             label: t('employees.organization'),
                             value:
-                              organizations?.find((o: any) => o._id === selectedOrgId)?.name || '—',
+                              organizations?.find((o: any) => o.id === selectedOrgId)?.name || '—',
                           },
                         ]
                       : []),

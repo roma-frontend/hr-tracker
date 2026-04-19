@@ -35,12 +35,11 @@ import {
 } from 'recharts';
 import Link from 'next/link';
 import { format, isSameMonth } from 'date-fns';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
-import { useAuthUser, type User } from '@/store/useAuthStore';
+import { useLeaves, useUsers, useSecurityStats } from '@/hooks/useDashboard';
+import { useAuthUser, type UserProfile as User } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import { useMyOrganization } from '@/hooks/useOrganizations';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,7 +50,7 @@ import {
   type LeaveType,
   type LeaveStatus,
 } from '@/lib/types';
-import { type LeaveEnriched, type Organization } from '@/lib/convex-types';
+
 import dynamic from 'next/dynamic';
 import { PlanGate } from '@/components/subscription/PlanGate';
 import { DashboardBanners } from '@/components/dashboard/DashboardBanners';
@@ -148,31 +147,12 @@ export default function DashboardClient() {
   const selectedOrgId = useSelectedOrganization();
   const shouldUseOrgQuery = selectedOrgId && user?.id;
 
-  // Convex useQuery arguments - properly typed
-  const userId = user?.id as Id<'users'> | undefined;
-
-  const leaves = useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : 'skip') as
-    | any[]
-    | null
-    | undefined;
-
-  const usersFromConvex = useQuery(
-    api.users.queries.getAllUsers,
-    userId ? { requesterId: userId } : 'skip',
-  ) as any[] | null | undefined;
-  // Convert Convex _id to id for User type compatibility
-  const users = (usersFromConvex || []).map((u: any) => ({ ...u, id: u._id })) as unknown as User[];
-  const organization = useQuery(
-    api.organizations.getMyOrganization,
-    userId ? { userId } : 'skip',
-  ) as Organization | null;
-
-  // Security stats — only for superadmin (always call, condition is in arguments)
   const isSuperadmin = user?.role === 'superadmin';
-  const securityStats = useQuery(
-    api.security.getLoginStats,
-    mounted && isSuperadmin ? { hours: 24 } : 'skip',
-  );
+
+  const { data: leaves, isLoading: leavesLoading } = useLeaves();
+  const { data: users, isLoading: usersLoading } = useUsers();
+  const { data: securityStats, isLoading: securityLoading } = useSecurityStats(24);
+  const { data: organization } = useMyOrganization(!!user?.id);
 
   React.useEffect(() => {
     setMounted(true);
@@ -189,14 +169,14 @@ export default function DashboardClient() {
   // ═══════════════════════════════════════════════════════════════
   const stats = useMemo(
     () => ({
-      totalEmployees: users?.filter((u) => u.role !== 'superadmin').length ?? 0,
-      pendingRequests: leaves?.filter((r) => r.status === 'pending').length ?? 0,
+      totalEmployees: users?.filter((u: any) => u.role !== 'superadmin').length ?? 0,
+      pendingRequests: leaves?.filter((r: any) => r.status === 'pending').length ?? 0,
       onLeaveNow:
         leaves?.filter(
-          (r) => r.status === 'approved' && r.startDate <= todayStr && r.endDate >= todayStr,
+          (r: any) => r.status === 'approved' && r.startDate <= todayStr && r.endDate >= todayStr,
         ).length ?? 0,
       approvedThisMonth:
-        leaves?.filter((r) => r.status === 'approved' && isSameMonth(new Date(r.startDate), today))
+        leaves?.filter((r: any) => r.status === 'approved' && isSameMonth(new Date(r.startDate), today))
           .length ?? 0,
     }),
     [users, leaves, todayStr, today],
@@ -207,10 +187,10 @@ export default function DashboardClient() {
   const pieData = useMemo(() => {
     const data = (Object.keys(LEAVE_TYPE_COLORS) as LeaveType[]).map((key) => ({
       name: t(`leaveTypes.${key}`) || LEAVE_TYPE_LABELS[key],
-      value: leaves?.filter((r) => r.type === key).length ?? 0,
+      value: leaves?.filter((r: any) => r.type === key).length ?? 0,
       color: LEAVE_TYPE_COLORS[key],
     }));
-    return data.filter((d) => d.value > 0);
+    return data.filter((d: any) => d.value > 0);
   }, [leaves, t]);
 
   const monthlyTrend = useMemo(() => {
@@ -245,7 +225,7 @@ export default function DashboardClient() {
       };
     }
 
-    leaves?.forEach((l) => {
+    leaves?.forEach((l: any) => {
       const key = l.startDate.slice(0, 7);
       if (months[key]) {
         months[key][l.status as 'approved' | 'pending' | 'rejected']++;
@@ -256,21 +236,7 @@ export default function DashboardClient() {
 
   if (!mounted) return null;
 
-  const isLoading = leaves === undefined || users === undefined;
-  const isError = leaves === null || users === null;
-
-  if (isError)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-          <TrendingUp className="w-8 h-8 text-amber-500" />
-        </div>
-        <h2 className="text-xl font-semibold text-(--text-primary)">
-          {t('dashboard.convexNotDeployed')}
-        </h2>
-        <p className="text-(--text-muted) text-sm max-w-sm">{t('dashboard.convexNotDeployed')}</p>
-      </div>
-    );
+  const isLoading = leavesLoading || usersLoading;
 
   return (
     <motion.div
@@ -691,8 +657,8 @@ export default function DashboardClient() {
             <CardContent>
               {recentLeaves.length > 0 ? (
                 <ul className="space-y-3">
-                  {recentLeaves.map((leave) => (
-                    <li key={leave._id} className="flex items-center justify-between text-sm">
+                  {recentLeaves.map((leave: any) => (
+                    <li key={leave.id} className="flex items-center justify-between text-sm">
                       <div>
                         <p className="font-medium text-(--text-primary)">{leave.userName}</p>
                         <p className="text-(--text-muted)">
@@ -724,7 +690,7 @@ export default function DashboardClient() {
         </motion.div>
         {user?.id && (
           <motion.div variants={itemVariants} data-tour="leave-balance">
-            <LeaveStats userId={user.id as Id<'users'>} />
+            <LeaveStats userId={user.id as string} />
           </motion.div>
         )}
       </div>

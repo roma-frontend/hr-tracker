@@ -1,8 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { CheckInOutWidget } from '@/components/attendance/CheckInOutWidget';
@@ -15,20 +13,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Users, Star, UserCheck, BarChart2, Search } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
-import type { Id } from '../../../../convex/_generated/dataModel';
+import {
+  useTodaySummary,
+  useTodayAllAttendance,
+  useAllEmployeesOverview,
+  useNeedsRating,
+} from '@/hooks/useAttendanceAdmin';
 import type { AttendanceRecord } from '@/components/attendance/AttendanceDetailModal';
 import type { EmployeeInfo } from '@/components/attendance/EmployeeAttendanceDrawer';
-
-// Isolate Convex API refs to avoid infinite type instantiation
-const getTodaySummaryApi = api.timeTracking.getTodayAttendanceSummary;
-const getCurrentlyAtWorkApi = api.timeTracking.getCurrentlyAtWork;
-const getTodayAllAttendanceApi = api.timeTracking.getTodayAllAttendance;
-const getNeedsRatingApi = api.supervisorRatings.getEmployeesNeedingRating;
 
 type Tab = 'today' | 'all' | 'rating';
 
 interface AttendanceUser {
-  _id: Id<'users'>;
+  id: string;
   name: string;
   avatarUrl?: string | null;
   position?: string;
@@ -36,7 +33,7 @@ interface AttendanceUser {
 }
 
 interface AttendanceRecordType {
-  _id: Id<'timeTracking'>;
+  id: string;
   user?: AttendanceUser;
   status: string;
   checkInTime: number;
@@ -49,7 +46,7 @@ interface AttendanceRecordType {
   overtimeMinutes?: number;
   notes?: string;
   date: string;
-  userId: Id<'users'>;
+  userId: string;
 }
 
 interface EmployeeOverviewStats {
@@ -62,7 +59,7 @@ interface EmployeeOverviewStats {
 
 interface EmployeeOverview {
   user: AttendanceUser;
-  supervisor: { _id: Id<'users'>; name: string } | null;
+  supervisor: { id: string; name: string } | null;
   stats: EmployeeOverviewStats;
   lastRecord: AttendanceRecordType | null;
 }
@@ -78,7 +75,7 @@ export default function AttendancePage() {
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
   const [selectedEmployee, setSelectedEmployee] = useState<{
-    id: Id<'users'>;
+    id: string;
     name: string;
   } | null>(null);
   const [detailRecord, setDetailRecord] = useState<AttendanceRecord | null>(null);
@@ -90,44 +87,11 @@ export default function AttendancePage() {
 
   const isAdminOrSupervisor = user?.role === 'admin' || user?.role === 'supervisor';
   const isSuperadmin = user?.role === 'superadmin';
-  const _isEmployee = user?.role === 'employee';
 
-  // For superadmin, use selectedOrgId if available
-  const _effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : user?.organizationId;
-
-  // Admin/Supervisor: fetch today's attendance summary and employees needing rating
-  // Use user?.id as dependency so queries only run after localStorage hydration
-  const todaySummary = useQuery(
-    getTodaySummaryApi,
-    user?.id && (isAdminOrSupervisor || isSuperadmin)
-      ? { adminId: user.id as Id<'users'> }
-      : 'skip',
-  );
-  const _currentlyAtWork = useQuery(
-    getCurrentlyAtWorkApi,
-    user?.id && (isAdminOrSupervisor || isSuperadmin)
-      ? { adminId: user.id as Id<'users'> }
-      : 'skip',
-  );
-  const todayAllAttendance = useQuery(
-    getTodayAllAttendanceApi,
-    user?.id && (isAdminOrSupervisor || isSuperadmin)
-      ? { adminId: user.id as Id<'users'> }
-      : 'skip',
-  );
-  const needsRating = useQuery(
-    getNeedsRatingApi,
-    user?.id && (isAdminOrSupervisor || isSuperadmin)
-      ? { supervisorId: user.id as Id<'users'> }
-      : 'skip',
-  );
-
-  const allEmployeesOverview = useQuery(
-    api.timeTracking.getAllEmployeesAttendanceOverview,
-    user?.id && (isAdminOrSupervisor || isSuperadmin)
-      ? { adminId: user.id as Id<'users'>, month: selectedMonth }
-      : 'skip',
-  );
+  const { data: todaySummary, isLoading: isLoadingSummary } = useTodaySummary();
+  const { data: todayAllAttendance, isLoading: isLoadingAll } = useTodayAllAttendance();
+  const { data: needsRating, isLoading: isLoadingRating } = useNeedsRating();
+  const { data: allEmployeesOverview, isLoading: isLoadingOverview } = useAllEmployeesOverview(selectedMonth);
 
   const tabs = [
     { id: 'today' as const, label: t('timePeriods.today'), icon: Clock },
@@ -155,7 +119,7 @@ export default function AttendancePage() {
   });
 
   const filteredEmployees = (allEmployeesOverview ?? []).filter(
-    (e) =>
+    (e: EmployeeOverview) =>
       !empSearch ||
       e.user.name.toLowerCase().includes(empSearch.toLowerCase()) ||
       (e.user.department ?? '').toLowerCase().includes(empSearch.toLowerCase()),
@@ -225,7 +189,7 @@ export default function AttendancePage() {
       )}
 
       {/* Admin/Supervisor: Today's overview */}
-      {isAdminOrSupervisor && activeTab === 'today' && todaySummary !== undefined && (
+      {isAdminOrSupervisor && activeTab === 'today' && todaySummary && (
         <div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <Card className="border border-green-200 dark:border-green-800">
@@ -264,8 +228,14 @@ export default function AttendancePage() {
         </div>
       )}
 
+      {isAdminOrSupervisor && activeTab === 'today' && isLoadingSummary && (
+        <div className="flex items-center justify-center py-12">
+          <ShieldLoader size="sm" />
+        </div>
+      )}
+
       {/* Admin/Supervisor: Today's full attendance list */}
-      {isAdminOrSupervisor && activeTab === 'today' && todayAllAttendance !== undefined && (
+      {isAdminOrSupervisor && activeTab === 'today' && todayAllAttendance && (
         <div>
           <Card>
             <CardHeader className="flex">
@@ -297,7 +267,7 @@ export default function AttendancePage() {
                     (record: AttendanceRecordType | null) =>
                       record && (
                         <div
-                          key={record._id}
+                          key={record.id}
                           className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
                           style={{
                             borderColor: 'var(--border)',
@@ -385,8 +355,14 @@ export default function AttendancePage() {
         </div>
       )}
 
+      {isAdminOrSupervisor && activeTab === 'today' && isLoadingAll && (
+        <div className="flex items-center justify-center py-12">
+          <ShieldLoader size="sm" />
+        </div>
+      )}
+
       {/* All Employees Tab */}
-      {isAdminOrSupervisor && activeTab === t('common.allEmployees') && (
+      {isAdminOrSupervisor && activeTab === 'all' && (
         <div>
           <Card>
             <CardHeader>
@@ -436,7 +412,7 @@ export default function AttendancePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {allEmployeesOverview === undefined ? (
+              {isLoadingOverview ? (
                 <div className="flex items-center justify-center py-12">
                   <ShieldLoader size="sm" />
                 </div>
@@ -449,10 +425,10 @@ export default function AttendancePage() {
                   {filteredEmployees.map(
                     ({ user: emp, supervisor, stats, lastRecord }: EmployeeOverview) => (
                       <div
-                        key={emp._id}
+                        key={emp.id}
                         onClick={() => {
                           const empForDrawer: EmployeeInfo = {
-                            _id: emp._id,
+                            id: emp.id,
                             name: emp.name,
                             position: emp.position,
                             department: emp.department,
@@ -592,7 +568,7 @@ export default function AttendancePage() {
                 <div className="space-y-3">
                   {needsRating.map(({ employee, lastRated }: EmployeeNeedingRating) => (
                     <div
-                      key={employee._id}
+                      key={employee.id}
                       className="flex items-center justify-between p-3 rounded-lg border"
                       style={{
                         borderColor: 'var(--border)',
@@ -638,7 +614,7 @@ export default function AttendancePage() {
                         className="text-white hover:opacity-90 transition-opacity"
                         style={{ background: 'var(--primary)' }}
                         onClick={() =>
-                          setSelectedEmployee({ id: employee._id, name: employee.name })
+                          setSelectedEmployee({ id: employee.id, name: employee.name })
                         }
                       >
                         <UserCheck className="w-4 h-4 mr-1" />
@@ -651,6 +627,12 @@ export default function AttendancePage() {
             </Card>
           </div>
         )}
+
+      {isAdminOrSupervisor && activeTab === 'rating' && isLoadingRating && (
+        <div className="flex items-center justify-center py-12">
+          <ShieldLoader size="sm" />
+        </div>
+      )}
 
       {/* Rating form when employee selected */}
       {isAdminOrSupervisor && activeTab === 'rating' && selectedEmployee && (

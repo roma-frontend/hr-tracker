@@ -1,9 +1,8 @@
-﻿'use client';
+'use client';
 import Image from 'next/image';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,6 @@ import {
   Trash2,
 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { format } from 'date-fns';
 import { useAuthStore } from '@/store/useAuthStore';
 import { SupervisorRatingForm } from '@/components/attendance/SupervisorRatingForm';
@@ -40,9 +38,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { EditEmployeeModal } from './EditEmployeeModal';
+import {
+  useEmployeeAIEvaluation,
+  useLatestSupervisorRating,
+  useMonthlyTimeStats,
+  useSupervisorRatings,
+  useDeleteEmployee,
+} from '@/hooks/useEmployees';
+import { useUserById } from '@/hooks/useUsers';
 
 interface EmployeeProfileDetailProps {
-  employeeId: Id<'users'>;
+  employeeId: string;
 }
 
 export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDetailProps) {
@@ -53,20 +59,24 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
   const [deleting, setDeleting] = useState(false);
   const { t } = useTranslation();
 
-  const employee = useQuery(api.users.queries.getUserById, { userId: employeeId });
-  const profile = useQuery(api.employeeProfiles.getEmployeeProfile, { userId: employeeId });
-  const score = useQuery(api.aiEvaluator.calculateEmployeeScore, { userId: employeeId });
-  const latestRating = useQuery(api.supervisorRatings.getLatestRating, { employeeId });
-  const monthlyStats = useQuery(api.timeTracking.getMonthlyStats, {
-    userId: employeeId,
-    month: new Date().toISOString().slice(0, 7),
+  const { data: employee, isLoading: employeeLoading } = useUserById(employeeId);
+  const { data: profile } = useQuery({
+    queryKey: ['employee-profile', employeeId],
+    queryFn: async () => {
+      const params = new URLSearchParams({ action: 'get-employee-profile', employeeId });
+      const res = await fetch(`/api/employees?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch employee profile');
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!employeeId,
   });
-  const ratingHistory = useQuery(api.supervisorRatings.getEmployeeRatings, {
-    employeeId,
-    limit: 3,
-  });
+  const { data: score } = useEmployeeAIEvaluation(employeeId);
+  const { data: latestRating } = useLatestSupervisorRating(employeeId);
+  const { data: monthlyStats } = useMonthlyTimeStats(employeeId, new Date().toISOString().slice(0, 7));
+  const { data: ratingHistory } = useSupervisorRatings(employeeId, 3);
 
-  const deleteUser = useMutation(api.users.mutations.deleteUser);
+  const deleteEmployee = useDeleteEmployee();
 
   const isAdminOrSupervisor = currentUser?.role === 'admin' || currentUser?.role === 'supervisor';
   const isSuperadmin =
@@ -81,14 +91,13 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
     setDeleting(true);
     try {
       if (!currentUser?.id) {
-        toast.error('User ID not found');
+        toast.error(t('employees.userIdNotFound', 'User ID not found'));
         return;
       }
-      await deleteUser({
-        userId: employeeId as Id<'users'>,
-        adminId: currentUser.id as Id<'users'>,
+      await deleteEmployee.mutateAsync({
+        employeeId,
+        adminId: currentUser.id,
       });
-      toast.success(t('employees.employeeDeleted', 'Employee deleted successfully'));
       window.history.back();
     } catch (error: any) {
       toast.error(error.message || t('employees.deleteFailed', 'Failed to delete employee'));
@@ -105,7 +114,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
       />
     ));
 
-  if (!employee) {
+  if (employeeLoading || !employee) {
     return (
       <Card>
         <CardContent className="p-8 text-center">
@@ -148,9 +157,9 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
                   <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>
                     {employee.role}
                   </Badge>
-                  <Badge variant="outline">{employee.employeeType}</Badge>
-                  <Badge variant={employee.isActive ? 'success' : 'destructive'}>
-                    {employee.isActive ? 'Active' : 'Inactive'}
+                  <Badge variant="outline">{employee.employee_type}</Badge>
+                  <Badge variant={employee.is_active ? 'success' : 'destructive'}>
+                    {employee.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
               </div>
@@ -234,7 +243,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div>
               <p className="text-xs text-(--text-muted)">{t('employeeProfile.joined')}</p>
               <p className="text-sm font-medium">
-                {format(new Date(employee.createdAt), 'MMM d, yyyy')}
+                {format(new Date((employee as any).createdAt), 'MMM d, yyyy')}
               </p>
             </div>
           </div>
@@ -391,7 +400,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="space-y-3">
               {ratingHistory.map((rating: any) => (
                 <div
-                  key={rating._id}
+                  key={rating.id}
                   className="flex items-center justify-between p-3 rounded-lg border"
                   style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
                 >
@@ -441,19 +450,19 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#2563eb]">{employee.paidLeaveBalance}</p>
+              <p className="text-2xl font-bold text-[#2563eb]">{(employee as any).paidLeaveBalance}</p>
             <p className="text-xs text-(--text-muted) mt-1">
               {t('employeeProfile.paidLeave')}
             </p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#ef4444]">{employee.sickLeaveBalance}</p>
+              <p className="text-2xl font-bold text-[#ef4444]">{(employee as any).sickLeaveBalance}</p>
             <p className="text-xs text-(--text-muted) mt-1">
               {t('employeeProfile.sickLeave')}
             </p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#10b981]">{employee.familyLeaveBalance}</p>
+              <p className="text-2xl font-bold text-[#10b981]">{(employee as any).familyLeaveBalance}</p>
             <p className="text-xs text-(--text-muted) mt-1">
               {t('employeeProfile.familyLeave')}
             </p>
@@ -547,7 +556,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
             <div className="space-y-2">
               {profile.documents.map((doc: any) => (
                 <div
-                  key={doc._id}
+                  key={doc.id}
                   className="flex items-center justify-between p-3 bg-[var(--card-hover)] rounded-lg"
                 >
                   <div className="flex items-center gap-3">

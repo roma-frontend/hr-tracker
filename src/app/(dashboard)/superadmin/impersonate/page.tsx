@@ -2,11 +2,8 @@
 
 // cspell:disable
 import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '@/convex/_generated/dataModel';
 import { User, Search, Shield, Clock, AlertTriangle, LogOut, History, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,9 +23,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import {
+  useSearchUsers,
+  useActiveImpersonation,
+  useImpersonationHistory,
+  useStartImpersonation,
+  useEndImpersonation,
+} from '@/hooks/useSuperadmin';
 
 interface SearchUser {
-  id: Id<'users'>;
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -37,22 +41,22 @@ interface SearchUser {
 }
 
 interface ImpersonationSession {
-  _id: Id<'impersonationSessions'>;
+  id: string;
   isActive: boolean;
   superadminName: string;
   targetUserName: string;
   targetUserEmail: string;
   organizationName: string;
   reason: string;
-  startedAt: string | number | Date;
-  endedAt?: string | number | Date;
+  startedAt: number;
+  endedAt?: number;
   duration: number;
   targetUser?: {
     name: string;
     email: string;
   };
-  expiresAt?: string | number | Date;
-  sessionId: Id<'impersonationSessions'>;
+  expiresAt?: number;
+  sessionId: string;
 }
 // cspell:enable
 
@@ -65,23 +69,12 @@ export default function ImpersonationPage() {
   const [startDialogOpen, setStartDialogOpen] = useState(false);
   const [reason, setReason] = useState('');
 
-  const searchResults = useQuery(
-    api.superadmin.searchUsersByPrefix,
-    searchQuery.length >= 2 ? { prefix: searchQuery } : 'skip',
-  ) as SearchUser[] | undefined;
+  const { data: searchResults } = useSearchUsers(searchQuery);
+  const { data: activeSession } = useActiveImpersonation(user?.id || '');
+  const { data: impersonationHistory } = useImpersonationHistory(user?.id || '', 20);
 
-  const activeSession = useQuery(
-    api.superadmin.getActiveImpersonation,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  ) as ImpersonationSession | undefined;
-
-  const impersonationHistory = useQuery(
-    api.superadmin.getImpersonationHistory,
-    user?.id ? { superadminId: user.id as Id<'users'>, limit: 20 } : 'skip',
-  ) as ImpersonationSession[] | undefined;
-
-  const startImpersonation = useMutation(api.superadmin.startImpersonation);
-  const endImpersonation = useMutation(api.superadmin.endImpersonation);
+  const startImpersonation = useStartImpersonation();
+  const endImpersonation = useEndImpersonation();
 
   const handleStartImpersonation = async () => {
     if (!selectedUser || !reason.trim()) {
@@ -90,8 +83,8 @@ export default function ImpersonationPage() {
     }
 
     try {
-      await startImpersonation({
-        superadminId: user!.id as Id<'users'>,
+      await startImpersonation.mutateAsync({
+        superadminId: user!.id,
         targetUserId: selectedUser.id,
         reason: reason.trim(),
       });
@@ -102,9 +95,6 @@ export default function ImpersonationPage() {
       setStartDialogOpen(false);
       setSelectedUser(null);
       setReason('');
-
-      // Redirect to user's dashboard
-      // window.location.href = "/dashboard";
     } catch (error) {
       toast.error(t('superadmin.impersonate.alerts.impersonationError'));
       console.error(error);
@@ -115,9 +105,9 @@ export default function ImpersonationPage() {
     if (!activeSession) return;
 
     try {
-      await endImpersonation({
-        sessionId: activeSession.sessionId as Id<'impersonationSessions'>,
-        userId: user!.id as Id<'users'>,
+      await endImpersonation.mutateAsync({
+        sessionId: activeSession.sessionId,
+        userId: user!.id,
       });
 
       toast.success(t('superadmin.impersonate.alerts.impersonationEnded'));
@@ -227,7 +217,7 @@ export default function ImpersonationPage() {
             {/* Search Results */}
             {searchResults && searchResults.length > 0 && (
               <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
-                {searchResults?.map((u) => (
+                {searchResults.map((u) => (
                   <div
                     key={u.id}
                     className="flex items-center justify-between p-3 rounded-lg border hover:border-primary/50 transition-colors"
@@ -295,7 +285,7 @@ export default function ImpersonationPage() {
             <CardDescription>{t('impersonate.historyDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {impersonationHistory === undefined ? (
+            {!impersonationHistory ? (
               <div className="flex items-center justify-center py-8">
                 <ShieldLoader />
               </div>
@@ -306,9 +296,9 @@ export default function ImpersonationPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {impersonationHistory?.map((session) => (
+                {impersonationHistory.map((session) => (
                   <div
-                    key={session._id}
+                    key={session.id}
                     className="p-3 sm:p-4 rounded-lg border"
                     style={{ background: 'var(--background-subtle)' }}
                   >
@@ -464,9 +454,9 @@ export default function ImpersonationPage() {
             >
               {t('impersonate.cancel')}
             </Button>
-            <Button onClick={handleStartImpersonation} disabled={!reason.trim()}>
+            <Button onClick={handleStartImpersonation} disabled={!reason.trim() || startImpersonation.isPending}>
               <Shield className="w-4 h-4 mr-2" />
-              {t('impersonate.startSession')}
+              {startImpersonation.isPending ? 'Starting...' : t('impersonate.startSession')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,6 +26,15 @@ import { format } from 'date-fns';
 import { SmartReply } from './SmartReply';
 import { LinkPreview, extractUrl } from './LinkPreview';
 import { createPortal } from 'react-dom';
+import {
+  useToggleReaction,
+  useEditMessage,
+  useDeleteMessage,
+  useDeleteMessageForMe,
+  usePinMessage,
+  useVotePoll,
+  useClosePoll,
+} from '@/hooks/useChat';
 
 // ── i18n labels for delivered / seen ──────────────────────────────────────────
 type Lang = 'en' | 'ru' | 'hy';
@@ -195,8 +201,8 @@ interface LinkPreviewData {
 }
 
 interface Message {
-  _id: Id<'chatMessages'>;
-  senderId: Id<'users'>;
+  id: string;
+  senderId: string;
   type: string;
   content: string;
   createdAt: number;
@@ -218,7 +224,7 @@ interface Message {
   callType?: string;
   callStatus?: string;
   callDuration?: number;
-  sender?: { _id: Id<'users'>; name: string; avatarUrl?: string } | null;
+  sender?: { id: string; name: string; avatarUrl?: string } | null;
 }
 
 interface Props {
@@ -226,11 +232,11 @@ interface Props {
   isOwn: boolean;
   showAvatar: boolean;
   showName: boolean;
-  currentUserId: Id<'users'>;
+  currentUserId: string;
   currentUserAvatar?: string;
   currentUserName?: string;
-  onReply: (id: Id<'chatMessages'>, content: string, senderName: string) => void;
-  onOpenThread: (id: Id<'chatMessages'>, content: string) => void;
+  onReply: (id: string, content: string, senderName: string) => void;
+  onOpenThread: (id: string, content: string) => void;
   onSendMessage?: (text: string) => void;
   lang?: string;
 }
@@ -359,13 +365,13 @@ export const MessageBubble = React.memo(function MessageBubble({
   const actionBarRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const toggleReaction = useMutation(api.chat.mutations.toggleReaction);
-  const editMessage = useMutation(api.chat.mutations.editMessage);
-  const deleteMessage = useMutation(api.chat.mutations.deleteMessage);
-  const deleteMessageForMe = useMutation(api.chat.mutations.deleteMessageForMe);
-  const pinMessage = useMutation(api.chat.mutations.pinMessage);
-  const votePoll = useMutation(api.chat.mutations.votePoll);
-  const closePoll = useMutation(api.chat.mutations.closePoll);
+  const toggleReactionMutation = useToggleReaction();
+  const editMessageMutation = useEditMessage();
+  const deleteMessageMutation = useDeleteMessage();
+  const deleteMessageForMeMutation = useDeleteMessageForMe();
+  const pinMessageMutation = usePinMessage();
+  const votePollMutation = useVotePoll();
+  const closePollMutation = useClosePoll();
 
   // Extract URL from content for link preview
   const urlInContent = message.content ? extractUrl(message.content) : null;
@@ -486,7 +492,7 @@ export const MessageBubble = React.memo(function MessageBubble({
     // Sanitize emoji to remove spaces and control characters
     const sanitizedEmoji = emoji.replace(/[\s\x00-\x1F\x7F]/g, '');
     if (!sanitizedEmoji) return; // Skip if emoji becomes empty after sanitization
-    toggleReaction({ messageId: message._id, userId: currentUserId, emoji: sanitizedEmoji });
+    toggleReactionMutation.mutate({ messageId: message.id, userId: currentUserId, emoji: sanitizedEmoji });
   };
 
   const handleEdit = async () => {
@@ -494,8 +500,8 @@ export const MessageBubble = React.memo(function MessageBubble({
       setEditing(false);
       return;
     }
-    await editMessage({
-      messageId: message._id,
+    await editMessageMutation.mutateAsync({
+      messageId: message.id,
       userId: currentUserId,
       content: editContent.trim(),
     });
@@ -503,19 +509,19 @@ export const MessageBubble = React.memo(function MessageBubble({
   };
 
   const handleDeleteForEveryone = async () => {
-    await deleteMessage({ messageId: message._id, userId: currentUserId });
+    await deleteMessageMutation.mutateAsync({ messageId: message.id, userId: currentUserId });
     setShowDeleteDialog(false);
     setShowMenu(false);
   };
 
   const handleDeleteForMe = async () => {
-    await deleteMessageForMe({ messageId: message._id, userId: currentUserId });
+    await deleteMessageForMeMutation.mutateAsync({ messageId: message.id, userId: currentUserId });
     setShowDeleteDialog(false);
     setShowMenu(false);
   };
 
   const handlePin = () => {
-    pinMessage({ messageId: message._id, userId: currentUserId, pin: !message.isPinned });
+    pinMessageMutation.mutate({ messageId: message.id, userId: currentUserId, pin: !message.isPinned });
     setShowMenu(false);
   };
 
@@ -618,10 +624,10 @@ export const MessageBubble = React.memo(function MessageBubble({
       >
         {/* Avatar */}
         <div className="w-8 shrink-0 mb-1">
-          {showAvatar && !isOwn && message.sender?._id ? (
+          {showAvatar && !isOwn && message.sender?.id ? (
             // Other person's avatar → clickable profile link
             <Link
-              href={`/employees/${message.sender._id}`}
+              href={`/employees/${message.sender.id}`}
               className="block rounded-full transition-transform duration-200 hover:scale-110 focus:outline-none"
               title={`View ${message.sender?.name}'s profile`}
               onClick={(e) => e.stopPropagation()}
@@ -947,8 +953,8 @@ export const MessageBubble = React.memo(function MessageBubble({
                         key={opt.id}
                         disabled={isClosed}
                         onClick={() =>
-                          votePoll({
-                            messageId: message._id,
+                          votePollMutation.mutate({
+                            messageId: message.id,
                             userId: currentUserId,
                             optionId: opt.id,
                           })
@@ -1002,7 +1008,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                 </span>
                 {isOwn && !message.poll.closedAt && (
                   <button
-                    onClick={() => closePoll({ messageId: message._id, userId: currentUserId })}
+                    onClick={() => closePollMutation.mutate({ messageId: message.id, userId: currentUserId })}
                     className="text-[9px] xs:text-[10px] hover:opacity-70 transition-opacity py-0.5 px-1.5 hover:bg-opacity-50 rounded"
                     style={{ color: 'var(--primary)' }}
                   >
@@ -1016,7 +1022,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           {/* Thread count */}
           {(message.threadCount ?? 0) > 0 && (
             <button
-              onClick={() => onOpenThread(message._id, message.content)}
+              onClick={() => onOpenThread(message.id, message.content)}
               className="flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full sm:text-[10px] text-xs font-medium border transition-all duration-200 hover:scale-105"
               style={{
                 borderColor: 'var(--primary)',
@@ -1041,7 +1047,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                 onSelect={(reply) =>
                   onSendMessage
                     ? onSendMessage(reply)
-                    : onReply(message._id, message.content, message.sender?.name ?? 'Someone')
+                    : onReply(message.id, message.content, message.sender?.name ?? 'Someone')
                 }
               />
             )}
@@ -1124,7 +1130,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             ))}
             <button
               onClick={() =>
-                onReply(message._id, message.content, message.sender?.name ?? 'Someone')
+                onReply(message.id, message.content, message.sender?.name ?? 'Someone')
               }
               className="w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:scale-110 transition-transform duration-150 min-h-9"
               style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}

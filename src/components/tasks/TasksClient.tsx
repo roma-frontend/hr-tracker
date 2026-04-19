@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useMemo, useRef, useCallback } from 'react';
-import { useQuery, useMutation } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import { useOrgTasks, useUpdateTask } from '@/hooks/useTasks';
 import { CreateTaskModal } from './CreateTaskModal';
 import { TaskDetailModal } from './TaskDetailModal';
 import { AssignSupervisorModal } from './AssignSupervisorModal';
@@ -262,7 +260,7 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
 function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) {
   const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: task._id,
+    id: task.id,
   });
   const style = { transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.4 : 1 };
 
@@ -328,7 +326,7 @@ function DroppableKanbanColumn({
         }`}
       >
         {tasks.map((task) => (
-          <DraggableTaskCard key={task._id} task={task} onOpen={() => onOpen(task)} />
+          <DraggableTaskCard key={task.id} task={task} onOpen={() => onOpen(task)} />
         ))}
         {tasks.length === 0 && (
           <div
@@ -466,47 +464,23 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
   const [search, setSearch] = useState('');
   const [activeTask, setActiveTask] = useState<any>(null);
 
-  const convexId = userId as Id<'users'>;
   const canManage = userRole === 'admin' || userRole === 'supervisor';
   const isSuperadmin = userRole === 'superadmin';
-  const selectedOrgId = useSelectedOrganization();
+  const selectedOrg = useSelectedOrganization();
 
-  // For superadmin, use selectedOrgId if available; for admin, use their org from user
-  const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : undefined;
+  // For superadmin, use selectedOrg if available; for admin, use their org from user
+  const effectiveOrgId = isSuperadmin && selectedOrg ? selectedOrg : undefined;
 
   // DnD sensors — require 5px movement before drag starts (prevents accidental drags)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-  const updateStatus = useMutation(api.tasks.updateTaskStatus);
+  const updateTask = useUpdateTask();
 
-  // Queries - for admin/superadmin, get all tasks in their organization
-  const adminTasks = useQuery(
-    api.tasks.getAllTasks,
-    (userRole === 'admin' || userRole === 'superadmin') && convexId
-      ? {
-          requesterId: convexId,
-          selectedOrganizationId: effectiveOrgId
-            ? (effectiveOrgId as Id<'organizations'>)
-            : undefined,
-        }
-      : 'skip',
+  // Queries - get tasks based on role
+  const { data: rawTasks, isLoading } = useOrgTasks(
+    effectiveOrgId || '',
+    filterStatus === 'all' ? undefined : filterStatus,
+    (userRole === 'employee' || userRole === 'driver') ? userId : undefined
   );
-  const supervisorTasks = useQuery(
-    api.tasks.getTasksAssignedBy,
-    userRole === 'supervisor' ? { supervisorId: convexId } : 'skip',
-  );
-  const employeeTasks = useQuery(
-    api.tasks.getTasksForEmployee,
-    (userRole === 'employee' || userRole === 'driver') && convexId ? { userId: convexId } : 'skip',
-  );
-
-  const rawTasks =
-    userRole === 'admin'
-      ? adminTasks
-      : userRole === 'supervisor'
-        ? supervisorTasks
-        : userRole === 'superadmin'
-          ? adminTasks
-          : employeeTasks;
 
   // Filter
   const tasks = useMemo(() => {
@@ -701,7 +675,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
       </div>
 
       {/* Content */}
-      {rawTasks === undefined ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <ShieldLoader size="lg" />
         </div>
@@ -709,7 +683,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
         <DndContext
           sensors={sensors}
           onDragStart={(e: DragStartEvent) => {
-            const task = tasks.find((t) => t._id === e.active.id);
+            const task = tasks.find((t) => t.id === e.active.id);
             setActiveTask(task ?? null);
           }}
           onDragEnd={async (e: DragEndEvent) => {
@@ -717,13 +691,12 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
             const { active, over } = e;
             if (!over) return;
             const newStatus = over.id as Status;
-            const task = tasks.find((t) => t._id === active.id);
+            const task = tasks.find((t) => t.id === active.id);
             if (!task || task.status === newStatus) return;
             try {
-              await updateStatus({
-                taskId: task._id as Id<'tasks'>,
+              await updateTask.mutateAsync({
+                taskId: task.id,
                 status: newStatus,
-                userId: convexId,
               });
               toast.success(
                 t('tasks.status.moved', { status: t(STATUS_CONFIG[newStatus].labelKey) }),
@@ -732,7 +705,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
                 },
               );
             } catch {
-              toast.error('Failed to update status');
+              toast.error(t('tasks.failedToUpdateStatus'));
             }
           }}
           onDragCancel={() => setActiveTask(null)}
@@ -790,7 +763,7 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
               </thead>
               <tbody>
                 {tasks.map((task) => (
-                  <TaskRow key={task._id} task={task} onOpen={() => setSelectedTask(task)} />
+                  <TaskRow key={task.id} task={task} onOpen={() => setSelectedTask(task)} />
                 ))}
               </tbody>
             </table>
@@ -801,15 +774,16 @@ export function TasksClient({ userId, userRole }: TasksClientProps) {
       {/* Modals */}
       {showCreate && (
         <CreateTaskModal
-          currentUserId={convexId}
+          currentUserId={userId}
           userRole={userRole as 'admin' | 'supervisor' | 'employee'}
+          organizationId={effectiveOrgId}
           onClose={() => setShowCreate(false)}
         />
       )}
       {selectedTask && (
         <TaskDetailModal
           task={selectedTask}
-          currentUserId={convexId}
+          currentUserId={userId}
           userRole={userRole as 'admin' | 'supervisor' | 'employee'}
           onClose={() => setSelectedTask(null)}
         />

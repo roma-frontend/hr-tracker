@@ -131,7 +131,7 @@ export function SmartErrorMessage({ error, className = '' }: SmartErrorMessagePr
 /**
  * Smart error parser - converts common API errors to user-friendly messages
  */
-export function parseAuthError(error: string): SmartError {
+export function parseAuthError(error: string) {
   const errorLower = error.toLowerCase();
 
   // Wrong password
@@ -142,10 +142,10 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'error',
-      message: '🔐 Неверный email или пароль',
-      suggestion: 'Проверьте правильность ввода. Caps Lock включен?',
+      message: 'Invalid email or password',
+      suggestion: 'Check your input. Is Caps Lock on?',
       action: {
-        label: 'Забыли пароль?',
+        label: 'Forgot password?',
         onClick: () => (window.location.href = '/forgot-password'),
       },
     };
@@ -159,10 +159,10 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'error',
-      message: '👤 Пользователь не найден',
-      suggestion: 'Возможно, вы еще не зарегистрированы в системе',
+      message: 'User not found',
+      suggestion: 'You may not be registered in the system yet',
       action: {
-        label: 'Создать аккаунт',
+        label: 'Create account',
         onClick: () => (window.location.href = '/register'),
       },
     };
@@ -176,10 +176,10 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'error',
-      message: '📧 Этот email уже зарегистрирован',
-      suggestion: 'Попробуйте войти или восстановите пароль',
+      message: 'This email is already registered',
+      suggestion: 'Try to login or reset your password',
       action: {
-        label: 'Перейти к входу',
+        label: 'Go to login',
         onClick: () => (window.location.href = '/login'),
       },
     };
@@ -193,8 +193,8 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'warning',
-      message: '🔒 Пароль недостаточно надежный',
-      suggestion: 'Используйте минимум 8 символов, включая буквы, цифры и спецсимволы',
+      message: 'Password not strong enough',
+      suggestion: 'Use at least 8 characters, including letters, numbers and special characters',
     };
   }
 
@@ -206,8 +206,8 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'warning',
-      message: '🌐 Проблема с подключением',
-      suggestion: 'Проверьте интернет-соединение и повторите попытку',
+      message: 'Connection problem',
+      suggestion: 'Check your internet connection and try again',
     };
   }
 
@@ -219,8 +219,8 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'error',
-      message: '⚠️ Ошибка сервера',
-      suggestion: 'Мы работаем над исправлением. Попробуйте через несколько минут',
+      message: 'Server error',
+      suggestion: 'We are working on fixing this. Please try again in a few minutes',
     };
   }
 
@@ -232,8 +232,8 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'warning',
-      message: '⏱️ Слишком много попыток',
-      suggestion: 'Подождите несколько минут перед следующей попыткой',
+      message: 'Too many attempts',
+      suggestion: 'Wait a few minutes before trying again',
     };
   }
 
@@ -245,8 +245,8 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'error',
-      message: '🚫 Аккаунт заблокирован',
-      suggestion: 'Обратитесь к администратору для разблокировки',
+      message: 'Account blocked',
+      suggestion: 'Contact your administrator to unblock',
     };
   }
 
@@ -258,8 +258,8 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'warning',
-      message: '📬 Email не подтвержден',
-      suggestion: 'Проверьте почту и перейдите по ссылке подтверждения',
+      message: 'Email not confirmed',
+      suggestion: 'Check your email and click the confirmation link',
     };
   }
 
@@ -271,15 +271,15 @@ export function parseAuthError(error: string): SmartError {
   ) {
     return {
       type: 'info',
-      message: '⏰ Сессия истекла',
-      suggestion: 'Войдите снова для продолжения работы',
+      message: 'Session expired',
+      suggestion: 'Login again to continue',
     };
   }
 
   // Default error
   return {
     type: 'error',
-    message: error || 'Произошла ошибка',
-    suggestion: 'Попробуйте еще раз или обратитесь в поддержку',
+    message: error || 'An error occurred',
+    suggestion: 'Try again or contact support',
   };
 }

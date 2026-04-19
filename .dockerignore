@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.env.example
+eslint-results.json
+tsconfig.tsbuildinfo
+dev-output.log
+*.log
+coverage
+.npm
+.eslintcache
+.next/cache
+supabase/.branches
+supabase/.temp

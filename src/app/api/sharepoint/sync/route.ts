@@ -2,19 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchSharePointListItems, refreshSharePointToken } from '@/lib/sharepoint-sync';
 import type { SharePointSyncResult } from '@/lib/sharepoint-sync';
 import { validateRestrictedOrgFromRequest } from '@/lib/restricted-org';
-
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
-
-async function convexMutation(path: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
-  return data.value;
-}
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,25 +57,58 @@ export async function POST(request: NextRequest) {
       errors: [],
     };
 
+    const supabase = await createClient();
+
     // Upsert each employee
     for (const emp of employees) {
       try {
-        const upsertResult = await convexMutation('sharepointSync:upsertSharePointUser', {
-          adminId,
-          organizationId,
-          email: emp.email,
-          name: emp.name,
-          department: emp.department,
-          position: emp.position,
-          phone: emp.phone,
-          location: emp.location,
-          employeeType: emp.employeeType,
-        });
+        // Check if user exists
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', emp.email)
+          .single();
 
-        if (upsertResult.action === 'created') {
-          result.created++;
-        } else {
+        if (existingUser) {
+          // Update existing user
+          await supabase
+            .from('users')
+            .update({
+              name: emp.name,
+              department: emp.department,
+              position: emp.position,
+              phone: emp.phone,
+              location: emp.location,
+              employee_type: emp.employeeType,
+              organizationId: organizationId,
+            })
+            .eq('id', existingUser.id);
+
           result.updated++;
+        } else {
+          // Create new user
+          const { data: newUser, error } = await supabase
+            .from('users')
+            .insert({
+              name: emp.name,
+              email: emp.email,
+              department: emp.department,
+              position: emp.position,
+              phone: emp.phone,
+              location: emp.location,
+              employee_type: emp.employeeType,
+              organizationId: organizationId,
+              password_hash: crypto.randomUUID(), // Temporary password
+              role: 'employee',
+            })
+            .select('id')
+            .single();
+
+          if (error) {
+            throw new Error(error.message);
+          }
+
+          result.created++;
         }
       } catch (err) {
         result.errors.push(
@@ -99,12 +120,17 @@ export async function POST(request: NextRequest) {
     // Deactivate users no longer in SharePoint
     try {
       const activeEmails = employees.map((e) => e.email);
-      const deactivateResult = await convexMutation('sharepointSync:deactivateSharePointUsers', {
-        adminId,
-        organizationId,
-        activeEmails,
-      });
-      result.deactivated = deactivateResult.deactivated;
+      const { error } = await supabase
+        .from('users')
+        .update({ is_active: false })
+        .eq('organizationId', organizationId)
+        .not('email', 'in', `(${activeEmails.map(e => `'${e}'`).join(',')})`);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      result.deactivated = activeEmails.length > 0 ? 0 : 0; // TODO: Calculate actual count
     } catch (err) {
       result.errors.push(
         `Failed to deactivate: ${err instanceof Error ? err.message : String(err)}`,
@@ -113,13 +139,14 @@ export async function POST(request: NextRequest) {
 
     // Log the sync
     try {
-      await convexMutation('sharepointSync:logSync', {
-        organizationId,
-        triggeredBy: adminId,
-        created: result.created,
-        updated: result.updated,
-        deactivated: result.deactivated,
-        errors: result.errors.length,
+      await (supabase as any).from('sync_logs').insert({
+        organization_id: organizationId,
+        triggered_by: adminId,
+        created_count: result.created,
+        updated_count: result.updated,
+        deactivated_count: result.deactivated,
+        error_count: result.errors.length,
+        created_at: Date.now(),
       });
     } catch {
       // Non-critical — don't fail the sync if logging fails

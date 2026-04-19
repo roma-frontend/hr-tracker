@@ -1,11 +1,7 @@
 'use client';
-import Image from 'next/image';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Phone,
   PhoneOff,
@@ -13,7 +9,6 @@ import {
   VideoOff,
   Mic,
   MicOff,
-  Monitor,
   Volume2,
   VolumeX,
 } from 'lucide-react';
@@ -24,7 +19,7 @@ export type { ActiveCall };
 
 interface Props {
   call: ActiveCall;
-  currentUserId: Id<'users'>;
+  currentUserId: string;
   currentUserName: string;
   currentUserAvatar?: string;
   onEnd: () => void;
@@ -64,15 +59,9 @@ export function CallModal({
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const endCallMutation = useMutation(api.chat.calls.endCall);
-  const answerCallMutation = useMutation(api.chat.calls.answerCall);
-  const updateOfferMutation = useMutation(api.chat.calls.updateOffer);
-  const updateIceMutation = useMutation(api.chat.calls.updateIceCandidates);
-  const setInCallStatusMutation = useMutation(api.users.mutations.setInCallStatus);
-  const resetCallStatusMutation = useMutation(api.users.mutations.resetFromCallStatus);
-  const callData = useQuery(api.chat.calls.getActiveCall, { conversationId: call.conversationId });
   const addedIceCandidatesRef = useRef<Set<string>>(new Set());
+  const [callData, setCallData] = useState<any>(null);
+  const callDataPollRef = useRef<NodeJS.Timeout | null>(null);
 
   const FALLBACK_ICE_SERVERS: RTCIceServer[] = [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -99,6 +88,90 @@ export function CallModal({
       credential: 'WOCnG2giai1RFd3N',
     },
   ];
+
+  const endCall = async (callId: string, userId: string) => {
+    try {
+      await fetch('/api/chat?action=end-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId, userId }),
+      });
+    } catch (e) {
+      console.error('Error ending call:', e);
+    }
+  };
+
+  const answerCall = async (callId: string, userId: string, answer: string) => {
+    try {
+      await fetch('/api/chat?action=answer-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId, userId, answer }),
+      });
+    } catch (e) {
+      console.error('Error answering call:', e);
+    }
+  };
+
+  const updateOffer = async (callId: string, userId: string, offer: string) => {
+    try {
+      await fetch('/api/chat?action=update-offer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId, userId, offer }),
+      });
+    } catch (e) {
+      console.error('Error updating offer:', e);
+    }
+  };
+
+  const updateIceCandidates = async (callId: string, userId: string, candidates: string[]) => {
+    try {
+      await fetch('/api/chat?action=update-ice-candidates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId, userId, candidates }),
+      });
+    } catch (e) {
+      console.error('Error updating ICE candidates:', e);
+    }
+  };
+
+  const setInCallStatus = async (userId: string) => {
+    try {
+      await fetch('/api/users?action=set-in-call-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+    } catch (e) {
+      console.error('Error setting in-call status:', e);
+    }
+  };
+
+  const resetCallStatus = async (userId: string) => {
+    try {
+      await fetch('/api/users?action=reset-from-call-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+    } catch (e) {
+      console.error('Error resetting call status:', e);
+    }
+  };
+
+  const fetchActiveCall = async (conversationId: string) => {
+    try {
+      const res = await fetch(`/api/chat?action=get-active-call&conversationId=${conversationId}`);
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data;
+    } catch (e) {
+      console.error('Error fetching active call:', e);
+      return null;
+    }
+  };
 
   const [iceServers, setIceServers] = useState<RTCIceServer[]>(FALLBACK_ICE_SERVERS);
 
@@ -230,7 +303,7 @@ export function CallModal({
       pc.onicecandidate = async (event) => {
         if (event.candidate && call.callId) {
           const candidates = [JSON.stringify(event.candidate)];
-          await updateIceMutation({ callId: call.callId, userId: currentUserId, candidates });
+          await updateIceCandidates(call.callId, currentUserId, candidates);
         }
       };
 
@@ -247,7 +320,7 @@ export function CallModal({
         setPeerConnected(true);
         setCallStatus('active');
         // Set user status to "in_call"
-        setInCallStatusMutation({ userId: currentUserId }).catch((e) =>
+        setInCallStatus(currentUserId).catch((e) =>
           console.error('[CallModal] Failed to set in_call status:', e),
         );
         // Start duration timer
@@ -260,7 +333,7 @@ export function CallModal({
         if (pc.connectionState === 'connected') {
           setCallStatus('active');
           // Set user status to "in_call"
-          setInCallStatusMutation({ userId: currentUserId }).catch((e) =>
+          setInCallStatus(currentUserId).catch((e) =>
             console.error('[CallModal] Failed to set in_call status:', e),
           );
         } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
@@ -272,11 +345,7 @@ export function CallModal({
         // Create offer and store it via dedicated mutation (does NOT change call status)
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
-        await updateOfferMutation({
-          callId: call.callId,
-          userId: currentUserId,
-          offer: JSON.stringify(offer),
-        });
+        await updateOffer(call.callId, currentUserId, JSON.stringify(offer));
         setCallStatus('connecting');
       }
     } catch (err: any) {
@@ -325,20 +394,27 @@ export function CallModal({
 
   useEffect(() => {
     initMedia();
+    
+    // Poll for active call data
+    callDataPollRef.current = setInterval(async () => {
+      const data = await fetchActiveCall(call.conversationId);
+      setCallData(data);
+    }, 2000);
+    
     return () => {
       cleanup();
+      if (callDataPollRef.current) {
+        clearInterval(callDataPollRef.current);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // mount only — cleanup is stable (no deps), initMedia runs once
+  }, []); // mount only
 
   // Detect when remote side ends the call
-  // getActiveCall returns null when status is no longer "ringing"/"active" (i.e. ended/declined/missed)
   const callEndedByRemoteRef = useRef(false);
   useEffect(() => {
-    // callData becomes null when the call is ended/declined/missed
-    // But it's also null initially before data loads, so only trigger after we've seen it non-null
     if (callData) {
-      callEndedByRemoteRef.current = true; // We've seen the call exist
+      callEndedByRemoteRef.current = true;
     }
     if (callData === null && callEndedByRemoteRef.current && callStatus !== 'ended') {
       console.log('[CallModal] Remote side ended the call (callData became null), cleaning up...');
@@ -355,7 +431,7 @@ export function CallModal({
     if (!callData || !peerConnectionRef.current) return;
     const pc = peerConnectionRef.current;
 
-    callData.participants?.forEach(async (p) => {
+    callData.participants?.forEach(async (p: any) => {
       // === Receiver side: read the initiator's SDP offer from p.offer ===
       if (!call.isInitiator && p.userId !== currentUserId && p.offer && !pc.remoteDescription) {
         try {
@@ -365,11 +441,7 @@ export function CallModal({
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
           // Store SDP answer on receiver's participant record (answerCall already called from ChatClient accept button)
-          await answerCallMutation({
-            callId: call.callId,
-            userId: currentUserId,
-            answer: JSON.stringify(answer),
-          });
+          await answerCall(call.callId, currentUserId, JSON.stringify(answer));
         } catch (e) {
           console.error('[CallModal] Error processing offer:', e);
         }
@@ -416,9 +488,9 @@ export function CallModal({
 
     setCallStatus('ended');
     try {
-      await endCallMutation({ callId: call.callId, userId: currentUserId });
+      await endCall(call.callId, currentUserId);
       // Reset status from "in_call" back to "available"
-      await resetCallStatusMutation({ userId: currentUserId });
+      await resetCallStatus(currentUserId);
     } catch (e) {
       console.error('[CallModal] Error ending call:', e);
     }

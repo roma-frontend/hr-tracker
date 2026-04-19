@@ -1,7 +1,5 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -9,6 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { Building2, Save, ArrowLeft } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { toast } from 'sonner';
+import {
+  useOrganizationById,
+  useUpdateOrganization,
+} from '@/hooks/useOrganizations';
 
 export default function EditOrganizationPage() {
   const { t } = useTranslation();
@@ -19,18 +21,15 @@ export default function EditOrganizationPage() {
   const isSuperadmin =
     user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
 
-  // Check if admin is trying to access their own organization
   const isOwnOrganization = user?.organizationId === orgId;
   const canAccess = isSuperadmin || (user?.role === 'admin' && isOwnOrganization);
 
-  const organization = useQuery(
-    api.organizations.getOrganizationById,
-    user?.id && orgId && canAccess
-      ? { callerUserId: user.id as any, organizationId: orgId as any }
-      : 'skip',
+  const { data: organization, isLoading: loadingOrg } = useOrganizationById(
+    orgId,
+    user?.id || ''
   );
 
-  const updateOrg = useMutation(api.organizations.updateOrganization);
+  const updateOrgMutation = useUpdateOrganization();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -48,7 +47,7 @@ export default function EditOrganizationPage() {
       setFormData({
         name: organization.name,
         plan: organization.plan,
-        isActive: organization.isActive,
+        isActive: organization.is_active,
         timezone: organization.timezone || 'UTC',
         country: organization.country || '',
         industry: organization.industry || '',
@@ -82,15 +81,14 @@ export default function EditOrganizationPage() {
           <h1 className="text-2xl font-bold mb-2">{t('ui.accessDenied')}</h1>
           <p className="text-muted-foreground">You can only manage your own organization</p>
           <p className="text-xs text-muted-foreground mt-2">
-            {t('common.superadmin')}: {user.role} | {t('common.organization')}:{' '}
-            {user.organizationId} | {t('common.requestedBy')}: {orgId}
+            {t('common.superadmin')}: {user.role} | {t('common.organization')}: {user.organizationId} | {t('common.requestedBy')}: {orgId}
           </p>
         </div>
       </div>
     );
   }
 
-  if (organization === undefined) {
+  if (loadingOrg) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <ShieldLoader size="lg" />
@@ -120,9 +118,8 @@ export default function EditOrganizationPage() {
     setIsLoading(true);
 
     try {
-      await updateOrg({
-        superadminUserId: user.id as any,
-        organizationId: orgId as any,
+      await updateOrgMutation.mutateAsync({
+        organizationId: orgId,
         name: formData.name,
         plan: formData.plan,
         isActive: formData.isActive,

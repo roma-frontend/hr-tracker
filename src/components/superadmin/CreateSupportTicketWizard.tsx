@@ -15,14 +15,13 @@ import {
   CardSelectionStep,
 } from '@/components/ui/wizard-step-components';
 import { Ticket, AlertCircle, User, Building } from 'lucide-react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useCreateTicket } from '@/hooks/useTickets';
+import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 
 interface CreateSupportTicketWizardProps {
-  userId: Id<'users'>;
-  organizationId?: Id<'organizations'>;
+  userId: string;
+  organizationId?: string;
   onComplete?: () => void;
   onCancel?: () => void;
 }
@@ -34,7 +33,7 @@ export function CreateSupportTicketWizard({
   onCancel,
 }: CreateSupportTicketWizardProps) {
   const { t } = useTranslation();
-  const createTicket = useMutation(api.tickets.createTicket);
+  const createTicket = useCreateTicket();
 
   const steps: WizardStep[] = [
     {
@@ -155,7 +154,7 @@ export function CreateSupportTicketWizard({
     data: Record<string, string | number | boolean | string[] | null>,
   ) => {
     try {
-      await createTicket({
+      await createTicket.mutateAsync({
         organizationId,
         createdBy: userId,
         title: String(data.title),

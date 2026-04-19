@@ -14,20 +14,18 @@ import {
   CardSelectionStep,
 } from '@/components/ui/wizard-step-components';
 import { AlertTriangle, AlertCircle, Shield, Users } from 'lucide-react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import { toast } from 'sonner';
+import { useCreateIncident } from '@/hooks/useEmergency';
 
 interface CreateIncidentWizardProps {
-  userId: Id<'users'>;
+  userId: string;
   onComplete?: () => void;
   onCancel?: () => void;
 }
 
 export function CreateIncidentWizard({ userId, onComplete, onCancel }: CreateIncidentWizardProps) {
   const { t } = useTranslation();
-  const createIncident = useMutation(api.superadmin.createIncident);
+  const createIncident = useCreateIncident();
 
   const steps: WizardStep[] = [
     {
@@ -142,7 +140,7 @@ export function CreateIncidentWizard({ userId, onComplete, onCancel }: CreateInc
     data: Record<string, string | number | boolean | string[] | null>,
   ) => {
     try {
-      await createIncident({
+      await createIncident.mutateAsync({
         createdBy: userId,
         title: String(data.title),
         description: String(data.description),

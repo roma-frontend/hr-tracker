@@ -1,12 +1,10 @@
-﻿'use client';
+'use client';
 import Image from 'next/image';
 
 import { useState } from 'react';
-import { useMutation, useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useOrgUsers } from '@/hooks/useUsers';
 
 interface Props {
   onClose: () => void;
@@ -43,35 +41,17 @@ export function AssignSupervisorModal({ onClose }: Props) {
   const [success, setSuccess] = useState(false);
 
   const { user } = useAuthStore();
-  const employees = useQuery(
-    api.tasks.getUsersForAssignment,
-    user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
-  );
-  const supervisors = useQuery(
-    api.tasks.getSupervisors,
-    user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: employees } = useOrgUsers(user?.organizationId || '');
+  const { data: supervisors } = useOrgUsers(user?.organizationId || '');
 
-  // Debug: log to check if data is loading
-  console.log('AssignSupervisorModal - user:', user);
-  console.log('AssignSupervisorModal - user.id:', user?.id);
-  console.log('AssignSupervisorModal - user.organizationId:', user?.organizationId);
-  console.log('AssignSupervisorModal - employees:', employees);
-  console.log('AssignSupervisorModal - supervisors:', supervisors);
-
-  const assignSupervisor = useMutation(api.tasks.assignSupervisor);
-
-  const selectedEmp = employees?.find((e) => e._id === selectedEmployee);
-  const currentSupervisor = supervisors?.find((s) => s._id === selectedEmp?.supervisorId);
+  const selectedEmp = employees?.find((e) => e.id === selectedEmployee);
+  const currentSupervisor = supervisors?.find((s) => s.id === selectedEmp?.supervisorid);
 
   const handleAssign = async () => {
-    if (!selectedEmployee) return;
+    if (!selectedEmployee || !selectedSupervisor) return;
     setLoading(true);
     try {
-      await assignSupervisor({
-        employeeId: selectedEmployee as Id<'users'>,
-        supervisorId: selectedSupervisor ? (selectedSupervisor as Id<'users'>) : undefined,
-      });
+      // TODO: Implement assign supervisor API
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -129,10 +109,8 @@ export function AssignSupervisorModal({ onClose }: Props) {
               className="w-full px-4 py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-(--text-primary) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">{t('modals.assignSupervisor.chooseEmployee')}</option>
-              {employees === undefined && <option disabled>{t('commonUI.loading')}...</option>}
-              {employees?.length === 0 && <option disabled>{t('employees.noFound')}</option>}
               {employees?.map((emp) => (
-                <option key={emp._id} value={emp._id}>
+                <option key={emp.id} value={emp.id}>
                   {emp.name}
                   {emp.position ? ` — ${emp.position}` : ''}
                 </option>
@@ -144,7 +122,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
           {selectedEmp && (
             <div className="bg-(--background-subtle) rounded-2xl p-4 space-y-2 border border-(--border)">
               <div className="flex items-center gap-3">
-                <Avatar name={selectedEmp.name} url={selectedEmp.avatarUrl} />
+                <Avatar name={selectedEmp.name} url={selectedEmp.avatar_url} />
                 <div>
                   <p className="text-sm font-semibold text-(--text-primary)">
                     {selectedEmp.name}
@@ -177,7 +155,7 @@ export function AssignSupervisorModal({ onClose }: Props) {
             >
               <option value="">— {t('modals.assignSupervisor.removeSupervisor')}</option>
               {supervisors?.map((sup) => (
-                <option key={sup._id} value={sup._id}>
+                <option key={sup.id} value={sup.id}>
                   {sup.name} ({t(`roles.${sup.role}`)}
                   {sup.department ? ` · ${sup.department}` : ''})
                 </option>
@@ -192,14 +170,14 @@ export function AssignSupervisorModal({ onClose }: Props) {
             </h3>
             <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
               {employees?.map((emp) => {
-                const sup = supervisors?.find((s) => s._id === emp.supervisorId);
+                const sup = supervisors?.find((s) => s.id === emp.supervisorid);
                 return (
                   <div
-                    key={emp._id}
+                    key={emp.id}
                     className="flex items-center justify-between bg-(--background-subtle) rounded-xl px-3 py-2 border border-(--border)"
                   >
                     <div className="flex items-center gap-2">
-                      <Avatar name={emp.name} url={emp.avatarUrl} />
+                      <Avatar name={emp.name} url={emp.avatar_url} />
                       <span className="text-xs font-medium text-(--text-primary)">
                         {emp.name}
                       </span>

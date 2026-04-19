@@ -23,9 +23,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import dynamic from 'next/dynamic';
 import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard';
 import { CookiePreferences } from '@/components/settings/CookiePreferences';
@@ -39,6 +36,7 @@ import { DashboardCustomization } from '@/components/settings/DashboardCustomiza
 import { AdvancedSecuritySettings } from '@/components/settings/AdvancedSecuritySettings';
 import { IntegrationSettings } from '@/components/settings/IntegrationSettings';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
+import { useUpdateOwnProfile } from '@/hooks/useProfile';
 
 const SLASettings = dynamic(() => import('@/components/admin/SLASettings'), { ssr: false });
 
@@ -130,26 +128,13 @@ export default function SettingsPage() {
     return () => window.removeEventListener('resize', updateScrollState);
   }, [updateScrollState]);
 
-  // Debug: log user data on mount
-  useEffect(() => {
-    // Debug removed - breakInterval/breakRemindersEnabled not on User type
-  }, [user]);
-
-  const updateOwnProfile = useMutation(api.users.mutations.updateOwnProfile);
-  const migrateFaceToAvatar = useMutation(api.users.admin.migrateFaceToAvatar);
+  const updateProfileMutation = useUpdateOwnProfile();
 
   // Sync when user loads from store (async)
   useEffect(() => {
     if (user?.name) setName(user.name);
     if (user?.email) setEmail(user.email);
   }, [user?.name, user?.email]);
-
-  // Auto-migrate: copy faceImageUrl → avatarUrl for users who registered face but have no avatar
-  useEffect(() => {
-    if (user?.role === 'admin') {
-      void migrateFaceToAvatar({}).catch(() => {});
-    }
-  }, [user?.role, migrateFaceToAvatar]);
 
   const handleSave = async () => {
     if (!user?.id) return;
@@ -166,11 +151,8 @@ export default function SettingsPage() {
         ...dashboardSettings,
       };
 
-      // 1. Save all settings to Convex DB
-      await updateOwnProfile({
-        userId: user.id as Id<'users'>,
-        ...allSettings,
-      });
+      // 1. Save all settings to Supabase DB via API
+      await updateProfileMutation.mutateAsync(allSettings);
 
       // 2. Update Zustand store (localStorage)
       login({
@@ -394,7 +376,7 @@ export default function SettingsPage() {
             {/* Localization Tab */}
             <TabsContent value="localization" className="space-y-6 mt-0">
               <LocalizationSettings
-                userId={user?.id as Id<'users'>}
+                userId={user?.id ?? ''}
                 user={user}
                 onSettingsChange={setLocalizationSettings}
               />

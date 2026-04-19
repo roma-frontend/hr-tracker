@@ -6,9 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useAvailableDrivers, useSubmitRating } from '@/hooks/useDrivers';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -29,12 +27,12 @@ import { toast } from 'sonner';
 interface RatingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  scheduleId: Id<'driverSchedules'>;
-  requestId?: Id<'driverRequests'>;
-  driverId: Id<'drivers'>;
+  scheduleId: string;
+  requestId?: string;
+  driverId: string;
   driverName?: string;
-  passengerId: Id<'users'>;
-  organizationId: Id<'organizations'>;
+  passengerId: string;
+  organizationId: string;
 }
 
 export function RatingDialog({
@@ -51,12 +49,12 @@ export function RatingDialog({
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const submitRating = useMutation(api.drivers.driver_operations.submitPassengerRating);
+  const submitRating = useSubmitRating();
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await submitRating({
+      await submitRating.mutateAsync({
         scheduleId,
         requestId,
         passengerId,
@@ -143,10 +141,10 @@ export function RatingDialog({
 interface ReassignDriverDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  requestId: Id<'driverRequests'>;
-  userId: Id<'users'>;
-  organizationId?: Id<'organizations'>;
-  currentDriverId: Id<'drivers'>;
+  requestId: string;
+  userId: string;
+  organizationId?: string;
+  currentDriverId: string;
 }
 
 export function ReassignDriverDialog({
@@ -160,23 +158,25 @@ export function ReassignDriverDialog({
   const { t } = useTranslation();
   const [selectedNewDriver, setSelectedNewDriver] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
-  const availableDrivers = useQuery(
-    api.drivers.queries.getAvailableDrivers,
-    organizationId ? { organizationId } : 'skip',
-  );
-  const reassign = useMutation(api.drivers.requests_mutations.reassignDriverRequest);
+  const { data: availableDrivers } = useAvailableDrivers(organizationId);
 
-  const otherDrivers = availableDrivers?.filter((d) => d && d._id !== currentDriverId) ?? [];
+  const otherDrivers = (availableDrivers ?? []).filter((d: any) => d && d.id !== currentDriverId);
 
   const handleReassign = async () => {
     if (!selectedNewDriver) return;
     setSubmitting(true);
     try {
-      await reassign({
-        requestId,
-        userId,
-        newDriverId: selectedNewDriver as Id<'drivers'>,
+      const res = await fetch('/api/drivers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'reassign-request',
+          requestId,
+          userId,
+          newDriverId: selectedNewDriver,
+        }),
       });
+      if (!res.ok) throw new Error('Failed to reassign');
       toast.success(t('driver.reassigned', 'Request sent to new driver!'));
       onOpenChange(false);
     } catch (error: any) {
@@ -201,8 +201,8 @@ export function ReassignDriverDialog({
               <SelectValue placeholder={t('driver.selectNewDriver', 'Choose another driver')} />
             </SelectTrigger>
             <SelectContent>
-              {otherDrivers.filter(Boolean).map((driver: any) => (
-                <SelectItem key={driver!._id} value={driver!._id}>
+              {otherDrivers.map((driver: any) => (
+                <SelectItem key={driver!.id} value={driver!.id}>
                   <div className="flex items-center gap-2">
                     <span>{driver!.userName}</span>
                     <span className="text-xs text-muted-foreground">

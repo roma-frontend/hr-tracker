@@ -24,12 +24,12 @@ interface DriverMapProps {
 
 const DEFAULT_CENTER: Location = { lat: 40.7128, lng: -74.006 };
 
-const LEAFLET_CSS_ID = 'leaflet-css';
+const LEAFLET_CSSid = 'leaflet-css';
 
 function ensureLeafletCSS() {
-  if (document.getElementById(LEAFLET_CSS_ID)) return;
+  if (document.getElementById(LEAFLET_CSSid)) return;
   const link = document.createElement('link');
-  link.id = LEAFLET_CSS_ID;
+  link.id = LEAFLET_CSSid;
   link.rel = 'stylesheet';
   link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
   link.crossOrigin = '';

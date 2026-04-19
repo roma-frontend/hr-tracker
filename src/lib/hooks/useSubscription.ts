@@ -1,7 +1,6 @@
 'use client';
 
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export type Plan = 'starter' | 'professional' | 'enterprise' | 'free';
@@ -13,7 +12,7 @@ export interface SubscriptionData {
   trialEnd: number | null;
   currentPeriodEnd: number | null;
   cancelAtPeriodEnd: boolean;
-  isActive: boolean; // trialing or active
+  isActive: boolean;
   isTrial: boolean;
   isPastDue: boolean;
   isCanceled: boolean;
@@ -21,18 +20,26 @@ export interface SubscriptionData {
   stripeSubscriptionId: string | null;
 }
 
+async function fetchSubscription(email: string): Promise<SubscriptionData> {
+  const response = await fetch(`/api/subscriptions?email=${encodeURIComponent(email)}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch subscription');
+  }
+  return response.json();
+}
+
 export function useSubscription(): { subscription: SubscriptionData; loading: boolean } {
   const { user } = useAuthStore();
 
-  const raw = useQuery(
-    api.subscriptions.getSubscriptionByEmail,
-    user?.email ? { email: user.email } : 'skip',
-  );
+  const { data, isLoading } = useQuery({
+    queryKey: ['subscription', user?.email],
+    queryFn: () => fetchSubscription(user!.email!),
+    enabled: !!user?.email,
+  });
 
-  // loading state — raw is undefined while Convex is fetching
-  const loading = raw === undefined && !!user?.email;
+  const loading = isLoading && !!user?.email;
 
-  if (!raw) {
+  if (!data) {
     return {
       loading,
       subscription: {
@@ -51,22 +58,8 @@ export function useSubscription(): { subscription: SubscriptionData; loading: bo
     };
   }
 
-  const isActive = raw.status === 'active' || raw.status === 'trialing';
-
   return {
     loading: false,
-    subscription: {
-      plan: raw.plan as Plan,
-      status: raw.status as SubscriptionStatus,
-      trialEnd: raw.trialEnd ?? null,
-      currentPeriodEnd: raw.currentPeriodEnd ?? null,
-      cancelAtPeriodEnd: raw.cancelAtPeriodEnd,
-      isActive,
-      isTrial: raw.status === 'trialing',
-      isPastDue: raw.status === 'past_due',
-      isCanceled: raw.status === 'canceled',
-      stripeCustomerId: raw.stripeCustomerId,
-      stripeSubscriptionId: raw.stripeSubscriptionId,
-    },
+    subscription: data,
   };
 }

@@ -1,8 +1,3 @@
-/**
- * Create Ticket Wizard
- * Пошаговая форма создания тикета
- */
-
 'use client';
 
 import React from 'react';
@@ -16,19 +11,17 @@ import {
 } from '@/components/ui/wizard-step-components';
 import { Ticket, AlertCircle, Info, FileText } from 'lucide-react';
 import { toast } from 'sonner';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useCreateTicket } from '@/hooks/useTickets';
 
 interface CreateTicketWizardProps {
-  userId: Id<'users'>;
+  userId: string;
   onComplete?: () => void;
   onCancel?: () => void;
 }
 
 export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicketWizardProps) {
   const { t } = useTranslation();
-  const createTicket = useMutation(api.tickets.createTicket);
+  const createTicket = useCreateTicket();
 
   const steps: WizardStep[] = [
     {
@@ -131,8 +124,8 @@ export function CreateTicketWizard({ userId, onComplete, onCancel }: CreateTicke
     data: Record<string, string | number | boolean | null | string[]>,
   ) => {
     try {
-      await createTicket({
-        createdBy: userId as any,
+      await createTicket.mutateAsync({
+        createdBy: userId,
         title: String(data.title),
         description: String(data.description),
         category: (String(data.category) || 'other') as any,

@@ -1,30 +1,22 @@
 'use client';
-import Image from 'next/image';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
-import { useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import {
   X,
-  Clock,
   Calendar,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
   LogIn,
   LogOut,
   Timer,
   Building2,
   UserCog,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useEmployeeAttendanceHistory, useMonthlyAttendanceStats } from '@/hooks/useAttendance';
 
 export interface EmployeeInfo {
-  _id: Id<'users'>;
+  id: string;
   name: string;
   position?: string;
   department?: string;
@@ -66,15 +58,9 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
     t('months.december'),
   ];
 
-  const history = useQuery(
-    api.timeTracking.getEmployeeAttendanceHistory,
-    employee ? { userId: employee._id, month: selectedMonth } : 'skip',
-  );
-
-  const monthlyStats = useQuery(
-    api.timeTracking.getMonthlyStats,
-    employee ? { userId: employee._id, month: selectedMonth } : 'skip',
-  );
+  const history = useEmployeeAttendanceHistory(employee?.id ?? undefined, selectedMonth);
+  const monthlyStatsQuery = useMonthlyAttendanceStats(selectedMonth);
+  const monthlyStats = monthlyStatsQuery.data;
 
   const [year, month] = selectedMonth.split('-').map(Number);
   const monthLabel = `${MONTHS[(month ?? 1) - 1]} ${year ?? new Date().getFullYear()}`;
@@ -241,11 +227,11 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
 
             {/* Records list */}
             <div className="flex-1 overflow-y-auto">
-              {history === undefined ? (
+              {history.isPending ? (
                 <div className="flex items-center justify-center h-40">
                   <ShieldLoader size="sm" variant="inline" />
                 </div>
-              ) : history.length === 0 ? (
+              ) : !history.data || history.data.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">
                   <Calendar className="w-12 h-12" style={{ color: 'var(--border)' }} />
                   <p className="font-medium" style={{ color: 'var(--text-muted)' }}>
@@ -257,7 +243,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                 </div>
               ) : (
                 <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
-                  {history.map((record) => {
+                  {history.data?.map((record: any) => {
                     const workedH = record.totalWorkedMinutes
                       ? (record.totalWorkedMinutes / 60).toFixed(1)
                       : null;
@@ -270,7 +256,7 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
 
                     return (
                       <div
-                        key={record._id}
+                        key={record.id}
                         className="px-6 py-4 transition-colors"
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.backgroundColor = 'var(--background-subtle)')

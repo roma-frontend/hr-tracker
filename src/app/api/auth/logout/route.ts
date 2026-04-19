@@ -1,23 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
-/**
- * Logout API Route - Complete session termination
- * Note: This route is deprecated. Use NextAuth's built-in signOut instead.
- */
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
-    // For server-side logout, we just need to clear cookies
-    // The actual signOut is handled client-side via next-auth
-    const response = NextResponse.json({ success: true });
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signOut();
 
-    // Clear auth cookies
-    response.cookies.delete('hr-auth-token');
-    response.cookies.delete('oauth-session');
-    response.cookies.delete('hr-session-token');
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
 
-    return response;
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Logout error:', error);
-    return NextResponse.json({ error: 'Logout failed' }, { status: 500 });
+    console.error('[auth/logout] Error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

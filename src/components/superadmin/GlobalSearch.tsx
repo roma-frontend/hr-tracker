@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useQuery } from 'convex/react';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 import { useRouter } from 'next/navigation';
-import { api } from '@/convex/_generated/api';
 import {
   Search,
   Users,
@@ -20,21 +19,21 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 type User = {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   organizationId?: string;
 };
 
 type Organization = {
-  _id: string;
+  id: string;
   name: string;
   plan: string;
   slug: string;
 };
 
 type LeaveRequest = {
-  _id: string;
+  id: string;
   userName: string;
   type: string;
   startDate: string;
@@ -43,7 +42,7 @@ type LeaveRequest = {
 };
 
 type Task = {
-  _id: string;
+  id: string;
   title: string;
   description?: string;
   status: string;
@@ -51,7 +50,7 @@ type Task = {
 };
 
 type DriverRequest = {
-  _id: string;
+  id: string;
   requesterName?: string;
   status: string;
   tripInfo?: {
@@ -88,10 +87,7 @@ export function GlobalSearch({
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const results = useQuery(
-    api.superadmin.globalSearch,
-    query.length >= 2 ? { query, limit: 20 } : 'skip',
-  );
+  const { data: results, isLoading, isError } = useGlobalSearch(query, 20);
 
   // Close on outside click
   useEffect(() => {
@@ -158,7 +154,7 @@ export function GlobalSearch({
     if (selectedType === null || selectedType === 'user') {
       all.push(
         ...(results.users || []).map((u: User) => ({
-          id: u._id,
+          id: u.id,
           type: 'user' as const,
           title: u.name,
           subtitle: u.email,
@@ -171,7 +167,7 @@ export function GlobalSearch({
     if (selectedType === null || selectedType === 'organization') {
       all.push(
         ...(results.organizations || []).map((o: Organization) => ({
-          id: o._id,
+          id: o.id,
           type: 'organization' as const,
           title: o.name,
           subtitle: `${o.plan} • ${o.slug}`,
@@ -183,7 +179,7 @@ export function GlobalSearch({
     if (selectedType === null || selectedType === 'leave') {
       all.push(
         ...(results.leaveRequests || []).map((l: LeaveRequest) => ({
-          id: l._id,
+          id: l.id,
           type: 'leave' as const,
           title: `${l.userName} - ${l.type}`,
           subtitle: `${l.startDate} → ${l.endDate}`,
@@ -196,7 +192,7 @@ export function GlobalSearch({
     if (selectedType === null || selectedType === 'task') {
       all.push(
         ...(results.tasks || []).map((t: Task) => ({
-          id: t._id,
+          id: t.id,
           type: 'task' as const,
           title: t.title,
           subtitle: t.description?.slice(0, 50) || t.status,
@@ -210,7 +206,7 @@ export function GlobalSearch({
     if (selectedType === null || selectedType === 'driver') {
       all.push(
         ...(results.driverRequests || []).map((d: DriverRequest) => ({
-          id: d._id,
+          id: d.id,
           type: 'driver' as const,
           title: `${d.requesterName || 'Unknown'}`,
           subtitle: `${d.tripInfo?.from} → ${d.tripInfo?.to}`,
@@ -223,7 +219,7 @@ export function GlobalSearch({
     if (selectedType === null || selectedType === 'ticket') {
       all.push(
         ...(results.supportTickets || []).map((t: any) => ({
-          id: t._id,
+          id: t.id,
           type: 'ticket' as const,
           title: t.ticketNumber,
           subtitle: t.title,
@@ -316,7 +312,7 @@ export function GlobalSearch({
 
           {/* Results */}
           <div className="overflow-y-auto flex-1 p-2">
-            {!results ? (
+            {isLoading ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
                 <div className="animate-pulse">Поиск...</div>
               </div>

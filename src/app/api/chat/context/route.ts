@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchQuery } from 'convex/nextjs';
-import { api } from '@/convex/_generated/api';
-
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
+import { createClient } from '@/lib/supabase/server';
 
 // Opt out of static generation — uses cookies
 export const revalidate = 0;
@@ -15,20 +12,45 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Get user session using Convex
-    const session = await fetchQuery(api.auth.getSession, { sessionToken });
+    const supabase = await createClient();
+
+    // Get user session
+    const { data: session } = await supabase
+      .from('users')
+      .select('*')
+      .eq('session_token', sessionToken)
+      .single();
 
     if (!session) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
     // Get user data
-    const userId = session.userId;
+    const userId = session.id;
 
     // Fetch user's leave data
-    const userLeaves = await fetchQuery(api.leaves.getUserLeaves, { userId });
-    const analytics = await fetchQuery(api.analytics.getUserAnalytics, { userId });
-    const teamCalendar = await fetchQuery(api.analytics.getTeamCalendar, { requesterId: userId });
+    const { data: userLeaves } = await supabase
+      .from('leave_requests')
+      .select('*')
+      .eq('userid', userId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    // Calculate analytics manually
+    const approvedLeaves = userLeaves?.filter((l: any) => l.status === 'approved') || [];
+    const pendingLeaves = userLeaves?.filter((l: any) => l.status === 'pending') || [];
+    const totalDaysTaken = approvedLeaves.reduce((sum: number, l: any) => sum + (l.days || 0), 0);
+    const pendingDays = pendingLeaves.reduce((sum: number, l: any) => sum + (l.days || 0), 0);
+
+    // Get team calendar
+    const { data: teamCalendar } = await supabase
+      .from('leave_requests')
+      .select('*, users(name, department)')
+      .eq('organizationId', session.organizationId!)
+      .eq('status', 'approved')
+      .gte('start_date', new Date().toISOString().split('T')[0])
+      .order('start_date', { ascending: true })
+      .limit(20);
 
     // Build context for AI
     const context = {
@@ -41,28 +63,28 @@ export async function GET(req: NextRequest) {
         organizationId: session.organizationId,
       },
       leaveBalances: {
-        paid: analytics.balances.paid,
-        sick: analytics.balances.sick,
-        family: analytics.balances.family,
+        paid: session.paid_leave_balance || 0,
+        sick: session.sick_leave_balance || 0,
+        family: session.family_leave_balance || 0,
       },
       stats: {
-        totalDaysTaken: analytics.totalDaysTaken,
-        pendingDays: analytics.pendingDays,
+        totalDaysTaken,
+        pendingDays,
       },
       recentLeaves:
-        analytics.userLeaves?.slice(0, 5).map((l: any) => ({
+        userLeaves?.slice(0, 5).map((l: any) => ({
           type: l.type,
-          startDate: l.startDate,
-          endDate: l.endDate,
+          startDate: l.start_date,
+          endDate: l.end_date,
           status: l.status,
           days: l.days,
         })) || [],
       teamAvailability:
         teamCalendar?.slice(0, 10).map((l: any) => ({
-          userName: l.userName,
-          department: l.userDepartment,
-          startDate: l.startDate,
-          endDate: l.endDate,
+          userName: l.users?.name || 'Unknown',
+          department: l.users?.department || '',
+          startDate: l.start_date,
+          endDate: l.end_date,
         })) || [],
     };
 

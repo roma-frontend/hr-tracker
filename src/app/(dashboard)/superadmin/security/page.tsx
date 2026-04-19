@@ -2,10 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '@/convex/_generated/dataModel';
 import {
   Shield,
   ShieldCheck,
@@ -24,6 +21,13 @@ import {
   Activity,
 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import {
+  useSecuritySettings,
+  useLoginStats,
+  useAuditLogs,
+  useSuspendedUsers,
+  useToggleSecuritySetting,
+} from '@/hooks/useSecurity';
 
 // ── Feature metadata ──────────────────────────────────────────────────────────
 const FEATURES = [
@@ -181,7 +185,7 @@ function RiskBadge({ score }: { score: number }) {
         className="px-2 py-0.5 rounded text-xs font-bold"
         style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--destructive)' }}
       >
-        HIGH {score}
+        HIGH {t('security.riskHigh')}
       </span>
     );
   if (score >= 30)
@@ -190,16 +194,16 @@ function RiskBadge({ score }: { score: number }) {
         className="px-2 py-0.5 rounded text-xs font-bold"
         style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--warning)' }}
       >
-        MED {score}
+        MED {t('security.riskMed')}
       </span>
     );
   return (
     <span
       className="px-2 py-0.5 rounded text-xs font-bold"
       style={{ background: 'rgba(16,185,129,0.15)', color: 'var(--success)' }}
-    >
-      LOW {score}
-    </span>
+      >
+        LOW {t('security.riskLow')}
+      </span>
   );
 }
 
@@ -211,7 +215,13 @@ export default function SecurityDashboard() {
     'settings',
   );
 
-  // ── Tabs slider logic ──
+  const { data: settings } = useSecuritySettings();
+  const { data: loginStats } = useLoginStats();
+  const { data: auditLogs } = useAuditLogs(50);
+  const { data: suspendedUsers } = useSuspendedUsers();
+  const toggleSetting = useToggleSecuritySetting();
+
+  // Tabs slider logic
   const tabsRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -235,13 +245,7 @@ export default function SecurityDashboard() {
     el.scrollBy({ left: dir === 'left' ? -150 : 150, behavior: 'smooth' });
   };
 
-  const settings = useQuery(api.security.getAllSettings);
-  const loginStats = useQuery(api.security.getLoginStats, { hours: 24 });
-  const auditLogs = useQuery(api.security.getRecentAuditLogs, { limit: 50 });
-  const suspendedUsers = useQuery(api.security.getSuspendedUsers);
-  const toggleSetting = useMutation(api.security.toggleSetting);
-
-  // STEP 1: Check if user is loading from auth store
+  // Check if user is loading from auth store
   if (!user) {
     return (
       <div className="flex items-center justify-center h-96" style={{ color: 'var(--text-muted)' }}>
@@ -251,7 +255,7 @@ export default function SecurityDashboard() {
     );
   }
 
-  // STEP 2: Check authorization - only after user is definitely loaded
+  // Check authorization
   const isSuperAdmin =
     user.role === 'superadmin' || user.email?.toLowerCase() === 'romangulanyan@gmail.com';
   if (!isSuperAdmin) {
@@ -266,7 +270,7 @@ export default function SecurityDashboard() {
   const handleToggle = async (key: string, currentEnabled: boolean) => {
     setToggling((prev) => ({ ...prev, [key]: true }));
     try {
-      await toggleSetting({ key, enabled: !currentEnabled, updatedBy: user!.id as Id<'users'> });
+      await toggleSetting.mutateAsync({ key, enabled: !currentEnabled, updatedBy: user!.id });
     } catch (err) {
       console.error('Toggle failed:', err);
     } finally {
@@ -535,7 +539,7 @@ export default function SecurityDashboard() {
                       className="text-[10px] sm:text-xs mt-1"
                       style={{ color: 'var(--text-disabled)' }}
                     >
-                      Last changed: {new Date(savedAt).toLocaleString()}
+                      {t('superadmin.security.lastChanged', { date: new Date(savedAt).toLocaleString() })}
                     </p>
                   )}
                 </div>
@@ -544,7 +548,7 @@ export default function SecurityDashboard() {
                     className="text-sm font-medium"
                     style={{ color: enabled ? 'var(--success)' : 'var(--text-disabled)' }}
                   >
-                    {enabled ? 'ON' : 'OFF'}
+                    {enabled ? t('security.toggleOn') : t('security.toggleOff')}
                   </span>
                   <Toggle
                     enabled={enabled}
@@ -581,11 +585,11 @@ export default function SecurityDashboard() {
 
                 return (
                   <div
-                    key={user._id}
+                    key={user.id}
                     className="rounded-lg sm:rounded-xl p-3 sm:p-5 border hover:shadow-md transition-all cursor-pointer"
                     style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
                     onClick={() =>
-                      (window.location.href = `/superadmin/security/alert/${user._id}`)
+                      (window.location.href = `/superadmin/security/alert/${user.id}`)
                     }
                   >
                     <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
@@ -616,7 +620,7 @@ export default function SecurityDashboard() {
                             </h3>
                             {isAutoBlocked && (
                               <span className="text-[10px] sm:text-xs font-bold bg-red-600 text-white px-1.5 sm:px-2 py-0.5 rounded">
-                                AUTO-BLOCKED
+                                {t('security.autoBlocked')}
                               </span>
                             )}
                           </div>
@@ -643,10 +647,10 @@ export default function SecurityDashboard() {
                             >
                               <span>
                                 <Clock className="w-3 h-3 inline mr-1" />
-                                Expires in {hoursLeft}h
+                                {t('security.expiresHours', { hours: hoursLeft })}
                               </span>
                               <span className="hidden sm:inline">
-                                Until {new Date(user.suspendedUntil).toLocaleString()}
+                                {t('security.suspendedUntil')} {new Date(user.suspendedUntil).toLocaleString()}
                               </span>
                             </div>
                           </div>
@@ -657,7 +661,7 @@ export default function SecurityDashboard() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.location.href = `/superadmin/security/alert/${user._id}`;
+                          window.location.href = `/superadmin/security/alert/${user.id}`;
                         }}
                         className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-center"
                         style={{
@@ -686,7 +690,7 @@ export default function SecurityDashboard() {
           <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
             {t('superadmin.security.recentSuspiciousLogins')}
           </p>
-          {!loginStats?.suspicious?.length ? (
+          {!loginStats?.suspicious || (Array.isArray(loginStats.suspicious) && loginStats.suspicious.length === 0) ? (
             <div className="text-center py-16" style={{ color: 'var(--text-muted)' }}>
               <ShieldCheck className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--success)' }} />
               {t('superadmin.security.noSuspiciousActivity')}
@@ -694,7 +698,7 @@ export default function SecurityDashboard() {
           ) : (
             <div className="space-y-2">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {loginStats.suspicious.map((attempt: any, i: number) => (
+              {Array.isArray(loginStats.suspicious) && loginStats.suspicious.map((attempt: any, i: number) => (
                 <div
                   key={i}
                   className="rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 border"
@@ -777,7 +781,7 @@ export default function SecurityDashboard() {
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {auditLogs.map((log: any) => (
                 <div
-                  key={log._id}
+                  key={log.id}
                   className="rounded-lg p-4 flex items-center gap-4 border"
                   style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
                 >

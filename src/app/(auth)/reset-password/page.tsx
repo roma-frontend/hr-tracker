@@ -29,14 +29,13 @@ function ResetPasswordForm() {
       setTokenValid(false);
       return;
     }
-    const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
-    fetch(`${CONVEX_URL}/api/query`, {
+    fetch('/api/auth/verify-reset-token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: 'auth:verifyResetToken', args: { token } }),
+      body: JSON.stringify({ token }),
     })
-      .then((r) => r.json() as Promise<{ value?: { valid?: boolean } }>)
-      .then((d) => setTokenValid(d.value?.valid === true))
+      .then((r) => r.json() as Promise<{ valid?: boolean }>)
+      .then((d) => setTokenValid(d.valid === true))
       .catch(() => setTokenValid(false));
   }, [token]);
 
@@ -44,11 +43,11 @@ function ResetPasswordForm() {
     e.preventDefault();
     setError(null);
     if (password !== confirm) {
-      setError('Passwords do not match');
+      setError(t('resetPassword.passwordsDoNotMatch', 'Passwords do not match'));
       return;
     }
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('resetPassword.passwordMin8', 'Password must be at least 8 characters'));
       return;
     }
 
@@ -60,11 +59,11 @@ function ResetPasswordForm() {
           body: JSON.stringify({ token, newPassword: password }),
         });
         const data = (await res.json()) as { error?: string };
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        if (!res.ok) throw new Error(data.error || t('resetPassword.somethingWentWrong', 'Something went wrong'));
         setSuccess(true);
         setTimeout(() => router.push('/login'), 3000);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong');
+        setError(err instanceof Error ? err.message : t('resetPassword.somethingWentWrong', 'Something went wrong'));
       }
     });
   };
@@ -119,7 +118,7 @@ function ResetPasswordForm() {
               <motion.div key="loading" className="text-center py-8">
                 <ShieldLoader size="lg" className="mb-3" />
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Verifying reset link...
+                  {t('resetPassword.verifyingLink', 'Verifying reset link...')}
                 </p>
               </motion.div>
             )}
@@ -136,16 +135,16 @@ function ResetPasswordForm() {
                   <AlertCircle className="w-8 h-8 text-red-500" />
                 </div>
                 <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Invalid or expired link
+                  {t('resetPassword.invalidOrExpiredLink', 'Invalid or expired link')}
                 </h2>
                 <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-                  This reset link has expired or is invalid. Please request a new one.
+                  {t('resetPassword.linkExpiredDesc', 'This reset link has expired or is invalid. Please request a new one.')}
                 </p>
                 <Link
                   href="/forgot-password"
                   className="inline-block py-2.5 px-6 rounded-xl font-semibold text-sm text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
                 >
-                  Request new link
+                  {t('resetPassword.requestNewLink', 'Request new link')}
                 </Link>
               </motion.div>
             )}
@@ -162,10 +161,10 @@ function ResetPasswordForm() {
                   <CheckCircle2 className="w-8 h-8 text-green-500" />
                 </div>
                 <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Password updated!
+                  {t('resetPassword.passwordUpdated', 'Password updated!')}
                 </h2>
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Your password has been reset successfully. Redirecting to login...
+                  {t('resetPassword.passwordUpdatedDesc', 'Your password has been reset successfully. Redirecting to login...')}
                 </p>
               </motion.div>
             )}
@@ -175,10 +174,10 @@ function ResetPasswordForm() {
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div className="mb-6">
                   <h1 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                    Set new password
+                    {t('resetPassword.setNewPassword', 'Set new password')}
                   </h1>
                   <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Choose a strong password for your account.
+                    {t('resetPassword.chooseStrongPassword', 'Choose a strong password for your account.')}
                   </p>
                 </div>
 
@@ -186,7 +185,7 @@ function ResetPasswordForm() {
                   {/* New password */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      New password
+                      {t('auth.newPassword', 'New password')}
                     </label>
                     <div className="relative">
                       <Lock
@@ -227,7 +226,7 @@ function ResetPasswordForm() {
                   {/* Confirm password */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      Confirm password
+                      {t('auth.confirmPassword', 'Confirm password')}
                     </label>
                     <div className="relative">
                       <Lock

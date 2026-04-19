@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { Id } from '@/convex/_generated/dataModel';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
@@ -22,15 +19,16 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { CreateIncidentWizard } from '@/components/superadmin/CreateIncidentWizard';
+import {
+  useEmergencyDashboard,
+  useUpdateIncidentStatus,
+} from '@/hooks/useEmergency';
 
 interface Ticket {
-  _id: string;
-  _creationTime: number;
+  id: string;
   ticketNumber: string;
   title: string;
   status: string;
@@ -40,9 +38,8 @@ interface Ticket {
 }
 
 interface Incident {
-  _id: Id<'emergencyIncidents'>;
-  _creationTime: number;
-  organizationId?: Id<'organizations'>;
+  id: string;
+  organizationId?: string;
   title: string;
   description: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
@@ -53,10 +50,9 @@ interface Incident {
   resolution?: string;
   startedAt: number;
   resolvedAt?: number;
-  createdBy: Id<'users'>;
+  createdBy: string;
   createdAt: number;
   updatedAt: number;
-  // Enriched fields from map()
   creatorName: string;
   minutesActive: number;
 }
@@ -73,13 +69,12 @@ export default function EmergencyDashboardPage() {
   const [createIncidentOpen, setCreateIncidentOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const data = useQuery(api.superadmin.getEmergencyDashboard);
-  const updateIncidentStatus = useMutation(api.superadmin.updateIncidentStatus);
+  const { data } = useEmergencyDashboard();
+  const updateIncidentStatus = useUpdateIncidentStatus();
 
   // Force refresh by toggling loading state
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Convex automatically refreshes, but we can show loading state
     await new Promise((resolve) => setTimeout(resolve, 500));
     setIsRefreshing(false);
   };
@@ -126,10 +121,10 @@ export default function EmergencyDashboardPage() {
     if (!resolution) return;
 
     try {
-      await updateIncidentStatus({
-        incidentId: incidentId as Id<'emergencyIncidents'>,
+      await updateIncidentStatus.mutateAsync({
+        incidentId,
         status: 'resolved',
-        userId: user.id as Id<'users'>,
+        userId: user.id,
         rootCause,
         resolution,
       });
@@ -291,7 +286,7 @@ export default function EmergencyDashboardPage() {
               <div className="space-y-3">
                 {criticalTickets.map((ticket: Ticket) => (
                   <div
-                    key={ticket._id}
+                    key={ticket.id}
                     className="p-3 sm:p-4 rounded-lg border border-red-500/30 bg-red-500/5"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start gap-3">
@@ -331,7 +326,7 @@ export default function EmergencyDashboardPage() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          (window.location.href = `/superadmin/support?ticket=${ticket._id}`)
+                          (window.location.href = `/superadmin/support?ticket=${ticket.id}`)
                         }
                         className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) shrink-0 self-start"
                       >
@@ -359,7 +354,7 @@ export default function EmergencyDashboardPage() {
               <div className="space-y-3">
                 {activeIncidents.map((incident: Incident) => (
                   <div
-                    key={incident._id}
+                    key={incident.id}
                     className="p-3 sm:p-4 rounded-lg border border-orange-500/30 bg-orange-500/5"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start gap-3">
@@ -415,7 +410,7 @@ export default function EmergencyDashboardPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleResolveIncident(incident._id)}
+                          onClick={() => handleResolveIncident(incident.id)}
                           className="border-(--border) bg-(--background) hover:bg-(--background-subtle) text-(--foreground) text-xs"
                         >
                           {t('superadmin.emergency.actions.resolve')}
@@ -510,11 +505,6 @@ export default function EmergencyDashboardPage() {
                 latency="180ms"
               />
               <SystemStatusItem
-                name={t('superadmin.emergency.systemComponents.convex')}
-                status={t('superadmin.emergency.systemComponents.operational')}
-                latency="35ms"
-              />
-              <SystemStatusItem
                 name={t('superadmin.emergency.systemComponents.redis')}
                 status={t('superadmin.emergency.systemComponents.operational')}
                 latency="8ms"
@@ -536,18 +526,18 @@ export default function EmergencyDashboardPage() {
 
       {/* Create Incident Wizard Dialog */}
       <Dialog open={createIncidentOpen} onOpenChange={setCreateIncidentOpen}>
-        <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-2xl max-h-[90vh] flex flex-col">
-          <DialogTitle className="sr-only">{t('superadmin.emergency.createIncident')}</DialogTitle>
-          <DialogDescription className="sr-only">Создание нового инцидента</DialogDescription>
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <CreateIncidentWizard
-              userId={user.id as Id<'users'>}
-              onComplete={() => setCreateIncidentOpen(false)}
-              onCancel={() => setCreateIncidentOpen(false)}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogTitle className="sr-only">{t('superadmin.emergency.createIncident')}</DialogTitle>
+        <DialogDescription className="sr-only">Создание нового инцидента</DialogDescription>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <CreateIncidentWizard
+            userId={user.id}
+            onComplete={() => setCreateIncidentOpen(false)}
+            onCancel={() => setCreateIncidentOpen(false)}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
     </div>
   );
 }

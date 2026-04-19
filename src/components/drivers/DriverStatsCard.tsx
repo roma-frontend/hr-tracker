@@ -6,29 +6,23 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useDriverSchedules } from '@/hooks/useDrivers';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { TrendingUp, MapPin, Clock, Calendar, Download, FileText, BarChart3 } from 'lucide-react';
+import { TrendingUp, MapPin, Clock, Download, FileText, BarChart3 } from 'lucide-react';
 import { exportTripsToExcel } from '@/lib/exportDriversToExcel';
 import { exportTripsToPDF } from '@/lib/exportDriversToPDF';
 
 interface DriverStatsCardProps {
-  driverId: Id<'drivers'>;
-  organizationId: Id<'organizations'>;
+  driverId: string;
+  organizationId: string;
 }
 
 export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardProps) {
   const { t } = useTranslation();
   const [period, setPeriod] = React.useState<'week' | 'month' | 'year'>('month');
 
-  const stats = useQuery(api.drivers.requests_queries.getDriverStats, { driverId, period });
-
-  // Calculate time range with useMemo to prevent infinite re-renders
   const timeRange = useMemo(() => {
     const now = Date.now();
     const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
@@ -38,23 +32,24 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
     };
   }, [period]);
 
-  const schedules = useQuery(
-    api.drivers.queries.getDriverSchedule,
-    driverId
-      ? {
-          driverId,
-          startTime: timeRange.startTime,
-          endTime: timeRange.endTime,
-        }
-      : 'skip',
-  );
+  const { data: schedules } = useDriverSchedules(driverId, timeRange.startTime, timeRange.endTime);
+
+  const stats = useMemo(() => {
+    if (!schedules) return { totalTrips: 0, totalWorkedHours: 0 };
+    const trips = schedules.filter((s: any) => s.type === 'trip' && s.status === 'completed');
+    const totalWorkedHours = trips.reduce((acc: number, trip: any) => {
+      const duration = (trip.endTime - trip.startTime) / (1000 * 60 * 60);
+      return acc + duration;
+    }, 0);
+    return { totalTrips: trips.length, totalWorkedHours };
+  }, [schedules]);
 
   const handleExportExcel = () => {
     if (!schedules) return;
 
     const trips = schedules
-      .filter((s) => s.type === 'trip' && s.status === 'completed')
-      .map((s) => ({
+      .filter((s: any) => s.type === 'trip' && s.status === 'completed')
+      .map((s: any) => ({
         date: new Date(s.startTime).toLocaleDateString(),
         driver: s.userName || 'Unknown',
         passenger: s.userName || 'Unknown',
@@ -70,11 +65,11 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
   };
 
   const handleExportPDF = () => {
-    if (!schedules || !stats) return;
+    if (!schedules) return;
 
     const trips = schedules
-      .filter((s) => s.type === 'trip' && s.status === 'completed')
-      .map((s) => ({
+      .filter((s: any) => s.type === 'trip' && s.status === 'completed')
+      .map((s: any) => ({
         date: new Date(s.startTime).toLocaleDateString(),
         driver: s.userName || 'Unknown',
         passenger: s.userName || 'Unknown',
@@ -90,7 +85,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
       trips,
       {
         totalTrips: stats.totalTrips,
-        totalDistance: 0, // TODO: Add distance tracking to schema
+        totalDistance: 0,
         totalDuration: stats.totalWorkedHours * 60,
         period:
           period === 'week'
@@ -103,13 +98,12 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
     );
   };
 
-  if (!stats) {
+  if (!schedules) {
     return null;
   }
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* Period Selector & Export */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex gap-2 w-full sm:w-auto">
           <Button
@@ -159,7 +153,6 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <Card variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between pb-2 px-3 py-2">
@@ -218,8 +211,6 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
           </CardContent>
         </Card>
       </div>
-
-      {/* Popular Routes — coming soon */}
     </div>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
@@ -15,11 +14,8 @@ export function GoogleSignInButton({ onOAuthStart }: GoogleSignInButtonProps) {
     setIsLoading(true);
     onOAuthStart?.();
     try {
-      // Redirect to dashboard after successful Google sign in
-      await signIn('google', {
-        callbackUrl: '/dashboard',
-        redirect: true,
-      });
+      // Redirect to Supabase Google OAuth via our custom API route
+      window.location.href = '/api/auth/[...nextauth]?provider=google';
     } catch (error) {
       console.error('Error signing in:', error);
       setIsLoading(false);

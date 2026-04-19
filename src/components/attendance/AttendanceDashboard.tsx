@@ -1,9 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, TrendingUp, AlertTriangle, Award, Target } from 'lucide-react';
@@ -11,23 +9,17 @@ import { motion } from '@/lib/cssMotion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { format } from 'date-fns';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useMonthlyAttendanceStats, useAttendanceHistory } from '@/hooks/useAttendance';
 
 export function AttendanceDashboard() {
   const { user } = useAuthStore();
   const { t } = useTranslation();
-  const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
+  const currentMonth = new Date().toISOString().slice(0, 7);
 
-  const monthlyStats = useQuery(
-    api.timeTracking.getMonthlyStats,
-    user?.id ? { userId: user.id as any, month: currentMonth } : 'skip',
-  );
+  const { data: monthlyStats, isLoading: statsLoading } = useMonthlyAttendanceStats(currentMonth);
+  const { data: history, isLoading: historyLoading } = useAttendanceHistory(10);
 
-  const history = useQuery(
-    api.timeTracking.getUserHistory,
-    user?.id ? { userId: user.id as any, limit: 10 } : 'skip',
-  );
-
-  if (!monthlyStats) {
+  if (!monthlyStats || statsLoading || historyLoading) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -151,7 +143,7 @@ export function AttendanceDashboard() {
             <div className="space-y-3">
               {history.map((record: any) => (
                 <div
-                  key={record._id}
+                  key={record.id}
                   className="flex items-center justify-between p-4 rounded-lg border"
                   style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
                 >

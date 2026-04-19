@@ -39,14 +39,13 @@ const PRESENCE_CONFIG: Record<PresenceStatus, { labelKey: string; dot: string; i
 function PresenceEmoji({ emoji }: { emoji: string }) {
   return <span aria-hidden="true">{emoji}</span>;
 }
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
+import { useNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from '@/hooks/useNotifications';
+import { useUserById, useUpdatePresenceStatus } from '@/hooks/useUsers';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { User as UserType } from '@/store/useAuthStore';
+import type { UserProfile as UserType } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { logoutAction } from '@/actions/auth';
-import { signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,7 +57,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { KeyboardShortcutsModal } from '@/components/KeyboardShortcutsModal';
 import { QuickStatsWidget } from '@/components/productivity/QuickStatsWidget';
 import { TeamPresence } from '@/components/productivity/TeamPresence';
@@ -96,20 +94,12 @@ export function Navbar() {
     setMounted(true);
   }, []);
 
-  // Convex notifications
-  const notifications =
-    useQuery(
-      api.notifications.getUserNotifications,
-      user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-    ) ?? [];
-  const markRead = useMutation(api.notifications.markAsRead);
-  const markAllRead = useMutation(api.notifications.markAllAsRead);
-  const updatePresence = useMutation(api.users.mutations.updatePresenceStatus);
+  const { data: notifications = [] } = useNotifications(user?.id);
+  const { mutate: markRead } = useMarkNotificationAsRead();
+  const { mutate: markAllRead } = useMarkAllNotificationsAsRead();
+  const { mutate: updatePresence } = useUpdatePresenceStatus();
   const { showNotification } = useStatusUpdate();
-  const currentUserData = useQuery(
-    api.users.queries.getUserById,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
+  const { data: currentUserData } = useUserById(user?.id || '');
 
   const currentPresence = ((currentUserData as any)?.presenceStatus ??
     'available') as PresenceStatus;
@@ -124,7 +114,7 @@ export function Navbar() {
 
     // Skip very first load to avoid sound on page refresh
     if (isFirstLoad.current) {
-      notifications.forEach((n: any) => prevNotifIds.current.add(n._id));
+      notifications.forEach((n: any) => prevNotifIds.current.add(n.id));
       prevUnreadCount.current = unreadCount;
       isFirstLoad.current = false;
       return;
@@ -132,7 +122,7 @@ export function Navbar() {
 
     // Find truly new notifications (not seen before)
     const newNotifs = notifications.filter(
-      (n: any) => !n.isRead && !prevNotifIds.current.has(n._id),
+      (n: any) => !n.isRead && !prevNotifIds.current.has(n.id),
     );
 
     if (newNotifs.length > 0) {
@@ -152,11 +142,11 @@ export function Navbar() {
         // }, 2000);
       }
       // Sound + banner are handled by NotificationBanner — just track seen IDs here
-      newNotifs.forEach((n: any) => prevNotifIds.current.add(n._id));
+      newNotifs.forEach((n: any) => prevNotifIds.current.add(n.id));
     }
 
     // Also track all IDs
-    notifications.forEach((n: any) => prevNotifIds.current.add(n._id));
+    notifications.forEach((n: any) => prevNotifIds.current.add(n.id));
     prevUnreadCount.current = unreadCount;
   }, [notifications, unreadCount, user]);
 
@@ -164,9 +154,6 @@ export function Navbar() {
     try {
       // Logout from server session
       await logoutAction();
-
-      // Logout from NextAuth (OAuth)
-      await signOut({ redirect: false });
 
       // Logout from useAuthStore
       logout();
@@ -186,11 +173,11 @@ export function Navbar() {
 
   const handleMarkAllRead = async () => {
     if (!user?.id) return;
-    await markAllRead({ userId: user.id as Id<'users'> });
+    await markAllRead(user.id);
   };
 
-  const handleMarkRead = async (id: Id<'notifications'>) => {
-    await markRead({ notificationId: id });
+  const handleMarkRead = async (id: string) => {
+    await markRead(id);
   };
 
   const timeAgo = (timestamp: number) => {
@@ -289,18 +276,18 @@ export function Navbar() {
                     ) : (
                       notifications.map(
                         (n: {
-                          _id: Id<'notifications'>;
+                          id: string;
                           title: string;
                           message: string;
                           isRead: boolean;
                           type: string;
                           relatedId?: string;
-                          _creationTime: number;
+                          createdAt: number;
                         }) => (
                           <div
-                            key={n._id}
+                            key={n.id}
                             onClick={async () => {
-                              await handleMarkRead(n._id);
+                              await handleMarkRead(n.id);
                               // Navigate based on notification type
                               if (n.type === 'security_alert' && n.relatedId) {
                                 router.push(`/superadmin/security/alert/${n.relatedId}`);
@@ -353,7 +340,7 @@ export function Navbar() {
                             </p>
                             <p className="text-xs text-(--text-muted) mt-1">{n.message}</p>
                             <p className="text-xs text-(--text-muted) mt-1">
-                              {timeAgo(n._creationTime)}
+                              {timeAgo(n.createdAt)}
                             </p>
                           </div>
                         ),
@@ -586,7 +573,7 @@ export function Navbar() {
                       onClick={async () => {
                         if (user?.id) {
                           await updatePresence({
-                            userId: user.id as Id<'users'>,
+                            userId: user.id,
                             presenceStatus: key,
                           });
                           showNotification(key, t(cfg.labelKey));

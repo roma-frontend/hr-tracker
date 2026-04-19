@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { Building2, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
 
 interface OrgSelectorProps {
   collapsed?: boolean;
@@ -36,16 +35,12 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
   const setSelectedOrgId = store.setSelectedOrgId;
   const isSuperadmin = user?.role === 'superadmin';
 
-  // Fetch all organizations for superadmin, or just user's org
-  const organizations = useQuery(
-    api.organizations.getAllOrganizations,
-    mounted && isSuperadmin ? {} : 'skip',
-  );
+  const { data: organizations } = useAllOrganizations(isSuperadmin && mounted);
 
   if (!mounted || !isSuperadmin) return null;
 
   const orgs = organizations ?? [];
-  const selectedOrg = orgs.find((org: any) => org._id === selectedOrgId);
+  const selectedOrg = orgs.find((org: any) => org.id === selectedOrgId);
 
   return (
     <div className="px-2 py-3 border-t" style={{ borderColor: 'var(--sidebar-border)' }}>
@@ -110,24 +105,24 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
             {/* Organization List */}
             {orgs.map((org: any) => (
               <button
-                key={org._id}
+                key={org.id}
                 onClick={() => {
-                  setSelectedOrgId(org._id);
+                  setSelectedOrgId(org.id);
                   setIsOpen(false);
                 }}
                 className={cn(
                   'w-full px-3 py-2 text-left text-sm transition-colors duration-200 hover:bg-opacity-80',
-                  selectedOrgId === org._id && 'font-semibold',
+                  selectedOrgId === org.id && 'font-semibold',
                 )}
                 style={{
                   backgroundColor:
-                    selectedOrgId === org._id ? 'var(--sidebar-item-hover)' : 'transparent',
-                  color: selectedOrgId === org._id ? 'var(--primary)' : 'var(--text-primary)',
+                    selectedOrgId === org.id ? 'var(--sidebar-item-hover)' : 'transparent',
+                  color: selectedOrgId === org.id ? 'var(--primary)' : 'var(--text-primary)',
                 }}
               >
                 <div className="truncate">{org.name}</div>
                 <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {org.memberCount || 0} {t('employees.members')}
+                  {org.totalEmployees || org.employeeCount || 0} {t('employees.members')}
                 </div>
               </button>
             ))}

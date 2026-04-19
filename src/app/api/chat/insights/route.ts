@@ -1,25 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '../../../../../convex/_generated/api';
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-// Opt out of static generation — uses request.url
-export const revalidate = 0;
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
   try {
     const userId = req.nextUrl.searchParams.get('userId');
     if (!userId) return NextResponse.json(null);
 
+    const supabase = await createClient();
+
     const [user, userLeaves, allLeaves, timeHistory] = await Promise.all([
-      convex.query(api.users.queries.getUserById, { userId: userId as any }),
-      convex.query(api.leaves.getUserLeaves, { userId: userId as any }),
-      convex.query(api.leaves.getAllLeaves, { requesterId: userId as any }),
-      convex.query(api.timeTracking.getUserHistory, { userId: userId as any, limit: 60 }),
+      supabase.from('users').select('*').eq('id', userId).single(),
+      supabase.from('leave_requests').select('*').eq('userid', userId),
+      supabase.from('leave_requests').select('*').eq('organizationId', ((await supabase.from('users').select('organizationId').eq('id', userId).single()).data?.organizationId) ?? ''),
+      supabase.from('time_tracking').select('*').eq('userId', userId).order('date', { ascending: false }).limit(60),
     ]);
 
-    if (!user) return NextResponse.json(null);
+    if (!user.data) return NextResponse.json(null);
 
     const today = new Date();
     const endOfYear = new Date(today.getFullYear(), 11, 31);
@@ -29,8 +25,8 @@ export async function GET(req: NextRequest) {
 
     // ── 1. Balance Warning ────────────────────────────────────────────────
     let balanceWarning = '';
-    const paidBalance = user.paidLeaveBalance ?? 0;
-    const sickBalance = user.sickLeaveBalance ?? 0;
+    const paidBalance = user.data.paid_leave_balance ?? 0;
+    const sickBalance = user.data.sick_leave_balance ?? 0;
 
     if (paidBalance > 0 && paidBalance <= 5 && daysToEndOfYear <= 90) {
       balanceWarning = `You only have ${paidBalance} paid leave days left and they expire on Dec 31! Consider booking them soon.`;
@@ -43,9 +39,9 @@ export async function GET(req: NextRequest) {
     // ── 2. Attendance Patterns ────────────────────────────────────────────
     const patterns: string[] = [];
 
-    if (timeHistory && timeHistory.length > 0) {
+    if (timeHistory.data && timeHistory.data.length > 0) {
       // Count late arrivals
-      const lateRecords = timeHistory.filter((r: any) => r.isLate);
+      const lateRecords = timeHistory.data.filter((r: any) => r.is_late);
       if (lateRecords.length >= 3) {
         // Check if late on specific days
         const dayNames = [
@@ -59,7 +55,7 @@ export async function GET(req: NextRequest) {
         ];
         const lateDayCounts: Record<number, number> = {};
         lateRecords.forEach((r: any) => {
-          const day = new Date(r.checkInTime).getDay();
+          const day = new Date(r.check_in_time).getDay();
           lateDayCounts[day] = (lateDayCounts[day] || 0) + 1;
         });
         const mostLateDay = Object.entries(lateDayCounts).sort((a, b) => b[1] - a[1])[0];
@@ -73,19 +69,19 @@ export async function GET(req: NextRequest) {
       }
 
       // Check early leave pattern
-      const earlyLeaves = timeHistory.filter((r: any) => r.isEarlyLeave);
+      const earlyLeaves = timeHistory.data.filter((r: any) => r.is_early_leave);
       if (earlyLeaves.length >= 3) {
         patterns.push(`${earlyLeaves.length} early departures recorded recently`);
       }
     }
 
     // Check sick leave pattern
-    const sickLeaves = userLeaves.filter((l: any) => l.type === 'sick');
+    const sickLeaves = (userLeaves.data || []).filter((l: any) => l.type === 'sick');
     if (sickLeaves.length >= 3) {
       // Check if sick leaves cluster around specific days
       const sickDayCounts: Record<number, number> = {};
       sickLeaves.forEach((l: any) => {
-        const day = new Date(l.startDate).getDay();
+        const day = new Date(l.start_date).getDay();
         sickDayCounts[day] = (sickDayCounts[day] || 0) + 1;
       });
       const dayNames = [
@@ -112,19 +108,19 @@ export async function GET(req: NextRequest) {
     const todayStr = today.toISOString().split('T')[0] || '';
     const next60Str = next60Days.toISOString().split('T')[0] || '';
 
-    const upcomingTeamLeaves = allLeaves.filter((l: any) => {
+    const upcomingTeamLeaves = (allLeaves.data || []).filter((l: any) => {
       return (
-        l.userId !== userId &&
+        l.userid !== userId &&
         l.status === 'approved' &&
-        l.endDate >= todayStr &&
-        l.startDate <= next60Str
+        l.end_date >= todayStr &&
+        l.start_date <= next60Str
       );
     });
 
     // Group by date range
     upcomingTeamLeaves.slice(0, 5).forEach((l: any) => {
       teamConflicts.push(
-        `${l.userName} (${l.userDepartment || 'Unknown dept'}) is on ${l.type} leave: ${l.startDate} → ${l.endDate}`,
+        `${l.userName || 'Unknown'} (${l.userDepartment || 'Unknown dept'}) is on ${l.type} leave: ${l.start_date} → ${l.end_date}`,
       );
     });
 
@@ -146,7 +142,7 @@ export async function GET(req: NextRequest) {
 
         // Check if anyone from team is on leave that week
         const conflict = upcomingTeamLeaves.some((l: any) => {
-          return l.startDate <= weekEndStr && l.endDate >= dateStr;
+          return l.start_date <= weekEndStr && l.end_date >= dateStr;
         });
 
         if (!conflict) {

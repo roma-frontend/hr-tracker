@@ -1,19 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../../convex/_generated/api';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { ServiceBroadcastDialog } from './ServiceBroadcastDialog';
 import { ServiceBroadcastsManager } from './ServiceBroadcastsManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, MessageSquare } from 'lucide-react';
-import type { Id } from '../../../convex/_generated/dataModel';
 
 interface SuperadminBroadcastsPanelProps {
-  organizationId?: Id<'organizations'>;
-  userId?: Id<'users'>;
+  organizationId?: string;
+  userId?: string;
 }
 
 /**
@@ -25,12 +23,11 @@ export function SuperadminBroadcastsPanel({
   userId,
 }: SuperadminBroadcastsPanelProps) {
   const { t } = useTranslation();
+  const { user: currentUser } = useAuthStore();
   const [broadcastDialogOpen, setBroadcastDialogOpen] = useState(false);
 
-  const currentUser = useQuery(api.users.queries.getCurrentUser, {});
-
   const finalOrgId = organizationId || currentUser?.organizationId;
-  const finalUserId = userId || currentUser?._id;
+  const finalUserId = userId || currentUser?.id;
 
   // Don't render if we don't have the required data
   if (!finalOrgId || !finalUserId) {

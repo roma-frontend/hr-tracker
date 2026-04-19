@@ -2,17 +2,15 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Clock, Phone, Home, Zap, X } from 'lucide-react';
 import { useStatusUpdate } from '@/context/StatusUpdateContext';
+import { useUpdatePresenceStatus } from '@/hooks/useUsers';
 
 interface StatusModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentUserId: Id<'users'>;
+  currentUserId: string;
   currentStatus?: string;
   onStatusChange?: (status: string) => void;
 }
@@ -41,7 +39,7 @@ export function StatusModal({
   const [showConfirm, setShowConfirm] = useState(false);
   const [outOfOfficeMsg, setOutOfOfficeMsg] = useState('');
 
-  const updateStatusMutation = useMutation(api.users.mutations.updatePresenceStatus);
+  const updateStatusMutation = useUpdatePresenceStatus();
 
   const statusOptions: {
     [key in StatusType]: StatusOption;
@@ -99,10 +97,9 @@ export function StatusModal({
 
   const handleConfirm = async () => {
     try {
-      await updateStatusMutation({
+      await updateStatusMutation.mutateAsync({
         userId: currentUserId,
         presenceStatus: selectedStatus,
-        outOfOfficeMessage: outOfOfficeMsg,
       });
 
       // Show status update banner with status key for contextual hint

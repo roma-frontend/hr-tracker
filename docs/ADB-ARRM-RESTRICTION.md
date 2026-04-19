@@ -43,16 +43,11 @@ All SharePoint and Outlook Calendar API routes now validate the user's organizat
 3. Check if `organizationId` matches ADB-ARRM
 4. Return 403 Forbidden if not ADB-ARRM
 
-### 3. Backend (Convex) Protection
+### 3. Backend (Supabase) Protection
 
-**File:** `convex/sharepointSync.ts`
+**File:** `src/lib/supabase.ts`
 
-All mutations now include org validation:
-
-- `upsertSharePointUser` - validates org before creating/updating users
-- `deactivateSharePointUsers` - validates org before deactivating users
-- `logSync` - validates org before logging sync operations
-- `getLastSync` - validates org before returning sync logs
+All database operations include org validation through RLS (Row Level Security) policies and server-side validation functions.
 
 **Error Message:**
 
@@ -85,7 +80,7 @@ const isRestrictedOrg = user?.organizationId
 | ------------------ | -------------------------- | ------------------------ |
 | **Frontend UI**    | Hidden UI for non-ADB-ARRM | ❌ No (client-side only) |
 | **API Routes**     | JWT validation + org check | ❌ No (server-side)      |
-| **Convex Backend** | Org slug validation        | ❌ No (database-level)   |
+| **Supabase Backend** | RLS policies + org validation | ❌ No (database-level)   |
 
 ## Testing
 
@@ -103,7 +98,7 @@ const isRestrictedOrg = user?.organizationId
 2. Navigate to `/settings` → Integrations tab
 3. **Expected:** SharePoint and Outlook Calendar sections are **NOT visible**
 4. **Expected:** Direct API calls return 403 Forbidden
-5. **Expected:** Convex mutations throw error
+5. **Expected:** Supabase queries throw error
 
 ### Test Case 3: API Direct Access (Non-ADB-ARRM)
 
@@ -128,7 +123,7 @@ curl -X POST http://localhost:3000/api/sharepoint/sync \
 | No JWT token          | 401    | "Authentication required"                                            |
 | Invalid/expired token | 401    | "Invalid or expired token"                                           |
 | Non-ADB-ARRM org      | 403    | "Access restricted to ADB-ARRM organization only"                    |
-| Convex mutation       | Error  | "SharePoint integration is restricted to ADB-ARRM organization only" |
+| Supabase query       | Error  | "SharePoint integration is restricted to ADB-ARRM organization only" |
 
 ## Files Modified
 
@@ -141,11 +136,11 @@ curl -X POST http://localhost:3000/api/sharepoint/sync \
 7. `src/app/api/calendar/outlook/auth/route.ts` - Added org validation
 8. `src/app/api/calendar/outlook/callback/route.ts` - Added org validation
 9. `src/app/api/calendar/outlook/sync/route.ts` - Added org validation
-10. `convex/sharepointSync.ts` - Added org validation in all mutations
+10. `src/lib/supabase.ts` - Added org validation with RLS policies
 11. `src/components/settings/IntegrationSettings.tsx` - Hidden UI for non-ADB-ARRM
 
 ## Maintenance Notes
 
-- **To change restricted org:** Update `RESTRICTED_ORG_NAME` and `RESTRICTED_ORG_SLUG` in `src/lib/restricted-org.ts` AND `convex/sharepointSync.ts`
+- **To change restricted org:** Update `RESTRICTED_ORG_NAME` and `RESTRICTED_ORG_SLUG` in `src/lib/restricted-org.ts` AND ensure RLS policies in Supabase match
 - **To add more restricted features:** Use `validateRestrictedOrgFromRequest()` in API routes or `isRestrictedOrganization()` in UI components
-- **Organization slug:** Must match the `slug` field in the `organizations` table in Convex
+- **Organization slug:** Must match the `slug` field in the `organizations` table in Supabase

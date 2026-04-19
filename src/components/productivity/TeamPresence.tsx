@@ -1,12 +1,11 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Users } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useTeamPresence } from '@/hooks/useProductivity';
 
 const PRESENCE_CONFIG = {
   available: {
@@ -44,15 +43,9 @@ const PRESENCE_CONFIG = {
 export function TeamPresence() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  // Only pass requesterId if it looks like a valid Convex user ID (not organizationId or temp ID)
-  const hasValidUserId =
-    user?.id && !user.id.startsWith('nextauth-') && user.id !== user.organizationId;
-  const teamMembers = useQuery(
-    api.productivity.getTeamPresence,
-    hasValidUserId ? { requesterId: user!.id as any } : 'skip',
-  );
+  const teamMembers = useTeamPresence(user?.organizationId || '');
 
-  if (!teamMembers) {
+  if (!teamMembers.data) {
     return (
       <div className="flex items-center justify-center py-6">
         <ShieldLoader size="sm" />
@@ -60,7 +53,7 @@ export function TeamPresence() {
     );
   }
 
-  const onlineCount = teamMembers.length;
+  const onlineCount = teamMembers.data.length;
 
   return (
     <div className="px-2 py-3">
@@ -77,13 +70,13 @@ export function TeamPresence() {
         <Users className="w-4 h-4 text-(--text-muted)" />
       </div>
 
-      {teamMembers.length === 0 ? (
+      {teamMembers.data.length === 0 ? (
         <div className="text-center py-4">
           <p className="text-xs text-(--text-muted)">{t('quickStats.noTeamMembersOnline')}</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {teamMembers.map((member: any) => {
+          {teamMembers.data.map((member: any) => {
             const presenceConfig =
               PRESENCE_CONFIG[member.presenceStatus as keyof typeof PRESENCE_CONFIG] ||
               PRESENCE_CONFIG.available;
@@ -96,7 +89,7 @@ export function TeamPresence() {
 
             return (
               <div
-                key={member._id}
+                key={member.id}
                 className="flex items-center gap-3 rounded-lg p-2 transition-all hover:bg-(--background-subtle)"
               >
                 <div className="relative">

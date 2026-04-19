@@ -20,22 +20,22 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
-import { toast } from 'sonner';
 import type { LeaveType } from '@/lib/types';
 import { calculateDays } from '@/lib/types';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useOrgMembers } from '@/hooks/useOrganizations';
+import { useCreateLeave } from '@/hooks/useLeaves';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface LeaveRequestWizardProps {
-  userId: Id<'users'>;
-  orgId?: Id<'organizations'>;
+  userId: string;
+  orgId?: string;
   isSuperadmin: boolean;
-  selectedOrgId?: Id<'organizations'>;
+  selectedOrgId?: string;
   onComplete?: () => void;
   onCancel?: () => void;
   preselectedStartDate?: string;
@@ -62,21 +62,17 @@ export function LeaveRequestWizard({
   preselectedEndDate,
 }: LeaveRequestWizardProps) {
   const { t } = useTranslation();
-  const createLeave = useMutation(api.leaves.createLeave);
+  const { user: currentUser } = useAuthStore();
+  const createLeaveMutation = useCreateLeave();
 
-  const useOrgFilter = isSuperadmin && selectedOrgId;
-  const allUsers = useQuery(
-    useOrgFilter ? api.organizations.getOrgMembers : api.users.queries.getAllUsers,
-    userId
-      ? useOrgFilter
-        ? {
-            organizationId: selectedOrgId as Id<'organizations'>,
-            superadminUserId: userId as Id<'users'>,
-          }
-        : { requesterId: userId as Id<'users'> }
-      : 'skip',
+  const useOrgFilter = isSuperadmin && selectedOrgId ? true : undefined;
+  
+  const { data: allUsers } = useOrgMembers(
+    selectedOrgId || '',
+    userId || '',
+    undefined,
+    useOrgFilter,
   );
-  const currentUser = useQuery(api.users.queries.getUserById, { userId });
 
   const canSelectEmployee = isSuperadmin ?? false;
 
@@ -129,17 +125,16 @@ export function LeaveRequestWizard({
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const targetUserId = canSelectEmployee ? (stepData.selectedUserId as Id<'users'>) : userId;
+      const targetUserId = canSelectEmployee ? stepData.selectedUserId : userId;
       const days = calculateDays(String(stepData.startDate), String(stepData.endDate));
 
-      await createLeave({
-        userId: targetUserId,
-        type: stepData.type!,
+      await createLeaveMutation.mutateAsync({
+        userId: targetUserId!,
+        organizationId: selectedOrgId || orgId || '',
+        leaveType: stepData.type!,
         startDate: String(stepData.startDate),
         endDate: String(stepData.endDate),
-        days,
         reason: String(stepData.reason),
-        comment: stepData.comment || undefined,
       });
 
       toast.success(t('toasts.leaveRequestSubmitted', 'Leave request submitted!'), {
@@ -352,7 +347,7 @@ function EmployeeStep({
       >
         <option value="">{t('placeholders.selectEmployee', 'Select employee...')}</option>
         {allUsers?.map((emp: any) => (
-          <option key={emp._id} value={emp._id}>
+          <option key={emp.id} value={emp.id}>
             {emp.name}
             {emp.department ? ` · ${emp.department}` : ''}
           </option>
@@ -564,7 +559,7 @@ function DetailsStep({
 }) {
   const { t } = useTranslation();
 
-  const selectedUser = allUsers?.find((u: any) => u._id === stepData.selectedUserId);
+  const selectedUser = allUsers?.find((u: any) => u.id === stepData.selectedUserId);
   const displayUser = selectedUser || currentUser;
 
   const typeLabels: Record<string, string> = {

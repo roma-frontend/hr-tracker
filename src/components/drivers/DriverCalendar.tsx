@@ -6,44 +6,30 @@
 
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useMemo, useState } from 'react';
+import { useDriverSchedules, useUpdateScheduleStatus } from '@/hooks/useDrivers';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import type { FunctionReference } from 'convex/server';
 import {
   ChevronLeft,
   ChevronRight,
   Clock,
   Calendar as CalendarIcon,
-  Car,
-  Coffee,
   Shield,
   Play,
   CheckCircle2,
-  Wrench,
 } from 'lucide-react';
 import { format, startOfWeek, addDays, isSameDay, isToday } from 'date-fns';
 import { enUS, ru, hy } from 'date-fns/locale';
-import { Input } from '../ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { TripDetailsModal } from './modals/TripDetailsModal';
 import { BlockTimeWizard } from './BlockTimeWizard';
-import { AnimatePresence, motion } from 'framer-motion';
-
-interface DriverCalendarProps {
-  driverId: Id<'drivers'>;
-  organizationId: Id<'organizations'>;
-  userId?: Id<'users'>;
-  role?: 'admin' | 'driver';
-}
+import { motion } from '@/lib/cssMotion';
 
 interface ScheduleItem {
-  _id: Id<'driverSchedules'>;
+  id: string;
   type: string;
   status: string;
   startTime: number;
@@ -57,6 +43,13 @@ interface ScheduleItem {
   userName?: string;
 }
 
+interface DriverCalendarProps {
+  driverId: string;
+  organizationId: string;
+  userId?: string;
+  role?: 'admin' | 'driver';
+}
+
 // Trip Card Component
 function TripCard({
   item,
@@ -65,10 +58,7 @@ function TripCard({
   role,
 }: {
   item: ScheduleItem;
-  onUpdateStatus: (
-    id: Id<'driverSchedules'>,
-    status: 'in_progress' | 'completed' | 'cancelled',
-  ) => void;
+  onUpdateStatus: (id: string, status: 'in_progress' | 'completed' | 'cancelled') => void;
   onOpenDetails?: (item: ScheduleItem) => void;
   role?: 'admin' | 'driver';
 }) {
@@ -220,7 +210,7 @@ function TripCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onUpdateStatus(item._id, 'in_progress');
+              onUpdateStatus(item.id, 'in_progress');
             }}
             className={`w-full mt-1 py-1.5 text-[9px] sm:text-[10px] font-semibold rounded-md ${config.btnBg} ${config.btnText} transition-colors flex items-center justify-center gap-1`}
           >
@@ -232,7 +222,7 @@ function TripCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onUpdateStatus(item._id, 'completed');
+              onUpdateStatus(item.id, 'completed');
             }}
             className="w-full mt-1 py-1.5 text-[9px] sm:text-[10px] font-semibold rounded-md bg-emerald-500 hover:bg-emerald-600 text-white transition-colors flex items-center justify-center gap-1"
           >
@@ -254,7 +244,6 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
 
   const dateFnsLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
-  // Get current week
   const weekStart = useMemo(() => {
     const d = startOfWeek(selectedDate, { weekStartsOn: 1 });
     d.setHours(0, 0, 0, 0);
@@ -263,19 +252,12 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
 
   const weekEnd = useMemo(() => weekStart + 7 * 24 * 60 * 60 * 1000 - 1, [weekStart]);
 
-  // Get schedule for the week
-  const schedule = useQuery(
-    api.drivers.queries.getDriverSchedule,
-    driverId ? ({ driverId, startTime: weekStart, endTime: weekEnd } as const) : 'skip',
-  );
+  const { data: schedule } = useDriverSchedules(driverId, weekStart, weekEnd);
 
-  // Mutations
-  const updateTripStatus = useMutation(
-    api.drivers.driver_operations.updateTripStatus as FunctionReference<'mutation'>,
-  );
+  const updateTripStatus = useUpdateScheduleStatus();
 
   const handleUpdateTripStatus = async (
-    scheduleId: Id<'driverSchedules'>,
+    scheduleId: string,
     status: 'in_progress' | 'completed' | 'cancelled',
   ) => {
     if (!userId) {
@@ -283,7 +265,7 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
       return;
     }
     try {
-      await updateTripStatus({ scheduleId, userId, status });
+      await updateTripStatus.mutateAsync({ scheduleId, status });
       toast.success(
         t('driverCalendar.tripStatusUpdated', 'Trip status updated to {{status}}', { status }),
       );
@@ -416,7 +398,7 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
                       .sort((a: ScheduleItem, b: ScheduleItem) => a.startTime - b.startTime)
                       .map((s: ScheduleItem) => (
                         <TripCard
-                          key={s._id}
+                          key={s.id}
                           item={s}
                           onUpdateStatus={handleUpdateTripStatus}
                           onOpenDetails={(item) => {
@@ -510,7 +492,7 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
                 .sort((a: ScheduleItem, b: ScheduleItem) => a.startTime - b.startTime)
                 .map((s: ScheduleItem) => (
                   <TripCard
-                    key={s._id}
+                    key={s.id}
                     item={s}
                     onUpdateStatus={handleUpdateTripStatus}
                     onOpenDetails={(item) => {

@@ -6,9 +6,7 @@
 'use client';
 
 import React from 'react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { useCheckLeaveConflictsManual } from '@/hooks/useEvents';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
@@ -20,11 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface CheckConflictsButtonProps {
-  leaveRequestId: Id<'leaveRequests'>;
-  userId: Id<'users'>;
+  leaveRequestId: string;
+  userId: string;
   startDate: string;
   endDate: string;
-  organizationId: Id<'organizations'>;
+  organizationId: string;
 }
 
 export function CheckConflictsButton({
@@ -34,7 +32,7 @@ export function CheckConflictsButton({
   endDate,
   organizationId,
 }: CheckConflictsButtonProps) {
-  const checkConflicts = useMutation(api.events.checkLeaveConflictsManual);
+  const { mutateAsync: checkConflicts } = useCheckLeaveConflictsManual();
   const [isChecking, setIsChecking] = React.useState(false);
   const [conflictCount, setConflictCount] = React.useState<number | null>(null);
 
@@ -47,7 +45,7 @@ export function CheckConflictsButton({
         startDate: new Date(startDate).getTime(),
         endDate: new Date(endDate).getTime(),
         organizationId,
-      });
+      }) as any;
       setConflictCount(result.conflictsFound);
     } catch (error: any) {
       console.error('Conflict check failed:', error);

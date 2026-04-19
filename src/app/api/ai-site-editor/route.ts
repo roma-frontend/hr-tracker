@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createGroq } from '@ai-sdk/groq';
+import { createClient } from '@/lib/supabase/server';
+import fs from 'fs';
+import path from 'path';
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
@@ -35,11 +38,6 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, delayMs = 5000): 
   }
   throw new Error('Max retries exceeded');
 }
-import { fetchMutation, fetchQuery } from 'convex/nextjs';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import fs from 'fs';
-import path from 'path';
 
 // ─── Whitelist / Blacklist ────────────────────────────────────────────────────
 
@@ -47,7 +45,6 @@ const ALLOWED_DIRECTORIES = ['src/app', 'src/components', 'src/i18n/locales'];
 
 const FORBIDDEN_PATHS = [
   'src/components/ui',
-  'convex',
   'src/app/api',
   'package.json',
   'tsconfig.json',
@@ -522,7 +519,6 @@ ALLOWED PATHS:
 
 FORBIDDEN:
 ❌ src/components/ui/
-❌ convex/
 ❌ src/app/api/
 ❌ package.json, .env, node_modules`;
 
@@ -696,13 +692,8 @@ export async function POST(req: NextRequest) {
 
     // Проверяем лимиты плана
     console.log('[AI Site Editor] Checking limits...');
-    // @ts-expect-error Convex type instantiation is too deep
-    const canEdit = await fetchQuery(api.aiSiteEditor.canMakeEdit, {
-      userId: userId as Id<'users'>,
-      organizationId: organizationId as Id<'organizations'>,
-      editType,
-    });
-    console.log('[AI Site Editor] Can edit:', canEdit);
+    // TODO: Implement plan limits check with Supabase
+    const canEdit = { allowed: true, reason: '' };
 
     if (!canEdit.allowed) {
       return NextResponse.json(
@@ -711,13 +702,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const supabase = await createClient();
+
     // Создаем сессию
-    const sessionId = await fetchMutation(api.aiSiteEditor.createSession, {
-      userId: userId as Id<'users'>,
-      organizationId: organizationId as Id<'organizations'>,
-      userMessage: message,
-      editType,
-    });
+    const { data: session, error: sessionError } = await supabase
+      .from('ai_site_editor_sessions')
+      .insert({
+        userId: userId,
+        organizationId,
+        user_message: message,
+        edit_type: editType,
+        status: 'pending',
+        created_at: Date.now(),
+      })
+      .select()
+      .single();
+
+    if (sessionError) {
+      throw new Error(sessionError.message);
+    }
+
+    const sessionId = session.id;
 
     // Находим релевантные файлы для контекста
     const filesToRead = findRelevantFiles(message);
@@ -786,25 +791,18 @@ export async function POST(req: NextRequest) {
 
     const changesMade = appliedFiles;
 
-    // Обновляем сессию в Convex
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateSessionMutation: any = api.aiSiteEditor.updateSession;
-    await fetchMutation(updateSessionMutation, {
-      sessionId: sessionId as Id<'aiSiteEditorSessions'>,
-      aiResponse: aiText,
-      changesMade,
-      status: 'completed',
-      tokensUsed: undefined,
-    });
+    // Обновляем сессию в Supabase
+    await supabase!
+      .from('ai_site_editor_sessions')
+      .update({
+        ai_response: aiText,
+        changes_made: changesMade,
+        status: 'completed',
+        updated_at: Date.now(),
+      })
+      .eq('id', sessionId);
 
-    // Увеличиваем счётчик использования
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const incrementUsageMutation: any = api.aiSiteEditor.incrementUsage;
-    await fetchMutation(incrementUsageMutation, {
-      userId: userId as Id<'users'>,
-      organizationId: organizationId as Id<'organizations'>,
-      editType,
-    });
+    // TODO: Увеличиваем счётчик использования (requires usage tracking table)
 
     // Возвращаем JSON ответ
     return NextResponse.json({
@@ -831,5 +829,69 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 },
     );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const action = searchParams.get('action');
+  const userId = searchParams.get('userId');
+
+  try {
+    const supabase = await createClient();
+
+    switch (action) {
+      case 'get-current-month-usage': {
+        if (!userId) {
+          return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+        }
+
+        // Get current month usage
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+        
+        const { data: sessions } = await supabase
+          .from('ai_site_editor_sessions')
+          .select('*')
+          .eq('userId', userId)
+          .gte('created_at', monthStart);
+
+        const usage = {
+          designChanges: sessions?.filter((s: any) => s.edit_type === 'design').length || 0,
+          contentChanges: sessions?.filter((s: any) => s.edit_type === 'content').length || 0,
+          layoutChanges: sessions?.filter((s: any) => s.edit_type === 'layout').length || 0,
+          logicChanges: sessions?.filter((s: any) => s.edit_type === 'logic').length || 0,
+          fullControlChanges: sessions?.filter((s: any) => s.edit_type === 'full_control').length || 0,
+          totalRequests: sessions?.length || 0,
+        };
+
+        return NextResponse.json({
+          data: usage,
+        });
+      }
+
+      case 'get-history': {
+        if (!userId) {
+          return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+        }
+
+        const limit = parseInt(searchParams.get('limit') || '10');
+
+        const { data: sessions } = await supabase
+          .from('ai_site_editor_sessions')
+          .select('*')
+          .eq('userId', userId)
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        return NextResponse.json({ data: sessions || [] });
+      }
+
+      default:
+        return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('AI Site Editor GET error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

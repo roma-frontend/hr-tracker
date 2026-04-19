@@ -14,9 +14,7 @@ import {
   CardSelectionStep,
 } from '@/components/ui/wizard-step-components';
 import { Car, MapPin, Clock, Calendar, Users } from 'lucide-react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useAvailableDrivers, useCreateDriverRequest } from '@/hooks/useDrivers';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +22,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
 interface RequestDriverWizardProps {
-  userId: Id<'users'>;
+  userId: string;
   onComplete?: () => void;
   onCancel?: () => void;
   preselectedDriverId?: string;
@@ -37,14 +35,11 @@ export function RequestDriverWizard({
   preselectedDriverId,
 }: RequestDriverWizardProps) {
   const { t } = useTranslation();
-  const requestDriver = useMutation(api.drivers.requests_mutations.requestDriver);
+  const requestDriver = useCreateDriverRequest();
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
-  const organizationId = (selectedOrgId ?? user?.organizationId) as Id<'organizations'> | undefined;
-  const drivers = useQuery(
-    api.drivers.queries.getAvailableDrivers,
-    organizationId ? { organizationId } : 'skip',
-  );
+  const organizationId = (selectedOrgId ?? user?.organizationId) as string | undefined;
+  const { data: drivers } = useAvailableDrivers(organizationId);
 
   const [wizardData, setWizardData] = useState<Record<string, string | number | boolean | null>>(
     {},
@@ -157,7 +152,7 @@ export function RequestDriverWizard({
             options={drivers
               .filter((driver) => driver !== null)
               .map((driver) => ({
-                value: driver._id,
+                value: driver.id,
                 title: driver.userName,
                 description: driver.userPosition || '',
                 icon: <Car className="w-6 h-6" />,
@@ -248,10 +243,9 @@ export function RequestDriverWizard({
 
       const endTime = startTime + 3600000;
 
-      const result = await requestDriver({
+      const result = await requestDriver.mutateAsync({
         organizationId,
-        requesterId: userId,
-        driverId: mergedData.driverId as Id<'drivers'>,
+        driverId: mergedData.driverId as string,
         startTime,
         endTime,
         tripInfo: {
@@ -261,19 +255,7 @@ export function RequestDriverWizard({
           passengerCount: Number(mergedData.passengerCount) || 1,
           notes: mergedData.notes ? String(mergedData.notes) : undefined,
         },
-        tripCategory: mergedData.tripCategory as
-          | 'client_meeting'
-          | 'airport'
-          | 'office_transfer'
-          | 'emergency'
-          | 'team_event'
-          | 'personal',
       });
-
-      if (result.error) {
-        toast.error(result.error.message);
-        return;
-      }
 
       toast.success(t('driverWizard.toast.success'));
       onComplete?.();

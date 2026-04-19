@@ -27,15 +27,13 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X, Calendar, Clock, Users, AlertCircle, Briefcase } from 'lucide-react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useCreateCompanyEvent } from '@/hooks/useEvents';
 
 interface CreateEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  organizationId: Id<'organizations'>;
-  userId: Id<'users'>;
+  organizationId: string;
+  userId: string;
   onSuccess?: () => void;
 }
 
@@ -91,7 +89,7 @@ export function CreateEventModal({
   onSuccess,
 }: CreateEventModalProps) {
   const { t } = useTranslation();
-  const createEvent = useMutation(api.events.createCompanyEvent);
+  const { mutateAsync: createEvent } = useCreateCompanyEvent();
 
   // Form state
   const [name, setName] = useState('');

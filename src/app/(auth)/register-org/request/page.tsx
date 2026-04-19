@@ -25,8 +25,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import bcrypt from 'bcryptjs';
-import { useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { useRequestOrganization } from '@/hooks/useOrganizationRequests';
 
 const passwordStrength = (pwd: string) => {
   if (pwd.length < 8) return 0;
@@ -62,7 +61,7 @@ export default function RequestOrgPage() {
     description: '',
   });
 
-  const requestOrg = useMutation(api.organizationRequests.requestOrganization);
+  const requestOrg = useRequestOrganization();
 
   const strength = passwordStrength(formData.password);
 
@@ -99,7 +98,7 @@ export default function RequestOrgPage() {
         const hashedPassword = await bcrypt.hash(formData.password, 10);
 
         // Create request
-        await requestOrg({
+        await requestOrg.mutateAsync({
           name: formData.orgName,
           slug: formData.slug,
           email: formData.email,
@@ -151,10 +150,7 @@ export default function RequestOrgPage() {
         />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
+      <div
         className="w-full max-w-2xl relative"
       >
         <div
@@ -165,9 +161,8 @@ export default function RequestOrgPage() {
           <div className="flex items-center gap-3 mb-6">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${planColor})` }}
             >
-              <Icon className="w-6 h-6 text-white" />
+              <Icon className="w-6 h-6 text-blue-500" />
             </div>
             <div>
               <h1
@@ -529,13 +524,10 @@ export default function RequestOrgPage() {
             )}
 
             {/* Submit */}
-            <motion.button
+            <button
               type="submit"
               disabled={isPending}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
-              style={{ background: `linear-gradient(135deg, ${planColor})` }}
+              className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isPending ? (
                 <>
@@ -546,7 +538,7 @@ export default function RequestOrgPage() {
                   <CheckCircle2 className="w-4 h-4" /> Submit Request
                 </>
               )}
-            </motion.button>
+            </button>
 
             <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
               We'll review your request and get back to you within 24 hours.
@@ -563,7 +555,7 @@ export default function RequestOrgPage() {
             <ArrowLeft className="w-3 h-3" /> {t('ui.backToPlans')}
           </Link>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -19,7 +19,7 @@ import { AvatarUpload } from '@/components/ui/avatar-upload';
 import { AnimatePresence } from '@/lib/cssMotion';
 
 interface Employee {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   position?: string;
@@ -52,7 +52,7 @@ interface EmployeeCardProps {
   roleConf: RoleConfig;
   typeConf: TypeConfig;
   presence: { labelKey: string; cls: string };
-  supervisors?: Array<{ _id: string; name: string }>;
+  supervisors?: Array<{ id: string; name: string }>;
   canManage: boolean;
   isAdmin: boolean;
   openMenuId: string | null;
@@ -88,7 +88,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
     const router = useRouter();
     const RoleIcon = roleConf.icon;
 
-    const supervisor = supervisors?.find((s) => s._id === emp.supervisorId);
+    const supervisor = supervisors?.find((s) => s.id === emp.supervisorId);
 
     // Grid view
     if (viewMode === 'grid') {
@@ -98,7 +98,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ delay: index * 0.03 }}
-          onClick={() => router.push(`/employees/${emp._id}`)}
+          onClick={() => router.push(`/employees/${emp.id}`)}
           className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
           style={{
             background: 'var(--card)',
@@ -108,11 +108,11 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
         >
           <div className="flex items-start gap-3 mb-4">
             <AvatarUpload
-              userId={emp._id}
+              userId={emp.id}
               currentUrl={emp.avatarUrl}
               name={emp.name}
               size="md"
-              readonly={!canManage && emp._id !== (window as any).__CURRENT_USER_ID__}
+              readonly={!canManage && emp.id !== (window as any).__CURRENT_USERid__}
             />
             <div className="min-w-0 flex-1">
               <h3
@@ -215,7 +215,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
         transition={{ delay: index * 0.02 }}
-        onClick={() => router.push(`/employees/${emp._id}`)}
+        onClick={() => router.push(`/employees/${emp.id}`)}
         className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-(--background-subtle) relative"
         style={{ borderColor: 'var(--border)', opacity: emp.isActive ? 1 : 0.5 }}
       >
@@ -319,7 +319,7 @@ export const EmployeeCard = React.memo<EmployeeCardProps>(
           <button
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/employees/${emp._id}`);
+              router.push(`/employees/${emp.id}`);
             }}
             className="p-1.5 rounded-md text-blue-500 hover:bg-blue-500/20 transition-colors"
             title={t('common.view')}

@@ -10,16 +10,14 @@ import { useTranslation } from 'react-i18next';
 import { Wizard, WizardStep } from '@/components/ui/wizard';
 import { CardSelectionStep, TextInputStep } from '@/components/ui/wizard-step-components';
 import { Calendar, Clock, FileText } from 'lucide-react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useCreateSchedule } from '@/hooks/useDrivers';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
 interface BlockTimeWizardProps {
-  driverId: Id<'drivers'>;
-  organizationId: Id<'organizations'>;
+  driverId: string;
+  organizationId: string;
   onComplete?: () => void;
   onCancel?: () => void;
 }
@@ -31,7 +29,7 @@ export function BlockTimeWizard({
   onCancel,
 }: BlockTimeWizardProps) {
   const { t } = useTranslation();
-  const blockTimeOff = useMutation(api.drivers.driver_operations.blockTimeOff);
+  const createSchedule = useCreateSchedule();
 
   const [wizardData, setWizardData] = useState<Record<string, any>>({});
 
@@ -148,16 +146,15 @@ export function BlockTimeWizard({
       }
 
       if (endTime <= startTime) {
-        toast.error('End time must be after start time');
+        toast.error(t('toasts.endTimeAfterStart'));
         return;
       }
 
-      await blockTimeOff({
+      await createSchedule.mutateAsync({
         driverId,
-        organizationId,
+        type: type as 'vacation' | 'sick' | 'personal',
         startTime,
         endTime,
-        type: type as 'vacation' | 'sick' | 'personal',
         reason,
       });
 

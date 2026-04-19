@@ -7,10 +7,9 @@ import React from 'react';
 import { Bell } from 'lucide-react';
 import { useUnreadRequestsCount, useTabBlink } from '@/hooks/useUnreadRequests';
 import { useTranslation } from 'react-i18next';
-import type { Id } from '@/convex/_generated/dataModel';
 
 interface UnreadRequestsBadgeProps {
-  userId?: Id<'users'> | null;
+  userId?: string | null;
   className?: string;
 }
 

@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { ConversationList } from './ConversationList';
 import { ChatWindow } from './ChatWindow';
 import { NewConversationModal } from './NewConversationModal';
@@ -14,6 +11,14 @@ import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useTranslation } from 'react-i18next';
 import { playChatMessageSound } from '@/lib/notificationSound';
+import {
+  useChatConversations,
+  useTogglePinConversation,
+  useDeleteConversation,
+  useRestoreConversation,
+  useToggleArchive,
+  useToggleMute,
+} from '@/hooks/useChat';
 
 interface Props {
   userId: string;
@@ -24,11 +29,11 @@ interface Props {
 }
 
 export interface ActiveCall {
-  callId: Id<'chatCalls'>;
-  conversationId: Id<'chatConversations'>;
+  callId: string;
+  conversationId: string;
   type: 'audio' | 'video';
   isInitiator: boolean;
-  remoteUserId?: Id<'users'>;
+  remoteUserId?: string;
   remoteUserName?: string;
 }
 
@@ -39,7 +44,7 @@ export default function ChatClient({
   userAvatar,
   userRole,
 }: Props) {
-  const [selectedConvId, setSelectedConvId] = useState<Id<'chatConversations'> | null>(null);
+  const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
   const [showNewConv, setShowNewConv] = useState(false);
   const [activeCall, setActiveCall] = useState<ActiveCall | null>(null);
   const [mobileShowChat, setMobileShowChat] = useState(false);
@@ -49,31 +54,26 @@ export default function ChatClient({
     { conversationId: string; content: string; type?: string }[]
   >([]);
 
-  const uid = userId as Id<'users'>;
-  const orgId = organizationId as Id<'organizations'>;
+  const uid = userId;
+  const orgId = organizationId;
 
   // Respect org selector: if a specific org is selected (e.g. superadmin), use it
   const { selectedOrgId } = useOrgSelectorStore();
   // For superadmins, don't pass organizationId - they see all conversations they're members of
-  const effectiveOrgId = userRole === 'superadmin' ? undefined : (selectedOrgId ? (selectedOrgId as Id<'organizations'>) : orgId);
+  const effectiveOrgId = userRole === 'superadmin' ? undefined : (selectedOrgId ?? orgId);
 
   console.log('[ChatClient] userRole:', userRole, 'effectiveOrgId:', effectiveOrgId);
 
-  const conversations = useQuery(
-    api.chat.queries.getMyConversations,
-    uid ? { userId: uid, organizationId: effectiveOrgId } : 'skip',
-  );
-
-  const initiateCallMutation = useMutation(api.chat.calls.initiateCall);
+  const { data: conversations } = useChatConversations(uid, effectiveOrgId);
 
   // Conversation management mutations
-  const togglePinMutation = useMutation(api.chat.mutations.togglePin);
-  const deleteConversationMutation = useMutation(api.chat.mutations.deleteConversation);
-  const restoreConversationMutation = useMutation(api.chat.mutations.restoreConversation);
-  const toggleArchiveMutation = useMutation(api.chat.mutations.toggleArchive);
-  const toggleMuteMutation = useMutation(api.chat.mutations.toggleMute);
+  const togglePinMutation = useTogglePinConversation();
+  const deleteConversationMutation = useDeleteConversation();
+  const restoreConversationMutation = useRestoreConversation();
+  const toggleArchiveMutation = useToggleArchive();
+  const toggleMuteMutation = useToggleMute();
 
-  const handleSelectConversation = useCallback((convId: Id<'chatConversations'>) => {
+  const handleSelectConversation = useCallback((convId: string) => {
     setSelectedConvId(convId);
     setMobileShowChat(true);
     // slight delay so animation fires after state set
@@ -91,9 +91,9 @@ export default function ChatClient({
 
   const handleStartCall = useCallback(
     async (
-      convId: Id<'chatConversations'>,
+      convId: string,
       type: 'audio' | 'video',
-      participantIds: Id<'users'>[],
+      participantIds: string[],
       remoteUserName?: string,
     ) => {
       console.log('[ChatClient] Starting call', {
@@ -103,15 +103,10 @@ export default function ChatClient({
         org: effectiveOrgId,
       });
 
-      const callId = await initiateCallMutation({
-        conversationId: convId,
-        organizationId: effectiveOrgId ?? undefined,
-        initiatorId: uid,
-        type,
-        participantIds,
-      });
+      // TODO: Implement WebRTC call signaling via API
+      // For now, just set the active call state
       setActiveCall({
-        callId,
+        callId: `temp-${Date.now()}`,
         conversationId: convId,
         type,
         isInitiator: true,
@@ -119,7 +114,7 @@ export default function ChatClient({
         remoteUserName,
       });
     },
-    [initiateCallMutation, effectiveOrgId, uid],
+    [effectiveOrgId, uid],
   );
 
   const handleEndCall = useCallback(() => {
@@ -238,19 +233,19 @@ export default function ChatClient({
               setShowNewConv(true);
             }}
             onTogglePin={async (convId) => {
-              await togglePinMutation({ conversationId: convId, userId: uid });
+              await togglePinMutation.mutateAsync({ conversationId: convId, userId: uid });
             }}
             onDelete={async (convId) => {
-              await deleteConversationMutation({ conversationId: convId, userId: uid });
+              await deleteConversationMutation.mutateAsync({ conversationId: convId, userId: uid });
             }}
             onRestore={async (convId) => {
-              await restoreConversationMutation({ conversationId: convId, userId: uid });
+              await restoreConversationMutation.mutateAsync({ conversationId: convId, userId: uid });
             }}
             onToggleArchive={async (convId) => {
-              await toggleArchiveMutation({ conversationId: convId, userId: uid });
+              await toggleArchiveMutation.mutateAsync({ conversationId: convId, userId: uid });
             }}
             onToggleMute={async (convId) => {
-              await toggleMuteMutation({ conversationId: convId, userId: uid });
+              await toggleMuteMutation.mutateAsync({ conversationId: convId, userId: uid });
             }}
           />
         </div>

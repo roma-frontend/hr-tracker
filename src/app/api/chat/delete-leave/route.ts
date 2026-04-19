@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchMutation, fetchQuery } from 'convex/nextjs';
-import { api } from '../../../../../convex/_generated/api';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
   try {
@@ -17,24 +15,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'Missing requesterId' }, { status: 400 });
     }
 
+    const supabase = await createClient();
+
     // Fetch all data
-    const allLeaves = await fetchQuery(api.leaves.getAllLeaves, {
-      requesterId: requesterId as any,
-    });
-    const allUsers = await fetchQuery(api.users.queries.getAllUsers, { requesterId: requesterId as any });
+    const { data: requesterUser } = await supabase.from('users').select('organizationId').eq('id', requesterId).single();
+    const organizationId = requesterUser?.organizationId;
+
+    const { data: allLeaves } = await supabase
+      .from('leave_requests')
+      .select('*')
+      .eq('organizationId', organizationId || '');
+    
+    const { data: allUsers } = await supabase
+      .from('users')
+      .select('*')
+      .eq('organizationId', organizationId || '');
 
     // Find leave by ID first
-    let targetLeave = (allLeaves as any[]).find((l: any) => l._id === leaveId);
+    let targetLeave = (allLeaves as any[]).find((l: any) => l.id === leaveId);
 
     // If not found by ID — search by employee name + dates
     if (!targetLeave) {
       targetLeave = (allLeaves as any[]).find((l: any) => {
-        const leaveUser = (allUsers as any[]).find((u: any) => u._id === l.userId);
+        const leaveUser = (allUsers as any[]).find((u: any) => u.id === l.userid);
         const nameOk = searchEmployeeName
           ? leaveUser?.name?.toLowerCase().includes(searchEmployeeName.toLowerCase())
           : true;
-        const startOk = searchStartDate ? l.startDate === searchStartDate : true;
-        const endOk = searchEndDate ? l.endDate === searchEndDate : true;
+        const startOk = searchStartDate ? l.start_date === searchStartDate : true;
+        const endOk = searchEndDate ? l.end_date === searchEndDate : true;
         const typeOk = searchLeaveType ? l.type === searchLeaveType : true;
         return nameOk && startOk && endOk && typeOk;
       });
@@ -44,8 +52,8 @@ export async function POST(req: Request) {
       const preview = (allLeaves as any[])
         .slice(0, 5)
         .map((l: any) => {
-          const u = (allUsers as any[]).find((u: any) => u._id === l.userId);
-          return `${u?.name ?? '?'}: ${l.type} ${l.startDate}→${l.endDate} [${l._id}]`;
+          const u = (allUsers as any[]).find((u: any) => u.id === l.userid);
+          return `${u?.name ?? '?'}: ${l.type} ${l.start_date}→${l.end_date} [${l.id}]`;
         })
         .join(', ');
       return NextResponse.json({
@@ -55,13 +63,13 @@ export async function POST(req: Request) {
     }
 
     // Find requester
-    const requester = (allUsers as any[]).find((u: any) => u._id === requesterId);
+    const requester = (allUsers as any[]).find((u: any) => u.id === requesterId);
     if (!requester) {
       return NextResponse.json({ success: false, message: 'Requester not found' });
     }
 
     const isAdmin = requester.role === 'admin';
-    const isOwner = targetLeave.userId === requesterId;
+    const isOwner = targetLeave.userid === requesterId;
 
     if (!isAdmin && !isOwner) {
       return NextResponse.json({
@@ -70,17 +78,14 @@ export async function POST(req: Request) {
       });
     }
 
-    const ownerUser = (allUsers as any[]).find((u: any) => u._id === targetLeave.userId);
+    const ownerUser = (allUsers as any[]).find((u: any) => u.id === targetLeave.userid);
     const ownerName = ownerUser?.name ?? 'Employee';
 
-    await fetchMutation(api.leaves.deleteLeave, {
-      leaveId: targetLeave._id as Id<'leaveRequests'>,
-      requesterId: requesterId as Id<'users'>,
-    });
+    await supabase.from('leave_requests').delete().eq('id', targetLeave.id);
 
     return NextResponse.json({
       success: true,
-      message: `✅ ${isAdmin && !isOwner ? `${ownerName}'s` : 'Your'} ${targetLeave.type} leave (${targetLeave.startDate} → ${targetLeave.endDate}) has been deleted.${targetLeave.status === 'approved' ? ' Leave balance restored.' : ''}`,
+      message: `✅ ${isAdmin && !isOwner ? `${ownerName}'s` : 'Your'} ${targetLeave.type} leave (${targetLeave.start_date} → ${targetLeave.end_date}) has been deleted.${targetLeave.status === 'approved' ? ' Leave balance restored.' : ''}`,
     });
   } catch (error: any) {
     return NextResponse.json({

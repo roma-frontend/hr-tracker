@@ -1,20 +1,18 @@
 'use client';
 
-import { useMaintenanceAutoLogout } from '@/hooks/useMaintenanceAutoLogout';
-import { useConvexAuthReady } from '@/lib/convex';
+import { useState, useEffect } from 'react';
+import { MaintenanceAutoLogoutInner } from '@/components/MaintenanceAutoLogoutInner';
 
-/**
- * Component that handles auto-logout when maintenance mode is detected
- * This runs on all protected pages and logs out users when maintenance starts
- * Only activates when Convex is ready to prevent hook errors on static pages.
- */
 export function MaintenanceAutoLogout() {
-  const isConvexReady = useConvexAuthReady();
+  const [isMounted, setIsMounted] = useState(false);
 
-  if (!isConvexReady) {
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
     return null;
   }
 
-  useMaintenanceAutoLogout();
-  return null;
+  return <MaintenanceAutoLogoutInner />;
 }

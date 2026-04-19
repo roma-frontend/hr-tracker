@@ -10,6 +10,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 // ═══════════════════════════════════════════════════════════════
 // PUBLIC PATHS (no auth required)
@@ -38,6 +39,11 @@ const PUBLIC_PATHS = [
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
   '/api/auth/face-login',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/auth/oauth-session',
+  '/api/auth/session',
+  '/api/auth/callback',
   '/api/security/face-verify',
   '/api/security/log-event',
   '/api/chat',
@@ -55,6 +61,7 @@ const PUBLIC_PATHS = [
   '/api/chat/link-preview',
   '/api/drivers/available',
   '/api/events/scan-conflicts',
+  '/auth/callback',
   '/_next',
 ];
 
@@ -119,16 +126,35 @@ function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-function hasAuthCookie(request: NextRequest): boolean {
-  return (
-    request.cookies.has('hr-auth-token') || request.cookies.has('oauth-session')
+async function hasValidSession(request: NextRequest): Promise<boolean> {
+  const response = NextResponse.next();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          response.cookies.set({ name, value: '', ...options });
+        },
+      },
+    }
   );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  return !!session;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // SECURITY HEADERS
 // ═══════════════════════════════════════════════════════════════
-function applySecurityHeaders(response: NextResponse): NextResponse {
+function applySecurityHeaders(request: NextRequest, response: NextResponse): NextResponse {
   const isProduction = process.env.NODE_ENV === 'production';
 
   // Content Security Policy
@@ -146,7 +172,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com https://*.sentry.io https://vercel.live https://va.vercel-scripts.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.convex.cloud https://*.convex.site https://*.sentry.io https://vercel.live https://*.stripe.com https://*.js.stripe.com https://va.vercel-scripts.com https://vitals.vercel-insights.com wss://*.convex.cloud wss://*.vercel.live",
+      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://*.sentry.io https://vercel.live https://*.stripe.com https://*.js.stripe.com https://va.vercel-scripts.com https://vitals.vercel-insights.com wss://*.supabase.co wss://*.supabase.in wss://*.vercel.live",
       "worker-src 'self' blob:",
       "frame-src 'none'",
       "object-src 'none'",
@@ -156,11 +182,13 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     ].join('; '),
   );
 
-  // HSTS — enforce HTTPS
-  response.headers.set(
-    'Strict-Transport-Security',
-    'max-age=31536000; includeSubDomains; preload',
-  );
+  // HSTS — enforce HTTPS (skip localhost)
+  if (isProduction && !request.nextUrl.hostname.includes('localhost')) {
+    response.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload',
+    );
+  }
 
   // X-Content-Type-Options
   response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -186,7 +214,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 // ═══════════════════════════════════════════════════════════════
 // MIDDLEWARE
 // ═══════════════════════════════════════════════════════════════
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip Next.js internal paths and static files
@@ -197,7 +225,7 @@ export function middleware(request: NextRequest) {
   ) {
     // Still apply security headers to API responses
     const response = NextResponse.next();
-    return applySecurityHeaders(response);
+    return applySecurityHeaders(request, response);
   }
 
   // Public paths — no auth check needed
@@ -205,16 +233,20 @@ export function middleware(request: NextRequest) {
     // If user is already authenticated and tries to access login/register, redirect to dashboard
     // BUT skip this redirect if maintenance mode is active (prevents infinite redirect loop)
     const isMaintenance = request.nextUrl.searchParams.get('maintenance') === 'true';
-    if (AUTH_PATHS.some((prefix) => pathname.startsWith(prefix)) && hasAuthCookie(request) && !isMaintenance) {
+    const hasSession = await hasValidSession(request);
+
+    if (AUTH_PATHS.some((prefix) => pathname.startsWith(prefix)) && hasSession && !isMaintenance) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     const response = NextResponse.next();
-    return applySecurityHeaders(response);
+    return applySecurityHeaders(request, response);
   }
 
   // Protected paths — require auth
   if (isProtectedPath(pathname)) {
-    if (!hasAuthCookie(request)) {
+    const hasSession = await hasValidSession(request);
+
+    if (!hasSession) {
       // Redirect to login with callback URL
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('next', pathname);
@@ -223,8 +255,8 @@ export function middleware(request: NextRequest) {
   }
 
   // All other paths — apply security headers
-  const response = NextResponse.next();
-  return applySecurityHeaders(response);
+    const response = NextResponse.next();
+    return applySecurityHeaders(request, response);
 }
 
 // ═══════════════════════════════════════════════════════════════

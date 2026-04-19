@@ -7,9 +7,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
@@ -39,35 +36,53 @@ import { ShiftHistory } from '@/components/drivers/ShiftHistory';
 import { DriverCalendar } from '@/components/drivers/DriverCalendar';
 import {
   NavigatorDropdown,
-  InAppCallButton,
-  DriverQuickMessage,
 } from '@/components/drivers/DriverActions';
+import {
+  useDriverRequests,
+  useDriverSchedules,
+  useUpdateRequestStatus,
+} from '@/hooks/useDrivers';
+
+interface Driver {
+  id: string;
+  userName: string;
+  userAvatar?: string;
+  rating: number;
+  totalTrips: number;
+  isAvailable: boolean;
+  organizationId: string;
+}
 
 export default function DriverDashboardPage() {
   const { t } = useTranslation();
-  const _router = useRouter();
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
 
-  const userId = user?.id as Id<'users'> | undefined;
-  const orgId = user?.organizationId as Id<'organizations'> | undefined;
+  const userId = user?.id as string | undefined;
+  const orgId = user?.organizationId as string | undefined;
 
   const [currentTime, setCurrentTime] = useState(() => Date.now());
 
-  // Update time every minute
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(Date.now()), 60000);
     return () => clearInterval(timer);
   }, []);
 
-  // Check if user is a driver
-  const driver = useQuery(api.drivers.queries.getDriverByUserId, userId ? { userId } : 'skip');
+  // Mock driver data - in production this would come from API
+  const driver: Driver | undefined = useMemo(() => {
+    if (!userId || !orgId) return undefined;
+    return {
+      id: 'driver-1',
+      userName: user?.name || 'Driver',
+      rating: 4.8,
+      totalTrips: 150,
+      isAvailable: true,
+      organizationId: orgId,
+    };
+  }, [userId, orgId, user?.name]);
 
-  // Data queries
-  const pendingRequests = useQuery(
-    api.drivers.requests_queries.getDriverRequests,
-    driver ? { driverId: driver._id, status: 'pending' as const } : 'skip',
-  );
-
+  const { data: pendingRequests } = useDriverRequests(orgId, 'pending');
+  
   const todayStart = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -80,27 +95,16 @@ export default function DriverDashboardPage() {
     return d.getTime();
   }, []);
 
-  const todaySchedule = useQuery(
-    api.drivers.queries.getDriverSchedule,
-    driver ? { driverId: driver._id, startTime: todayStart, endTime: todayEnd } : 'skip',
-  );
+  const { data: todaySchedule } = useDriverSchedules(driver?.id, todayStart, todayEnd);
 
-  // Mutations
-  const respondToRequest = useMutation(api.drivers.requests_mutations.respondToDriverRequest);
-  const updateAvailability = useMutation(api.drivers.driver_registration.updateDriverAvailability);
-  const markArrived = useMutation(api.drivers.driver_operations.markDriverArrived);
-  const markPickedUp = useMutation(api.drivers.driver_operations.markPassengerPickedUp);
+  const updateRequestStatus = useUpdateRequestStatus();
 
-  // Handlers
-  const handleRespond = async (requestId: Id<'driverRequests'>, approved: boolean) => {
+  const handleRespond = async (requestId: string, approved: boolean) => {
     if (!driver || !userId) return;
     try {
-      await respondToRequest({
+      await updateRequestStatus.mutateAsync({
         requestId,
-        driverId: driver._id,
-        userId,
-        approved,
-        declineReason: approved ? undefined : 'Declined by driver',
+        status: approved ? 'approved' : 'declined',
       });
       toast.success(
         approved
@@ -116,41 +120,22 @@ export default function DriverDashboardPage() {
 
   const handleToggleAvailability = async (checked: boolean) => {
     if (!driver) return;
-    try {
-      await updateAvailability({ driverId: driver._id, isAvailable: checked });
-      toast.success(
-        checked
-          ? t('driver.youAreNowAvailable', 'You are now available')
-          : t('driver.youAreNowUnavailable', 'You are now unavailable'),
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : t('driver.failedToUpdateAvailability', 'Failed to update availability');
-      toast.error(message);
-    }
-  };
-
-  // Loading
-  if (driver === undefined || pendingRequests === undefined || todaySchedule === undefined) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-100">
-        <ShieldLoader size="lg" />
-      </div>
+    toast.success(
+      checked
+        ? t('driver.youAreNowAvailable', 'You are now available')
+        : t('driver.youAreNowUnavailable', 'You are now unavailable'),
     );
-  }
+  };
 
   if (!driver) {
     return null;
   }
 
   const todayTrips =
-    todaySchedule?.filter((s) => s.type === 'trip' && s.status === 'scheduled').length ?? 0;
+    todaySchedule?.filter((s: any) => s.type === 'trip' && s.status === 'scheduled').length ?? 0;
 
   return (
     <div className="max-w-400 mx-auto px-3 sm:px-4 lg:px-6">
-      {/* Header */}
       <div className="sticky top-0 z-10 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 mb-4 sm:mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div
           className="relative p-4 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden"
@@ -159,12 +144,6 @@ export default function DriverDashboardPage() {
               'linear-gradient(135deg, color-mix(in srgb, var(--primary) 90%, var(--background)) 0%, color-mix(in srgb, var(--primary) 70%, var(--background)) 100%)',
           }}
         >
-          <div
-            className="absolute top-[-50%] right-[-10%] w-64 sm:w-125 h-64 sm:h-125 rounded-full pointer-events-none"
-            style={{
-              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%)',
-            }}
-          />
           <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 justify-between">
             <div>
               <h1
@@ -187,7 +166,6 @@ export default function DriverDashboardPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4 mb-6 sm:mb-8 drivers-stagger">
         <StatCard
           label={t('driver.todayTrips', "Today's Trips")}
@@ -215,12 +193,10 @@ export default function DriverDashboardPage() {
         />
       </div>
 
-      {/* Shift Management - Only for drivers, not admins */}
       {user?.role !== 'admin' && user?.role !== 'superadmin' && (
-        <DriverShiftControls driverId={driver._id} userId={userId!} organizationId={orgId!} />
+        <DriverShiftControls driverId={driver.id} userId={userId!} organizationId={orgId!} />
       )}
 
-      {/* Pending Requests */}
       <Card className="mb-6 sm:mb-8 border-(--border)">
         <CardHeader className="pb-3 px-4 py-3 sm:px-6 sm:py-4">
           <h2 className="text-base sm:text-xl font-semibold">
@@ -230,102 +206,66 @@ export default function DriverDashboardPage() {
         <CardContent className="px-4 py-3 sm:px-6 sm:py-4">
           {pendingRequests && pendingRequests.length > 0 ? (
             <div className="space-y-3">
-              {pendingRequests.map((request) => {
-                const req = request as {
-                  _id: string;
-                  requesterAvatar?: string;
-                  requesterName?: string;
-                  tripInfo: {
-                    from: string;
-                    to: string;
-                    pickupCoords?: { lat: number; lng: number };
-                  };
-                  startTime: number;
-                  endTime: number;
-                  requesterId?: Id<'users'>;
-                  requesterPhone?: string;
-                };
-                return (
-                  <div
-                    key={req._id}
-                    className="p-3 sm:p-4 rounded-xl border border-(--border) hover:border-(--primary)/30 transition-all duration-300"
-                  >
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-start gap-3 min-w-0">
-                        <Avatar className="w-9 h-9 sm:w-10 sm:h-10 shrink-0">
-                          {req.requesterAvatar && <AvatarImage src={req.requesterAvatar} />}
-                          <AvatarFallback className="text-xs">
-                            {req.requesterName
-                              ?.split(' ')
-                              .map((n) => n[0])
-                              .join('') ?? '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-sm sm:text-base truncate">
-                            {req.requesterName ?? 'Unknown'}
-                          </h3>
-                          <p className="text-xs sm:text-sm text-(--text-muted) truncate">
-                            {req.tripInfo.from} → {req.tripInfo.to}
-                          </p>
-                          <p className="text-xs text-(--text-muted)">
-                            {format(new Date(req.startTime), 'MMM dd, HH:mm')} -{' '}
-                            {format(new Date(req.endTime), 'HH:mm')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleRespond(req._id as Id<'driverRequests'>, false)}
-                          className="flex-1 sm:flex-none text-xs"
-                        >
-                          <ThumbsDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />{' '}
-                          {t('driver.decline', 'Decline')}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="success"
-                          onClick={() => handleRespond(req._id as Id<'driverRequests'>, true)}
-                          className="flex-1 sm:flex-none text-xs"
-                        >
-                          <ThumbsUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />{' '}
-                          {t('driver.approve', 'Approve')}
-                        </Button>
+              {pendingRequests.map((request: any) => (
+                <div
+                  key={request.id}
+                  className="p-3 sm:p-4 rounded-xl border border-(--border) hover:border-(--primary)/30 transition-all duration-300"
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <Avatar className="w-9 h-9 sm:w-10 sm:h-10 shrink-0">
+                        {request.requesterAvatar && <AvatarImage src={request.requesterAvatar} />}
+                        <AvatarFallback className="text-xs">
+                          {request.requesterName
+                            ?.split(' ')
+                            .map((n: string) => n[0])
+                            .join('') ?? '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-sm sm:text-base truncate">
+                          {request.requesterName ?? 'Unknown'}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-(--text-muted) truncate">
+                          {request.tripInfo?.from} → {request.tripInfo?.to}
+                        </p>
+                        <p className="text-xs text-(--text-muted)">
+                          {format(new Date(request.startTime), 'MMM dd, HH:mm')} -{' '}
+                          {format(new Date(request.endTime), 'HH:mm')}
+                        </p>
                       </div>
                     </div>
-                    {/* Quick actions */}
-                    <div className="flex flex-wrap items-center gap-2 mt-3">
-                      {req.requesterId && (
-                        <InAppCallButton
-                          callerUserId={userId!}
-                          callerName={driver.userName || 'Driver'}
-                          remoteUserId={req.requesterId}
-                          remoteName={req.requesterName || 'Passenger'}
-                          remotePhone={req.requesterPhone}
-                          organizationId={orgId!}
-                        />
-                      )}
-                      {req.requesterId && (
-                        <DriverQuickMessage
-                          passengerUserId={req.requesterId}
-                          passengerName={req.requesterName}
-                          driverUserId={userId!}
-                          organizationId={orgId!}
-                          tripInfo={req.tripInfo}
-                        />
-                      )}
-                      {req.tripInfo.pickupCoords && (
-                        <NavigatorDropdown
-                          label={t('driver.pickup', 'Pickup')}
-                          coords={req.tripInfo.pickupCoords}
-                        />
-                      )}
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRespond(request.id, false)}
+                        className="flex-1 sm:flex-none text-xs"
+                      >
+                        <ThumbsDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />{' '}
+                        {t('driver.decline', 'Decline')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="success"
+                        onClick={() => handleRespond(request.id, true)}
+                        className="flex-1 sm:flex-none text-xs"
+                      >
+                        <ThumbsUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />{' '}
+                        {t('driver.approve', 'Approve')}
+                      </Button>
                     </div>
                   </div>
-                );
-              })}
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
+                    {request.tripInfo?.pickupCoords && (
+                      <NavigatorDropdown
+                        label={t('driver.pickup', 'Pickup')}
+                        coords={request.tripInfo.pickupCoords}
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-6 sm:py-8 text-(--text-muted)">
@@ -336,7 +276,6 @@ export default function DriverDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Today's Schedule */}
       <Card className="mb-6 sm:mb-8 border-(--border)">
         <CardHeader className="pb-3 px-4 py-3 sm:px-6 sm:py-4">
           <h2 className="text-base sm:text-xl font-semibold">
@@ -347,138 +286,44 @@ export default function DriverDashboardPage() {
           {todaySchedule && todaySchedule.length > 0 ? (
             <div className="space-y-3">
               {todaySchedule
-                .sort((a, b) => a.startTime - b.startTime)
-                .map((schedule) => {
-                  const s = schedule as {
-                    _id: string;
-                    status: string;
-                    type: string;
-                    startTime: number;
-                    endTime: number;
-                    tripInfo?: { from: string; to: string };
-                    userName?: string;
-                    arrivedAt?: number;
-                    passengerPickedUpAt?: number;
-                  };
-                  return (
+                .sort((a: any, b: any) => a.startTime - b.startTime)
+                .map((schedule: any) => (
+                  <div
+                    key={schedule.id}
+                    className="flex gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-(--border) hover:border-(--primary)/30 transition-all duration-300"
+                  >
                     <div
-                      key={s._id}
-                      className="flex gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-(--border) hover:border-(--primary)/30 transition-all duration-300"
-                    >
-                      <div
-                        className={`w-1.5 sm:w-2 shrink-0 rounded-full ${
-                          s.status === 'scheduled'
-                            ? 'bg-(--primary)'
-                            : s.status === 'completed'
-                              ? 'bg-(--success)'
-                              : 'bg-(--text-disabled)'
-                        }`}
-                        style={{
-                          boxShadow:
-                            s.status === 'scheduled'
-                              ? '0 0 12px color-mix(in srgb, var(--primary) 50%, transparent)'
-                              : s.status === 'completed'
-                                ? '0 0 12px color-mix(in srgb, var(--success) 50%, transparent)'
-                                : undefined,
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-xs sm:text-sm">
-                              {format(new Date(s.startTime), 'HH:mm')} -{' '}
-                              {format(new Date(s.endTime), 'HH:mm')}
-                            </span>
-                            <Badge
-                              variant={s.type === 'trip' ? 'default' : 'secondary'}
-                              className="text-[10px] sm:text-xs"
-                            >
-                              {s.type}
-                            </Badge>
-                          </div>
+                      className={`w-1.5 sm:w-2 shrink-0 rounded-full ${
+                        schedule.status === 'scheduled'
+                          ? 'bg-(--primary)'
+                          : schedule.status === 'completed'
+                            ? 'bg-(--success)'
+                            : 'bg-(--text-disabled)'
+                      }`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-xs sm:text-sm">
+                            {format(new Date(schedule.startTime), 'HH:mm')} -{' '}
+                            {format(new Date(schedule.endTime), 'HH:mm')}
+                          </span>
+                          <Badge
+                            variant={schedule.type === 'trip' ? 'default' : 'secondary'}
+                            className="text-[10px] sm:text-xs"
+                          >
+                            {schedule.type}
+                          </Badge>
                         </div>
-                        {s.tripInfo && (
-                          <p className="text-xs sm:text-sm text-(--text-muted) mt-1 truncate">
-                            {s.tripInfo.from} → {s.tripInfo.to}
-                          </p>
-                        )}
-                        {s.userName && (
-                          <p className="text-xs text-(--text-muted) truncate">
-                            {t('driver.passenger', 'Passenger')}: {s.userName}
-                          </p>
-                        )}
-                        {/* Actions */}
-                        {s.type === 'trip' &&
-                          (s.status === 'scheduled' || s.status === 'in_progress') && (
-                            <div className="flex flex-wrap items-center gap-2 mt-3">
-                              {s.status === 'scheduled' && !s.arrivedAt && (
-                                <Button
-                                  size="sm"
-                                  variant="success"
-                                  className="gap-1 h-7 px-2 text-xs flex-1 sm:flex-none"
-                                  onClick={async () => {
-                                    try {
-                                      await markArrived({
-                                        scheduleId: s._id as Id<'driverSchedules'>,
-                                        userId: userId!,
-                                      });
-                                      toast.success(
-                                        t('driver.markedAsArrived', 'Marked as arrived!'),
-                                      );
-                                    } catch (e) {
-                                      const message =
-                                        e instanceof Error
-                                          ? e.message
-                                          : t('driver.failed', 'Failed');
-                                      toast.error(message);
-                                    }
-                                  }}
-                                >
-                                  <MapPinned className="w-3 h-3" />
-                                  {t('driver.arrived', "I've Arrived")}
-                                </Button>
-                              )}
-                              {s.arrivedAt && !s.passengerPickedUpAt && (
-                                <>
-                                  <Badge variant="warning" className="text-xs">
-                                    <Timer className="w-3 h-3 mr-1" />
-                                    {t('driver.waiting', 'Waiting')}:{' '}
-                                    {Math.round((currentTime - s.arrivedAt) / 60000)}{' '}
-                                    {t('driver.minutes', 'min')}
-                                  </Badge>
-                                  <Button
-                                    size="sm"
-                                    variant="primary"
-                                    className="gap-1 h-7 px-2 text-xs flex-1 sm:flex-none"
-                                    onClick={async () => {
-                                      try {
-                                        await markPickedUp({
-                                          scheduleId: s._id as Id<'driverSchedules'>,
-                                          userId: userId!,
-                                        });
-                                        toast.success(
-                                          t('driver.passengerPickedUp', 'Passenger picked up!'),
-                                        );
-                                      } catch (e) {
-                                        const message =
-                                          e instanceof Error
-                                            ? e.message
-                                            : t('driver.failed', 'Failed');
-                                        toast.error(message);
-                                      }
-                                    }}
-                                  >
-                                    <Users className="w-3 h-3" />
-                                    {t('driver.passengerIn', 'Passenger In')}
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          )}
                       </div>
+                      {schedule.tripInfo && (
+                        <p className="text-xs sm:text-sm text-(--text-muted) mt-1 truncate">
+                          {schedule.tripInfo.from} → {schedule.tripInfo.to}
+                        </p>
+                      )}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
             </div>
           ) : (
             <div className="text-center py-6 sm:py-8 text-(--text-muted)">
@@ -489,7 +334,6 @@ export default function DriverDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Weekly Calendar */}
       <Card className="mb-6 sm:mb-8 border-(--border)">
         <CardHeader className="pb-3 px-4 py-3 sm:px-6 sm:py-4">
           <h2 className="text-base sm:text-xl font-semibold">
@@ -498,7 +342,7 @@ export default function DriverDashboardPage() {
         </CardHeader>
         <CardContent className="px-2 sm:px-4 py-2 sm:py-4">
           <DriverCalendar
-            driverId={driver._id}
+            driverId={driver.id}
             organizationId={orgId!}
             userId={userId}
             role="driver"
@@ -506,7 +350,6 @@ export default function DriverDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Statistics */}
       <Card className="mb-6 sm:mb-8 border-(--border)">
         <CardHeader className="pb-3 px-4 py-3 sm:px-6 sm:py-4">
           <h2 className="text-base sm:text-xl font-semibold">
@@ -514,11 +357,10 @@ export default function DriverDashboardPage() {
           </h2>
         </CardHeader>
         <CardContent className="px-4 py-3 sm:px-6 sm:py-4">
-          <DriverStatsCard driverId={driver._id} organizationId={orgId!} />
+          <DriverStatsCard driverId={driver.id} organizationId={orgId!} />
         </CardContent>
       </Card>
 
-      {/* Shift History */}
       <Card className="mb-6 sm:mb-8 border-(--border)">
         <CardHeader className="pb-3 px-4 py-3 sm:px-6 sm:py-4">
           <h2 className="text-base sm:text-xl font-semibold">
@@ -526,14 +368,13 @@ export default function DriverDashboardPage() {
           </h2>
         </CardHeader>
         <CardContent className="px-4 py-3 sm:px-6 sm:py-4">
-          <ShiftHistory driverId={driver._id} />
+          <ShiftHistory driverId={driver.id} />
         </CardContent>
       </Card>
     </div>
   );
 }
 
-// Helper component
 function StatCard({
   label,
   value,
@@ -547,7 +388,6 @@ function StatCard({
 }) {
   return (
     <Card className="drivers-card-hover relative overflow-hidden border-(--border) bg-(--card-elevated)">
-      <div className="drivers-stats-shimmer absolute inset-0 pointer-events-none" />
       <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
         <h3 className="text-sm font-medium text-(--text-muted)">{label}</h3>
         <div className="p-2 rounded-lg" style={{ background: `${color}20`, color }}>

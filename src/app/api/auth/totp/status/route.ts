@@ -1,34 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyJWT } from '@/lib/jwt';
+import { NextResponse } from 'next/server';
+import { getTotpStatus } from '@/lib/supabase/totp';
+import { createClient } from '@/lib/supabase/server';
 
-// Opt out of static generation — uses cookies
-export const revalidate = 0;
-
-async function getUserIdFromCookie(req: NextRequest): Promise<string | null> {
-  const token = req.cookies.get('hr-auth-token')?.value;
-  if (token) {
-    const payload = await verifyJWT(token);
-    if (payload) return payload.userId;
-  }
-  return null;
-}
-
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    let userId = await getUserIdFromCookie(req);
-    if (!userId) {
-      userId = req.nextUrl.searchParams.get('userId');
-    }
-    if (!userId) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // TOTP is not implemented in this project, return disabled by default
-    return NextResponse.json({
-      totpEnabled: false,
-    });
-  } catch (error: any) {
-    console.error('TOTP status error:', error);
-    return NextResponse.json({ error: 'Failed to get status' }, { status: 500 });
+    const status = await getTotpStatus(user.id);
+
+    return NextResponse.json(status);
+  } catch (error) {
+    console.error('[totp/status] Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to get TOTP status' },
+      { status: 500 }
+    );
   }
 }

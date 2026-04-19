@@ -1,9 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useDriverShifts } from '@/hooks/useDrivers';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,12 +9,12 @@ import { History, Clock, TrendingUp, CheckCircle, Coffee } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ShiftHistoryProps {
-  driverId: Id<'drivers'>;
+  driverId: string;
 }
 
 export function ShiftHistory({ driverId }: ShiftHistoryProps) {
   const { t } = useTranslation();
-  const shifts = useQuery(api.drivers.shifts_mutations.getShiftHistory, { driverId, limit: 10 });
+  const { data: shifts } = useDriverShifts(undefined, driverId);
 
   if (!shifts) return null;
 
@@ -72,7 +70,7 @@ export function ShiftHistory({ driverId }: ShiftHistoryProps) {
           <div className="space-y-3">
             {shifts.map((shift: any) => (
               <div
-                key={shift._id}
+                key={shift.id}
                 className="p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-3">

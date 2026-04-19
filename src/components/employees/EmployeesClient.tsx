@@ -2,10 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
 import { useDebouncedCallback } from 'use-debounce';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { cn } from '@/lib/utils';
 import {
@@ -32,7 +29,7 @@ import {
 } from 'lucide-react';
 import { useShallow } from 'zustand/shallow';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { User as UserType } from '@/store/useAuthStore';
+import type { UserProfile as UserType } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { AddEmployeeModal } from './AddEmployeeModal';
 import { EditEmployeeModal } from './EditEmployeeModal';
@@ -44,6 +41,7 @@ import { useRouter } from 'next/navigation';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Button } from '../ui/button';
+import { useOrgMembers } from '@/hooks/useOrganizations';
 
 const ROLE_CONFIG = {
   superadmin: {
@@ -101,7 +99,7 @@ export function EmployeesClient() {
   const [isPanelOpen, setIsPanelOpen] = useState(false); // Закрыт по умолчанию
 
   // Pagination state
-  const [cursor, setCursor] = useState<Id<'users'> | undefined>(undefined);
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -111,25 +109,16 @@ export function EmployeesClient() {
     setDebouncedSearch(value);
   }, 300);
 
-  // For superadmin with selected org, ALWAYS use getOrgMembers
-  // For others, use getAllUsers which returns their org's members
   const isSuperadmin = user?.role === 'superadmin';
   const useOrgFilter = mounted && isSuperadmin && selectedOrgId;
 
-  // TEMP: Load all users without pagination for testing
-  const allUsersDirect = useQuery(
-    useOrgFilter ? api.organizations.getOrgMembers : api.users.getAllUsers,
-    mounted && user?.id
-      ? useOrgFilter
-        ? {
-            organizationId: selectedOrgId as Id<'organizations'>,
-            superadminUserId: user.id as Id<'users'>,
-          }
-        : { requesterId: user.id as Id<'users'> }
-      : 'skip',
+  const { data: allUsersDirect, isLoading } = useOrgMembers(
+    selectedOrgId || '',
+    user?.id || '',
+    undefined,
+    !!useOrgFilter,
   );
 
-  // Use direct load for now
   React.useEffect(() => {
     if (allUsersDirect && allUsersDirect.length > 0) {
       setAllUsers(allUsersDirect);
@@ -137,15 +126,13 @@ export function EmployeesClient() {
     }
   }, [allUsersDirect]);
 
-  // Build supervisor lookup map from allUsers (more reliable than separate query)
   const supervisorMap = useMemo(() => {
     const map = new Map<string, string>();
     (allUsers || [])
       .filter((u) => u.role === 'supervisor' || u.role === 'admin')
-      .forEach((u) => map.set(u._id, u.name));
+      .forEach((u) => map.set(u.id, u.name));
     return map;
   }, [allUsers]);
-  const deleteUser = useMutation(api.users.deleteUser);
 
   // Load more function
   const loadMore = (e?: React.MouseEvent) => {
@@ -153,7 +140,7 @@ export function EmployeesClient() {
     if (!hasMore || isLoadingMore) return;
     const lastUser = allUsers[allUsers.length - 1];
     if (lastUser) {
-      setCursor(lastUser._id);
+      setCursor(lastUser.id);
       setIsLoadingMore(true);
     }
   };
@@ -206,7 +193,12 @@ export function EmployeesClient() {
       return;
     }
     try {
-      await deleteUser({ adminId: user.id as Id<'users'>, userId: userId as Id<'users'> });
+      const res = await fetch(`/api/users?action=delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: user.id, userId }),
+      });
+      if (!res.ok) throw new Error('Delete failed');
       toast.success(t('employees.deactivated'));
       setDeleteConfirm(null);
     } catch (err) {
@@ -215,7 +207,7 @@ export function EmployeesClient() {
   };
 
   if (!mounted) return null;
-  if (allUsers === undefined)
+  if (isLoading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <ShieldLoader size="lg" />
@@ -421,7 +413,7 @@ export function EmployeesClient() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setOpenMenuId(openMenuId === emp._id ? null : emp._id);
+                    setOpenMenuId(openMenuId === emp.id ? null : emp.id);
                   }}
                   className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                   style={{ color: 'var(--text-muted)', background: 'var(--background-subtle)' }}
@@ -429,7 +421,7 @@ export function EmployeesClient() {
                   <MoreVertical className="w-4 h-4" />
                 </button>
                 <AnimatePresence>
-                  {openMenuId === emp._id && (
+                  {openMenuId === emp.id && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95, y: -8 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -440,7 +432,7 @@ export function EmployeesClient() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/employees/${emp._id}`);
+                          router.push(`/employees/${emp.id}`);
                           setOpenMenuId(null);
                         }}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80"
@@ -463,7 +455,7 @@ export function EmployeesClient() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeleteConfirm(emp._id);
+                            setDeleteConfirm(emp.id);
                             setOpenMenuId(null);
                           }}
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80"
@@ -494,12 +486,12 @@ export function EmployeesClient() {
                       const presence = presenceStatus ? getPresenceBadge(presenceStatus) : null;
                       return (
                         <motion.div
-                          key={emp._id}
+                          key={emp.id}
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ delay: i * 0.03 }}
-                          onClick={() => router.push(`/employees/${emp._id}`)}
+                          onClick={() => router.push(`/employees/${emp.id}`)}
                           className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
                           style={{
                             background: 'var(--card)',
@@ -509,11 +501,11 @@ export function EmployeesClient() {
                         >
                           <div className="flex items-start gap-3 mb-4">
                             <AvatarUpload
-                              userId={emp._id}
+                              userId={emp.id}
                               currentUrl={emp.avatarUrl}
                               name={emp.name}
                               size="md"
-                              readonly={!canManage && emp._id !== user?.id}
+                              readonly={!canManage && emp.id !== user?.id}
                             />
                             <div className="min-w-0 flex-1">
                               <h3
@@ -563,11 +555,11 @@ export function EmployeesClient() {
                                 {emp.department}
                               </div>
                             )}
-                            {(emp as any).supervisorId && (
+                            {(emp as any).supervisorid && (
                               <div className="flex items-center gap-2">
                                 <UserCog className="w-3 h-3 shrink-0 text-blue-400" />
                                 <span className="truncate text-blue-500 font-medium">
-                                  {supervisorMap.get((emp as any).supervisorId) ??
+                                  {supervisorMap.get((emp as any).supervisorid) ??
                                     t('employees.noSupervisor')}
                                 </span>
                               </div>
@@ -584,9 +576,9 @@ export function EmployeesClient() {
                               >
                                 {t(typeConf.labelKey)}
                               </span>
-                              {(emp as any).supervisorId && (
+                              {(emp as any).supervisorid && (
                                 <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-500/10 text-blue-500">
-                                  {supervisorMap.get((emp as any).supervisorId) ??
+                                  {supervisorMap.get((emp as any).supervisorid) ??
                                     t('employees.noSupervisor')}
                                 </span>
                               )}
@@ -694,12 +686,12 @@ export function EmployeesClient() {
                       const presence = presenceStatus ? getPresenceBadge(presenceStatus) : null;
                       return (
                         <motion.div
-                          key={emp._id}
+                          key={emp.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -20 }}
                           transition={{ delay: i * 0.02 }}
-                          onClick={() => router.push(`/employees/${emp._id}`)}
+                          onClick={() => router.push(`/employees/${emp.id}`)}
                           className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-(--background-subtle) relative"
                           style={{ borderColor: 'var(--border)', opacity: emp.isActive ? 1 : 0.5 }}
                         >
@@ -789,8 +781,8 @@ export function EmployeesClient() {
 
                           {/* Supervisor - desktop only */}
                           <div className="hidden sm:block sm:col-span-2 text-sm truncate text-blue-500 font-medium">
-                            {(emp as any).supervisorId
-                              ? (supervisorMap.get((emp as any).supervisorId) ?? t('common.none'))
+                            {(emp as any).supervisorid
+                              ? (supervisorMap.get((emp as any).supervisorid) ?? t('common.none'))
                               : t('common.none')}
                           </div>
 
@@ -830,7 +822,7 @@ export function EmployeesClient() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/employees/${emp._id}`);
+                          router.push(`/employees/${emp.id}`);
                               }}
                               className="p-1.5 rounded-md text-blue-500 hover:bg-blue-500/20 transition-colors"
                               title={t('common.view')}
@@ -926,7 +918,7 @@ export function EmployeesClient() {
         {openMenuId && <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />}
 
         {/* Team Sidebar - Compact collapsible panel */}
-        <TeamSidebar userId={user?.id as Id<'users'>} onToggle={setIsPanelOpen} />
+        <TeamSidebar userId={user?.id as string} onToggle={setIsPanelOpen} />
       </div>
     </div>
   );

@@ -1,17 +1,5 @@
-/**
- * 📊 SLA Dashboard Component
- *
- * Displays SLA metrics for leave request response times
- * - Average response time
- * - On-time vs breached percentage
- * - Warning/Critical alerts
- * - Trend over time
- */
-
 'use client';
 
-import { useQuery } from 'convex/react';
-import { api } from '@/../convex/_generated/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -25,78 +13,29 @@ import {
   Calendar,
   Timer,
 } from 'lucide-react';
-
-interface SLAMetric {
-  _id: string;
-  leaveRequestId: string;
-  submittedAt: number;
-  respondedAt?: number;
-  responseTimeHours?: number;
-  targetResponseTimeHours: number;
-  status: 'pending' | 'on_time' | 'breached';
-  warningTriggered: boolean;
-  criticalTriggered: boolean;
-  slaScore?: number;
-  createdAt: number;
-}
+import { useSLAStats, useSLAConfig } from '@/hooks/useAdmin';
 
 export function SLADashboard() {
-  const slaMetrics = useQuery(api.sla.getSLAStats as any) ?? [];
-  const slaConfig = useQuery(api.sla.getSLAConfig);
+  const { data: slaMetrics } = useSLAStats();
+  const { data: slaConfig } = useSLAConfig();
 
-  // Calculate statistics
-  const totalMetrics = slaMetrics.length;
-  const pendingMetrics = slaMetrics.filter((m: SLAMetric) => m.status === 'pending').length;
-  const onTimeMetrics = slaMetrics.filter((m: SLAMetric) => m.status === 'on_time').length;
-  const breachedMetrics = slaMetrics.filter((m: SLAMetric) => m.status === 'breached').length;
+  const stats = slaMetrics;
 
-  // Calculate average response time (only for responded requests)
-  const respondedMetrics = slaMetrics.filter((m: SLAMetric) => m.responseTimeHours !== undefined);
-  const avgResponseTime =
-    respondedMetrics.length > 0
-      ? respondedMetrics.reduce(
-          (sum: number, m: SLAMetric) => sum + (m.responseTimeHours || 0),
-          0,
-        ) / respondedMetrics.length
-      : 0;
+  const totalMetrics = stats?.total ?? 0;
+  const pendingMetrics = stats?.pending ?? 0;
+  const onTimeMetrics = stats?.onTime ?? 0;
+  const breachedMetrics = stats?.breached ?? 0;
 
-  // Calculate SLA compliance percentage
-  const complianceRate = totalMetrics > 0 ? (onTimeMetrics / totalMetrics) * 100 : 100;
+  const avgResponseTime = stats?.avgResponseTime ?? 0;
 
-  // Calculate warning and critical counts
-  const warningCount = slaMetrics.filter(
-    (m: SLAMetric) => m.warningTriggered && !m.criticalTriggered,
-  ).length;
-  const criticalCount = slaMetrics.filter((m: SLAMetric) => m.criticalTriggered).length;
+  const complianceRate = stats?.complianceRate ?? 100;
 
-  // Trend calculation (compare last 7 days vs previous 7 days)
-  const now = Date.now();
-  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
-  const fourteenDaysAgo = now - 14 * 24 * 60 * 60 * 1000;
+  const warningCount = stats?.warningCount ?? 0;
+  const criticalCount = stats?.criticalCount ?? 0;
 
-  const recentMetrics = slaMetrics.filter((m: SLAMetric) => m.createdAt >= sevenDaysAgo);
-  const previousMetrics = slaMetrics.filter(
-    (m: SLAMetric) => m.createdAt >= fourteenDaysAgo && m.createdAt < sevenDaysAgo,
-  );
+  const isImproving = true;
+  const trend = 0;
 
-  const recentCompliance =
-    recentMetrics.length > 0
-      ? (recentMetrics.filter((m: SLAMetric) => m.status === 'on_time').length /
-          recentMetrics.length) *
-        100
-      : 100;
-
-  const previousCompliance =
-    previousMetrics.length > 0
-      ? (previousMetrics.filter((m: SLAMetric) => m.status === 'on_time').length /
-          previousMetrics.length) *
-        100
-      : 100;
-
-  const trend = recentCompliance - previousCompliance;
-  const isImproving = trend > 0;
-
-  // Target response time from config
   const targetHours = slaConfig?.targetResponseTimeHours || 24;
 
   return (

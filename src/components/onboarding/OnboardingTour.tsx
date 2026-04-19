@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { X, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 
 export interface TourStep {
   target: string; // CSS selector or ID
@@ -49,13 +47,32 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
   }, []);
 
   // Check if user has seen this tour
-  const hasSeenTour = useQuery(api.userPreferences.hasSeenTour, {
-    tourId,
-    sessionToken,
-  });
-  const markTourAsSeenMutation = useMutation(api.userPreferences.markTourAsSeen);
+  const [hasSeenTour, setHasSeenTour] = useState<boolean | undefined>(undefined);
   const [localStorageChecked, setLocalStorageChecked] = useState(false);
   const [hasSeenTourLocal, setHasSeenTourLocal] = useState<boolean | null>(null);
+
+  // Fetch tour status from API
+  useEffect(() => {
+    if (!sessionToken) return;
+
+    const fetchTourStatus = async () => {
+      try {
+        const params = new URLSearchParams({ action: 'has-seen-tour', tourId });
+        const res = await fetch(`/api/user-preferences?${params}`);
+        if (res.ok) {
+          const json = await res.json();
+          setHasSeenTour(json.data?.hasSeenTour ?? false);
+        } else {
+          setHasSeenTour(false);
+        }
+      } catch (error) {
+        console.error('Failed to fetch tour status', error);
+        setHasSeenTour(false);
+      }
+    };
+
+    fetchTourStatus();
+  }, [tourId, sessionToken]);
 
   // Check localStorage for non-authenticated users
   useEffect(() => {
@@ -296,7 +313,12 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     // Try to save to database if user is logged in
     if (sessionToken) {
       try {
-        await markTourAsSeenMutation({ tourId, sessionToken });
+        const res = await fetch('/api/user-preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark-tour-as-seen', tourId, sessionToken }),
+        });
+        if (!res.ok) throw new Error('Failed to mark tour as seen');
       } catch (err) {
         console.log('Failed to save to database, using localStorage', err);
       }
@@ -316,7 +338,12 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     // Try to save to database if user is logged in
     if (sessionToken) {
       try {
-        await markTourAsSeenMutation({ tourId, sessionToken });
+        const res = await fetch('/api/user-preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark-tour-as-seen', tourId, sessionToken }),
+        });
+        if (!res.ok) throw new Error('Failed to mark tour as seen');
       } catch (err) {
         console.log('Failed to save to database, using localStorage', err);
       }

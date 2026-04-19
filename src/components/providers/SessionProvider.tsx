@@ -1,13 +1,13 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react';
 
 /**
- * Session Provider for Auth.js v5
+ * Session Provider
  *
- * Wraps children with next-auth SessionProvider to enable useSession() hook.
+ * NextAuth has been removed in favor of Supabase Auth.
+ * This is now a no-op wrapper.
  */
 export function SessionProvider({ children }: { children: ReactNode }) {
-  return <NextAuthSessionProvider>{children}</NextAuthSessionProvider>;
+  return <>{children}</>;
 }

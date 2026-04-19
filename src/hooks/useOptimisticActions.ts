@@ -1,21 +1,15 @@
-/**
- * useOptimisticSendMessage - Optimistic message sending hook
- *
- * Provides instant UI feedback when sending messages
- * Rolls back automatically on error
- */
-
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/../convex/_generated/api';
-import type { Id } from '@/../convex/_generated/dataModel';
-import { useOptimistic, useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback } from 'react';
+import { useSendMessage, useToggleReaction } from '@/hooks/useChat';
+import { useCreateLeave } from '@/hooks/useLeaves';
+import { useUpdateTask } from '@/hooks/useTasks';
 
 interface OptimisticMessage {
-  _id: string;
-  conversationId: Id<'chatConversations'>;
-  senderId: Id<'users'>;
+  id: string;
+  conversationId: string;
+  senderId: string;
   content: string;
   createdAt: number;
   pending: boolean;
@@ -24,19 +18,53 @@ interface OptimisticMessage {
 }
 
 export function useOptimisticSendMessage(
-  conversationId: Id<'chatConversations'>,
-  userId: Id<'users'>,
-  organizationId: Id<'organizations'>,
+  conversationId: string,
+  userId: string,
+  organizationId: string,
 ) {
   const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([]);
+  const queryClient = useQueryClient();
 
-  const addOptimisticMessage = useCallback((newMessage: OptimisticMessage) => {
-    setOptimisticMessages((prev) => [...prev, newMessage]);
-  }, []);
+  const { data: messages = [] } = useQuery({
+    queryKey: ['chat', 'messages', conversationId],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        action: 'get-messages',
+        conversationId,
+        userId,
+        limit: '60',
+      });
+      const res = await fetch(`/api/chat?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch messages');
+      const json = await res.json();
+      return json.data || [];
+    },
+    enabled: !!conversationId && !!userId,
+  });
 
-  const sendMessage = useMutation(api.chat.mutations.sendMessage);
-  const messages =
-    useQuery(api.chat.queries.getMessages, { conversationId, userId, limit: 60 }) ?? [];
+  const sendMessageMutation = useMutation({
+    mutationFn: async (data: {
+      conversationId: string;
+      senderId: string;
+      organizationId: string;
+      content: string;
+      replyToId?: string;
+      type: 'text' | 'image' | 'file';
+      attachments?: Array<{ url: string; name: string; type: string; size: number }>;
+    }) => {
+      const res = await fetch('/api/chat?action=send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to send message');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'messages', conversationId] });
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations', userId, organizationId] });
+    },
+  });
 
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +72,7 @@ export function useOptimisticSendMessage(
   const sendOptimistic = useCallback(
     async (
       content: string,
-      replyToId?: Id<'chatMessages'>,
+      replyToId?: string,
       attachmentUrl?: string,
       attachmentType?: 'image' | 'file',
     ) => {
@@ -53,9 +81,8 @@ export function useOptimisticSendMessage(
       setIsSending(true);
       setError(null);
 
-      // Create optimistic message
       const optimisticMsg: OptimisticMessage = {
-        _id: `temp-${Date.now()}`,
+        id: `temp-${Date.now()}`,
         conversationId,
         senderId: userId,
         content,
@@ -65,12 +92,10 @@ export function useOptimisticSendMessage(
         attachmentUrl: attachmentUrl ?? undefined,
       };
 
-      // Add to optimistic state (instant UI update)
-      addOptimisticMessage(optimisticMsg);
+      setOptimisticMessages((prev) => [...prev, optimisticMsg]);
 
       try {
-        // Send to server
-        await sendMessage({
+        await sendMessageMutation.mutateAsync({
           conversationId,
           senderId: userId,
           organizationId,
@@ -82,17 +107,15 @@ export function useOptimisticSendMessage(
             : undefined,
         });
 
-        // Clear optimistic on success (real message will appear from Convex)
         setIsSending(false);
         return true;
       } catch (err) {
-        // Remove optimistic message on error
         setError(err instanceof Error ? err.message : 'Failed to send message');
         setIsSending(false);
         throw err;
       }
     },
-    [conversationId, userId, organizationId, sendMessage, addOptimisticMessage],
+    [conversationId, userId, organizationId, sendMessageMutation],
   );
 
   return {
@@ -103,19 +126,27 @@ export function useOptimisticSendMessage(
   };
 }
 
-/**
- * useOptimisticReaction - Optimistic reaction hook
- */
-export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<'users'>) {
+export function useOptimisticReaction(messageId: string, userId: string) {
   const [optimisticReactions, setOptimisticReactions] = useState<
-    Array<{ userId: Id<'users'>; emoji: string }>
+    Array<{ userId: string; emoji: string }>
   >([]);
+  const queryClient = useQueryClient();
 
-  const addOptimisticReaction = useCallback((reaction: { userId: Id<'users'>; emoji: string }) => {
-    setOptimisticReactions((prev) => [...prev, reaction]);
-  }, []);
+  const toggleReactionMutation = useMutation({
+    mutationFn: async (data: { messageId: string; userId: string; emoji: string }) => {
+      const res = await fetch('/api/chat?action=react-to-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to toggle reaction');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'messages'] });
+    },
+  });
 
-  const toggleReaction = useMutation(api.chat.mutations.toggleReaction);
   const [isToggling, setIsToggling] = useState(false);
 
   const toggleOptimistic = useCallback(
@@ -123,17 +154,17 @@ export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<
       setIsToggling(true);
 
       const reaction = { userId, emoji };
-      addOptimisticReaction(reaction);
+      setOptimisticReactions((prev) => [...prev, reaction]);
 
       try {
-        await toggleReaction({ messageId, userId, emoji });
+        await toggleReactionMutation.mutateAsync({ messageId, userId, emoji });
         setIsToggling(false);
       } catch (err) {
         setIsToggling(false);
         throw err;
       }
     },
-    [messageId, userId, toggleReaction, addOptimisticReaction],
+    [messageId, userId, toggleReactionMutation],
   );
 
   return {
@@ -143,34 +174,41 @@ export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<
   };
 }
 
-/**
- * useOptimisticLeaveRequest - Optimistic leave request hook
- */
 export function useOptimisticLeaveRequest() {
   const [optimisticRequests, setOptimisticRequests] = useState<
     Array<{ id: string; type: string; startDate: string; endDate: string; status: 'pending' }>
   >([]);
+  const queryClient = useQueryClient();
 
-  const addOptimisticRequest = useCallback(
-    (request: {
-      id: string;
-      type: string;
+  const createLeaveMutation = useMutation({
+    mutationFn: async (data: {
+      userId: string;
+      organizationId: string;
+      leaveType: string;
       startDate: string;
       endDate: string;
-      status: 'pending';
+      reason: string;
+      comment?: string;
     }) => {
-      setOptimisticRequests((prev) => [...prev, request]);
+      const res = await fetch('/api/leaves', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to create leave request');
+      return res.json();
     },
-    [],
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leaves'] });
+    },
+  });
 
-  const createLeave = useMutation(api.leaves.createLeave);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const createOptimistic = useCallback(
     async (
-      userId: Id<'users'>,
+      userId: string,
       type: 'paid' | 'unpaid' | 'sick' | 'family' | 'doctor',
       startDate: string,
       endDate: string,
@@ -189,10 +227,18 @@ export function useOptimisticLeaveRequest() {
         status: 'pending' as const,
       };
 
-      addOptimisticRequest(optimisticRequest);
+      setOptimisticRequests((prev) => [...prev, optimisticRequest]);
 
       try {
-        await createLeave({ userId, type, startDate, endDate, days, reason, comment });
+        await createLeaveMutation.mutateAsync({
+          userId,
+          organizationId: '',
+          leaveType: type,
+          startDate,
+          endDate,
+          reason,
+          comment,
+        });
         setIsCreating(false);
         return true;
       } catch (err) {
@@ -201,7 +247,7 @@ export function useOptimisticLeaveRequest() {
         throw err;
       }
     },
-    [createLeave, addOptimisticRequest],
+    [createLeaveMutation],
   );
 
   return {
@@ -212,35 +258,43 @@ export function useOptimisticLeaveRequest() {
   };
 }
 
-/**
- * useOptimisticTaskStatus - Optimistic task status update hook
- */
 export function useOptimisticTaskStatus() {
   const [optimisticUpdates, setOptimisticUpdates] = useState<
-    Array<{ taskId: Id<'tasks'>; status: string }>
+    Array<{ taskId: string; status: string }>
   >([]);
+  const queryClient = useQueryClient();
 
-  const addOptimisticUpdate = useCallback((update: { taskId: Id<'tasks'>; status: string }) => {
-    setOptimisticUpdates((prev) => [...prev, update]);
-  }, []);
+  const updateTaskMutation = useMutation({
+    mutationFn: async (data: { taskId: string; status: string; userId: string }) => {
+      const res = await fetch('/api/tasks?action=update-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to update task');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
 
-  const updateTaskStatus = useMutation(api.tasks.updateTaskStatus);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const updateOptimistic = useCallback(
     async (
-      taskId: Id<'tasks'>,
+      taskId: string,
       status: 'pending' | 'in_progress' | 'review' | 'completed' | 'cancelled',
-      userId: Id<'users'>,
+      userId: string,
     ) => {
       setIsUpdating(true);
       setError(null);
 
-      addOptimisticUpdate({ taskId, status });
+      setOptimisticUpdates((prev) => [...prev, { taskId, status }]);
 
       try {
-        await updateTaskStatus({ taskId, status, userId });
+        await updateTaskMutation.mutateAsync({ taskId, status, userId });
         setIsUpdating(false);
         return true;
       } catch (err) {
@@ -249,7 +303,7 @@ export function useOptimisticTaskStatus() {
         throw err;
       }
     },
-    [updateTaskStatus, addOptimisticUpdate],
+    [updateTaskMutation],
   );
 
   return {

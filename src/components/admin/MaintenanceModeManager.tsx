@@ -1,29 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Power, PowerOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useMaintenanceMode, useDisableMaintenanceMode } from '@/hooks/useAdmin';
 
 interface MaintenanceModeManagerProps {
-  organizationId?: Id<'organizations'> | string;
-  userId?: Id<'users'> | string;
+  organizationId?: string;
+  userId?: string;
 }
 
 export function MaintenanceModeManager({ organizationId, userId }: MaintenanceModeManagerProps) {
   const [disabling, setDisabling] = useState(false);
-  const maintenance = useQuery(
-    api.admin.getMaintenanceMode,
-    organizationId && userId ? { organizationId: organizationId as Id<'organizations'> } : 'skip',
-  );
-  const disableMaintenanceMode = useMutation(api.admin.disableMaintenanceMode);
+  const { data: maintenance, isLoading } = useMaintenanceMode(organizationId || '');
+  const disableMaintenanceModeMutation = useDisableMaintenanceMode();
 
-  if (maintenance === undefined) {
+  if (isLoading || maintenance === undefined) {
     return null; // Loading
   }
 
@@ -35,9 +30,9 @@ export function MaintenanceModeManager({ organizationId, userId }: MaintenanceMo
     if (!organizationId || !userId) return;
     setDisabling(true);
     try {
-      await disableMaintenanceMode({
-        organizationId: organizationId as Id<'organizations'>,
-        userId: userId as Id<'users'>,
+      await disableMaintenanceModeMutation.mutateAsync({
+        organizationId,
+        userId,
       });
     } finally {
       setDisabling(false);

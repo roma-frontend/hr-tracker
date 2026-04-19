@@ -1,6 +1,6 @@
 /**
  * Create Manual Subscription Wizard - Пошаговая форма создания ручной подписки
- * Использует универсальный Wizard компонент
+ * Uses universal Wizard component
  */
 
 'use client';
@@ -15,9 +15,9 @@ import {
   CardSelectionStep,
 } from '@/components/ui/wizard-step-components';
 import { CreditCard, Building, Crown, DollarSign } from 'lucide-react';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useCreateManualSubscription } from '@/hooks/useSubscriptions';
+import { useAllOrganizations } from '@/hooks/useOrganizations';
+import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 
 interface CreateManualSubscriptionWizardProps {
@@ -30,10 +30,14 @@ export function CreateManualSubscriptionWizard({
   onCancel,
 }: CreateManualSubscriptionWizardProps) {
   const { t } = useTranslation();
-  const createManual = useMutation(api.subscriptions_admin.createManualSubscription);
+  const { user } = useAuthStore();
+  const createManual = useCreateManualSubscription();
 
-  // Загрузка организаций
-  const allOrganizations = useQuery(api.organizations.getAllOrganizations, {}) || [];
+  const { data: allOrganizations, isLoading } = useAllOrganizations(
+    user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com'
+  );
+
+  const orgs = allOrganizations || [];
 
   const steps: WizardStep[] = [
     {
@@ -47,10 +51,10 @@ export function CreateManualSubscriptionWizard({
           updateStepData={() => {}}
           field="organizationId"
           label={t('subscriptionWizard.steps.organization.organizationLabel')}
-          options={allOrganizations.map((org: any) => ({
-            value: org._id,
+          options={orgs.map((org: any) => ({
+            value: org.id,
             label: `${org.name} (${org.slug})`,
-            description: `${org.totalEmployees || 0} employees`,
+            description: `${org.totalEmployees || org.employeeCount || 0} employees`,
           }))}
           placeholder={t('subscriptionWizard.steps.organization.organizationPlaceholder')}
           required
@@ -129,8 +133,8 @@ export function CreateManualSubscriptionWizard({
     data: Record<string, string | number | boolean | string[] | null>,
   ) => {
     try {
-      await createManual({
-        organizationId: String(data.organizationId) as Id<'organizations'>,
+      await createManual.mutateAsync({
+        organizationId: String(data.organizationId),
         plan: String(data.plan) as 'starter' | 'professional' | 'enterprise',
         customPrice: data.customPrice ? parseFloat(String(data.customPrice)) : undefined,
         notes: data.notes ? String(data.notes) : undefined,
@@ -139,7 +143,7 @@ export function CreateManualSubscriptionWizard({
       toast.success(t('subscriptionWizard.toast.success'));
       onComplete?.();
     } catch (error) {
-      toast.error(t('subscriptionWizard.toast.error'));
+      toast.error((error as Error).message || t('subscriptionWizard.toast.error'));
       console.error(error);
     }
   };

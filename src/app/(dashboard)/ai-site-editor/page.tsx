@@ -1,7 +1,5 @@
 'use client';
 
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { SiteEditorChat } from '@/components/ai/SiteEditorChat';
 import { PlanGate } from '@/components/billing/PlanGate';
 import { Card } from '@/components/ui/card';
@@ -21,7 +19,6 @@ import {
 } from 'lucide-react';
 import { usePlanFeatures } from '@/hooks/usePlanFeatures';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Id } from '@/convex/_generated/dataModel';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -32,12 +29,6 @@ export default function AISiteEditorPage() {
   const { features, plan } = usePlanFeatures();
   const router = useRouter();
 
-  // Get user details from Convex
-  const currentUser = useQuery(
-    api.users.queries.getUserById,
-    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
-  );
-
   // Only superadmin can access AI Site Editor // cspell:disable-line
   React.useEffect(() => {
     if (user && user.role !== 'superadmin') {
@@ -46,7 +37,7 @@ export default function AISiteEditorPage() {
     }
   }, [user, router]);
 
-  if (!user || !currentUser) {
+  if (!user) {
     return null; // Providers.tsx will show ShieldLoader during loading
   }
 
@@ -136,7 +127,7 @@ export default function AISiteEditorPage() {
 
           {/* Chat Tab */}
           <TabsContent value="chat" className="min-h-150">
-            <SiteEditorChat userId={currentUser._id} organizationId={currentUser.organizationId!} />
+            <SiteEditorChat userId={user.id} organizationId={user.organizationId!} />
           </TabsContent>
 
           {/* Features Tab */}

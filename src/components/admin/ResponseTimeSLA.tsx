@@ -1,8 +1,6 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -19,6 +17,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { useSLAStats, useSLATrend, usePendingWithSLA } from '@/hooks/useAdmin';
 
 interface SLAStatsProps {
   startDate?: number;
@@ -27,11 +26,13 @@ interface SLAStatsProps {
 
 export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
   const { t } = useTranslation();
-  const stats = useQuery(api.sla.getSLAStats, { startDate, endDate });
-  const trend = useQuery(api.sla.getSLATrend, { days: 30 });
-  const pendingWithSLA = useQuery(api.sla.getPendingWithSLA, {});
+  const { data: stats, isLoading: statsLoading } = useSLAStats(startDate, endDate);
+  const { data: trend, isLoading: trendLoading } = useSLATrend(30);
+  const { data: pendingWithSLA, isLoading: pendingLoading } = usePendingWithSLA();
 
-  if (!stats) {
+  const isLoading = statsLoading || trendLoading || pendingLoading;
+
+  if (isLoading || !stats) {
     return (
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -246,12 +247,12 @@ export function ResponseTimeSLA({ startDate, endDate }: SLAStatsProps) {
                   breached: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Breached' },
                 } as const;
 
-                const config = statusConfig[request.sla.status as keyof typeof statusConfig];
+                const config = statusConfig[request.sla?.status as keyof typeof statusConfig] || statusConfig.normal;
                 const StatusIcon = config.icon;
 
                 return (
                   <div
-                    key={request._id}
+                    key={request.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="flex items-center gap-4 flex-1">

@@ -1,37 +1,31 @@
 'use client';
 
 import React from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { X, Bookmark, MessageCircle } from 'lucide-react';
 import { MessageBubble } from './MessageBubble';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { usePinnedMessages, usePinMessage } from '@/hooks/useChat';
 
 interface Props {
-  userId: Id<'users'>;
-  organizationId?: Id<'organizations'>;
+  userId: string;
+  organizationId?: string;
   onClose: () => void;
-  onSelectMessage: (conversationId: Id<'chatConversations'>, messageId: Id<'chatMessages'>) => void;
+  onSelectMessage: (conversationId: string, messageId: string) => void;
 }
 
 export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMessage }: Props) {
   const { t } = useTranslation();
-  // TODO: Implement saved messages feature
   const { user } = useAuthStore();
 
-  // For now, using pinned messages as placeholder
-  const savedMessages = useQuery(api.chat.queries.getPinnedMessages, {
-    conversationId: undefined as any,
-  });
-  const unsaveMessage = useMutation(api.chat.mutations.togglePin);
+  const { data: savedMessages, isLoading } = usePinnedMessages(organizationId || '');
+  const pinMessage = usePinMessage();
 
-  const handleUnsave = async (e: React.MouseEvent, messageId: Id<'chatMessages'>) => {
+  const handleUnsave = async (e: React.MouseEvent, messageId: string) => {
     e.stopPropagation();
     if (!user?.id) return;
-    await unsaveMessage({ conversationId: messageId as any, userId: user.id as Id<'users'> });
+    await pinMessage.mutateAsync({ messageId, userId: user.id, pin: false });
   };
 
   return (
@@ -71,11 +65,11 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {savedMessages === undefined ? (
+          {isLoading ? (
             <div className="flex items-center justify-center h-40">
               <ShieldLoader size="xs" variant="inline" />
             </div>
-          ) : savedMessages.length === 0 ? (
+          ) : !savedMessages || savedMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 gap-3">
               <Bookmark className="w-12 h-12 opacity-20" style={{ color: 'var(--text-muted)' }} />
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
@@ -83,17 +77,17 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
               </p>
             </div>
           ) : (
-            savedMessages?.map((saved: any) => {
+            savedMessages.map((saved) => {
               if (!saved) return null;
               const isOwn = saved.senderId === userId;
 
               return (
                 <div
-                  key={saved._id}
+                  key={saved.id}
                   onClick={() =>
                     onSelectMessage(
-                      saved.conversationId as Id<'chatConversations'>,
-                      saved._id as Id<'chatMessages'>,
+                      (saved as any).conversationid || '',
+                      saved.id,
                     )
                   }
                   className="group relative p-4 rounded-xl border cursor-pointer hover:shadow-md transition-all"
@@ -102,20 +96,6 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
                     background: 'var(--background-subtle)',
                   }}
                 >
-                  {/* Conversation badge */}
-                  {saved.conversation && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <MessageCircle
-                        className="w-3.5 h-3.5"
-                        style={{ color: 'var(--text-muted)' }}
-                      />
-                      <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                        {saved.conversation.name ||
-                          (saved.conversation.type === 'direct' ? 'Direct Message' : 'Group')}
-                      </span>
-                    </div>
-                  )}
-
                   {/* Message content */}
                   <MessageBubble
                     message={saved}
@@ -130,7 +110,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
 
                   {/* Unsave button */}
                   <button
-                    onClick={(e) => handleUnsave(e, saved._id as Id<'chatMessages'>)}
+                    onClick={(e) => handleUnsave(e, saved.id)}
                     className="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--background)"
                     title="Remove from saved"
                   >
@@ -139,7 +119,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
 
                   {/* Saved timestamp */}
                   <div className="mt-2 text-xs" style={{ color: 'var(--text-disabled)' }}>
-                    Saved {new Date(saved.savedAt).toLocaleDateString()}
+                    Saved {new Date(saved.createdAt).toLocaleDateString()}
                   </div>
                 </div>
               );

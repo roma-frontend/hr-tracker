@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import type { Id } from '../../../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import {
@@ -35,18 +32,30 @@ import { playChatMessageSound } from '@/lib/notificationSound';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { getInitials, formatFileSize } from '@/lib/stringUtils';
+import {
+  useChatMessages,
+  useChatMembers,
+  useChatConversations,
+  usePinnedMessages,
+  useTypingUsers,
+  useSearchMessages,
+  useSendMessage,
+  useScheduleMessage,
+  useMarkAsRead,
+  useSetTyping,
+} from '@/hooks/useChat';
 
 interface Props {
-  conversationId: Id<'chatConversations'>;
-  currentUserId: Id<'users'>;
-  organizationId?: Id<'organizations'>;
+  conversationId: string;
+  currentUserId: string;
+  organizationId?: string;
   currentUserName: string;
   currentUserAvatar?: string;
   onBack: () => void;
   onStartCall: (
-    convId: Id<'chatConversations'>,
+    convId: string,
     type: 'audio' | 'video',
-    participantIds: Id<'users'>[],
+    participantIds: string[],
     remoteUserName?: string,
   ) => void;
 }
@@ -74,7 +83,7 @@ export const ChatWindow = React.memo(function ChatWindow({
   );
   const [input, setInput] = useState('');
   const [replyTo, setReplyTo] = useState<{
-    id: Id<'chatMessages'>;
+    id: string;
     content: string;
     senderName: string;
   } | null>(null);
@@ -90,7 +99,7 @@ export const ChatWindow = React.memo(function ChatWindow({
   const [showPollCreator, setShowPollCreator] = useState(false);
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState(['', '']);
-  const [thread, setThread] = useState<{ id: Id<'chatMessages'>; content: string } | null>(null);
+  const [thread, setThread] = useState<{ id: string; content: string } | null>(null);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionStart, setMentionStart] = useState<number>(-1);
   const [mentionIndex, setMentionIndex] = useState(0);
@@ -102,19 +111,15 @@ export const ChatWindow = React.memo(function ChatWindow({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesParentRef = useRef<HTMLDivElement>(null);
 
-  const messages = (useQuery as any)((api.chat.queries as any).getMessages, {
-    conversationId,
-    userId: currentUserId,
-    limit: 200,
-  }) as any;
+  const { data: messages } = useChatMessages(conversationId, currentUserId, 200);
 
   // Deduplicate messages to prevent duplicate key warnings
   const dedupedMessages = React.useMemo(() => {
     if (!messages) return messages;
     const seen = new Set();
     return messages.filter((msg: any) => {
-      if (seen.has(msg._id)) return false;
-      seen.add(msg._id);
+      if (seen.has(msg.id)) return false;
+      seen.add(msg.id);
       return true;
     });
   }, [messages]);
@@ -123,20 +128,16 @@ export const ChatWindow = React.memo(function ChatWindow({
   if (messages && messages.length > 0 && !messages[0]?.sender) {
     console.warn('[ChatWindow] Message without sender:', messages[0]);
   }
-  const members = useQuery(api.chat.queries.getConversationMembers, { conversationId });
-  const typingUsers = useQuery(api.chat.queries.getTypingUsers, { conversationId, currentUserId });
-  const conversation = useQuery(api.chat.queries.getMyConversations, {
-    userId: currentUserId,
-    organizationId,
-  });
-  const pinnedMessages = useQuery(api.chat.queries.getPinnedMessages, { conversationId });
-  const currentUser = useQuery(api.users.queries.getUserById, { userId: currentUserId });
-  const searchResults = useQuery(
-    api.chat.queries.searchMessages,
-    showSearch && searchQuery.length > 1
-      ? { conversationId, userId: currentUserId, query: searchQuery }
-      : 'skip',
-  );
+  const { data: members } = useChatMembers(conversationId);
+  const { data: typingUsers } = useTypingUsers(conversationId, currentUserId);
+  const { data: conversations } = useChatConversations(currentUserId, organizationId);
+  const { data: pinnedMessages } = usePinnedMessages(conversationId);
+  const { data: searchResults } = useSearchMessages(conversationId, currentUserId, searchQuery);
+  
+  // Get current user info (mock for now, should come from auth)
+  const currentUser = { id: currentUserId, name: currentUserName, avatarUrl: currentUserAvatar };
+
+  const conversation = conversations?.find((c) => c != null && c.id === conversationId) ?? null;
 
   // Virtualization for messages
   const virtualizer = useVirtualizer({
@@ -146,17 +147,17 @@ export const ChatWindow = React.memo(function ChatWindow({
     overscan: 5,
   });
 
-  const sendMessage = useMutation(api.chat.mutations.sendMessage);
-  const scheduleMessage = useMutation(api.chat.mutations.scheduleMessage);
-  const markAsRead = useMutation(api.chat.mutations.markAsRead);
-  const setTyping = useMutation(api.chat.mutations.setTyping);
+  const sendMessageMutation = useSendMessage();
+  const scheduleMessageMutation = useScheduleMessage();
+  const markAsReadMutation = useMarkAsRead();
+  const setTypingMutation = useSetTyping();
 
-  const conv = conversation?.find((c) => c != null && c._id === conversationId) ?? null;
+  const conv = conversation;
   const otherUser = conv?.type === 'direct' ? (conv as any).otherUser : null;
   const displayName =
     conv?.type === 'group' ? ((conv as any).name ?? 'Group') : (otherUser?.name ?? 'Chat');
   const otherMembers = members?.filter((m) => m.userId !== currentUserId) ?? [];
-  const otherMemberIds = otherMembers.map((m: any) => m.userId as Id<'users'>);
+  const otherMemberIds = otherMembers.map((m: any) => m.userId);
 
   // Track previous message count to only scroll on NEW messages, not on conversation switch
   const prevMsgCountRef = useRef<number>(0);
@@ -166,7 +167,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     if (conversationId) {
       // Mark conversation as read with a small debounce to avoid duplicate calls
       const timer = setTimeout(() => {
-        markAsRead({ conversationId, userId: currentUserId });
+        markAsReadMutation.mutate({ conversationId, userId: currentUserId });
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -176,7 +177,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     initialLoadDoneRef.current = false;
     lastPlayedMsgIdRef.current = null;
     return;
-  }, [conversationId, markAsRead, currentUserId]);
+  }, [conversationId, markAsReadMutation, currentUserId]);
 
   useEffect(() => {
     if (dedupedMessages === undefined) return;
@@ -194,13 +195,13 @@ export const ChatWindow = React.memo(function ChatWindow({
   }, [dedupedMessages]);
 
   const handleTyping = useCallback(() => {
-    setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: true });
+    setTypingMutation.mutate({ conversationId, userId: currentUserId, organizationId, isTyping: true });
     if (isTypingTimeout) clearTimeout(isTypingTimeout);
     const t = setTimeout(() => {
-      setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: false });
+      setTypingMutation.mutate({ conversationId, userId: currentUserId, organizationId, isTyping: false });
     }, 3000);
     setIsTypingTimeout(t);
-  }, [conversationId, currentUserId, organizationId, isTypingTimeout, setTyping]);
+  }, [conversationId, currentUserId, organizationId, isTypingTimeout, setTypingMutation]);
 
   // ── File picking ──────────────────────────────────────────────────────────
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -267,13 +268,13 @@ export const ChatWindow = React.memo(function ChatWindow({
       setShowSchedule(false);
       setShowPollCreator(false);
       if (isTypingTimeout) clearTimeout(isTypingTimeout);
-      await setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: false });
+      await setTypingMutation.mutateAsync({ conversationId, userId: currentUserId, organizationId, isTyping: false });
 
       // Scheduled send
       if (scheduledFor) {
         const scheduledTs = new Date(scheduledFor).getTime();
         if (scheduledTs > Date.now()) {
-          await scheduleMessage({
+          await scheduleMessageMutation.mutateAsync({
             conversationId,
             senderId: currentUserId,
             organizationId,
@@ -298,16 +299,16 @@ export const ChatWindow = React.memo(function ChatWindow({
       // Parse @mentions
       const mentionRegex =
         /@([a-zA-Zа-яА-ЯёЁа-ֆА-Ֆ\u0531-\u0587][a-zA-Zа-яА-ЯёЁа-ֆА-Ֆ\u0531-\u0587\s]*?)(?=\s|$|[^a-zA-Zа-яА-ЯёЁ])/g;
-      const mentionedIds: Id<'users'>[] = [];
+      const mentionedIds: string[] = [];
       let match;
       while ((match = mentionRegex.exec(text)) !== null) {
         const mentionName = match[1]?.toLowerCase();
         if (!mentionName) continue;
         const member = members?.find((m) => m.user?.name.toLowerCase().includes(mentionName));
-        if (member) mentionedIds.push(member.userId as Id<'users'>);
+        if (member) mentionedIds.push(member.userId);
       }
 
-      await sendMessage({
+      await sendMessageMutation.mutateAsync({
         conversationId,
         senderId: currentUserId,
         organizationId,
@@ -334,8 +335,8 @@ export const ChatWindow = React.memo(function ChatWindow({
     conversationId,
     currentUserId,
     organizationId,
-    sendMessage,
-    setTyping,
+    sendMessageMutation,
+    setTypingMutation,
     members,
     isTypingTimeout,
   ]);
@@ -424,7 +425,7 @@ export const ChatWindow = React.memo(function ChatWindow({
         const result = await uploadChatAttachment(base64, 'voice.webm', 'audio/webm');
 
         // Send voice message with attachments array
-        await sendMessage({
+        await sendMessageMutation.mutateAsync({
           conversationId,
           senderId: currentUserId,
           organizationId,
@@ -453,7 +454,7 @@ export const ChatWindow = React.memo(function ChatWindow({
         setIsRecording(false);
       }
     },
-    [conversationId, currentUserId, organizationId, sendMessage, t],
+    [conversationId, currentUserId, organizationId, sendMessageMutation, t],
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -504,7 +505,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     if (!q || opts.length < 2) return;
     setSending(true);
     try {
-      await sendMessage({
+      await sendMessageMutation.mutateAsync({
         conversationId,
         senderId: currentUserId,
         organizationId,
@@ -521,7 +522,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     } finally {
       setSending(false);
     }
-  }, [pollQuestion, pollOptions, conversationId, currentUserId, organizationId, sendMessage]);
+  }, [pollQuestion, pollOptions, conversationId, currentUserId, organizationId, sendMessageMutation]);
 
   // Track whether initial messages have already been loaded (to avoid sound on open)
   const initialLoadDoneRef = useRef(false);
@@ -535,7 +536,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     if (!initialLoadDoneRef.current) {
       initialLoadDoneRef.current = true;
       const latest = dedupedMessages[dedupedMessages.length - 1];
-      if (latest) lastPlayedMsgIdRef.current = latest._id;
+      if (latest) lastPlayedMsgIdRef.current = latest.id;
       return;
     }
 
@@ -544,17 +545,17 @@ export const ChatWindow = React.memo(function ChatWindow({
     // Don't play for own messages
     if (latest.senderId === currentUserId) return;
     // Don't play the same message twice
-    if (lastPlayedMsgIdRef.current === latest._id) return;
+    if (lastPlayedMsgIdRef.current === latest.id) return;
     // Don't play for system service broadcasts (informational only)
     if (latest.isServiceBroadcast) return;
     // Don't play if conversation is muted
     if (conv?.membership?.isMuted) return;
-    lastPlayedMsgIdRef.current = latest._id;
+    lastPlayedMsgIdRef.current = latest.id;
 
     // If chat is active (tab focused) — mark as read immediately, play sound
     if (document.hasFocus()) {
       // Ensure this call completes by using Promise handling
-      void markAsRead({ conversationId, userId: currentUserId });
+      void markAsReadMutation.mutate({ conversationId, userId: currentUserId });
       playChatMessageSound();
       return;
     }
@@ -566,19 +567,19 @@ export const ChatWindow = React.memo(function ChatWindow({
         body: latest.content?.slice(0, 80) || '📎 Attachment',
         icon: latest.sender?.avatarUrl ?? '/favicon.ico',
         badge: '/favicon.ico',
-        tag: latest._id,
+        tag: latest.id,
         silent: true, // sound is handled by playChatMessageSound
       });
     } else if (Notification.permission === 'default') {
       Notification.requestPermission();
     }
-  }, [dedupedMessages, conv?.membership?.isMuted, currentUserId, conversationId, markAsRead]);
+  }, [dedupedMessages, conv?.membership?.isMuted, currentUserId, conversationId, markAsReadMutation]);
 
   const canSend = (input.trim().length > 0 || pendingFiles.length > 0) && !sending;
 
   // Check if current user can send messages (not blocked from System Announcements)
   const isSystemAnnouncementsChannel = (conv as any)?.name === 'System Announcements';
-  const canUserSendMessage = !isSystemAnnouncementsChannel || currentUser?.role === 'superadmin';
+  const canUserSendMessage = !isSystemAnnouncementsChannel || (currentUser as any)?.role === 'superadmin';
 
   return (
     <div className="flex h-full min-h-0 overflow-hidden">
@@ -597,9 +598,9 @@ export const ChatWindow = React.memo(function ChatWindow({
 
           {/* Avatar — clickable for DM (goes to employee profile) */}
           <div className="relative shrink-0">
-            {conv?.type === 'direct' && otherUser?._id ? (
+            {conv?.type === 'direct' && otherUser?.id ? (
               <Link
-                href={`/employees/${otherUser._id}`}
+                href={`/employees/${otherUser.id}`}
                 className="block rounded-full transition-transform duration-200 hover:scale-110 hover:opacity-90"
                 title={`View ${displayName}'s profile`}
               >
@@ -818,7 +819,7 @@ export const ChatWindow = React.memo(function ChatWindow({
 
                 return (
                   <div
-                    key={msg._id}
+                    key={msg.id}
                     data-index={virtualRow.index}
                     ref={virtualizer.measureElement}
                     style={{
@@ -840,7 +841,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                       onReply={(id, content, senderName) => setReplyTo({ id, content, senderName })}
                       onOpenThread={(id, content) => setThread({ id, content })}
                       onSendMessage={async (text) => {
-                        await sendMessage({
+                        await sendMessageMutation.mutateAsync({
                           conversationId,
                           senderId: currentUserId,
                           organizationId,
@@ -865,7 +866,7 @@ export const ChatWindow = React.memo(function ChatWindow({
             className="px-4 py-2 border-t"
             style={{ borderColor: 'var(--border)', background: 'var(--background)' }}
           >
-            <TypingIndicator users={typingUsers} />
+            <TypingIndicator users={(typingUsers || []).map((u: any) => ({ userId: u.id, name: u.name }))} />
           </div>
         )}
 

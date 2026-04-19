@@ -8,23 +8,48 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { WebAuthnButton } from '@/components/auth/WebAuthnButton';
 import { FaceRegistration } from '@/components/auth/FaceRegistration';
 import { toast } from 'sonner';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface SecuritySettingsProps {
   userId: string;
 }
 
+async function fetchFaceDescriptor(userId: string) {
+  const params = new URLSearchParams({ action: 'get-face-descriptor', userId });
+  const res = await fetch(`/api/security?${params}`);
+  if (!res.ok) throw new Error('Failed to fetch face descriptor');
+  const json = await res.json();
+  return json.data;
+}
+
+async function removeFaceRegistration(userId: string) {
+  const res = await fetch('/api/security', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'remove-face-registration', userId }),
+  });
+  if (!res.ok) throw new Error('Failed to remove face registration');
+  return res.json();
+}
+
 export function SecuritySettings({ userId }: SecuritySettingsProps) {
   const { t } = useTranslation();
   const [showFaceRegistration, setShowFaceRegistration] = useState(false);
+  const queryClient = useQueryClient();
 
   // Get face descriptor status
-  const faceData = useQuery(
-    api.faceRecognition.getFaceDescriptor,
-    userId ? { userId: userId as any } : 'skip',
-  );
-  const removeFaceRegistration = useMutation(api.faceRecognition.removeFaceRegistration);
+  const { data: faceData } = useQuery({
+    queryKey: ['face-descriptor', userId],
+    queryFn: () => fetchFaceDescriptor(userId),
+    enabled: !!userId,
+  });
+
+  const removeFaceMutation = useMutation({
+    mutationFn: () => removeFaceRegistration(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['face-descriptor', userId] });
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -99,7 +124,7 @@ export function SecuritySettings({ userId }: SecuritySettingsProps) {
                   variant="outline"
                   onClick={async () => {
                     if (confirm(t('settingsSecurity.removeFaceIdConfirm'))) {
-                      await removeFaceRegistration({ userId: userId as any });
+                      await removeFaceMutation.mutateAsync();
                       toast.success(t('settingsSecurity.faceIdRemoved'));
                     }
                   }}

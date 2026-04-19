@@ -2,7 +2,7 @@
 import Image from 'next/image';
 
 import React, { useState, useRef } from 'react';
-import type { Id } from '../../../convex/_generated/dataModel';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   ContextMenu,
@@ -32,38 +32,38 @@ import { useTranslation } from 'react-i18next';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
 interface Conversation {
-  _id: Id<'chatConversations'>;
+  id: string;
   type: 'direct' | 'group';
   name?: string;
   avatarUrl?: string;
   lastMessageAt?: number;
   lastMessageText?: string;
-  lastMessageSenderId?: Id<'users'>;
+  lastMessageSenderId?: string;
   isPinned?: boolean;
   isArchived?: boolean;
   isDeleted?: boolean;
   membership: { unreadCount: number; isMuted: boolean; isDeleted?: boolean; isArchived?: boolean };
   otherUser?: {
-    _id: Id<'users'>;
+    id: string;
     name: string;
     avatarUrl?: string;
     presenceStatus?: string;
   } | null;
   memberCount?: number;
-  members?: Array<{ userId: Id<'users'>; user?: { name: string; avatarUrl?: string } | null }>;
+  members?: Array<{ userId: string; user?: { name: string; avatarUrl?: string } | null }>;
 }
 
 interface Props {
   conversations: Conversation[];
-  selectedId: Id<'chatConversations'> | null;
-  currentUserId: Id<'users'>;
-  onSelect: (id: Id<'chatConversations'>) => void;
+  selectedId: string | null;
+  currentUserId: string;
+  onSelect: (id: string) => void;
   onNewConversation: () => void;
-  onTogglePin?: (convId: Id<'chatConversations'>) => Promise<void>;
-  onDelete?: (convId: Id<'chatConversations'>) => Promise<void>;
-  onRestore?: (convId: Id<'chatConversations'>) => Promise<void>;
-  onToggleArchive?: (convId: Id<'chatConversations'>) => Promise<void>;
-  onToggleMute?: (convId: Id<'chatConversations'>) => Promise<void>;
+  onTogglePin?: (convId: string) => Promise<void>;
+  onDelete?: (convId: string) => Promise<void>;
+  onRestore?: (convId: string) => Promise<void>;
+  onToggleArchive?: (convId: string) => Promise<void>;
+  onToggleMute?: (convId: string) => Promise<void>;
 }
 
 type FilterType = 'all' | 'chat' | 'unread' | 'groups' | 'pinned' | 'archived';
@@ -183,7 +183,7 @@ export function ConversationList({
 
   const handleOperation = async (
     operation: () => Promise<void>,
-    convId: Id<'chatConversations'>,
+    convId: string,
   ) => {
     try {
       setLoadingOpId(convId);
@@ -335,7 +335,7 @@ export function ConversationList({
         )}
 
         {filtered.map((conv, idx) => {
-          const isSelected = conv._id === selectedId;
+          const isSelected = conv.id === selectedId;
           const isGroup = conv.type === 'group';
           const displayName = isGroup
             ? (conv.name ?? 'Group')
@@ -403,13 +403,13 @@ export function ConversationList({
               ? null
               : (lastSenderMember?.user?.name?.[0]?.toUpperCase() ?? null);
 
-          const isLoading = loadingOpId === conv._id;
+          const isLoading = loadingOpId === conv.id;
 
           return (
-            <ContextMenu key={conv._id}>
+            <ContextMenu key={conv.id}>
               <ContextMenuTrigger asChild>
                 <div
-                  onClick={() => onSelect(conv._id)}
+                  onClick={() => onSelect(conv.id)}
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-left relative cursor-pointer',
                     isSelected ? 'shadow-sm scale-[1.01]' : 'hover:opacity-90',
@@ -542,10 +542,10 @@ export function ConversationList({
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOperation(async () => {
-                              await onRestore?.(conv._id);
+                              await onRestore?.(conv.id);
                               // Force refresh by switching to chat filter after a small delay
                               setTimeout(() => setFilter('chat'), 100);
-                            }, conv._id);
+                            }, conv.id);
                           }}
                           className="p-1.5 rounded-lg transition-colors hover:bg-(--sidebar-item-hover)"
                           title={t('chat.restore') || 'Восстановить'}
@@ -557,8 +557,8 @@ export function ConversationList({
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOperation(
-                              () => onToggleArchive?.(conv._id) || Promise.resolve(),
-                              conv._id,
+                              () => onToggleArchive?.(conv.id) || Promise.resolve(),
+                              conv.id,
                             );
                           }}
                           className="p-1.5 rounded-lg transition-colors hover:bg-(--sidebar-item-hover)"
@@ -587,9 +587,9 @@ export function ConversationList({
                   <ContextMenuItem
                     onClick={() =>
                       handleOperation(async () => {
-                        await onRestore?.(conv._id);
+                        await onRestore?.(conv.id);
                         setFilter('chat');
-                      }, conv._id)
+                      }, conv.id)
                     }
                     disabled={isLoading}
                     className="flex items-center gap-2"
@@ -602,8 +602,8 @@ export function ConversationList({
                     <ContextMenuItem
                       onClick={() =>
                         handleOperation(
-                          () => onTogglePin?.(conv._id) || Promise.resolve(),
-                          conv._id,
+                          () => onTogglePin?.(conv.id) || Promise.resolve(),
+                          conv.id,
                         )
                       }
                       disabled={isLoading}
@@ -616,8 +616,8 @@ export function ConversationList({
                     <ContextMenuItem
                       onClick={() =>
                         handleOperation(
-                          () => onToggleMute?.(conv._id) || Promise.resolve(),
-                          conv._id,
+                          () => onToggleMute?.(conv.id) || Promise.resolve(),
+                          conv.id,
                         )
                       }
                       disabled={isLoading}
@@ -639,8 +639,8 @@ export function ConversationList({
                     <ContextMenuItem
                       onClick={() =>
                         handleOperation(
-                          () => onToggleArchive?.(conv._id) || Promise.resolve(),
-                          conv._id,
+                          () => onToggleArchive?.(conv.id) || Promise.resolve(),
+                          conv.id,
                         )
                       }
                       disabled={isLoading}
@@ -656,7 +656,7 @@ export function ConversationList({
 
                     <ContextMenuItem
                       onClick={() =>
-                        handleOperation(() => onDelete?.(conv._id) || Promise.resolve(), conv._id)
+                        handleOperation(() => onDelete?.(conv.id) || Promise.resolve(), conv.id)
                       }
                       disabled={isLoading}
                       className="flex items-center gap-2 text-red-500 focus:text-red-500"

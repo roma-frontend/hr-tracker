@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchMutation, fetchQuery } from 'convex/nextjs';
-import { api } from '../../../../../convex/_generated/api';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
   try {
@@ -14,24 +12,32 @@ export async function POST(req: Request) {
       );
     }
 
+    const supabase = await createClient();
+
     // Get the leave to validate
-    const leaves = await fetchQuery(api.leaves.getAllLeaves, { requesterId: requesterId as any });
-    const leave = (leaves as any[]).find((l: any) => l._id === leaveId);
+    const { data: leaves } = await supabase
+      .from('leave_requests')
+      .select('*')
+      .eq('organizationId', (await supabase.from('users').select('organizationId').eq('id', requesterId).single()).data?.organizationId ?? '');
+    const leave = (leaves as any[]).find((l: any) => l.id === leaveId);
 
     if (!leave) {
       return NextResponse.json({ success: false, message: 'Leave request not found' });
     }
 
     // Get requester
-    const users = await fetchQuery(api.users.queries.getAllUsers, { requesterId: requesterId as any });
-    const requester = (users as any[]).find((u: any) => u._id === requesterId);
+    const { data: users } = await supabase
+      .from('users')
+      .select('*')
+      .eq('organizationId', (await supabase.from('users').select('organizationId').eq('id', requesterId).single()).data?.organizationId ?? '');
+    const requester = (users as any[]).find((u: any) => u.id === requesterId);
 
     if (!requester) {
       return NextResponse.json({ success: false, message: 'User not found' });
     }
 
     const isAdmin = requester.role === 'admin';
-    const isOwner = leave.userId === requesterId;
+    const isOwner = leave.userid === requesterId;
 
     if (!isAdmin && !isOwner) {
       return NextResponse.json({
@@ -48,15 +54,14 @@ export async function POST(req: Request) {
       });
     }
 
-    await fetchMutation(api.leaves.updateLeave, {
-      leaveId: leaveId as Id<'leaveRequests'>,
-      requesterId: requesterId as Id<'users'>,
-      ...(startDate && { startDate }),
-      ...(endDate && { endDate }),
+    await supabase.from('leave_requests').update({
+      ...(startDate && { start_date: startDate }),
+      ...(endDate && { end_date: endDate }),
       ...(days && { days }),
       ...(reason && { reason }),
       ...(type && { type }),
-    });
+      updated_at: Date.now(),
+    }).eq('id', leaveId);
 
     return NextResponse.json({
       success: true,

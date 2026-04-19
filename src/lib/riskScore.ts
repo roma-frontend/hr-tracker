@@ -11,7 +11,7 @@ export interface RiskContext {
   userAgent?: string;
   deviceFingerprint?: string;
   email: string;
-  method: 'password' | 'face_id' | 'webauthn' | 'google';
+  method: 'password' | 'faceid' | 'webauthn' | 'google';
   // From DB lookups (passed in from API)
   isKnownDevice?: boolean;
   isTrustedDevice?: boolean;
@@ -89,7 +89,7 @@ export function calculateRiskScore(ctx: RiskContext): RiskResult {
   }
 
   // ── Auth method bonus (stronger methods lower risk) ───────────────────────
-  if (ctx.method === 'face_id') {
+  if (ctx.method === 'faceid') {
     score -= 10;
   } else if (ctx.method === 'webauthn') {
     score -= 15;

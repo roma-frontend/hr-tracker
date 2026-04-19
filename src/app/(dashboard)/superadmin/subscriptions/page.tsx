@@ -1,52 +1,43 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
   Users,
   Plus,
-  CreditCard,
   Calendar,
   DollarSign,
   Shield,
   X,
   CheckCircle,
-  AlertCircle,
   ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import type { Id } from '@/convex/_generated/dataModel';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CreateManualSubscriptionWizard } from '@/components/superadmin/CreateManualSubscriptionWizard';
+import {
+  useListAllSubscriptions,
+  useCancelSubscription,
+} from '@/hooks/useSubscriptions';
 
 const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
 export default function SubscriptionsManagementPage() {
   const { t } = useTranslation();
-  const subscriptions = useQuery(api.subscriptions_admin.listAllWithUsers);
-
-  // Get current user from useAuthStore (works with both email/password and OAuth)
   const { user } = useAuthStore();
 
-  const allOrganizations = useQuery(
-    api.organizations.getAllOrganizations,
-    user?.id ? { superadminUserId: user.id as any } : 'skip',
-  );
+  const isSuperAdmin =
+    user?.role === 'superadmin' || user?.email?.toLowerCase() === SUPERADMIN_EMAIL;
 
-  const createManual = useMutation(api.subscriptions_admin.createManualSubscription);
+  const { data: subscriptions, isLoading } = useListAllSubscriptions(isSuperAdmin);
+  const cancelMutation = useCancelSubscription();
 
   const [showForm, setShowForm] = useState(false);
 
-  // Wait for user to load - MUST check this first before checking role
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -55,10 +46,6 @@ export default function SubscriptionsManagementPage() {
     );
   }
 
-  // Check if user is superadmin - only after user is loaded
-  const isSuperAdmin = user.role === 'superadmin' || user.email?.toLowerCase() === SUPERADMIN_EMAIL;
-
-  // If not superadmin, show access denied
   if (!isSuperAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -80,10 +67,15 @@ export default function SubscriptionsManagementPage() {
     );
   }
 
-  const handleCancel = async (subId: Id<'subscriptions'>) => {
+  const handleCancel = async (subId: string) => {
     if (!confirm(t('superadmin.subscriptions.confirmCancelSub'))) return;
 
-    toast.error(t('superadmin.subscriptions.cancelNotImplemented'));
+    try {
+      await cancelMutation.mutateAsync({ subscriptionId: subId });
+      toast.success(t('superadmin.subscriptions.cancelSuccess'));
+    } catch (error) {
+      toast.error((error as Error).message || t('superadmin.subscriptions.cancelNotImplemented'));
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -102,6 +94,14 @@ export default function SubscriptionsManagementPage() {
       </Badge>
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <ShieldLoader size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -124,7 +124,6 @@ export default function SubscriptionsManagementPage() {
         </div>
       </div>
 
-      {/* Create Manual Subscription Form - Using Wizard */}
       {showForm && (
         <Card className="border-(--primary)/20 bg-(--card)">
           <CardHeader>
@@ -146,7 +145,6 @@ export default function SubscriptionsManagementPage() {
         </Card>
       )}
 
-      {/* Subscriptions List */}
       <Card className="bg-(--card)">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -189,7 +187,7 @@ export default function SubscriptionsManagementPage() {
               <tbody>
                 {subscriptions?.map((sub: any) => (
                   <tr
-                    key={sub._id}
+                    key={sub.id}
                     className="border-b border-(--border) hover:bg-(--background-subtle) transition-colors"
                   >
                     <td className="py-3 px-2">
@@ -234,7 +232,7 @@ export default function SubscriptionsManagementPage() {
                     </td>
                     <td className="py-3 px-2 text-(--text-primary)">
                       $
-                      {(sub as any).metadata?.customPrice ||
+                      {sub.metadata?.customPrice ||
                         (sub.plan === 'professional'
                           ? '49'
                           : sub.plan === 'enterprise'
@@ -244,7 +242,7 @@ export default function SubscriptionsManagementPage() {
                     <td className="py-3 px-2 text-(--text-muted) text-sm">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {new Date(sub.currentPeriodEnd ?? 0).toLocaleDateString()}
+                        {new Date((sub.current_period_end ?? 0) * 1000).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="py-3 px-2">
@@ -252,13 +250,14 @@ export default function SubscriptionsManagementPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleCancel(sub._id)}
+                          onClick={() => handleCancel(sub.id)}
+                          disabled={cancelMutation.isPending}
                           className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
                         >
                           <X className="w-4 h-4" />
                         </Button>
                       )}
-                    </td>
+                   </td>
                   </tr>
                 ))}
               </tbody>

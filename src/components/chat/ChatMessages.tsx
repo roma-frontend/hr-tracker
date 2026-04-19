@@ -42,8 +42,8 @@ export function ChatMessages({
   const dedupedMessages = React.useMemo(() => {
     const seen = new Set();
     return (messages || []).filter((msg) => {
-      if (seen.has(msg._id)) return false;
-      seen.add(msg._id);
+      if (seen.has(msg.id)) return false;
+      seen.add(msg.id);
       return true;
     });
   }, [messages]);
@@ -113,7 +113,7 @@ export function ChatMessages({
 
             return (
               <div
-                key={msg._id}
+                key={msg.id}
                 data-index={virtualRow.index}
                 ref={virtualizer.measureElement}
                 style={{

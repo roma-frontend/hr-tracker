@@ -3,9 +3,6 @@
 import './drivers-animations.css';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
@@ -20,6 +17,14 @@ import {
   TripDetailsModal,
 } from '@/components/drivers/modals';
 import { toast } from 'sonner';
+import {
+  useAvailableDrivers,
+  useMyRequests,
+  useFavoriteDrivers,
+  useRecurringTrips,
+  useAddFavorite,
+  useRemoveFavorite,
+} from '@/hooks/useDrivers';
 
 interface VehicleInfo {
   model: string;
@@ -29,20 +34,8 @@ interface VehicleInfo {
   year?: number;
 }
 
-interface _DriverRecord {
-  _id: Id<'drivers'>;
-  userName: string;
-  userAvatar?: string;
-  userPosition?: string;
-  rating: number;
-  totalTrips: number;
-  isOnShift?: boolean;
-  isAvailable: boolean;
-  vehicleInfo: VehicleInfo;
-}
-
 interface TripRequest {
-  _id: Id<'driverRequests'>;
+  id: string;
   status: 'pending' | 'approved' | 'declined' | 'cancelled' | 'completed';
   startTime: number;
   endTime: number;
@@ -58,41 +51,12 @@ interface TripRequest {
   };
 }
 
-interface _RecurringTrip {
-  _id: Id<'recurringTrips'>;
-  isActive: boolean;
-  driverName?: string;
-  driverVehicle?: VehicleInfo;
-  tripInfo?: {
-    from: string;
-    to: string;
-    purpose: string;
-    passengerCount: number;
-    notes?: string;
-  };
-  schedule: {
-    daysOfWeek: number[];
-    startTime: string;
-    endTime: string;
-  };
-  userId: Id<'users'>;
-  driverId: Id<'drivers'>;
-  organizationId: Id<'organizations'>;
-  createdAt: number;
-  updatedAt: number;
-}
-
 export default function DriversPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { selectedOrgId: storeSelectedOrgId } = useOrgSelectorStore();
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ALL HOOKS MUST BE CALLED UNCONDITIONALLY, IN SAME ORDER, EVERY RENDER
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  // 1. State hooks
   const [searchQuery, setSearchQuery] = useState('');
   const [capacityFilter, setCapacityFilter] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'rating' | 'name' | 'availability'>('rating');
@@ -100,7 +64,7 @@ export default function DriversPage() {
   const [showSelectDriverModal, setShowSelectDriverModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedDriverCandidate, setSelectedDriverCandidate] = useState<{
-    _id: Id<'users'>;
+    id: string;
     name: string;
     email: string;
     phone?: string;
@@ -110,19 +74,14 @@ export default function DriversPage() {
   const [selectedRequest, setSelectedRequest] = useState<TripRequest | null>(null);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
 
-  const userId = user?.id as Id<'users'> | undefined;
-  const orgId = user?.organizationId as Id<'organizations'> | undefined;
+  const userId = user?.id as string | undefined;
+  const orgId = user?.organizationId as string | undefined;
   const isSuperadmin = user?.role === 'superadmin';
-  
-  // For superadmin, use selected org from store, otherwise use user's org
-  const effectiveOrgId = isSuperadmin ? (storeSelectedOrgId as Id<'organizations'> | undefined) : orgId;
+  const effectiveOrgId = isSuperadmin ? (storeSelectedOrgId as string | undefined) : orgId;
 
-  // 2. Mutation hooks
-  const addFavorite = useMutation(api.drivers.driver_registration.addFavoriteDriver);
-  const removeFavorite = useMutation(api.drivers.driver_registration.removeFavoriteDriver);
-  const registerAsDriver = useMutation(api.drivers.driver_registration.registerAsDriver);
+  const addFavoriteMutation = useAddFavorite();
+  const removeFavoriteMutation = useRemoveFavorite();
 
-  // 3. Effect hooks
   useEffect(() => {
     if (!isAuthenticated) router.push('/login');
   }, [isAuthenticated, router]);
@@ -131,65 +90,41 @@ export default function DriversPage() {
     if (isAuthenticated && user && !orgId) router.push('/onboarding/select-organization');
   }, [isAuthenticated, user, orgId, router]);
 
-  // 4. Query hooks
-  const driverRecord = useQuery(
-    api.drivers.queries.getDriverByUserId,
-    userId && orgId ? { userId } : 'skip',
-  );
+  const { data: availableDrivers, isLoading: isLoadingDrivers } = useAvailableDrivers(effectiveOrgId);
+  const { data: myRequests, isLoading: isLoadingRequests } = useMyRequests(userId);
+  const { data: favoriteDrivers, isLoading: isLoadingFavorites } = useFavoriteDrivers(userId);
+  const { data: recurringTrips, isLoading: isLoadingRecurring } = useRecurringTrips(effectiveOrgId);
 
-  const availableDrivers = useQuery(
-    api.drivers.queries.getAvailableDrivers,
-    effectiveOrgId ? { organizationId: effectiveOrgId } : 'skip',
-  );
+  const [optimisticFavoriteIds, setOptimisticFavoriteIds] = useState<Set<string>>(() => new Set());
 
-  const myRequests = useQuery(
-    api.drivers.requests_queries.getMyRequests,
-    userId ? { userId } : 'skip',
-  );
-
-  const favoriteDrivers = useQuery(
-    api.drivers.requests_queries.getFavoriteDrivers,
-    userId ? { userId } : 'skip',
-  );
-
-  // Optimistic favorite IDs state - initialized from query when available
-  const [optimisticFavoriteIds, setOptimisticFavoriteIds] = useState<Set<string>>(() => {
-    // This will be updated by the effect below when data loads
-    return new Set();
-  });
-
-  const recurringTrips = useQuery(
-    api.drivers.recurring_trips.getRecurringTrips,
-    userId ? { userId } : 'skip',
-  );
-
-  // Get all employees with driver role for registration
-  const driverCandidates = useQuery(
-    api.users.queries.getUsersByRole,
-    effectiveOrgId ? { organizationId: effectiveOrgId, role: 'driver' } : 'skip',
-  );
-
-  // 5. Redirect effect
   useEffect(() => {
-    if (driverRecord && user?.role !== 'admin' && user?.role !== 'superadmin') {
-      router.replace('/drivers/dashboard');
+    if (favoriteDrivers) {
+      setOptimisticFavoriteIds(new Set(favoriteDrivers.map((f: any) => f.driverId)));
     }
-  }, [driverRecord, router, user?.role]);
+  }, [favoriteDrivers]);
 
-  // 6. Memo hooks (MUST be before early returns!)
+  useEffect(() => {
+    if (availableDrivers && user?.role !== 'admin' && user?.role !== 'superadmin') {
+      const hasDriverRecord = availableDrivers.length > 0;
+      if (hasDriverRecord) {
+        router.replace('/drivers/dashboard');
+      }
+    }
+  }, [availableDrivers, router, user?.role]);
+
   const favoriteIds = useMemo(() => optimisticFavoriteIds, [optimisticFavoriteIds]);
 
   const drivers = useMemo(
     () =>
-      (availableDrivers ?? []).filter(Boolean).map((d) => ({
-        _id: String((d as { _id: string })._id),
-        userName: (d as { userName: string }).userName,
-        userAvatar: (d as { userAvatar?: string }).userAvatar,
-        userPosition: (d as { userPosition?: string }).userPosition,
-        rating: (d as { rating?: number }).rating ?? 5.0,
-        totalTrips: (d as { totalTrips?: number }).totalTrips ?? 0,
-        isOnShift: (d as { isOnShift?: boolean }).isOnShift,
-        vehicleInfo: (d as { vehicleInfo?: VehicleInfo }).vehicleInfo ?? {
+      (availableDrivers ?? []).filter(Boolean).map((d: any) => ({
+        id: String(d.id),
+        userName: d.userName,
+        userAvatar: d.userAvatar,
+        userPosition: d.userPosition,
+        rating: d.rating ?? 5.0,
+        totalTrips: d.totalTrips ?? 0,
+        isOnShift: d.isOnShift,
+        vehicleInfo: d.vehicleInfo ?? {
           model: 'Unknown',
           capacity: 4,
           plateNumber: 'N/A',
@@ -201,9 +136,9 @@ export default function DriversPage() {
   const activeRequests = useMemo(
     () =>
       (myRequests ?? []).filter(
-        (r) =>
-          (r as { status: string }).status === 'pending' ||
-          (r as { status: string }).status === 'approved',
+        (r: any) =>
+          r.status === 'pending' ||
+          r.status === 'approved',
       ),
     [myRequests],
   );
@@ -211,26 +146,24 @@ export default function DriversPage() {
   const historyRequests = useMemo(
     () =>
       (myRequests ?? []).filter(
-        (r) =>
-          (r as { status: string }).status === 'completed' ||
-          (r as { status: string }).status === 'cancelled',
+        (r: any) =>
+          r.status === 'completed' ||
+          r.status === 'cancelled',
       ),
     [myRequests],
   );
 
   const recurringData = useMemo(
     () =>
-      (recurringTrips ?? []).map((trip) => ({
-        _id: String((trip as { _id: string })._id),
-        isActive: (trip as { isActive: boolean }).isActive ?? true,
-        days: (trip as { schedule: { daysOfWeek: number[] } }).schedule?.daysOfWeek ?? [
-          1, 2, 3, 4, 5,
-        ],
-        startTime: (trip as { schedule: { startTime: string } }).schedule?.startTime ?? '08:00',
-        endTime: (trip as { schedule: { endTime: string } }).schedule?.endTime ?? '09:00',
+      (recurringTrips ?? []).map((trip: any) => ({
+        id: String(trip.id),
+        isActive: trip.isActive ?? true,
+        days: trip.schedule?.daysOfWeek ?? [1, 2, 3, 4, 5],
+        startTime: trip.schedule?.startTime ?? '08:00',
+        endTime: trip.schedule?.endTime ?? '09:00',
         tripInfo: {
-          from: (trip as { tripInfo?: { from?: string } }).tripInfo?.from ?? 'Unknown',
-          to: (trip as { tripInfo?: { to?: string } }).tripInfo?.to ?? 'Unknown',
+          from: trip.tripInfo?.from ?? 'Unknown',
+          to: trip.tripInfo?.to ?? 'Unknown',
         },
       })),
     [recurringTrips],
@@ -239,18 +172,17 @@ export default function DriversPage() {
   const stats = useMemo(
     () => ({
       availableDrivers: (availableDrivers ?? []).filter(
-        (d) => (d as { isAvailable?: boolean }).isAvailable,
+        (d: any) => d.isAvailable,
       ).length,
       pendingRequests: (myRequests ?? []).filter(
-        (r) => (r as { status: string }).status === 'pending',
+        (r: any) => r.status === 'pending',
       ).length,
-      totalTrips: (myRequests ?? []).filter((r) => (r as { status: string }).status === 'approved')
+      totalTrips: (myRequests ?? []).filter((r: any) => r.status === 'approved')
         .length,
     }),
     [availableDrivers, myRequests],
   );
 
-  // 7. Effect for scroll blocking when wizard, calendar, or trip details are open
   useEffect(() => {
     if (showRequestWizard || showTripDetails || showCalendarDialog) {
       const mainEl = document.querySelector<HTMLElement>('main');
@@ -273,7 +205,6 @@ export default function DriversPage() {
     }
   }, [showRequestWizard, showTripDetails, showCalendarDialog]);
 
-  // 8. Callback hooks (MUST be before early returns!)
   const handleBook = useCallback((id: string) => {
     setSelectedDriverId(id);
     setShowRequestWizard(true);
@@ -300,7 +231,6 @@ export default function DriversPage() {
     async (id: string) => {
       if (!userId || !effectiveOrgId) return;
 
-      // Optimistic update
       const wasFavorite = optimisticFavoriteIds.has(id);
       const newSet = new Set(optimisticFavoriteIds);
       if (wasFavorite) {
@@ -312,10 +242,10 @@ export default function DriversPage() {
 
       try {
         if (wasFavorite) {
-          await removeFavorite({ userId, driverId: id as Id<'drivers'> });
+          await removeFavoriteMutation.mutateAsync({ userId, driverId: id });
           toast.success(t('driver.removedFromFavorites', 'Removed from favorites'));
         } else {
-          await addFavorite({ organizationId: effectiveOrgId, userId, driverId: id as Id<'drivers'> });
+          await addFavoriteMutation.mutateAsync({ organizationId: effectiveOrgId, userId, driverId: id });
           toast.success(t('driver.addedToFavorites', 'Added to favorites'));
         }
       } catch (e: unknown) {
@@ -323,7 +253,7 @@ export default function DriversPage() {
         toast.error(e instanceof Error ? e.message : t('driver.failed', 'Failed'));
       }
     },
-    [userId, effectiveOrgId, optimisticFavoriteIds, addFavorite, removeFavorite, t],
+    [userId, effectiveOrgId, optimisticFavoriteIds, addFavoriteMutation, removeFavoriteMutation, t],
   );
 
   const handleRequestDriver = useCallback(() => {
@@ -336,7 +266,7 @@ export default function DriversPage() {
   }, []);
 
   const handleSelectDriver = useCallback(
-    (driver: { _id: Id<'users'>; name: string; email: string; phone?: string }) => {
+    (driver: { id: string; name: string; email: string; phone?: string }) => {
       setSelectedDriverCandidate(driver);
       setShowSelectDriverModal(false);
       setShowRegisterModal(true);
@@ -367,24 +297,30 @@ export default function DriversPage() {
     }) => {
       if (!userId || !effectiveOrgId || !selectedDriverCandidate) return;
       try {
-        await registerAsDriver({
-          userId: selectedDriverCandidate._id,
-          organizationId: effectiveOrgId,
-          adminId: userId, // Admin is registering the driver
-          vehicleInfo: {
-            model: data.vehicleMake || '',
-            year: data.vehicleYear ? parseInt(data.vehicleYear) : 2024,
-            color: data.vehicleColor || '',
-            plateNumber: data.licensePlate || '',
-            capacity: data.maxPassengers || 4,
-          },
-          workingHours: {
-            startTime: '09:00',
-            endTime: '18:00',
-            workingDays: [1, 2, 3, 4, 5],
-          },
-          maxTripsPerDay: data.maxTripsPerDay || 3,
+        const res = await fetch('/api/drivers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'register-driver',
+            userId: selectedDriverCandidate.id,
+            organizationId: effectiveOrgId,
+            adminId: userId,
+            vehicleInfo: {
+              model: data.vehicleMake || '',
+              year: data.vehicleYear ? parseInt(data.vehicleYear) : 2024,
+              color: data.vehicleColor || '',
+              plateNumber: data.licensePlate || '',
+              capacity: data.maxPassengers || 4,
+            },
+            workingHours: {
+              startTime: '09:00',
+              endTime: '18:00',
+              workingDays: [1, 2, 3, 4, 5],
+            },
+            maxTripsPerDay: data.maxTripsPerDay || 3,
+          }),
         });
+        if (!res.ok) throw new Error('Failed to register driver');
         toast.success(t('driver.registered', 'Registered as driver!'));
         setShowRegisterModal(false);
         setSelectedDriverCandidate(null);
@@ -394,7 +330,7 @@ export default function DriversPage() {
         );
       }
     },
-    [userId, effectiveOrgId, selectedDriverCandidate, registerAsDriver, t],
+    [userId, effectiveOrgId, selectedDriverCandidate, t],
   );
 
   const noOp = useCallback(() => {}, []);
@@ -404,24 +340,12 @@ export default function DriversPage() {
   }, []);
   const closeRegisterModal = useCallback(() => setShowRegisterModal(false), []);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // NOW EARLY RETURNS ARE SAFE (all hooks are above)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  // Use effect to set current time once (avoids impure function in render)
   const [currentTime] = useState(() => Date.now());
   const tripModalTime = currentTime;
 
-  if (
-    !isAuthenticated ||
-    !userId ||
-    !effectiveOrgId ||
-    driverRecord === undefined ||
-    availableDrivers === undefined ||
-    myRequests === undefined ||
-    favoriteDrivers === undefined ||
-    recurringTrips === undefined
-  ) {
+  const isLoading = isLoadingDrivers || isLoadingRequests || isLoadingFavorites || isLoadingRecurring;
+
+  if (!isAuthenticated || !userId || !effectiveOrgId || isLoading) {
     return (
       <div className="flex items-center justify-center h-full min-h-100">
         <ShieldLoader size="lg" />
@@ -429,13 +353,6 @@ export default function DriversPage() {
     );
   }
 
-  if (driverRecord && user?.role !== 'admin' && user?.role !== 'superadmin') {
-    return null;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RENDER
-  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <>
       <DriverBookingPage
@@ -488,8 +405,8 @@ export default function DriversPage() {
 
       {showSelectDriverModal && (
         <SelectDriverModal
-          candidates={(driverCandidates ?? []).map((c) => ({
-            _id: c._id,
+          candidates={(availableDrivers ?? []).map((c: any) => ({
+            id: c.id,
             name: c.name,
             email: c.email,
             phone: c.phone,

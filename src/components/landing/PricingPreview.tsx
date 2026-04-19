@@ -425,10 +425,10 @@ function PricingCard({
 
 // ── Section ───────────────────────────────────────────────────────────────────
 export default function PricingPreview() {
-  const { ref, style } = useReveal();
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const { plan } = useSubscription();
+  const { ref, style } = useReveal();
 
   // Only show current plan if user is logged in
   const currentPlan = user ? plan : undefined;

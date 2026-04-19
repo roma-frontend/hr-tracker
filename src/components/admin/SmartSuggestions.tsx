@@ -1,18 +1,17 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb, Sparkles } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useSmartSuggestions } from '@/hooks/useAdmin';
 
 export default function SmartSuggestions() {
   const { t } = useTranslation();
-  const suggestions = useQuery(api.admin.getSmartSuggestions);
+  const { data: suggestions, isLoading } = useSmartSuggestions();
 
-  if (!suggestions) {
+  if (isLoading || !suggestions) {
     return (
       <Card className="border-(--border)">
         <CardContent className="flex items-center justify-center p-8">

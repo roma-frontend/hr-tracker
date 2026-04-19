@@ -61,9 +61,9 @@ export function ChatHeader({
       </button>
 
       <div className="relative shrink-0">
-        {conversation?.type === 'direct' && otherUser?._id ? (
+        {conversation?.type === 'direct' && otherUser?.id ? (
           <Link
-            href={`/employees/${otherUser._id}`}
+            href={`/employees/${otherUser.id}`}
             className="block rounded-full transition-transform duration-200 hover:scale-110 hover:opacity-90"
             title={`View ${displayName}'s profile`}
           >

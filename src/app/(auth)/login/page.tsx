@@ -15,7 +15,6 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { OAuthSyncLoader } from '@/components/auth/OAuthSyncLoader';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { loginTourSteps } from '@/components/onboarding/loginTourSteps';
-import { useSession } from 'next-auth/react';
 import { useKeystrokeDynamics } from '@/hooks/useKeystrokeDynamics';
 import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { SmartEmailInput } from '@/components/auth/SmartEmailInput';
@@ -220,7 +219,6 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { login, isAuthenticated } = useAuthStore();
-  const { status } = useSession();
   const [isPending, startTransition] = useTransition();
   const [_showPassword, _setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -291,11 +289,6 @@ export default function LoginPage() {
       .catch(() => {});
   }, []);
 
-
-
-  // Check if OAuth sync is in progress OR redirecting
-  const isOAuthSyncing = (status === 'authenticated' && !isAuthenticated) || isRedirecting;
-
   // Detect when auth completes and redirect (but NOT during maintenance)
   useEffect(() => {
     // Check if we're in maintenance mode
@@ -307,7 +300,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (status === 'authenticated' && isAuthenticated && !isRedirecting) {
+    if (isAuthenticated && !isRedirecting) {
       setIsRedirecting(true);
 
       // Получаем параметр from из URL
@@ -317,7 +310,7 @@ export default function LoginPage() {
       const destination = from && from.startsWith('/') ? from : '/dashboard';
       router.push(destination);
     }
-  }, [status, isAuthenticated, isRedirecting, router]);
+  }, [isAuthenticated, isRedirecting, router]);
 
 
 
@@ -361,8 +354,8 @@ export default function LoginPage() {
         const result = (await response.json()) as {
           requiresTwoFactor?: boolean;
           tempToken?: string;
-          session?: {
-            userId: string;
+          user?: {
+            id: string;
             name: string;
             email: string;
             role: string;
@@ -371,7 +364,13 @@ export default function LoginPage() {
             position?: string;
             employeeType?: string;
             avatar?: string;
+            isApproved?: boolean;
+            phone?: string;
+            presenceStatus?: string;
+            organizationSlug?: string;
+            organizationName?: string;
           };
+          session?: any;
           riskLevel?: string;
           error?: string;
         };
@@ -387,21 +386,25 @@ export default function LoginPage() {
 
         console.error('✅ Login successful:', result);
 
-        if (!result.session) {
-          throw new Error('No session data in response');
+        if (!result.user) {
+          throw new Error('No user data in response');
         }
 
-        const session = result.session;
-        const userData: import('@/store/useAuthStore').User = {
-          id: session.userId,
-          name: session.name,
-          email: session.email,
-          role: session.role as 'admin' | 'supervisor' | 'employee' | 'superadmin' | 'driver',
-          organizationId: session.organizationId,
-          department: session.department,
-          position: session.position,
-          employeeType: session.employeeType as 'staff' | 'contractor' | undefined,
-          avatar: session.avatar,
+        const userData: import('@/store/useAuthStore').UserProfile = {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          role: result.user.role as 'admin' | 'supervisor' | 'employee' | 'superadmin' | 'driver',
+          organizationId: result.user.organizationId,
+          department: result.user.department,
+          position: result.user.position,
+          employeeType: result.user.employeeType as 'staff' | 'contractor' | undefined,
+          avatar: result.user.avatar,
+          isApproved: result.user.isApproved,
+          phone: result.user.phone,
+          presenceStatus: result.user.presenceStatus as any,
+          organizationSlug: result.user.organizationSlug,
+          organizationName: result.user.organizationName,
         };
 
         console.error('💾 Saving user to store:', userData);
@@ -509,7 +512,7 @@ export default function LoginPage() {
         }
 
         const session = result.session;
-        const userData: import('@/store/useAuthStore').User = {
+        const userData: import('@/store/useAuthStore').UserProfile = {
           id: session.userId,
           name: session.name,
           email: session.email,
@@ -558,10 +561,10 @@ export default function LoginPage() {
           <OAuthSyncLoader />
 
           {/* Hide login page during OAuth sync */}
-          {isOAuthSyncing && <div style={{ display: 'none' }} />}
+          {false && <div style={{ display: 'none' }} />}
 
           {/* Onboarding Tour */}
-          {!isOAuthSyncing && (
+          {!false && (
             <OnboardingTour
               steps={loginTourSteps}
               tourId={t('auth.loginTour')}
@@ -573,7 +576,7 @@ export default function LoginPage() {
           <div
             className="min-h-screen flex items-center justify-center"
             style={{
-              display: isOAuthSyncing ? 'none' : 'flex',
+              display: 'flex',
               background: 'var(--background)',
             }}
           >
@@ -628,15 +631,15 @@ export default function LoginPage() {
                         <ShieldCheck className="w-6 h-6 text-white" />
                       </div>
                       <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                        Two-Factor Authentication
+                        {t('auth2fa.title', 'Two-Factor Authentication')}
                       </h2>
                       <p
                         className="text-xs mt-1 text-center"
                         style={{ color: 'var(--text-muted)' }}
                       >
                         {isBackupCode
-                          ? 'Enter one of your backup codes'
-                          : 'Enter the 6-digit code from your authenticator app'}
+                          ? t('auth2fa.backupCodeDesc', 'Enter one of your backup codes')
+                          : t('auth2fa.authenticatorCodeDesc', 'Enter the 6-digit code from your authenticator app')}
                       </p>
                     </div>
 
@@ -691,7 +694,7 @@ export default function LoginPage() {
                           type="submit"
                           className="w-full py-2 rounded-xl font-semibold text-sm text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
                         >
-                          Verify Backup Code
+                          {t('auth2fa.verifyBackupCode', 'Verify Backup Code')}
                         </button>
                       )}
                     </form>
@@ -708,7 +711,7 @@ export default function LoginPage() {
                         className="text-xs hover:underline"
                         style={{ color: '#2563eb' }}
                       >
-                        {isBackupCode ? 'Use authenticator code instead' : 'Use a backup code'}
+                        {isBackupCode ? t('auth2fa.useAuthenticatorCode', 'Use authenticator code instead') : t('auth2fa.useBackupCode', 'Use a backup code')}
                       </button>
                       <br />
                       <button
@@ -723,7 +726,7 @@ export default function LoginPage() {
                         className="text-xs hover:underline"
                         style={{ color: 'var(--text-muted)' }}
                       >
-                        Back to login
+                        {t('auth2fa.backToLogin', 'Back to login')}
                       </button>
                     </div>
                   </div>

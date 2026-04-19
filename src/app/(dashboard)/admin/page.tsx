@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
 import { useTranslation } from 'react-i18next';
-import { api } from '@/convex/_generated/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { toast } from 'sonner';
@@ -12,9 +10,8 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Users, Shield, Building2, CheckCircle, Eye, LogOut } from 'lucide-react';
-import type { Id } from '@/convex/_generated/dataModel';
-import type { Doc } from '@/convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
+import { useAllOrganizations, useAssignUserAsOrgAdmin } from '@/hooks/useOrganizations';
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -25,15 +22,12 @@ export default function AdminPage() {
   const [assignEmail, setAssignEmail] = useState('');
   const [isAssigning, setIsAssigning] = useState(false);
 
-  // Check if user is superadmin BEFORE calling conditional hooks
   const isSuperadmin =
     user && (user.role === 'superadmin' || user.email?.toLowerCase() === 'romangulanyan@gmail.com');
 
-  // Call hooks unconditionally (but they will use "skip" if not superadmin)
-  const organizations = useQuery(api.organizations.listAll, isSuperadmin ? {} : 'skip');
-  const assignUserAsOrgAdmin = useMutation(api.admin.assignUserAsOrgAdmin);
+  const { data: organizations, isLoading: isLoadingOrgs } = useAllOrganizations(!!isSuperadmin);
+  const assignUserAsOrgAdmin = useAssignUserAsOrgAdmin();
 
-  // Check if user is superadmin
   if (!user || !isSuperadmin) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -53,11 +47,9 @@ export default function AdminPage() {
 
     setIsAssigning(true);
     try {
-      const userId = user.id as Id<'users'>;
-      await assignUserAsOrgAdmin({
-        superadminUserId: userId,
+      await assignUserAsOrgAdmin.mutateAsync({
         userEmail: assignEmail.toLowerCase().trim(),
-        organizationId: selectedOrgId as Id<'organizations'>,
+        organizationId: selectedOrgId,
       });
 
       toast.success(t('admin.userAssignedSuccess'));
@@ -121,7 +113,7 @@ export default function AdminPage() {
                   <span className="text-sm text-blue-500 font-medium">
                     {t('superadmin.viewingOrganization')}:{' '}
                     {
-                      organizations?.find((o: Doc<'organizations'>) => o._id === selectedOrgId)
+                      organizations?.find((o: any) => o.id === selectedOrgId)
                         ?.name
                     }
                   </span>
@@ -139,19 +131,19 @@ export default function AdminPage() {
 
             {/* Organization Selector */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {organizations?.map((org: Doc<'organizations'>) => (
+              {organizations?.map((org: any) => (
                 <Button
-                  key={org._id}
-                  variant={selectedOrgId === org._id ? 'default' : 'outline'}
+                  key={org.id}
+                  variant={selectedOrgId === org.id ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedOrgId(org._id)}
+                  onClick={() => setSelectedOrgId(org.id)}
                   className="justify-start text-left h-auto py-2 px-3"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{org.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{org.plan}</p>
                   </div>
-                  {selectedOrgId === org._id && (
+                  {selectedOrgId === org.id && (
                     <CheckCircle className="w-4 h-4 text-green-500 shrink-0 ml-2" />
                   )}
                 </Button>
@@ -162,7 +154,7 @@ export default function AdminPage() {
 
           <Button
             onClick={handleAssign}
-            disabled={isAssigning || !assignEmail.trim() || !selectedOrgId}
+            disabled={isAssigning || !assignEmail.trim() || !selectedOrgId || assignUserAsOrgAdmin.isPending}
             className={cn(
               'flex items-center gap-2 justify-center mx-auto',
               assignEmail
@@ -171,7 +163,7 @@ export default function AdminPage() {
             )}
             size="lg"
           >
-            {isAssigning ? (
+            {isAssigning || assignUserAsOrgAdmin.isPending ? (
               <>
                 <ShieldLoader size="xs" variant="inline" />
                 {t('admin.assigning')}
@@ -203,9 +195,9 @@ export default function AdminPage() {
             <p className="text-(--text-muted) text-center py-8">{t('admin.noOrganizations')}</p>
           ) : (
             <div className="space-y-3">
-              {organizations.map((org: Doc<'organizations'>) => (
+              {organizations.map((org: any) => (
                 <div
-                  key={org._id}
+                  key={org.id}
                   className="flex items-center justify-between p-4 rounded-lg border border-(--border) bg-(--background-subtle)"
                 >
                   <div className="flex-1">
@@ -218,7 +210,7 @@ export default function AdminPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <Badge>{org.isActive ? t('admin.active') : t('admin.inactive')}</Badge>
+                    <Badge>{org.is_active ? t('admin.active') : t('admin.inactive')}</Badge>
                   </div>
                 </div>
               ))}

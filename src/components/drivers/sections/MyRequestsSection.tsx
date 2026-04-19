@@ -23,7 +23,7 @@ import { format } from 'date-fns';
 import { motion } from '@/lib/cssMotion';
 
 interface Request {
-  _id: string;
+  id: string;
   status: string;
   startTime?: number;
   tripInfo?: {
@@ -36,7 +36,7 @@ interface Request {
 }
 
 interface RecurringTrip {
-  _id: string;
+  id: string;
   isActive: boolean;
   days: number[];
   startTime: string;
@@ -297,7 +297,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
             {activeRequests.length > 0 ? (
               activeRequests.map((request) => (
                 <RequestItem
-                  key={request._id}
+                  key={request.id}
                   request={request}
                   onViewDetails={() => onViewDetails(request)}
                   onEdit={() => onEdit(request)}
@@ -317,7 +317,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
             {historyRequests.length > 0 ? (
               historyRequests.map((request) => (
                 <RequestItem
-                  key={request._id}
+                  key={request.id}
                   request={request}
                   onViewDetails={() => onViewDetails(request)}
                   onRate={() => onRate(request)}
@@ -335,7 +335,7 @@ export const MyRequestsSection = memo(function MyRequestsSection({
             {recurringTrips.length > 0 ? (
               recurringTrips.map((trip) => (
                 <RecurringTripItem
-                  key={trip._id}
+                  key={trip.id}
                   trip={trip}
                   onToggle={() => onToggleRecurring(trip)}
                   onDelete={() => onDeleteRecurring(trip)}

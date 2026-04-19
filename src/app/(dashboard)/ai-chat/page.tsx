@@ -6,9 +6,15 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import {
+  useAiConversations,
+  useAiMessages,
+  useCreateAiConversation,
+  useUpdateAiConversationTitle,
+  useDeleteAiConversation,
+  useAddAiMessage,
+  useAutoRenameAiConversation,
+} from '@/hooks/useAiChat';
 import {
   Sparkles,
   Send,
@@ -37,7 +43,6 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 type Message = {
-  _id?: string;
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -53,7 +58,7 @@ type AnyAction = {
 };
 
 type Conversation = {
-  _id: string;
+  id: string;
   title: string;
   date: Date;
 };
@@ -104,16 +109,16 @@ function getFollowUpSuggestions(
     return [t('chatWidget.showBalance'), t('chatWidget.viewUpcoming'), t('chatWidget.whoOnLeave')];
   }
   if (lower.includes('balance') || lower.includes('days left') || lower.includes('remaining')) {
-    return ['📆 Book a vacation', '🤒 Request sick leave', '📊 Show my leave history'];
+    return [t('aiChat.bookVacation'), t('aiChat.requestSickLeave'), t('aiChat.showLeaveHistory')];
   }
   if (lower.includes('sick') || lower.includes('doctor') || lower.includes('medical')) {
-    return ['🤒 Book sick leave for today', '👨‍⚕️ Book a doctor visit', t('chatWidget.showBalance')];
+    return [t('aiChat.bookSickLeaveToday'), t('aiChat.bookDoctorVisit'), t('chatWidget.showBalance')];
   }
   if (lower.includes('team') || lower.includes('colleague') || lower.includes('who is')) {
-    return ['📅 Show team calendar', '📋 My leave balance', '📆 Book time off'];
+    return [t('aiChat.showTeamCalendar'), t('aiChat.myLeaveBalance'), t('aiChat.bookTimeOff')];
   }
   if (lower.includes('cancel') || lower.includes('delete') || lower.includes('removed')) {
-    return ['📋 Show my pending leaves', '📆 Book new leave', '📊 My leave balance'];
+    return [t('aiChat.showPendingLeaves'), t('aiChat.bookNewLeave'), t('aiChat.myLeaveBalance')];
   }
   if (userRole === 'admin' || userRole === 'supervisor') {
     return [
@@ -122,7 +127,7 @@ function getFollowUpSuggestions(
       t('chatWidget.pendingApprovals'),
     ];
   }
-  return ['📆 Book a vacation', t('chatWidget.showBalance'), '👥 Who is on leave this week?'];
+  return [t('aiChat.bookVacation'), t('chatWidget.showBalance'), t('aiChat.whoOnLeaveThisWeek')];
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -141,7 +146,7 @@ export default function AIChatPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
-  const userId = user?.id as Id<'users'> | undefined;
+  const userId = user?.id;
 
   // State
   const [messages, setMessages] = useState<Message[]>([]);
@@ -169,23 +174,16 @@ export default function AIChatPage() {
     }
   };
 
-  // Convex queries
-  const savedConversations = useQuery(api.aiChat.getConversations, userId ? { userId } : 'skip');
+  // React Query hooks
+  const { data: savedConversations } = useAiConversations(userId || '');
+  const { data: savedMessages } = useAiMessages(activeConversationId);
 
-  // Load messages for active conversation
-  const savedMessages = useQuery(
-    api.aiChat.getMessages,
-    activeConversationId
-      ? { conversationId: activeConversationId as Id<'aiConversations'> }
-      : 'skip',
-  );
-
-  // Convex mutations
-  const createConversation = useMutation(api.aiChatMutations.createConversation);
-  const updateConversationTitle = useMutation(api.aiChatMutations.updateConversationTitle);
-  const deleteConversation = useMutation(api.aiChatMutations.deleteConversation);
-  const addMessage = useMutation(api.aiChatMutations.addMessage);
-  const autoRenameConversation = useMutation(api.aiChatMutations.autoRenameConversation);
+  // Mutations
+  const createConversationMutation = useCreateAiConversation();
+  const updateConversationTitleMutation = useUpdateAiConversationTitle();
+  const deleteConversationMutation = useDeleteAiConversation();
+  const addMessageMutation = useAddAiMessage();
+  const autoRenameConversationMutation = useAutoRenameAiConversation();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -216,21 +214,21 @@ export default function AIChatPage() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Load conversations from Convex
+  // Load conversations from API
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
   useEffect(() => {
     if (savedConversations) {
       const convs = savedConversations.map((c) => ({
-        _id: c._id,
+        id: c.id,
         title: c.title,
-        date: new Date(c.createdAt),
+        date: new Date(c.created_at),
       }));
       setConversations(convs);
 
       // Auto-select first conversation if none selected
       if (convs.length > 0 && !activeConversationId) {
-        setActiveConversationId(convs[0]!._id);
+        setActiveConversationId(convs[0]!.id);
       }
     }
   }, [savedConversations, activeConversationId]);
@@ -239,11 +237,10 @@ export default function AIChatPage() {
   useEffect(() => {
     if (savedMessages && activeConversationId) {
       const loadedMessages: Message[] = savedMessages.map((m) => ({
-        _id: m._id,
-        id: m._id,
+        id: m.id,
         role: m.role,
         content: m.content,
-        timestamp: new Date(m.createdAt),
+        timestamp: new Date(m.created_at),
         actions: [],
         suggestions: [],
       }));
@@ -267,16 +264,17 @@ export default function AIChatPage() {
     if (!userId) return;
 
     try {
-      const { conversationId } = await createConversation({
+      const result = await createConversationMutation.mutateAsync({
         userId,
         title: t('aiChat.newChat') || 'New Chat',
       });
 
+      const conversationId = result.data.conversationId;
       setActiveConversationId(conversationId);
       setMessages([]);
       setConversations((prev) => [
         {
-          _id: conversationId,
+          id: conversationId,
           title: t('aiChat.newChat') || 'New Chat',
           date: new Date(),
         },
@@ -304,11 +302,11 @@ export default function AIChatPage() {
       // Wait for animation
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Delete from Convex (also deletes all messages)
-      await deleteConversation({ conversationId: conversationId as Id<'aiConversations'> });
+      // Delete from Supabase (also deletes all messages)
+      await deleteConversationMutation.mutateAsync({ conversationId });
 
       // Update local state
-      setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+      setConversations((prev) => prev.filter((c) => c.id !== conversationId));
 
       if (activeConversationId === conversationId) {
         setMessages([]);
@@ -329,7 +327,7 @@ export default function AIChatPage() {
   // ═══════════════════════════════════════════════════════════════
   const startEditingTitle = (conv: Conversation, e: React.MouseEvent) => {
     e.stopPropagation();
-    setEditingTitleId(conv._id);
+    setEditingTitleId(conv.id);
     setEditingTitle(conv.title);
   };
 
@@ -338,13 +336,13 @@ export default function AIChatPage() {
   // ═══════════════════════════════════════════════════════════════
   const saveEditedTitle = async (conversationId: string) => {
     try {
-      await updateConversationTitle({
-        conversationId: conversationId as Id<'aiConversations'>,
+      await updateConversationTitleMutation.mutateAsync({
+        conversationId,
         title: editingTitle,
       });
 
       setConversations((prev) =>
-        prev.map((c) => (c._id === conversationId ? { ...c, title: editingTitle } : c)),
+        prev.map((c) => (c.id === conversationId ? { ...c, title: editingTitle } : c)),
       );
       setEditingTitleId(null);
       toast.success(t('aiChat.titleUpdated') || 'Title updated');
@@ -372,15 +370,19 @@ export default function AIChatPage() {
     let currentConvId = activeConversationId;
     if (!currentConvId) {
       try {
-        const { conversationId } = await createConversation({
+        const result = await createConversationMutation.mutateAsync({
           userId,
           title: userMessageContent.slice(0, 50),
         });
-        currentConvId = conversationId;
-        setActiveConversationId(conversationId);
+        currentConvId = result.data.conversationId;
+        if (!currentConvId) {
+          toast.error(t('toasts.conversationCreateFailed'));
+          return;
+        }
+        setActiveConversationId(currentConvId);
         setConversations((prev) => [
           {
-            _id: conversationId,
+            id: currentConvId!,
             title: userMessageContent.slice(0, 50),
             date: new Date(),
           },
@@ -407,10 +409,10 @@ export default function AIChatPage() {
     setInput('');
     setIsLoading(true);
 
-    // Save user message to Convex
+    // Save user message to Supabase
     try {
-      await addMessage({
-        conversationId: currentConvId as Id<'aiConversations'>,
+      await addMessageMutation.mutateAsync({
+        conversationId: currentConvId!,
         role: 'user',
         content: userMessage.content,
       });
@@ -482,10 +484,10 @@ export default function AIChatPage() {
         }, 800);
       }
 
-      // Save AI message to Convex
+      // Save AI message to Supabase
       try {
-        await addMessage({
-          conversationId: currentConvId as Id<'aiConversations'>,
+        await addMessageMutation.mutateAsync({
+          conversationId: currentConvId!,
           role: 'assistant',
           content: cleanContent.replace(/<NAVIGATE>.*?<\/NAVIGATE>/g, '').trim(),
         });
@@ -496,13 +498,13 @@ export default function AIChatPage() {
       // Auto-rename if first message (only user message in loaded messages)
       if (savedMessages && savedMessages.length === 0 && currentConvId) {
         try {
-          await autoRenameConversation({
-            conversationId: currentConvId as Id<'aiConversations'>,
+          await autoRenameConversationMutation.mutateAsync({
+            conversationId: currentConvId,
             firstMessage: userMessage.content,
           });
           setConversations((prev) =>
             prev.map((c) =>
-              c._id === currentConvId ? { ...c, title: userMessage.content.slice(0, 50) } : c,
+              c.id === currentConvId ? { ...c, title: userMessage.content.slice(0, 50) } : c,
             ),
           );
         } catch (error) {
@@ -532,7 +534,7 @@ export default function AIChatPage() {
         {
           id: `error-${Date.now()}`,
           role: 'assistant',
-          content: '❌ ' + (error instanceof Error ? error.message : 'Unknown error'),
+          content: '❌ ' + (error instanceof Error ? error.message : t('common.unknownError') || 'Unknown error'),
           timestamp: new Date(),
           isNew: true,
         },
@@ -558,22 +560,22 @@ export default function AIChatPage() {
     {
       icon: <Calendar className="w-4 h-4" />,
       label: t('aiChat.quickLeave') || 'Отпуск',
-      query: 'Создать заявку на отпуск с 1 по 10 января',
+      query: t('aiChat.bookVacation'),
     },
     {
       icon: <ClipboardList className="w-4 h-4" />,
       label: t('aiChat.quickTasks') || 'Задачи',
-      query: 'Показать мои задачи',
+      query: t('aiChat.quickTasks'),
     },
     {
       icon: <Users className="w-4 h-4" />,
       label: t('aiChat.quickTeam') || 'Команда',
-      query: 'Показать сотрудников',
+      query: t('aiChat.quickTeam'),
     },
     {
       icon: <TrendingUp className="w-4 h-4" />,
       label: t('aiChat.quickAttendance') || 'Посещаемость',
-      query: 'Моя посещаемость',
+      query: t('aiChat.quickAttendance'),
     },
   ];
 
@@ -663,17 +665,17 @@ export default function AIChatPage() {
               ) : (
                 conversations.map((conv) => (
                   <div
-                    key={conv._id}
+                    key={conv.id}
                     className={`group relative flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
-                      activeConversationId === conv._id
+                      activeConversationId === conv.id
                         ? 'bg-(--primary)/10 text-(--primary) border border-(--primary)/20'
                         : 'hover:bg-(--background-subtle) border border-transparent'
                     }`}
-                    onClick={() => handleSelectConversation(conv._id)}
+                    onClick={() => handleSelectConversation(conv.id)}
                   >
                     <MessageSquare className="w-4 h-4 shrink-0" />
 
-                    {editingTitleId === conv._id ? (
+                    {editingTitleId === conv.id ? (
                       <div
                         className="flex-1 flex items-center gap-1"
                         onClick={(e) => e.stopPropagation()}
@@ -683,7 +685,7 @@ export default function AIChatPage() {
                           value={editingTitle}
                           onChange={(e) => setEditingTitle(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') saveEditedTitle(conv._id);
+                            if (e.key === 'Enter') saveEditedTitle(conv.id);
                             if (e.key === 'Escape') cancelEditingTitle();
                           }}
                           className="flex-1 min-w-0 bg-transparent border-b border-(--primary) outline-none text-sm"
@@ -693,7 +695,7 @@ export default function AIChatPage() {
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0 text-green-600"
-                          onClick={() => saveEditedTitle(conv._id)}
+                          onClick={() => saveEditedTitle(conv.id)}
                         >
                           <Check className="w-3 h-3" />
                         </Button>
@@ -725,7 +727,7 @@ export default function AIChatPage() {
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
-                            onClick={(e) => handleDeleteConversation(conv._id, e)}
+                            onClick={(e) => handleDeleteConversation(conv.id, e)}
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
@@ -780,7 +782,7 @@ export default function AIChatPage() {
 
           <Badge variant="secondary" className="gap-1 shrink-0">
             <Zap className="w-3 h-3" />
-            AI Powered
+            {t('aiChat.aiPowered') || 'AI Powered'}
           </Badge>
         </header>
 

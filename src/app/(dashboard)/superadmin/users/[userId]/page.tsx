@@ -1,9 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useUser360 } from '@/hooks/useUser360';
 import { useTranslation } from 'react-i18next';
 import {
   User,
@@ -39,9 +37,9 @@ import { toast } from 'sonner';
 export default function UserProfile360Page() {
   const params = useParams();
   const router = useRouter();
-  const userId = params.userId as Id<'users'>;
+  const userId = params.userId as string;
 
-  const data = useQuery(api.superadmin.getUser360, userId ? { userId } : 'skip');
+  const { data } = useUser360(userId as string);
 
   const { t } = useTranslation();
 
@@ -62,7 +60,9 @@ export default function UserProfile360Page() {
     supportTickets,
     stats,
     loginAttempts,
-  } = data;
+    notifications,
+    chatMessages,
+  } = data || {};
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -246,31 +246,31 @@ export default function UserProfile360Page() {
           <TabsList className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-7 h-auto">
             <TabsTrigger value="leaves" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Отпуска</span>
+              <span className="hidden sm:inline">{t('superadmin.users.tabLeaves')}</span>
             </TabsTrigger>
             <TabsTrigger value="tasks" className="flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
-              <span className="hidden sm:inline">Задачи</span>
+              <span className="hidden sm:inline">{t('superadmin.users.tabTasks')}</span>
             </TabsTrigger>
             <TabsTrigger value="drivers" className="flex items-center gap-2">
               <Car className="w-4 h-4" />
-              <span className="hidden sm:inline">Поездки</span>
+              <span className="hidden sm:inline">{t('superadmin.users.tabDrivers')}</span>
             </TabsTrigger>
             <TabsTrigger value="tickets" className="flex items-center gap-2">
               <Ticket className="w-4 h-4" />
-              <span className="hidden sm:inline">Тикеты</span>
+              <span className="hidden sm:inline">{t('superadmin.users.tabTickets')}</span>
             </TabsTrigger>
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span className="hidden sm:inline">Активность</span>
+              <span className="hidden sm:inline">{t('superadmin.users.tabActivity')}</span>
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Безопасность</span>
+              <span className="hidden sm:inline">{t('superadmin.users.tabSecurity')}</span>
             </TabsTrigger>
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              <span className="hidden sm:inline">Чат</span>
+              <span className="hidden sm:inline">{t('superadmin.users.tabChat')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -293,7 +293,7 @@ export default function UserProfile360Page() {
                   <div className="space-y-3">
                     {leaves.map((leave: any) => (
                       <div
-                        key={leave._id}
+                        key={leave.id}
                         className="p-4 rounded-lg border"
                         style={{ background: 'var(--background-subtle)' }}
                       >
@@ -359,7 +359,7 @@ export default function UserProfile360Page() {
                   <div className="space-y-3">
                     {tasks.map((task: any) => (
                       <div
-                        key={task._id}
+                        key={task.id}
                         className="p-4 rounded-lg border"
                         style={{ background: 'var(--background-subtle)' }}
                       >
@@ -413,20 +413,20 @@ export default function UserProfile360Page() {
           <TabsContent value="drivers">
             <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
-                <CardTitle>Поездки</CardTitle>
-                <CardDescription>{driverRequests.length} поездок найдено</CardDescription>
+                <CardTitle>{t('superadmin.users.tabDrivers')}</CardTitle>
+                <CardDescription>{t('superadmin.users.driversFound', { count: driverRequests.length })}</CardDescription>
               </CardHeader>
               <CardContent>
                 {driverRequests.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Car className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p>Поездок не найдено</p>
+                    <p>{t('superadmin.users.noDriversFound')}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {driverRequests.map((req: any) => (
                       <div
-                        key={req._id}
+                        key={req.id}
                         className="p-4 rounded-lg border"
                         style={{ background: 'var(--background-subtle)' }}
                       >
@@ -469,20 +469,20 @@ export default function UserProfile360Page() {
           <TabsContent value="tickets">
             <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
-                <CardTitle>Тикеты поддержки</CardTitle>
-                <CardDescription>{supportTickets.length} тикетов найдено</CardDescription>
+                <CardTitle>{t('superadmin.users.ticketsTitle')}</CardTitle>
+                <CardDescription>{t('superadmin.users.ticketsFound', { count: supportTickets.length })}</CardDescription>
               </CardHeader>
               <CardContent>
                 {supportTickets.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Ticket className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p>Тикетов не найдено</p>
+                    <p>{t('superadmin.users.noTicketsFound')}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {supportTickets.map((ticket: any) => (
                       <div
-                        key={ticket._id}
+                        key={ticket.id}
                         className="p-4 rounded-lg border"
                         style={{ background: 'var(--background-subtle)' }}
                       >
@@ -527,14 +527,14 @@ export default function UserProfile360Page() {
           <TabsContent value="activity">
             <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
-                <CardTitle>Последняя активность</CardTitle>
-                <CardDescription>Уведомления и действия пользователя</CardDescription>
+                <CardTitle>{t('superadmin.users.lastActivity')}</CardTitle>
+                <CardDescription>{t('superadmin.users.notificationsAndActions')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.notifications?.slice(0, 20).map((notif: any) => (
+                  {notifications?.slice(0, 20).map((notif: any) => (
                     <div
-                      key={notif._id}
+                      key={notif.id}
                       className={`p-3 rounded-lg border flex items-start gap-3 ${!notif.isRead ? 'bg-blue-500/5 border-blue-500/30' : ''}`}
                       style={{ background: 'var(--background-subtle)' }}
                     >
@@ -559,14 +559,14 @@ export default function UserProfile360Page() {
           <TabsContent value="security">
             <Card style={{ background: 'var(--card)' }}>
               <CardHeader>
-                <CardTitle>История входов</CardTitle>
-                <CardDescription>Последние попытки входа в систему</CardDescription>
+                <CardTitle>{t('superadmin.users.loginHistory')}</CardTitle>
+                <CardDescription>{t('superadmin.users.recentLogins')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {loginAttempts?.slice(0, 20).map((attempt: any) => (
                     <div
-                      key={attempt._id}
+                      key={attempt.id}
                       className={`p-3 rounded-lg border flex items-start gap-3 ${!attempt.success ? 'bg-red-500/5 border-red-500/30' : ''}`}
                       style={{ background: 'var(--background-subtle)' }}
                     >
@@ -581,7 +581,7 @@ export default function UserProfile360Page() {
                             className="text-sm font-medium"
                             style={{ color: 'var(--text-primary)' }}
                           >
-                            {attempt.success ? 'Успешный вход' : 'Неудачная попытка'}
+                            {attempt.success ? t('superadmin.users.successfulLogin') : t('superadmin.users.failedLogin')}
                           </span>
                           <Badge variant="outline">{attempt.authMethod || 'password'}</Badge>
                         </div>
@@ -590,7 +590,7 @@ export default function UserProfile360Page() {
                           <div>Устройство: {attempt.userAgent || 'N/A'}</div>
                           {attempt.riskScore && (
                             <div>
-                              Риск:{' '}
+                              {t('superadmin.users.risk')}: {' '}
                               <span
                                 className={
                                   attempt.riskScore > 50 ? 'text-red-500' : 'text-green-500'
@@ -621,9 +621,9 @@ export default function UserProfile360Page() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.chatMessages?.slice(0, 20).map((msg: any) => (
+                  {chatMessages?.slice(0, 20).map((msg: any) => (
                     <div
-                      key={msg._id}
+                      key={msg.id}
                       className="p-3 rounded-lg border"
                       style={{ background: 'var(--background-subtle)' }}
                     >

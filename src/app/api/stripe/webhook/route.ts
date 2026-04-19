@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { Resend } from 'resend';
 import { resolvePlanFromPriceId } from '@/lib/stripe-config';
 import * as Sentry from '@sentry/nextjs';
+import { createClient } from '@/lib/supabase/server';
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -19,7 +20,6 @@ function getResend(): Resend | null {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const resend = getResend();
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || '';
 
 // ── Processed event IDs cache (in-memory deduplication) ──────────────────────
 const processedEvents = new Map<string, number>();
@@ -35,15 +35,6 @@ function isEventProcessed(eventId: string): boolean {
 
 function markEventProcessed(eventId: string) {
   processedEvents.set(eventId, Date.now());
-}
-
-// ── HTTP helpers to avoid Convex type instantiation issues ───────────────────
-async function convexMutation(fn: string, args: Record<string, unknown>) {
-  await fetch(`${convexUrl}/api/${fn}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(args),
-  });
 }
 
 // ── Send notification email to manager ────────────────────────────────────────
@@ -147,21 +138,25 @@ export async function POST(req: NextRequest) {
             break;
           }
 
-          await convexMutation('subscriptions/upsertSubscription', {
-            stripeCustomerId:
-              typeof sub.customer === 'string' ? sub.customer : (sub.customer as any).id,
-            stripeSubscriptionId: sub.id,
-            stripeSessionId: session.id,
-            plan,
-            status: sub.status,
+          const supabase = await createClient();
+          const { error } = await supabase.from('subscriptions').upsert({
+            stripe_customerid: typeof sub.customer === 'string' ? sub.customer : (sub.customer as any).id,
+            stripe_subscriptionid: sub.id,
+            stripe_sessionid: session.id,
+            plan: plan as 'starter' | 'professional' | 'enterprise',
+            status: sub.status as "active" | "trialing" | "past_due" | "canceled" | "incomplete",
             email: session.customer_email ?? undefined,
-            currentPeriodStart: (sub as any).current_period_start * 1000,
-            currentPeriodEnd: (sub as any).current_period_end * 1000,
-            cancelAtPeriodEnd: sub.cancel_at_period_end,
-            trialEnd: sub.trial_end ? (sub.trial_end as number) * 1000 : undefined,
+            current_period_start: ((sub as any).current_period_start ?? 0) * 1000,
+            current_period_end: ((sub as any).current_period_end ?? 0) * 1000,
+            cancel_at_period_end: sub.cancel_at_period_end,
+            trial_end: sub.trial_end ? (sub.trial_end as number) * 1000 : undefined,
           });
 
-          console.log('[Stripe] ✅ Subscription saved:', sub.id, plan);
+          if (error) {
+            console.error('[Stripe] Failed to save subscription:', error);
+          } else {
+            console.log('[Stripe] ✅ Subscription saved:', sub.id, plan);
+          }
 
           const customerEmail = session.customer_email ?? (session.customer_details as any)?.email;
           if (customerEmail) {
@@ -179,24 +174,30 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.updated': {
         const sub = event.data.object as Stripe.Subscription;
         console.log('[Stripe] 🔄 subscription.updated:', sub.id);
-        await convexMutation('subscriptions/updateSubscriptionStatus', {
-          stripeSubscriptionId: sub.id,
-          status: sub.status,
-          cancelAtPeriodEnd: sub.cancel_at_period_end,
-          currentPeriodStart: (sub as any).current_period_start * 1000,
-          currentPeriodEnd: (sub as any).current_period_end * 1000,
-        });
+        const supabase = await createClient();
+        await supabase
+          .from('subscriptions')
+          .update({
+            status: sub.status as "active" | "trialing" | "past_due" | "canceled" | "incomplete",
+            cancel_at_period_end: sub.cancel_at_period_end,
+            current_period_start: ((sub as any).current_period_start ?? 0) * 1000,
+            current_period_end: ((sub as any).current_period_end ?? 0) * 1000,
+          })
+          .eq('stripe_subscriptionid', sub.id);
         break;
       }
 
       case 'customer.subscription.deleted': {
         const sub = event.data.object as Stripe.Subscription;
         console.log('[Stripe] ❌ subscription.deleted:', sub.id);
-        await convexMutation('subscriptions/updateSubscriptionStatus', {
-          stripeSubscriptionId: sub.id,
-          status: 'canceled',
-          cancelAtPeriodEnd: false,
-        });
+        const supabase = await createClient();
+        await supabase
+          .from('subscriptions')
+          .update({
+            status: 'canceled',
+            cancel_at_period_end: false,
+          })
+          .eq('stripe_subscriptionid', sub.id);
         break;
       }
 
@@ -208,11 +209,14 @@ export async function POST(req: NextRequest) {
             : (invoice as any).subscription?.id;
         console.log('[Stripe] ⚠️ invoice.payment_failed:', invoice.id);
         if (subId) {
-          await convexMutation('subscriptions/updateSubscriptionStatus', {
-            stripeSubscriptionId: subId,
-            status: 'past_due',
-            cancelAtPeriodEnd: false,
-          });
+          const supabase = await createClient();
+          await supabase
+            .from('subscriptions')
+            .update({
+              status: 'past_due',
+              cancel_at_period_end: false,
+            })
+            .eq('stripe_subscriptionid', subId);
         }
         break;
       }
@@ -225,17 +229,20 @@ export async function POST(req: NextRequest) {
             : (invoice as any).subscription?.id;
         console.log('[Stripe] 💰 invoice.payment_succeeded:', invoice.id);
         if (subId) {
-          await convexMutation('subscriptions/updateSubscriptionStatus', {
-            stripeSubscriptionId: subId,
-            status: 'active',
-            cancelAtPeriodEnd: false,
-            currentPeriodStart: invoice.period_start
-              ? (invoice.period_start as number) * 1000
-              : undefined,
-            currentPeriodEnd: invoice.period_end
-              ? (invoice.period_end as number) * 1000
-              : undefined,
-          });
+          const supabase = await createClient();
+          await supabase
+            .from('subscriptions')
+            .update({
+              status: 'active',
+              cancel_at_period_end: false,
+              current_period_start: invoice.period_start
+                ? (invoice.period_start as number) * 1000
+                : undefined,
+              current_period_end: invoice.period_end
+                ? (invoice.period_end as number) * 1000
+                : undefined,
+            })
+            .eq('stripe_subscriptionid', subId);
         }
         break;
       }
@@ -266,11 +273,14 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.resumed': {
         const sub = event.data.object as Stripe.Subscription;
         console.log(`[Stripe] ${event.type}:`, sub.id);
-        await convexMutation('subscriptions/updateSubscriptionStatus', {
-          stripeSubscriptionId: sub.id,
-          status: event.type === 'customer.subscription.paused' ? 'canceled' : 'active',
-          cancelAtPeriodEnd: false,
-        });
+        const supabase = await createClient();
+        await supabase
+          .from('subscriptions')
+          .update({
+            status: event.type === 'customer.subscription.paused' ? 'canceled' : 'active',
+            cancel_at_period_end: false,
+          })
+          .eq('stripe_subscriptionid', sub.id);
         break;
       }
 

@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         trial_period_days: 14,
         metadata: { plan, organizationId: organizationId ?? '' },
       },
-      success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
+      success_url: `${origin}/checkout/success?sessionid={CHECKOUT_SESSIONid}&plan=${plan}`,
       cancel_url: `${origin}/#pricing`,
       metadata: { plan, organizationId: organizationId ?? '' },
     });

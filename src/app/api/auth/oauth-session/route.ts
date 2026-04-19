@@ -1,185 +1,72 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { signJWT } from '@/lib/jwt';
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
-
-async function convexMutation(path: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') throw new Error(data.errorMessage ?? 'Convex error');
-  return data.value;
-}
-
-async function convexQuery(path: string, args: Record<string, unknown>) {
-  const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data.status === 'error') return null;
-  return data.value;
-}
-
-/**
- * POST /api/auth/oauth-session
- * Called after Google OAuth sync to create a JWT session for the user.
- * This replaces window.location.reload() — no page reload needed.
- */
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { email, name, avatarUrl } = await req.json();
+    const supabase = await createClient();
+    const body = await request.json();
+    const { email, name, avatarUrl } = body;
 
     if (!email) {
-      return NextResponse.json({ error: 'Email required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      );
     }
 
-    const emailLower = email.toLowerCase().trim();
-    console.log('[oauth-session] Starting OAuth session creation for:', emailLower);
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
 
-    // 1. Find user by email directly via query
-    console.log('[oauth-session] Querying Convex for user...');
-    const userResult = await convexQuery('users:getUserByEmail', { email: emailLower });
-
-    console.log(
-      '[oauth-session] Convex query result:',
-      userResult
-        ? {
-            id: userResult._id,
-            name: userResult.name,
-            email: userResult.email,
-            role: userResult.role,
-            department: userResult.department,
-            position: userResult.position,
-          }
-        : 'NOT_FOUND',
-    );
-
-    if (!userResult) {
-      console.error('[oauth-session] ❌ User not found in database:', emailLower);
-      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
-    }
-
-    // Check maintenance mode — block non-superadmin login
-    if (userResult.role !== 'superadmin' && userResult.organizationId) {
-      const maintenanceData = await convexQuery('admin:getMaintenanceMode', {
-        organizationId: userResult.organizationId,
+    if (existingUser) {
+      return NextResponse.json({
+        userId: existingUser.id,
+        created: false,
       });
-      if (maintenanceData?.isActive && maintenanceData.startTime <= Date.now()) {
-        return NextResponse.json(
-          { error: 'maintenance', organizationId: userResult.organizationId },
-          { status: 503 },
-        );
-      }
     }
 
-    // 2. Create session via mutation (bypasses password — OAuth is trusted)
-    const sessionToken = crypto.randomUUID();
-    const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+    const finalName = name?.trim() || email.split('@')[0] || 'User';
+    const now = Math.floor(Date.now() / 1000);
 
-    console.log('[oauth-session] Creating login session...');
-    const loginResult = await convexMutation('auth:login', {
-      email: emailLower,
-      password: '',
-      sessionToken,
-      sessionExpiry,
-      isFaceLogin: true, // skip password check
+    const { data: newUser, error } = await supabase
+      .from('users')
+      .insert({
+        email,
+        name: finalName,
+        password_hash: 'oauth',
+        role: 'employee',
+        employee_type: 'staff',
+        is_active: true,
+        is_approved: false,
+        travel_allowance: 0,
+        paid_leave_balance: 20,
+        sick_leave_balance: 10,
+        family_leave_balance: 5,
+        avatar_url: avatarUrl,
+        created_at: now,
+        updated_at: now,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      userId: newUser.id,
+      created: true,
     });
-
-    const result = userResult;
-
-    // Create JWT — getUserByEmail returns Convex doc with _id field
-    const jwt = await signJWT({
-      userId: result._id,
-      name: result.name,
-      email: result.email,
-      role: result.role,
-      organizationId: result.organizationId,
-      organizationSlug: loginResult.organizationSlug,
-      organizationName: loginResult.organizationName,
-      department: result.department,
-      position: result.position,
-      employeeType: result.employeeType,
-      avatar: result.avatarUrl ?? avatarUrl,
-    });
-
-    console.log('[oauth-session] ✅ JWT created for user:', {
-      userId: result._id,
-      name: result.name,
-      role: result.role,
-    });
-
-    // Set cookies
-    const cookieStore = await cookies();
-    cookieStore.set('hr-auth-token', jwt, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
-      path: '/',
-    });
-    cookieStore.set('hr-session-token', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
-      path: '/',
-    });
-
-    // Log the OAuth login
-    try {
-      const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-      const auditEnabled = await convexQuery('security:getSetting', { key: 'audit_logging' });
-      if (auditEnabled) {
-        await convexMutation('security:logLoginAttempt', {
-          email: emailLower,
-          userId: result._id,
-          organizationId: result.organizationId,
-          success: true,
-          method: 'google',
-          ip,
-          userAgent: req.headers.get('user-agent') ?? undefined,
-          riskScore: 5, // Google OAuth is trusted
-          riskFactors: [],
-        });
-      }
-    } catch {}
-
-    const responseData = {
-      success: true,
-      session: {
-        userId: result._id,
-        name: result.name,
-        email: result.email,
-        role: result.role,
-        organizationId: result.organizationId,
-        organizationSlug: loginResult.organizationSlug,
-        organizationName: loginResult.organizationName,
-        department: result.department,
-        position: result.position,
-        employeeType: result.employeeType,
-        avatar: result.avatarUrl ?? avatarUrl,
-      },
-    };
-
-    console.log('[oauth-session] ✅ Returning success response:', {
-      userId: responseData.session.userId,
-      name: responseData.session.name,
-      email: responseData.session.email,
-      role: responseData.session.role,
-    });
-
-    return NextResponse.json(responseData);
-  } catch (error: any) {
-    console.error('[oauth-session] ❌ OAuth session error:', error.message || error);
+  } catch (error) {
+    console.error('[auth/oauth-session] Error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create OAuth session' },
-      { status: 500 },
+      { error: 'Internal server error' },
+      { status: 500 }
     );
   }
 }

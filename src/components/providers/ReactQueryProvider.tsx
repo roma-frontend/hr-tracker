@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * React Query Provider для кэширования данных
@@ -17,6 +17,7 @@ import { useState } from 'react';
  * - Real-time (attendance, chat): 0 seconds (use Convex directly)
  */
 export function ReactQueryProvider({ children }: { children: React.ReactNode }) {
+  const [isMounted, setIsMounted] = useState(false);
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -41,11 +42,16 @@ export function ReactQueryProvider({ children }: { children: React.ReactNode }) 
       }),
   );
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
+      {!isMounted ? null : (
+        process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />
+      )}
       {children}
-      {/* Devtools только в development режиме */}
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );
 }

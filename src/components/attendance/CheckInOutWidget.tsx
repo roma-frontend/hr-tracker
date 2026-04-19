@@ -1,31 +1,24 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, LogIn, LogOut, TrendingUp, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { format } from 'date-fns';
+import { useTodayStatus, useCheckIn, useCheckOut } from '@/hooks/useAttendance';
 
 export function CheckInOutWidget() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
-  const todayStatus = useQuery(
-    api.timeTracking.getTodayStatus,
-    user?.id ? { userId: user.id as any } : 'skip',
-  );
+  const { data: todayStatus, isLoading } = useTodayStatus();
+  const checkInMutation = useCheckIn();
+  const checkOutMutation = useCheckOut();
 
-  const checkIn = useMutation(api.timeTracking.checkIn);
-  const checkOut = useMutation(api.timeTracking.checkOut);
-
-  // Update current time every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -33,22 +26,12 @@ export function CheckInOutWidget() {
 
   const handleCheckIn = async () => {
     if (!user?.id) return;
-    try {
-      await checkIn({ userId: user.id as any });
-      toast.success(t('toasts.checkedInSuccess'));
-    } catch (error: any) {
-      toast.error(error.message || t('attendance.failedCheckIn'));
-    }
+    await checkInMutation.mutateAsync();
   };
 
   const handleCheckOut = async () => {
     if (!user?.id) return;
-    try {
-      await checkOut({ userId: user.id as any });
-      toast.success(t('toasts.checkedOutSuccess'));
-    } catch (error: any) {
-      toast.error(error.message || t('attendance.failedCheckOut'));
-    }
+    await checkOutMutation.mutateAsync();
   };
 
   const isCheckedIn = todayStatus?.status === 'checked_in';
@@ -79,14 +62,14 @@ export function CheckInOutWidget() {
       </CardHeader>
 
       <CardContent className="p-6 space-y-4">
-        {/* Current Status */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-(--background-subtle)">
           <div>
             <p className="text-sm text-(--text-muted)">{t('attendance.status')}</p>
             <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {!todayStatus && t('attendance.notCheckedIn')}
-              {isCheckedIn && t('attendance.atWork')}
-              {isCheckedOut && t('attendance.finishedToday')}
+              {isLoading && t('common.loading', 'Loading...')}
+              {!isLoading && !todayStatus && t('attendance.notCheckedIn')}
+              {!isLoading && isCheckedIn && t('attendance.atWork')}
+              {!isLoading && isCheckedOut && t('attendance.finishedToday')}
             </p>
           </div>
           <Badge
@@ -101,7 +84,6 @@ export function CheckInOutWidget() {
           </Badge>
         </div>
 
-        {/* Check In/Out Times */}
         {todayStatus && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-3 rounded-lg border" style={{ borderColor: 'var(--border)' }}>
@@ -136,7 +118,6 @@ export function CheckInOutWidget() {
           </div>
         )}
 
-        {/* Work Duration */}
         {todayStatus && todayStatus.totalWorkedMinutes && (
           <div className="p-4 rounded-lg bg-linear-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950">
             <div className="flex items-center justify-between">
@@ -152,33 +133,34 @@ export function CheckInOutWidget() {
             </div>
             {todayStatus.overtimeMinutes && todayStatus.overtimeMinutes > 0 && (
               <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                +{formatDuration(todayStatus.overtimeMinutes)} {t('attendanceExtra.overtimeShort')} 🌟
+                +{formatDuration(todayStatus.overtimeMinutes)} {t('attendanceExtra.overtimeShort')}
               </p>
             )}
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex gap-3 pt-2">
           {!todayStatus && (
             <Button
               onClick={handleCheckIn}
+              disabled={checkInMutation.isPending}
               className="flex-1 bg-green-500 hover:bg-green-600 text-white"
               size="lg"
             >
               <LogIn className="w-5 h-5 mr-2" />
-              {t('attendance.checkIn')}
+              {checkInMutation.isPending ? t('common.checkingIn', 'Checking in...') : t('attendance.checkIn')}
             </Button>
           )}
 
           {isCheckedIn && (
             <Button
               onClick={handleCheckOut}
+              disabled={checkOutMutation.isPending}
               className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
               size="lg"
             >
               <LogOut className="w-5 h-5 mr-2" />
-              {t('attendance.checkOut')}
+              {checkOutMutation.isPending ? t('common.checkingOut', 'Checking out...') : t('attendance.checkOut')}
             </Button>
           )}
 
@@ -191,7 +173,6 @@ export function CheckInOutWidget() {
           )}
         </div>
 
-        {/* Info Message */}
         {!todayStatus && (
           <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950">
             <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5" />

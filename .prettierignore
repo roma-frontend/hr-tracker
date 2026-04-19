@@ -6,9 +6,6 @@ node_modules/
 out/
 build/
 
-# Convex generated files
-convex/_generated/
-
 # Package manager
 package-lock.json
 pnpm-lock.yaml

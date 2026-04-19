@@ -1,21 +1,20 @@
-﻿'use client';
+'use client';
 
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DollarSign } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useCostAnalysis } from '@/hooks/useAdmin';
 
 export default function CostAnalysis() {
   const { t } = useTranslation();
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
 
-  const data = useQuery(api.admin.getCostAnalysis, { period });
+  const { data: costData, isLoading } = useCostAnalysis(period);
 
-  if (!data) {
+  if (isLoading || !costData) {
     return (
       <Card className="border-(--border)">
         <CardContent className="flex items-center justify-center p-8">
@@ -65,23 +64,23 @@ export default function CostAnalysis() {
             <div>
               <p className="text-sm text-(--text-secondary)">{t('costAnalysis.totalCost')}</p>
               <p className="text-3xl font-bold text-(--text-primary)">
-                ${data.totalCost.toLocaleString()}
+                ${costData.totalCost.toLocaleString()}
               </p>
               <p className="mt-1 text-xs text-(--text-secondary)">
-                {data.totalLeaves} leaves В· {data.totalDays} days
+                {costData.totalLeaves} leaves В· {costData.totalDays} days
               </p>
             </div>
           </div>
         </div>
 
         {/* By Department */}
-        {data.byDepartment.length > 0 && (
+        {costData.byDepartment.length > 0 && (
           <div>
             <h4 className="mb-2 font-semibold text-(--text-primary)">
               {t('costAnalysis.byDepartment')}
             </h4>
             <div className="space-y-2">
-              {data.byDepartment.map((dept: any) => (
+              {costData.byDepartment.map((dept: any) => (
                 <div key={dept.name} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-(--text-secondary)">{dept.name}</span>
@@ -102,13 +101,13 @@ export default function CostAnalysis() {
         )}
 
         {/* By Type */}
-        {data.byType.length > 0 && (
+        {costData.byType.length > 0 && (
           <div>
             <h4 className="mb-2 font-semibold text-(--text-primary)">
               {t('costAnalysis.byLeaveType')}
             </h4>
             <div className="space-y-2">
-              {data.byType.map((typeData: any) => (
+              {costData.byType.map((typeData: any) => (
                 <div key={typeData.type} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-(--text-secondary) capitalize">{typeData.type}</span>
@@ -128,7 +127,7 @@ export default function CostAnalysis() {
           </div>
         )}
 
-        {data.totalCost === 0 && (
+        {costData.totalCost === 0 && (
           <p className="text-center text-sm text-(--text-secondary)">
             {t('costAnalysis.noData')}
           </p>

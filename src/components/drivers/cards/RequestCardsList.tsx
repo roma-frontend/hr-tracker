@@ -9,7 +9,7 @@ import { RequestCard } from './RequestCard';
 
 interface RequestCardsListProps {
   requests: Array<{
-    _id: string;
+    id: string;
     status: string;
     startTime?: number;
     tripInfo?: {
@@ -37,7 +37,7 @@ export const RequestCardsList = memo(function RequestCardsList({
     <div className="space-y-3">
       {displayed.map((request) => (
         <RequestCard
-          key={request._id}
+          key={request.id}
           request={request}
           onViewDetails={() => onViewDetails(request)}
           onRate={onRate ? () => onRate(request) : undefined}

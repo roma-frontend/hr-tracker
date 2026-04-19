@@ -6,9 +6,9 @@ import { MonitoringProvider } from '@/components/providers/MonitoringProvider';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { I18nProvider } from '@/components/I18nProvider';
 import { StatusUpdateProvider } from '@/context/StatusUpdateContext';
-import { ConvexClientProvider } from '@/lib/convex';
 import { AuthSyncProvider } from '@/components/providers/AuthSyncProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 import { Toaster } from 'sonner';
 import { MaintenanceAutoLogout } from '@/components/MaintenanceAutoLogout';
 import { HtmlLangUpdater } from '@/components/HtmlLangUpdater';
@@ -25,8 +25,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <I18nProvider>
             <HtmlLangUpdater />
             <StatusUpdateProvider>
-              <ConvexClientProvider>
-                <AuthSyncProvider>
+              <AuthSyncProvider>
+                <ReactQueryProvider>
                   <MaintenanceAutoLogout />
                   <ThemeProvider
                     attribute="class"
@@ -50,8 +50,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
                       }}
                     />
                   </ThemeProvider>
-                </AuthSyncProvider>
-              </ConvexClientProvider>
+                </ReactQueryProvider>
+              </AuthSyncProvider>
             </StatusUpdateProvider>
           </I18nProvider>
         </SessionProvider>

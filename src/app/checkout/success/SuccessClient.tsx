@@ -16,7 +16,7 @@ export default function SuccessClient() {
   const { t } = useTranslation();
   const params = useSearchParams();
   const plan = params.get('plan') ?? 'starter';
-  const sessionId = params.get('session_id');
+  const sessionId = params.get('sessionid');
   const [count, setCount] = useState(5);
   const [verified, setVerified] = useState<boolean | null>(sessionId ? null : false);
 
@@ -24,7 +24,7 @@ export default function SuccessClient() {
     if (!sessionId) return false;
 
     try {
-      const res = await fetch(`/api/stripe/verify-session?session_id=${sessionId}`);
+      const res = await fetch(`/api/stripe/verify-session?sessionid=${sessionId}`);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data: { valid?: boolean } = await res.json();
       return data.valid ?? false;

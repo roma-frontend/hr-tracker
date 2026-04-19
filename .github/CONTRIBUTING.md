@@ -55,5 +55,5 @@ asdf
 ```
 feat(drivers): add shift management
 fix(i18n): merge duplicate superadmin keys
-refactor(convex): split drivers.ts into modules
+refactor(supabase): split drivers.ts into modules
 ```

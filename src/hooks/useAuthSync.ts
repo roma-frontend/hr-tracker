@@ -1,119 +1,73 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+import { supabase } from '@/lib/supabase/client';
 
-function extractUserName(session: any): string {
-  return session.user.name?.trim() || session.user.email!.split('@')[0] || 'User';
+function extractUserName(user: any): string {
+  return user.user_metadata?.name?.trim() || user.email?.split('@')[0] || 'User';
 }
 
-function isDashboardPage(path: string): boolean {
-  const dashboardPrefixes = [
-    '/dashboard',
-    '/superadmin',
-    '/admin',
-    '/employees',
-    '/tasks',
-    '/calendar',
-    '/leaves',
-    '/attendance',
-    '/settings',
-    '/chat',
-    '/analytics',
-    '/reports',
-    '/join-requests',
-    '/org-requests',
-    '/approvals',
-    '/profile',
-    '/ai-site-editor',
-    '/drivers',
-    '/events',
-  ];
-  return dashboardPrefixes.some((prefix) => path === prefix || path.startsWith(prefix + '/'));
-}
-
-function isPublicRoute(path: string): boolean {
-  const publicRoutes = ['/', '/contact', '/privacy', '/terms', '/test-i18n', '/landing'];
-  return publicRoutes.some(
-    (route) => path === route || path === route + '/' || path.startsWith(route + '/'),
-  );
-}
-
-async function createJwtSession(userData: any) {
-  try {
-    const res = await fetch('/api/auth/oauth-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.session) {
-        const { login } = useAuthStore.getState();
-        login({
-          id: data.session.userId,
-          name: data.session.name,
-          email: data.session.email,
-          role: data.session.role,
-          avatar: data.session.avatar,
-          department: data.session.department,
-          position: data.session.position,
-          employeeType: data.session.employeeType,
-          organizationId: data.session.organizationId,
-          organizationSlug: data.session.organizationSlug,
-          organizationName: data.session.organizationName,
-        });
-        return { success: true, data: data.session };
-      }
-    }
-  } catch (error) {
-    console.error('[useAuthSync] JWT session error:', error);
-  }
-  return { success: false, data: null };
-}
 
 export function useAuthSync() {
-  const { data: session, status } = useSession();
-  const { login, logout, isAuthenticated } = useAuthStore();
-  const createOAuthUser = useMutation(api.users.auth.createOAuthUser);
-  const sessionCreated = useRef(false);
-  const lastSyncedUserRef = useRef<string | null>(null);
+  const { login, isAuthenticated, initialize } = useAuthStore();
+  const initializedRef = useRef(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const prevUserState = useRef<{ organizationId?: string | null; isApproved?: boolean }>({});
 
-  const currentUser = useQuery(
-    api.users.queries.getCurrentUser,
-    userEmail ? { email: userEmail } : 'skip',
-  );
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    initialize();
+  }, [initialize]);
 
   useEffect(() => {
     const syncAuth = async () => {
-      if (status === 'loading') return;
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (status === 'unauthenticated') {
-        const { isAuthenticated } = useAuthStore.getState();
+      if (!session?.user) {
         if (isAuthenticated) return;
-        logout();
         setUserEmail(null);
-        sessionCreated.current = false;
         return;
       }
 
-      if (status === 'authenticated' && session?.user && userEmail !== session.user.email) {
+      if (userEmail !== session.user.email) {
         try {
-          const finalName = extractUserName(session);
-          const userData = {
-            email: session.user.email!,
-            name: finalName,
-            avatarUrl: session.user.image || undefined,
-          };
+          const finalName = extractUserName(session.user);
+          const { data: existingUser } = await supabase
+            .from('users')
+            .select('id, email')
+            .eq('email', session.user.email!)
+            .single();
 
-          await createOAuthUser(userData);
-          setUserEmail(session.user.email!);
+          if (!existingUser) {
+            const { data: newUser } = await supabase
+              .from('users')
+              .insert({
+                email: session.user.email!,
+                name: finalName,
+                password_hash: 'oauth',
+                role: 'employee',
+                employee_type: 'staff',
+                is_active: true,
+                is_approved: false,
+                travel_allowance: 0,
+                paid_leave_balance: 20,
+                sick_leave_balance: 10,
+                family_leave_balance: 5,
+                created_at: Math.floor(Date.now() / 1000),
+                updated_at: Math.floor(Date.now() / 1000),
+              })
+              .select()
+              .single();
+
+            if (newUser) {
+              setUserEmail(session.user.email!);
+            }
+          } else {
+            setUserEmail(session.user.email!);
+          }
         } catch (error) {
           console.error('[useAuthSync] Error syncing OAuth user:', error);
         }
@@ -121,93 +75,73 @@ export function useAuthSync() {
     };
 
     syncAuth();
-  }, [status, session?.user?.email, userEmail, createOAuthUser]);
+  }, [isAuthenticated, userEmail]);
 
   useEffect(() => {
-    if (!session?.user?.email) return;
-
-    if (lastSyncedUserRef.current === session.user.email) return;
-
-    if (currentUser) {
-      let finalName = currentUser.name;
-      if (currentUser.name === 'User' || !currentUser.name) {
-        const sessionName = session.user.name?.trim();
-        if (sessionName && sessionName !== 'User') {
-          finalName = sessionName;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Skip if we already have a valid user in store (login page already set it)
+        const currentState = useAuthStore.getState();
+        if (currentState.user && currentState.user.email === session.user.email) {
+          return;
         }
-      }
 
-      const syncSession = async () => {
-        const result = await createJwtSession({
-          email: currentUser.email,
-          name: finalName,
-          avatarUrl: currentUser.avatarUrl || session?.user?.image || undefined,
-        });
+        const profile = await supabase
+          .from('users')
+          .select(`
+            id,
+            name,
+            email,
+            role,
+            employee_type,
+            department,
+            position,
+            avatar_url,
+            is_approved,
+            organizationId,
+            organizations (
+              id,
+              name,
+              slug
+            )
+          `)
+          .eq('email', session.user.email!)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-        if (!result.success) {
-          const { login } = useAuthStore.getState();
+        if (profile.data) {
+          const finalName = profile.data.name || extractUserName(session.user);
+
           login({
-            id: currentUser._id,
+            id: profile.data.id,
             name: finalName,
-            email: currentUser.email,
-            role: currentUser.role,
-            avatar: currentUser.avatarUrl,
-            department: currentUser.department,
-            position: currentUser.position,
-            employeeType: currentUser.employeeType,
-            organizationId: currentUser.organizationId,
-            organizationSlug: currentUser.organizationSlug,
-            organizationName: currentUser.organizationName,
-            isApproved: currentUser.isApproved,
+            email: profile.data.email,
+            role: profile.data.role,
+            avatar: profile.data.avatar_url || undefined,
+            department: profile.data.department || undefined,
+            position: profile.data.position || undefined,
+            employeeType: profile.data.employee_type || undefined,
+            organizationId: profile.data.organizationId || undefined,
+            organizationSlug: profile.data.organizations?.slug || undefined,
+            organizationName: profile.data.organizations?.name || undefined,
+            isApproved: profile.data.is_approved,
           });
-        } else {
-          lastSyncedUserRef.current = currentUser.email;
+
           prevUserState.current = {
-            organizationId: result.data.organizationId,
-            isApproved: currentUser.isApproved,
+            organizationId: profile.data.organizationId,
+            isApproved: profile.data.is_approved,
           };
         }
-      };
-      syncSession();
-
-      const prevApproved = prevUserState.current.isApproved;
-      const currApproved = currentUser.isApproved;
-      const currOrg = currentUser.organizationId;
-      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-
-      if (!prevApproved && currApproved && currOrg && !isDashboardPage(currentPath)) {
-        // User was just approved - could redirect here if needed
+      } else if (event === 'SIGNED_OUT') {
+        useAuthStore.getState().logout();
       }
+    });
 
-      prevUserState.current = {
-        organizationId: currOrg,
-        isApproved: currApproved,
-      };
-    }
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [login]);
 
-    if (!sessionCreated.current) {
-      sessionCreated.current = true;
-
-      const createSession = async () => {
-        const params = new URLSearchParams(window.location.search);
-        const isMaintenance = params.get('maintenance') === 'true';
-        const path = window.location.pathname;
-
-        if (isMaintenance || isPublicRoute(path)) return;
-
-        if (currentUser && !currentUser.organizationId) return;
-
-        const callbackUrl = params.get('next');
-        const redirectTarget = callbackUrl || '/dashboard';
-
-        if (!isDashboardPage(path) && !isPublicRoute(path)) {
-          // Could redirect here if needed
-        }
-      };
-
-      setTimeout(createSession, 0);
-    }
-  }, [currentUser]);
-
-  return { session, status, currentUser };
+  return { userEmail };
 }

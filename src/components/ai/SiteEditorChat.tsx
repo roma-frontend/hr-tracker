@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +26,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useCurrentMonthUsage, useAiSiteEditorHistory } from '@/hooks/useAiSiteEditor';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -97,14 +96,9 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
   const { features, plan } = usePlanFeatures();
   const { isActive } = useSubscription();
 
-  const usage = useQuery(api.aiSiteEditor.getCurrentMonthUsage, {
-    userId: userId as any,
-  });
+  const { data: usage } = useCurrentMonthUsage(userId);
 
-  const history = useQuery(api.aiSiteEditor.getHistory, {
-    userId: userId as any,
-    limit: 10,
-  });
+  const { data: history } = useAiSiteEditorHistory(userId, 10);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -210,12 +204,12 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
 
       // Показываем результат
       if (appliedFiles && appliedFiles.length > 0) {
-        toast.success(`✅ Применено ${appliedFiles.length} изменений! Файлы обновлены.`, {
+        toast.success(t('aiSiteEditor.appliedChanges', { count: appliedFiles.length }, '✅ Applied {{count}} changes! Files updated.'), {
           duration: 5000,
         });
         console.log('Applied files:', appliedFiles);
       } else {
-        toast.info('AI ответил, но файлы не были изменены', { duration: 3000 });
+        toast.info(t('aiSiteEditor.noFilesChanged', 'AI responded, but files were not changed'), { duration: 3000 });
       }
 
       // Обновляем список backup'ов
@@ -253,21 +247,21 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
       const data = await res.json();
 
       if (res.ok && data.success) {
-        toast.success(`↩️ Откат выполнен: ${filePath}`);
+        toast.success(t('aiSiteEditor.rollbackSuccess', '↩️ Rollback completed: {{filePath}}', { filePath }));
         fetchBackups();
         setMessages((prev) => [
           ...prev,
           {
             role: 'system',
-            content: `↩️ Откат выполнен для файла ${filePath}`,
+            content: t('aiSiteEditor.rollbackCompleted', { filePath }),
             timestamp: Date.now(),
           },
         ]);
       } else {
-        toast.error(`Ошибка отката: ${data.error || 'Неизвестная ошибка'}`);
+        toast.error(t('aiSiteEditor.rollbackError', 'Rollback error: {{error}}', { error: data.error || t('aiSiteEditor.unknownError', 'Unknown error') }));
       }
     } catch {
-      toast.error('Ошибка при выполнении отката');
+      toast.error(t('aiSiteEditor.rollbackFailed', 'Failed to perform rollback'));
     } finally {
       setRollingBack(null);
     }
@@ -395,10 +389,10 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                   {/* Message content */}
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
                     {msg.content || (
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        <ShieldLoader size="xs" variant="inline" />
-                        AI читает файлы и применяет изменения…
-                      </span>
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          <ShieldLoader size="xs" variant="inline" />
+                          {t('aiSiteEditor.aiThinking')}
+                        </span>
                     )}
                   </div>
 
@@ -406,7 +400,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                   {msg.appliedFiles && msg.appliedFiles.length > 0 && (
                     <div className="mt-3 space-y-1 border-t pt-3">
                       <p className="text-xs font-medium text-muted-foreground mb-1">
-                        📂 Изменённые файлы:
+                        📂 {t('aiSiteEditor.changedFiles')}
                       </p>
                       {msg.appliedFiles.map((af: any) => {
                         const key = `${af.filePath}:${af.timestamp}`;
@@ -432,7 +426,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                               ) : (
                                 <>
                                   <Undo2 className="h-3 w-3 mr-1" />
-                                  Откат
+                                  {t('aiSiteEditor.rollback')}
                                 </>
                               )}
                             </Button>
@@ -449,10 +443,10 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
             {isLoading && messages[messages.length - 1]?.content === '' && (
               <div className="flex justify-start">
                 <div className="bg-secondary text-secondary-foreground rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Sparkles className="h-4 w-4 animate-pulse text-purple-500" />
-                    AI читает код и применяет изменения…
-                  </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Sparkles className="h-4 w-4 animate-pulse text-purple-500" />
+                      {t('aiSiteEditor.aiThinking')}
+                    </div>
                 </div>
               </div>
             )}
@@ -497,19 +491,19 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold flex items-center gap-2 text-sm">
               <History className="h-4 w-4" />
-              История изменений ({backups.length} backup-ов)
+              {t('aiSiteEditor.backupHistory', { count: backups.length })}
             </h3>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                setShowBackups((v) => !v);
-                fetchBackups();
-              }}
-            >
-              <RefreshCw className="h-3 w-3 mr-1" />
-              {showBackups ? 'Скрыть' : 'Показать'}
-            </Button>
+                onClick={() => {
+                  setShowBackups((v) => !v);
+                  fetchBackups();
+                }}
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                {showBackups ? t('aiSiteEditor.hide') : t('aiSiteEditor.show')}
+              </Button>
           </div>
 
           {showBackups && (
@@ -538,14 +532,14 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
                       disabled={isRollingThisBack}
                       onClick={() => handleRollback(b.originalPath, b.timestamp)}
                     >
-                      {isRollingThisBack ? (
-                        <ShieldLoader size="xs" variant="inline" />
-                      ) : (
-                        <>
-                          <Undo2 className="h-3 w-3 mr-1" />
-                          Откат
-                        </>
-                      )}
+                              {isRollingThisBack ? (
+                                <ShieldLoader size="xs" variant="inline" />
+                              ) : (
+                                <>
+                                  <Undo2 className="h-3 w-3 mr-1" />
+                                  {t('aiSiteEditor.rollback')}
+                                </>
+                              )}
                     </Button>
                   </div>
                 );
@@ -565,7 +559,7 @@ export function SiteEditorChat({ userId, organizationId }: SiteEditorChatProps) 
           <div className="space-y-2">
             {history.slice(0, 5).map((session: any) => (
               <div
-                key={session._id}
+                key={session.id}
                 className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">

@@ -8,7 +8,6 @@ const ALLOWED_DIRECTORIES = ['src/app', 'src/components', 'src/i18n/locales'];
 
 const FORBIDDEN_PATHS = [
   'src/components/ui',
-  'convex',
   'src/app/api',
   'package.json',
   'tsconfig.json',
