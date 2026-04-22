@@ -1229,7 +1229,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-              className="relative z-10 w-full max-w-lg bg-(--card) rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative z-10 w-full max-w-lg bg-(--card) rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] mt-16"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Hero Header */}
