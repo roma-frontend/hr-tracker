@@ -114,6 +114,21 @@ export const createTask = mutation({
       });
     }
 
+    // Audit log: task created
+    await ctx.db.insert('auditLogs', {
+      organizationId,
+      userId: args.assignedBy,
+      action: 'task_created',
+      target: taskId,
+      details: JSON.stringify({
+        title: args.title,
+        priority: args.priority,
+        assignedTo: args.assignedTo,
+        deadline: args.deadline,
+      }),
+      createdAt: now,
+    });
+
     return taskId;
   },
 });
@@ -158,6 +173,20 @@ export const updateTaskStatus = mutation({
         });
       }
     }
+
+    // Audit log: task status updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: task.organizationId,
+      userId: args.userId,
+      action: 'task_status_updated',
+      target: args.taskId,
+      details: JSON.stringify({
+        title: task.title,
+        oldStatus: task.status,
+        newStatus: args.status,
+      }),
+      createdAt: now,
+    });
   },
 });
 
@@ -186,6 +215,23 @@ export const updateTask = mutation({
     const { taskId, ...updates } = args;
     const filtered = Object.fromEntries(Object.entries(updates).filter(([, v]) => v !== undefined));
     await ctx.db.patch(taskId, { ...filtered, updatedAt: Date.now() });
+
+    // Audit log: task updated
+    const taskForUpdate = await ctx.db.get(taskId);
+    if (taskForUpdate?.organizationId && taskForUpdate?.assignedBy) {
+      await ctx.db.insert('auditLogs', {
+        organizationId: taskForUpdate.organizationId,
+        userId: taskForUpdate.assignedBy,
+        action: 'task_updated',
+        target: taskId,
+        details: JSON.stringify({
+          updatedFields: Object.keys(filtered),
+          title: updates.title || taskForUpdate.title,
+          status: updates.status || taskForUpdate.status,
+        }),
+        createdAt: Date.now(),
+      });
+    }
   },
 });
 
@@ -193,6 +239,9 @@ export const updateTask = mutation({
 export const deleteTask = mutation({
   args: { taskId: v.id('tasks') },
   handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error('Task not found');
+
     // Delete comments first
     const comments = await ctx.db
       .query('taskComments')
@@ -200,6 +249,16 @@ export const deleteTask = mutation({
       .collect();
     for (const c of comments) await ctx.db.delete(c._id);
     await ctx.db.delete(args.taskId);
+
+    // Audit log: task deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: task.organizationId,
+      userId: task.assignedBy,
+      action: 'task_deleted',
+      target: args.taskId,
+      details: JSON.stringify({ title: task.title, status: task.status }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -211,6 +270,9 @@ export const addComment = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error('Task not found');
+
     const now = Date.now();
     await ctx.db.insert('taskComments', {
       taskId: args.taskId,
@@ -219,6 +281,16 @@ export const addComment = mutation({
       createdAt: now,
     });
     await ctx.db.patch(args.taskId, { updatedAt: now });
+
+    // Audit log: task comment added
+    await ctx.db.insert('auditLogs', {
+      organizationId: task.organizationId,
+      userId: args.authorId,
+      action: 'task_comment_added',
+      target: args.taskId,
+      details: JSON.stringify({ content: args.content.slice(0, 100) }),
+      createdAt: now,
+    });
   },
 });
 
@@ -229,8 +301,19 @@ export const assignSupervisor = mutation({
     supervisorId: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {
+    const empForSupervisor = await ctx.db.get(args.employeeId);
     await ctx.db.patch(args.employeeId, {
       supervisorId: args.supervisorId,
+    });
+
+    // Audit log: supervisor assigned
+    await ctx.db.insert('auditLogs', {
+      organizationId: empForSupervisor?.organizationId,
+      userId: args.supervisorId || args.employeeId,
+      action: 'task_supervisor_assigned',
+      target: args.employeeId,
+      details: JSON.stringify({ employeeId: args.employeeId, supervisorId: args.supervisorId }),
+      createdAt: Date.now(),
     });
   },
 });
@@ -480,6 +563,16 @@ export const addAttachment = mutation({
       ],
       updatedAt: Date.now(),
     });
+
+    // Audit log: attachment added
+    await ctx.db.insert('auditLogs', {
+      organizationId: task?.organizationId,
+      userId: args.uploadedBy,
+      action: 'task_attachment_added',
+      target: args.taskId,
+      details: JSON.stringify({ name: args.name, type: args.type, size: args.size }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -494,6 +587,18 @@ export const removeAttachment = mutation({
     if (!task) throw new Error('Task not found');
     const attachments = (task.attachments ?? []).filter((a: any) => a.url !== args.url);
     await ctx.db.patch(args.taskId, { attachments, updatedAt: Date.now() });
+
+    // Audit log: attachment removed
+    if (task.organizationId && task.assignedBy) {
+      await ctx.db.insert('auditLogs', {
+        organizationId: task.organizationId,
+        userId: task.assignedBy,
+        action: 'task_attachment_removed',
+        target: args.taskId,
+        details: JSON.stringify({ url: args.url }),
+        createdAt: Date.now(),
+      });
+    }
   },
 });
 
@@ -525,6 +630,9 @@ export const backfillTaskOrg = mutation({
   args: { taskId: v.id('tasks'), organizationId: v.optional(v.id('organizations')) },
   handler: async (ctx, { taskId, organizationId }) => {
     await ctx.db.patch(taskId, { organizationId });
+
+    // Note: This is a migration function, no meaningful userId available for audit
+    // Skipping audit log for this administrative operation
   },
 });
 

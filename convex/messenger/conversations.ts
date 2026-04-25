@@ -252,6 +252,16 @@ export const createGroupConversation = mutation({
       createdAt: now,
     });
 
+    // Audit log: group conversation created
+    await ctx.db.insert('auditLogs', {
+      organizationId: orgId,
+      userId: creatorId,
+      action: 'messenger_group_created',
+      target: convId,
+      details: JSON.stringify({ name, participantCount: uniqueIds.length + 1 }),
+      createdAt: now,
+    });
+
     return convId;
   },
 });
@@ -278,6 +288,16 @@ export const updateConversation = mutation({
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
     if (name !== undefined) patch.name = name;
     await ctx.db.patch(conversationId, patch);
+
+    // Audit log: conversation updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId,
+      action: 'messenger_conversation_updated',
+      target: conversationId,
+      details: JSON.stringify({ name: name || 'metadata' }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -309,6 +329,16 @@ export const leaveConversation = mutation({
         senderId: userId,
         type: 'system',
         content: `${user?.name ?? 'A member'} left the group`,
+        createdAt: Date.now(),
+      });
+
+      // Audit log: user left conversation
+      await ctx.db.insert('auditLogs', {
+        organizationId: conv.organizationId,
+        userId,
+        action: 'messenger_user_left_conversation',
+        target: conversationId,
+        details: JSON.stringify({ userName: user?.name ?? 'Unknown' }),
         createdAt: Date.now(),
       });
     }
@@ -373,6 +403,16 @@ export const addParticipants = mutation({
         content: `${admin?.name ?? 'Admin'} added ${addedNames.join(', ')}`,
         createdAt: now,
       });
+
+      // Audit log: participants added
+      await ctx.db.insert('auditLogs', {
+        organizationId: conv.organizationId,
+        userId: adminUserId,
+        action: 'messenger_participants_added',
+        target: conversationId,
+        details: JSON.stringify({ addedNames, count: addedNames.length }),
+        createdAt: now,
+      });
     }
   },
 });
@@ -418,6 +458,19 @@ export const removeParticipant = mutation({
         content: `${admin?.name ?? 'Admin'} removed ${target?.name ?? 'a member'}`,
         createdAt: Date.now(),
       });
+
+      // Audit log: participant removed
+      await ctx.db.insert('auditLogs', {
+        organizationId: conv.organizationId,
+        userId: adminUserId,
+        action: 'messenger_participant_removed',
+        target: conversationId,
+        details: JSON.stringify({
+          removedUserId: targetUserId,
+          removedUserName: target?.name ?? 'Unknown',
+        }),
+        createdAt: Date.now(),
+      });
     }
   },
 });
@@ -440,6 +493,19 @@ export const toggleMute = mutation({
     if (!membership) throw new Error('Not a member');
 
     await ctx.db.patch(membership._id, { isMuted: !membership.isMuted });
+
+    // Audit log: conversation muted/unmuted
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId,
+      action: membership.isMuted
+        ? 'messenger_conversation_unmuted'
+        : 'messenger_conversation_muted',
+      target: conversationId,
+      details: JSON.stringify({ muted: !membership.isMuted }),
+      createdAt: Date.now(),
+    });
+
     return !membership.isMuted;
   },
 });
@@ -463,6 +529,16 @@ export const markConversationRead = mutation({
 
     const now = Date.now();
     await ctx.db.patch(membership._id, { lastReadAt: now, unreadCount: 0 });
+
+    // Audit log: conversation marked as read
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId,
+      action: 'messenger_conversation_marked_read',
+      target: conversationId,
+      details: JSON.stringify({ markedAt: now }),
+      createdAt: now,
+    });
 
     // Stamp readBy on recent unread messages
     const recent = await ctx.db
@@ -503,6 +579,16 @@ export const pinConversation = mutation({
     if (!membership) throw new Error('Not a member');
 
     await ctx.db.patch(conversationId, { isPinned: pin });
+
+    // Audit log: conversation pinned/unpinned
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId,
+      action: pin ? 'messenger_conversation_pinned' : 'messenger_conversation_unpinned',
+      target: conversationId,
+      details: JSON.stringify({ pinned: pin }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -525,6 +611,16 @@ export const archiveConversation = mutation({
     if (!membership) throw new Error('Not a member');
 
     await ctx.db.patch(conversationId, { isArchived: archive });
+
+    // Audit log: conversation archived/unarchived
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId,
+      action: archive ? 'messenger_conversation_archived' : 'messenger_conversation_unarchived',
+      target: conversationId,
+      details: JSON.stringify({ archived: archive }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -548,6 +644,16 @@ export const deleteConversation = mutation({
     await ctx.db.patch(membership._id, {
       isDeleted: true,
       deletedAt: Date.now(),
+    });
+
+    // Audit log: conversation deleted (soft)
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId,
+      action: 'messenger_conversation_deleted',
+      target: conversationId,
+      details: JSON.stringify({ softDelete: true }),
+      createdAt: Date.now(),
     });
   },
 });

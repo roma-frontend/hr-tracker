@@ -59,6 +59,23 @@ export const createOrganization = mutation({
       updatedAt: Date.now(),
     });
 
+    // Audit log: organization created
+    await ctx.db.insert('auditLogs', {
+      organizationId: orgId,
+      userId: args.superadminUserId,
+      action: 'organization_created',
+      target: orgId,
+      details: JSON.stringify({
+        name: args.name,
+        slug,
+        plan: args.plan,
+        timezone: args.timezone,
+        country: args.country,
+        industry: args.industry,
+      }),
+      createdAt: Date.now(),
+    });
+
     return { orgId, slug };
   },
 });
@@ -174,6 +191,17 @@ export const updateOrganization = mutation({
     }
 
     await ctx.db.patch(organizationId, patch);
+
+    // Audit log: organization updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: organizationId,
+      userId: superadminUserId,
+      action: 'organization_updated',
+      target: organizationId,
+      details: JSON.stringify({ updatedFields: Object.keys(updates) }),
+      createdAt: Date.now(),
+    });
+
     return organizationId;
   },
 });
@@ -201,6 +229,16 @@ export const assignOrgAdmin = mutation({
       role: 'admin',
       isApproved: true,
       approvedAt: Date.now(),
+    });
+
+    // Audit log: org admin assigned
+    await ctx.db.insert('auditLogs', {
+      organizationId: organizationId,
+      userId: superadminUserId,
+      action: 'org_admin_assigned',
+      target: userId,
+      details: JSON.stringify({ assignedUserId: userId, assignedUserName: user.name }),
+      createdAt: Date.now(),
     });
 
     return userId;
@@ -333,6 +371,20 @@ export const removeOrgAdmin = mutation({
       role: 'employee',
     });
 
+    // Audit log: org admin removed
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: superadminUserId,
+      action: 'org_admin_removed',
+      target: userId,
+      details: JSON.stringify({
+        removedUserId: userId,
+        removedUserName: user.name,
+        previousRole: 'admin',
+      }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -463,6 +515,21 @@ export const requestToJoinOrganization = mutation({
         message: `${args.requestedByName} (${args.requestedByEmail}) wants to join ${org.name}.`,
         isRead: false,
         relatedId: inviteId,
+        createdAt: Date.now(),
+      });
+    }
+
+    // Audit log: join request submitted (only if user already exists in system)
+    if (existingUser) {
+      await ctx.db.insert('auditLogs', {
+        organizationId: args.organizationId,
+        userId: existingUser._id,
+        action: 'join_request_submitted',
+        target: inviteId,
+        details: JSON.stringify({
+          requestedByEmail: args.requestedByEmail,
+          requestedByName: args.requestedByName,
+        }),
         createdAt: Date.now(),
       });
     }
@@ -653,6 +720,21 @@ export const approveJoinRequest = mutation({
       createdAt: Date.now(),
     });
 
+    // Audit log: join request approved
+    await ctx.db.insert('auditLogs', {
+      organizationId: invite.organizationId,
+      userId: args.adminId,
+      action: 'join_request_approved',
+      target: userId,
+      details: JSON.stringify({
+        inviteId: args.inviteId,
+        email: invite.requestedByEmail,
+        name: invite.requestedByName,
+        role: args.role,
+      }),
+      createdAt: Date.now(),
+    });
+
     return { userId, inviteId: args.inviteId };
   },
 });
@@ -689,6 +771,20 @@ export const rejectJoinRequest = mutation({
       reviewedBy: args.adminId,
       reviewedAt: Date.now(),
       rejectionReason: args.reason,
+    });
+
+    // Audit log: join request rejected
+    await ctx.db.insert('auditLogs', {
+      organizationId: invite.organizationId,
+      userId: args.adminId,
+      action: 'join_request_rejected',
+      target: args.inviteId,
+      details: JSON.stringify({
+        email: invite.requestedByEmail,
+        name: invite.requestedByName,
+        reason: args.reason,
+      }),
+      createdAt: Date.now(),
     });
 
     return args.inviteId;
@@ -729,6 +825,16 @@ export const generateInviteToken = mutation({
       inviteToken: token,
       inviteEmail: args.inviteEmail,
       inviteExpiry: expiry,
+      createdAt: Date.now(),
+    });
+
+    // Audit log: invite token generated
+    await ctx.db.insert('auditLogs', {
+      organizationId: admin.organizationId,
+      userId: args.adminId,
+      action: 'invite_token_generated',
+      target: inviteId,
+      details: JSON.stringify({ inviteEmail: args.inviteEmail, expiryHours: expiryHours }),
       createdAt: Date.now(),
     });
 
@@ -834,6 +940,20 @@ export const removeMemberFromOrganization = mutation({
     await ctx.db.patch(userId, {
       organizationId: undefined,
       isActive: false,
+    });
+
+    // Audit log: member removed from organization
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: superadminUserId,
+      action: 'member_removed_from_org',
+      target: userId,
+      details: JSON.stringify({
+        removedEmail: user.email,
+        removedName: user.name,
+        previousOrgId: user.organizationId,
+      }),
+      createdAt: Date.now(),
     });
 
     console.log(`[removeMemberFromOrganization] ✅ Removed ${user.email} from organization`);

@@ -68,6 +68,19 @@ export const getOrCreateDM = mutation({
       joinedAt: now,
     });
 
+    // Audit log: DM conversation created
+    await ctx.db.insert('auditLogs', {
+      organizationId: args.organizationId,
+      userId: args.currentUserId,
+      action: 'chat_dm_created',
+      target: convId,
+      details: JSON.stringify({
+        currentUserId: args.currentUserId,
+        targetUserId: args.targetUserId,
+      }),
+      createdAt: now,
+    });
+
     return convId;
   },
 });
@@ -128,6 +141,16 @@ export const createGroup = mutation({
       createdAt: now,
     });
 
+    // Audit log: group created
+    await ctx.db.insert('auditLogs', {
+      organizationId: args.organizationId,
+      userId: args.createdBy,
+      action: 'chat_group_created',
+      target: convId,
+      details: JSON.stringify({ name: args.name, memberCount: args.memberIds.length + 1 }),
+      createdAt: now,
+    });
+
     return convId;
   },
 });
@@ -154,6 +177,18 @@ export const updateGroup = mutation({
     if (args.name !== undefined) updates.name = args.name;
     if (args.description !== undefined) updates.description = args.description;
     await ctx.db.patch(args.conversationId, updates);
+
+    // Audit log: group updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId: args.userId,
+      action: 'chat_group_updated',
+      target: args.conversationId,
+      details: JSON.stringify({
+        updatedFields: Object.keys(updates).filter((k) => k !== 'updatedAt'),
+      }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -194,6 +229,16 @@ export const addMember = mutation({
       content: `${user?.name ?? 'Someone'} was added to the group`,
       createdAt: now,
     });
+
+    // Audit log: member added
+    await ctx.db.insert('auditLogs', {
+      organizationId: args.organizationId,
+      userId: args.requesterId,
+      action: 'chat_member_added',
+      target: args.conversationId,
+      details: JSON.stringify({ addedUserId: args.userId, addedUserName: user?.name }),
+      createdAt: now,
+    });
   },
 });
 
@@ -222,6 +267,16 @@ export const leaveConversation = mutation({
         senderId: args.userId,
         type: 'system',
         content: `${user?.name ?? 'Someone'} left the group`,
+        createdAt: Date.now(),
+      });
+
+      // Audit log: member left
+      await ctx.db.insert('auditLogs', {
+        organizationId: conv.organizationId,
+        userId: args.userId,
+        action: 'chat_member_left',
+        target: args.conversationId,
+        details: JSON.stringify({ leftUserId: args.userId, leftUserName: user?.name }),
         createdAt: Date.now(),
       });
     }
@@ -377,6 +432,20 @@ export const sendMessage = mutation({
       }
     }
 
+    // Audit log: message sent
+    await ctx.db.insert('auditLogs', {
+      organizationId: args.organizationId,
+      userId: args.senderId,
+      action: 'chat_message_sent',
+      target: msgId,
+      details: JSON.stringify({
+        conversationId: args.conversationId,
+        type: args.type,
+        contentLength: args.content.length,
+      }),
+      createdAt: now,
+    });
+
     return msgId;
   },
 });
@@ -395,6 +464,19 @@ export const editMessage = mutation({
       content: args.content,
       isEdited: true,
       editedAt: Date.now(),
+    });
+
+    // Audit log: message edited
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: args.userId,
+      action: 'chat_message_edited',
+      target: args.messageId,
+      details: JSON.stringify({
+        conversationId: msg.conversationId,
+        contentLength: args.content.length,
+      }),
+      createdAt: Date.now(),
     });
   },
 });
@@ -457,6 +539,19 @@ export const deleteMessage = mutation({
         });
       }
     }
+
+    // Audit log: message deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: args.userId,
+      action: 'chat_message_deleted',
+      target: args.messageId,
+      details: JSON.stringify({
+        deleteForEveryone: args.deleteForEveryone,
+        conversationId: msg.conversationId,
+      }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -473,6 +568,16 @@ export const deleteMessageForMe = mutation({
     if (!existing.includes(args.userId)) {
       await ctx.db.patch(args.messageId, {
         deletedForUsers: [...existing, args.userId],
+      });
+
+      // Audit log: message deleted for me
+      await ctx.db.insert('auditLogs', {
+        organizationId: msg.organizationId,
+        userId: args.userId,
+        action: 'chat_message_deleted_for_me',
+        target: args.messageId,
+        details: JSON.stringify({ conversationId: msg.conversationId }),
+        createdAt: Date.now(),
       });
     }
   },
@@ -541,6 +646,16 @@ export const toggleReaction = mutation({
     }
 
     await ctx.db.patch(args.messageId, { reactions });
+
+    // Audit log: reaction toggled
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: args.userId,
+      action: 'chat_reaction_toggled',
+      target: args.messageId,
+      details: JSON.stringify({ emoji: sanitizedEmoji, reactionCount: users.length }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -552,10 +667,23 @@ export const pinMessage = mutation({
     pin: v.boolean(),
   },
   handler: async (ctx, args) => {
+    const msg = await ctx.db.get(args.messageId);
+    if (!msg) throw new Error('Message not found');
+
     await ctx.db.patch(args.messageId, {
       isPinned: args.pin,
       pinnedBy: args.pin ? args.userId : undefined,
       pinnedAt: args.pin ? Date.now() : undefined,
+    });
+
+    // Audit log: message pinned/unpinned
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: args.userId,
+      action: args.pin ? 'chat_message_pinned' : 'chat_message_unpinned',
+      target: args.messageId,
+      details: JSON.stringify({ pinned: args.pin }),
+      createdAt: Date.now(),
     });
   },
 });
@@ -596,6 +724,16 @@ export const markAsRead = mutation({
         readBy: [...readBy, { userId: args.userId, readAt: now }],
       });
     }
+
+    // Audit log: conversation marked as read
+    await ctx.db.insert('auditLogs', {
+      organizationId: membership.organizationId,
+      userId: args.userId,
+      action: 'chat_conversation_marked_read',
+      target: args.conversationId,
+      details: JSON.stringify({ messagesRead: recent.length }),
+      createdAt: now,
+    });
   },
 });
 
@@ -646,6 +784,16 @@ export const setTyping = mutation({
           organizationId: args.organizationId,
           updatedAt: Date.now(),
         });
+
+        // Audit log: typing indicator set
+        await ctx.db.insert('auditLogs', {
+          organizationId: args.organizationId,
+          userId: args.userId,
+          action: 'chat_typing_started',
+          target: args.conversationId,
+          details: JSON.stringify({ conversationId: args.conversationId }),
+          createdAt: Date.now(),
+        });
       }
     } else {
       if (existing) await ctx.db.delete(existing._id);
@@ -679,6 +827,16 @@ export const votePoll = mutation({
       return { ...opt, votes };
     });
     await ctx.db.patch(args.messageId, { poll: { ...poll, options } });
+
+    // Audit log: poll vote
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: args.userId,
+      action: 'chat_poll_voted',
+      target: args.messageId,
+      details: JSON.stringify({ optionId: args.optionId, poll: poll.question }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -695,6 +853,16 @@ export const closePoll = mutation({
       closedAt?: number;
     };
     await ctx.db.patch(args.messageId, { poll: { ...poll, closedAt: Date.now() } });
+
+    // Audit log: poll closed
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: args.userId,
+      action: 'chat_poll_closed',
+      target: args.messageId,
+      details: JSON.stringify({ poll: poll.question }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -728,6 +896,20 @@ export const sendThreadReply = mutation({
         threadLastAt: now,
       });
     }
+
+    // Audit log: thread reply sent
+    await ctx.db.insert('auditLogs', {
+      organizationId: args.organizationId,
+      userId: args.senderId,
+      action: 'chat_thread_reply',
+      target: replyId,
+      details: JSON.stringify({
+        parentMessageId: args.parentMessageId,
+        conversationId: args.conversationId,
+      }),
+      createdAt: now,
+    });
+
     return replyId;
   },
 });
@@ -744,7 +926,7 @@ export const scheduleMessage = mutation({
     scheduledFor: v.number(),
   },
   handler: async (ctx, args) => {
-    return ctx.db.insert('chatMessages', {
+    const scheduledMsgId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
       senderId: args.senderId,
@@ -754,6 +936,21 @@ export const scheduleMessage = mutation({
       isSent: false,
       createdAt: Date.now(),
     });
+
+    // Audit log: message scheduled
+    await ctx.db.insert('auditLogs', {
+      organizationId: args.organizationId,
+      userId: args.senderId,
+      action: 'chat_message_scheduled',
+      target: scheduledMsgId,
+      details: JSON.stringify({
+        conversationId: args.conversationId,
+        scheduledFor: args.scheduledFor,
+      }),
+      createdAt: Date.now(),
+    });
+
+    return scheduledMsgId;
   },
 });
 
@@ -764,6 +961,16 @@ export const cancelScheduledMessage = mutation({
     const msg = await ctx.db.get(args.messageId);
     if (!msg || msg.senderId !== args.userId) throw new Error('Not authorized');
     await ctx.db.delete(args.messageId);
+
+    // Audit log: scheduled message cancelled
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: args.userId,
+      action: 'chat_scheduled_message_cancelled',
+      target: args.messageId,
+      details: JSON.stringify({ conversationId: msg.conversationId }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -780,7 +987,20 @@ export const setLinkPreview = mutation({
     }),
   },
   handler: async (ctx, args) => {
+    const msg = await ctx.db.get(args.messageId);
+    if (!msg) throw new Error('Message not found');
+
     await ctx.db.patch(args.messageId, { linkPreview: args.preview });
+
+    // Audit log: link preview set
+    await ctx.db.insert('auditLogs', {
+      organizationId: msg.organizationId,
+      userId: msg.senderId,
+      action: 'chat_link_preview_set',
+      target: args.messageId,
+      details: JSON.stringify({ url: args.preview.url, title: args.preview.title }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -808,6 +1028,17 @@ export const togglePin = mutation({
       isPinned: !conv.isPinned,
       updatedAt: Date.now(),
     });
+
+    // Audit log: conversation pinned/unpinned
+    await ctx.db.insert('auditLogs', {
+      organizationId: conv.organizationId,
+      userId: args.userId,
+      action: !conv.isPinned ? 'chat_conversation_pinned' : 'chat_conversation_unpinned',
+      target: args.conversationId,
+      details: JSON.stringify({ conversationName: conv.name, pinned: !conv.isPinned }),
+      createdAt: Date.now(),
+    });
+
     return !conv.isPinned;
   },
 });
@@ -856,6 +1087,16 @@ export const deleteConversation = mutation({
         }
       }),
     );
+
+    // Audit log: conversation deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: conv.organizationId,
+      userId: args.userId,
+      action: 'chat_conversation_deleted',
+      target: args.conversationId,
+      details: JSON.stringify({ conversationName: conv.name }),
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -903,6 +1144,16 @@ export const restoreConversation = mutation({
       }),
     );
 
+    // Audit log: conversation restored
+    await ctx.db.insert('auditLogs', {
+      organizationId: conv.organizationId,
+      userId: args.userId,
+      action: 'chat_conversation_restored',
+      target: args.conversationId,
+      details: JSON.stringify({ conversationName: conv.name }),
+      createdAt: Date.now(),
+    });
+
     return { success: true };
   },
 });
@@ -930,6 +1181,17 @@ export const toggleArchive = mutation({
     await ctx.db.patch(member._id, {
       isArchived: newArchived,
     });
+
+    // Audit log: conversation archived/unarchived
+    await ctx.db.insert('auditLogs', {
+      organizationId: conv.organizationId,
+      userId: args.userId,
+      action: newArchived ? 'chat_conversation_archived' : 'chat_conversation_unarchived',
+      target: args.conversationId,
+      details: JSON.stringify({ conversationName: conv.name, archived: newArchived }),
+      createdAt: Date.now(),
+    });
+
     return newArchived;
   },
 });
@@ -941,6 +1203,9 @@ export const toggleMute = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const conv = await ctx.db.get(args.conversationId);
+    if (!conv) throw new Error('Conversation not found');
+
     const member = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
@@ -952,6 +1217,17 @@ export const toggleMute = mutation({
     await ctx.db.patch(member._id, {
       isMuted: !member.isMuted,
     });
+
+    // Audit log: conversation muted/unmuted
+    await ctx.db.insert('auditLogs', {
+      organizationId: conv.organizationId,
+      userId: args.userId,
+      action: !member.isMuted ? 'chat_conversation_muted' : 'chat_conversation_unmuted',
+      target: args.conversationId,
+      details: JSON.stringify({ conversationName: conv.name, muted: !member.isMuted }),
+      createdAt: Date.now(),
+    });
+
     return !member.isMuted;
   },
 });
@@ -1007,6 +1283,20 @@ export const sendServiceBroadcast = mutation({
         });
       }
     }
+
+    // Audit log: service broadcast sent
+    await ctx.db.insert('auditLogs', {
+      organizationId: args.organizationId,
+      userId: args.senderId,
+      action: 'chat_service_broadcast',
+      target: msgId,
+      details: JSON.stringify({
+        title: args.title,
+        contentLength: args.content.length,
+        recipientCount: members.length - 1,
+      }),
+      createdAt: now,
+    });
 
     return msgId;
   },

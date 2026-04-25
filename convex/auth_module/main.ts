@@ -316,6 +316,21 @@ export const register = mutation({
         }
       }
 
+      // Audit log: user registered
+      await ctx.db.insert('auditLogs', {
+        organizationId,
+        userId,
+        action: 'auth_register',
+        target: userId,
+        details: JSON.stringify({
+          name: args.name,
+          email,
+          role,
+          needsApproval: !isApproved,
+        }),
+        createdAt: Date.now(),
+      });
+
       return { userId, role, needsApproval: !isApproved, organizationId };
     }, 'register');
   },
@@ -379,6 +394,20 @@ export const login = mutation({
         lastLoginAt: Date.now(),
       });
 
+      // Audit log: user login
+      await ctx.db.insert('auditLogs', {
+        organizationId: user.organizationId,
+        userId: user._id,
+        action: 'auth_login',
+        target: user._id,
+        details: JSON.stringify({
+          email: user.email,
+          isFaceLogin: isFaceLogin || false,
+          sessionExpiry,
+        }),
+        createdAt: Date.now(),
+      });
+
       return {
         ...safeUser(user as Parameters<typeof safeUser>[0]),
         organizationName: org.name,
@@ -395,9 +424,22 @@ export const login = mutation({
 export const logout = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error('User not found');
+
     await ctx.db.patch(userId, {
       sessionToken: undefined,
       sessionExpiry: undefined,
+    });
+
+    // Audit log: user logout
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId,
+      action: 'auth_logout',
+      target: userId,
+      details: JSON.stringify({ email: user.email }),
+      createdAt: Date.now(),
     });
   },
 });
@@ -513,6 +555,16 @@ export const resetPassword = mutation({
       sessionToken: undefined,
     });
 
+    // Audit log: password reset
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: user._id,
+      action: 'auth_password_reset',
+      target: user._id,
+      details: JSON.stringify({ email: user.email }),
+      createdAt: Date.now(),
+    });
+
     return { success: true };
   },
 });
@@ -565,6 +617,16 @@ export const changePassword = mutation({
     await ctx.db.patch(userId, {
       passwordHash: hashedPassword,
       sessionToken: undefined, // force re-login on other devices
+    });
+
+    // Audit log: password changed
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId,
+      action: 'auth_password_changed',
+      target: userId,
+      details: JSON.stringify({ email: user.email }),
+      createdAt: Date.now(),
     });
 
     return { success: true };
@@ -646,6 +708,20 @@ export const loginWebauthn = mutation({
       sessionToken,
       sessionExpiry,
       lastLoginAt: Date.now(),
+    });
+
+    // Audit log: WebAuthn login
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: user._id,
+      action: 'auth_login_webauthn',
+      target: user._id,
+      details: JSON.stringify({
+        email: user.email,
+        credentialId,
+        sessionExpiry,
+      }),
+      createdAt: Date.now(),
     });
 
     return {

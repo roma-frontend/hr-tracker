@@ -116,6 +116,22 @@ export const createUser = mutation({
       });
     }
 
+    // Audit log: user created
+    await ctx.db.insert('auditLogs', {
+      organizationId: targetOrgId,
+      userId: adminId,
+      action: 'user_created',
+      target: userId,
+      details: JSON.stringify({
+        name: args.name,
+        email,
+        role: args.role,
+        employeeType: args.employeeType,
+        department: args.department,
+      }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -166,6 +182,21 @@ export const updateUser = mutation({
     const travelAllowance = employeeType === 'contractor' ? 12000 : 20000;
 
     await ctx.db.patch(userId, { ...updates, travelAllowance });
+
+    // Audit log: user updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: caller.organizationId,
+      userId: adminId,
+      action: 'user_updated',
+      target: userId,
+      details: JSON.stringify({
+        updatedFields: Object.keys(updates),
+        name: updates.name || user.name,
+        role: updates.role || user.role,
+      }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -206,6 +237,17 @@ export const deleteUser = mutation({
     }
 
     await ctx.db.patch(userId, { isActive: false });
+
+    // Audit log: user deleted (soft)
+    await ctx.db.insert('auditLogs', {
+      organizationId: caller.organizationId,
+      userId: adminId,
+      action: 'user_deleted',
+      target: userId,
+      details: JSON.stringify({ name: user.name, email: user.email, role: user.role }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -227,6 +269,17 @@ export const hardDeleteUser = mutation({
 
     // Hard delete - remove from database completely
     await ctx.db.delete(userId);
+
+    // Audit log: user hard deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: adminId,
+      action: 'user_hard_deleted',
+      target: userId,
+      details: JSON.stringify({ name: user.name, email: user.email, role: user.role }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -277,6 +330,16 @@ export const approveUser = mutation({
       createdAt: Date.now(),
     });
 
+    // Audit log: user approved
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: adminId,
+      action: 'user_approved',
+      target: userId,
+      details: JSON.stringify({ name: user.name, email: user.email }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -301,6 +364,16 @@ export const rejectUser = mutation({
     if (!isSuperadmin) {
       await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
+
+    // Audit log: user rejected
+    await ctx.db.insert('auditLogs', {
+      organizationId: caller.organizationId,
+      userId: adminId,
+      action: 'user_rejected',
+      target: userId,
+      details: JSON.stringify({ name: user.name, email: user.email, role: user.role }),
+      createdAt: Date.now(),
+    });
 
     await ctx.db.delete(userId);
     return userId;
@@ -343,6 +416,17 @@ export const updateOwnProfile = mutation({
     if (!user) throw new Error('User not found');
 
     await ctx.db.patch(userId, updates);
+
+    // Audit log: profile updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: userId,
+      action: 'profile_updated',
+      target: userId,
+      details: JSON.stringify({ updatedFields: Object.keys(updates) }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -375,6 +459,16 @@ export const updatePresenceStatus = mutation({
       updatedAt: Date.now(),
     });
 
+    // Audit log: presence status updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: userId,
+      action: 'presence_status_updated',
+      target: userId,
+      details: JSON.stringify({ newStatus: presenceStatus }),
+      createdAt: Date.now(),
+    });
+
     return { success: true, newStatus: presenceStatus };
   },
 });
@@ -388,7 +482,19 @@ export const updateAvatar = mutation({
     // RBAC: verify ownership
     await requireUser(ctx, userId);
 
+    const userForAvatar = await ctx.db.get(userId);
     await ctx.db.patch(userId, { avatarUrl });
+
+    // Audit log: avatar updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: userForAvatar?.organizationId,
+      userId: userId,
+      action: 'avatar_updated',
+      target: userId,
+      details: JSON.stringify({ avatarUrl }),
+      createdAt: Date.now(),
+    });
+
     return userId;
   },
 });
@@ -408,6 +514,16 @@ export const deleteAvatar = mutation({
     // Remove avatar URL from database
     await ctx.db.patch(userId, {
       avatarUrl: undefined,
+    });
+
+    // Audit log: avatar deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: userId,
+      action: 'avatar_deleted',
+      target: userId,
+      details: 'User avatar removed',
+      createdAt: Date.now(),
     });
 
     return userId;
@@ -434,6 +550,16 @@ export const setInCallStatus = mutation({
         presenceStatus: 'in_call',
         updatedAt: Date.now(),
       });
+
+      // Audit log: set in call status
+      await ctx.db.insert('auditLogs', {
+        organizationId: user.organizationId,
+        userId: userId,
+        action: 'status_set_in_call',
+        target: userId,
+        details: 'User status set to in_call',
+        createdAt: Date.now(),
+      });
     }
 
     return { success: true };
@@ -459,6 +585,16 @@ export const resetFromCallStatus = mutation({
       await ctx.db.patch(userId, {
         presenceStatus: 'available',
         updatedAt: Date.now(),
+      });
+
+      // Audit log: reset from call status
+      await ctx.db.insert('auditLogs', {
+        organizationId: user.organizationId,
+        userId: userId,
+        action: 'status_reset_from_call',
+        target: userId,
+        details: 'User status reset from in_call to available',
+        createdAt: Date.now(),
       });
     }
 

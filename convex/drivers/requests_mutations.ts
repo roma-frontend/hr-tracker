@@ -8,6 +8,7 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
 import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { requireUser } from '../lib/rbac';
 
 /** Request a driver for a trip */
 export const requestDriver = mutation({
@@ -262,6 +263,21 @@ export const respondToDriverRequest = mutation({
       createdAt: Date.now(),
     });
 
+    // Audit log: driver request responded
+    await ctx.db.insert('auditLogs', {
+      organizationId: request.organizationId,
+      userId,
+      action: approved ? 'driver_request_approved' : 'driver_request_declined',
+      target: requestId,
+      details: JSON.stringify({
+        tripInfo: request.tripInfo.purpose,
+        from: request.tripInfo.from,
+        to: request.tripInfo.to,
+        approved,
+      }),
+      createdAt: Date.now(),
+    });
+
     return { success: true };
   },
 });
@@ -344,6 +360,20 @@ export const updateDriverRequest = mutation({
 
     await ctx.db.patch(args.requestId, patch);
 
+    // Audit log: driver request updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: request.organizationId,
+      userId: args.userId,
+      action: 'driver_request_updated',
+      target: args.requestId,
+      details: JSON.stringify({
+        tripInfo: args.tripInfo?.purpose || request.tripInfo.purpose,
+        wasApproved,
+        driverId: args.driverId || request.driverId,
+      }),
+      createdAt: Date.now(),
+    });
+
     // Notify the driver about the updated request
     const driverId = args.driverId || request.driverId;
     const driverRecord = driverId ? await ctx.db.get(driverId) : null;
@@ -381,6 +411,20 @@ export const cancelDriverRequest = mutation({
     await ctx.db.patch(requestId, {
       status: 'cancelled',
       updatedAt: Date.now(),
+    });
+
+    // Audit log: driver request cancelled
+    await ctx.db.insert('auditLogs', {
+      organizationId: request.organizationId,
+      userId,
+      action: 'driver_request_cancelled',
+      target: requestId,
+      details: JSON.stringify({
+        tripInfo: request.tripInfo.purpose,
+        from: request.tripInfo.from,
+        to: request.tripInfo.to,
+      }),
+      createdAt: Date.now(),
     });
 
     return { success: true };
@@ -430,6 +474,20 @@ export const deleteDriverRequest = mutation({
       cancelledAt: Date.now(),
       cancelledBy: args.userId,
       cancellationReason: 'Cancelled by requester',
+    });
+
+    // Audit log: driver request deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: request.organizationId,
+      userId: args.userId,
+      action: 'driver_request_deleted',
+      target: args.requestId,
+      details: JSON.stringify({
+        tripInfo: request.tripInfo.purpose,
+        from: request.tripInfo.from,
+        to: request.tripInfo.to,
+      }),
+      createdAt: Date.now(),
     });
 
     return { success: true };
@@ -483,6 +541,22 @@ export const reassignDriverRequest = mutation({
       declineReason: undefined,
       reviewedAt: undefined,
       updatedAt: Date.now(),
+    });
+
+    // Audit log: driver request reassigned
+    await ctx.db.insert('auditLogs', {
+      organizationId: request.organizationId,
+      userId,
+      action: 'driver_request_reassigned',
+      target: requestId,
+      details: JSON.stringify({
+        tripInfo: request.tripInfo.purpose,
+        from: request.tripInfo.from,
+        to: request.tripInfo.to,
+        oldDriverId: request.driverId,
+        newDriverId,
+      }),
+      createdAt: Date.now(),
     });
 
     // Notify new driver

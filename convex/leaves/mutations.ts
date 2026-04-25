@@ -112,6 +112,22 @@ export const createLeave = mutation({
       createdAt: Date.now(),
     });
 
+    // Audit log: leave request created
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: args.userId,
+      action: 'leave_created',
+      target: leaveId,
+      details: JSON.stringify({
+        type: args.type,
+        startDate: args.startDate,
+        endDate: args.endDate,
+        days: args.days,
+        reason: args.reason,
+      }),
+      createdAt: Date.now(),
+    });
+
     return leaveId;
   },
 });
@@ -208,6 +224,22 @@ export const approveLeave = mutation({
       });
     }
 
+    // Audit log: leave approved
+    await ctx.db.insert('auditLogs', {
+      organizationId: leave.organizationId,
+      userId: reviewerId,
+      action: 'leave_approved',
+      target: leaveId,
+      details: JSON.stringify({
+        type: leave.type,
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        days: leave.days,
+        comment,
+      }),
+      createdAt: now,
+    });
+
     return leaveId;
   },
 });
@@ -284,6 +316,22 @@ export const rejectLeave = mutation({
       });
     }
 
+    // Audit log: leave rejected
+    await ctx.db.insert('auditLogs', {
+      organizationId: leave.organizationId,
+      userId: reviewerId,
+      action: 'leave_rejected',
+      target: leaveId,
+      details: JSON.stringify({
+        type: leave.type,
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        days: leave.days,
+        comment,
+      }),
+      createdAt: now,
+    });
+
     return leaveId;
   },
 });
@@ -342,6 +390,21 @@ export const updateLeave = mutation({
         createdAt: Date.now(),
       });
     }
+
+    // Audit log: leave updated
+    await ctx.db.insert('auditLogs', {
+      organizationId: leave.organizationId,
+      userId: requesterId,
+      action: 'leave_updated',
+      target: leaveId,
+      details: JSON.stringify({
+        updatedFields: Object.keys(updates),
+        type: updates.type || leave.type,
+        startDate: updates.startDate || leave.startDate,
+        endDate: updates.endDate || leave.endDate,
+      }),
+      createdAt: Date.now(),
+    });
 
     return leaveId;
   },
@@ -403,6 +466,22 @@ export const deleteLeave = mutation({
       });
     }
 
+    // Audit log: leave deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: leave.organizationId,
+      userId: requesterId,
+      action: 'leave_deleted',
+      target: leaveId,
+      details: JSON.stringify({
+        type: leave.type,
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        days: leave.days,
+        status: leave.status,
+      }),
+      createdAt: Date.now(),
+    });
+
     await ctx.db.delete(leaveId);
     return leaveId;
   },
@@ -428,6 +507,21 @@ export const forceDeleteLeave = mutation({
       throw new Error('Only superadmin can force delete leaves');
     }
 
+    // Audit log: leave force deleted
+    await ctx.db.insert('auditLogs', {
+      organizationId: leave.organizationId,
+      userId: requesterId,
+      action: 'leave_force_deleted',
+      target: leaveId,
+      details: JSON.stringify({
+        type: leave.type,
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        status: leave.status,
+      }),
+      createdAt: Date.now(),
+    });
+
     // Delete without any checks or notifications
     await ctx.db.delete(leaveId);
     return leaveId;
@@ -442,6 +536,16 @@ export const markLeaveAsRead = mutation({
   handler: async (ctx, { leaveId }) => {
     const leave = await ctx.db.get(leaveId);
     if (!leave) throw new Error('Leave request not found');
+
+    // Audit log: leave marked as read
+    await ctx.db.insert('auditLogs', {
+      organizationId: leave.organizationId,
+      userId: leave.userId,
+      action: 'leave_marked_read',
+      target: leaveId,
+      details: 'Leave request marked as read',
+      createdAt: Date.now(),
+    });
 
     await ctx.db.patch(leaveId, { isRead: true });
     return leaveId;
@@ -475,6 +579,18 @@ export const markAllLeavesAsRead = mutation({
 
     for (const leave of unreadLeaves) {
       await ctx.db.patch(leave._id, { isRead: true });
+    }
+
+    // Audit log: all leaves marked as read
+    if (unreadLeaves.length > 0) {
+      await ctx.db.insert('auditLogs', {
+        organizationId: requester.organizationId,
+        userId: requesterId,
+        action: 'all_leaves_marked_read',
+        target: String(unreadLeaves.length),
+        details: JSON.stringify({ count: unreadLeaves.length }),
+        createdAt: Date.now(),
+      });
     }
 
     return unreadLeaves.length;
@@ -592,6 +708,18 @@ export const bulkApproveLeaves = mutation({
       }
     }
 
+    // Audit log: bulk approve leaves
+    if (approved.length > 0) {
+      await ctx.db.insert('auditLogs', {
+        organizationId: reviewer.organizationId,
+        userId: reviewerId,
+        action: 'bulk_leaves_approved',
+        target: String(approved.length),
+        details: JSON.stringify({ approvedCount: approved.length, errors: errors.length }),
+        createdAt: Date.now(),
+      });
+    }
+
     return { approved, errors };
   },
 });
@@ -687,6 +815,18 @@ export const bulkRejectLeaves = mutation({
       } catch (error) {
         errors.push(`Error processing leave ${leaveId}: ${error}`);
       }
+    }
+
+    // Audit log: bulk reject leaves
+    if (rejected.length > 0) {
+      await ctx.db.insert('auditLogs', {
+        organizationId: reviewer.organizationId,
+        userId: reviewerId,
+        action: 'bulk_leaves_rejected',
+        target: String(rejected.length),
+        details: JSON.stringify({ rejectedCount: rejected.length, errors: errors.length, comment }),
+        createdAt: Date.now(),
+      });
     }
 
     return { rejected, errors };
