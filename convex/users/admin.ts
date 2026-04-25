@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { Id, Doc } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
@@ -204,7 +205,8 @@ export const autoUnsuspendExpired = mutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
-    const allUsers = await ctx.db.query('users').collect();
+    // NOTE: Using .collect() here because we must check ALL users for expired suspensions (scheduled maintenance task)
+    const allUsers = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
 
     let count = 0;
     for (const user of allUsers) {
@@ -272,7 +274,8 @@ export const upgradeSuperadminRole = mutation({
 export const migrateFaceToAvatar = mutation({
   args: {},
   handler: async (ctx) => {
-    const users = await ctx.db.query('users').collect();
+    // NOTE: Using .collect() here because we must migrate ALL users' face images to avatars (one-time migration task)
+    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
     let count = 0;
     for (const user of users) {
       if (!user.avatarUrl && user.faceImageUrl) {

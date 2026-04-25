@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
@@ -40,7 +41,7 @@ async function verifyAuth(): Promise<string | null> {
   }
 }
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   // SECURITY: Require authentication — user can only verify their own face
   const authenticatedUserId = await verifyAuth();
   if (!authenticatedUserId) {
@@ -56,7 +57,10 @@ export async function POST(req: NextRequest) {
 
     // SECURITY: Users can only verify their own face data
     if (userId !== authenticatedUserId) {
-      return NextResponse.json({ error: 'Forbidden. You can only verify your own face data.' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Forbidden. You can only verify your own face data.' },
+        { status: 403 },
+      );
     }
 
     // Get stored face descriptor
@@ -78,4 +82,4 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});

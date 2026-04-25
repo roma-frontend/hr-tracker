@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/app/api/auth/[...nextauth]/route';
 import { signJWT, verifyJWT } from '@/lib/jwt';
 import { cookies } from 'next/headers';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
-export async function POST(request: NextRequest) {
+export const POST = withCsrfProtection(async (request: NextRequest) => {
   try {
     const { userId, name, email } = await request.json();
 
@@ -69,4 +70,4 @@ export async function POST(request: NextRequest) {
     console.error('[/api/profile/update] Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

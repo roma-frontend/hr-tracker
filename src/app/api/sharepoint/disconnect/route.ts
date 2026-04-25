@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateRestrictedOrgFromRequest } from '@/lib/restricted-org';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
-export async function POST(request: NextRequest) {
+export const POST = withCsrfProtection(async (request: NextRequest) => {
   const validation = await validateRestrictedOrgFromRequest(request);
 
   if (!validation.allowed) {
@@ -25,4 +26,4 @@ export async function POST(request: NextRequest) {
   });
 
   return response;
-}
+});

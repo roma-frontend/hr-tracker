@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   try {
     const { message, context, lang } = await req.json();
 
@@ -51,4 +52,4 @@ Rules:
       replies: ['👍', 'Понял, спасибо!', 'Можете уточнить?'],
     });
   }
-}
+});

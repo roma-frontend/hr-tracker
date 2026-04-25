@@ -1,16 +1,17 @@
-import { v } from "convex/values";
-import { query } from "../_generated/server";
+import { v } from 'convex/values';
+import { query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET UNREAD MESSAGE COUNT — total badge
 // ─────────────────────────────────────────────────────────────────────────────
 export const getUnreadMessageCount = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     const memberships = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+      .query('chatMembers')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .take(MAX_PAGE_SIZE);
 
     let total = 0;
     for (const m of memberships) {
@@ -26,14 +27,14 @@ export const getUnreadMessageCount = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const getTotalUnread = query({
   args: {
-    userId: v.id("users"),
-    organizationId: v.optional(v.id("organizations"))
+    userId: v.id('users'),
+    organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, { userId, organizationId }) => {
     const memberships = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+      .query('chatMembers')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .take(MAX_PAGE_SIZE);
 
     let total = 0;
     for (const m of memberships) {

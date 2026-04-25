@@ -1,6 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { applyRateLimit, PASSWORD_RESET_RATE_LIMIT } from '@/lib/rate-limit';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -16,7 +17,7 @@ async function convexMutation(name: string, args: Record<string, unknown>) {
   return data.value;
 }
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   // Rate limiting: 3 requests per hour
   const rateLimitResponse = await applyRateLimit(req, PASSWORD_RESET_RATE_LIMIT, 'forgot-password');
   if (rateLimitResponse) return rateLimitResponse;
@@ -130,4 +131,4 @@ export async function POST(req: NextRequest) {
     const msg = err instanceof Error ? err.message : 'Something went wrong';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
-}
+});

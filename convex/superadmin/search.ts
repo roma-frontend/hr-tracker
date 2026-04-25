@@ -3,6 +3,7 @@ import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import { Id } from '../_generated/dataModel';
 import { api } from '../_generated/api';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // Isolate API references at module level
 const superadminApi = api.superadmin;
@@ -37,30 +38,30 @@ export const globalSearch = query({
           .query('users')
           .withIndex('by_email')
           .filter((q) => q.eq(q.field('email'), searchQuery))
-          .collect(),
+          .take(MAX_PAGE_SIZE),
 
         // Search organizations by slug and name
         ctx.db
           .query('organizations')
           .withIndex('by_slug')
           .filter((q) => q.eq(q.field('slug'), searchQuery))
-          .collect(),
+          .take(MAX_PAGE_SIZE),
 
         // Search leave requests
-        ctx.db.query('leaveRequests').withIndex('by_status').collect(),
+        ctx.db.query('leaveRequests').withIndex('by_status').take(MAX_PAGE_SIZE),
 
         // Search driver requests
-        ctx.db.query('driverRequests').collect(),
+        ctx.db.query('driverRequests').take(MAX_PAGE_SIZE),
 
         // Search tasks
-        ctx.db.query('tasks').collect(),
+        ctx.db.query('tasks').take(MAX_PAGE_SIZE),
 
         // Search support tickets
         ctx.db
           .query('supportTickets')
           .withIndex('by_ticket_number')
           .filter((q) => q.eq(q.field('ticketNumber'), args.query))
-          .collect(),
+          .take(MAX_PAGE_SIZE),
       ]);
 
     // Filter and enrich results
@@ -247,7 +248,7 @@ export const searchUsersByPrefix = query({
       const users = await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-        .collect();
+        .take(MAX_PAGE_SIZE);
 
       return users
         .filter(
@@ -264,7 +265,7 @@ export const searchUsersByPrefix = query({
         }));
     } else {
       // Global search for superadmin
-      const allUsers = await ctx.db.query('users').collect();
+      const allUsers = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
 
       return allUsers
         .filter(

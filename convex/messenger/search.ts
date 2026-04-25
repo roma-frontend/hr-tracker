@@ -1,28 +1,29 @@
-import { v } from "convex/values";
-import { query } from "../_generated/server";
+import { v } from 'convex/values';
+import { query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEARCH MESSAGES
 // ─────────────────────────────────────────────────────────────────────────────
 export const searchMessages = query({
   args: {
-    conversationId: v.id("chatConversations"),
-    userId: v.id("users"),
+    conversationId: v.id('chatConversations'),
+    userId: v.id('users'),
     query: v.string(),
   },
   handler: async (ctx, args) => {
     const membership = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", args.userId)
+      .query('chatMembers')
+      .withIndex('by_conversation_user', (q) =>
+        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
       )
       .first();
     if (!membership) return [];
 
     const messages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
-      .collect();
+      .query('chatMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
+      .take(MAX_PAGE_SIZE);
 
     const q = args.query.toLowerCase();
     const matches = messages
@@ -34,10 +35,10 @@ export const searchMessages = query({
         const sender = await ctx.db.get(m.senderId);
         return {
           ...m,
-          senderName: sender?.name ?? "Unknown",
+          senderName: sender?.name ?? 'Unknown',
           senderAvatarUrl: sender?.avatarUrl,
         };
-      })
+      }),
     );
   },
 });

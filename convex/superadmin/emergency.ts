@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from '../_generated/server';
 import { Id } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─── EMERGENCY DASHBOARD ─────────────────────────────────────────────────────
 /**
@@ -32,13 +33,15 @@ export const getEmergencyDashboard = query({
             q.gt(q.field('createdAt'), oneHourAgo),
           ),
         )
-        .collect(),
+        .order('desc')
+        .take(MAX_PAGE_SIZE),
 
       // Active emergency incidents
       ctx.db
         .query('emergencyIncidents')
         .filter((q) => q.eq(q.field('status'), 'investigating'))
-        .collect(),
+        .order('desc')
+        .take(MAX_PAGE_SIZE),
 
       // SLA breaches in last 24h
       ctx.db
@@ -49,7 +52,8 @@ export const getEmergencyDashboard = query({
             q.gt(q.field('createdAt'), twentyFourHoursAgo),
           ),
         )
-        .collect(),
+        .order('desc')
+        .take(MAX_PAGE_SIZE),
 
       // Failed login attempts (potential attack)
       ctx.db
@@ -57,19 +61,21 @@ export const getEmergencyDashboard = query({
         .filter((q) =>
           q.and(q.eq(q.field('success'), false), q.gt(q.field('createdAt'), oneHourAgo)),
         )
-        .collect(),
+        .order('desc')
+        .take(MAX_PAGE_SIZE),
 
       // Organizations in maintenance mode
       ctx.db
         .query('maintenanceMode')
         .filter((q) => q.eq(q.field('isActive'), true))
-        .collect(),
+        .order('desc')
+        .take(MAX_PAGE_SIZE),
 
       // Pending organization requests
       ctx.db
         .query('organizationRequests')
         .withIndex('by_status', (q) => q.eq('status', 'pending'))
-        .collect(),
+        .take(MAX_PAGE_SIZE),
     ]);
 
     // Enrich critical tickets
@@ -197,6 +203,7 @@ export const createIncident = mutation({
     });
 
     // Notify all superadmins
+    // NOTE: Using .collect() here because we must notify ALL superadmins of an emergency incident; truncating would miss critical recipients
     const superadmins = await ctx.db
       .query('users')
       .withIndex('by_role', (q) => q.eq('role', 'superadmin'))

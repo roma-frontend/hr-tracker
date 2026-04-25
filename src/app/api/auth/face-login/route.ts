@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { signJWT } from '@/lib/jwt';
 import { log } from '@/lib/logger';
 import { applyRateLimit, FACE_LOGIN_RATE_LIMIT } from '@/lib/rate-limit';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -32,7 +33,7 @@ async function convexQuery(name: string, args: Record<string, unknown>) {
   return data.value;
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withCsrfProtection(async (request: NextRequest) => {
   // Rate limiting: 10 attempts per 15 minutes
   const rateLimitResponse = await applyRateLimit(request, FACE_LOGIN_RATE_LIMIT, 'face-login');
   if (rateLimitResponse) return rateLimitResponse;
@@ -125,4 +126,4 @@ export async function POST(request: NextRequest) {
     log.error('Face Login API error', error);
     return NextResponse.json({ error: error.message || 'Login failed' }, { status: 500 });
   }
-}
+});

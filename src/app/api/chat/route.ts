@@ -4,6 +4,8 @@ import { buildRoleBasedPrompt, detectIntent } from '@/lib/aiAssistant';
 import type { UserRole } from '@/lib/aiAssistant';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Remove edge runtime to see better errors
 // export const runtime = 'edge';
@@ -29,14 +31,16 @@ async function verifyChatAuth(): Promise<{ userId: string; role: string } | null
   }
 }
 
-export async function POST(req: Request) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   // SECURITY: Require authentication for AI chat (costly API)
   const auth = await verifyChatAuth();
   if (!auth) {
-    return new Response(JSON.stringify({ error: 'Unauthorized. Please log in to use AI chat.' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json(
+      { error: 'Unauthorized. Please log in to use AI chat.' },
+      {
+        status: 401,
+      },
+    );
   }
 
   try {
@@ -668,15 +672,14 @@ When asked about specific employees, use the COMPLETE SYSTEM DATA above to give 
     return result.toTextStreamResponse();
   } catch (error) {
     console.error('❌ Chat API error:', error);
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         error: error instanceof Error ? error.message : 'Unknown error',
         details: error,
-      }),
+      },
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
       },
     );
   }
-}
+});

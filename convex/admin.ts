@@ -1,6 +1,8 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { requireRole } from './lib/rbac';
+import { MAX_PAGE_SIZE } from './pagination';
 
 /**
  * Get cost analysis data for admin dashboard
@@ -33,10 +35,11 @@ export const getCostAnalysis = query({
       .filter((q) =>
         q.and(q.eq(q.field('status'), 'approved'), q.gte(q.field('createdAt'), startTimestamp)),
       )
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Get all users
-    const users = await ctx.db.query('users').collect();
+    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Calculate costs by department
@@ -91,10 +94,11 @@ export const detectConflicts = query({
     const leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) => q.or(q.eq(q.field('status'), 'approved'), q.eq(q.field('status'), 'pending')))
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Get all users
-    const users = await ctx.db.query('users').collect();
+    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Group by department and date
@@ -194,11 +198,12 @@ export const getSmartSuggestions = query({
     }> = [];
 
     // Get all users and leaves
-    const users = await ctx.db.query('users').collect();
+    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
     const leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) => q.eq(q.field('status'), 'approved'))
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Suggestion 1: Users with high leave balances
     const highBalanceUsers = users.filter((u) => {
@@ -291,10 +296,11 @@ export const getCalendarExportData = query({
     const leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) => q.eq(q.field('status'), 'approved'))
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Get all users
-    const users = await ctx.db.query('users').collect();
+    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Filter by date range if provided
@@ -340,11 +346,7 @@ export const sendServiceBroadcast = mutation({
     scheduledFor: v.optional(v.number()), // optional timestamp for scheduling
   },
   handler: async (ctx, args) => {
-    // Verify user is superadmin
-    const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== 'superadmin') {
-      throw new Error('Only superadmin can send service broadcasts');
-    }
+    await requireRole(ctx, args.userId, 'superadmin');
     // Get or create the "System Announcements" group chat for this organization
     let announcementConv = await ctx.db
       .query('chatConversations')
@@ -378,6 +380,8 @@ export const sendServiceBroadcast = mutation({
       );
 
       // Add all active, approved users to this channel
+      // NOTE: Using .collect() here because we need to iterate ALL active users in the org
+      // to add them to the newly created System Announcements channel (batch operation)
       const users = await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
@@ -618,11 +622,7 @@ export const enableMaintenanceMode = mutation({
     icon: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Verify user is superadmin
-    const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== 'superadmin') {
-      throw new Error('Only superadmin can enable maintenance mode');
-    }
+    await requireRole(ctx, args.userId, 'superadmin');
 
     const now = Date.now();
 
@@ -676,11 +676,7 @@ export const disableMaintenanceMode = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, args) => {
-    // Verify user is superadmin
-    const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== 'superadmin') {
-      throw new Error('Only superadmin can disable maintenance mode');
-    }
+    await requireRole(ctx, args.userId, 'superadmin');
 
     const maintenance = await ctx.db
       .query('maintenanceMode')
@@ -726,11 +722,7 @@ export const assignUserAsOrgAdmin = mutation({
     organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
-    // Verify caller is superadmin
-    const superadmin = await ctx.db.get(args.superadminUserId);
-    if (!superadmin || superadmin.email.toLowerCase() !== 'romangulanyan@gmail.com') {
-      throw new Error('Only superadmin can assign organization admins');
-    }
+    await requireRole(ctx, args.superadminUserId, 'superadmin');
 
     // Find user by email
     const user = await ctx.db
@@ -846,7 +838,13 @@ export const getSuperadminDashboard = query({
 
       // Calculate revenue based on plan
       const monthlyRevenue =
-        subscription?.plan === 'starter' ? 29 : subscription?.plan === 'professional' ? 79 : subscription?.plan === 'enterprise' ? 199 : 0;
+        subscription?.plan === 'starter'
+          ? 29
+          : subscription?.plan === 'professional'
+            ? 79
+            : subscription?.plan === 'enterprise'
+              ? 199
+              : 0;
 
       // Calculate utilization
       const utilization =

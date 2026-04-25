@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 /**
  * Convert emoji to ASCII-safe key format using Unicode code points
@@ -322,6 +323,7 @@ export const sendMessage = mutation({
 
     // Increment unread counts for all members except sender
     // Also stamp readBy with readAt:-1 (delivered) for each online recipient
+    // NOTE: Using .collect() here because we must update unread counts for ALL members of the conversation
     const members = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
@@ -837,11 +839,10 @@ export const deleteConversation = mutation({
     });
 
     // Hide all existing messages from this user (clear chat history for them)
+    // NOTE: Using .collect() here because we must hide ALL existing messages from the deleting user's view
     const messages = await ctx.db
       .query('chatMessages')
-      .withIndex('by_conversation_created', (q) =>
-        q.eq('conversationId', args.conversationId),
-      )
+      .withIndex('by_conversation_created', (q) => q.eq('conversationId', args.conversationId))
       .collect();
 
     await Promise.all(
@@ -857,7 +858,6 @@ export const deleteConversation = mutation({
     );
   },
 });
-
 
 /** Restore a deleted conversation (per-user) */
 export const restoreConversation = mutation({
@@ -888,9 +888,7 @@ export const restoreConversation = mutation({
     // Also restore messages for this user
     const messages = await ctx.db
       .query('chatMessages')
-      .withIndex('by_conversation_created', (q) =>
-        q.eq('conversationId', args.conversationId),
-      )
+      .withIndex('by_conversation_created', (q) => q.eq('conversationId', args.conversationId))
       .collect();
 
     await Promise.all(
@@ -996,6 +994,7 @@ export const sendServiceBroadcast = mutation({
     });
 
     // Add unread count for all members except sender
+    // NOTE: Using .collect() here because we must add unread counts for ALL members of the conversation
     const members = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))

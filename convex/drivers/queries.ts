@@ -7,6 +7,7 @@
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 /** Get all available drivers in organization */
 export const getAvailableDrivers = query({
@@ -19,7 +20,7 @@ export const getAvailableDrivers = query({
       .withIndex('by_org_available', (q) =>
         q.eq('organizationId', organizationId).eq('isAvailable', true),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Enrich with user info and filter only users with role 'driver'
     const enriched = await Promise.all(
@@ -99,7 +100,7 @@ export const getDriverSchedule = query({
       .filter((q) =>
         q.and(q.gte(q.field('startTime'), startTime), q.lte(q.field('startTime'), endTime)),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Enrich with user info for each schedule
     const enriched = await Promise.all(
@@ -198,7 +199,7 @@ export const isDriverAvailable = query({
           q.neq(q.field('status'), 'cancelled'),
         ),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     if (tripsToday.length >= driver.maxTripsPerDay) {
       return { available: false, reason: 'max_trips_reached' };
@@ -234,7 +235,7 @@ export const isDriverOnLeave = query({
       .query('leaveRequests')
       .withIndex('by_user', (q) => q.eq('userId', driver.userId))
       .filter((q) => q.eq(q.field('status'), 'approved'))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Check for overlap in JavaScript
     for (const leave of allLeaves) {
@@ -275,7 +276,7 @@ export const getAlternativeDrivers = query({
       .withIndex('by_org_available', (q) =>
         q.eq('organizationId', organizationId).eq('isAvailable', true),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Filter out excluded driver
     const drivers = excludeDriverId
@@ -306,7 +307,7 @@ export const getAlternativeDrivers = query({
               q.gte(q.field('endDate'), startDateStr),
             ),
           )
-          .collect();
+          .take(MAX_PAGE_SIZE);
 
         if (leaveRequests.length > 0) {
           return null; // Skip drivers on leave
@@ -364,7 +365,7 @@ export const getOrgDriverSchedules = query({
           q.lte(q.field('startTime'), endTime),
         ),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const enriched = await Promise.all(
       schedules.map(async (schedule) => {
@@ -399,7 +400,7 @@ export const getFilteredDrivers = query({
       .withIndex('by_org_available', (q) =>
         q.eq('organizationId', organizationId).eq('isAvailable', true),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const enriched = await Promise.all(
       drivers.map(async (driver) => {

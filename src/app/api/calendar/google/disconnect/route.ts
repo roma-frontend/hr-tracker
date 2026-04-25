@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
-export async function POST() {
+export const POST = withCsrfProtection(async () => {
   const response = NextResponse.json({ success: true });
 
   response.cookies.set('google_access_token', '', {
@@ -18,4 +19,4 @@ export async function POST() {
   });
 
   return response;
-}
+});

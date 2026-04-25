@@ -4,8 +4,9 @@
 
 import { NextRequest } from 'next/server';
 import { fetchMutation } from 'convex/nextjs';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
-export async function POST(request: NextRequest) {
+export const POST = withCsrfProtection(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { organizationId } = body;
@@ -27,4 +28,4 @@ export async function POST(request: NextRequest) {
     console.error('Conflict scan failed:', error);
     return Response.json({ error: 'Scan failed' }, { status: 500 });
   }
-}
+});

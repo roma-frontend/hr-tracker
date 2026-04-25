@@ -6,6 +6,7 @@
 
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 /** Start a new shift for a driver */
 export const startShift = mutation({
@@ -221,7 +222,7 @@ export const getShiftStatistics = query({
       .query('driverShifts')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .filter((q) => q.gte(q.field('startTime'), periodStart))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const completedShifts = shifts.filter((s) => s.status === 'completed');
 

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { signJWT } from '@/lib/jwt';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
-export async function POST(request: NextRequest) {
+export const POST = withCsrfProtection(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { userId, name, email, role, department, position, employeeType, avatar } = body;
@@ -48,4 +49,4 @@ export async function POST(request: NextRequest) {
     console.error('Error creating session:', error);
     return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
   }
-}
+});

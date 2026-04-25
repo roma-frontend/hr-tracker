@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from '../_generated/server';
 import { Id } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─── IMPERSONATION ───────────────────────────────────────────────────────────
 /**
@@ -145,7 +146,7 @@ export const getActiveImpersonation = query({
       .query('impersonationSessions')
       .withIndex('by_active', (q) => q.eq('isActive', true))
       .filter((q) => q.eq(q.field('targetUserId'), args.userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     if (sessions.length === 0) return null;
 
@@ -180,7 +181,7 @@ export const getImpersonationHistory = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let sessions = await ctx.db.query('impersonationSessions').order('desc').collect();
+    let sessions = await ctx.db.query('impersonationSessions').order('desc').take(MAX_PAGE_SIZE);
 
     if (args.superadminId) {
       sessions = sessions.filter((s) => s.superadminId === args.superadminId);

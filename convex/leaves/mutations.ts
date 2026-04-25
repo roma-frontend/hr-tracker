@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
 import { SUPERADMIN_EMAIL } from './helpers';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CREATE LEAVE REQUEST
@@ -48,6 +49,7 @@ export const createLeave = mutation({
     // 2. Future: scheduled job to check conflicts
 
     // Notify admins within same org only
+    // NOTE: Using .collect() here because we must notify ALL admins of a new leave request; truncating would miss recipients
     const admins = await ctx.db
       .query('users')
       .withIndex('by_org_role', (q) =>
@@ -460,13 +462,13 @@ export const markAllLeavesAsRead = mutation({
     // Superadmin can mark all as read
     let unreadLeaves;
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      const allLeaves = await ctx.db.query('leaveRequests').collect();
+      const allLeaves = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
       unreadLeaves = allLeaves.filter((l) => l.isRead === false || l.isRead === undefined);
     } else {
       const leaves = await ctx.db
         .query('leaveRequests')
         .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId!))
-        .collect();
+        .take(MAX_PAGE_SIZE);
       unreadLeaves = leaves.filter((l) => l.isRead === false || l.isRead === undefined);
     }
 

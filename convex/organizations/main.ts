@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ── SUPERADMIN EMAIL ─────────────────────────────────────────────────────────
 // Only this account can create organizations and access all tenants
@@ -85,7 +86,7 @@ export const listAll = query({
       return [];
     }
 
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(MAX_PAGE_SIZE);
 
     // Enrich with employee counts
     return await Promise.all(
@@ -93,7 +94,7 @@ export const listAll = query({
         const employees = await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', org._id))
-          .collect();
+          .take(MAX_PAGE_SIZE);
 
         // Filter out superadmins from employee counts
         const filteredEmployees = employees.filter((e) => e.role !== 'superadmin');
@@ -121,7 +122,7 @@ export const getAllOrganizations = query({
       }
     }
 
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').order('desc').take(MAX_PAGE_SIZE);
 
     // Enrich with employee counts and admin info
     return await Promise.all(
@@ -129,7 +130,7 @@ export const getAllOrganizations = query({
         const employees = await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', org._id))
-          .collect();
+          .take(MAX_PAGE_SIZE);
 
         // Filter out superadmins from employee counts
         const filteredEmployees = employees.filter((e) => e.role !== 'superadmin');
@@ -241,7 +242,7 @@ export const getOrganizationById = query({
     const members = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Filter out superadmins from employee count
     const filteredMembers = members.filter((m) => m.role !== 'superadmin');
@@ -353,13 +354,13 @@ export const searchOrganizations = query({
     const bySlug = await ctx.db
       .query('organizations')
       .withIndex('by_slug', (qb) => qb.eq('slug', q))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Get all active orgs and filter by name
     const all = await ctx.db
       .query('organizations')
       .withIndex('by_active', (qb) => qb.eq('isActive', true))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const byName = all.filter((org) => org.name.toLowerCase().includes(q) || org.slug.includes(q));
 
@@ -423,7 +424,7 @@ export const requestToJoinOrganization = mutation({
     const existing = await ctx.db
       .query('organizationInvites')
       .withIndex('by_email', (q) => q.eq('requestedByEmail', args.requestedByEmail))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const alreadyPending = existing.find(
       (inv) => inv.organizationId === args.organizationId && inv.status === 'pending',
@@ -454,7 +455,7 @@ export const requestToJoinOrganization = mutation({
       .withIndex('by_org_role', (q) =>
         q.eq('organizationId', args.organizationId).eq('role', 'admin'),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     for (const admin of admins) {
       await ctx.db.insert('notifications', {
@@ -505,9 +506,9 @@ export const getJoinRequests = query({
         invites = await ctx.db
           .query('organizationInvites')
           .withIndex('by_status', (q) => q.eq('status', status))
-          .collect();
+          .take(MAX_PAGE_SIZE);
       } else {
-        invites = await ctx.db.query('organizationInvites').collect();
+        invites = await ctx.db.query('organizationInvites').take(MAX_PAGE_SIZE);
       }
     } else {
       // Admin or superadmin with org - return org-specific invites
@@ -516,13 +517,13 @@ export const getJoinRequests = query({
           .query('organizationInvites')
           .withIndex('by_org_status', (q) => q.eq('organizationId', orgId).eq('status', status))
           .order('desc')
-          .collect();
+          .take(MAX_PAGE_SIZE);
       } else {
         invites = await ctx.db
           .query('organizationInvites')
           .withIndex('by_org', (q) => q.eq('organizationId', orgId))
           .order('desc')
-          .collect();
+          .take(MAX_PAGE_SIZE);
       }
     }
 
@@ -569,7 +570,7 @@ export const approveJoinRequest = mutation({
       .withIndex('by_org_active', (q) =>
         q.eq('organizationId', invite.organizationId).eq('isActive', true),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     if (currentCount.length >= org.employeeLimit) {
       throw new Error(
@@ -803,7 +804,7 @@ export const getPendingJoinRequestCount = query({
     const pending = await ctx.db
       .query('organizationInvites')
       .withIndex('by_org_status', (q) => q.eq('organizationId', orgId).eq('status', 'pending'))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     return pending.length;
   },
@@ -857,7 +858,7 @@ export const getOrganizationsForPicker = query({
       const orgs = await ctx.db
         .query('organizations')
         .withIndex('by_active', (q) => q.eq('isActive', true))
-        .collect();
+        .take(MAX_PAGE_SIZE);
       return orgs.map((o) => ({ _id: o._id, name: o.name, slug: o.slug }));
     }
 

@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import type { Id, Doc } from '../_generated/dataModel';
 import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─── CONVERSATIONS ────────────────────────────────────────────────────────────
 
@@ -23,17 +24,23 @@ export const getMyConversations = query({
     const memberships = await ctx.db
       .query('chatMembers')
       .withIndex('by_user', (q) => q.eq('userId', args.userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Step 2: Check if user is a superadmin
     const user = await ctx.db.get(args.userId);
-    const isSuperadmin = user ? (user.role === 'superadmin' || user.email === SUPERADMIN_EMAIL) : false;
+    const isSuperadmin = user
+      ? user.role === 'superadmin' || user.email === SUPERADMIN_EMAIL
+      : false;
 
     // Debug: log memberships
     if (isSuperadmin) {
-      console.log(`[getMyConversations] Superadmin ${args.userId} has ${memberships.length} memberships`);
+      console.log(
+        `[getMyConversations] Superadmin ${args.userId} has ${memberships.length} memberships`,
+      );
       memberships.forEach((m, idx) => {
-        console.log(`  Membership ${idx}: conversationId=${m.conversationId}, isDeleted=${m.isDeleted}`);
+        console.log(
+          `  Membership ${idx}: conversationId=${m.conversationId}, isDeleted=${m.isDeleted}`,
+        );
       });
     }
 
@@ -49,18 +56,19 @@ export const getMyConversations = query({
     }
 
     // Step 4: Filter valid conversations (not deleted)
-    const validConvs: Array<{ conv: Doc<'chatConversations'>; membership: Doc<'chatMembers'> }> = [];
+    const validConvs: Array<{ conv: Doc<'chatConversations'>; membership: Doc<'chatMembers'> }> =
+      [];
     conversations.forEach((conv, idx) => {
       const membership = memberships[idx];
       if (!conv || !membership) return;
       if (membership?.isDeleted) return;
-      
+
       // Superadmins see all conversations they are members of
       if (isSuperadmin) {
         validConvs.push({ conv, membership });
         return;
       }
-      
+
       // Regular users: check organization match
       if (args.organizationId && conv.organizationId !== args.organizationId) {
         return;
@@ -82,7 +90,9 @@ export const getMyConversations = query({
 
     // Debug: log for superadmin
     if (isSuperadmin) {
-      console.log(`[getMyConversations] Superadmin ${args.userId} has ${memberships.length} memberships, found ${validConvs.length} valid conversations, ${dedupedConvs.length} after dedup`);
+      console.log(
+        `[getMyConversations] Superadmin ${args.userId} has ${memberships.length} memberships, found ${validConvs.length} valid conversations, ${dedupedConvs.length} after dedup`,
+      );
     }
 
     const filteredConvs = dedupedConvs.filter(Boolean) as Array<{
@@ -96,7 +106,7 @@ export const getMyConversations = query({
     }>;
 
     // Step 5: Load ALL chat members
-    const allChatMembers = await ctx.db.query('chatMembers').collect();
+    const allChatMembers = await ctx.db.query('chatMembers').order('desc').take(MAX_PAGE_SIZE);
 
     // Step 6: Collect all user IDs
     const allUserIds = new Set<Id<'users'>>();
@@ -130,8 +140,12 @@ export const getMyConversations = query({
       .forEach((m) => groupMemberUserIds.add(m.userId));
 
     // Load group member users
-    const groupMemberUsers = await Promise.all(Array.from(groupMemberUserIds).map((id) => ctx.db.get(id)));
-    const groupMemberUserMap = new Map(Array.from(groupMemberUserIds).map((id, i) => [id, groupMemberUsers[i]]));
+    const groupMemberUsers = await Promise.all(
+      Array.from(groupMemberUserIds).map((id) => ctx.db.get(id)),
+    );
+    const groupMemberUserMap = new Map(
+      Array.from(groupMemberUserIds).map((id, i) => [id, groupMemberUsers[i]]),
+    );
 
     // Step 9: Build result
     const conversationsWithDetails = filteredConvs.map((conv, idx) => {
@@ -199,7 +213,7 @@ export const getConversationMembers = query({
     const members = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0] || '';
@@ -215,7 +229,7 @@ export const getConversationMembers = query({
             .query('leaveRequests')
             .withIndex('by_user', (q) => q.eq('userId', user._id))
             .filter((q) => q.eq(q.field('status'), 'approved'))
-            .collect();
+            .take(MAX_PAGE_SIZE);
 
           const hasActiveLeave = approvedLeaves.some((leave) => {
             return leave.startDate <= today && today <= leave.endDate;
@@ -308,7 +322,7 @@ export const getTotalUnread = query({
     const memberships = await ctx.db
       .query('chatMembers')
       .withIndex('by_user', (q) => q.eq('userId', args.userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
     // Only count memberships that are not deleted/archived
     // If organizationId provided, filter by org
     return memberships
@@ -331,7 +345,7 @@ export const getTypingUsers = query({
     const typing = await ctx.db
       .query('chatTyping')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const active = typing.filter((t) => t.userId !== args.currentUserId && t.updatedAt > cutoff);
 
@@ -363,7 +377,7 @@ export const searchMessages = query({
     const messages = await ctx.db
       .query('chatMessages')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const q = args.query.toLowerCase();
     return messages.filter((m) => !m.isDeleted && m.content.toLowerCase().includes(q)).slice(-20);
@@ -379,7 +393,7 @@ export const getPinnedMessages = query({
       .withIndex('by_pinned', (q) =>
         q.eq('conversationId', args.conversationId).eq('isPinned', true),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     return Promise.all(
       messages.map(async (msg) => {
@@ -401,7 +415,7 @@ export const getThreadReplies = query({
       .query('chatMessages')
       .filter((q) => q.eq(q.field('parentMessageId'), args.parentMessageId))
       .order('asc')
-      .collect();
+      .take(MAX_PAGE_SIZE);
     return Promise.all(
       replies.map(async (r) => {
         const sender = await ctx.db.get(r.senderId);
@@ -423,7 +437,7 @@ export const getScheduledMessages = query({
     const msgs = await ctx.db
       .query('chatMessages')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
     return msgs.filter((m) => m.senderId === args.senderId && m.scheduledFor && !m.isSent);
   },
 });
@@ -446,7 +460,8 @@ export const getUnreadConversations = query({
           q.gt(q.field('unreadCount'), 0),
         ),
       )
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Filter out per-user deleted/archived memberships
     const activeMembers = members.filter((m) => !m.isDeleted && !m.isArchived);
@@ -474,7 +489,8 @@ export const getGroupConversations = query({
           q.eq(q.field('organizationId'), args.organizationId),
         ),
       )
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Filter out per-user deleted/archived memberships
     const activeMembers = members.filter((m) => !m.isDeleted && !m.isArchived);
@@ -504,7 +520,8 @@ export const getPinnedConversations = query({
           q.eq(q.field('organizationId'), args.organizationId),
         ),
       )
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Filter out members who have per-user deleted this conversation
     const activeMembers = members.filter((m) => !m.isDeleted);
@@ -532,7 +549,8 @@ export const getArchivedConversations = query({
           q.eq(q.field('organizationId'), args.organizationId),
         ),
       )
-      .collect();
+      .order('desc')
+      .take(MAX_PAGE_SIZE);
 
     // Only show conversations archived by this user (per-user) and not deleted
     const archivedMembers = members.filter((m) => m.isArchived && !m.isDeleted);
@@ -555,7 +573,7 @@ export const getOrgUsers = query({
     const users = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0] || '';
@@ -577,7 +595,7 @@ export const getOrgUsers = query({
             .query('leaveRequests')
             .withIndex('by_user', (q) => q.eq('userId', u._id))
             .filter((q) => q.eq(q.field('status'), 'approved'))
-            .collect();
+            .take(MAX_PAGE_SIZE);
 
           const hasActiveLeave = approvedLeaves.some((leave) => {
             return leave.startDate <= today && today <= leave.endDate;
@@ -629,7 +647,7 @@ export const getServiceBroadcasts = query({
       .query('chatMessages')
       .withIndex('by_conversation', (q) => q.eq('conversationId', systemAnnouncements._id))
       .filter((q) => q.eq(q.field('isServiceBroadcast'), true))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Get sender info for each broadcast
     const enriched = await Promise.all(
@@ -661,7 +679,7 @@ export const getUnreadMessageCount = query({
     const memberships = await ctx.db
       .query('chatMembers')
       .withIndex('by_user', (q) => q.eq('userId', userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     let total = 0;
     for (const m of memberships) {

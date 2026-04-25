@@ -1,6 +1,12 @@
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import type { Id, Doc } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
+
+interface LeaveQuery {
+  order: (direction: 'asc' | 'desc') => { take: (n: number) => Promise<Doc<'leaveRequests'>[]> };
+  collect: () => Promise<Doc<'leaveRequests'>[]>;
+}
 
 /**
  * Helper to batch-load users and their leave status
@@ -10,7 +16,7 @@ export async function getUsersWithLeaveStatus(
   ctx: {
     db: {
       get: (id: Id<'users'>) => Promise<Doc<'users'> | null>;
-      query: (table: 'leaveRequests') => { collect: () => Promise<Doc<'leaveRequests'>[]> };
+      query: (table: 'leaveRequests') => LeaveQuery;
     };
   },
   userIds: Id<'users'>[],
@@ -25,7 +31,7 @@ export async function getUsersWithLeaveStatus(
   const userMap = new Map(users.map((u) => [u?._id, u]));
 
   // Batch load all approved leaves for these users
-  const allLeaves = await ctx.db.query('leaveRequests').collect();
+  const allLeaves = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
   const userLeavesMap = new Map<
     Id<'users'>,
     Array<{
@@ -78,7 +84,7 @@ export const getUserPresenceStatus = query({
         .query('leaveRequests')
         .withIndex('by_user', (q) => q.eq('userId', user._id))
         .filter((q) => q.eq(q.field('status'), 'approved'))
-        .collect();
+        .take(MAX_PAGE_SIZE);
 
       hasActiveLeave = approvedLeaves.some((leave) => {
         return leave.startDate <= today && today <= leave.endDate;

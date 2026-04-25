@@ -1,5 +1,6 @@
-import { v } from "convex/values";
-import { mutation, query } from "../_generated/server";
+import { v } from 'convex/values';
+import { mutation, query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CALLS - Audio/Video calling using WebRTC (similar to web version)
@@ -11,31 +12,31 @@ import { mutation, query } from "../_generated/server";
  */
 export const startCall = mutation({
   args: {
-    conversationId: v.id("chatConversations"),
-    initiatorId: v.id("users"),
-    callType: v.union(v.literal("audio"), v.literal("video")),
+    conversationId: v.id('chatConversations'),
+    initiatorId: v.id('users'),
+    callType: v.union(v.literal('audio'), v.literal('video')),
   },
   handler: async (ctx, { conversationId, initiatorId, callType }) => {
     const conv = await ctx.db.get(conversationId);
-    if (!conv) throw new Error("Conversation not found");
+    if (!conv) throw new Error('Conversation not found');
 
     const initiator = await ctx.db.get(initiatorId);
-    if (!initiator) throw new Error("Initiator not found");
+    if (!initiator) throw new Error('Initiator not found');
 
     const now = Date.now();
-    const callId = await ctx.db.insert("chatMessages", {
+    const callId = await ctx.db.insert('chatMessages', {
       conversationId,
       organizationId: conv.organizationId,
       senderId: initiatorId,
-      type: "call",
+      type: 'call',
       content: `${initiator.name} started a ${callType} call`,
       callType,
-      callStatus: "missed", // Will be updated when answered
+      callStatus: 'missed', // Will be updated when answered
       createdAt: now,
     });
 
     // Set initiator status to "in_call"
-    await ctx.db.patch(initiatorId, { presenceStatus: "in_call" });
+    await ctx.db.patch(initiatorId, { presenceStatus: 'in_call' });
 
     return { callId, conversationId };
   },
@@ -46,21 +47,21 @@ export const startCall = mutation({
  */
 export const answerCall = mutation({
   args: {
-    callMessageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    callMessageId: v.id('chatMessages'),
+    userId: v.id('users'),
   },
   handler: async (ctx, { callMessageId, userId }) => {
     const call = await ctx.db.get(callMessageId);
-    if (!call) throw new Error("Call not found");
+    if (!call) throw new Error('Call not found');
 
     // Update call status to answered
     await ctx.db.patch(callMessageId, {
-      callStatus: "answered",
+      callStatus: 'answered',
       content: `Call answered`,
     });
 
     // Set user status to "in_call"
-    await ctx.db.patch(userId, { presenceStatus: "in_call" });
+    await ctx.db.patch(userId, { presenceStatus: 'in_call' });
 
     return callMessageId;
   },
@@ -71,13 +72,13 @@ export const answerCall = mutation({
  */
 export const endCall = mutation({
   args: {
-    callMessageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    callMessageId: v.id('chatMessages'),
+    userId: v.id('users'),
     duration: v.optional(v.number()),
   },
   handler: async (ctx, { callMessageId, userId, duration }) => {
     const call = await ctx.db.get(callMessageId);
-    if (!call) throw new Error("Call not found");
+    if (!call) throw new Error('Call not found');
 
     // Update call with duration
     const patch: Record<string, any> = {
@@ -88,7 +89,7 @@ export const endCall = mutation({
     await ctx.db.patch(callMessageId, patch);
 
     // Reset user status to "available"
-    await ctx.db.patch(userId, { presenceStatus: "available" });
+    await ctx.db.patch(userId, { presenceStatus: 'available' });
 
     return callMessageId;
   },
@@ -99,20 +100,20 @@ export const endCall = mutation({
  */
 export const declineCall = mutation({
   args: {
-    callMessageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    callMessageId: v.id('chatMessages'),
+    userId: v.id('users'),
   },
   handler: async (ctx, { callMessageId, userId }) => {
     const call = await ctx.db.get(callMessageId);
-    if (!call) throw new Error("Call not found");
+    if (!call) throw new Error('Call not found');
 
     await ctx.db.patch(callMessageId, {
-      callStatus: "declined",
+      callStatus: 'declined',
       content: `Call declined`,
     });
 
     // Reset initiator status
-    await ctx.db.patch(call.senderId, { presenceStatus: "available" });
+    await ctx.db.patch(call.senderId, { presenceStatus: 'available' });
 
     return callMessageId;
   },
@@ -123,18 +124,18 @@ export const declineCall = mutation({
  */
 export const getActiveCall = query({
   args: {
-    conversationId: v.id("chatConversations"),
+    conversationId: v.id('chatConversations'),
   },
   handler: async (ctx, { conversationId }) => {
     const messages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
-      .order("desc")
+      .query('chatMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', conversationId))
+      .order('desc')
       .take(5);
 
     // Find the most recent call message that's still active
     const activeCall = messages.find(
-      (m) => m.type === "call" && (m.callStatus === "answered" || m.callStatus === "missed")
+      (m) => m.type === 'call' && (m.callStatus === 'answered' || m.callStatus === 'missed'),
     );
 
     if (!activeCall) return null;
@@ -146,7 +147,7 @@ export const getActiveCall = query({
       conversationId,
       type: activeCall.callType,
       initiatorId: activeCall.senderId,
-      initiatorName: initiator?.name ?? "Unknown",
+      initiatorName: initiator?.name ?? 'Unknown',
       status: activeCall.callStatus,
       createdAt: activeCall.createdAt,
     };
@@ -158,26 +159,26 @@ export const getActiveCall = query({
  */
 export const getIncomingCalls = query({
   args: {
-    userId: v.id("users"),
-    organizationId: v.optional(v.id("organizations")),
+    userId: v.id('users'),
+    organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, { userId, organizationId }) => {
     // Get all conversations for this user
     const memberships = await ctx.db
-      .query("chatMembers")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+      .query('chatMembers')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .take(MAX_PAGE_SIZE);
 
     // Find active calls in these conversations
     for (const membership of memberships) {
       const messages = await ctx.db
-        .query("chatMessages")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", membership.conversationId))
-        .order("desc")
+        .query('chatMessages')
+        .withIndex('by_conversation', (q) => q.eq('conversationId', membership.conversationId))
+        .order('desc')
         .take(3);
 
       const incomingCall = messages.find(
-        (m) => m.type === "call" && m.senderId !== userId && m.callStatus === "missed"
+        (m) => m.type === 'call' && m.senderId !== userId && m.callStatus === 'missed',
       );
 
       if (incomingCall) {
@@ -187,7 +188,7 @@ export const getIncomingCalls = query({
           conversationId: incomingCall.conversationId,
           type: incomingCall.callType,
           initiatorId: incomingCall.senderId,
-          initiatorName: initiator?.name ?? "Unknown",
+          initiatorName: initiator?.name ?? 'Unknown',
           status: incomingCall.callStatus,
           createdAt: incomingCall.createdAt,
         };

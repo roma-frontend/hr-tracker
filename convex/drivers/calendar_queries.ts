@@ -6,6 +6,7 @@
 
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 /** Check calendar access permission */
 export const checkCalendarAccess = query({
@@ -46,7 +47,7 @@ export const getCalendarAccessList = query({
       .query('calendarAccess')
       .withIndex('by_owner', (q) => q.eq('ownerId', ownerId))
       .filter((q) => q.eq(q.field('isActive'), true))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Enrich with viewer info
     const enriched = await Promise.all(
@@ -106,7 +107,7 @@ export const getDriverCalendarForViewer = query({
       .filter((q) =>
         q.and(q.gte(q.field('startTime'), startTime), q.lte(q.field('startTime'), endTime)),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Filter based on access level
     if (access.accessLevel === 'busy_only') {

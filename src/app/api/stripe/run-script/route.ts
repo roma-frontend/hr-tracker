@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const ALLOWED_SCRIPTS = [
   'stripe:view',
@@ -47,7 +48,7 @@ async function verifySuperadmin(): Promise<{ userId: string; role: string } | nu
   }
 }
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   // Require superadmin authentication
   const user = await verifySuperadmin();
   if (!user) {
@@ -90,4 +91,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
-}
+});

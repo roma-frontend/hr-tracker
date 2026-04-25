@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createGroq } from '@ai-sdk/groq';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
@@ -329,7 +330,8 @@ function parseAIResponseForFileChanges(
     while ((match = bareBlock.exec(response)) !== null) {
       const content = match[1];
       // Safety: reject truncated content
-      if (!content || content.includes('... [TRUNCATED]') || content.includes('[TRUNCATED]')) continue;
+      if (!content || content.includes('... [TRUNCATED]') || content.includes('[TRUNCATED]'))
+        continue;
       const filePath = fallbackFiles[0];
       if (filePath && isPathAllowed(filePath)) {
         changes.push({ filePath, content, description: 'AI Site Editor: Auto-applied changes' });
@@ -668,7 +670,7 @@ IMPORTANT: Only output FILE blocks for files that need to change. Do NOT rewrite
 
 // ─── POST handler ──────────────────────────────────────────────────────────────
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   try {
     console.log('[AI Site Editor] Request received');
 
@@ -832,4 +834,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
-}
+});

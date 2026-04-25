@@ -6,6 +6,7 @@
 
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 /** Block time slot (for driver) */
 export const blockTimeSlot = mutation({
@@ -99,6 +100,7 @@ export const submitDriverFeedback = mutation({
     if (schedule.driverId) {
       const driver = await ctx.db.get(schedule.driverId);
       if (driver) {
+        // NOTE: Using .collect() here because we need ALL ratings to calculate the driver's accurate average
         const allRatings = await ctx.db
           .query('passengerRatings')
           .withIndex('by_driver', (q) => q.eq('driverId', schedule.driverId))
@@ -218,6 +220,7 @@ export const submitPassengerRating = mutation({
 
     const driver = await ctx.db.get(args.driverId);
     if (driver) {
+      // NOTE: Using .collect() here because we need ALL ratings to calculate the driver's accurate average
       const allRatings = await ctx.db
         .query('passengerRatings')
         .withIndex('by_driver', (q) => q.eq('driverId', args.driverId))

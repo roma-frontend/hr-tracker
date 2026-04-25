@@ -13,10 +13,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   try {
     const {
       userId,
@@ -124,7 +125,7 @@ export async function POST(req: NextRequest) {
     console.error('[create-task] Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to create task' }, { status: 500 });
   }
-}
+});
 
 /**
  * GET endpoint for quick task conflict check

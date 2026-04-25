@@ -16,6 +16,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -151,7 +152,7 @@ export const checkConflictsForRequest = query({
       const events = await ctx.db
         .query('companyEvents')
         .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-        .collect();
+        .take(MAX_PAGE_SIZE);
 
       for (const event of events) {
         const overlaps = args.startDate <= event.endDate && args.endDate >= event.startDate;
@@ -205,7 +206,7 @@ export const checkConflictsForRequest = query({
         const existingTrips = await ctx.db
           .query('driverSchedules')
           .withIndex('by_driver', (q) => q.eq('driverId', driverId))
-          .collect();
+          .take(MAX_PAGE_SIZE);
 
         for (const trip of existingTrips) {
           const overlaps = args.startDate <= trip.endTime && args.endDate >= trip.startTime;
@@ -239,7 +240,7 @@ export const checkConflictsForRequest = query({
         const leaveRequests = await ctx.db
           .query('leaveRequests')
           .withIndex('by_user', (q) => q.eq('userId', assigneeId))
-          .collect();
+          .take(MAX_PAGE_SIZE);
 
         for (const leave of leaveRequests) {
           const overlaps =
@@ -291,13 +292,13 @@ async function detectLeaveEventConflicts(
   const events = await ctx.db
     .query('companyEvents')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .collect();
+    .take(MAX_PAGE_SIZE);
 
   // Получаем все одобренные отпуска в периоде
   const leaves = await ctx.db
     .query('leaveRequests')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .collect();
+    .take(MAX_PAGE_SIZE);
 
   const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
@@ -364,13 +365,13 @@ async function detectDepartmentConflicts(
   const users = await ctx.db
     .query('users')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .collect();
+    .take(MAX_PAGE_SIZE);
 
   // Получаем все одобренные отпуска
   const leaves = await ctx.db
     .query('leaveRequests')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .collect();
+    .take(MAX_PAGE_SIZE);
 
   const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
@@ -477,7 +478,7 @@ async function detectDriverConflicts(
   const schedules = await ctx.db
     .query('driverSchedules')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .collect();
+    .take(MAX_PAGE_SIZE);
 
   const activeSchedules = schedules.filter(
     (s: any) => s.status === 'approved' || s.status === 'pending',
@@ -540,7 +541,7 @@ async function detectTaskConflicts(
   const tasks = await ctx.db
     .query('tasks')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .collect();
+    .take(MAX_PAGE_SIZE);
 
   const activeTasks = tasks.filter(
     (t: any) => t.status !== 'completed' && t.status !== 'cancelled',
@@ -550,7 +551,7 @@ async function detectTaskConflicts(
   const leaves = await ctx.db
     .query('leaveRequests')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .collect();
+    .take(MAX_PAGE_SIZE);
 
   const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 

@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import bcrypt from 'bcryptjs';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ── Password Hashing Helpers ─────────────────────────────────────────────────
 const BCRYPT_ROUNDS = 12;
@@ -164,6 +165,7 @@ export const register = mutation({
         isApproved = true;
 
         // Superadmin must have an org (even a virtual one) — find or create
+        // NOTE: Using .collect() here because we need to check if any organizations exist for bootstrap
         const allOrgs = await ctx.db.query('organizations').collect();
         if (allOrgs.length === 0) {
           // Bootstrap: create the first platform organization
@@ -236,6 +238,7 @@ export const register = mutation({
         if (!org || !org.isActive) throw new Error('Organization is inactive or not found');
 
         // Check employee limit
+        // NOTE: Using .collect() here because we need an accurate count of all active members
         const currentMembers = await ctx.db
           .query('users')
           .withIndex('by_org_active', (q) =>
@@ -249,6 +252,7 @@ export const register = mutation({
         }
 
         // Check if first member of the org → becomes admin
+        // NOTE: Using .collect() here because we need an accurate count to determine first member
         const orgMembers = await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', organizationId!))
@@ -290,6 +294,7 @@ export const register = mutation({
       // ── 4. Notify org admins if user needs approval ────────────────────────
       if (!isApproved) {
         const org = await ctx.db.get(organizationId);
+        // NOTE: Using .collect() here because we need to notify ALL admins
         const admins = await ctx.db
           .query('users')
           .withIndex('by_org_role', (q) =>
@@ -723,6 +728,7 @@ export const googleOAuthLogin = mutation({
     }
 
     // ── 2. New user — create account ───────────────────────────────────────
+    // NOTE: Using .collect() here because we need to find an active organization for bootstrap
     const allOrgs = await ctx.db
       .query('organizations')
       .filter((q) => q.eq(q.field('isActive'), true))
@@ -738,6 +744,7 @@ export const googleOAuthLogin = mutation({
     const organizationId = org._id;
 
     // Check if first member → admin
+    // NOTE: Using .collect() here because we need to count ALL members to determine if this is the first user (admin bootstrap logic)
     const orgMembers = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
@@ -770,6 +777,7 @@ export const googleOAuthLogin = mutation({
 
     // Notify admins if needs approval
     if (!isApproved) {
+      // NOTE: Using .collect() here because we must notify ALL admins of a new user registration; truncating would miss recipients
       const admins = await ctx.db
         .query('users')
         .withIndex('by_org_role', (q) => q.eq('organizationId', organizationId).eq('role', 'admin'))

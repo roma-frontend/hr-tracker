@@ -6,6 +6,7 @@
 
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
@@ -68,9 +69,6 @@ export const requestDriver = mutation({
     const endDate = new Date(args.endTime);
     const startDateStr = startDate.toISOString().split('T')[0] || '';
     const endDateStr = endDate.toISOString().split('T')[0] || '';
-
-
-
 
     const driver = await ctx.db.get(args.driverId);
     let leaveError = null;
@@ -174,6 +172,7 @@ export const requestDriver = mutation({
 
     // If requires approval, notify managers
     if (args.requiresApproval) {
+      // NOTE: Using .collect() here because we need to notify ALL admins of a trip request requiring approval
       const admins = await ctx.db
         .query('users')
         .withIndex('by_org_role', (q) =>

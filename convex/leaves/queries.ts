@@ -1,7 +1,13 @@
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
-import { paginationArgs, normalizePageSize, decodeCursor, encodeCursor } from '../pagination';
+import {
+  paginationArgs,
+  normalizePageSize,
+  decodeCursor,
+  encodeCursor,
+  MAX_PAGE_SIZE,
+} from '../pagination';
 import { enrichLeavesWithUserData, SUPERADMIN_EMAIL } from './helpers';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,7 +26,7 @@ export const getAllLeaves = query({
         .query('leaveRequests')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
         .order('desc')
-        .collect();
+        .take(MAX_PAGE_SIZE);
 
       return enrichLeavesWithUserData(ctx, leaves);
     }
@@ -34,7 +40,7 @@ export const getAllLeaves = query({
     // Superadmin sees all leaves across all organizations
     let leaves;
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      leaves = await ctx.db.query('leaveRequests').order('desc').collect();
+      leaves = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
     } else {
       // User without organization — return empty array (needs onboarding)
       if (!requester.organizationId) return [];
@@ -42,7 +48,7 @@ export const getAllLeaves = query({
         .query('leaveRequests')
         .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
         .order('desc')
-        .collect();
+        .take(MAX_PAGE_SIZE);
     }
 
     return enrichLeavesWithUserData(ctx, leaves);
@@ -60,7 +66,7 @@ export const getLeavesForOrganization = query({
       .query('leaveRequests')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .order('desc')
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     return enrichLeavesWithUserData(ctx, leaves);
   },
@@ -76,7 +82,7 @@ export const getUserLeaves = query({
       .query('leaveRequests')
       .withIndex('by_user', (q) => q.eq('userId', userId))
       .order('desc')
-      .collect();
+      .take(MAX_PAGE_SIZE);
   },
 });
 
@@ -96,7 +102,8 @@ export const getPendingLeaves = query({
       leaves = await ctx.db
         .query('leaveRequests')
         .filter((q) => q.eq(q.field('status'), 'pending'))
-        .collect();
+        .order('desc')
+        .take(MAX_PAGE_SIZE);
     } else {
       if (!requester.organizationId) throw new Error('User does not belong to an organization');
       leaves = await ctx.db
@@ -104,7 +111,7 @@ export const getPendingLeaves = query({
         .withIndex('by_org_status', (q) =>
           q.eq('organizationId', requester.organizationId).eq('status', 'pending'),
         )
-        .collect();
+        .take(MAX_PAGE_SIZE);
     }
 
     return enrichLeavesWithUserData(ctx, leaves, false); // Don't need reviewer for pending
@@ -123,13 +130,13 @@ export const getLeaveStats = query({
     // Superadmin sees stats across all organizations
     let all;
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      all = await ctx.db.query('leaveRequests').collect();
+      all = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
     } else {
       if (!requester.organizationId) throw new Error('User does not belong to an organization');
       all = await ctx.db
         .query('leaveRequests')
         .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
-        .collect();
+        .take(MAX_PAGE_SIZE);
     }
 
     const pending = all.filter((l) => l.status === 'pending').length;
@@ -156,7 +163,7 @@ export const getUnreadCount = query({
     // Superadmin sees all unread across all organizations
     let unread: number;
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      const allLeaves = await ctx.db.query('leaveRequests').collect();
+      const allLeaves = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
       // Treat missing isRead as false (old records before field was added)
       unread = allLeaves.filter(
         (l) => (l.isRead === false || l.isRead === undefined) && l.status === 'pending',
@@ -166,7 +173,7 @@ export const getUnreadCount = query({
       const orgLeaves = await ctx.db
         .query('leaveRequests')
         .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
-        .collect();
+        .take(MAX_PAGE_SIZE);
       // Treat missing isRead as false (old records before field was added)
       unread = orgLeaves.filter(
         (l) => (l.isRead === false || l.isRead === undefined) && l.status === 'pending',

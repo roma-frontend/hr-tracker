@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import { Id } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─── USER 360 PROFILE ────────────────────────────────────────────────────────
 /**
@@ -29,19 +30,19 @@ export const getUser360 = query({
       ctx.db
         .query('leaveRequests')
         .withIndex('by_user', (q) => q.eq('userId', args.userId))
-        .collect(),
+        .take(MAX_PAGE_SIZE),
 
       // Tasks (assigned to user)
       ctx.db
         .query('tasks')
         .filter((q) => q.eq(q.field('assignedTo'), args.userId))
-        .collect(),
+        .take(MAX_PAGE_SIZE),
 
       // Driver requests
       ctx.db
         .query('driverRequests')
         .withIndex('by_requester', (q) => q.eq('requesterId', args.userId))
-        .collect(),
+        .take(MAX_PAGE_SIZE),
 
       // Notifications (last 50)
       ctx.db
@@ -63,13 +64,13 @@ export const getUser360 = query({
         .filter((q) =>
           q.or(q.eq(q.field('createdBy'), args.userId), q.eq(q.field('assignedTo'), args.userId)),
         )
-        .collect(),
+        .take(MAX_PAGE_SIZE),
 
       // Ticket comments
       ctx.db
         .query('ticketComments')
         .filter((q) => q.eq(q.field('authorId'), args.userId))
-        .collect(),
+        .take(MAX_PAGE_SIZE),
 
       // Chat messages (last 100)
       ctx.db

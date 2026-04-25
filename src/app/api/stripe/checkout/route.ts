@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { isValidEmail } from '@/lib/stripe-config';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -14,7 +15,7 @@ const PLANS: Record<string, { priceId: string; name: string }> = {
   enterprise: { priceId: process.env.STRIPE_PRICE_ENTERPRISE!, name: 'Enterprise' },
 };
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   const stripe = getStripe();
   if (!stripe) {
     return NextResponse.json(
@@ -77,4 +78,4 @@ export async function POST(req: NextRequest) {
     console.error('[Stripe Checkout]', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});

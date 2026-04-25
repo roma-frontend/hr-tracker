@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import type { Id, Doc } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
@@ -55,7 +56,7 @@ export const getAllUsers = query({
 
     // Superadmin sees all users across all orgs (with org info)
     if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      let query = ctx.db.query('users');
+      let query = ctx.db.query('users').order('desc');
       if (cursor) {
         query = (query as any).startAfter(cursor);
       }
@@ -151,7 +152,7 @@ export const getCurrentUser = query({
     // Get organization data
     let organizationSlug: string | undefined;
     let organizationName: string | undefined;
-    
+
     if (user.organizationId) {
       const org = await ctx.db.get(user.organizationId);
       if (org) {
@@ -241,12 +242,12 @@ export const getSupervisors = query({
     const supervisors = await ctx.db
       .query('users')
       .withIndex('by_org_role', (q) => q.eq('organizationId', targetOrgId).eq('role', 'supervisor'))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const admins = await ctx.db
       .query('users')
       .withIndex('by_org_role', (q) => q.eq('organizationId', targetOrgId).eq('role', 'admin'))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     return [...supervisors, ...admins]
       .filter((u) => u.isActive)
@@ -273,7 +274,7 @@ export const getUsersByRole = query({
       .query('users')
       .withIndex('by_org_role', (q) => q.eq('organizationId', organizationId).eq('role', role))
       .filter((q) => q.eq(q.field('isActive'), true))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     return users.map((u) => ({
       _id: u._id,
@@ -299,7 +300,7 @@ export const getPendingApprovalUsers = query({
 
     // Superadmin sees all pending users across all orgs
     if (admin.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      const allUsers = await ctx.db.query('users').collect();
+      const allUsers = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
       return allUsers.filter((u) => !u.isApproved);
     }
 
@@ -310,7 +311,7 @@ export const getPendingApprovalUsers = query({
       .withIndex('by_org_approval', (q) =>
         q.eq('organizationId', admin.organizationId).eq('isApproved', false),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
   },
 });
 
@@ -347,7 +348,7 @@ export const getEffectivePresenceStatus = query({
       .query('leaveRequests')
       .withIndex('by_user', (q) => q.eq('userId', userId))
       .filter((q) => q.eq(q.field('status'), 'approved'))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Check if any leave is active today
     const today = new Date().toISOString().split('T')[0] || '';
@@ -377,7 +378,7 @@ export const getWebauthnCredentials = query({
     return await ctx.db
       .query('webauthnCredentials')
       .withIndex('by_user', (q) => q.eq('userId', userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
   },
 });
 
@@ -435,7 +436,7 @@ export const listAll = query({
 
     // Superadmin sees all users across all organizations
     if (currentUser.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      return await ctx.db.query('users').collect();
+      return await ctx.db.query('users').take(MAX_PAGE_SIZE);
     }
 
     // Admin sees only users from their organization
@@ -445,7 +446,7 @@ export const listAll = query({
       return await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', currentUser.organizationId))
-        .collect();
+        .take(MAX_PAGE_SIZE);
     }
 
     return [];

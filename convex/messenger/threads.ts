@@ -1,27 +1,28 @@
-import { v } from "convex/values";
-import { mutation, query } from "../_generated/server";
-import type { Id } from "../_generated/dataModel";
+import { v } from 'convex/values';
+import { mutation, query } from '../_generated/server';
+import type { Id } from '../_generated/dataModel';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEND THREAD REPLY
 // ─────────────────────────────────────────────────────────────────────────────
 export const sendThreadReply = mutation({
   args: {
-    parentMessageId: v.id("chatMessages"),
-    conversationId: v.id("chatConversations"),
-    senderId: v.id("users"),
+    parentMessageId: v.id('chatMessages'),
+    conversationId: v.id('chatConversations'),
+    senderId: v.id('users'),
     content: v.string(),
   },
   handler: async (ctx, args) => {
     const conv = await ctx.db.get(args.conversationId);
-    if (!conv) throw new Error("Conversation not found");
+    if (!conv) throw new Error('Conversation not found');
 
     const now = Date.now();
-    const replyId = await ctx.db.insert("chatMessages", {
+    const replyId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: conv.organizationId,
       senderId: args.senderId,
-      type: "text",
+      type: 'text',
       content: args.content,
       parentMessageId: args.parentMessageId,
       createdAt: now,
@@ -38,7 +39,7 @@ export const sendThreadReply = mutation({
     const sender = await ctx.db.get(args.senderId);
     await ctx.db.patch(args.conversationId, {
       lastMessageAt: now,
-      lastMessageText: `${sender?.name ?? "Someone"}: ${args.content.slice(0, 60)}`,
+      lastMessageText: `${sender?.name ?? 'Someone'}: ${args.content.slice(0, 60)}`,
       lastMessageSenderId: args.senderId,
       updatedAt: now,
     });
@@ -51,13 +52,13 @@ export const sendThreadReply = mutation({
 // GET THREAD REPLIES
 // ─────────────────────────────────────────────────────────────────────────────
 export const getThreadReplies = query({
-  args: { parentMessageId: v.id("chatMessages") },
+  args: { parentMessageId: v.id('chatMessages') },
   handler: async (ctx, args) => {
     const replies = await ctx.db
-      .query("chatMessages")
-      .filter((q) => q.eq(q.field("parentMessageId"), args.parentMessageId))
-      .order("asc")
-      .collect();
+      .query('chatMessages')
+      .filter((q) => q.eq(q.field('parentMessageId'), args.parentMessageId))
+      .order('asc')
+      .take(MAX_PAGE_SIZE);
 
     return Promise.all(
       replies
@@ -66,10 +67,10 @@ export const getThreadReplies = query({
           const sender = await ctx.db.get(r.senderId);
           return {
             ...r,
-            senderName: sender?.name ?? "Unknown",
+            senderName: sender?.name ?? 'Unknown',
             senderAvatarUrl: sender?.avatarUrl,
           };
-        })
+        }),
     );
   },
 });
@@ -79,8 +80,8 @@ export const getThreadReplies = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const pinMessage = mutation({
   args: {
-    messageId: v.id("chatMessages"),
-    userId: v.id("users"),
+    messageId: v.id('chatMessages'),
+    userId: v.id('users'),
     pin: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -96,14 +97,14 @@ export const pinMessage = mutation({
 // GET PINNED MESSAGES
 // ─────────────────────────────────────────────────────────────────────────────
 export const getPinnedMessages = query({
-  args: { conversationId: v.id("chatConversations") },
+  args: { conversationId: v.id('chatConversations') },
   handler: async (ctx, args) => {
     const messages = await ctx.db
-      .query("chatMessages")
-      .withIndex("by_pinned", (q) =>
-        q.eq("conversationId", args.conversationId).eq("isPinned", true)
+      .query('chatMessages')
+      .withIndex('by_pinned', (q) =>
+        q.eq('conversationId', args.conversationId).eq('isPinned', true),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     return Promise.all(
       messages
@@ -112,10 +113,10 @@ export const getPinnedMessages = query({
           const sender = await ctx.db.get(msg.senderId);
           return {
             ...msg,
-            senderName: sender?.name ?? "Unknown",
+            senderName: sender?.name ?? 'Unknown',
             senderAvatarUrl: sender?.avatarUrl,
           };
-        })
+        }),
     );
   },
 });

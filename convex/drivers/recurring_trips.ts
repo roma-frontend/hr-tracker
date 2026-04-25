@@ -6,6 +6,7 @@
 
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 /** Create a recurring trip template */
 export const createRecurringTrip = mutation({
@@ -50,7 +51,7 @@ export const getRecurringTrips = query({
     const trips = await ctx.db
       .query('recurringTrips')
       .withIndex('by_user', (q) => q.eq('userId', userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const enriched = await Promise.all(
       trips.map(async (trip) => {
@@ -106,6 +107,7 @@ export const generateRecurringRequests = mutation({
     const dayOfWeek = today.getDay();
     const todayStr = today.toISOString().slice(0, 10);
 
+    // NOTE: Using .collect() here because we need to generate trips from ALL active recurring templates
     const recurringTrips = await ctx.db
       .query('recurringTrips')
       .withIndex('by_org_active', (q) =>

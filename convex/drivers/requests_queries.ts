@@ -6,6 +6,7 @@
 
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
+import { MAX_PAGE_SIZE } from '../pagination';
 
 /** Get pending driver requests for a driver */
 export const getDriverRequests = query({
@@ -28,12 +29,12 @@ export const getDriverRequests = query({
         .query('driverRequests')
         .withIndex('by_driver', (q) => q.eq('driverId', driverId))
         .filter((q) => q.eq(q.field('status'), status))
-        .collect();
+        .take(MAX_PAGE_SIZE);
     } else {
       requests = await ctx.db
         .query('driverRequests')
         .withIndex('by_driver', (q) => q.eq('driverId', driverId))
-        .collect();
+        .take(MAX_PAGE_SIZE);
     }
 
     // Enrich with requester info
@@ -112,7 +113,7 @@ export const getCompletedTrips = query({
       .query('driverRequests')
       .withIndex('by_requester', (q) => q.eq('requesterId', userId))
       .order('desc')
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Filter to approved requests where trip is completed
     const completedRequests = [];
@@ -190,7 +191,7 @@ export const getRecurringTrips = query({
     let trips = await ctx.db
       .query('recurringTrips')
       .withIndex('by_user', (q) => q.eq('userId', userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     if (activeOnly) {
       trips = trips.filter((t) => t.isActive);
@@ -223,7 +224,7 @@ export const getFavoriteDrivers = query({
     const favorites = await ctx.db
       .query('favoriteDrivers')
       .withIndex('by_user', (q) => q.eq('userId', userId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     // Enrich with driver info
     const enriched = await Promise.all(
@@ -306,7 +307,7 @@ export const getDriverStats = query({
           q.neq(q.field('status'), 'cancelled'),
         ),
       )
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const completedTrips = trips.filter((t) => t.status === 'completed').length;
     const totalWorkedMinutes = trips.reduce((sum, t) => {
@@ -371,7 +372,7 @@ export const getShiftStatistics = query({
       .query('driverShifts')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .filter((q) => q.gte(q.field('startTime'), startTime))
-      .collect();
+      .take(MAX_PAGE_SIZE);
 
     const totalShifts = shifts.length;
     const completedShifts = shifts.filter((s) => s.status === 'completed').length;
