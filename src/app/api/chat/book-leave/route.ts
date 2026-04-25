@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-export async function POST(req: Request) {
+export const POST = withCsrfProtection(async (req: Request) => {
   try {
     const { userId, organizationId, type, startDate, endDate, days, reason } = await req.json();
 
@@ -132,7 +133,7 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
-}
+});
 
 /**
  * Build human-readable conflict message for AI

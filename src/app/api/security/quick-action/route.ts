@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -9,7 +10,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
  * Quick Security Action API
  * Allows superadmin to quickly suspend/unsuspend users from notifications
  */
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   try {
     const { action, userId, adminId, reason, duration } = await req.json();
 
@@ -67,4 +68,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
-}
+});

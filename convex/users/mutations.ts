@@ -1,20 +1,8 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
-import type { Doc, Id } from '../_generated/dataModel';
-import type { QueryCtx, MutationCtx } from '../_generated/server';
-
-const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
-
-// ── Security helpers ──────────────────────────────────────────────────────────
-/** Verify caller has admin/superadmin role and return their organizationId */
-async function requireAdmin(ctx: QueryCtx, adminId: Id<'users'>) {
-  const admin = (await ctx.db.get(adminId)) as Doc<'users'> | null;
-  if (!admin) throw new Error('Admin not found');
-  if (admin.role !== 'admin' && admin.role !== 'superadmin') {
-    throw new Error('Only org admins can perform this action');
-  }
-  return admin;
-}
+import type { Id } from '../_generated/dataModel';
+import { requireRole, requireOrgAdmin, requireUser } from '../lib/rbac';
+import { isSuperadminEmail } from '../lib/auth';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CREATE USER (admin only) — auto-scoped to admin's org
@@ -39,10 +27,9 @@ export const createUser = mutation({
     organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, { adminId, organizationId, ...args }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && admin.email.toLowerCase() !== SUPERADMIN_EMAIL)) {
-      throw new Error('Only org admins can create users');
-    }
+    // RBAC: require org admin access (superadmin can create in any org)
+    const caller = await requireUser(ctx, adminId);
+    const isSuperadmin = isSuperadminEmail(caller.email);
 
     const email = args.email.toLowerCase().trim();
 
@@ -54,8 +41,7 @@ export const createUser = mutation({
     if (existing) throw new Error('A user with this email already exists');
 
     // Determine target organization:
-    const isSuperadmin = admin.email.toLowerCase() === SUPERADMIN_EMAIL;
-    const targetOrgId = organizationId || (isSuperadmin ? null : admin.organizationId);
+    const targetOrgId = organizationId || (isSuperadmin ? null : caller.organizationId);
 
     if (!targetOrgId) {
       throw new Error(
@@ -63,6 +49,11 @@ export const createUser = mutation({
           ? 'Superadmin must specify an organization when creating users'
           : 'Admin must belong to an organization',
       );
+    }
+
+    // RBAC: verify caller has admin access to the target org
+    if (!isSuperadmin) {
+      await requireOrgAdmin(ctx, adminId, targetOrgId);
     }
 
     const org = await ctx.db.get(targetOrgId);
@@ -156,20 +147,16 @@ export const updateUser = mutation({
     familyLeaveBalance: v.optional(v.number()),
   },
   handler: async (ctx, { adminId, userId, ...updates }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && admin.email.toLowerCase() !== SUPERADMIN_EMAIL)) {
-      throw new Error('Only org admins can update users');
-    }
+    // RBAC: require org admin access
+    const caller = await requireUser(ctx, adminId);
+    const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
-    // Verify same organization
-    if (
-      admin.organizationId !== user.organizationId &&
-      admin.email.toLowerCase() !== SUPERADMIN_EMAIL
-    ) {
-      throw new Error('Access denied: cannot update users from another organization');
+    // RBAC: verify same organization (superadmin can update any org)
+    if (!isSuperadmin) {
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     const employeeType = updates.employeeType ?? user.employeeType;
@@ -189,37 +176,29 @@ export const deleteUser = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, { adminId, userId }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && admin.email.toLowerCase() !== SUPERADMIN_EMAIL)) {
-      throw new Error('Only org admins can delete users');
-    }
+    // RBAC: require org admin access
+    const caller = await requireUser(ctx, adminId);
+    const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
-    // Cross-org protection
-    if (
-      admin.organizationId !== user.organizationId &&
-      admin.email.toLowerCase() !== SUPERADMIN_EMAIL
-    ) {
-      throw new Error('Access denied: cannot delete users from another organization');
+    // RBAC: cross-org protection (superadmin can delete from any org)
+    if (!isSuperadmin) {
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     // Protect superadmin
-    if (user.role === 'superadmin' && admin.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+    if (user.role === 'superadmin' && !isSuperadmin) {
       throw new Error('Only superadmin can deactivate superadmin account');
     }
 
     // Protect other admins
-    if (
-      user.role === 'admin' &&
-      admin.role === 'admin' &&
-      admin.email.toLowerCase() !== user.email.toLowerCase()
-    ) {
+    if (user.role === 'admin' && caller.role === 'admin' && !isSuperadmin) {
       throw new Error('Only superadmin can deactivate admin accounts');
     }
 
-    if (user.role === 'admin' && user.email.toLowerCase() === admin.email.toLowerCase()) {
+    if (user.role === 'admin' && user.email.toLowerCase() === caller.email.toLowerCase()) {
       throw new Error('Cannot delete your own admin account');
     }
 
@@ -237,21 +216,11 @@ export const hardDeleteUser = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, { adminId, userId }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && admin.email.toLowerCase() !== SUPERADMIN_EMAIL)) {
-      throw new Error('Only org admins can delete users');
-    }
+    // RBAC: require superadmin role
+    await requireRole(ctx, adminId, 'superadmin');
 
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
-
-    // Cross-org protection
-    if (
-      admin.organizationId !== user.organizationId &&
-      admin.email.toLowerCase() !== SUPERADMIN_EMAIL
-    ) {
-      throw new Error('Access denied: cannot delete users from another organization');
-    }
 
     // Hard delete - remove from database completely
     await ctx.db.delete(userId);
@@ -268,19 +237,16 @@ export const approveUser = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, { adminId, userId }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && admin.email.toLowerCase() !== SUPERADMIN_EMAIL)) {
-      throw new Error('Only org admins can approve users');
-    }
+    // RBAC: require org admin access
+    const caller = await requireUser(ctx, adminId);
+    const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
-    if (
-      admin.organizationId !== user.organizationId &&
-      admin.email.toLowerCase() !== SUPERADMIN_EMAIL
-    ) {
-      throw new Error('Access denied: cross-organization operation');
+    // RBAC: cross-org protection
+    if (!isSuperadmin) {
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     if (user.isApproved) throw new Error('User already approved');
@@ -289,6 +255,8 @@ export const approveUser = mutation({
     if (user.organizationId) {
       org = await ctx.db.get(user.organizationId);
     }
+
+    const callerUser = await ctx.db.get(adminId);
 
     await ctx.db.patch(userId, {
       isApproved: true,
@@ -301,7 +269,7 @@ export const approveUser = mutation({
       userId,
       type: 'join_approved',
       title: '✅ Account Approved',
-      message: `Your account has been approved by ${admin.name}. Welcome to ${org?.name ?? 'the team'}!`,
+      message: `Your account has been approved by ${callerUser?.name ?? 'admin'}. Welcome to ${org?.name ?? 'the team'}!`,
       isRead: false,
       createdAt: Date.now(),
     });
@@ -319,19 +287,16 @@ export const rejectUser = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, { adminId, userId }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && admin.email.toLowerCase() !== SUPERADMIN_EMAIL)) {
-      throw new Error('Only org admins can reject users');
-    }
+    // RBAC: require org admin access
+    const caller = await requireUser(ctx, adminId);
+    const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
-    if (
-      admin.organizationId !== user.organizationId &&
-      admin.email.toLowerCase() !== SUPERADMIN_EMAIL
-    ) {
-      throw new Error('Access denied: cross-organization operation');
+    // RBAC: cross-org protection
+    if (!isSuperadmin) {
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     await ctx.db.delete(userId);
@@ -368,6 +333,9 @@ export const updateOwnProfile = mutation({
     compactMode: v.optional(v.boolean()),
   },
   handler: async (ctx, { userId, ...updates }) => {
+    // RBAC: verify ownership
+    await requireUser(ctx, userId);
+
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
@@ -391,7 +359,10 @@ export const updatePresenceStatus = mutation({
     ),
     outOfOfficeMessage: v.optional(v.string()),
   },
-  handler: async (ctx, { userId, presenceStatus, outOfOfficeMessage }) => {
+  handler: async (ctx, { userId, presenceStatus, outOfOfficeMessage: _outOfOfficeMessage }) => {
+    // RBAC: verify ownership
+    await requireUser(ctx, userId);
+
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
@@ -411,6 +382,9 @@ export const updatePresenceStatus = mutation({
 export const updateAvatar = mutation({
   args: { userId: v.id('users'), avatarUrl: v.string() },
   handler: async (ctx, { userId, avatarUrl }) => {
+    // RBAC: verify ownership
+    await requireUser(ctx, userId);
+
     await ctx.db.patch(userId, { avatarUrl });
     return userId;
   },
@@ -422,6 +396,9 @@ export const updateAvatar = mutation({
 export const deleteAvatar = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
+    // RBAC: verify ownership
+    await requireUser(ctx, userId);
+
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
@@ -442,6 +419,9 @@ export const setInCallStatus = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, { userId }) => {
+    // RBAC: verify ownership
+    await requireUser(ctx, userId);
+
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 
@@ -465,6 +445,9 @@ export const resetFromCallStatus = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, { userId }) => {
+    // RBAC: verify ownership
+    await requireUser(ctx, userId);
+
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
 

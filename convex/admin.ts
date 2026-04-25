@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { requireRole } from './lib/rbac';
 
 /**
  * Get cost analysis data for admin dashboard
@@ -340,11 +341,7 @@ export const sendServiceBroadcast = mutation({
     scheduledFor: v.optional(v.number()), // optional timestamp for scheduling
   },
   handler: async (ctx, args) => {
-    // Verify user is superadmin
-    const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== 'superadmin') {
-      throw new Error('Only superadmin can send service broadcasts');
-    }
+    await requireRole(ctx, args.userId, 'superadmin');
     // Get or create the "System Announcements" group chat for this organization
     let announcementConv = await ctx.db
       .query('chatConversations')
@@ -618,11 +615,7 @@ export const enableMaintenanceMode = mutation({
     icon: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Verify user is superadmin
-    const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== 'superadmin') {
-      throw new Error('Only superadmin can enable maintenance mode');
-    }
+    await requireRole(ctx, args.userId, 'superadmin');
 
     const now = Date.now();
 
@@ -676,11 +669,7 @@ export const disableMaintenanceMode = mutation({
     userId: v.id('users'),
   },
   handler: async (ctx, args) => {
-    // Verify user is superadmin
-    const user = await ctx.db.get(args.userId);
-    if (!user || user.role !== 'superadmin') {
-      throw new Error('Only superadmin can disable maintenance mode');
-    }
+    await requireRole(ctx, args.userId, 'superadmin');
 
     const maintenance = await ctx.db
       .query('maintenanceMode')
@@ -726,11 +715,7 @@ export const assignUserAsOrgAdmin = mutation({
     organizationId: v.id('organizations'),
   },
   handler: async (ctx, args) => {
-    // Verify caller is superadmin
-    const superadmin = await ctx.db.get(args.superadminUserId);
-    if (!superadmin || superadmin.email.toLowerCase() !== 'romangulanyan@gmail.com') {
-      throw new Error('Only superadmin can assign organization admins');
-    }
+    await requireRole(ctx, args.superadminUserId, 'superadmin');
 
     // Find user by email
     const user = await ctx.db
@@ -846,7 +831,13 @@ export const getSuperadminDashboard = query({
 
       // Calculate revenue based on plan
       const monthlyRevenue =
-        subscription?.plan === 'starter' ? 29 : subscription?.plan === 'professional' ? 79 : subscription?.plan === 'enterprise' ? 199 : 0;
+        subscription?.plan === 'starter'
+          ? 29
+          : subscription?.plan === 'professional'
+            ? 79
+            : subscription?.plan === 'enterprise'
+              ? 199
+              : 0;
 
       // Calculate utilization
       const utilization =

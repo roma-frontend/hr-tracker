@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 // ─── Whitelist / Blacklist (дублируем для изоляции endpoint) ──────────────────
 
@@ -73,7 +74,7 @@ export async function GET(_req: NextRequest) {
 
 // ─── POST: ручное применение изменений (fallback) ─────────────────────────────
 
-export async function POST(req: NextRequest) {
+export const POST = withCsrfProtection(async (req: NextRequest) => {
   try {
     const body = await req.json();
     const { filePath, content, description } = body as {
@@ -136,11 +137,11 @@ export async function POST(req: NextRequest) {
     console.error('Error applying changes:', error);
     return NextResponse.json({ error: 'Failed to apply changes' }, { status: 500 });
   }
-}
+});
 
 // ─── DELETE: откат к backup по filePath + timestamp ───────────────────────────
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = withCsrfProtection(async (req: NextRequest) => {
   try {
     const body = await req.json();
     const { filePath, timestamp } = body as { filePath: string; timestamp: number };
@@ -208,4 +209,4 @@ export async function DELETE(req: NextRequest) {
     console.error('Error rolling back changes:', error);
     return NextResponse.json({ error: 'Failed to rollback changes' }, { status: 500 });
   }
-}
+});

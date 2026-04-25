@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { fetchMutation, fetchQuery } from 'convex/nextjs';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
-export async function POST(req: Request) {
+export const POST = withCsrfProtection(async (req: Request) => {
   try {
     const body = await req.json();
     const leaveId: string = body.leaveId ?? '';
@@ -21,7 +22,9 @@ export async function POST(req: Request) {
     const allLeaves = await fetchQuery(api.leaves.getAllLeaves, {
       requesterId: requesterId as any,
     });
-    const allUsers = await fetchQuery(api.users.queries.getAllUsers, { requesterId: requesterId as any });
+    const allUsers = await fetchQuery(api.users.queries.getAllUsers, {
+      requesterId: requesterId as any,
+    });
 
     // Find leave by ID first
     let targetLeave = (allLeaves as any[]).find((l: any) => l._id === leaveId);
@@ -88,4 +91,4 @@ export async function POST(req: Request) {
       message: error.message ?? 'Failed to delete leave',
     });
   }
-}
+});

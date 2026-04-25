@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
@@ -45,7 +46,7 @@ async function verifySuperadmin(): Promise<{ userId: string; role: string } | nu
   }
 }
 
-export async function POST() {
+export const POST = withCsrfProtection(async () => {
   // SECURITY: Require superadmin authentication
   const user = await verifySuperadmin();
   if (!user) {
@@ -64,4 +65,4 @@ export async function POST() {
       { status: 500 },
     );
   }
-}
+});
