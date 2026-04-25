@@ -10,11 +10,11 @@ import { useConvexAuthReady } from '@/lib/convex';
  */
 export function MaintenanceAutoLogout() {
   const isConvexReady = useConvexAuthReady();
+  useMaintenanceAutoLogout();
 
   if (!isConvexReady) {
     return null;
   }
 
-  useMaintenanceAutoLogout();
   return null;
 }

@@ -65,31 +65,31 @@ describe('Badge', () => {
     it('should apply bg-primary for default variant', () => {
       const { container } = render(<Badge variant="default">Test</Badge>);
       const badge = container.firstChild as HTMLElement;
-      expect(badge.className).toContain('bg-(--primary)');
+      expect(badge.className).toContain('bg-(--badge-primary-bg)');
     });
 
     it('should apply bg-success for success variant', () => {
       const { container } = render(<Badge variant="success">Success</Badge>);
       const badge = container.firstChild as HTMLElement;
-      expect(badge.className).toContain('bg-[var(--success)]');
+      expect(badge.className).toContain('bg-(--badge-success-bg)');
     });
 
     it('should apply bg-destructive for destructive variant', () => {
       const { container } = render(<Badge variant="destructive">Danger</Badge>);
       const badge = container.firstChild as HTMLElement;
-      expect(badge.className).toContain('bg-[var(--destructive)]');
+      expect(badge.className).toContain('bg-(--badge-danger-bg)');
     });
 
     it('should apply bg-warning for warning variant', () => {
       const { container } = render(<Badge variant="warning">Warning</Badge>);
       const badge = container.firstChild as HTMLElement;
-      expect(badge.className).toContain('bg-[var(--warning)]');
+      expect(badge.className).toContain('bg-(--badge-warning-bg)');
     });
 
     it('should apply bg-info for info variant', () => {
       const { container } = render(<Badge variant="info">Info</Badge>);
       const badge = container.firstChild as HTMLElement;
-      expect(badge.className).toContain('bg-[var(--info)]');
+      expect(badge.className).toContain('bg-(--badge-info-bg)');
     });
 
     it('should have border-transparent for default variant', () => {
@@ -107,31 +107,23 @@ describe('Badge', () => {
 
   describe('Accessibility', () => {
     it('should support aria-label', () => {
-      render(
-        <Badge aria-label="Status: active">Active</Badge>,
-      );
+      render(<Badge aria-label="Status: active">Active</Badge>);
       expect(screen.getByLabelText('Status: active')).toBeInTheDocument();
     });
 
     it('should support role attribute', () => {
-      render(
-        <Badge role="status">Loading</Badge>,
-      );
+      render(<Badge role="status">Loading</Badge>);
       expect(screen.getByRole('status')).toBeInTheDocument();
     });
 
     it('should support aria-hidden', () => {
-      render(
-        <Badge aria-hidden="true">Hidden</Badge>,
-      );
+      render(<Badge aria-hidden="true">Hidden</Badge>);
       const badge = screen.getByText('Hidden');
       expect(badge).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should support custom data attributes', () => {
-      render(
-        <Badge data-testid="custom-badge">Test</Badge>,
-      );
+      render(<Badge data-testid="custom-badge">Test</Badge>);
       expect(screen.getByTestId('custom-badge')).toBeInTheDocument();
     });
 
@@ -161,9 +153,7 @@ describe('Badge', () => {
 
     it('should handle mouse enter events', () => {
       const handleMouseEnter = jest.fn();
-      render(
-        <Badge onMouseEnter={handleMouseEnter}>Hover me</Badge>,
-      );
+      render(<Badge onMouseEnter={handleMouseEnter}>Hover me</Badge>);
       const badge = screen.getByText('Hover me');
       // fireEvent.mouseEnter properly triggers React's synthetic event
       const { fireEvent } = require('@testing-library/react');
@@ -186,7 +176,7 @@ describe('Badge', () => {
 
     it('should apply variant classes', () => {
       const result = badgeVariants({ variant: 'success' });
-      expect(result).toContain('bg-[var(--success)]');
+      expect(result).toContain('bg-(--badge-success-bg)');
     });
 
     it('should append custom className', () => {
@@ -200,7 +190,7 @@ describe('Badge', () => {
       render(<Badge variant="success">Approved</Badge>);
       const badge = screen.getByText('Approved');
       expect(badge).toBeInTheDocument();
-      expect(badge.className).toContain('bg-[var(--success)]');
+      expect(badge.className).toContain('bg-(--badge-success-bg)');
     });
 
     it('should render as a count badge', () => {

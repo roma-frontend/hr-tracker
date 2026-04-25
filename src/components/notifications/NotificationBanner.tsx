@@ -22,9 +22,6 @@ export function NotificationBanner() {
   const router = useRouter();
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
-  // Only admin users see the banner and hear the sound
-  if (!isAdmin) return null;
-
   const notifications = useQuery(
     api.notifications.getUserNotifications,
     user?.id ? { userId: user.id as Id<'users'> } : 'skip',
@@ -38,7 +35,7 @@ export function NotificationBanner() {
   } | null>(null);
 
   useEffect(() => {
-    if (!notifications) return;
+    if (!isAdmin || !notifications) return;
 
     const unread = notifications.filter((n) => !n.isRead);
     const currentCount = unread.length;
@@ -70,12 +67,14 @@ export function NotificationBanner() {
     }
 
     setLastSeenCount(currentCount);
-  }, [notifications, lastSeenCount]);
+  }, [notifications, lastSeenCount, isAdmin]);
 
   const handleDismiss = useCallback(() => {
     setNewNotification(null);
   }, []);
 
+  // Only admin users see the banner and hear the sound
+  if (!isAdmin) return null;
   if (!newNotification) return null;
 
   // Map notification type to banner type

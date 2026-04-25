@@ -12,9 +12,9 @@ import React from 'react';
  * Use for list items in Employees, Leaves, Tasks tables
  */
 export const MemoTableRow = React.memo(
-  ({ children, ...props }: React.ComponentProps<'tr'>) => (
-    <tr {...props}>{children}</tr>
-  ),
+  function MemoTableRowInner({ children, ...props }: React.ComponentProps<'tr'>) {
+    return <tr {...props}>{children}</tr>;
+  },
   (prevProps, nextProps) => {
     // Shallow comparison of props — skip re-render if identical
     const prevKeys = Object.keys(prevProps);
@@ -22,7 +22,9 @@ export const MemoTableRow = React.memo(
     if (prevKeys.length !== nextKeys.length) return false;
 
     return prevKeys.every(
-      (key) => prevProps[key as keyof React.ComponentProps<'tr'>] === nextProps[key as keyof React.ComponentProps<'tr'>],
+      (key) =>
+        prevProps[key as keyof React.ComponentProps<'tr'>] ===
+        nextProps[key as keyof React.ComponentProps<'tr'>],
     );
   },
 );
@@ -33,16 +35,15 @@ export const MemoTableRow = React.memo(
  * Memoized badge/status cell — only re-renders when status changes
  */
 export const MemoBadge = React.memo(
-  ({ children, className, ...props }: React.ComponentProps<'span'>) => (
-    <span className={className} {...props}>
-      {children}
-    </span>
-  ),
-  (prevProps, nextProps) => {
+  function MemoBadgeInner({ children, className, ...props }: React.ComponentProps<'span'>) {
     return (
-      prevProps.children === nextProps.children &&
-      prevProps.className === nextProps.className
+      <span className={className} {...props}>
+        {children}
+      </span>
     );
+  },
+  (prevProps, nextProps) => {
+    return prevProps.children === nextProps.children && prevProps.className === nextProps.className;
   },
 );
 
@@ -51,21 +52,21 @@ export const MemoBadge = React.memo(
 /**
  * Memoized stat card for dashboard metrics
  */
-export const MemoStatCard = React.memo(
-  ({
-    children,
-    className,
-    'data-testid': dataTestId,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-    'data-testid'?: string;
-  }) => (
+export const MemoStatCard = React.memo(function MemoStatCardInner({
+  children,
+  className,
+  'data-testid': dataTestId,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  'data-testid'?: string;
+}) {
+  return (
     <div className={className} data-testid={dataTestId}>
       {children}
     </div>
-  ),
-);
+  );
+});
 
 // ── List Item Memo Wrapper ──────────────────────────────────────────────────
 
@@ -73,7 +74,7 @@ export const MemoStatCard = React.memo(
  * Generic memoized list item with deep comparison for data prop
  */
 export const MemoListItem = React.memo(
-  <T,>({
+  function MemoListItemInner<T>({
     item,
     render,
     className,
@@ -81,7 +82,9 @@ export const MemoListItem = React.memo(
     item: T;
     render: (item: T) => React.ReactNode;
     className?: string;
-  }) => <div className={className}>{render(item)}</div>,
+  }) {
+    return <div className={className}>{render(item)}</div>;
+  },
   (prevProps, nextProps) => {
     // Compare by item identity (requires stable references)
     return prevProps.item === nextProps.item;

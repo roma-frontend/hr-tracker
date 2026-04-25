@@ -8,7 +8,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)]()
 [![Convex](https://img.shields.io/badge/Convex-Real--time_DB-FF6F00)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
-[![Vercel](https://img.shields.io/badge/deployed_on-Vercel_(EU)-000000?logo=vercel&logoColor=white)](https://hr-project-sigma.vercel.app)
+[![Vercel](<https://img.shields.io/badge/deployed_on-Vercel_(EU)-000000?logo=vercel&logoColor=white>)](https://hr-project-sigma.vercel.app)
 
 **All-in-One HR Management SaaS Platform**
 
@@ -45,6 +45,7 @@
 ### The Problem
 
 HR processes are typically fragmented across multiple disconnected tools:
+
 - Employee data scattered in spreadsheets and SharePoint lists
 - Leave requests handled via email with no calendar visibility
 - Attendance tracked manually — error-prone and time-consuming
@@ -58,65 +59,69 @@ HR Office replaces all fragmented tools with a **unified platform** — zero man
 
 ## ✨ Features
 
-| Module | Description | Highlights |
-|--------|-------------|------------|
-| 👤 **Employee Lifecycle** | Full employee profile management | Documents, performance metrics, onboarding/offboarding |
-| 🔐 **Face Recognition** | Biometric attendance check-in/out | Browser-based camera, daily logs, anomaly detection |
-| 📅 **Leave Management** | End-to-end leave workflow | Multi-level approval, auto Outlook Calendar sync, entitlement rules |
-| 📋 **Task Management** | Kanban board with drag-and-drop | Assignment, deadlines, progress tracking, notifications |
-| 💬 **Team Chat** | Real-time messaging | File sharing, channels, direct messages |
-| 🤖 **AI HR Assistant** | Conversational HR chatbot | Policy Q&A, smart insights, analytics queries |
-| 🚗 **Driver Management** | Vehicle/driver booking system | Availability tracking, scheduling, route management |
-| 📊 **AI Analytics** | Workforce intelligence dashboard | Headcount trends, leave patterns, attendance heatmaps |
-| 🔗 **M365 Integration** | SharePoint + Outlook sync | Auto employee sync, calendar events for leave |
-| 💳 **Multi-Tenant Billing** | Stripe subscription management | Plans, invoicing, usage tracking |
+| Module                      | Description                       | Highlights                                                          |
+| --------------------------- | --------------------------------- | ------------------------------------------------------------------- |
+| 👤 **Employee Lifecycle**   | Full employee profile management  | Documents, performance metrics, onboarding/offboarding              |
+| 🔐 **Face Recognition**     | Biometric attendance check-in/out | Browser-based camera, daily logs, anomaly detection                 |
+| 📅 **Leave Management**     | End-to-end leave workflow         | Multi-level approval, auto Outlook Calendar sync, entitlement rules |
+| 📋 **Task Management**      | Kanban board with drag-and-drop   | Assignment, deadlines, progress tracking, notifications             |
+| 💬 **Team Chat**            | Real-time messaging               | File sharing, channels, direct messages                             |
+| 🤖 **AI HR Assistant**      | Conversational HR chatbot         | Policy Q&A, smart insights, analytics queries                       |
+| 🚗 **Driver Management**    | Vehicle/driver booking system     | Availability tracking, scheduling, route management                 |
+| 📊 **AI Analytics**         | Workforce intelligence dashboard  | Headcount trends, leave patterns, attendance heatmaps               |
+| 🔗 **M365 Integration**     | SharePoint + Outlook sync         | Auto employee sync, calendar events for leave                       |
+| 💳 **Multi-Tenant Billing** | Stripe subscription management    | Plans, invoicing, usage tracking                                    |
 
 ### Role-Based Access Control (5 Roles)
 
-| Role | Permissions |
-|------|------------|
-| **Superadmin** | Full system access, tenant management, billing |
-| **Admin** | Organization settings, user management, approvals |
-| **Supervisor** | Team management, leave/task approvals, reports |
-| **Employee** | Self-service: profile, leave requests, tasks, chat |
-| **Driver** | Booking management, availability, schedule view |
+| Role           | Permissions                                        |
+| -------------- | -------------------------------------------------- |
+| **Superadmin** | Full system access, tenant management, billing     |
+| **Admin**      | Organization settings, user management, approvals  |
+| **Supervisor** | Team management, leave/task approvals, reports     |
+| **Employee**   | Self-service: profile, leave requests, tasks, chat |
+| **Driver**     | Booking management, availability, schedule view    |
 
 ---
 
 ## 🛠 Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-|-----------|---------|
-| [Next.js 16](https://nextjs.org/) | React framework (SSR/SSG/ISR) |
-| [React 19](https://react.dev/) | UI library |
-| [TypeScript 5.x](https://www.typescriptlang.org/) | Type safety |
-| [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
-| [Shadcn/ui](https://ui.shadcn.com/) | Accessible component library |
+
+| Technology                                        | Purpose                       |
+| ------------------------------------------------- | ----------------------------- |
+| [Next.js 16](https://nextjs.org/)                 | React framework (SSR/SSG/ISR) |
+| [React 19](https://react.dev/)                    | UI library                    |
+| [TypeScript 5.x](https://www.typescriptlang.org/) | Type safety                   |
+| [Tailwind CSS](https://tailwindcss.com/)          | Utility-first styling         |
+| [Shadcn/ui](https://ui.shadcn.com/)               | Accessible component library  |
 
 ### Backend & Database
-| Technology | Purpose |
-|-----------|---------|
-| [Convex](https://www.convex.dev/) | Real-time database + serverless functions |
-| [NextAuth.js v5](https://authjs.dev/) | Authentication framework |
-| [Upstash Redis](https://upstash.com/) | Rate limiting & caching |
+
+| Technology                            | Purpose                                   |
+| ------------------------------------- | ----------------------------------------- |
+| [Convex](https://www.convex.dev/)     | Real-time database + serverless functions |
+| [NextAuth.js v5](https://authjs.dev/) | Authentication framework                  |
+| [Upstash Redis](https://upstash.com/) | Rate limiting & caching                   |
 
 ### Integrations
-| Service | Purpose |
-|---------|---------|
-| [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/) | SharePoint sync + Outlook Calendar |
-| [Google Calendar API](https://developers.google.com/calendar) | Calendar sync (alternative) |
-| [Stripe](https://stripe.com/) | Subscription billing |
-| [Resend](https://resend.com/) | Transactional email |
-| [Cloudinary](https://cloudinary.com/) | Media storage & optimization |
-| [Sentry](https://sentry.io/) + [OpenTelemetry](https://opentelemetry.io/) | Error tracking & observability |
+
+| Service                                                                   | Purpose                            |
+| ------------------------------------------------------------------------- | ---------------------------------- |
+| [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/)           | SharePoint sync + Outlook Calendar |
+| [Google Calendar API](https://developers.google.com/calendar)             | Calendar sync (alternative)        |
+| [Stripe](https://stripe.com/)                                             | Subscription billing               |
+| [Resend](https://resend.com/)                                             | Transactional email                |
+| [Cloudinary](https://cloudinary.com/)                                     | Media storage & optimization       |
+| [Sentry](https://sentry.io/) + [OpenTelemetry](https://opentelemetry.io/) | Error tracking & observability     |
 
 ### DevOps
-| Tool | Purpose |
-|------|---------|
-| [Vercel](https://vercel.com/) (EU, fra1) | Hosting & Edge Functions |
-| [GitHub Actions](https://github.com/features/actions) | CI/CD pipeline |
-| [Playwright](https://playwright.dev/) | E2E testing |
+
+| Tool                                                             | Purpose                    |
+| ---------------------------------------------------------------- | -------------------------- |
+| [Vercel](https://vercel.com/) (EU, fra1)                         | Hosting & Edge Functions   |
+| [GitHub Actions](https://github.com/features/actions)            | CI/CD pipeline             |
+| [Playwright](https://playwright.dev/)                            | E2E testing                |
 | [Jest](https://jestjs.io/) + [RTL](https://testing-library.com/) | Unit & integration testing |
 
 ---
@@ -168,7 +173,7 @@ graph TB
     A --> B
     D --> E
     D <-->|"Flow A: Employee Sync"| H
-    D -->|"Flow B: Leave → Calendar"| H
+    D -->|"Flow B: Leave to Calendar"| H
     H --> F & G
     D --> I & J & K & L
     A --> M & N & O
@@ -178,3 +183,213 @@ graph TB
     style H fill:#0078d4,color:#fff
     style F fill:#217346,color:#fff
     style G fill:#0072c6,color:#fff
+```
+
+### Data Flows
+
+```
+Flow A (Employee Sync):
+SharePoint List → Microsoft Graph API → Convex DB → HR Office UI
+
+Flow B (Leave Calendar Sync):
+HR Office (Leave Approved) → Convex Action → Microsoft Graph API → Outlook Calendar Event
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js** 20+ (LTS recommended)
+- **npm** 10+ or **pnpm** 9+
+- **Convex account** — [sign up free](https://dashboard.convex.dev)
+- **Vercel account** — [sign up free](https://vercel.com/signup)
+
+### Installation
+
+```bash
+git clone https://github.com/roma-frontend/hr-project.git
+cd hr-project
+npm install
+npx convex dev
+cp .env.example .env.local
+npm run dev
+```
+
+### Quick Commands
+
+```bash
+npm run dev          # Start development server + Convex sync
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # ESLint check
+npm run type-check   # TypeScript type check
+npm run test         # Run unit tests
+npm run test:e2e     # Run Playwright E2E tests
+npm run test:coverage # Run tests with coverage report
+```
+
+---
+
+## 🔑 Environment Variables
+
+Create `.env.local` from `.env.example`:
+
+```bash
+# CONVEX
+CONVEX_DEPLOYMENT=
+NEXT_PUBLIC_CONVEX_URL=
+
+# AUTHENTICATION — NextAuth.js v5
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+
+# MICROSOFT 365 / AZURE AD (Entra ID)
+MICROSOFT_CLIENT_ID=
+MICROSOFT_CLIENT_SECRET=
+MICROSOFT_TENANT_ID=
+SHAREPOINT_SITE_ID=
+SHAREPOINT_LIST_ID=
+
+# GOOGLE OAUTH
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# STRIPE (Billing)
+STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+# RESEND (Email)
+RESEND_API_KEY=
+
+# CLOUDINARY (Media Storage)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# UPSTASH REDIS (Rate Limiting & Cache)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+
+# SENTRY (Error Monitoring)
+SENTRY_DSN=
+SENTRY_AUTH_TOKEN=
+
+# FEATURE FLAGS
+NEXT_PUBLIC_ENABLE_FACE_RECOGNITION=true
+NEXT_PUBLIC_ENABLE_AI_ASSISTANT=true
+NEXT_PUBLIC_ENABLE_DRIVER_MODULE=true
+```
+
+---
+
+## 📁 Project Structure
+
+```
+hr-project/
+├── .github/workflows/ci.yml
+├── app/
+│   ├── (auth)/
+│   ├── (dashboard)/
+│   │   ├── employees/
+│   │   ├── attendance/
+│   │   ├── leaves/
+│   │   ├── tasks/
+│   │   ├── chat/
+│   │   ├── ai-assistant/
+│   │   ├── drivers/
+│   │   ├── analytics/
+│   │   ├── settings/
+│   │   └── billing/
+│   └── api/
+├── components/
+├── convex/
+├── lib/
+├── hooks/
+├── locales/ (en.json, ru.json, hy.json)
+├── types/
+├── tests/
+├── TEST_PLAN.md
+└── README.md
+```
+
+---
+
+## 🧪 Testing
+
+See **[TEST_PLAN.md](./TEST_PLAN.md)** for 82 test cases across 14 modules.
+
+| Category               | Target | Gate     |
+| ---------------------- | ------ | -------- |
+| **Statements**         | ≥ 80%  | Required |
+| **Branches**           | ≥ 75%  | Required |
+| **Functions**          | ≥ 80%  | Required |
+| **Lines**              | ≥ 80%  | Required |
+| **E2E Critical Paths** | 100%   | Required |
+
+---
+
+## 🚢 Deployment
+
+Deployed on **Vercel** in **EU (fra1)** for GDPR compliance.
+
+```bash
+git push origin main    # Auto-deploy
+vercel --prod           # Manual deploy
+```
+
+---
+
+## 🔒 Security
+
+| Layer                | Implementation                                |
+| -------------------- | --------------------------------------------- |
+| **Authentication**   | OAuth 2.0 (Azure AD + Google), NextAuth.js v5 |
+| **Multi-Factor**     | TOTP 2FA + WebAuthn Passkeys                  |
+| **Biometric**        | Face Recognition (attendance)                 |
+| **Password Hashing** | bcrypt (12 rounds)                            |
+| **Authorization**    | Convex RLS, 5-tier RBAC                       |
+| **Transport**        | HSTS, TLS 1.3                                 |
+| **XSS Prevention**   | CSP headers                                   |
+| **Rate Limiting**    | Upstash Redis                                 |
+| **Monitoring**       | Sentry + OpenTelemetry                        |
+
+---
+
+## 🌐 Internationalization
+
+| Code | Language    | Status      |
+| ---- | ----------- | ----------- |
+| `en` | 🇬🇧 English  | ✅ Complete |
+| `ru` | 🇷🇺 Russian  | ✅ Complete |
+| `hy` | 🇦🇲 Armenian | ✅ Complete |
+
+---
+
+## 🤝 Contributing
+
+1. Fork → 2. Branch (`feature/x`) → 3. Commit (Conventional Commits) → 4. Push → 5. PR
+
+---
+
+## 🗺 Roadmap
+
+- [x] Employee lifecycle, Face recognition, Leave management, Tasks, Chat, AI, Drivers, Analytics
+- [x] Microsoft 365 integration, Stripe billing, i18n (EN/RU/HY)
+- [ ] Mobile app (React Native), Performance reviews, Payroll, E-signatures, PDF export
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+## 👨‍💻 Author
+
+**Roman Gulanyan** — [@roma-frontend](https://github.com/roma-frontend) — romangulanyan@gmail.com
+
+<div align="center">Built with ❤️ using Next.js + Convex + Microsoft 365</div>

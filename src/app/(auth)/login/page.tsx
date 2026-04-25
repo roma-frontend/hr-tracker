@@ -261,7 +261,7 @@ export default function LoginPage() {
     const checkMaintenanceMode = async () => {
       const params = new URLSearchParams(window.location.search);
       const orgId = params.get('org');
-      
+
       if (orgId && !showMaintenanceBanner) {
         try {
           const response = await fetch(`/api/maintenance/check?org=${orgId}`);
@@ -291,8 +291,6 @@ export default function LoginPage() {
       .catch(() => {});
   }, []);
 
-
-
   // Check if OAuth sync is in progress OR redirecting
   const isOAuthSyncing = (status === 'authenticated' && !isAuthenticated) || isRedirecting;
 
@@ -318,8 +316,6 @@ export default function LoginPage() {
       router.push(destination);
     }
   }, [status, isAuthenticated, isRedirecting, router]);
-
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -896,7 +892,7 @@ export default function LoginPage() {
                   <Link href="/register-org" id={t('auth.createOrgLink')}>
                     <button
                       className="text-xs font-semibold hover:underline"
-                      style={{ color: '#10b981' }}
+                      style={{ color: '#047857' }}
                     >
                       🏢 {t('auth.createNewOrganization')}
                     </button>

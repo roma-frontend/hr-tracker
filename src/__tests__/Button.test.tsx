@@ -72,13 +72,13 @@ describe('Button', () => {
     it('should apply primary classes for default variant', () => {
       render(<Button>Test</Button>);
       const button = screen.getByRole('button');
-      expect(button.className).toContain('bg-primary');
+      expect(button.className).toContain('bg-(--button-primary-bg)');
     });
 
     it('should apply destructive classes for destructive variant', () => {
       render(<Button variant="destructive">Delete</Button>);
       const button = screen.getByRole('button');
-      expect(button.className).toContain('bg-destructive');
+      expect(button.className).toContain('bg-(--button-danger-bg)');
     });
   });
 
@@ -200,11 +200,7 @@ describe('Button', () => {
     it('should handle click events', async () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
-      render(
-        <Button onClick={handleClick}>
-          Click me
-        </Button>,
-      );
+      render(<Button onClick={handleClick}>Click me</Button>);
       await user.click(screen.getByRole('button', { name: /click me/i }));
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
@@ -212,11 +208,7 @@ describe('Button', () => {
     it('should handle multiple clicks', async () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
-      render(
-        <Button onClick={handleClick}>
-          Click me
-        </Button>,
-      );
+      render(<Button onClick={handleClick}>Click me</Button>);
       const button = screen.getByRole('button', { name: /click me/i });
       await user.click(button);
       await user.click(button);
@@ -240,11 +232,7 @@ describe('Button', () => {
     it('should handle mouse down events', async () => {
       const user = userEvent.setup();
       const handleMouseDown = jest.fn();
-      render(
-        <Button onMouseDown={handleMouseDown}>
-          Test
-        </Button>,
-      );
+      render(<Button onMouseDown={handleMouseDown}>Test</Button>);
       await user.pointer({ keys: '[MouseLeft>]', target: screen.getByRole('button') });
       expect(handleMouseDown).toHaveBeenCalled();
     });
@@ -259,12 +247,12 @@ describe('Button', () => {
     it('should return class string for default variant', () => {
       const result = buttonVariants();
       expect(typeof result).toBe('string');
-      expect(result).toContain('bg-primary');
+      expect(result).toContain('bg-(--button-primary-bg)');
     });
 
     it('should combine variant and size classes', () => {
       const result = buttonVariants({ variant: 'destructive', size: 'lg' });
-      expect(result).toContain('bg-destructive');
+      expect(result).toContain('bg-(--button-danger-bg)');
       expect(result).toContain('h-10');
     });
 

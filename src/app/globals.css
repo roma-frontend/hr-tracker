@@ -178,7 +178,7 @@ html.light {
 
   /* Muted */
   --muted: #e8f0fe;
-  --muted-foreground: #4a6fa5;
+  --muted-foreground: #3d6196;
 
   /* Accent */
   --accent: #f0f6ff;
@@ -211,7 +211,7 @@ html.light {
   --button-danger-border: rgba(239, 68, 68, 0.2);
   --button-success-bg: rgba(16, 185, 129, 0.08);
   --button-success-hover: rgba(16, 185, 129, 0.15);
-  --button-success-text: #10b981;
+  --button-success-text: #047857;
   --button-success-border: rgba(16, 185, 129, 0.2);
   --button-outline-bg: transparent;
   --button-outline-hover: rgba(0, 0, 0, 0.04);
@@ -230,7 +230,7 @@ html.light {
   --badge-primary-text: #2563eb;
   --badge-primary-border: rgba(37, 99, 235, 0.2);
   --badge-success-bg: rgba(16, 185, 129, 0.1);
-  --badge-success-text: #10b981;
+  --badge-success-text: #047857;
   --badge-success-border: rgba(16, 185, 129, 0.2);
   --badge-warning-bg: rgba(245, 158, 11, 0.1);
   --badge-warning-text: #f59e0b;
@@ -242,7 +242,7 @@ html.light {
   --badge-info-text: #2563eb;
   --badge-info-border: rgba(37, 99, 235, 0.2);
   --badge-secondary-bg: rgba(147, 197, 253, 0.1);
-  --badge-secondary-text: #4a6fa5;
+  --badge-secondary-text: #3d6196;
   --badge-secondary-border: rgba(147, 197, 253, 0.15);
   --badge-purple-bg: rgba(147, 51, 234, 0.1);
   --badge-purple-text: #9333ea;
@@ -252,7 +252,7 @@ html.light {
   /* Text */
   --text-primary: #0c1a2e;
   --text-secondary: #1e3a6e;
-  --text-muted: #4a6fa5;
+  --text-muted: #3d6196;
   --text-disabled: #93bef7;
 
   /* Sidebar */
@@ -261,7 +261,7 @@ html.light {
   --sidebar-item-hover: #e8f0fe;
   --sidebar-item-active: rgba(37, 99, 235, 0.1);
   --sidebar-item-active-text: #2563eb;
-  --sidebar-text: #4a6fa5;
+  --sidebar-text: #3d6196;
   --sidebar-text-muted: #93bef7;
 
   /* Navbar */
@@ -293,7 +293,7 @@ html.light {
   --landing-bg: linear-gradient(135deg, #f0f6ff 0%, #e8f0fe 50%, #f0f6ff 100%);
   --landing-text-primary: #0c1a2e;
   --landing-text-secondary: #1e3a6e;
-  --landing-text-muted: #4a6fa5;
+  --landing-text-muted: #3d6196;
   --landing-navbar-bg: rgba(255, 255, 255, 0.88);
   --landing-navbar-bg-rgb: 255, 255, 255;
   --landing-navbar-text: #1e3a6e;

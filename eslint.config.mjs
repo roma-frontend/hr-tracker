@@ -23,6 +23,9 @@ const eslintConfig = defineConfig([
     "remove-console-logs.js",
     // Ignore tests
     "src/__tests__/**",
+    "tests/**",
+    // Ignore coverage
+    "coverage/**",
     // Ignore public
     "public/**",
   ]),

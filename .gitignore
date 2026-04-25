@@ -107,3 +107,14 @@ test-results/
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# Debug/output log files
+lint-output*.txt
+test-all-output*.txt
+test-output*.txt
+typecheck-output.txt
+setup-hr-testing.sh
+
+# Reports and analysis directories
+reports/
+tests/
