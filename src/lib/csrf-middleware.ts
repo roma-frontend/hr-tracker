@@ -5,10 +5,8 @@ import { verifyCsrfFromRequest, requiresCsrfProtection } from '@/lib/csrf';
  * CSRF protection middleware for API routes
  * Usage: Apply to all POST/PUT/DELETE/PATCH requests
  */
-export function withCsrfProtection(
-  handler: (req: NextRequest) => Promise<NextResponse | Response>,
-) {
-  return async (req: NextRequest): Promise<NextResponse | Response> => {
+export function withCsrfProtection(handler: (req: NextRequest) => Promise<NextResponse>) {
+  return async (req: NextRequest): Promise<NextResponse> => {
     // Skip GET requests - they don't modify state
     if (req.method === 'GET') {
       return handler(req);

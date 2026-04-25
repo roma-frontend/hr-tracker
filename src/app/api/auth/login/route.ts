@@ -4,8 +4,6 @@ import { signJWT } from '@/lib/jwt';
 import { calculateRiskScore } from '@/lib/riskScore';
 import { withTracing, addSpanAttributes } from '@/lib/tracing';
 
-import { withCsrfProtection } from '@/lib/csrf-middleware';
-
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
 
 async function convexMutation(path: string, args: Record<string, unknown>) {
@@ -30,7 +28,7 @@ async function convexQuery(path: string, args: Record<string, unknown>) {
   return data.value;
 }
 
-export const POST = withCsrfProtection(async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
   return withTracing('auth.login', async () => {
     const ip =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
@@ -326,4 +324,4 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
       );
     }
   });
-});
+}

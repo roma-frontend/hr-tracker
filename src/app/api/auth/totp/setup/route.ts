@@ -4,7 +4,6 @@ import QRCode from 'qrcode';
 import { verifyJWT } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
-import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -19,7 +18,7 @@ async function convexMutation(path: string, args: Record<string, unknown>) {
   return data.value;
 }
 
-async function getAuthPayload(_req: NextRequest) {
+async function getAuthPayload(req: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get('hr-auth-token')?.value;
   if (token) {
@@ -30,7 +29,7 @@ async function getAuthPayload(_req: NextRequest) {
   return null;
 }
 
-export const POST = withCsrfProtection(async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
 
@@ -88,4 +87,4 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
     console.error('TOTP setup error:', error);
     return NextResponse.json({ error: error.message || 'Setup failed' }, { status: 500 });
   }
-});
+}

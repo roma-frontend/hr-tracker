@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { signJWT } from '@/lib/jwt';
-import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
@@ -32,7 +31,7 @@ async function convexQuery(path: string, args: Record<string, unknown>) {
  * Called after Google OAuth sync to create a JWT session for the user.
  * This replaces window.location.reload() — no page reload needed.
  */
-export const POST = withCsrfProtection(async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
   try {
     const { email, name, avatarUrl } = await req.json();
 
@@ -183,4 +182,4 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
       { status: 500 },
     );
   }
-});
+}

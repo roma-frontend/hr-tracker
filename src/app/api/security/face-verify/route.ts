@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { withCsrfProtection } from '@/lib/csrf-middleware';
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
@@ -41,7 +40,7 @@ async function verifyAuth(): Promise<string | null> {
   }
 }
 
-export const POST = withCsrfProtection(async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
   // SECURITY: Require authentication — user can only verify their own face
   const authenticatedUserId = await verifyAuth();
   if (!authenticatedUserId) {
@@ -82,4 +81,4 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-});
+}

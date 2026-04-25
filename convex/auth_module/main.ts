@@ -1,8 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import bcrypt from 'bcryptjs';
-import { MAX_PAGE_SIZE } from '../pagination';
-import { SUPERADMIN_EMAIL } from '../lib/auth';
 
 // ── Password Hashing Helpers ─────────────────────────────────────────────────
 const BCRYPT_ROUNDS = 12;
@@ -58,6 +56,7 @@ function wrapConvexError<T>(fn: () => T, operation: string): T {
 }
 
 // ── Constants ────────────────────────────────────────────────────────────────
+const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
 /**
  * Check if a user is a superadmin.
@@ -165,7 +164,6 @@ export const register = mutation({
         isApproved = true;
 
         // Superadmin must have an org (even a virtual one) — find or create
-        // NOTE: Using .collect() here because we need to check if any organizations exist for bootstrap
         const allOrgs = await ctx.db.query('organizations').collect();
         if (allOrgs.length === 0) {
           // Bootstrap: create the first platform organization
@@ -238,7 +236,6 @@ export const register = mutation({
         if (!org || !org.isActive) throw new Error('Organization is inactive or not found');
 
         // Check employee limit
-        // NOTE: Using .collect() here because we need an accurate count of all active members
         const currentMembers = await ctx.db
           .query('users')
           .withIndex('by_org_active', (q) =>
@@ -252,7 +249,6 @@ export const register = mutation({
         }
 
         // Check if first member of the org → becomes admin
-        // NOTE: Using .collect() here because we need an accurate count to determine first member
         const orgMembers = await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', organizationId!))
@@ -294,7 +290,6 @@ export const register = mutation({
       // ── 4. Notify org admins if user needs approval ────────────────────────
       if (!isApproved) {
         const org = await ctx.db.get(organizationId);
-        // NOTE: Using .collect() here because we need to notify ALL admins
         const admins = await ctx.db
           .query('users')
           .withIndex('by_org_role', (q) =>
@@ -315,21 +310,6 @@ export const register = mutation({
           });
         }
       }
-
-      // Audit log: user registered
-      await ctx.db.insert('auditLogs', {
-        organizationId,
-        userId,
-        action: 'auth_register',
-        target: userId,
-        details: JSON.stringify({
-          name: args.name,
-          email,
-          role,
-          needsApproval: !isApproved,
-        }),
-        createdAt: Date.now(),
-      });
 
       return { userId, role, needsApproval: !isApproved, organizationId };
     }, 'register');
@@ -394,20 +374,6 @@ export const login = mutation({
         lastLoginAt: Date.now(),
       });
 
-      // Audit log: user login
-      await ctx.db.insert('auditLogs', {
-        organizationId: user.organizationId,
-        userId: user._id,
-        action: 'auth_login',
-        target: user._id,
-        details: JSON.stringify({
-          email: user.email,
-          isFaceLogin: isFaceLogin || false,
-          sessionExpiry,
-        }),
-        createdAt: Date.now(),
-      });
-
       return {
         ...safeUser(user as Parameters<typeof safeUser>[0]),
         organizationName: org.name,
@@ -424,22 +390,9 @@ export const login = mutation({
 export const logout = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) throw new Error('User not found');
-
     await ctx.db.patch(userId, {
       sessionToken: undefined,
       sessionExpiry: undefined,
-    });
-
-    // Audit log: user logout
-    await ctx.db.insert('auditLogs', {
-      organizationId: user.organizationId,
-      userId,
-      action: 'auth_logout',
-      target: userId,
-      details: JSON.stringify({ email: user.email }),
-      createdAt: Date.now(),
     });
   },
 });
@@ -555,16 +508,6 @@ export const resetPassword = mutation({
       sessionToken: undefined,
     });
 
-    // Audit log: password reset
-    await ctx.db.insert('auditLogs', {
-      organizationId: user.organizationId,
-      userId: user._id,
-      action: 'auth_password_reset',
-      target: user._id,
-      details: JSON.stringify({ email: user.email }),
-      createdAt: Date.now(),
-    });
-
     return { success: true };
   },
 });
@@ -617,16 +560,6 @@ export const changePassword = mutation({
     await ctx.db.patch(userId, {
       passwordHash: hashedPassword,
       sessionToken: undefined, // force re-login on other devices
-    });
-
-    // Audit log: password changed
-    await ctx.db.insert('auditLogs', {
-      organizationId: user.organizationId,
-      userId,
-      action: 'auth_password_changed',
-      target: userId,
-      details: JSON.stringify({ email: user.email }),
-      createdAt: Date.now(),
     });
 
     return { success: true };
@@ -710,20 +643,6 @@ export const loginWebauthn = mutation({
       lastLoginAt: Date.now(),
     });
 
-    // Audit log: WebAuthn login
-    await ctx.db.insert('auditLogs', {
-      organizationId: user.organizationId,
-      userId: user._id,
-      action: 'auth_login_webauthn',
-      target: user._id,
-      details: JSON.stringify({
-        email: user.email,
-        credentialId,
-        sessionExpiry,
-      }),
-      createdAt: Date.now(),
-    });
-
     return {
       ...safeUser(user as Parameters<typeof safeUser>[0]),
       organizationName: org.name,
@@ -804,7 +723,6 @@ export const googleOAuthLogin = mutation({
     }
 
     // ── 2. New user — create account ───────────────────────────────────────
-    // NOTE: Using .collect() here because we need to find an active organization for bootstrap
     const allOrgs = await ctx.db
       .query('organizations')
       .filter((q) => q.eq(q.field('isActive'), true))
@@ -820,7 +738,6 @@ export const googleOAuthLogin = mutation({
     const organizationId = org._id;
 
     // Check if first member → admin
-    // NOTE: Using .collect() here because we need to count ALL members to determine if this is the first user (admin bootstrap logic)
     const orgMembers = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
@@ -853,7 +770,6 @@ export const googleOAuthLogin = mutation({
 
     // Notify admins if needs approval
     if (!isApproved) {
-      // NOTE: Using .collect() here because we must notify ALL admins of a new user registration; truncating would miss recipients
       const admins = await ctx.db
         .query('users')
         .withIndex('by_org_role', (q) => q.eq('organizationId', organizationId).eq('role', 'admin'))

@@ -4,8 +4,8 @@
  */
 import type { QueryCtx, MutationCtx } from '../_generated/server';
 
-/** The single source of truth for the superadmin email (from env or fallback) */
-export const SUPERADMIN_EMAIL = process.env.MANAGER_EMAIL ?? 'romangulanyan@gmail.com';
+/** The single source of truth for the superadmin email */
+export const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 
 /**
  * Returns true if the given email belongs to the superadmin.
