@@ -1,0 +1,736 @@
+import { v } from 'convex/values';
+import { mutation } from '../_generated/server';
+import type { Id } from '../_generated/dataModel';
+import { calculatePayroll } from '../lib/payrollCalculator';
+import { requireOrgAdmin } from '../lib/rbac';
+
+type RunTotals = {
+  totalGross: number;
+  totalNet: number;
+  totalDeductions: number;
+  totalEmployerCost: number;
+  employeeCount: number;
+};
+
+async function recomputeRunTotals(ctx: any, payrollRunId: Id<'payrollRuns'>): Promise<RunTotals> {
+  const records = await ctx.db
+    .query('payrollRecords')
+    .withIndex('by_payroll_run', (q: any) => q.eq('payrollRunId', payrollRunId))
+    .collect();
+
+  let totalGross = 0;
+  let totalNet = 0;
+  let totalDeductions = 0;
+  let totalEmployerCost = 0;
+  for (const r of records) {
+    if (r.status === 'cancelled') continue;
+    totalGross += r.grossSalary || 0;
+    totalNet += r.netSalary || 0;
+    totalDeductions += r.deductions?.total || 0;
+    totalEmployerCost += r.totalCost || r.grossSalary || 0;
+  }
+
+  const totals: RunTotals = {
+    totalGross: round2(totalGross),
+    totalNet: round2(totalNet),
+    totalDeductions: round2(totalDeductions),
+    totalEmployerCost: round2(totalEmployerCost),
+    employeeCount: records.filter((r: any) => r.status !== 'cancelled').length,
+  };
+
+  await ctx.db.patch(payrollRunId, {
+    ...totals,
+    updatedAt: Date.now(),
+  });
+
+  return totals;
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+type FieldChange = { field: string; before: unknown; after: unknown };
+
+function diffFields(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+  fields: string[],
+): FieldChange[] {
+  const changes: FieldChange[] = [];
+  for (const f of fields) {
+    const b = before[f] ?? null;
+    const a = after[f] ?? null;
+    if (JSON.stringify(b) !== JSON.stringify(a)) {
+      changes.push({ field: f, before: b, after: a });
+    }
+  }
+  return changes;
+}
+
+export const createPayrollRun = mutation({
+  args: {
+    requesterId: v.id('users'),
+    organizationId: v.id('organizations'),
+    period: v.string(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { requesterId, organizationId, period, notes } = args;
+    await requireOrgAdmin(ctx, requesterId, organizationId);
+
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) {
+      throw new Error('Invalid period format, expected YYYY-MM');
+    }
+
+    const existing = await ctx.db
+      .query('payrollRuns')
+      .withIndex('by_org_period', (q) =>
+        q.eq('organizationId', organizationId).eq('period', period),
+      )
+      .first();
+
+    if (existing) {
+      throw new Error('Payroll run for this period already exists');
+    }
+
+    const now = Date.now();
+    const runId = await ctx.db.insert('payrollRuns', {
+      organizationId,
+      period,
+      status: 'draft',
+      createdAt: now,
+      updatedAt: now,
+      notes,
+    });
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId,
+      userId: requesterId,
+      action: 'create_run',
+      payrollRunId: runId,
+      details: `Payroll run created for period: ${period}`,
+      createdAt: now,
+    });
+
+    return runId;
+  },
+});
+
+export const calculatePayrollRun = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payrollRunId: v.id('payrollRuns'),
+  },
+  handler: async (ctx, args) => {
+    const run = await ctx.db.get(args.payrollRunId);
+    if (!run) {
+      throw new Error('Payroll run not found');
+    }
+    if (!run.organizationId) {
+      throw new Error('Payroll run has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, run.organizationId);
+
+    if (run.status !== 'draft') {
+      throw new Error('Can only calculate draft payroll runs');
+    }
+
+    const employees = await ctx.db
+      .query('employeeProfiles')
+      .withIndex('by_org', (q) => q.eq('organizationId', run.organizationId!))
+      .collect();
+
+    const settings = await ctx.db
+      .query('salarySettings')
+      .withIndex('by_org', (q) => q.eq('organizationId', run.organizationId!))
+      .first();
+
+    const taxCountry = settings?.taxCountry ?? 'armenia';
+    const minWage = settings?.minimumWage ?? 0;
+    const maxOvertime = settings?.maximumOvertime ?? 0;
+
+    let totalGross = 0;
+    let totalNet = 0;
+    let totalDeductions = 0;
+    let totalEmployerCost = 0;
+    let processed = 0;
+    const skipped: { userId: Id<'users'>; reason: string }[] = [];
+
+    for (const emp of employees) {
+      const user = await ctx.db.get(emp.userId);
+      if (!user) {
+        skipped.push({ userId: emp.userId, reason: 'user_not_found' });
+        continue;
+      }
+
+      const baseSalary = emp.baseSalary ?? 0;
+      const bonuses = emp.bonuses ?? 0;
+      let overtimeHours = emp.overtimeHours ?? 0;
+      const hourlyRate =
+        emp.hourlyRate && emp.hourlyRate > 0
+          ? emp.hourlyRate
+          : baseSalary > 0
+            ? baseSalary / 160
+            : 0;
+
+      if (baseSalary <= 0) {
+        skipped.push({ userId: emp.userId, reason: 'no_base_salary' });
+        continue;
+      }
+      if (minWage > 0 && baseSalary < minWage) {
+        skipped.push({ userId: emp.userId, reason: 'below_minimum_wage' });
+        continue;
+      }
+      if (maxOvertime > 0 && overtimeHours > maxOvertime) {
+        // Cap overtime at the configured maximum, do not skip
+        overtimeHours = maxOvertime;
+      }
+
+      const calculation = calculatePayroll({
+        country: taxCountry,
+        baseSalary,
+        bonuses,
+        overtimeHours,
+        hourlyRate,
+      });
+
+      await ctx.db.insert('payrollRecords', {
+        organizationId: run.organizationId,
+        userId: emp.userId,
+        payrollRunId: args.payrollRunId,
+        period: run.period,
+        baseSalary: calculation.baseSalary,
+        grossSalary: calculation.grossSalary,
+        netSalary: calculation.netSalary,
+        bonuses: calculation.bonuses > 0 ? calculation.bonuses : undefined,
+        overtimeHours: overtimeHours > 0 ? overtimeHours : undefined,
+        overtimePay: calculation.overtimePay > 0 ? calculation.overtimePay : undefined,
+        deductions: calculation.deductions,
+        employerContributions: calculation.employerContributions ?? 0,
+        totalCost: calculation.totalCost ?? calculation.grossSalary,
+        taxCountry,
+        currency: settings?.currency,
+        status: 'calculated',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      totalGross += calculation.grossSalary;
+      totalNet += calculation.netSalary;
+      totalDeductions += calculation.deductions.total;
+      totalEmployerCost += calculation.totalCost ?? calculation.grossSalary;
+      processed++;
+    }
+
+    await ctx.db.patch(args.payrollRunId, {
+      status: 'calculated',
+      totalGross: round2(totalGross),
+      totalNet: round2(totalNet),
+      totalDeductions: round2(totalDeductions),
+      totalEmployerCost: round2(totalEmployerCost),
+      employeeCount: processed,
+      skippedCount: skipped.length,
+      updatedAt: Date.now(),
+    });
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: run.organizationId,
+      userId: args.requesterId,
+      action: 'calculate',
+      payrollRunId: args.payrollRunId,
+      details: `Calculated ${processed} of ${employees.length} employees (${skipped.length} skipped)`,
+      metadata: {
+        processed,
+        totalEmployees: employees.length,
+        skipped,
+      },
+      createdAt: Date.now(),
+    });
+
+    return {
+      payrollRunId: args.payrollRunId,
+      processed,
+      totalEmployees: employees.length,
+      skipped,
+      totalGross: round2(totalGross),
+      totalNet: round2(totalNet),
+      totalDeductions: round2(totalDeductions),
+      totalEmployerCost: round2(totalEmployerCost),
+    };
+  },
+});
+
+export const approvePayrollRun = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payrollRunId: v.id('payrollRuns'),
+  },
+  handler: async (ctx, args) => {
+    const run = await ctx.db.get(args.payrollRunId);
+    if (!run) {
+      throw new Error('Payroll run not found');
+    }
+    if (!run.organizationId) {
+      throw new Error('Payroll run has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, run.organizationId);
+
+    if (run.status !== 'calculated') {
+      throw new Error('Can only approve calculated payroll runs');
+    }
+
+    await ctx.db.patch(args.payrollRunId, {
+      status: 'approved',
+      approvedBy: args.requesterId,
+      approvedAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    const records = await ctx.db
+      .query('payrollRecords')
+      .withIndex('by_payroll_run', (q) => q.eq('payrollRunId', args.payrollRunId))
+      .collect();
+
+    for (const record of records) {
+      await ctx.db.patch(record._id, {
+        status: 'approved',
+        updatedAt: Date.now(),
+      });
+    }
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: run.organizationId,
+      userId: args.requesterId,
+      action: 'approve',
+      payrollRunId: args.payrollRunId,
+      details: 'Payroll run approved',
+      createdAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+export const markPayrollRunAsPaid = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payrollRunId: v.id('payrollRuns'),
+  },
+  handler: async (ctx, args) => {
+    const run = await ctx.db.get(args.payrollRunId);
+    if (!run) {
+      throw new Error('Payroll run not found');
+    }
+    if (!run.organizationId) {
+      throw new Error('Payroll run has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, run.organizationId);
+
+    if (run.status !== 'approved') {
+      throw new Error('Can only pay approved payroll runs');
+    }
+
+    await ctx.db.patch(args.payrollRunId, {
+      status: 'paid',
+      paidAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    const records = await ctx.db
+      .query('payrollRecords')
+      .withIndex('by_payroll_run', (q) => q.eq('payrollRunId', args.payrollRunId))
+      .collect();
+
+    for (const record of records) {
+      await ctx.db.patch(record._id, {
+        status: 'paid',
+        updatedAt: Date.now(),
+      });
+    }
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: run.organizationId,
+      userId: args.requesterId,
+      action: 'pay',
+      payrollRunId: args.payrollRunId,
+      details: 'Payroll run marked as paid',
+      createdAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+export const cancelPayrollRun = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payrollRunId: v.id('payrollRuns'),
+  },
+  handler: async (ctx, args) => {
+    const run = await ctx.db.get(args.payrollRunId);
+    if (!run) {
+      throw new Error('Payroll run not found');
+    }
+    if (!run.organizationId) {
+      throw new Error('Payroll run has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, run.organizationId);
+
+    if (run.status === 'paid') {
+      throw new Error('Cannot cancel a paid payroll run');
+    }
+
+    await ctx.db.patch(args.payrollRunId, {
+      status: 'cancelled',
+      updatedAt: Date.now(),
+    });
+
+    const records = await ctx.db
+      .query('payrollRecords')
+      .withIndex('by_payroll_run', (q) => q.eq('payrollRunId', args.payrollRunId))
+      .collect();
+
+    for (const record of records) {
+      await ctx.db.patch(record._id, {
+        status: 'cancelled',
+        updatedAt: Date.now(),
+      });
+    }
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: run.organizationId,
+      userId: args.requesterId,
+      action: 'cancel',
+      payrollRunId: args.payrollRunId,
+      details: 'Payroll run cancelled',
+      createdAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+export const generatePayslip = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payrollRecordId: v.id('payrollRecords'),
+    email: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const record = await ctx.db.get(args.payrollRecordId);
+    if (!record) {
+      throw new Error('Payroll record not found');
+    }
+    if (!record.organizationId) {
+      throw new Error('Payroll record has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, record.organizationId);
+
+    const existing = await ctx.db
+      .query('payslips')
+      .withIndex('by_payroll_record', (q) => q.eq('payrollRecordId', args.payrollRecordId))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        status: 'generated',
+        generatedAt: Date.now(),
+      });
+      return existing._id;
+    }
+
+    const payslipId = await ctx.db.insert('payslips', {
+      organizationId: record.organizationId,
+      userId: record.userId,
+      payrollRecordId: args.payrollRecordId,
+      payrollRunId: record.payrollRunId!,
+      period: record.period,
+      generatedAt: Date.now(),
+      email: args.email,
+      status: 'generated',
+    });
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: record.organizationId,
+      userId: args.requesterId,
+      action: 'generate_payslip',
+      payrollRecordId: args.payrollRecordId,
+      details: 'Payslip generated',
+      createdAt: Date.now(),
+    });
+
+    return payslipId;
+  },
+});
+
+export const sendPayslip = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payslipId: v.id('payslips'),
+  },
+  handler: async (ctx, args) => {
+    const payslip = await ctx.db.get(args.payslipId);
+    if (!payslip) {
+      throw new Error('Payslip not found');
+    }
+    if (!payslip.organizationId) {
+      throw new Error('Payslip has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, payslip.organizationId);
+
+    await ctx.db.patch(args.payslipId, {
+      status: 'sent',
+      sentAt: Date.now(),
+    });
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: payslip.organizationId,
+      userId: args.requesterId,
+      action: 'send_payslip',
+      payrollRecordId: payslip.payrollRecordId,
+      details: `Payslip sent to ${payslip.email}`,
+      createdAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+export const updatePayrollRecord = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payrollRecordId: v.id('payrollRecords'),
+    baseSalary: v.optional(v.number()),
+    bonuses: v.optional(v.number()),
+    overtimeHours: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const record = await ctx.db.get(args.payrollRecordId);
+    if (!record) {
+      throw new Error('Payroll record not found');
+    }
+    if (!record.organizationId) {
+      throw new Error('Payroll record has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, record.organizationId);
+
+    if (record.status === 'paid') {
+      throw new Error('Cannot update a paid payroll record');
+    }
+
+    if (args.baseSalary !== undefined && args.baseSalary < 0) {
+      throw new Error('Base salary cannot be negative');
+    }
+    if (args.bonuses !== undefined && args.bonuses < 0) {
+      throw new Error('Bonuses cannot be negative');
+    }
+    if (args.overtimeHours !== undefined && args.overtimeHours < 0) {
+      throw new Error('Overtime hours cannot be negative');
+    }
+
+    const settings = await ctx.db
+      .query('salarySettings')
+      .withIndex('by_org', (q) => q.eq('organizationId', record.organizationId!))
+      .first();
+    const minWage = settings?.minimumWage ?? 0;
+    const maxOvertime = settings?.maximumOvertime ?? 0;
+
+    const newBase = args.baseSalary ?? record.baseSalary;
+    if (minWage > 0 && newBase < minWage) {
+      throw new Error(`Base salary is below the configured minimum wage (${minWage})`);
+    }
+    const newOvertime = args.overtimeHours ?? record.overtimeHours ?? 0;
+    if (maxOvertime > 0 && newOvertime > maxOvertime) {
+      throw new Error(`Overtime hours exceed the configured maximum (${maxOvertime})`);
+    }
+
+    const updates: Record<string, any> = {
+      updatedAt: Date.now(),
+    };
+
+    if (args.baseSalary !== undefined) updates.baseSalary = args.baseSalary;
+    if (args.bonuses !== undefined) updates.bonuses = args.bonuses;
+    if (args.overtimeHours !== undefined) updates.overtimeHours = args.overtimeHours;
+    if (args.notes !== undefined) updates.notes = args.notes;
+
+    if (
+      args.baseSalary !== undefined ||
+      args.bonuses !== undefined ||
+      args.overtimeHours !== undefined
+    ) {
+      const calculation = calculatePayroll({
+        country: record.taxCountry,
+        baseSalary: newBase,
+        bonuses: args.bonuses ?? record.bonuses ?? 0,
+        overtimeHours: newOvertime,
+        hourlyRate: newBase / 160,
+      });
+
+      updates.grossSalary = calculation.grossSalary;
+      updates.netSalary = calculation.netSalary;
+      updates.deductions = calculation.deductions;
+      updates.overtimePay = calculation.overtimePay;
+      updates.employerContributions = calculation.employerContributions ?? 0;
+      updates.totalCost = calculation.totalCost ?? calculation.grossSalary;
+    }
+
+    const before = {
+      baseSalary: record.baseSalary,
+      bonuses: record.bonuses ?? 0,
+      overtimeHours: record.overtimeHours ?? 0,
+      notes: record.notes ?? '',
+      grossSalary: record.grossSalary,
+      netSalary: record.netSalary,
+    };
+    const after = {
+      baseSalary: updates.baseSalary ?? record.baseSalary,
+      bonuses: updates.bonuses ?? record.bonuses ?? 0,
+      overtimeHours: updates.overtimeHours ?? record.overtimeHours ?? 0,
+      notes: updates.notes ?? record.notes ?? '',
+      grossSalary: updates.grossSalary ?? record.grossSalary,
+      netSalary: updates.netSalary ?? record.netSalary,
+    };
+    const changes = diffFields(before, after, [
+      'baseSalary',
+      'bonuses',
+      'overtimeHours',
+      'notes',
+      'grossSalary',
+      'netSalary',
+    ]);
+
+    await ctx.db.patch(args.payrollRecordId, updates);
+
+    if (record.payrollRunId) {
+      await recomputeRunTotals(ctx, record.payrollRunId);
+    }
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: record.organizationId,
+      userId: args.requesterId,
+      action: 'update_record',
+      payrollRecordId: args.payrollRecordId,
+      payrollRunId: record.payrollRunId ?? undefined,
+      details: changes.length > 0 ? `Updated ${changes.length} field(s)` : 'No effective changes',
+      metadata: { changes },
+      createdAt: Date.now(),
+    });
+
+    return { success: true, changes };
+  },
+});
+
+export const deletePayrollRecord = mutation({
+  args: {
+    requesterId: v.id('users'),
+    payrollRecordId: v.id('payrollRecords'),
+  },
+  handler: async (ctx, args) => {
+    const record = await ctx.db.get(args.payrollRecordId);
+    if (!record) {
+      throw new Error('Payroll record not found');
+    }
+    if (!record.organizationId) {
+      throw new Error('Payroll record has no organization');
+    }
+    await requireOrgAdmin(ctx, args.requesterId, record.organizationId);
+
+    if (record.status === 'paid') {
+      throw new Error('Cannot delete a paid payroll record');
+    }
+
+    const runId = record.payrollRunId;
+
+    await ctx.db.delete(args.payrollRecordId);
+
+    const payslips = await ctx.db
+      .query('payslips')
+      .withIndex('by_payroll_record', (q) => q.eq('payrollRecordId', args.payrollRecordId))
+      .collect();
+
+    for (const payslip of payslips) {
+      await ctx.db.delete(payslip._id);
+    }
+
+    if (runId) {
+      await recomputeRunTotals(ctx, runId);
+    }
+
+    await ctx.db.insert('payrollAuditLog', {
+      organizationId: record.organizationId,
+      userId: args.requesterId,
+      action: 'delete_record',
+      payrollRecordId: args.payrollRecordId,
+      payrollRunId: runId ?? undefined,
+      details: 'Payroll record deleted',
+      metadata: {
+        snapshot: {
+          userId: record.userId,
+          baseSalary: record.baseSalary,
+          grossSalary: record.grossSalary,
+          netSalary: record.netSalary,
+          status: record.status,
+        },
+      },
+      createdAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+export const saveSalarySettings = mutation({
+  args: {
+    requesterId: v.id('users'),
+    organizationId: v.id('organizations'),
+    taxCountry: v.union(v.literal('armenia'), v.literal('russia')),
+    taxRegion: v.optional(v.string()),
+    payFrequency: v.union(v.literal('monthly'), v.literal('biweekly'), v.literal('weekly')),
+    currency: v.optional(v.string()),
+    minimumWage: v.optional(v.number()),
+    maximumOvertime: v.optional(v.number()),
+    emailNotifications: v.optional(v.boolean()),
+    notifyOnCreate: v.optional(v.boolean()),
+    notifyOnApprove: v.optional(v.boolean()),
+    notifyOnPay: v.optional(v.boolean()),
+    notifyEmployee: v.optional(v.boolean()),
+    accountingSystem: v.optional(v.string()),
+    paymentMethod: v.optional(v.string()),
+    bankName: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireOrgAdmin(ctx, args.requesterId, args.organizationId);
+
+    if (args.minimumWage !== undefined && args.minimumWage < 0) {
+      throw new Error('Minimum wage cannot be negative');
+    }
+    if (args.maximumOvertime !== undefined && args.maximumOvertime < 0) {
+      throw new Error('Maximum overtime cannot be negative');
+    }
+
+    const { requesterId: _requesterId, ...settingsArgs } = args;
+
+    const existing = await ctx.db
+      .query('salarySettings')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        ...settingsArgs,
+        updatedAt: now,
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert('salarySettings', {
+      ...settingsArgs,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
