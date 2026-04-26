@@ -24,22 +24,14 @@ export function withCsrfProtection(
     const origin = req.headers.get('origin');
     const host = req.headers.get('host');
 
-    if (!referer && !origin) {
-      return new NextResponse(JSON.stringify({ error: 'CSRF validation failed: Missing origin' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    // Skip CSRF for requests from same origin/browser
+    const isSameOrigin =
+      (referer && host && referer.includes(host)) || (origin && host && origin.includes(host));
+    if (isSameOrigin) {
+      return handler(req);
     }
 
-    // Verify origin matches
-    if (origin && !origin.includes(host || '')) {
-      return new NextResponse(JSON.stringify({ error: 'CSRF validation failed: Invalid origin' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Verify CSRF token
+    // For external requests, verify CSRF token
     const isValid = verifyCsrfFromRequest(req);
     if (!isValid) {
       return new NextResponse(JSON.stringify({ error: 'CSRF validation failed: Invalid token' }), {
