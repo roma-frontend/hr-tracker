@@ -255,8 +255,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                     </div>
                     {record.overtimeMinutes && record.overtimeMinutes > 0 && (
                       <p className="text-xs text-sky-400 mt-1">
-                        +{formatDuration(record.overtimeMinutes)}{' '}
-                        {t('attendanceExtra.overtime') || 'overtime'}
+                        +{formatDuration(record.overtimeMinutes)} {t('attendanceExtra.overtime')}
                       </p>
                     )}
                   </div>
@@ -305,7 +304,7 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                     <div className="text-center">
                       <p className="text-xl font-bold text-orange-500">{monthlyStats.lateDays}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {t('attendanceExtra.lateDays') || 'Late days'}
+                        {t('attendanceExtra.lateDays')}
                       </p>
                     </div>
                   </div>
