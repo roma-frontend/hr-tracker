@@ -30,7 +30,7 @@ const getInitialLanguage = () => {
   // Check for cookie first (works on both server and client)
   if (typeof document !== 'undefined') {
     const match = document.cookie.match(/i18nextLng=(en|hy|ru)/);
-    if (match && ['en', 'hy', 'ru'].includes(match[1])) {
+    if (match && match[1] && ['en', 'hy', 'ru'].includes(match[1])) {
       return match[1];
     }
   }
