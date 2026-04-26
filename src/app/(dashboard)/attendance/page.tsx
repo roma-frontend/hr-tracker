@@ -602,7 +602,7 @@ export default function AttendancePage() {
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-linear-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white text-sm font-bold">
+                          <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) flex items-center justify-center text-white text-sm font-bold">
                             {employee.avatarUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img

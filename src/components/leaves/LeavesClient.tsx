@@ -12,7 +12,7 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -33,7 +33,6 @@ import {
 import dynamic from 'next/dynamic';
 import { playNotificationSound, sendBrowserNotification } from '@/lib/notificationSound';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
-import { ShieldLoader } from '../ui/ShieldLoader';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { useOptimisticLeaveActions } from '@/hooks/useOptimisticActions';
 

@@ -27,22 +27,28 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
           console.log('🔄 Restoring language from localStorage:', savedLang);
           i18n.changeLanguage(savedLang).then(() => {
             console.log('✅ Language restored successfully:', savedLang);
+            // Set cookie for SSR compatibility
+            document.cookie = `i18nextLng=${savedLang};path=/;max-age=${60 * 60 * 24 * 365}`;
             // Force re-render by setting ready state
             setIsReady(true);
           });
           return; // Exit early, setIsReady called in promise
         } else {
           console.log('✅ Language already matches localStorage:', savedLang);
+          // Set cookie for SSR compatibility
+          document.cookie = `i18nextLng=${savedLang};path=/;max-age=${60 * 60 * 24 * 365}`;
         }
       } else if (!savedLang) {
         // If no saved language, save current language
         const langToSave = currentLang || 'en';
         localStorage.setItem('i18nextLng', langToSave);
+        document.cookie = `i18nextLng=${langToSave};path=/;max-age=${60 * 60 * 24 * 365}`;
         console.log('💾 Initialized localStorage with:', langToSave);
       } else {
         console.warn('⚠️ Invalid language in localStorage:', savedLang, '- resetting to en');
         localStorage.setItem('i18nextLng', 'en');
         i18n.changeLanguage('en');
+        document.cookie = `i18nextLng=en;path=/;max-age=${60 * 60 * 24 * 365}`;
       }
     }
     setIsReady(true);

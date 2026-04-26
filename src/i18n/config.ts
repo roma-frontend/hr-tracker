@@ -25,13 +25,13 @@ if (typeof window !== 'undefined') {
   i18n.use(LanguageDetector);
 }
 
-// Get language from localStorage if available
+// Get language from cookie (SSR-compatible) or fallback to 'en'
 const getInitialLanguage = () => {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('i18nextLng');
-    if (saved && ['en', 'hy', 'ru'].includes(saved)) {
-      console.log('🔄 config.ts: Loading saved language:', saved);
-      return saved;
+  // Check for cookie first (works on both server and client)
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/i18nextLng=(en|hy|ru)/);
+    if (match && ['en', 'hy', 'ru'].includes(match[1])) {
+      return match[1];
     }
   }
   return 'en';
@@ -54,13 +54,12 @@ i18n
 
     // Client-side language detection
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
+      order: ['cookie', 'localStorage', 'navigator', 'htmlTag'],
+      lookupCookie: 'i18nextLng',
       lookupLocalStorage: 'i18nextLng',
-      caches: ['localStorage'],
+      caches: ['localStorage', 'cookie'],
       // Custom detection function
       lookupQuerystring: 'lng',
-      lookupCookie: 'i18next',
-      lookupSessionStorage: 'i18nextLng',
     },
 
     // SSR support
