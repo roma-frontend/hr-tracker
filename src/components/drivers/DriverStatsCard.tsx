@@ -184,7 +184,7 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
           <CardContent className="px-3 py-2 pb-3">
             <div className="text-xl sm:text-2xl font-bold text-(--text-primary)">N/A</div>
             <p className="text-[10px] sm:text-xs text-(--text-muted) mt-1">
-              Distance tracking coming soon
+              {t('driver.distanceTrackingSoon')}
             </p>
           </CardContent>
         </Card>

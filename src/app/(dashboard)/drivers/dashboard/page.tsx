@@ -151,7 +151,7 @@ export default function DriverDashboardPage() {
   return (
     <div className="max-w-400 mx-auto px-3 sm:px-4 lg:px-6">
       {/* Header */}
-      <div className="sticky top-0 z-10 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 mb-4 sm:mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+      <div className="-mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 mb-4 sm:mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div
           className="relative p-4 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden"
           style={{

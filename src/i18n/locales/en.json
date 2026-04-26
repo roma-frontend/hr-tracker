@@ -4482,6 +4482,7 @@
     "currentLocation": "Current Location",
     "clickOnMap": "Click on map to select location",
     "driver": "Driver",
+    "distanceTrackingSoon": "Distance tracking coming soon",
     "registerDriver": "Register as Driver",
     "registerDriverDesc": "Register your vehicle to start accepting trip requests",
     "vehicleInfoTitle": "Vehicle Information",
