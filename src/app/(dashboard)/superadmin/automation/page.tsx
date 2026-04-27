@@ -120,7 +120,7 @@ export default function AutomationPage() {
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
+            <h1 className="text-2xl sm:text-3xl font-bold text-(--text-primary)">
               {t('superadmin.automation.title') || 'Automation Dashboard'}
             </h1>
             <p className="text-sm text-(--text-muted) mt-1">

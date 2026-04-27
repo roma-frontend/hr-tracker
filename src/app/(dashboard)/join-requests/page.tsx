@@ -171,7 +171,7 @@ export default function JoinRequestsPage() {
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-(--text-primary) flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-(--text-primary) flex items-center gap-2">
               {t('joinRequestsPage.title')}
               {(pendingCount ?? 0) > 0 && (
                 <span className="ml-1 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white">
@@ -268,9 +268,7 @@ export default function JoinRequestsPage() {
                       ).toLowerCase(),
                     })}
               </p>
-              <p className="text-xs text-(--text-muted)">
-                {t('joinRequestsPage.shareInviteLink')}
-              </p>
+              <p className="text-xs text-(--text-muted)">{t('joinRequestsPage.shareInviteLink')}</p>
               {filter === 'pending' && (
                 <p className="text-xs text-(--text-muted) pt-2 border-t border-(--border)">
                   {t('joinRequestsPage.tipCheckFilters')}

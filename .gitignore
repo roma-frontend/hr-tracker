@@ -129,4 +129,6 @@ check-*.js
 .claude/
 .agents/
 skills-lock.json
+AGENTS.md
+CLAUDE.md
 src/app/api/csrf-token/

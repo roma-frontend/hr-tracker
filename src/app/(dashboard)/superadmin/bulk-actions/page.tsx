@@ -144,7 +144,7 @@ export default function BulkActionsPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex flex-col">
               <h1
-                className="text-2xl md:text-4xl font-bold mb-2"
+                className="text-2xl sm:text-3xl font-bold mb-2"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {t('superadmin.bulkActions.title')}

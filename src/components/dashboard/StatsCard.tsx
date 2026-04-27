@@ -130,7 +130,7 @@ export const StatsCard = memo(
                   {prefix}
                 </span>
               )}
-              <span className="text-xl sm:text-xl font-bold text-(--text-primary) tabular-nums">
+              <span className="text-xl sm:text-xl md:text-2xl font-bold text-(--text-primary) tabular-nums">
                 {typeof value === 'number' ? animatedValue.toLocaleString() : value}
               </span>
               {suffix && (

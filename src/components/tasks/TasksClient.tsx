@@ -162,7 +162,7 @@ function DeadlineBadge({ deadline, status }: { deadline?: number; status: Status
   if (soon)
     return (
       <span className="text-xs font-medium text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">
-        âš¡ {dateStr}
+        📅 {dateStr}
       </span>
     );
   return <span className="text-xs text-(--text-muted)">📅 {dateStr}</span>;
@@ -260,7 +260,6 @@ function TaskCardContent({ task, isDragging = false }: { task: any; isDragging?:
   );
 }
 
-// â”€â”€ Draggable Task Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) {
   const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -296,7 +295,6 @@ function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) 
   );
 }
 
-// â”€â”€ Droppable Kanban Column â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DroppableKanbanColumn({
   status,
   tasks,
@@ -346,7 +344,6 @@ function DroppableKanbanColumn({
   );
 }
 
-// â”€â”€ List Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TaskRow({ task, onOpen }: { task: any; onOpen: () => void }) {
   const { t } = useTranslation();
   const statusCfg = STATUS_CONFIG[task.status as Status];
@@ -561,14 +558,14 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1
-              className="text-2xl sm:text-3xl font-bold tracking-tight"
+              className="text-2xl font-bold tracking-tight"
               style={{ color: 'var(--text-primary)' }}
             >
               {userRole === 'employee' || userRole === 'driver'
                 ? t('tasksClient.myTasks')
                 : t('tasksClient.taskManager')}
             </h1>
-            <p className="mt-1 text-sm sm:text-base" style={{ color: 'var(--text-muted)' }}>
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
               {userRole === 'employee' || userRole === 'driver'
                 ? t('tasksClient.trackAssignments')
                 : t('tasksClient.assignMonitor')}

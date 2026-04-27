@@ -107,7 +107,7 @@ export default function HelpSupportPage() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h1
-                  className="text-2xl md:text-3xl lg:text-4xl font-bold"
+                  className="text-2xl sm:text-3xl font-bold"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   {t('help.title')}
@@ -127,9 +127,9 @@ export default function HelpSupportPage() {
                   </Badge>
                 )}
               </div>
-              <p className="text-sm md:text-base text-muted-foreground">{t('help.subtitle')}</p>
+              <p className="text-sm sm:text-base text-muted-foreground">{t('help.subtitle')}</p>
               {userOrg?.plan === 'starter' && (
-                <p className="text-xs md:text-sm text-orange-600 mt-2">
+                <p className="text-xs sm:text-sm text-orange-600 mt-2">
                   ⚠️ {t('help.planLimit.starter')}
                 </p>
               )}
@@ -423,7 +423,6 @@ function QuickHelpCard({
   );
 }
 
-
 // Plan Card Component
 function PlanCard({
   name,
@@ -438,7 +437,6 @@ function PlanCard({
   current?: boolean;
   recommended?: boolean;
 }) {
-
   const { t } = useTranslation();
 
   return (

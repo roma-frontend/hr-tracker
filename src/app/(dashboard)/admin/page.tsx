@@ -76,7 +76,7 @@ export default function AdminPage() {
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-(--text-primary) flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text-primary) flex items-center gap-2">
             <Shield className="w-6 h-6 text-(--primary)" />
             {t('admin.superadminPanel')}
           </h1>

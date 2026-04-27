@@ -150,7 +150,7 @@ export default function EmergencyDashboardPage() {
             <div>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                 <h1
-                  className="text-2xl sm:text-3xl md:text-4xl font-bold"
+                  className="text-2xl sm:text-3xl font-bold"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   {t('superadmin.emergency.title')}
