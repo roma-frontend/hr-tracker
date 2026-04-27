@@ -21,6 +21,8 @@ import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { SmartEmailInput } from '@/components/auth/SmartEmailInput';
 import { SmartPasswordInput } from '@/components/auth/SmartPasswordInput';
 import { SmartErrorMessage, parseAuthError } from '@/components/auth/SmartErrorMessage';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 function MaintenanceBanner() {
   const { t } = useTranslation();
@@ -381,8 +383,6 @@ export default function LoginPage() {
           return;
         }
 
-        console.log('✅ Login successful:', result);
-
         if (!result.session) {
           throw new Error('No session data in response');
         }
@@ -416,11 +416,9 @@ export default function LoginPage() {
         }
 
         // Redirect to dashboard or callback URL
-        console.log('🔄 Redirecting to dashboard...');
         const params = new URLSearchParams(window.location.search);
         const nextUrl = params.get('next');
         const redirectUrl = nextUrl || '/dashboard';
-        console.log('🔄 Redirect URL:', redirectUrl);
         window.location.href = redirectUrl;
       } catch (err) {
         console.error('❌ Login failed:', err);
@@ -644,7 +642,7 @@ export default function LoginPage() {
                       className="space-y-3"
                     >
                       <div>
-                        <input
+                        <Input
                           ref={totpInputRef}
                           type="text"
                           inputMode={isBackupCode ? 'text' : 'numeric'}
@@ -683,17 +681,17 @@ export default function LoginPage() {
                       </AnimatePresence>
 
                       {isBackupCode && (
-                        <button
+                        <Button
                           type="submit"
                           className="w-full py-2 rounded-xl font-semibold text-sm text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
                         >
                           Verify Backup Code
-                        </button>
+                        </Button>
                       )}
                     </form>
 
                     <div className="text-center space-y-2">
-                      <button
+                      <Button
                         type="button"
                         onClick={() => {
                           setIsBackupCode(!isBackupCode);
@@ -705,9 +703,9 @@ export default function LoginPage() {
                         style={{ color: '#2563eb' }}
                       >
                         {isBackupCode ? 'Use authenticator code instead' : 'Use a backup code'}
-                      </button>
+                      </Button>
                       <br />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => {
                           setTwoFactorPending(false);
@@ -720,7 +718,7 @@ export default function LoginPage() {
                         style={{ color: 'var(--text-muted)' }}
                       >
                         Back to login
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -730,7 +728,7 @@ export default function LoginPage() {
                       className="flex gap-2 mb-4 p-1 rounded-xl"
                       style={{ background: 'var(--muted)' }}
                     >
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setLoginMode('email')}
                         className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center justify-center ${
@@ -744,8 +742,8 @@ export default function LoginPage() {
                       >
                         <Mail className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">{t('auth.email')}</span>
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
                         onClick={() => setLoginMode('face')}
                         className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center justify-center ${
@@ -758,8 +756,8 @@ export default function LoginPage() {
                       >
                         <ScanFace className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">{t('auth.faceId')}</span>
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
                         onClick={() => setLoginMode('touch')}
                         className={`flex-1 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center justify-center ${
@@ -773,7 +771,7 @@ export default function LoginPage() {
                       >
                         <Fingerprint className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">Touch ID</span>
-                      </button>
+                      </Button>
                     </div>
 
                     {/* Face ID Login */}
@@ -851,7 +849,7 @@ export default function LoginPage() {
                         </AnimatePresence>
 
                         {/* Submit */}
-                        <button
+                        <Button
                           type="submit"
                           disabled={isPending}
                           className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-2 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
@@ -864,7 +862,7 @@ export default function LoginPage() {
                           ) : (
                             t('auth.signIn')
                           )}
-                        </button>
+                        </Button>
                       </form>
                     )}
                   </>
@@ -894,13 +892,14 @@ export default function LoginPage() {
                     id="create-org-btn"
                     data-translate-id={t('auth.createOrgLink')}
                   >
-                    <button
+                    <Button
+                      variant="link"
                       className="text-xs font-semibold hover:underline"
                       style={{ color: '#047857' }}
                       aria-label={t('auth.createNewOrganization', 'Create new organization')}
                     >
                       🏢 {t('auth.createNewOrganization')}
-                    </button>
+                    </Button>
                   </Link>
                 </div>
               </div>

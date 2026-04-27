@@ -30,6 +30,9 @@ import { I18nProvider } from '@/components/I18nProvider';
 import { SmartEmailInput } from '@/components/auth/SmartEmailInput';
 import { SmartPasswordInput } from '@/components/auth/SmartPasswordInput';
 import { SmartErrorMessage, parseAuthError } from '@/components/auth/SmartErrorMessage';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface OrgResult {
@@ -446,17 +449,15 @@ function RegisterPageContent() {
                     )}
                   </AnimatePresence>
 
-                  <motion.button
+                  <Button
                     type="button"
                     onClick={handleOrgNext}
                     disabled={!selectedOrg && !inviteToken}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
                     className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('auth.continue', 'Continue')}
                     <ChevronRight className="w-4 h-4" />
-                  </motion.button>
+                  </Button>
                 </motion.div>
               )}
 
@@ -485,12 +486,12 @@ function RegisterPageContent() {
 
                   {/* Name */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    <Label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {t('auth.fullName')}
-                    </label>
+                    </Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
-                      <input
+                      <Input
                         type="text"
                         required
                         value={formData.name}
@@ -526,12 +527,12 @@ function RegisterPageContent() {
 
                   {/* Phone */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    <Label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {t('auth.phoneOptional')}
-                    </label>
+                    </Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
-                      <input
+                      <Input
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
@@ -566,11 +567,9 @@ function RegisterPageContent() {
                   </AnimatePresence>
 
                   {/* Submit */}
-                  <motion.button
+                  <Button
                     type="submit"
                     disabled={isPending}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
                     className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
                   >
                     {isPending ? (
@@ -581,7 +580,7 @@ function RegisterPageContent() {
                     ) : (
                       t('auth.requestToJoin', 'Request to Join')
                     )}
-                  </motion.button>
+                  </Button>
                 </motion.form>
               )}
             </AnimatePresence>
@@ -605,12 +604,13 @@ function RegisterPageContent() {
                 <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
               </div>
               <Link href="/register-org">
-                <button
+                <Button
+                  variant="link"
                   className="text-sm font-semibold hover:underline"
                   style={{ color: '#10b981' }}
                 >
                   🏢 {t('register.createOrgWithPlan')}
-                </button>
+                </Button>
               </Link>
             </div>
           </div>
