@@ -258,7 +258,7 @@ export default function RequestOrgPage() {
                       id="teamSize"
                       value={formData.teamSize}
                       onChange={(e) => setFormData((p) => ({ ...p, teamSize: e.target.value }))}
-                      className="w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none transition-all appearance-none bg-[var(--input)]"
+                      className="w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none transition-all appearance-none bg-(--input)"
                       style={{
                         borderColor: 'var(--border)',
                         color: 'var(--text-primary)',
