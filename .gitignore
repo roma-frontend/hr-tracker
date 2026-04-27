@@ -124,4 +124,9 @@ audit-*.js
 add-*.js
 fix-*.js
 check-*.js
+
+# AI assistant local configs
+.claude/
+.agents/
+skills-lock.json
 src/app/api/csrf-token/
