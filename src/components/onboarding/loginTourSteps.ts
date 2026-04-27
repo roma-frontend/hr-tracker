@@ -46,7 +46,7 @@ export const loginTourSteps: TourStep[] = [
     highlight: true,
   },
   {
-    target: '#create-org-link',
+    target: '#create-org-btn',
     title: '🏢 Создать организацию',
     description: 'Создайте свою организацию и пригласите сотрудников',
     placement: 'right',
