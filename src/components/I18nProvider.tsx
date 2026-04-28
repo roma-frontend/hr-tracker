@@ -15,18 +15,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       const savedLang = localStorage.getItem('i18nextLng');
       const currentLang = i18n.language;
 
-      console.log('🔄 I18nProvider mounted:');
-      console.log('   - localStorage has:', savedLang);
-      console.log('   - i18n.language is:', currentLang);
-
       // Check if saved language is valid
       const validLanguages = ['en', 'hy', 'ru'];
 
       if (savedLang && validLanguages.includes(savedLang)) {
         if (savedLang !== currentLang) {
-          console.log('🔄 Restoring language from localStorage:', savedLang);
           i18n.changeLanguage(savedLang).then(() => {
-            console.log('✅ Language restored successfully:', savedLang);
             // Set cookie for SSR compatibility
             document.cookie = `i18nextLng=${savedLang};path=/;max-age=${60 * 60 * 24 * 365}`;
             // Force re-render by setting ready state
@@ -34,7 +28,6 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
           });
           return; // Exit early, setIsReady called in promise
         } else {
-          console.log('✅ Language already matches localStorage:', savedLang);
           // Set cookie for SSR compatibility
           document.cookie = `i18nextLng=${savedLang};path=/;max-age=${60 * 60 * 24 * 365}`;
         }
@@ -43,7 +36,6 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         const langToSave = currentLang || 'en';
         localStorage.setItem('i18nextLng', langToSave);
         document.cookie = `i18nextLng=${langToSave};path=/;max-age=${60 * 60 * 24 * 365}`;
-        console.log('💾 Initialized localStorage with:', langToSave);
       } else {
         console.warn('⚠️ Invalid language in localStorage:', savedLang, '- resetting to en');
         localStorage.setItem('i18nextLng', 'en');
