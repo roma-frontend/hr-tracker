@@ -510,6 +510,13 @@ export const deleteMessage = mutation({
           deletedAt: Date.now(),
           content: 'This message was deleted',
         });
+
+        // Update conversation's lastMessageText to show deletion
+        if (msg.conversationId) {
+          await ctx.db.patch(msg.conversationId, {
+            lastMessageText: 'This message was deleted',
+          });
+        }
         return;
       }
 
@@ -530,6 +537,13 @@ export const deleteMessage = mutation({
         deletedAt: Date.now(),
         content: 'This message was deleted',
       });
+
+      // Update conversation's lastMessageText to show deletion
+      if (msg.conversationId) {
+        await ctx.db.patch(msg.conversationId, {
+          lastMessageText: 'This message was deleted',
+        });
+      }
     } else {
       // Delete only for current user
       const existing: Id<'users'>[] = (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];

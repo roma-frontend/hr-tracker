@@ -54,10 +54,14 @@ export default function ChatClient({
 
   // Respect org selector: if a specific org is selected (e.g. superadmin), use it
   const { selectedOrgId } = useOrgSelectorStore();
-  // For superadmins, don't pass organizationId - they see all conversations they're members of
-  const effectiveOrgId = userRole === 'superadmin' ? undefined : (selectedOrgId ? (selectedOrgId as Id<'organizations'>) : orgId);
-
-  console.log('[ChatClient] userRole:', userRole, 'effectiveOrgId:', effectiveOrgId);
+  // If superadmin has selected an org, filter by that org; otherwise show all
+  const effectiveOrgId = userRole === 'superadmin' && selectedOrgId
+    ? (selectedOrgId as Id<'organizations'>)
+    : userRole === 'superadmin'
+      ? undefined
+      : selectedOrgId
+        ? (selectedOrgId as Id<'organizations'>)
+        : orgId;
 
   const conversations = useQuery(
     api.chat.queries.getMyConversations,
@@ -242,6 +246,11 @@ export default function ChatClient({
             }}
             onDelete={async (convId) => {
               await deleteConversationMutation({ conversationId: convId, userId: uid });
+              // Clear selected conversation to show initial empty state
+              if (selectedConvId === convId) {
+                setSelectedConvId(null);
+                setMobileShowChat(false);
+              }
             }}
             onRestore={async (convId) => {
               await restoreConversationMutation({ conversationId: convId, userId: uid });

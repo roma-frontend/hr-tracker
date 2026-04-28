@@ -198,6 +198,13 @@ export const deleteMessage = mutation({
     if (message.senderId !== userId) throw new Error('Can only delete your own messages');
 
     await ctx.db.patch(messageId, { isDeleted: true, deletedAt: Date.now() });
+
+    // Update conversation's lastMessageText to show deletion
+    if (message.conversationId) {
+      await ctx.db.patch(message.conversationId, {
+        lastMessageText: 'This message was deleted',
+      });
+    }
   },
 });
 

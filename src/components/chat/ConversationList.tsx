@@ -363,9 +363,8 @@ export const ConversationList = React.memo(function ConversationList({
                       ?.user?.name?.split(' ')[0] ?? '')
                   : '';
           const deletedMessages = ['This message was deleted', 'Это сообщение было удалено', 'Այս հաղորդագրությունը ջնջված է'];
-          const rawLastText = deletedMessages.includes(conv.lastMessageText || '')
-            ? ''
-            : conv.lastMessageText;
+          const isDeleted = deletedMessages.includes(conv.lastMessageText || '');
+          const rawLastText = isDeleted ? '' : conv.lastMessageText;
 
           // Remove sender prefix for System Announcements (in case it's still there)
           let displayLastText = rawLastText;
@@ -382,7 +381,7 @@ export const ConversationList = React.memo(function ConversationList({
           const lastMsgPreview = isSystemAnnouncements
             ? t('maintenance.notificationLabel') // Show translated label for System Announcements instead of message text
             : displayLastText
-              ? senderName && !isSystemAnnouncements
+              ? senderName && !isSystemAnnouncements && !isDeleted
                 ? `${senderName}: ${displayLastText}`
                 : displayLastText
               : isGroup
@@ -499,10 +498,13 @@ export const ConversationList = React.memo(function ConversationList({
                               }}
                             >
                               {lastSenderAvatar ? (
-                                <img
+                                <Image  
                                   src={lastSenderAvatar}
                                   alt=""
+                                  width={16}
+                                  height={16}
                                   className="w-full h-full object-cover"
+                                  unoptimized
                                 />
                               ) : (
                                 lastSenderInitial
@@ -520,7 +522,7 @@ export const ConversationList = React.memo(function ConversationList({
                               : 'var(--text-muted)',
                           }}
                         >
-                          {conv.membership.isDeleted
+                          {isDeleted
                             ? t('chat.deleted') || '[Удалено]'
                             : lastMsgPreview}
                         </p>
