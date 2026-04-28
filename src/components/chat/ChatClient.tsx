@@ -55,13 +55,14 @@ export default function ChatClient({
   // Respect org selector: if a specific org is selected (e.g. superadmin), use it
   const { selectedOrgId } = useOrgSelectorStore();
   // If superadmin has selected an org, filter by that org; otherwise show all
-  const effectiveOrgId = userRole === 'superadmin' && selectedOrgId
-    ? (selectedOrgId as Id<'organizations'>)
-    : userRole === 'superadmin'
-      ? undefined
-      : selectedOrgId
-        ? (selectedOrgId as Id<'organizations'>)
-        : orgId;
+  const effectiveOrgId =
+    userRole === 'superadmin' && selectedOrgId
+      ? (selectedOrgId as Id<'organizations'>)
+      : userRole === 'superadmin'
+        ? undefined
+        : selectedOrgId
+          ? (selectedOrgId as Id<'organizations'>)
+          : orgId;
 
   const conversations = useQuery(
     api.chat.queries.getMyConversations,
@@ -139,6 +140,15 @@ export default function ChatClient({
     }
   }, [selectedConvId]);
 
+  // Clear selected conversation when organization changes
+  useEffect(() => {
+    if (selectedConvId) {
+      setSelectedConvId(null);
+      setMobileShowChat(false);
+      setChatVisible(false);
+    }
+  }, [effectiveOrgId]);
+
   // Global notification sound for new messages in ANY conversation
   const previousTotalUnreadRef = useRef<number | null>(null);
 
@@ -160,7 +170,7 @@ export default function ChatClient({
     if (totalUnread > previousTotalUnreadRef.current) {
       // Skip if the currently open ChatWindow will handle the sound itself
       const isActiveConvHandlingSound = selectedConvId != null;
-           if (!isActiveConvHandlingSound) {
+      if (!isActiveConvHandlingSound) {
         playChatMessageSound();
       }
     }
@@ -350,5 +360,3 @@ function EmptyState({ onNewConversation }: { onNewConversation: () => void }) {
     </div>
   );
 }
-
-

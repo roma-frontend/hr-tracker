@@ -36,7 +36,32 @@ export const getOrCreateDM = mutation({
       .withIndex('by_dm_key', (q) => q.eq('dmKey', dmKey))
       .first();
 
-    if (existing) return existing._id;
+    if (existing) {
+      // Check if the conversation was soft-deleted by either user
+      const currentMember = await ctx.db
+        .query('chatMembers')
+        .withIndex('by_conversation_user', (q) =>
+          q.eq('conversationId', existing._id).eq('userId', args.currentUserId),
+        )
+        .first();
+      const targetMember = await ctx.db
+        .query('chatMembers')
+        .withIndex('by_conversation_user', (q) =>
+          q.eq('conversationId', existing._id).eq('userId', args.targetUserId),
+        )
+        .first();
+
+      // If current user deleted, restore their member record so conversation appears
+      // Do NOT restore messages - user deleted them intentionally
+      if (currentMember?.isDeleted) {
+        await ctx.db.patch(currentMember._id, {
+          isDeleted: false,
+          deletedAt: undefined,
+        });
+      }
+
+      return existing._id;
+    }
 
     const now = Date.now();
     const convId = await ctx.db.insert('chatConversations', {
@@ -511,11 +536,43 @@ export const deleteMessage = mutation({
           content: 'This message was deleted',
         });
 
-        // Update conversation's lastMessageText to show deletion
+        // Update conversation's lastMessageText to show deletion or find new last message
         if (msg.conversationId) {
-          await ctx.db.patch(msg.conversationId, {
-            lastMessageText: 'This message was deleted',
-          });
+          const conv = await ctx.db.get(msg.conversationId);
+          if (conv) {
+            const isLastMessage = conv.lastMessageAt === msg.createdAt;
+
+            if (isLastMessage) {
+              const allMessages = await ctx.db
+                .query('chatMessages')
+                .withIndex('by_conversation_created', (q) =>
+                  q.eq('conversationId', msg.conversationId),
+                )
+                .order('desc')
+                .take(10);
+
+              const nextValidMsg = allMessages.find((m) => m._id !== msg._id && !m.isDeleted);
+
+              if (nextValidMsg) {
+                const preview = nextValidMsg.content?.slice(0, 100) || 'Message';
+                await ctx.db.patch(msg.conversationId, {
+                  lastMessageText: preview,
+                  lastMessageAt: nextValidMsg.createdAt,
+                  lastMessageSenderId: nextValidMsg.senderId,
+                });
+              } else {
+                await ctx.db.patch(msg.conversationId, {
+                  lastMessageText: undefined,
+                  lastMessageAt: undefined,
+                  lastMessageSenderId: undefined,
+                });
+              }
+            } else {
+              await ctx.db.patch(msg.conversationId, {
+                lastMessageText: 'This message was deleted',
+              });
+            }
+          }
         }
         return;
       }
@@ -538,11 +595,43 @@ export const deleteMessage = mutation({
         content: 'This message was deleted',
       });
 
-      // Update conversation's lastMessageText to show deletion
+      // Update conversation's lastMessageText to show deletion or find new last message
       if (msg.conversationId) {
-        await ctx.db.patch(msg.conversationId, {
-          lastMessageText: 'This message was deleted',
-        });
+        const conv = await ctx.db.get(msg.conversationId);
+        if (conv) {
+          const isLastMessage = conv.lastMessageAt === msg.createdAt;
+
+          if (isLastMessage) {
+            const allMessages = await ctx.db
+              .query('chatMessages')
+              .withIndex('by_conversation_created', (q) =>
+                q.eq('conversationId', msg.conversationId),
+              )
+              .order('desc')
+              .take(10);
+
+            const nextValidMsg = allMessages.find((m) => m._id !== msg._id && !m.isDeleted);
+
+            if (nextValidMsg) {
+              const preview = nextValidMsg.content?.slice(0, 100) || 'Message';
+              await ctx.db.patch(msg.conversationId, {
+                lastMessageText: preview,
+                lastMessageAt: nextValidMsg.createdAt,
+                lastMessageSenderId: nextValidMsg.senderId,
+              });
+            } else {
+              await ctx.db.patch(msg.conversationId, {
+                lastMessageText: undefined,
+                lastMessageAt: undefined,
+                lastMessageSenderId: undefined,
+              });
+            }
+          } else {
+            await ctx.db.patch(msg.conversationId, {
+              lastMessageText: 'This message was deleted',
+            });
+          }
+        }
       }
     } else {
       // Delete only for current user
@@ -551,6 +640,42 @@ export const deleteMessage = mutation({
         await ctx.db.patch(args.messageId, {
           deletedForUsers: [...existing, args.userId],
         });
+
+        // If this was the last message, find new last message
+        if (msg.conversationId) {
+          const conv = await ctx.db.get(msg.conversationId);
+          if (conv && conv.lastMessageAt === msg.createdAt) {
+            const allMessages = await ctx.db
+              .query('chatMessages')
+              .withIndex('by_conversation_created', (q) =>
+                q.eq('conversationId', msg.conversationId),
+              )
+              .order('desc')
+              .take(10);
+
+            const nextValidMsg = allMessages.find((m) => {
+              if (m._id === msg._id) return false;
+              const delForUsers: Id<'users'>[] =
+                (m.deletedForUsers as Id<'users'>[] | undefined) ?? [];
+              return !delForUsers.includes(args.userId) && !m.isDeleted;
+            });
+
+            if (nextValidMsg) {
+              const preview = nextValidMsg.content?.slice(0, 100) || 'Message';
+              await ctx.db.patch(msg.conversationId, {
+                lastMessageText: preview,
+                lastMessageAt: nextValidMsg.createdAt,
+                lastMessageSenderId: nextValidMsg.senderId,
+              });
+            } else {
+              await ctx.db.patch(msg.conversationId, {
+                lastMessageText: undefined,
+                lastMessageAt: undefined,
+                lastMessageSenderId: undefined,
+              });
+            }
+          }
+        }
       }
     }
 
@@ -583,6 +708,44 @@ export const deleteMessageForMe = mutation({
       await ctx.db.patch(args.messageId, {
         deletedForUsers: [...existing, args.userId],
       });
+
+      // If this was the last message for this conversation, find new last message
+      if (msg.conversationId) {
+        const conv = await ctx.db.get(msg.conversationId);
+        if (conv && conv.lastMessageAt === msg.createdAt) {
+          const allMessages = await ctx.db
+            .query('chatMessages')
+            .withIndex('by_conversation_created', (q) => q.eq('conversationId', msg.conversationId))
+            .order('desc')
+            .take(50);
+
+          let nextValidMsg = null;
+          for (const m of allMessages) {
+            if (m._id === msg._id) continue;
+            const delForUsers: Id<'users'>[] =
+              (m.deletedForUsers as Id<'users'>[] | undefined) ?? [];
+            if (!delForUsers.includes(args.userId) && !m.isDeleted) {
+              nextValidMsg = m;
+              break;
+            }
+          }
+
+          if (nextValidMsg) {
+            const preview = nextValidMsg.content?.slice(0, 100) || 'Message';
+            await ctx.db.patch(msg.conversationId, {
+              lastMessageText: preview,
+              lastMessageAt: nextValidMsg.createdAt,
+              lastMessageSenderId: nextValidMsg.senderId,
+            });
+          } else {
+            await ctx.db.patch(msg.conversationId, {
+              lastMessageText: undefined,
+              lastMessageAt: undefined,
+              lastMessageSenderId: undefined,
+            });
+          }
+        }
+      }
 
       // Audit log: message deleted for me
       await ctx.db.insert('auditLogs', {
@@ -1081,6 +1244,13 @@ export const deleteConversation = mutation({
       isDeleted: true,
       deletedAt: Date.now(),
       unreadCount: 0,
+    });
+
+    // Clear lastMessageText on conversation so it doesn't show in other user's list
+    await ctx.db.patch(args.conversationId, {
+      lastMessageText: undefined,
+      lastMessageAt: undefined,
+      lastMessageSenderId: undefined,
     });
 
     // Hide all existing messages from this user (clear chat history for them)

@@ -20,6 +20,7 @@ import {
   Clock,
   BarChart2,
   Mic,
+  ChevronDown,
 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import Link from 'next/link';
@@ -96,9 +97,10 @@ export const ChatWindow = React.memo(function ChatWindow({
   const [isRecording, setIsRecording] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesParentRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const messages = (useQuery as any)((api.chat.queries as any).getMessages, {
     conversationId,
@@ -135,13 +137,6 @@ export const ChatWindow = React.memo(function ChatWindow({
   });
   const pinnedMessages = useQuery(api.chat.queries.getPinnedMessages, { conversationId });
   const currentUser = useQuery(api.users.queries.getUserById, { userId: currentUserId });
-  const searchResults = useQuery(
-    api.chat.queries.searchMessages,
-    showSearch && searchQuery.length > 1
-      ? { conversationId, userId: currentUserId, query: searchQuery }
-      : 'skip',
-  );
-
   // Merge real messages with optimistic messages for instant UI feedback
   const allMessages = React.useMemo(() => {
     const real = dedupedMessages ?? [];
@@ -151,6 +146,14 @@ export const ChatWindow = React.memo(function ChatWindow({
     const pendingOptimistic = optimistic.filter((m: any) => !realIds.has(m._id));
     return [...real, ...pendingOptimistic];
   }, [dedupedMessages, optMessages]);
+
+  // Memoize search results independently
+  const searchResults = useQuery(
+    api.chat.queries.searchMessages,
+    showSearch && searchQuery.length > 1
+      ? { conversationId, userId: currentUserId, query: searchQuery }
+      : 'skip',
+  );
 
   // Virtualization for messages
   const virtualizer = useVirtualizer({
@@ -166,7 +169,9 @@ export const ChatWindow = React.memo(function ChatWindow({
   const conv = conversation?.find((c) => c != null && c._id === conversationId) ?? null;
   const otherUser = conv?.type === 'direct' ? (conv as any).otherUser : null;
   const displayName =
-    conv?.type === 'group' ? ((conv as any).name ?? 'Group') : (otherUser?.name ?? 'Chat');
+    conv?.type === 'group'
+      ? ((conv as any).name ?? t('chat.defaultGroupName'))
+      : (otherUser?.name ?? t('chat.defaultChatName'));
   const otherMembers = members?.filter((m) => m.userId !== currentUserId) ?? [];
   const otherMemberIds = otherMembers.map((m: any) => m.userId as Id<'users'>);
 
@@ -205,6 +210,19 @@ export const ChatWindow = React.memo(function ChatWindow({
     }
   }, [allMessages]);
 
+  // Detect scroll position to show/hide scroll down button
+  useEffect(() => {
+    const parent = messagesParentRef.current;
+    if (!parent) return;
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = parent;
+      setShowScrollDown(scrollHeight - scrollTop - clientHeight > 300);
+    };
+    parent.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => parent.removeEventListener('scroll', handleScroll);
+  }, [allMessages]);
+
   const handleTyping = useCallback(() => {
     setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: true });
     if (isTypingTimeout) clearTimeout(isTypingTimeout);
@@ -220,6 +238,13 @@ export const ChatWindow = React.memo(function ChatWindow({
     if (!files.length) return;
     // reset input so same file can be picked again
     e.target.value = '';
+
+    const MAX_SIZE = 1 * 1024 * 1024; // 1MB
+    const tooBig = files.filter((f) => f.size > MAX_SIZE);
+    if (tooBig.length > 0) {
+      alert(t('chat.fileSizeLimit'));
+      return;
+    }
 
     const newPending: PendingFile[] = files.map((file: any) => ({
       file,
@@ -415,10 +440,15 @@ export const ChatWindow = React.memo(function ChatWindow({
     }, 0);
   };
 
-  // â”€â”€ Voice Message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleVoiceMessage = useCallback(
     async (blob: Blob, duration: number) => {
       try {
+        const MAX_SIZE = 1 * 1024 * 1024; // 1MB
+        if (blob.size > MAX_SIZE) {
+          alert(t('chat.voiceSizeLimit'));
+          return;
+        }
+
         // Convert blob to base64 (without data URL prefix)
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
@@ -471,11 +501,16 @@ export const ChatWindow = React.memo(function ChatWindow({
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value);
-    handleTyping();
 
-    // Use CSS-based auto-resize to avoid forced reflow
-    // The textarea uses CSS max-height and resize: none with overflow-y: auto
-    // No JS height calculation needed
+    // Send typing indicator only once when user starts typing after pause
+    if (value.trim() && !isTypingTimeout) {
+      setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: true });
+      const t = setTimeout(() => {
+        setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: false });
+        setIsTypingTimeout(null);
+      }, 3000);
+      setIsTypingTimeout(t);
+    }
 
     // Detect @mention — look backward from cursor for '@'
     const cursorPos = e.target.selectionStart;
@@ -881,6 +916,18 @@ export const ChatWindow = React.memo(function ChatWindow({
           </div>
         )}
 
+        {/* Scroll down button */}
+        {showScrollDown && (
+          <button
+            onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+            className="absolute bottom-20 right-4 w-10 h-10 rounded-full shadow-lg flex items-center justify-center animate-fade-in z-30"
+            style={{ background: 'var(--primary)', color: 'white' }}
+            title="Scroll to bottom"
+          >
+            <ChevronDown className="w-5 h-5" />
+          </button>
+        )}
+
         {/* Pending file previews */}
         {pendingFiles.length > 0 && (
           <div
@@ -978,7 +1025,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               onClick={() => setReplyTo(null)}
               className="w-5 h-5 flex items-center justify-center rounded-full hover:opacity-70 shrink-0"
             >
-              âœ•
+              ✕
             </button>
           </div>
         )}
@@ -1005,7 +1052,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                 className="text-[9px] hover:opacity-70"
                 style={{ color: 'var(--text-muted)' }}
               >
-                âœ•
+                <X className="w-3 h-3" />
               </button>
             </div>
             <input
@@ -1031,7 +1078,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                     onClick={() => setPollOptions(pollOptions.filter((_, j) => j !== i))}
                     className="text-red-400 hover:opacity-70 px-1"
                   >
-                    âœ•
+                    ✕
                   </button>
                 )}
               </div>
@@ -1091,7 +1138,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               className="text-[9px] hover:opacity-70"
               style={{ color: 'var(--text-muted)' }}
             >
-              âœ•
+              ✕
             </button>
           </div>
         )}
@@ -1245,7 +1292,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                     pendingFiles.length > 0 ? t('chat.addCaption') : t('chat.messagePlaceholder')
                   }
                   rows={1}
-                  className="w-full resize-none bg-transparent outline-none text-xs xs:text-sm leading-5"
+                  className="w-full resize-none bg-transparent outline-none text-xs xs:text-sm leading-5 self-center"
                   style={{ color: 'var(--text-primary)', maxHeight: '120px' }}
                 />
               </div>
@@ -1309,7 +1356,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               </button>
             </div>
             <p
-              className="text-[10px] xs:text-[12px] mt-1 text-center"
+              className="text-[11px] xs:text-[12px] mt-1 text-center"
               style={{ color: 'var(--text-disabled)' }}
             >
               {t('chat.enterHint')}
@@ -1328,10 +1375,10 @@ export const ChatWindow = React.memo(function ChatWindow({
                 className="text-xs xs:text-sm font-medium"
                 style={{ color: 'var(--text-primary)' }}
               >
-                🔒 Read-Only Channel
+                {t('chat.readOnlyChannel')}
               </p>
-              <p className="text-[9px] xs:text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                This is an information-only channel. Messages are sent by administrators only.
+              <p className="text-[11px] xs:text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                {t('chat.readOnlyChannelDesc')}
               </p>
             </div>
           </div>

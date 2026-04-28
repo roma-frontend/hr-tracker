@@ -367,12 +367,16 @@ export const MessageBubble = React.memo(function MessageBubble({
   const pinMessage = useMutation(api.chat.mutations.pinMessage);
   const votePoll = useMutation(api.chat.mutations.votePoll);
   const closePoll = useMutation(api.chat.mutations.closePoll);
+  const { toggleOptimistic: toggleOptimisticReaction } = useOptimisticReaction(
+    message._id,
+    currentUserId,
+  );
 
   // Extract URL from content for link preview
   const urlInContent = message.content ? extractUrl(message.content) : null;
 
   // Detect if conversation is direct (single receipt entry possible)
-  const isDirect = true; // passed from parent ideally; assume true for now
+  const isDirect = true;
 
   if (message.isDeleted) {
     return (
@@ -483,15 +487,16 @@ export const MessageBubble = React.memo(function MessageBubble({
     );
   }
 
-  const { toggleOptimistic: toggleOptimisticReaction } = useOptimisticReaction(message._id, currentUserId);
-
   const handleReaction = async (emoji: string) => {
     // Sanitize emoji to remove spaces and control characters
     const sanitizedEmoji = emoji.replace(/[\s\x00-\x1F\x7F]/g, '');
     if (!sanitizedEmoji) return; // Skip if emoji becomes empty after sanitization
 
     try {
-      await toggleOptimisticReaction(sanitizedEmoji, (message.reactions?.[emojiToKey(sanitizedEmoji)] ?? []) as Id<"users">[]);
+      await toggleOptimisticReaction(
+        sanitizedEmoji,
+        (message.reactions?.[emojiToKey(sanitizedEmoji)] ?? []) as Id<'users'>[],
+      );
     } catch (err) {
       console.error('Reaction failed:', err);
     }
@@ -511,13 +516,13 @@ export const MessageBubble = React.memo(function MessageBubble({
   };
 
   const handleDeleteForEveryone = async () => {
-    await deleteMessage({ messageId: message._id, userId: currentUserId });
+    await deleteMessage({ messageId: message._id, userId: currentUserId, deleteForEveryone: true });
     setShowDeleteDialog(false);
     setShowMenu(false);
   };
 
   const handleDeleteForMe = async () => {
-    await deleteMessageForMe({ messageId: message._id, userId: currentUserId });
+    await deleteMessage({ messageId: message._id, userId: currentUserId });
     setShowDeleteDialog(false);
     setShowMenu(false);
   };
@@ -565,53 +570,54 @@ export const MessageBubble = React.memo(function MessageBubble({
       )}
 
       {/* Delete dialog - use portal to render outside virtual list */}
-      {showDeleteDialog && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in overflow-auto">
-          <div
-            className="rounded-2xl shadow-2xl border p-5 w-72 max-h-[90vh] overflow-auto flex flex-col gap-3 animate-slide-up my-4"
-            style={{ background: 'var(--background)', borderColor: 'var(--border)' }}
-          >
-            <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-              {L.deleteMsg}
-            </h3>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {L.deleteDesc}
-            </p>
-            <div className="flex flex-col gap-2">
-              <Button onClick={handleDeleteForMe} variant="outline" className="w-full text-sm">
-                {L.deleteForMe}
-              </Button>
-              {isOwn && withinFiveMin && (
-                <Button
-                  onClick={handleDeleteForEveryone}
-                  variant="destructive"
-                  className="w-full text-sm"
-                >
-                  {L.deleteForEveryone}
-                </Button>
-              )}
-              {isOwn && !withinFiveMin && (
-                <p className="text-[11px] text-center" style={{ color: 'var(--text-disabled)' }}>
-                  {L.canOnlyDelete}
-                </p>
-              )}
-            </div>
-            <Button
-              onClick={() => setShowDeleteDialog(false)}
-              variant="ghost"
-              className="text-xs hover:opacity-70 transition-opacity"
+      {showDeleteDialog &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in overflow-auto">
+            <div
+              className="rounded-2xl shadow-2xl border p-5 w-72 max-h-[90vh] overflow-auto flex flex-col gap-3 animate-slide-up my-4"
+              style={{ background: 'var(--background)', borderColor: 'var(--border)' }}
             >
-              {L.cancel}
-            </Button>
-          </div>
-        </div>,
-        document.body,
-      )}
+              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                {L.deleteMsg}
+              </h3>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {L.deleteDesc}
+              </p>
+              <div className="flex flex-col gap-2">
+                <Button onClick={handleDeleteForMe} variant="outline" className="w-full text-sm">
+                  {L.deleteForMe}
+                </Button>
+                {isOwn && withinFiveMin && (
+                  <Button
+                    onClick={handleDeleteForEveryone}
+                    variant="destructive"
+                    className="w-full text-sm"
+                  >
+                    {L.deleteForEveryone}
+                  </Button>
+                )}
+                {isOwn && !withinFiveMin && (
+                  <p className="text-[11px] text-center" style={{ color: 'var(--text-disabled)' }}>
+                    {L.canOnlyDelete}
+                  </p>
+                )}
+              </div>
+              <Button
+                onClick={() => setShowDeleteDialog(false)}
+                variant="ghost"
+                className="text-xs hover:opacity-70 transition-opacity"
+              >
+                {L.cancel}
+              </Button>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* Message row */}
       <div
         className={cn(
-          'flex items-end gap-2 my-0.5 group animate-msg-in overflow-x-hidden',
+          'flex items-end gap-2 my-0.5 group animate-msg-in',
           isOwn ? 'flex-row-reverse' : 'flex-row',
         )}
         onMouseEnter={() => {
@@ -619,7 +625,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         }}
         onMouseLeave={() => {
-          // Delay closing to allow moving to menu
+          // Delay closing to allow moving to the menu
           hoverTimeoutRef.current = setTimeout(() => {
             setShowActions(false);
           }, 100);
@@ -976,7 +982,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         />
                         <div className="relative flex items-center justify-between px-2.5 xs:px-3 py-2 min-h-9 xs:min-h-[32px]">
                           <span
-                            className="text-[10px] xs:text-[11px] font-medium flex items-center gap-1 truncate max-w-[75%]"
+                            className="text-[11px] xs:text-[12px] font-medium flex items-center gap-1 truncate max-w-[75%]"
                             style={{ color: isVoted ? 'var(--primary)' : 'var(--text-primary)' }}
                           >
                             {isVoted && (
@@ -1288,4 +1294,3 @@ function MenuItem({
     </button>
   );
 }
-

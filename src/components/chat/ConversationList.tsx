@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -68,6 +68,27 @@ interface Props {
 
 type FilterType = 'all' | 'chat' | 'unread' | 'groups' | 'pinned' | 'archived';
 
+const CHAT_FILTER_KEY = 'chat_filters';
+
+function getStoredFilters(): FilterType[] {
+  if (typeof window === 'undefined') return ['chat'];
+  const stored = localStorage.getItem(CHAT_FILTER_KEY);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch {
+      // If not valid JSON, treat as single filter
+      if (['all', 'chat', 'unread', 'groups', 'pinned', 'archived'].includes(stored)) {
+        return [stored as FilterType];
+      }
+    }
+  }
+  return ['chat'];
+}
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -112,11 +133,27 @@ export const ConversationList = React.memo(function ConversationList({
 }: Props) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<FilterType>('chat');
+  const [activeFilters, setActiveFilters] = useState<FilterType[]>(getStoredFilters);
   const [loadingOpId, setLoadingOpId] = useState<string | null>(null);
   const filtersRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Persist filter to localStorage
+  useEffect(() => {
+    localStorage.setItem(CHAT_FILTER_KEY, activeFilters[0] || 'chat');
+  }, [activeFilters]);
+
+  const toggleFilter = (f: FilterType) => {
+    setActiveFilters((prev) => {
+      if (prev.includes(f)) {
+        // Don't allow deselecting if it's the last filter
+        if (prev.length === 1) return prev;
+        return prev.filter((filter) => filter !== f);
+      }
+      return [...prev, f];
+    });
+  };
 
   // Handle wheel scroll for filters
   const handleFilterWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -162,21 +199,33 @@ export const ConversationList = React.memo(function ConversationList({
     if (!matchesSearch) return false;
 
     const isHidden = c.membership.isArchived || c.isArchived;
+    const isUnread = c.membership.unreadCount > 0 && !c.membership.isDeleted;
+    const isPinned = c.isPinned && !isHidden && !c.membership.isDeleted;
+    const isDirect = c.type === 'direct' && !isHidden && !c.membership.isDeleted;
+    const isGroup = c.type === 'group' && !isHidden && !c.membership.isDeleted;
+    const isArchived = c.membership.isDeleted || isHidden;
+    const isActive = !isHidden && !c.membership.isDeleted;
 
-    switch (filter) {
-      case 'chat':
-        return c.type === 'direct' && !isHidden && !c.membership.isDeleted;
-      case 'unread':
-        return c.membership.unreadCount > 0 && !isHidden && !c.membership.isDeleted;
-      case 'groups':
-        return c.type === 'group' && !isHidden && !c.membership.isDeleted;
-      case 'pinned':
-        return c.isPinned && !isHidden && !c.membership.isDeleted;
-      case 'archived':
-        return c.membership.isDeleted || isHidden;
-      default:
-        return !isHidden && !c.membership.isDeleted; // "all" shows non-archived/deleted only
-    }
+    // If no filters active, show all active
+    if (activeFilters.length === 0) return isActive;
+
+    // Match if any filter matches
+    return activeFilters.some((f) => {
+      switch (f) {
+        case 'chat':
+          return isDirect;
+        case 'unread':
+          return isUnread;
+        case 'groups':
+          return isGroup;
+        case 'pinned':
+          return isPinned;
+        case 'archived':
+          return isArchived;
+        default:
+          return isActive;
+      }
+    });
   });
 
   const totalUnread = conversations.reduce((s, c) => s + (c.membership.unreadCount ?? 0), 0);
@@ -278,18 +327,17 @@ export const ConversationList = React.memo(function ConversationList({
             return (
               <button
                 key={f}
-                onClick={() => setFilter(f)}
+                onClick={() => toggleFilter(f)}
                 className={cn(
                   'px-3 py-1 text-xs rounded-full whitespace-nowrap transition-all shrink-0 active:scale-95',
-                  filter === f
+                  activeFilters.includes(f)
                     ? 'text-white shadow-md'
                     : 'text-gray-500 opacity-60 hover:opacity-100',
                 )}
                 style={{
-                  background:
-                    filter === f
-                      ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)'
-                      : 'transparent',
+                  background: activeFilters.includes(f)
+                    ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)'
+                    : 'transparent',
                   cursor: 'pointer',
                 }}
                 title={f === 'archived' ? 'Archived conversations - tap to restore' : undefined}
@@ -362,31 +410,35 @@ export const ConversationList = React.memo(function ConversationList({
                       ?.find((m) => m.userId === conv.lastMessageSenderId)
                       ?.user?.name?.split(' ')[0] ?? '')
                   : '';
-          const deletedMessages = ['This message was deleted', 'Это сообщение было удалено', 'Այս հաղորդագրությունը ջնջված է'];
+          const deletedMessages = [
+            'This message was deleted',
+            'Это сообщение было удалено',
+            'Այս հաղորդագրությունը ջնջված է',
+          ];
           const isDeleted = deletedMessages.includes(conv.lastMessageText || '');
           const rawLastText = isDeleted ? '' : conv.lastMessageText;
 
           // Remove sender prefix for System Announcements (in case it's still there)
           let displayLastText = rawLastText;
           if (isSystemAnnouncements && displayLastText) {
-            // Strip "Name: " from beginning if present
             const match = displayLastText.match(/^[^:]*:\s*/);
             if (match) {
               displayLastText = displayLastText.substring(match[0].length);
             }
-            // Also strip common time patterns that appear in maintenance messages
             displayLastText = displayLastText.replace(/^\d{1,2}\s*[AP]M\s*🔔?\s*/, '');
           }
 
           const lastMsgPreview = isSystemAnnouncements
-            ? t('maintenance.notificationLabel') // Show translated label for System Announcements instead of message text
-            : displayLastText
-              ? senderName && !isSystemAnnouncements && !isDeleted
-                ? `${senderName}: ${displayLastText}`
-                : displayLastText
-              : isGroup
-                ? `${conv.memberCount ?? 2} ${t('chat.members')}`
-                : t('chat.startConversationHint');
+            ? t('maintenance.notificationLabel')
+            : isDeleted
+              ? t('chat.deleted') || 'This message was deleted'
+              : displayLastText
+                ? senderName && !isSystemAnnouncements && !isDeleted
+                  ? `${senderName}: ${displayLastText}`
+                  : displayLastText
+                : isGroup
+                  ? `${conv.memberCount ?? 2} ${t('chat.members')}`
+                  : t('chat.startConversationHint');
 
           // Last message sender avatar (for groups, but NOT for System Announcements)
           const lastSenderMember =
@@ -498,7 +550,7 @@ export const ConversationList = React.memo(function ConversationList({
                               }}
                             >
                               {lastSenderAvatar ? (
-                                <Image  
+                                <Image
                                   src={lastSenderAvatar}
                                   alt=""
                                   width={16}
@@ -522,9 +574,7 @@ export const ConversationList = React.memo(function ConversationList({
                               : 'var(--text-muted)',
                           }}
                         >
-                          {isDeleted
-                            ? t('chat.deleted') || '[Удалено]'
-                            : lastMsgPreview}
+                          {isDeleted ? t('chat.deleted') || '[Удалено]' : lastMsgPreview}
                         </p>
                       </div>
                       {unread > 0 && !conv.membership.isMuted && (
@@ -539,7 +589,7 @@ export const ConversationList = React.memo(function ConversationList({
                   </div>
 
                   {/* Action buttons for archived/deleted items (visible without right-click) */}
-                  {filter === 'archived' && (
+                  {activeFilters.includes('archived') && (
                     <div className="flex items-center gap-1 shrink-0 ml-1">
                       {conv.membership.isDeleted ? (
                         <button

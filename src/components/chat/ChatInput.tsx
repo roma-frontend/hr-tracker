@@ -180,7 +180,7 @@ export function ChatInput({
               pendingFilesCount > 0 ? t('chat.addCaption') : t('chat.messagePlaceholder')
             }
             rows={1}
-            className="w-full resize-none bg-transparent outline-none text-xs xs:text-sm leading-5"
+            className="w-full resize-none bg-transparent outline-none text-xs xs:text-sm leading-5 self-center"
             style={{ color: 'var(--text-primary)', maxHeight: '120px' }}
           />
         </div>
@@ -246,7 +246,7 @@ export function ChatInput({
         </button>
       </div>
       <p
-        className="text-[10px] xs:text-[12px] mt-1 text-center"
+        className="text-[11px] xs:text-[12px] mt-1 text-center"
         style={{ color: 'var(--text-disabled)' }}
       >
         {t('chat.enterHint')}
