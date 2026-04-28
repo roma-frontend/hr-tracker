@@ -942,7 +942,7 @@ export function ChatWidget() {
         <>
           {/* Pulsing animation background */}
           <motion.div
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary/20"
+            className="fixed bottom-6 right-6 z-50 w-10 sm:w-14 h-10 sm:h-14 rounded-full bg-primary/20"
             animate={{
               scale: [1, 1.2, 1] as any,
               opacity: [0.7, 0, 0.7] as any,
@@ -990,7 +990,7 @@ export function ChatWidget() {
               // Reset hint timer when user opens chat
               setLastActivityTime(Date.now());
             }}
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center gap-2 justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+            className="fixed bottom-6 right-6 z-50 w-10 sm:w-14 h-10 sm:h-14 rounded-full flex items-center gap-2 justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
             whileTap={{ scale: 0.95 }}
           >
             <AnimatePresence mode="wait">
@@ -1012,7 +1012,7 @@ export function ChatWidget() {
                   exit={{ rotate: -90, opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <Sparkles className="w-6 h-6" />
+                  <Sparkles className="w-4 sm:w-6 h-4 sm:h-6" />
                 </motion.div>
               )}
             </AnimatePresence>
