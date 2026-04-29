@@ -212,7 +212,7 @@ const getInitialSuggestions = (role: UserRole | undefined): string[] => {
 };
 
 export function ChatWidget() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -1167,7 +1167,13 @@ export function ChatWidget() {
                                         📅{' '}
                                         {new Date(
                                           (action as BookDriverAction).startTime,
-                                        ).toLocaleString()}
+                                        ).toLocaleString(
+                                          i18n.language === 'ru'
+                                            ? 'ru-RU'
+                                            : i18n.language === 'hy'
+                                              ? 'hy-AM'
+                                              : 'en-US',
+                                        )}
                                       </p>
                                       <p>
                                         📍 {(action as BookDriverAction).from} →{' '}
