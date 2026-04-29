@@ -47,7 +47,7 @@ function formatDuration(min: number) {
 // Months will be translated using i18n in the component
 
 export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.toISOString().slice(0, 7));
 
@@ -262,11 +262,18 @@ export function EmployeeAttendanceDrawer({ employee, onClose }: Props) {
                       ? (record.totalWorkedMinutes / 60).toFixed(1)
                       : null;
                     const dateObj = new Date(record.date + 'T00:00:00');
-                    const dayLabel = dateObj.toLocaleDateString('en-GB', {
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short',
-                    });
+                    const dayLabel = dateObj.toLocaleDateString(
+                      i18n?.language === 'ru'
+                        ? 'ru-RU'
+                        : i18n?.language === 'hy'
+                          ? 'hy-AM'
+                          : 'en-GB',
+                      {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                      },
+                    );
 
                     return (
                       <div

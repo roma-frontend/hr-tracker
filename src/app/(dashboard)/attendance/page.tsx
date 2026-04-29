@@ -75,7 +75,7 @@ interface EmployeeNeedingRating {
 }
 
 export default function AttendancePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
   const [selectedEmployee, setSelectedEmployee] = useState<{
@@ -274,11 +274,14 @@ export default function AttendancePage() {
                 <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                   <Users className="w-5 h-5 text-blue-500" />
                   {t('attendance.todaysAttendance')} —{' '}
-                  {new Date().toLocaleDateString('en-GB', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                  })}
+                  {new Date().toLocaleDateString(
+                    i18n?.language === 'ru' ? 'ru-RU' : i18n?.language === 'hy' ? 'hy-AM' : 'en-GB',
+                    {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                    },
+                  )}
                   <Badge className="ml-0 sm:ml-auto bg-blue-500/10 text-blue-500 border-blue-500/30">
                     {todayAllAttendance.length} {t('common.recorded', 'recorded')}
                   </Badge>
