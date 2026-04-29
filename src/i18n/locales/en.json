@@ -1277,6 +1277,16 @@
     "recentLeaves": "Recent Leaves",
     "noRecentLeaves": "No recent leaves",
     "recentRequests": "Recent Requests",
+    "hello": [
+      "Hi! How can I help you today?",
+      "Hello! What can I do for you?",
+      "Hey! I'm here to help. What do you need?"
+    ],
+    "hints": {
+      "help": "Need help? I'm here!",
+      "leaveRequest": "Try /leave to request time off",
+      "reports": "Ask me about team reports"
+    },
     "daysWorked": "days worked",
     "totalHours": "total hours",
     "punctuality": "punctuality",
@@ -1549,6 +1559,10 @@
     "employeeType": "Employee Type",
     "travelAllowance": "Travel Allowance",
     "enterDetails": "Enter the employee details",
+    "aboutHours": "about {{count}} hours",
+    "aboutDays": "about {{count}} days",
+    "about1Hour": "about 1 hour",
+    "about1Day": "about 1 day",
     "contractorHint": "Add \"contractor\" in email if this is a contractor (auto-detected)",
     "adding": "Adding...",
     "staff": "Staff",
