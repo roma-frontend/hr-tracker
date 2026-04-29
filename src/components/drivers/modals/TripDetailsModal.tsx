@@ -122,7 +122,7 @@ export function TripDetailsModal({
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="w-full h-full flex flex-col"
     >
-      <div className="bg-(--card) rounded-2xl shadow-2xl overflow-hidden w-full h-full flex flex-col">
+      <div className="rounded-2xl shadow-2xl overflow-hidden w-full h-full flex flex-col">
         {/* Header with gradient */}
         <div
           className={`relative p-6 shrink-0 ${
@@ -173,7 +173,7 @@ export function TripDetailsModal({
         </div>
 
         {/* Content - Scrollable area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="bg-(--card) flex-1 overflow-y-auto p-6 space-y-5">
           {isTrip && schedule.tripInfo && (
             <>
               {/* Route */}

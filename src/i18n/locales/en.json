@@ -3350,6 +3350,7 @@
     "seconds": "seconds",
     "ago": "ago",
     "justNow": "Just now",
+    "hoursAgo": "{{count}} hours ago",
     "selectDateRange": "Select date range"
   },
   "filters": {

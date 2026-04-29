@@ -3372,6 +3372,7 @@
     "seconds": "секунд",
     "ago": "назад",
     "justNow": "Только что",
+    "hoursAgo": "{{count}} ч. назад",
     "selectDateRange": "Выберите диапазон дат"
   },
   "filters": {

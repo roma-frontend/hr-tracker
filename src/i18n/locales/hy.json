@@ -3197,6 +3197,7 @@
     "seconds": "վայրկյաններ",
     "ago": "առաջ",
     "justNow": "Հենց նոր",
+    "hoursAgo": "{{count}} ժ առաջ",
     "selectDateRange": "Ընտրել ամսաթվերի միջակայք"
   },
   "filters": {
