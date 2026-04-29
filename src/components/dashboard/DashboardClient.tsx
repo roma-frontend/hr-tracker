@@ -250,7 +250,7 @@ export default function DashboardClient() {
           d.getMonth()
         ] ?? 'jan';
       months[key] = {
-        month: t(`common.months.${monthKey}`),
+        month: t(`months.${monthKey}`),
         approved: 0,
         pending: 0,
         rejected: 0,
