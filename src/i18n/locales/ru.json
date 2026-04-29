@@ -2032,7 +2032,10 @@
     "design": "Дизайн",
     "management": "Менеджмент",
     "legal": "Юридический",
-    "it": "IT"
+    "it": "IT",
+    "itSupport": "IT поддержка",
+    "customerService": "Клиентский сервис",
+    "administrative": "Административный"
   },
   "taskStatus": {
     "pending": "Ожидает",

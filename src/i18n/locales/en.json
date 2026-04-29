@@ -2034,7 +2034,10 @@
     "design": "Design",
     "management": "Management",
     "legal": "Legal",
-    "it": "IT"
+    "it": "IT",
+    "itSupport": "IT Support",
+    "customerService": "Customer Service",
+    "administrative": "Administrative"
   },
   "taskStatus": {
     "pending": "Pending",

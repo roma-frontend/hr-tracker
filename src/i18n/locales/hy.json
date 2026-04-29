@@ -1881,12 +1881,15 @@
     "hr": "Կադրեր",
     "finance": "Ֆինանսներ",
     "marketing": "Շուկայավարում",
-    "operations": "Գործառնություններ",
+    "operations": "Գործառնություն",
     "sales": "Վաճառք",
     "design": "Դիզայն",
     "management": "Կառավարում",
     "legal": "Իրավաբանական",
-    "it": "ՏՏ"
+    "it": "ՏՏ",
+    "itSupport": "IT սպասարկում",
+    "customerService": "Հաճախորդների սպասարկում",
+    "administrative": "Ադմինիստրատիվ"
   },
   "taskStatus": {
     "pending": "Սպասման մեջ",
