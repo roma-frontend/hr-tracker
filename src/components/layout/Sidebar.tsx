@@ -13,7 +13,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
   Building2,
   UserCheck,
   BarChart3,
@@ -31,6 +30,14 @@ import {
   HelpCircle,
   Cpu,
   Wallet,
+  Heart,
+  ClipboardList,
+  Target,
+  PenTool,
+  Crosshair,
+  Briefcase,
+  Rocket,
+  UserMinus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/useSidebarStore';
@@ -103,6 +110,54 @@ const navItems = [
     labelKey: 'nav.tasks',
     icon: CheckSquare,
     roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
+  },
+  {
+    href: '/recognition',
+    labelKey: 'nav.recognition',
+    icon: Heart,
+    roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
+  },
+  {
+    href: '/surveys',
+    labelKey: 'nav.surveys',
+    icon: ClipboardList,
+    roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
+  },
+  {
+    href: '/performance',
+    labelKey: 'nav.performance',
+    icon: Target,
+    roles: ['superadmin', 'admin', 'supervisor', 'employee'],
+  },
+  {
+    href: '/signatures',
+    labelKey: 'nav.signatures',
+    icon: PenTool,
+    roles: ['admin', 'supervisor', 'employee'],
+  },
+  {
+    href: '/goals',
+    labelKey: 'nav.goals',
+    icon: Crosshair,
+    roles: ['admin', 'supervisor', 'employee'],
+  },
+  {
+    href: '/recruitment',
+    labelKey: 'nav.recruitment',
+    icon: Briefcase,
+    roles: ['admin', 'supervisor'],
+  },
+  {
+    href: '/onboarding',
+    labelKey: 'nav.onboarding',
+    icon: Rocket,
+    roles: ['admin', 'supervisor', 'employee'],
+  },
+  {
+    href: '/offboarding',
+    labelKey: 'nav.offboarding',
+    icon: UserMinus,
+    roles: ['admin', 'supervisor'],
   },
   {
     href: '/payroll',

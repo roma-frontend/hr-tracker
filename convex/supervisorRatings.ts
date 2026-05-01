@@ -59,6 +59,50 @@ export const createRating = mutation({
     // Update performance metrics
     await updatePerformanceMetrics(ctx, args.employeeId, args.supervisorId);
 
+    // Award points for positive review (4-5 stars overall → +3 points)
+    if (overallRating >= 4) {
+      const employee = await ctx.db.get(args.employeeId);
+      if (employee?.organizationId) {
+        const orgId = employee.organizationId;
+        const now = Date.now();
+        const REVIEW_REWARD = 3;
+
+        const userPointsRecord = await ctx.db
+          .query('userPoints')
+          .withIndex('by_org_user', (q) =>
+            q.eq('organizationId', orgId).eq('userId', args.employeeId),
+          )
+          .first();
+
+        if (userPointsRecord) {
+          await ctx.db.patch(userPointsRecord._id, {
+            balance: userPointsRecord.balance + REVIEW_REWARD,
+            totalEarned: userPointsRecord.totalEarned + REVIEW_REWARD,
+            updatedAt: now,
+          });
+        } else {
+          await ctx.db.insert('userPoints', {
+            organizationId: orgId,
+            userId: args.employeeId,
+            balance: REVIEW_REWARD,
+            totalEarned: REVIEW_REWARD,
+            totalSpent: 0,
+            updatedAt: now,
+          });
+        }
+
+        await ctx.db.insert('pointTransactions', {
+          organizationId: orgId,
+          userId: args.employeeId,
+          amount: REVIEW_REWARD,
+          type: 'earned_review',
+          description: `Positive review (${overallRating.toFixed(1)}★)`,
+          referenceId: ratingId,
+          createdAt: now,
+        });
+      }
+    }
+
     return ratingId;
   },
 });

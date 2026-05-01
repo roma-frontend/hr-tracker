@@ -72,6 +72,7 @@ export const checkIn = mutation({
     const lateMinutes = isLate ? Math.floor((now - scheduledStart) / 1000 / 60) : 0;
 
     // Create or update time tracking record
+    let recordId: Id<'timeTracking'>;
     if (existing) {
       // Update existing record
       await ctx.db.patch(existing._id, {
@@ -81,10 +82,10 @@ export const checkIn = mutation({
         lateMinutes: lateMinutes > 0 ? lateMinutes : undefined,
         updatedAt: now,
       });
-      return existing._id;
+      recordId = existing._id;
     } else {
       // Create new record
-      const id = await ctx.db.insert('timeTracking', {
+      recordId = await ctx.db.insert('timeTracking', {
         userId: args.userId,
         checkInTime: now,
         scheduledStartTime: scheduledStart,
@@ -97,8 +98,60 @@ export const checkIn = mutation({
         createdAt: now,
         updatedAt: now,
       });
-      return id;
     }
+
+    // Award attendance points (+1)
+    const user = await ctx.db.get(args.userId);
+    if (user?.organizationId) {
+      const orgId = user.organizationId;
+      const todayObj = new Date();
+      todayObj.setHours(0, 0, 0, 0);
+      const todayStart = todayObj.getTime();
+      const existingPointsToday = await ctx.db
+        .query('pointTransactions')
+        .withIndex('by_org_user_created', (q) =>
+          q.eq('organizationId', orgId).eq('userId', args.userId).gte('createdAt', todayStart),
+        )
+        .filter((q) => q.eq(q.field('type'), 'earned_attendance'))
+        .first();
+
+      if (!existingPointsToday) {
+        const userPointsRecord = await ctx.db
+          .query('userPoints')
+          .withIndex('by_org_user', (q) =>
+            q.eq('organizationId', orgId).eq('userId', args.userId),
+          )
+          .first();
+
+        if (userPointsRecord) {
+          await ctx.db.patch(userPointsRecord._id, {
+            balance: userPointsRecord.balance + 1,
+            totalEarned: userPointsRecord.totalEarned + 1,
+            updatedAt: now,
+          });
+        } else {
+          await ctx.db.insert('userPoints', {
+            organizationId: orgId,
+            userId: args.userId,
+            balance: 1,
+            totalEarned: 1,
+            totalSpent: 0,
+            updatedAt: now,
+          });
+        }
+
+        await ctx.db.insert('pointTransactions', {
+          organizationId: orgId,
+          userId: args.userId,
+          amount: 1,
+          type: 'earned_attendance',
+          description: 'Daily attendance',
+          createdAt: now,
+        });
+      }
+    }
+
+    return recordId;
   },
 });
 

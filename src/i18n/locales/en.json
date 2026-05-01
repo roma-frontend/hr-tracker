@@ -306,7 +306,10 @@
     "back": "Back",
     "next": "Next",
     "employee": "Employee",
-    "optional": "Optional"
+    "optional": "Optional",
+    "sending": "Sending...",
+    "selectAll": "Select All",
+    "deleted": "Deleted"
   },
   "nav": {
     "home": "Home",
@@ -358,6 +361,14 @@
     "aiSiteEditor": "AI Site Editor",
     "subscriptions": "Subscriptions",
     "security": "Security",
+    "recognition": "Recognition",
+    "surveys": "Surveys",
+    "performance": "Performance",
+    "signatures": "E-Signatures",
+    "goals": "OKR & Goals",
+    "recruitment": "Recruitment",
+    "onboarding": "Onboarding",
+    "offboarding": "Offboarding",
     "openMenu": "Open menu",
     "userMenu": "User menu"
   },
@@ -6305,5 +6316,753 @@
     "configureSettings": "1. Configure settings",
     "baseSalaryHint": "Enter the employee's monthly base salary before taxes and bonuses.",
     "additionsHint": "Add any bonuses or overtime hours to be included in the payroll calculation."
+  },
+  "recognition": {
+    "title": "Recognition & Kudos",
+    "subtitle": "Celebrate your colleagues' achievements and contributions",
+    "sendKudos": "Send Kudos",
+    "kudosSent": "Kudos sent successfully!",
+    "sentTo": "gave kudos to",
+    "emptyFeed": "No kudos yet",
+    "emptyFeedHint": "Be the first to recognize a colleague!",
+    "emptyLeaderboard": "No kudos data for this period",
+    "tabs": {
+      "feed": "Feed",
+      "leaderboard": "Leaderboard"
+    },
+    "stats": {
+      "received": "Kudos Received",
+      "sent": "Kudos Sent",
+      "categories": "Categories"
+    },
+    "points": {
+      "label": "pts",
+      "balance": "Points Balance",
+      "notEnough": "Not enough points to send kudos (3 pts required)",
+      "earned": "Earned",
+      "spent": "Spent",
+      "history": "Points History",
+      "attendance": "Daily attendance",
+      "review": "Positive review",
+      "manual": "Manual award",
+      "kudosSent": "Sent kudos"
+    },
+    "period": {
+      "week": "This Week",
+      "month": "This Month",
+      "quarter": "This Quarter",
+      "year": "This Year",
+      "all": "All Time"
+    },
+    "category": {
+      "teamwork": "Teamwork",
+      "innovation": "Innovation",
+      "leadership": "Leadership",
+      "dedication": "Dedication",
+      "customerFocus": "Customer Focus",
+      "mentorship": "Mentorship",
+      "excellence": "Excellence",
+      "aboveAndBeyond": "Above & Beyond"
+    },
+    "form": {
+      "recipient": "Recipient",
+      "selectRecipient": "Select a colleague...",
+      "category": "Category",
+      "message": "Message",
+      "messagePlaceholder": "Write something nice about your colleague...",
+      "publicKudos": "Show in public feed"
+    },
+    "wizard": {
+      "selectRecipientHint": "Who do you want to recognize?",
+      "selectCategoryHint": "What did they do great?"
+    },
+    "errors": {
+      "fillAllFields": "Please fill all required fields",
+      "sendFailed": "Failed to send kudos",
+      "reactFailed": "Failed to add reaction"
+    }
+  },
+  "surveys": {
+    "title": "Pulse Surveys",
+    "subtitle": "Gather employee feedback and measure engagement",
+    "createSurvey": "Create Survey",
+    "created": "Survey created successfully!",
+    "published": "Survey published!",
+    "closed": "Survey closed",
+    "deleted": "Survey deleted",
+    "responseSubmitted": "Response submitted! Thank you.",
+    "anonymous": "Anonymous",
+    "named": "Named",
+    "questionsCount": "questions",
+    "responses": "responses",
+    "results": "Results",
+    "createdBy": "Created by",
+    "take": "Take Survey",
+    "viewResults": "View Results",
+    "publish": "Publish",
+    "close": "Close Survey",
+    "delete": "Delete",
+    "createFirst": "Create your first survey",
+    "empty": "No surveys yet",
+    "yes": "Yes",
+    "no": "No",
+    "submit": "Submit Response",
+    "filter": {
+      "all": "All",
+      "active": "Active",
+      "draft": "Drafts",
+      "closed": "Closed"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "wizard": {
+      "surveyInfo": "Info",
+      "questions": "Questions",
+      "review": "Review"
+    },
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "e.g. Q4 Employee Satisfaction",
+      "description": "Description",
+      "descriptionPlaceholder": "What is this survey about?",
+      "anonymous": "Anonymous responses (respondents won't be identified)",
+      "addQuestion": "Add a question",
+      "questionTextPlaceholder": "Type your question...",
+      "addOption": "Add option...",
+      "required": "Required",
+      "addQuestionBtn": "Add Question",
+      "typePlaceholder": "Type your answer..."
+    },
+    "questionType": {
+      "rating": "Rating",
+      "multipleChoice": "Multi-choice",
+      "text": "Text",
+      "yesNo": "Yes/No",
+      "nps": "NPS"
+    },
+    "errors": {
+      "createFailed": "Failed to create survey",
+      "publishFailed": "Failed to publish survey",
+      "closeFailed": "Failed to close survey",
+      "deleteFailed": "Failed to delete survey",
+      "submitFailed": "Failed to submit response",
+      "requiredFields": "Please answer all required questions"
+    }
+  },
+  "performance": {
+    "title": "Performance Reviews",
+    "subtitle": "360° feedback cycles and performance evaluations",
+    "createCycle": "Create Review Cycle",
+    "cycleCreated": "Review cycle created successfully",
+    "cycleLaunched": "Review cycle launched! Assignments sent to participants.",
+    "cycleClosed": "Review cycle closed",
+    "cycleCancelled": "Review cycle cancelled",
+    "launchCycle": "Launch Cycle",
+    "launch": "Launch",
+    "close": "Close",
+    "fillReview": "Fill Review",
+    "submitReview": "Submit Review",
+    "reviewSubmitted": "Review submitted successfully!",
+    "reviewingEmployee": "Reviewing",
+    "selectParticipants": "Please select at least one participant",
+    "selectParticipantsHint": "Select employees to include in this review cycle",
+    "selectedCount": "Selected",
+    "noReviewsPending": "You have no pending reviews. Great job!",
+    "noCycles": "No review cycles yet. Create one to get started.",
+    "noResults": "No results yet for this cycle",
+    "overallScore": "Overall Score",
+    "reviewsCompleted": "reviews completed",
+    "competencyScores": "Competency Scores",
+    "reviews": "reviews",
+    "addCompetency": "Add Competency",
+    "totalWeight": "Total weight",
+    "peerAnonymityNotMet": "Peer reviews hidden ({{current}}/{{threshold}} minimum needed)",
+    "results": "Results",
+    "wizard": {
+      "basicInfo": "Basic Info",
+      "reviewTypes": "Review Types",
+      "competencies": "Competencies",
+      "selectTypes": "Select which types of reviews to include in this 360° cycle",
+      "defineCompetencies": "Define competencies to evaluate (weight should sum to 100%)"
+    },
+    "fields": {
+      "title": "Cycle Title",
+      "titlePlaceholder": "e.g., Q2 2026 Performance Review",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description for this cycle",
+      "type": "Cycle Type",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "peerThreshold": "Peer Anonymity Threshold",
+      "peerThresholdHint": "Minimum peer reviews required before showing results to reviewee",
+      "competencyName": "Competency name",
+      "competencyDesc": "Description",
+      "competencyComment": "Optional comment for this competency...",
+      "strengths": "Strengths",
+      "strengthsPlaceholder": "What does this person do well?",
+      "improvements": "Areas for Improvement",
+      "improvementsPlaceholder": "What could this person improve?",
+      "generalComments": "General Comments",
+      "generalCommentsPlaceholder": "Any additional feedback...",
+      "score": "Score"
+    },
+    "types": {
+      "quarterly": "Quarterly",
+      "semiAnnual": "Semi-Annual",
+      "annual": "Annual",
+      "custom": "Custom"
+    },
+    "reviewType": {
+      "self": "Self Review",
+      "selfDesc": "Employee evaluates their own performance",
+      "manager": "Manager Review",
+      "managerDesc": "Supervisor evaluates direct reports",
+      "peer": "Peer Review",
+      "peerDesc": "Colleagues evaluate each other",
+      "directReport": "Direct Report Review",
+      "directReportDesc": "Subordinates evaluate their manager"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "stats": {
+      "pending": "Pending Reviews",
+      "completed": "Completed Reviews",
+      "activeCycles": "Active Cycles"
+    },
+    "tabs": {
+      "myReviews": "My Reviews",
+      "cycles": "Cycles",
+      "results": "Results"
+    }
+  },
+  "signatures": {
+    "title": "E-Signatures",
+    "subtitle": "Create, send, and sign documents electronically",
+    "createDocument": "New Document",
+    "created": "Document sent for signing!",
+    "signed": "Document signed successfully!",
+    "declined": "Document declined",
+    "cancelled": "Document cancelled",
+    "reminderSent": "Reminder sent",
+    "send": "Send for Signing",
+    "sign": "Sign",
+    "decline": "Decline",
+    "confirmDecline": "Confirm Decline",
+    "cancel": "Cancel Document",
+    "templates": "Templates",
+    "createTemplate": "New Template",
+    "templateCreated": "Template created!",
+    "save": "Save Template",
+    "signers": "Signers",
+    "signingOrder": "Order",
+    "noDocuments": "No documents yet",
+    "noPending": "No documents to sign",
+    "noPendingHint": "You're all caught up!",
+    "noTemplates": "No templates yet",
+    "noEmployees": "No employees found",
+    "createFirst": "Create your first document",
+    "expiresOn": "Expires",
+    "auditLog": "Activity Log",
+    "consent": "By signing, you agree to be legally bound by this document.",
+    "signTitle": "Sign Document",
+    "declineTitle": "Decline Document",
+    "pad": {
+      "drawSignature": "Draw your signature below",
+      "clear": "Clear",
+      "apply": "Apply Signature",
+      "redraw": "Redraw"
+    },
+    "wizard": {
+      "documentInfo": "Document Info",
+      "signers": "Signers",
+      "review": "Review & Send",
+      "selectSigners": "Select employees who need to sign. Order determines signing sequence."
+    },
+    "fields": {
+      "title": "Document Title",
+      "titlePlaceholder": "e.g., Employment Contract — John Doe",
+      "content": "Document Content",
+      "contentPlaceholder": "Enter document text...",
+      "template": "Template (optional)",
+      "selectTemplate": "Select a template...",
+      "expiresAt": "Expiration Date (optional)",
+      "category": "Category",
+      "description": "Description",
+      "declineReason": "Reason for declining (optional)",
+      "declineReasonPlaceholder": "Explain why you are declining..."
+    },
+    "category": {
+      "nda": "NDA",
+      "offer": "Offer Letter",
+      "contract": "Contract",
+      "policy": "Policy",
+      "custom": "Custom"
+    },
+    "status": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "partially_signed": "Partially Signed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "requestStatus": {
+      "pending": "Pending",
+      "signed": "Signed",
+      "declined": "Declined",
+      "expired": "Expired"
+    },
+    "actions": {
+      "created": "Document created",
+      "sent": "Sent for signing",
+      "viewed": "Document viewed",
+      "signed": "Document signed",
+      "declined": "Document declined",
+      "cancelled": "Document cancelled",
+      "expired": "Document expired",
+      "reminder_sent": "Reminder sent"
+    },
+    "stats": {
+      "pending": "Awaiting My Signature",
+      "completed": "Completed",
+      "awaitingOthers": "Awaiting Others"
+    },
+    "tabs": {
+      "mySignatures": "My Signatures",
+      "documents": "Documents"
+    },
+    "errors": {
+      "createFailed": "Failed to create document",
+      "signFailed": "Failed to sign document",
+      "declineFailed": "Failed to decline",
+      "cancelFailed": "Failed to cancel",
+      "reminderFailed": "Failed to send reminder",
+      "templateFailed": "Failed to create template",
+      "previousSigners": "Waiting for previous signers"
+    }
+  },
+  "goals": {
+    "title": "OKR & Goals",
+    "subtitle": "Set objectives, track key results, and align your team",
+    "create": "New Objective",
+    "allPeriods": "All",
+    "empty": "No objectives yet",
+    "emptyHint": "Create your first objective to get started",
+    "overallProgress": "Overall Progress",
+    "keyResults": "Key Results",
+    "alignedGoals": "Aligned Goals",
+    "recentCheckins": "Recent Check-ins",
+    "markComplete": "Mark Complete",
+    "completed": "Objective completed!",
+    "deleted": "Objective deleted",
+    "level": {
+      "company": "Company",
+      "team": "Team",
+      "individual": "Individual"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "stats": {
+      "total": "Total Objectives",
+      "avgProgress": "Avg Progress",
+      "onTrack": "On Track",
+      "atRisk": "At Risk / Behind"
+    },
+    "tabs": {
+      "my": "My Goals",
+      "team": "Team",
+      "company": "Company"
+    },
+    "wizard": {
+      "title": "Create Objective",
+      "step1": "Basic Info",
+      "step2": "Key Results",
+      "step3": "Review",
+      "titleLabel": "Objective Title",
+      "titlePlaceholder": "e.g. Increase customer satisfaction",
+      "description": "Description",
+      "descPlaceholder": "What does achieving this look like?",
+      "level": "Level",
+      "department": "Department",
+      "deptPlaceholder": "e.g. Engineering",
+      "period": "Period",
+      "year": "Year",
+      "alignTo": "Align to Parent Objective",
+      "noAlignment": "None (top-level)",
+      "krHint": "Define measurable outcomes. Weights should sum to 100.",
+      "kr": "Key Result",
+      "krTitlePlaceholder": "e.g. Reach 95% NPS score",
+      "metric": "Metric",
+      "direction": "Direction",
+      "start": "Start",
+      "target": "Target",
+      "unit": "Unit",
+      "unitPlaceholder": "e.g. %, $, users",
+      "weight": "Weight %",
+      "addKR": "Add Key Result",
+      "weightWarning": "Weights must sum to 100. Current: {{sum}}",
+      "krSummary": "Key Results",
+      "create": "Create Objective",
+      "success": "Objective created successfully!",
+      "fillRequired": "Please fill in all required fields"
+    },
+    "metric": {
+      "number": "Number",
+      "percentage": "Percentage",
+      "currency": "Currency",
+      "boolean": "Yes/No"
+    },
+    "direction": {
+      "increase": "Increase",
+      "decrease": "Decrease"
+    },
+    "confidence": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "checkin": {
+      "title": "Check-in",
+      "btn": "Check-in",
+      "current": "Current",
+      "newValue": "New Value",
+      "target": "Target",
+      "confidence": "Confidence",
+      "note": "Note (optional)",
+      "notePlaceholder": "What progress was made?",
+      "submit": "Submit Check-in",
+      "success": "Check-in recorded",
+      "yes": "Yes",
+      "no": "No"
+    }
+  },
+  "recruitment": {
+    "title": "Recruitment",
+    "subtitle": "Manage vacancies, candidates, and hiring pipeline",
+    "createVacancy": "New Vacancy",
+    "addCandidate": "Add",
+    "candidates": "candidates",
+    "selectVacancy": "Select a vacancy to view pipeline:",
+    "empty": "No vacancies yet",
+    "noInterviews": "No upcoming interviews",
+    "scorecards": "Scorecards",
+    "interviews": "Interviews",
+    "timeline": "Timeline",
+    "status": {
+      "draft": "Draft",
+      "open": "Open",
+      "paused": "Paused",
+      "closed": "Closed"
+    },
+    "stage": {
+      "applied": "Applied",
+      "screening": "Screening",
+      "interview": "Interview",
+      "offer": "Offer",
+      "hired": "Hired",
+      "rejected": "Rejected"
+    },
+    "stats": {
+      "openVacancies": "Open Vacancies",
+      "totalCandidates": "Total Candidates",
+      "hired": "Hired",
+      "inInterview": "In Interview"
+    },
+    "tabs": {
+      "vacancies": "Vacancies",
+      "pipeline": "Pipeline",
+      "interviews": "My Interviews"
+    },
+    "wizard": {
+      "title": "Create Vacancy",
+      "step1": "Job Info",
+      "step2": "Description",
+      "step3": "Review",
+      "create": "Create Vacancy",
+      "success": "Vacancy created"
+    },
+    "fields": {
+      "title": "Job Title",
+      "titlePlaceholder": "e.g. Senior Frontend Developer",
+      "department": "Department",
+      "deptPlaceholder": "e.g. Engineering",
+      "location": "Location",
+      "locPlaceholder": "e.g. Remote / Yerevan",
+      "type": "Employment Type",
+      "description": "Job Description",
+      "descPlaceholder": "Describe the role, responsibilities...",
+      "requirements": "Requirements",
+      "reqPlaceholder": "Skills, experience, education...",
+      "salaryMin": "Min Salary",
+      "salaryMax": "Max Salary",
+      "currency": "Currency"
+    },
+    "type": {
+      "fullTime": "Full-time",
+      "partTime": "Part-time",
+      "contract": "Contract",
+      "internship": "Internship"
+    },
+    "source": {
+      "manual": "Manual",
+      "referral": "Referral",
+      "linkedin": "LinkedIn",
+      "careerPage": "Career Page",
+      "other": "Other"
+    },
+    "candidate": {
+      "addTitle": "Add Candidate",
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "source": "Source",
+      "resume": "Resume / Summary",
+      "resumePlaceholder": "Brief summary or paste resume...",
+      "add": "Add",
+      "added": "Candidate added",
+      "fillRequired": "Name and email are required",
+      "appliedTo": "Applied to",
+      "moved": "Candidate moved",
+      "rejected": "Candidate rejected",
+      "reject": "Reject"
+    },
+    "interviewType": {
+      "phone": "Phone",
+      "video": "Video",
+      "onsite": "On-site",
+      "technical": "Technical",
+      "hr": "HR"
+    },
+    "rec": {
+      "strong_yes": "Strong Yes",
+      "yes": "Yes",
+      "neutral": "Neutral",
+      "no": "No",
+      "strong_no": "Strong No"
+    }
+  },
+  "careers": {
+    "loading": "Loading...",
+    "notFound": "Page not found",
+    "notFoundHint": "This organization does not have a career page.",
+    "badge": "We're Hiring",
+    "heroTitle": "Join",
+    "heroSubtitle": "Explore open positions and become part of our team. Build something amazing together.",
+    "openPositions": "Open Positions",
+    "departments": "Departments",
+    "locations": "Locations",
+    "searchPlaceholder": "Search positions...",
+    "allDepartments": "All Departments",
+    "allTypes": "All Types",
+    "allLocations": "All Locations",
+    "clearFilters": "Clear filters",
+    "noResults": "No positions match your filters",
+    "noVacancies": "No open positions right now",
+    "checkBack": "Check back soon for new opportunities!",
+    "ctaTitle": "Don't see the right role?",
+    "ctaSubtitle": "We're always looking for talented people. Send us your resume and we'll keep you in mind for future openings.",
+    "contactUs": "Get in Touch",
+    "description": "Description",
+    "requirements": "Requirements",
+    "applyNow": "Apply Now",
+    "applied": "Application Submitted!",
+    "appliedHint": "Thank you for your interest. We'll review your application and get back to you soon.",
+    "close": "Close",
+    "backToDetails": "Back to details",
+    "applicationForm": "Your Application",
+    "formName": "Full Name",
+    "formEmail": "Email",
+    "formPhone": "Phone",
+    "formResume": "Resume / Cover Letter",
+    "resumePlaceholder": "Tell us about yourself, your experience, and why you're interested in this role...",
+    "consentText": "I agree to the processing of my personal data in accordance with the Privacy Policy. My data will be used solely for recruitment purposes.",
+    "consentRequired": "Please agree to the privacy policy",
+    "fillRequired": "Name and email are required",
+    "submitting": "Submitting...",
+    "submitApplication": "Submit Application"
+  },
+  "onboarding": {
+    "title": "Onboarding",
+    "subtitle": "Manage new hire onboarding workflows",
+    "startOnboarding": "Start Onboarding",
+    "newTemplate": "New Template",
+    "empty": "No onboarding programs yet",
+    "noTemplates": "No templates yet",
+    "started": "Started",
+    "buddy": "Buddy",
+    "manager": "Manager",
+    "tasks": "tasks",
+    "active": "Active",
+    "inactive": "Inactive",
+    "yourProgress": "Your Progress",
+    "taskCompleted": "Task completed!",
+    "programCompleted": "Onboarding completed!",
+    "completeProgram": "Complete Onboarding",
+    "addTask": "Add Task",
+    "status": {
+      "label": "Status",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "stats": {
+      "active": "Active",
+      "completed": "Completed",
+      "templates": "Templates",
+      "mentees": "My Mentees"
+    },
+    "tabs": {
+      "my": "My Onboarding",
+      "programs": "Programs",
+      "templates": "Templates"
+    },
+    "category": {
+      "documentation": "Documentation",
+      "access": "Access",
+      "training": "Training",
+      "equipment": "Equipment",
+      "intro": "Introductions",
+      "other": "Other"
+    },
+    "assigneeType": {
+      "new_hire": "New Hire",
+      "buddy": "Buddy",
+      "manager": "Manager",
+      "hr": "HR",
+      "it": "IT"
+    },
+    "wizard": {
+      "title": "Start Onboarding",
+      "step1": "Employee",
+      "step2": "Template",
+      "step3": "Details",
+      "start": "Start",
+      "success": "Onboarding started!"
+    },
+    "templateWizard": {
+      "title": "Create Template",
+      "step1": "Basic Info",
+      "step2": "Tasks",
+      "step3": "Review",
+      "create": "Create",
+      "success": "Template created!"
+    },
+    "fields": {
+      "employeeId": "Employee ID",
+      "employeeHint": "The user must already exist in the system",
+      "template": "Template",
+      "selectTemplate": "Select a template (optional)",
+      "startDate": "Start Date",
+      "managerId": "Manager ID",
+      "buddyId": "Buddy ID (optional)",
+      "templateName": "Template Name",
+      "templateNamePlaceholder": "e.g. Engineering Onboarding",
+      "description": "Description",
+      "descPlaceholder": "What is this template for?",
+      "department": "Department",
+      "deptPlaceholder": "e.g. Engineering",
+      "taskTitle": "Task title"
+    }
+  },
+  "offboarding": {
+    "title": "Offboarding",
+    "subtitle": "Manage employee departures and exit workflows",
+    "startOffboarding": "Start Offboarding",
+    "empty": "No offboarding programs",
+    "lastDay": "Last day",
+    "manager": "Manager",
+    "checklist": "Checklist",
+    "taskCompleted": "Task completed",
+    "programCompleted": "Offboarding completed",
+    "completeProgram": "Complete Offboarding",
+    "exitInterview": "Exit Interview",
+    "conductInterview": "Conduct",
+    "exitSubmitted": "Exit interview submitted",
+    "experience": "Experience",
+    "status": {
+      "label": "Status",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "reason": {
+      "label": "Reason",
+      "resignation": "Resignation",
+      "termination": "Termination",
+      "layoff": "Layoff",
+      "retirement": "Retirement",
+      "contract_end": "Contract End",
+      "other": "Other"
+    },
+    "stats": {
+      "active": "Active",
+      "completed": "Completed",
+      "avgExperience": "Avg Experience",
+      "recommendRate": "Would Recommend"
+    },
+    "tabs": {
+      "programs": "Programs",
+      "insights": "Insights"
+    },
+    "category": {
+      "access_revoke": "Access Revoke",
+      "equipment_return": "Equipment Return",
+      "knowledge_transfer": "Knowledge Transfer",
+      "documentation": "Documentation",
+      "exit_interview": "Exit Interview",
+      "payroll": "Payroll",
+      "other": "Other"
+    },
+    "assigneeType": {
+      "employee": "Employee",
+      "manager": "Manager",
+      "hr": "HR",
+      "it": "IT",
+      "finance": "Finance"
+    },
+    "insights": {
+      "reasons": "Departure Reasons",
+      "noData": "No data yet",
+      "avgScore": "Average Experience Score",
+      "totalExits": "Total Exits"
+    },
+    "wizard": {
+      "title": "Start Offboarding",
+      "step1": "Employee",
+      "step2": "Details",
+      "step3": "Confirm",
+      "start": "Start",
+      "success": "Offboarding started",
+      "confirm": "Please confirm the offboarding details:",
+      "autoTasks": "Default checklist tasks will be created automatically."
+    },
+    "fields": {
+      "employeeId": "Employee ID",
+      "managerId": "Manager ID",
+      "lastDay": "Last Working Day",
+      "reason": "Reason",
+      "note": "Note (optional)",
+      "notePlaceholder": "Additional context..."
+    },
+    "exitForm": {
+      "title": "Exit Interview Form",
+      "experience": "Overall Experience (1-5)",
+      "recommend": "Would recommend?",
+      "reason": "Primary reason for leaving",
+      "feedback": "Feedback",
+      "improvements": "Suggestions for improvement",
+      "submit": "Submit"
+    }
   }
 }

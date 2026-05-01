@@ -14,6 +14,7 @@ import {
   Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface MobileMenuProps {
@@ -31,6 +32,7 @@ const menuItemsConfig = [
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { t } = useTranslation();
+  const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -96,6 +98,11 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     onClose();
+
+    if (pathname !== '/') {
+      window.location.href = `/${href}`;
+      return;
+    }
 
     setTimeout(() => {
       const element = document.querySelector(href);

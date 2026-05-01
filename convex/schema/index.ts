@@ -21,6 +21,14 @@ import { corporate } from './corporate';
 import { conflicts } from './conflicts';
 import { ai } from './ai';
 import { payroll } from './payroll';
+import { recognition } from './recognition';
+import { surveys } from './surveys';
+import { performance } from './performance';
+import { signatures } from './signatures';
+import { goals } from './goals';
+import { recruitment } from './recruitment';
+import { onboarding } from './onboarding';
+import { offboarding } from './offboarding';
 
 export default defineSchema({
   ...organizations,
@@ -45,6 +53,14 @@ export default defineSchema({
   ...conflicts,
   ...ai,
   ...payroll,
+  ...recognition,
+  ...surveys,
+  ...performance,
+  ...signatures,
+  ...goals,
+  ...recruitment,
+  ...onboarding,
+  ...offboarding,
 });
 
 export {
@@ -70,4 +86,12 @@ export {
   conflicts,
   ai,
   payroll,
+  recognition,
+  surveys,
+  performance,
+  signatures,
+  goals,
+  recruitment,
+  onboarding,
+  offboarding,
 };

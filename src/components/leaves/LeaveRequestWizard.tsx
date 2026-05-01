@@ -487,6 +487,8 @@ function DatesStep({
   preEnd?: string;
 }) {
   const { t } = useTranslation();
+  const lang = i18n.language || 'en';
+  const dateFnsLocale = lang === 'ru' ? ru : lang === 'hy' ? hy : enUS;
   const start = startDate || preStart || '';
   const end = endDate || preEnd || '';
   const days = start && end ? calculateDays(start, end) : 0;
@@ -568,6 +570,8 @@ function DetailsStep({
   onCommentChange: (v: string) => void;
 }) {
   const { t } = useTranslation();
+  const lang = i18n.language || 'en';
+  const dateFnsLocale = lang === 'ru' ? ru : lang === 'hy' ? hy : enUS;
 
   const selectedUser = allUsers?.find((u: any) => u._id === stepData.selectedUserId);
   const displayUser = selectedUser || currentUser;

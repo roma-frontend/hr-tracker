@@ -96,7 +96,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAIChatPage = pathname?.startsWith('/ai-chat');
   const isChatPage = pathname?.startsWith('/chat') && !isAIChatPage;
-  const isOnboardingPage = pathname?.startsWith('/onboarding');
+  const isAuthOnboardingPage = pathname?.startsWith('/onboarding/select-organization') || pathname?.startsWith('/onboarding/pending');
   const redirectedRef = React.useRef(false);
   const hasHydratedRef = React.useRef(false);
 
@@ -124,14 +124,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Redirect to onboarding if user needs it (and not already on onboarding page)
   useEffect(() => {
-    if (hydrated && user && !user.organizationId && !isOnboardingPage && !redirectedRef.current) {
+    if (hydrated && user && !user.organizationId && !isAuthOnboardingPage && !redirectedRef.current) {
       redirectedRef.current = true;
       router.push('/onboarding/select-organization');
     }
-  }, [hydrated, user, isOnboardingPage, router]);
+  }, [hydrated, user, isAuthOnboardingPage, router]);
 
-  // Don't redirect to login if user is on onboarding page
-  if (isOnboardingPage) {
+  // Don't redirect to login if user is on auth onboarding page
+  if (isAuthOnboardingPage) {
     return <>{children}</>;
   }
 
@@ -148,7 +148,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   // Block dashboard access if user has no organization (onboarding required)
-  if (user && !user.organizationId && !isOnboardingPage) {
+  if (user && !user.organizationId && !isAuthOnboardingPage) {
     return (
       <div className="flex h-screen items-center justify-center bg-(--background)">
         <ShieldLoader size="lg" />

@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
-import { CreateTaskModal } from './CreateTaskModal';
+import { CreateTaskWizard } from './CreateTaskWizard';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TaskDetailModal } from './TaskDetailModal';
 import { AssignSupervisorModal } from './AssignSupervisorModal';
 import {
@@ -795,13 +796,26 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
       )}
 
       {/* Modals */}
-      {showCreate && (
-        <CreateTaskModal
-          currentUserId={convexId}
-          userRole={userRole as 'admin' | 'supervisor' | 'employee'}
-          onClose={() => setShowCreate(false)}
-        />
-      )}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent
+          className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-2xl max-h-[90vh] flex flex-col"
+          aria-describedby={undefined}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-lg md:text-xl">
+              {t('task.createTask')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <CreateTaskWizard
+              currentUserId={convexId}
+              userRole={userRole as 'admin' | 'supervisor' | 'employee'}
+              onComplete={() => setShowCreate(false)}
+              onCancel={() => setShowCreate(false)}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
       {selectedTask && (
         <TaskDetailModal
           task={selectedTask}

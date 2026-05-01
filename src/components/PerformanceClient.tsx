@@ -1,0 +1,1148 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  Target,
+  Plus,
+  BarChart3,
+  Users,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Send,
+  Eye,
+  Trash2,
+  Play,
+  XCircle,
+  Star,
+  Clock,
+  Award,
+  TrendingUp,
+  Calendar,
+  UserCheck,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useShallow } from 'zustand/shallow';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+interface CompetencyDraft {
+  id: string;
+  name: string;
+  description: string;
+  weight: number;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CREATE CYCLE WIZARD
+// ══════════════════════════════════════════════════════════════════════════════
+
+function CreateCycleWizard({
+  open,
+  onClose,
+  organizationId,
+  userId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  organizationId: Id<'organizations'>;
+  userId: Id<'users'>;
+}) {
+  const { t } = useTranslation();
+  const [step, setStep] = useState(0);
+  const [sending, setSending] = useState(false);
+
+  // Step 0: Basic info
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [type, setType] = useState<'quarterly' | 'semi_annual' | 'annual' | 'custom'>('quarterly');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Step 1: 360° settings
+  const [includesSelf, setIncludesSelf] = useState(true);
+  const [includesPeer, setIncludesPeer] = useState(true);
+  const [includesManager, setIncludesManager] = useState(true);
+  const [includesDirectReport, setIncludesDirectReport] = useState(false);
+  const [peerThreshold, setPeerThreshold] = useState(2);
+
+  // Step 2: Competencies
+  const [competencies, setCompetencies] = useState<CompetencyDraft[]>([
+    { id: 'quality', name: 'Quality of Work', description: 'Accuracy and reliability', weight: 20 },
+    { id: 'communication', name: 'Communication', description: 'Clarity and effectiveness', weight: 20 },
+    { id: 'teamwork', name: 'Teamwork', description: 'Collaboration and support', weight: 20 },
+    { id: 'initiative', name: 'Initiative', description: 'Proactiveness and innovation', weight: 20 },
+    { id: 'leadership', name: 'Leadership', description: 'Guiding and accountability', weight: 20 },
+  ]);
+
+  const createCycle = useMutation(api.performance.createCycle);
+
+  const steps = [
+    t('performance.wizard.basicInfo'),
+    t('performance.wizard.reviewTypes'),
+    t('performance.wizard.competencies'),
+  ];
+
+  const canGoNext = () => {
+    if (step === 0) return title.trim() && startDate && endDate;
+    if (step === 1) return includesSelf || includesPeer || includesManager || includesDirectReport;
+    if (step === 2) return competencies.length > 0;
+    return false;
+  };
+
+  const handleSubmit = async () => {
+    setSending(true);
+    try {
+      await createCycle({
+        organizationId,
+        title: title.trim(),
+        description: description.trim() || undefined,
+        type,
+        startDate: new Date(startDate).getTime(),
+        endDate: new Date(endDate).getTime(),
+        includesSelf,
+        includesPeer,
+        includesManager,
+        includesDirectReport,
+        competencies,
+        peerAnonymityThreshold: peerThreshold,
+        showPeerIdentity: false,
+        createdBy: userId,
+      });
+      toast.success(t('performance.cycleCreated'));
+      onClose();
+      resetForm();
+    } catch (e: any) {
+      toast.error(e.message || t('common.error'));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const resetForm = () => {
+    setStep(0);
+    setTitle('');
+    setDescription('');
+    setStartDate('');
+    setEndDate('');
+  };
+
+  const addCompetency = () => {
+    const id = `comp_${Date.now()}`;
+    setCompetencies([...competencies, { id, name: '', description: '', weight: 0 }]);
+  };
+
+  const removeCompetency = (id: string) => {
+    setCompetencies(competencies.filter((c) => c.id !== id));
+  };
+
+  const updateCompetency = (id: string, field: keyof CompetencyDraft, value: string | number) => {
+    setCompetencies(
+      competencies.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[85vh]">
+        {/* Header */}
+        <DialogHeader className="px-5 pt-5 pb-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            {t('performance.createCycle')}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col">
+          {/* Progress bar + Step indicators */}
+          <div className="px-5 pt-4 pb-3">
+            <div className="relative h-1.5 bg-muted rounded-full overflow-hidden mb-4">
+              <div
+                className="absolute inset-y-0 left-0 bg-primary rounded-full transition-all duration-300 ease-in-out"
+                style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between gap-1">
+              {steps.map((label, idx) => {
+                const isCompleted = idx < step;
+                const isCurrent = idx === step;
+                return (
+                  <React.Fragment key={idx}>
+                    <div className="flex flex-col items-center flex-1 min-w-0">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0 ${
+                          isCompleted
+                            ? 'bg-primary border-primary text-primary-foreground'
+                            : isCurrent
+                              ? 'border-primary bg-background text-primary scale-110'
+                              : 'border-muted-foreground/30 bg-background text-muted-foreground'
+                        }`}
+                      >
+                        {isCompleted ? <CheckCircle className="w-4 h-4" /> : idx + 1}
+                      </div>
+                      <p
+                        className={`text-[10px] font-medium mt-1.5 text-center truncate w-full px-1 ${
+                          isCurrent ? 'text-primary' : 'text-muted-foreground'
+                        }`}
+                      >
+                        {label}
+                      </p>
+                    </div>
+                    {idx < steps.length - 1 && (
+                      <div className="flex-1 h-0.5 bg-muted mx-1 max-w-8 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            isCompleted ? 'bg-primary' : 'bg-transparent'
+                          }`}
+                          style={{ width: isCompleted ? '100%' : '0%' }}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step Content */}
+          <div className="px-5 py-4 min-h-[280px] overflow-y-auto max-h-[50vh]">
+            {/* Step 0: Basic Info */}
+            {step === 0 && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">{t('performance.fields.title')}</label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder={t('performance.fields.titlePlaceholder')}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">{t('performance.fields.description')}</label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder={t('performance.fields.descriptionPlaceholder')}
+                    rows={3}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">{t('performance.fields.type')}</label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value as any)}
+                    className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm"
+                  >
+                    <option value="quarterly">{t('performance.types.quarterly')}</option>
+                    <option value="semi_annual">{t('performance.types.semiAnnual')}</option>
+                    <option value="annual">{t('performance.types.annual')}</option>
+                    <option value="custom">{t('performance.types.custom')}</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">{t('performance.fields.startDate')}</label>
+                    <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-1" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">{t('performance.fields.endDate')}</label>
+                    <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="mt-1" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 1: Review Types */}
+            {step === 1 && (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">{t('performance.wizard.selectTypes')}</p>
+                {[
+                  { key: 'self', label: t('performance.reviewType.self'), desc: t('performance.reviewType.selfDesc'), value: includesSelf, set: setIncludesSelf },
+                  { key: 'manager', label: t('performance.reviewType.manager'), desc: t('performance.reviewType.managerDesc'), value: includesManager, set: setIncludesManager },
+                  { key: 'peer', label: t('performance.reviewType.peer'), desc: t('performance.reviewType.peerDesc'), value: includesPeer, set: setIncludesPeer },
+                  { key: 'direct', label: t('performance.reviewType.directReport'), desc: t('performance.reviewType.directReportDesc'), value: includesDirectReport, set: setIncludesDirectReport },
+                ].map((item) => (
+                  <label
+                    key={item.key}
+                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      item.value ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={item.value}
+                      onChange={(e) => item.set(e.target.checked)}
+                      className="mt-0.5 rounded"
+                    />
+                    <div>
+                      <div className="font-medium text-sm">{item.label}</div>
+                      <div className="text-xs text-muted-foreground">{item.desc}</div>
+                    </div>
+                  </label>
+                ))}
+                {includesPeer && (
+                  <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+                    <label className="text-sm font-medium">{t('performance.fields.peerThreshold')}</label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={peerThreshold}
+                      onChange={(e) => setPeerThreshold(Number(e.target.value))}
+                      className="w-24 mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('performance.fields.peerThresholdHint')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 2: Competencies */}
+            {step === 2 && (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">{t('performance.wizard.defineCompetencies')}</p>
+                {competencies.map((comp) => (
+                  <div key={comp.id} className="flex items-start gap-2 p-3 border rounded-lg">
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={comp.name}
+                        onChange={(e) => updateCompetency(comp.id, 'name', e.target.value)}
+                        placeholder={t('performance.fields.competencyName')}
+                        className="text-sm"
+                      />
+                      <Input
+                        value={comp.description}
+                        onChange={(e) => updateCompetency(comp.id, 'description', e.target.value)}
+                        placeholder={t('performance.fields.competencyDesc')}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="w-16">
+                      <Input
+                        type="number"
+                        value={comp.weight}
+                        onChange={(e) => updateCompetency(comp.id, 'weight', Number(e.target.value))}
+                        min={0}
+                        max={100}
+                        className="text-sm"
+                      />
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => removeCompetency(comp.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" onClick={addCompetency}>
+                  <Plus className="h-4 w-4 mr-1" /> {t('performance.addCompetency')}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {t('performance.totalWeight')}: {competencies.reduce((s, c) => s + c.weight, 0)}%
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-5 py-4 border-t bg-muted/30">
+            <Button
+              variant="ghost"
+              onClick={step > 0 ? () => setStep(step - 1) : onClose}
+              disabled={sending}
+              size="sm"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              {step > 0 ? t('common.back') : t('common.cancel')}
+            </Button>
+            {step < steps.length - 1 ? (
+              <Button onClick={() => setStep(step + 1)} disabled={!canGoNext()} size="sm" className="gap-1">
+                {t('common.next')}
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit} disabled={!canGoNext() || sending} size="sm" className="gap-1">
+                <Send className="h-4 w-4" />
+                {sending ? t('common.sending') : t('performance.createCycle')}
+              </Button>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FILL REVIEW WIZARD
+// ══════════════════════════════════════════════════════════════════════════════
+
+function FillReviewDialog({
+  open,
+  onClose,
+  assignment,
+}: {
+  open: boolean;
+  onClose: () => void;
+  assignment: any;
+}) {
+  const { t } = useTranslation();
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [comments, setComments] = useState<Record<string, string>>({});
+  const [strengths, setStrengths] = useState('');
+  const [improvements, setImprovements] = useState('');
+  const [generalComments, setGeneralComments] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const submitReview = useMutation(api.performance.submitReview);
+  const competencies: CompetencyDraft[] = assignment?.competencies || [];
+
+  const allRated = competencies.every((c) => ratings[c.id] && ratings[c.id]! >= 1);
+
+  const handleSubmit = async () => {
+    setSending(true);
+    try {
+      await submitReview({
+        assignmentId: assignment._id,
+        ratings: competencies.map((c) => ({
+          competencyId: c.id,
+          competencyName: c.name,
+          score: ratings[c.id] || 3,
+          comment: comments[c.id] || undefined,
+        })),
+        strengths: strengths.trim() || undefined,
+        improvements: improvements.trim() || undefined,
+        generalComments: generalComments.trim() || undefined,
+      });
+      toast.success(t('performance.reviewSubmitted'));
+      onClose();
+    } catch (e: any) {
+      toast.error(e.message || t('common.error'));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const typeLabel = {
+    self: t('performance.reviewType.self'),
+    peer: t('performance.reviewType.peer'),
+    manager: t('performance.reviewType.manager'),
+    direct_report: t('performance.reviewType.directReport'),
+  }[assignment?.type as string] || '';
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5" />
+            {t('performance.fillReview')} — {typeLabel}
+          </DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            {t('performance.reviewingEmployee')}: <strong>{assignment?.revieweeName}</strong>
+          </p>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Competency Ratings */}
+          {competencies.map((comp) => (
+            <div key={comp.id} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-medium text-sm">{comp.name}</span>
+                  <p className="text-xs text-muted-foreground">{comp.description}</p>
+                </div>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((score) => (
+                    <button
+                      key={score}
+                      onClick={() => setRatings({ ...ratings, [comp.id]: score })}
+                      className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
+                        ratings[comp.id] === score
+                          ? 'bg-primary text-primary-foreground'
+                          : ratings[comp.id] && ratings[comp.id]! >= score
+                            ? 'bg-primary/20 text-primary'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      }`}
+                    >
+                      {score}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Textarea
+                value={comments[comp.id] || ''}
+                onChange={(e) => setComments({ ...comments, [comp.id]: e.target.value })}
+                placeholder={t('performance.fields.competencyComment')}
+                rows={1}
+                className="text-xs"
+              />
+            </div>
+          ))}
+
+          {/* Overall Feedback */}
+          <div className="border-t pt-4 space-y-3">
+            <div>
+              <label className="text-sm font-medium">{t('performance.fields.strengths')}</label>
+              <Textarea
+                value={strengths}
+                onChange={(e) => setStrengths(e.target.value)}
+                placeholder={t('performance.fields.strengthsPlaceholder')}
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{t('performance.fields.improvements')}</label>
+              <Textarea
+                value={improvements}
+                onChange={(e) => setImprovements(e.target.value)}
+                placeholder={t('performance.fields.improvementsPlaceholder')}
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{t('performance.fields.generalComments')}</label>
+              <Textarea
+                value={generalComments}
+                onChange={(e) => setGeneralComments(e.target.value)}
+                placeholder={t('performance.fields.generalCommentsPlaceholder')}
+                rows={2}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-6">
+          <Button variant="outline" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleSubmit} disabled={!allRated || sending}>
+            <Send className="h-4 w-4 mr-1" />
+            {sending ? t('common.sending') : t('performance.submitReview')}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LAUNCH CYCLE DIALOG
+// ══════════════════════════════════════════════════════════════════════════════
+
+function LaunchCycleDialog({
+  open,
+  onClose,
+  cycleId,
+  organizationId,
+  userId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  cycleId: Id<'reviewCycles'>;
+  organizationId: Id<'organizations'>;
+  userId: Id<'users'>;
+}) {
+  const { t } = useTranslation();
+  const [sending, setSending] = useState(false);
+  const [selectedParticipants, setSelectedParticipants] = useState<Id<'users'>[]>([]);
+
+  const participants = useQuery(api.performance.getEligibleParticipants, { organizationId });
+  const launchCycle = useMutation(api.performance.launchCycle);
+
+  const toggleParticipant = (id: Id<'users'>) => {
+    setSelectedParticipants((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
+    );
+  };
+
+  const selectAll = () => {
+    if (participants) {
+      setSelectedParticipants(participants.map((p) => p._id));
+    }
+  };
+
+  const handleLaunch = async () => {
+    if (selectedParticipants.length === 0) {
+      toast.error(t('performance.selectParticipants'));
+      return;
+    }
+    setSending(true);
+    try {
+      await launchCycle({
+        cycleId,
+        launchedBy: userId,
+        participants: selectedParticipants,
+      });
+      toast.success(t('performance.cycleLaunched'));
+      onClose();
+    } catch (e: any) {
+      toast.error(e.message || t('common.error'));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Play className="h-5 w-5" />
+            {t('performance.launchCycle')}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {t('performance.selectParticipantsHint')}
+            </p>
+            <Button variant="outline" size="sm" onClick={selectAll}>
+              {t('common.selectAll')}
+            </Button>
+          </div>
+
+          <div className="space-y-2 max-h-[40vh] overflow-y-auto">
+            {participants?.map((p) => (
+              <label
+                key={p._id}
+                className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-colors ${
+                  selectedParticipants.includes(p._id) ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedParticipants.includes(p._id)}
+                  onChange={() => toggleParticipant(p._id)}
+                />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">{p.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {p.position || p.role} {p.department ? `• ${p.department}` : ''}
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
+
+          <p className="text-sm">
+            {t('performance.selectedCount')}: <strong>{selectedParticipants.length}</strong>
+          </p>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleLaunch} disabled={sending || selectedParticipants.length === 0}>
+            <Play className="h-4 w-4 mr-1" />
+            {sending ? t('common.sending') : t('performance.launchCycle')}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RESULTS DIALOG
+// ══════════════════════════════════════════════════════════════════════════════
+
+function ResultsDialog({
+  open,
+  onClose,
+  cycleId,
+  revieweeId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  cycleId: Id<'reviewCycles'>;
+  revieweeId: Id<'users'>;
+}) {
+  const { t } = useTranslation();
+  const results = useQuery(api.performance.getRevieweeResults, { cycleId, revieweeId });
+
+  if (!results) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            {t('performance.results')} — {results.reviewee?.name}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Overall Score */}
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-3xl font-bold">{results.overallScore}</div>
+            <div className="text-sm text-muted-foreground">{t('performance.overallScore')}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {results.totalResponses} {t('performance.reviewsCompleted')}
+            </div>
+          </div>
+
+          {/* Competency Scores */}
+          <div>
+            <h4 className="text-sm font-medium mb-3">{t('performance.competencyScores')}</h4>
+            <div className="space-y-2">
+              {results.competencyAverages.map((c) => (
+                <div key={c.id} className="flex items-center gap-3">
+                  <span className="text-sm w-40 truncate">{c.name}</span>
+                  <div className="flex-1 bg-muted rounded-full h-2">
+                    <div
+                      className="bg-primary rounded-full h-2 transition-all"
+                      style={{ width: `${(c.average / 5) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium w-10 text-right">{c.average}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Self Review */}
+          {results.selfReview && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">{t('performance.reviewType.self')}</h4>
+              <Card>
+                <CardContent className="p-3 text-sm space-y-1">
+                  <div><strong>{t('performance.fields.score')}:</strong> {results.selfReview.overallScore}/5</div>
+                  {results.selfReview.strengths && <div><strong>{t('performance.fields.strengths')}:</strong> {results.selfReview.strengths}</div>}
+                  {results.selfReview.improvements && <div><strong>{t('performance.fields.improvements')}:</strong> {results.selfReview.improvements}</div>}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Manager Reviews */}
+          {results.managerReviews.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">{t('performance.reviewType.manager')}</h4>
+              {results.managerReviews.map((r, i) => (
+                <Card key={i} className="mb-2">
+                  <CardContent className="p-3 text-sm space-y-1">
+                    <div><strong>{t('performance.fields.score')}:</strong> {r.overallScore}/5</div>
+                    {r.strengths && <div><strong>{t('performance.fields.strengths')}:</strong> {r.strengths}</div>}
+                    {r.improvements && <div><strong>{t('performance.fields.improvements')}:</strong> {r.improvements}</div>}
+                    {r.generalComments && <div><strong>{t('performance.fields.generalComments')}:</strong> {r.generalComments}</div>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Peer Reviews */}
+          {results.peerReviews ? (
+            <div>
+              <h4 className="text-sm font-medium mb-2">
+                {t('performance.reviewType.peer')} ({results.peerCount})
+              </h4>
+              {results.peerReviews.map((r, i) => (
+                <Card key={i} className="mb-2">
+                  <CardContent className="p-3 text-sm space-y-1">
+                    <div><strong>{t('performance.fields.score')}:</strong> {r.overallScore}/5</div>
+                    {r.strengths && <div><strong>{t('performance.fields.strengths')}:</strong> {r.strengths}</div>}
+                    {r.improvements && <div><strong>{t('performance.fields.improvements')}:</strong> {r.improvements}</div>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : results.peerCount > 0 ? (
+            <div className="text-sm text-muted-foreground italic">
+              {t('performance.peerAnonymityNotMet', { threshold: results.peerThreshold, current: results.peerCount })}
+            </div>
+          ) : null}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MAIN CLIENT
+// ══════════════════════════════════════════════════════════════════════════════
+
+export function PerformanceClient() {
+  const { t } = useTranslation();
+  const { currentUser, organizationId } = useAuthStore(
+    useShallow((s) => ({ currentUser: s.user, organizationId: s.user?.organizationId })),
+  );
+
+  const [showCreateWizard, setShowCreateWizard] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const [launchCycleId, setLaunchCycleId] = useState<Id<'reviewCycles'> | null>(null);
+  const [viewResults, setViewResults] = useState<{ cycleId: Id<'reviewCycles'>; revieweeId: Id<'users'> } | null>(null);
+
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin';
+  const isSupervisor = currentUser?.role === 'supervisor';
+  const canManageCycles = isAdmin || isSupervisor;
+
+  const cycles = useQuery(
+    api.performance.listCycles,
+    organizationId ? { organizationId: organizationId as Id<'organizations'> } : 'skip',
+  );
+
+  const myAssignments = useQuery(
+    api.performance.getMyAssignments,
+    currentUser?.id ? { userId: currentUser.id as Id<'users'> } : 'skip',
+  );
+
+  const closeCycle = useMutation(api.performance.closeCycle);
+  const cancelCycle = useMutation(api.performance.cancelCycle);
+  const deleteCycle = useMutation(api.performance.deleteCycle);
+
+  if (!currentUser || !organizationId) {
+    return <ShieldLoader />;
+  }
+
+  const pendingAssignments = myAssignments?.filter((a) => a.status === 'pending' || a.status === 'in_progress') || [];
+
+  const statusBadge = (status: string) => {
+    const map: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
+      draft: { variant: 'outline', label: t('performance.status.draft') },
+      active: { variant: 'default', label: t('performance.status.active') },
+      completed: { variant: 'secondary', label: t('performance.status.completed') },
+      cancelled: { variant: 'destructive', label: t('performance.status.cancelled') },
+    };
+    const s = map[status] || { variant: 'outline' as const, label: status };
+    return <Badge variant={s.variant}>{s.label}</Badge>;
+  };
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              {t('performance.title')}
+            </h1>
+            <p className="text-muted-foreground text-sm">{t('performance.subtitle')}</p>
+          </div>
+          {canManageCycles && (
+            <Button onClick={() => setShowCreateWizard(true)} className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-1" /> {t('performance.createCycle')}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+              <Clock className="h-5 w-5 text-orange-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{pendingAssignments.length}</div>
+              <div className="text-xs text-muted-foreground">{t('performance.stats.pending')}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold">
+                {myAssignments?.filter((a) => a.status === 'submitted').length || 0}
+              </div>
+              <div className="text-xs text-muted-foreground">{t('performance.stats.completed')}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold">
+                {cycles?.filter((c) => c.status === 'active').length || 0}
+              </div>
+              <div className="text-xs text-muted-foreground">{t('performance.stats.activeCycles')}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="my-reviews">
+        <TabsList>
+          <TabsTrigger value="my-reviews">
+            <UserCheck className="h-4 w-4 mr-1" />
+            {t('performance.tabs.myReviews')}
+          </TabsTrigger>
+          {canManageCycles && (
+            <TabsTrigger value="cycles">
+              <Calendar className="h-4 w-4 mr-1" />
+              {t('performance.tabs.cycles')}
+            </TabsTrigger>
+          )}
+          {canManageCycles && (
+            <TabsTrigger value="results">
+              <BarChart3 className="h-4 w-4 mr-1" />
+              {t('performance.tabs.results')}
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        {/* My Reviews Tab */}
+        <TabsContent value="my-reviews" className="space-y-4">
+          {pendingAssignments.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                <CheckCircle className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p>{t('performance.noReviewsPending')}</p>
+              </CardContent>
+            </Card>
+          ) : (
+            pendingAssignments.map((a) => (
+              <Card key={a._id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      {a.revieweeAvatar ? (
+                        <img src={a.revieweeAvatar} className="w-10 h-10 rounded-full object-cover" alt="" />
+                      ) : (
+                        <Users className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm truncate">{a.revieweeName}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {a.cycleName} • {
+                          { self: t('performance.reviewType.self'), peer: t('performance.reviewType.peer'), manager: t('performance.reviewType.manager'), direct_report: t('performance.reviewType.directReport') }[a.type]
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                    <Badge variant="outline" className="text-xs">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {new Date(a.dueDate).toLocaleDateString()}
+                    </Badge>
+                    <Button size="sm" onClick={() => setSelectedAssignment(a)}>
+                      <Star className="h-4 w-4 mr-1" /> {t('performance.fillReview')}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
+
+        {/* Cycles Tab */}
+        {canManageCycles && (
+          <TabsContent value="cycles" className="space-y-4">
+            {!cycles || cycles.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  <Target className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p>{t('performance.noCycles')}</p>
+                </CardContent>
+              </Card>
+            ) : (
+              cycles.map((cycle) => (
+                <Card key={cycle._id}>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">{cycle.title}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                        {statusBadge(cycle.status)}
+                        <span>
+                          {new Date(cycle.startDate).toLocaleDateString()} — {new Date(cycle.endDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {cycle.status === 'draft' && (
+                        <>
+                          <Button size="sm" onClick={() => setLaunchCycleId(cycle._id)}>
+                            <Play className="h-4 w-4 mr-1" /> {t('performance.launch')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={async () => {
+                              await deleteCycle({ cycleId: cycle._id });
+                              toast.success(t('common.deleted'));
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      {cycle.status === 'active' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              await closeCycle({ cycleId: cycle._id });
+                              toast.success(t('performance.cycleClosed'));
+                            }}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" /> {t('performance.close')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={async () => {
+                              await cancelCycle({ cycleId: cycle._id });
+                              toast.success(t('performance.cycleCancelled'));
+                            }}
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+        )}
+
+        {/* Results Tab */}
+        {canManageCycles && (
+          <TabsContent value="results" className="space-y-4">
+            {cycles?.filter((c) => c.status === 'completed' || c.status === 'active').map((cycle) => (
+              <CycleSummaryCard
+                key={cycle._id}
+                cycleId={cycle._id}
+                title={cycle.title}
+                status={cycle.status}
+                onViewResults={(revieweeId) => setViewResults({ cycleId: cycle._id, revieweeId })}
+              />
+            ))}
+          </TabsContent>
+        )}
+      </Tabs>
+
+      {/* Dialogs */}
+      <CreateCycleWizard
+        open={showCreateWizard}
+        onClose={() => setShowCreateWizard(false)}
+        organizationId={organizationId as Id<'organizations'>}
+        userId={currentUser.id as Id<'users'>}
+      />
+
+      {selectedAssignment && (
+        <FillReviewDialog
+          open={!!selectedAssignment}
+          onClose={() => setSelectedAssignment(null)}
+          assignment={selectedAssignment}
+        />
+      )}
+
+      {launchCycleId && (
+        <LaunchCycleDialog
+          open={!!launchCycleId}
+          onClose={() => setLaunchCycleId(null)}
+          cycleId={launchCycleId}
+          organizationId={organizationId as Id<'organizations'>}
+          userId={currentUser.id as Id<'users'>}
+        />
+      )}
+
+      {viewResults && (
+        <ResultsDialog
+          open={!!viewResults}
+          onClose={() => setViewResults(null)}
+          cycleId={viewResults.cycleId}
+          revieweeId={viewResults.revieweeId}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Cycle Summary Card (shows employees and their scores) ────────────────────
+function CycleSummaryCard({
+  cycleId,
+  title,
+  status,
+  onViewResults,
+}: {
+  cycleId: Id<'reviewCycles'>;
+  title: string;
+  status: string;
+  onViewResults: (revieweeId: Id<'users'>) => void;
+}) {
+  const { t } = useTranslation();
+  const summary = useQuery(api.performance.getCycleSummary, { cycleId });
+
+  if (!summary) return null;
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center justify-between">
+          <span>{title}</span>
+          <Badge variant={status === 'active' ? 'default' : 'secondary'}>
+            {status === 'active' ? t('performance.status.active') : t('performance.status.completed')}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {summary.summaries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('performance.noResults')}</p>
+        ) : (
+          summary.summaries.map((s) => (
+            <div
+              key={s.revieweeId}
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
+              onClick={() => onViewResults(s.revieweeId as Id<'users'>)}
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                  {s.avatar ? (
+                    <img src={s.avatar} className="w-8 h-8 object-cover" alt="" />
+                  ) : (
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+                <span className="text-sm">{s.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">{s.averageScore}/5</span>
+                <Badge variant="outline" className="text-xs">
+                  {s.reviewCount} {t('performance.reviews')}
+                </Badge>
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  );
+}

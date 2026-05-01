@@ -27,6 +27,7 @@ export default function Footer() {
       { nameKey: 'nav.employees', href: '/login' },
       { nameKey: 'nav.analytics', href: '/login' },
       { nameKey: 'nav.calendar', href: '/login' },
+      { nameKey: 'nav.recruitment', href: '/careers' },
     ],
     account: [
       { nameKey: 'auth.signIn', href: '/login' },

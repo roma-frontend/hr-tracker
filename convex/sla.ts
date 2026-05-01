@@ -378,14 +378,14 @@ export const getSLATrend = query({
       }
 
       if (metric.status === "on_time") {
-        dailyData[date].onTime++;
+        dailyData[date]!.onTime++;
       } else if (metric.status === "breached") {
-        dailyData[date].breached++;
+        dailyData[date]!.breached++;
       }
 
       if (metric.responseTimeHours !== undefined) {
-        dailyData[date].avgResponseTime += metric.responseTimeHours;
-        dailyData[date].count++;
+        dailyData[date]!.avgResponseTime += metric.responseTimeHours;
+        dailyData[date]!.count++;
       }
     });
     
@@ -402,7 +402,7 @@ export const getSLATrend = query({
   },
 });
   
-"// ÄÄ Get All SLA Metrics (for dashboard) ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ"  
+"// ï¿½ï¿½ Get All SLA Metrics (for dashboard) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"  
 "export const getAllSLAMetrics = query({"  
 "  args: {},"  
 "  handler: async (ctx) => {"  

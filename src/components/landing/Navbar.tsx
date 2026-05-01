@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import dynamic from 'next/dynamic';
 
@@ -46,6 +46,7 @@ export default function Navbar() {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -139,10 +140,11 @@ export default function Navbar() {
             { name: t('landing.pricing'), href: '#pricing' },
             { name: t('landing.testimonials'), href: '#testimonials' },
             { name: t('landing.faq'), href: '#faq' },
+            { name: t('nav.recruitment', 'Careers'), href: '/careers' },
           ].map((item) => (
             <a
               key={item.name}
-              href={item.href}
+              href={item.href.startsWith('#') && pathname !== '/' ? `/${item.href}` : item.href}
               className="text-sm transition-colors duration-200 font-medium focus:outline-none focus:underline underline-offset-4"
               style={{ color: 'var(--landing-navbar-text)' }}
               onMouseEnter={(e) =>

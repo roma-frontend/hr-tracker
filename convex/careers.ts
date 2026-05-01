@@ -1,0 +1,153 @@
+import { query, mutation } from './_generated/server';
+import { v } from 'convex/values';
+
+// Public query: list open vacancies for an organization by slug
+export const listOpenVacancies = query({
+  args: { orgSlug: v.string() },
+  handler: async (ctx, { orgSlug }) => {
+    const org = await ctx.db
+      .query('organizations')
+      .withIndex('by_slug', (q) => q.eq('slug', orgSlug))
+      .first();
+    if (!org || !org.isActive) return { org: null, vacancies: [] };
+
+    const vacancies = await ctx.db
+      .query('vacancies')
+      .withIndex('by_org_status', (q) =>
+        q.eq('organizationId', org._id).eq('status', 'open')
+      )
+      .collect();
+
+    return {
+      org: {
+        name: org.name,
+        slug: org.slug,
+        logoUrl: org.logoUrl,
+        primaryColor: org.primaryColor,
+        industry: org.industry,
+      },
+      vacancies: vacancies.map((v) => ({
+        _id: v._id,
+        title: v.title,
+        department: v.department,
+        location: v.location,
+        employmentType: v.employmentType,
+        salary: v.salary,
+        createdAt: v.createdAt,
+        // Truncated description for cards (first 200 chars)
+        excerpt: v.description.length > 200
+          ? v.description.slice(0, 200) + '...'
+          : v.description,
+      })),
+    };
+  },
+});
+
+// Public query: get full vacancy details
+export const getVacancyDetails = query({
+  args: { vacancyId: v.id('vacancies') },
+  handler: async (ctx, { vacancyId }) => {
+    const vacancy = await ctx.db.get(vacancyId);
+    if (!vacancy || vacancy.status !== 'open') return null;
+
+    const org = await ctx.db.get(vacancy.organizationId);
+
+    return {
+      _id: vacancy._id,
+      title: vacancy.title,
+      department: vacancy.department,
+      location: vacancy.location,
+      employmentType: vacancy.employmentType,
+      description: vacancy.description,
+      requirements: vacancy.requirements,
+      salary: vacancy.salary,
+      createdAt: vacancy.createdAt,
+      orgName: org?.name,
+    };
+  },
+});
+
+// Public mutation: apply to a vacancy
+export const applyToVacancy = mutation({
+  args: {
+    vacancyId: v.id('vacancies'),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    resumeText: v.optional(v.string()),
+    consentGiven: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    if (!args.consentGiven) {
+      throw new Error('Privacy consent is required');
+    }
+
+    // Validate vacancy is open
+    const vacancy = await ctx.db.get(args.vacancyId);
+    if (!vacancy || vacancy.status !== 'open') {
+      throw new Error('This vacancy is no longer accepting applications');
+    }
+
+    const orgId = vacancy.organizationId;
+    const normalizedEmail = args.email.trim().toLowerCase();
+
+    // Deduplicate candidate profile by email within org
+    let candidate = await ctx.db
+      .query('candidateProfiles')
+      .withIndex('by_org_email', (q) =>
+        q.eq('organizationId', orgId).eq('email', normalizedEmail)
+      )
+      .first();
+
+    if (!candidate) {
+      const candidateId = await ctx.db.insert('candidateProfiles', {
+        organizationId: orgId,
+        name: args.name,
+        email: normalizedEmail,
+        phone: args.phone,
+        resumeText: args.resumeText,
+        source: 'career_page',
+        createdBy: vacancy.createdBy, // system attribution to vacancy creator
+        createdAt: Date.now(),
+      });
+      candidate = await ctx.db.get(candidateId);
+    }
+
+    if (!candidate) throw new Error('Failed to create candidate');
+
+    // Check for duplicate active application (same candidate + vacancy)
+    const existingApp = await ctx.db
+      .query('applications')
+      .withIndex('by_vacancy', (q) => q.eq('vacancyId', args.vacancyId))
+      .filter((q) => q.eq(q.field('candidateId'), candidate!._id))
+      .filter((q) => q.neq(q.field('stage'), 'rejected'))
+      .first();
+
+    if (existingApp) {
+      throw new Error('You have already applied to this position');
+    }
+
+    // Create application
+    const applicationId = await ctx.db.insert('applications', {
+      organizationId: orgId,
+      candidateId: candidate._id,
+      vacancyId: args.vacancyId,
+      stage: 'applied',
+      createdBy: vacancy.createdBy, // system attribution
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    // Record event
+    await ctx.db.insert('applicationEvents', {
+      applicationId,
+      organizationId: orgId,
+      toStage: 'applied',
+      changedBy: vacancy.createdBy,
+      reason: 'Applied via career page',
+      createdAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});

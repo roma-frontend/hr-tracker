@@ -111,10 +111,10 @@ export const getDepartmentStats = query({
             avgFamilyLeave: 0,
           };
         }
-        acc[dept].employees += 1;
-        acc[dept].totalPaidLeave += user.paidLeaveBalance;
-        acc[dept].totalSickLeave += user.sickLeaveBalance;
-        acc[dept].totalFamilyLeave += user.familyLeaveBalance;
+        acc[dept]!.employees += 1;
+        acc[dept]!.totalPaidLeave += user.paidLeaveBalance;
+        acc[dept]!.totalSickLeave += user.sickLeaveBalance;
+        acc[dept]!.totalFamilyLeave += user.familyLeaveBalance;
         return acc;
       },
       {} as Record<
