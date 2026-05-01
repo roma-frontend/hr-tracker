@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/useAuthStore';
 import Navbar from '@/components/landing/Navbar';
 import {
   ArrowLeft,
@@ -187,6 +188,7 @@ function FeatureDetail({ type }: { type: string }) {
 export default function LeaveTypesPage() {
   const { t } = useTranslation();
   const searchParams = useSearchParams();
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<string>('vacation');
 
   useEffect(() => {
@@ -261,39 +263,43 @@ export default function LeaveTypesPage() {
 
         <FeatureDetail type={activeTab} />
 
-        <div
-          className="mt-12 p-8 rounded-3xl text-center"
-          style={{
-            background: 'var(--landing-card-bg)',
-            border: '1px solid var(--landing-card-border)',
-          }}
-        >
-          <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--landing-text-primary)' }}>
-            {t('features.readyToStart')}
-          </h3>
-          <p className="mb-6" style={{ color: 'var(--landing-text-secondary)' }}>
-            {t('features.tryFree')}
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/register"
-              className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #60a5fa)' }}
+        {!user && (
+          <div
+            className="mt-12 p-8 rounded-3xl text-center"
+            style={{
+              background: 'var(--landing-card-bg)',
+              border: '1px solid var(--landing-card-border)',
+            }}
+          >
+            <h3
+              className="text-2xl font-bold mb-4"
+              style={{ color: 'var(--landing-text-primary)' }}
             >
-              {t('features.getStarted')}
-            </Link>
-            <Link
-              href="/login"
-              className="px-6 py-3 rounded-xl font-semibold transition-all hover:opacity-70"
-              style={{
-                border: '1px solid var(--landing-card-border)',
-                color: 'var(--landing-text-primary)',
-              }}
-            >
-              {t('features.login')}
-            </Link>
+              {t('features.readyToStart')}
+            </h3>
+            <p className="mb-6" style={{ color: 'var(--landing-text-secondary)' }}>
+              {t('features.tryFree')}
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/register"
+                className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90 btn-gradient"
+              >
+                {t('features.getStarted')}
+              </Link>
+              <Link
+                href="/login"
+                className="px-6 py-3 rounded-xl font-semibold transition-all hover:opacity-70"
+                style={{
+                  border: '1px solid var(--landing-card-border)',
+                  color: 'var(--landing-text-primary)',
+                }}
+              >
+                {t('features.login')}
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
