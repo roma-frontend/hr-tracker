@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
 import {
   X,
   Home,
@@ -33,6 +34,7 @@ const menuItemsConfig = [
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { t } = useTranslation();
   const pathname = usePathname();
+  const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -100,7 +102,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     onClose();
 
     if (pathname !== '/') {
-      window.location.href = `/${href}`;
+      router.push(`/${href}`);
       return;
     }
 
@@ -162,8 +164,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg"
                 style={{
-                  background:
-                    'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
+                  background: 'btn-gradient',
                 }}
               >
                 <span className="text-white font-bold text-sm">HR</span>

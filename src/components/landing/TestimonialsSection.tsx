@@ -103,8 +103,7 @@ function TestimonialCard({
             <AvatarFallback
               className="text-xs text-white font-semibold"
               style={{
-                background:
-                  'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
+                background: 'btn-gradient',
               }}
             >
               {getInitials(name)}

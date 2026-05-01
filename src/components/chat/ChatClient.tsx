@@ -329,14 +329,7 @@ function EmptyState({ onNewConversation }: { onNewConversation: () => void }) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-5 p-8 select-none animate-fade-in">
-      <div
-        className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg"
-        style={{
-          background:
-            'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
-          animation: 'float 3s ease-in-out infinite',
-        }}
-      >
+      <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg">
         <MessageCircle className="w-9 h-9 text-white" />
       </div>
       <div className="text-center">
@@ -350,10 +343,6 @@ function EmptyState({ onNewConversation }: { onNewConversation: () => void }) {
       <button
         onClick={onNewConversation}
         className="px-5 py-2.5 rounded-xl text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-        style={{
-          background:
-            'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
-        }}
       >
         {t('chat.startConversation')}
       </button>

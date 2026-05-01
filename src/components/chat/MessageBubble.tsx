@@ -713,9 +713,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           <div
             className="relative rounded-2xl px-3 py-2 text-sm wrap-break-words transition-all duration-200 hover:brightness-105 max-w-65 xs:max-w-[280px] sm:max-w-[320px] md:max-w-90 w-full min-w-45"
             style={{
-              background: isOwn
-                ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)'
-                : 'var(--background-subtle)',
+              background: isOwn ? 'btn-gradient' : 'var(--background-subtle)',
               color: isOwn ? 'white' : 'var(--text-primary)',
               borderBottomRightRadius: isOwn ? '4px' : undefined,
               borderBottomLeftRadius: !isOwn ? '4px' : undefined,
