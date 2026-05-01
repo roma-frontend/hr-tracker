@@ -648,13 +648,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               >
                 <Avatar className="w-9 h-9">
                   {otherUser?.avatarUrl && <AvatarImage src={otherUser.avatarUrl} />}
-                  <AvatarFallback
-                    className="text-xs font-bold text-white"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                    }}
-                  >
+                  <AvatarFallback className="text-xs font-bold text-white btn-gradient">
                     {getInitials(displayName)}
                   </AvatarFallback>
                 </Avatar>
@@ -1092,11 +1086,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               <button
                 onClick={handleSendPoll}
                 disabled={!pollQuestion.trim() || pollOptions.filter(Boolean).length < 2 || sending}
-                className="ml-auto px-2.5 xs:px-3 py-1 rounded-lg text-[10px] xs:text-xs font-medium text-white transition-all hover:opacity-80 disabled:opacity-40 min-h-8"
-                style={{
-                  background:
-                    'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                }}
+                className="ml-auto px-2.5 xs:px-3 py-1 rounded-lg text-[10px] xs:text-xs font-medium text-white transition-all hover:opacity-80 disabled:opacity-40 min-h-8 btn-gradient"
               >
                 {t('chat.sendPoll')}
               </button>
@@ -1327,11 +1317,9 @@ export const ChatWindow = React.memo(function ChatWindow({
               <button
                 onClick={handleSend}
                 disabled={!canSend}
-                className="w-7 xs:w-8 h-7 xs:h-8 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                className={`w-7 xs:w-8 h-7 xs:h-8 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed shrink-0 ${canSend ? 'btn-gradient' : ''}`}
                 style={{
-                  background: canSend
-                    ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))'
-                    : 'var(--border)',
+                  background: canSend ? undefined : 'var(--border)',
                 }}
               >
                 {sending ? (

@@ -267,10 +267,8 @@ export const ConversationList = React.memo(function ConversationList({
           onClick={() => {
             onNewConversation();
           }}
-          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95 btn-gradient"
           style={{
-            background:
-              'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
             cursor: 'pointer',
             zIndex: 10,
             position: 'relative',
@@ -335,7 +333,7 @@ export const ConversationList = React.memo(function ConversationList({
                 className={cn(
                   'px-3 py-1 text-xs rounded-full whitespace-nowrap transition-all shrink-0 active:scale-95',
                   activeFilters.includes(f)
-                    ? 'text-white shadow-md'
+                    ? 'btn-gradient text-white shadow-md'
                     : 'text-gray-500 opacity-60 hover:opacity-100',
                 )}
                 style={{
@@ -499,12 +497,11 @@ export const ConversationList = React.memo(function ConversationList({
                     <Avatar className="w-10 h-10">
                       {avatarUrl && <AvatarImage src={avatarUrl} />}
                       <AvatarFallback
-                        className="text-xs font-bold text-white"
-                        style={{
-                          background: isGroup
-                            ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
-                            : 'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                        }}
+                        className={
+                          isGroup
+                            ? 'text-xs font-bold text-white bg-gradient-to-br from-indigo-500 to-purple-600'
+                            : 'text-xs font-bold text-white btn-gradient'
+                        }
                       >
                         {isGroup ? <Users className="w-4 h-4" /> : getInitials(displayName)}
                       </AvatarFallback>
@@ -549,13 +546,7 @@ export const ConversationList = React.memo(function ConversationList({
                           conv.lastMessageText &&
                           !isOwnLast &&
                           !isSystemAnnouncements && (
-                            <div
-                              className="sm:w-3.5 sm:h-3.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center sm:text-[7px] text-[8px] font-bold text-white overflow-hidden"
-                              style={{
-                                background:
-                                  'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                              }}
-                            >
+                            <div className="sm:w-3.5 sm:h-3.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center sm:text-[7px] text-[8px] font-bold text-white overflow-hidden btn-gradient">
                               {lastSenderAvatar ? (
                                 <Image
                                   src={lastSenderAvatar}

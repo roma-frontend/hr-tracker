@@ -65,7 +65,9 @@ export function NewConversationModal({
   // For a specific organization we keep using the lightweight chat.getOrgUsers query.
   const orgScopedUsers = useQuery(
     api.chat.queries.getOrgUsers,
-    isAllOrgs || !effectiveOrgId ? 'skip' : { organizationId: effectiveOrgId as any, currentUserId },
+    isAllOrgs || !effectiveOrgId
+      ? 'skip'
+      : { organizationId: effectiveOrgId as any, currentUserId },
   );
 
   // In "All orgs" mode we load users via users.getAllUsers which,
@@ -395,13 +397,7 @@ export function NewConversationModal({
               >
                 <Avatar className="w-9 h-9 shrink-0">
                   {u.avatarUrl && <AvatarImage src={u.avatarUrl} />}
-                  <AvatarFallback
-                    className="text-xs font-bold text-white"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                    }}
-                  >
+                  <AvatarFallback className="text-xs font-bold text-white btn-gradient">
                     {getInitials(u.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -432,11 +428,7 @@ export function NewConversationModal({
               handleCreate();
             }}
             disabled={!canCreate || loading}
-            className="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{
-              background:
-                'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-            }}
+            className="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed btn-gradient"
           >
             {loading
               ? t('chat.creating')

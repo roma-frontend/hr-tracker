@@ -647,13 +647,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             >
               <Avatar className="w-7 h-7 ring-2 ring-transparent hover:ring-(--primary) transition-all duration-200">
                 {message.sender?.avatarUrl && <AvatarImage src={message.sender.avatarUrl} />}
-                <AvatarFallback
-                  className="text-[10px] font-bold text-white"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                  }}
-                >
+                <AvatarFallback className="btn-gradient text-[10px] font-bold text-white">
                   {getInitials(message.sender?.name ?? '?')}
                 </AvatarFallback>
               </Avatar>
@@ -662,13 +656,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             // Own avatar on the right
             <Avatar className="w-7 h-7">
               {currentUserAvatar && <AvatarImage src={currentUserAvatar} />}
-              <AvatarFallback
-                className="text-[10px] font-bold text-white"
-                style={{
-                  background:
-                    'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                }}
-              >
+              <AvatarFallback className="btn-gradient text-[10px] font-bold text-white">
                 {getInitials(currentUserName ?? 'Me')}
               </AvatarFallback>
             </Avatar>

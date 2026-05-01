@@ -647,11 +647,7 @@ export function Navbar() {
               </Button>
               <Button
                 size="sm"
-                className="text-white"
-                style={{
-                  background:
-                    'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                }}
+                className="btn-gradient text-white"
                 onClick={() => router.push('/register')}
               >
                 {t('auth.signUp') || 'Sign Up'}

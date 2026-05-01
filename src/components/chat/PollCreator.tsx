@@ -87,11 +87,7 @@ export function PollCreator({
         <button
           onClick={onSend}
           disabled={!pollQuestion.trim() || pollOptions.filter(Boolean).length < 2 || sending}
-          className="ml-auto px-2.5 xs:px-3 py-1 rounded-lg text-[10px] xs:text-xs font-medium text-white transition-all hover:opacity-80 disabled:opacity-40 min-h-8"
-          style={{
-            background:
-              'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-          }}
+          className="ml-auto px-2.5 xs:px-3 py-1 rounded-lg text-[10px] xs:text-xs font-medium text-white transition-all hover:opacity-80 disabled:opacity-40 min-h-8 btn-gradient"
         >
           {t('chat.sendPoll')}
         </button>

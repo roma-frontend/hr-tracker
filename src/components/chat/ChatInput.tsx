@@ -216,11 +216,9 @@ export function ChatInput({
         <button
           onClick={onSend}
           disabled={!canSend}
-          className="w-7 xs:w-8 h-7 xs:h-8 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+          className={`w-7 xs:w-8 h-7 xs:h-8 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed shrink-0 ${canSend ? 'btn-gradient' : ''}`}
           style={{
-            background: canSend
-              ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))'
-              : 'var(--border)',
+            background: canSend ? undefined : 'var(--border)',
           }}
         >
           {sending ? (

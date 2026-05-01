@@ -69,13 +69,7 @@ export function ChatHeader({
           >
             <Avatar className="w-9 h-9">
               {otherUser?.avatarUrl && <AvatarImage src={otherUser.avatarUrl} />}
-              <AvatarFallback
-                className="text-xs font-bold text-white"
-                style={{
-                  background:
-                    'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                }}
-              >
+              <AvatarFallback className="text-xs font-bold text-white">
                 {getInitials(displayName)}
               </AvatarFallback>
             </Avatar>

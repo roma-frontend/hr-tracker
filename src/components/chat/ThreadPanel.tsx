@@ -142,13 +142,7 @@ export function ThreadPanel({
             >
               <Avatar className="sm:w-6 w-8 sm:h-6 h-8 shrink-0 mt-0.5">
                 {r.sender?.avatarUrl && <AvatarImage src={r.sender.avatarUrl} />}
-                <AvatarFallback
-                  className="sm:text-[8px] text-[10px] font-bold text-white"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))',
-                  }}
-                >
+                <AvatarFallback className="sm:text-[8px] text-[10px] font-bold text-white btn-gradient">
                   {getInitials(r.sender?.name ?? '?')}
                 </AvatarFallback>
               </Avatar>
@@ -160,11 +154,9 @@ export function ThreadPanel({
                   {isOwn ? 'You' : r.sender?.name}
                 </span>
                 <div
-                  className="sm:px-3 px-3.5 sm:py-1.5 py-2 rounded-xl sm:text-xs text-sm break-words"
+                  className={`sm:px-3 px-3.5 sm:py-1.5 py-2 rounded-xl sm:text-xs text-sm break-words ${isOwn ? 'btn-gradient' : ''}`}
                   style={{
-                    background: isOwn
-                      ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))'
-                      : 'var(--background-subtle)',
+                    background: isOwn ? undefined : 'var(--background-subtle)',
                     color: isOwn ? 'white' : 'var(--text-primary)',
                   }}
                 >
@@ -205,11 +197,9 @@ export function ThreadPanel({
           <button
             onClick={handleSend}
             disabled={!input.trim() || sending}
-            className="w-6 h-6 flex items-center justify-center rounded-lg transition-all hover:scale-110 disabled:opacity-30"
+            className={`w-6 h-6 flex items-center justify-center rounded-lg transition-all hover:scale-110 disabled:opacity-30 ${input.trim() ? 'btn-gradient' : ''}`}
             style={{
-              background: input.trim()
-                ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, var(--primary)))'
-                : 'var(--border)',
+              background: input.trim() ? undefined : 'var(--border)',
             }}
           >
             <Send className="w-3 h-3 text-white" />
