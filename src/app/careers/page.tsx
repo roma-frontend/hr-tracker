@@ -429,7 +429,6 @@ function VacancyCard({ vacancy, onClick }: { vacancy: VacancyItem; onClick: () =
                 className="inline-flex items-center gap-1 text-xs font-medium"
                 style={{ color: 'var(--landing-text-secondary)' }}
               >
-                <DollarSign className="w-3 h-3" />
                 {formatSalary(vacancy.salary)}
               </span>
             )}
@@ -808,7 +807,7 @@ function VacancyDetailModal({
                   href={
                     user
                       ? `/onboarding/select-organization?org=${vacancy.org.slug}`
-                      : `/login?next=/onboarding/select-organization?org=${vacancy.org.slug}`
+                      : `/register?next=/onboarding/select-organization?org=${vacancy.org.slug}`
                   }
                   className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all hover:opacity-80"
                   style={{
