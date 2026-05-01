@@ -7117,7 +7117,8 @@
     "emailDomainNotFound": "Домен email не существует",
     "emailInvalid": "Недействительный email-адрес",
     "joinOrg": "Присоединиться к организации",
-    "viewAll": "Все вакансии"
+    "viewAll": "Все вакансии",
+    "positionsCount": "позиций"
   },
   "onboarding": {
     "title": "Онбординг",

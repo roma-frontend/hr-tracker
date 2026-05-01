@@ -986,7 +986,7 @@ export function ChatWidget() {
               // Reset hint timer when user opens chat
               setLastActivityTime(Date.now());
             }}
-            className="fixed bottom-6 right-6 z-50 w-10 sm:w-14 h-10 sm:h-14 rounded-full flex items-center gap-2 justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+            className="fixed bottom-6 right-6 z-50 w-10 sm:w-14 h-10 sm:h-14 rounded-full flex items-center gap-2 justify-center btn-gradient text-white font-medium shadow-md hover:shadow-lg"
             whileTap={{ scale: 0.95 }}
           >
             <AnimatePresence mode="wait">
@@ -1029,7 +1029,7 @@ export function ChatWidget() {
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-(--border) shrink-0 bg-linear-to-r from-[#2563eb]/10 to-[#0ea5e9]/10">
-              <div className="w-8 h-8 rounded-xl bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity flex items-center justify-center shadow">
+              <div className="w-8 h-8 rounded-xl btn-gradient flex items-center justify-center shadow">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -1403,7 +1403,7 @@ export function ChatWidget() {
                 <Button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="btn-gradient disabled:opacity-50"
                 >
                   {isLoading ? (
                     <ShieldLoader size="xs" variant="inline" />

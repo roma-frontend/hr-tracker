@@ -307,7 +307,7 @@ export function LeaveRequestWizard({
             <Button
               onClick={handleNext}
               disabled={!canGoNext() || isSubmitting}
-              className="w-full sm:w-auto text-sm gap-2 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
+              className="w-full sm:w-auto text-sm gap-2 btn-gradient text-white"
             >
               {isSubmitting ? (
                 t('wizard.processing', 'Processing...')

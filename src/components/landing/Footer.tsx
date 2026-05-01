@@ -1,12 +1,22 @@
-"use client"
+'use client';
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
 function ShieldIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   );
 }
@@ -83,7 +93,9 @@ export default function Footer() {
                 className="text-xs uppercase tracking-[0.2em] font-bold mb-4"
                 style={{ color: 'var(--landing-text-muted)' }}
               >
-                {t(`landingExtra.${category === 'product' ? 'footerProduct' : category === 'platform' ? 'footerPlatform' : category === 'account' ? 'footerAccount' : 'footerLegal'}`)}
+                {t(
+                  `landingExtra.${category === 'product' ? 'footerProduct' : category === 'platform' ? 'footerPlatform' : category === 'account' ? 'footerAccount' : 'footerLegal'}`,
+                )}
               </h3>
               <ul className="space-y-3">
                 {links.map((link) => (
@@ -94,9 +106,14 @@ export default function Footer() {
                       style={{ color: 'var(--landing-text-secondary)' }}
                       aria-label={
                         link.href === '/privacy'
-                          ? t('landingExtra.footerPrivacyDesc', { defaultValue: 'View our privacy policy and data protection information' })
+                          ? t('landingExtra.footerPrivacyDesc', {
+                              defaultValue:
+                                'View our privacy policy and data protection information',
+                            })
                           : link.href === '/terms'
-                            ? t('landingExtra.footerTermsDesc', { defaultValue: 'Read our terms of service and conditions' })
+                            ? t('landingExtra.footerTermsDesc', {
+                                defaultValue: 'Read our terms of service and conditions',
+                              })
                             : undefined
                       }
                     >
@@ -114,10 +131,7 @@ export default function Footer() {
           className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{ borderColor: 'var(--landing-card-border)' }}
         >
-          <p
-            className="text-xs"
-            style={{ color: 'var(--landing-text-muted)' }}
-          >
+          <p className="text-xs" style={{ color: 'var(--landing-text-muted)' }}>
             © {new Date().getFullYear()} HROffice. {t('landingExtra.footerRights')}
           </p>
           <div className="flex items-center gap-4">

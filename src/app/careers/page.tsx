@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
@@ -48,9 +49,12 @@ type VacancyItem = {
 // ─── Helpers ─────────────────────────────────────────────────
 function formatSalary(salary: { min: number; max: number; currency: string }) {
   const fmt = (n: number) => {
-    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-    if (n >= 1000) return `${(n / 1000).toFixed(0)}K`;
-    return n.toString();
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (n >= 1000) {
+      const k = n / 1000;
+      return k % 1 === 0 ? `${k}K` : `${k.toFixed(1).replace(/\.0$/, '')}K`;
+    }
+    return n.toLocaleString();
   };
   return `${fmt(salary.min)} – ${fmt(salary.max)} ${salary.currency}`;
 }
@@ -72,11 +76,19 @@ const EMPLOYMENT_LABELS: Record<string, string> = {
   internship: 'Internship',
 };
 
+const EMPLOYMENT_TYPE_KEYS: Record<string, string> = {
+  full_time: 'fullTime',
+  part_time: 'partTime',
+  contract: 'contract',
+  internship: 'internship',
+};
+
 // ─── Main Page ───────────────────────────────────────────────
 export default function CareersGlobalPage() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const vacancies = useQuery(api.careers.listAllOpenVacancies);
+  const allOrgs = useQuery(api.careers.listActiveOrganizations);
 
   const [search, setSearch] = useState('');
   const [selectedOrg, setSelectedOrg] = useState<string>('');
@@ -86,14 +98,9 @@ export default function CareersGlobalPage() {
 
   // Derive filter options
   const orgs = useMemo(() => {
-    if (!vacancies) return [];
-    const map = new Map<string, { id: string; name: string; slug: string }>();
-    vacancies.forEach((v) => {
-      if (!map.has(v.org.slug))
-        map.set(v.org.slug, { id: v.org._id, name: v.org.name, slug: v.org.slug });
-    });
-    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [vacancies]);
+    if (!allOrgs) return [];
+    return allOrgs.map((o) => ({ id: o._id, name: o.name, slug: o.slug }));
+  }, [allOrgs]);
 
   const departments = useMemo(() => {
     if (!vacancies) return [];
@@ -149,7 +156,9 @@ export default function CareersGlobalPage() {
             }}
           >
             <Briefcase className="w-4 h-4" />
-            {vacancies ? `${vacancies.length} open positions` : 'Loading...'}
+            {vacancies
+              ? `${vacancies.length} ${t('careers.openPositions', 'open positions')}`
+              : t('common.loading', 'Loading...')}
           </div>
           <h1
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight"
@@ -222,10 +231,10 @@ export default function CareersGlobalPage() {
             }}
           >
             <option value="">{t('careers.allTypes', 'All Types')}</option>
-            <option value="full_time">Full-time</option>
-            <option value="part_time">Part-time</option>
-            <option value="contract">Contract</option>
-            <option value="internship">Internship</option>
+            <option value="full_time">{t('recruitment.type.fullTime', 'Full-time')}</option>
+            <option value="part_time">{t('recruitment.type.partTime', 'Part-time')}</option>
+            <option value="contract">{t('recruitment.type.contract', 'Contract')}</option>
+            <option value="internship">{t('recruitment.type.internship', 'Internship')}</option>
           </select>
 
           <select
@@ -254,7 +263,7 @@ export default function CareersGlobalPage() {
                 setSelectedDept('');
               }}
               className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-80"
-              style={{ background: 'var(--landing-gradient-from)', color: '#fff' }}
+              style={{ background: 'var(--primary)', color: '#fff' }}
             >
               <X className="w-3.5 h-3.5" />
               {t('careers.clearFilters', 'Clear')} ({activeFilters})
@@ -262,7 +271,7 @@ export default function CareersGlobalPage() {
           )}
 
           <span className="ml-auto text-sm" style={{ color: 'var(--landing-text-muted)' }}>
-            {filtered.length} {filtered.length === 1 ? 'position' : 'positions'}
+            {filtered.length} {t('careers.positionsCount', 'positions')}
           </span>
         </div>
 
@@ -313,13 +322,15 @@ export default function CareersGlobalPage() {
       </section>
 
       {/* Vacancy Detail Modal */}
-      {selectedVacancy && (
-        <VacancyDetailModal
-          vacancy={selectedVacancy}
-          onClose={() => setSelectedVacancy(null)}
-          user={user}
-        />
-      )}
+      {selectedVacancy &&
+        createPortal(
+          <VacancyDetailModal
+            vacancy={selectedVacancy}
+            onClose={() => setSelectedVacancy(null)}
+            user={user}
+          />,
+          document.body,
+        )}
 
       <Footer />
     </div>
@@ -328,11 +339,15 @@ export default function CareersGlobalPage() {
 
 // ─── Vacancy Card ────────────────────────────────────────────
 function VacancyCard({ vacancy, onClick }: { vacancy: VacancyItem; onClick: () => void }) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
-      className="w-full text-left p-5 rounded-xl transition-shadow duration-300 ease-out shadow-sm hover:shadow-lg hover:shadow-black/8 group bg-white/80 dark:bg-white/5"
-      style={{ border: '1px solid var(--landing-card-border)' }}
+      className="w-full text-left p-5 rounded-xl transition-shadow duration-300 ease-out shadow-sm hover:shadow-lg hover:shadow-black/8 group"
+      style={{
+        background: 'var(--landing-card-bg)',
+        border: '1px solid var(--landing-card-border)',
+      }}
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         {/* Org avatar */}
@@ -395,7 +410,10 @@ function VacancyCard({ vacancy, onClick }: { vacancy: VacancyItem; onClick: () =
               style={{ color: 'var(--landing-text-muted)' }}
             >
               <Clock className="w-3 h-3" />
-              {EMPLOYMENT_LABELS[vacancy.employmentType] || vacancy.employmentType}
+              {t(
+                `recruitment.type.${EMPLOYMENT_TYPE_KEYS[vacancy.employmentType] || vacancy.employmentType}`,
+                EMPLOYMENT_LABELS[vacancy.employmentType] || vacancy.employmentType,
+              )}
             </span>
             {vacancy.location && (
               <span
@@ -450,6 +468,14 @@ function VacancyDetailModal({
   const [submitted, setSubmitted] = useState(false);
   const [emailError, setEmailError] = useState('');
 
+  // Block background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const handleApply = async () => {
     if (!name || !email || !consent) return;
     setEmailError('');
@@ -491,17 +517,26 @@ function VacancyDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl bg-white dark:bg-[#0f1f3d]"
-        style={{ border: '1px solid var(--landing-card-border)' }}
+        className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+        style={{
+          background: 'var(--landing-modal-bg)',
+          border: '1px solid var(--landing-card-border)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="sticky top-0 z-10 p-6 pb-4 rounded-t-2xl bg-white/95 dark:bg-[#0f1f3d]/95 backdrop-blur-md"
-          style={{ borderBottom: '1px solid var(--landing-card-border)' }}
+          className="shrink-0 p-6 pb-4 rounded-t-2xl"
+          style={{
+            background: 'var(--landing-modal-bg)',
+            borderBottom: '1px solid var(--landing-card-border)',
+          }}
         >
           <button
             onClick={onClose}
@@ -547,7 +582,11 @@ function VacancyDetailModal({
               className="inline-flex items-center gap-1 text-sm"
               style={{ color: 'var(--landing-text-muted)' }}
             >
-              <Clock className="w-3.5 h-3.5" /> {EMPLOYMENT_LABELS[vacancy.employmentType]}
+              <Clock className="w-3.5 h-3.5" />{' '}
+              {t(
+                `recruitment.type.${EMPLOYMENT_TYPE_KEYS[vacancy.employmentType] || vacancy.employmentType}`,
+                EMPLOYMENT_LABELS[vacancy.employmentType] || vacancy.employmentType,
+              )}
             </span>
             {vacancy.salary && (
               <span
@@ -561,7 +600,7 @@ function VacancyDetailModal({
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           {!detail ? (
             <div className="flex justify-center py-8">
               <ShieldLoader />

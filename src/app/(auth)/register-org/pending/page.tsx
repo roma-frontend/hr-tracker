@@ -142,7 +142,7 @@ export default function PendingPage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
+                className="w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 btn-gradient"
               >
                 {t('auth.pending.goToLogin', 'Go to Login')}
                 <ArrowRight className="w-4 h-4" />

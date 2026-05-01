@@ -585,7 +585,7 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
             {canManage && (
               <button
                 onClick={() => setShowCreate(true)}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-gradient text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all w-full sm:w-auto"
               >
                 {t('tasksClient.newTask')}
               </button>
@@ -688,13 +688,13 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
         <div className="flex items-center bg-(--card) border border-(--border) rounded-xl p-1 ml-auto shrink-0">
           <button
             onClick={() => setViewMode('kanban')}
-            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'kanban' ? 'bg-blue-600 text-white shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'kanban' ? 'btn-gradient shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
           >
             {t('tasksClient.kanban')}
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'list' ? 'btn-gradient shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
           >
             {t('tasksClient.list')}
           </button>
@@ -802,9 +802,7 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
           aria-describedby={undefined}
         >
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl">
-              {t('task.createTask')}
-            </DialogTitle>
+            <DialogTitle className="text-lg md:text-xl">{t('task.createTask')}</DialogTitle>
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-y-auto">
             <CreateTaskWizard

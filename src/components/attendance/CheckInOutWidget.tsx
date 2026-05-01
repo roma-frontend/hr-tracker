@@ -66,7 +66,7 @@ export function CheckInOutWidget() {
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg">
+      <CardHeader className="btn-gradient text-white font-medium shadow-md hover:shadow-lg">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-white">
             <Clock className="w-5 h-5" />
@@ -152,7 +152,8 @@ export function CheckInOutWidget() {
             </div>
             {todayStatus.overtimeMinutes && todayStatus.overtimeMinutes > 0 && (
               <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                +{formatDuration(todayStatus.overtimeMinutes)} {t('attendanceExtra.overtimeShort')} 🌟
+                +{formatDuration(todayStatus.overtimeMinutes)} {t('attendanceExtra.overtimeShort')}{' '}
+                🌟
               </p>
             )}
           </div>
@@ -172,11 +173,7 @@ export function CheckInOutWidget() {
           )}
 
           {isCheckedIn && (
-            <Button
-              onClick={handleCheckOut}
-              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
-              size="lg"
-            >
+            <Button onClick={handleCheckOut} className="flex-1 btn-gradient" size="lg">
               <LogOut className="w-5 h-5 mr-2" />
               {t('attendance.checkOut')}
             </Button>

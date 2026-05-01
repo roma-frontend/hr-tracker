@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
@@ -38,9 +39,12 @@ type VacancyDetail = {
 // ─── Helpers ─────────────────────────────────────────────────
 function formatSalary(salary: { min: number; max: number; currency: string }) {
   const fmt = (n: number) => {
-    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-    if (n >= 1000) return `${(n / 1000).toFixed(0)}K`;
-    return n.toString();
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (n >= 1000) {
+      const k = n / 1000;
+      return k % 1 === 0 ? `${k}K` : `${k.toFixed(1).replace(/\.0$/, '')}K`;
+    }
+    return n.toLocaleString();
   };
   return `${fmt(salary.min)} – ${fmt(salary.max)} ${salary.currency}`;
 }
@@ -65,63 +69,140 @@ const TYPE_LABELS: Record<string, string> = {
 // ─── Icons ───────────────────────────────────────────────────
 function MapPinIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-      <circle cx="12" cy="10" r="3"/>
+    <svg
+      className={className}
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
     </svg>
   );
 }
 
 function BriefcaseIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    <svg
+      className={className}
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
     </svg>
   );
 }
 
 function ClockIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-      <polyline points="12 6 12 12 16 14"/>
+    <svg
+      className={className}
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }
 
 function SearchIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <svg
+      className={className}
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   );
 }
 
 function XIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
+    <svg
+      className={className}
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   );
 }
 
-function CheckCircleIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function CheckCircleIcon({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
-    <svg className={className} style={style} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-      <polyline points="22 4 12 14.01 9 11.01"/>
+    <svg
+      className={className}
+      style={style}
+      width="48"
+      height="48"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
   );
 }
 
 function DollarIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="1" x2="12" y2="23"/>
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    <svg
+      className={className}
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
   );
 }
@@ -151,8 +232,12 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
   const filtered = useMemo(() => {
     if (!data?.vacancies) return [];
     return data.vacancies.filter((v) => {
-      if (search && !v.title.toLowerCase().includes(search.toLowerCase()) &&
-          !v.excerpt.toLowerCase().includes(search.toLowerCase())) return false;
+      if (
+        search &&
+        !v.title.toLowerCase().includes(search.toLowerCase()) &&
+        !v.excerpt.toLowerCase().includes(search.toLowerCase())
+      )
+        return false;
       if (filterDept && v.department !== filterDept) return false;
       if (filterType && v.employmentType !== filterType) return false;
       if (filterLocation && v.location !== filterLocation) return false;
@@ -164,7 +249,10 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--landing-bg)' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--landing-bg)' }}
+      >
         <ShieldLoader />
       </div>
     );
@@ -172,7 +260,10 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
 
   if (!data.org) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--landing-bg)' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--landing-bg)' }}
+      >
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--landing-text-primary)' }}>
             {t('careers.notFound', 'Page not found')}
@@ -190,46 +281,89 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Decorative orbs */}
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full pointer-events-none opacity-60"
-          style={{ background: 'radial-gradient(circle, var(--landing-orb-1) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-        <div className="absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none opacity-50"
-          style={{ background: 'radial-gradient(circle, var(--landing-orb-2) 0%, transparent 70%)', filter: 'blur(50px)' }} />
+        <div
+          className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full pointer-events-none opacity-60"
+          style={{
+            background: 'radial-gradient(circle, var(--landing-orb-1) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+        <div
+          className="absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none opacity-50"
+          style={{
+            background: 'radial-gradient(circle, var(--landing-orb-2) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+          }}
+        />
 
         <div className="relative max-w-6xl mx-auto px-6 md:px-12 pt-20 pb-16 text-center">
           {/* Org branding */}
           {data.org.logoUrl && (
-            <img src={data.org.logoUrl} alt={data.org.name} className="w-16 h-16 mx-auto mb-6 rounded-2xl object-cover shadow-lg" />
+            <img
+              src={data.org.logoUrl}
+              alt={data.org.name}
+              className="w-16 h-16 mx-auto mb-6 rounded-2xl object-cover shadow-lg"
+            />
           )}
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-            style={{ background: 'var(--landing-card-bg)', border: '1px solid var(--landing-card-border)' }}>
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
+            style={{
+              background: 'var(--landing-card-bg)',
+              border: '1px solid var(--landing-card-border)',
+            }}
+          >
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--primary)' }} />
-            <span className="text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--landing-text-muted)' }}>
-              {t('careers.badge', 'We\'re Hiring')}
+            <span
+              className="text-xs font-bold tracking-widest uppercase"
+              style={{ color: 'var(--landing-text-muted)' }}
+            >
+              {t('careers.badge', "We're Hiring")}
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-4" style={{ color: 'var(--landing-text-primary)' }}>
+          <h1
+            className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-4"
+            style={{ color: 'var(--landing-text-primary)' }}
+          >
             {t('careers.heroTitle', 'Join')}{' '}
             <span style={{ color: 'var(--primary)' }}>{data.org.name}</span>
           </h1>
-          <p className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: 'var(--landing-text-secondary)' }}>
-            {t('careers.heroSubtitle', 'Explore open positions and become part of our team. Build something amazing together.')}
+          <p
+            className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
+            style={{ color: 'var(--landing-text-secondary)' }}
+          >
+            {t(
+              'careers.heroSubtitle',
+              'Explore open positions and become part of our team. Build something amazing together.',
+            )}
           </p>
 
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-8 mt-10">
             <div className="text-center">
-              <p className="text-3xl font-black" style={{ color: 'var(--primary)' }}>{data.vacancies.length}</p>
-              <p className="text-sm" style={{ color: 'var(--landing-text-muted)' }}>{t('careers.openPositions', 'Open Positions')}</p>
+              <p className="text-3xl font-black" style={{ color: 'var(--primary)' }}>
+                {data.vacancies.length}
+              </p>
+              <p className="text-sm" style={{ color: 'var(--landing-text-muted)' }}>
+                {t('careers.openPositions', 'Open Positions')}
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-black" style={{ color: 'var(--primary)' }}>{departments.length}</p>
-              <p className="text-sm" style={{ color: 'var(--landing-text-muted)' }}>{t('careers.departments', 'Departments')}</p>
+              <p className="text-3xl font-black" style={{ color: 'var(--primary)' }}>
+                {departments.length}
+              </p>
+              <p className="text-sm" style={{ color: 'var(--landing-text-muted)' }}>
+                {t('careers.departments', 'Departments')}
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-black" style={{ color: 'var(--primary)' }}>{locations.length}</p>
-              <p className="text-sm" style={{ color: 'var(--landing-text-muted)' }}>{t('careers.locations', 'Locations')}</p>
+              <p className="text-3xl font-black" style={{ color: 'var(--primary)' }}>
+                {locations.length}
+              </p>
+              <p className="text-sm" style={{ color: 'var(--landing-text-muted)' }}>
+                {t('careers.locations', 'Locations')}
+              </p>
             </div>
           </div>
         </div>
@@ -237,8 +371,13 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
 
       {/* Search & Filters */}
       <section className="max-w-6xl mx-auto px-6 md:px-12 -mt-4">
-        <div className="rounded-2xl p-4 md:p-6 backdrop-blur-sm"
-          style={{ background: 'var(--landing-card-bg)', border: '1px solid var(--landing-card-border)' }}>
+        <div
+          className="rounded-2xl p-4 md:p-6 backdrop-blur-sm"
+          style={{
+            background: 'var(--landing-card-bg)',
+            border: '1px solid var(--landing-card-border)',
+          }}
+        >
           {/* Search bar */}
           <div className="relative mb-4">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 opacity-50" />
@@ -263,17 +402,29 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
                 value={filterDept}
                 onChange={(e) => setFilterDept(e.target.value)}
                 className="px-3 py-2 rounded-lg text-sm outline-none cursor-pointer"
-                style={{ background: 'var(--landing-bg)', border: '1px solid var(--landing-card-border)', color: 'var(--landing-text-primary)' }}
+                style={{
+                  background: 'var(--landing-bg)',
+                  border: '1px solid var(--landing-card-border)',
+                  color: 'var(--landing-text-primary)',
+                }}
               >
                 <option value="">{t('careers.allDepartments', 'All Departments')}</option>
-                {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+                {departments.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
               </select>
             )}
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="px-3 py-2 rounded-lg text-sm outline-none cursor-pointer"
-              style={{ background: 'var(--landing-bg)', border: '1px solid var(--landing-card-border)', color: 'var(--landing-text-primary)' }}
+              style={{
+                background: 'var(--landing-bg)',
+                border: '1px solid var(--landing-card-border)',
+                color: 'var(--landing-text-primary)',
+              }}
             >
               <option value="">{t('careers.allTypes', 'All Types')}</option>
               <option value="full_time">{t('recruitment.type.fullTime', 'Full-time')}</option>
@@ -286,15 +437,28 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
                 className="px-3 py-2 rounded-lg text-sm outline-none cursor-pointer"
-                style={{ background: 'var(--landing-bg)', border: '1px solid var(--landing-card-border)', color: 'var(--landing-text-primary)' }}
+                style={{
+                  background: 'var(--landing-bg)',
+                  border: '1px solid var(--landing-card-border)',
+                  color: 'var(--landing-text-primary)',
+                }}
               >
                 <option value="">{t('careers.allLocations', 'All Locations')}</option>
-                {locations.map((l) => <option key={l} value={l}>{l}</option>)}
+                {locations.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
               </select>
             )}
             {hasFilters && (
               <button
-                onClick={() => { setSearch(''); setFilterDept(''); setFilterType(''); setFilterLocation(''); }}
+                onClick={() => {
+                  setSearch('');
+                  setFilterDept('');
+                  setFilterType('');
+                  setFilterLocation('');
+                }}
                 className="px-3 py-2 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
                 style={{ color: 'var(--primary)' }}
               >
@@ -322,7 +486,12 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {filtered.map((vacancy) => (
-              <VacancyCard key={vacancy._id} vacancy={vacancy} onClick={() => setSelectedId(vacancy._id)} t={t} />
+              <VacancyCard
+                key={vacancy._id}
+                vacancy={vacancy}
+                onClick={() => setSelectedId(vacancy._id)}
+                t={t}
+              />
             ))}
           </div>
         )}
@@ -330,25 +499,55 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
 
       {/* Footer banner */}
       <section className="max-w-6xl mx-auto px-6 md:px-12 pb-16">
-        <div className="rounded-2xl p-8 md:p-12 text-center relative overflow-hidden"
-          style={{ background: 'var(--landing-card-bg)', border: '1px solid var(--landing-card-border)' }}>
-          <div className="absolute inset-0 opacity-30 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse at center, var(--landing-orb-1) 0%, transparent 70%)' }} />
+        <div
+          className="rounded-2xl p-8 md:p-12 text-center relative overflow-hidden"
+          style={{
+            background: 'var(--landing-card-bg)',
+            border: '1px solid var(--landing-card-border)',
+          }}
+        >
+          <div
+            className="absolute inset-0 opacity-30 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, var(--landing-orb-1) 0%, transparent 70%)',
+            }}
+          />
           <div className="relative">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: 'var(--landing-text-primary)' }}>
-              {t('careers.ctaTitle', 'Don\'t see the right role?')}
+            <h2
+              className="text-2xl md:text-3xl font-bold mb-3"
+              style={{ color: 'var(--landing-text-primary)' }}
+            >
+              {t('careers.ctaTitle', "Don't see the right role?")}
             </h2>
             <p className="max-w-lg mx-auto mb-6" style={{ color: 'var(--landing-text-secondary)' }}>
-              {t('careers.ctaSubtitle', 'We\'re always looking for talented people. Send us your resume and we\'ll keep you in mind for future openings.')}
+              {t(
+                'careers.ctaSubtitle',
+                "We're always looking for talented people. Send us your resume and we'll keep you in mind for future openings.",
+              )}
             </p>
             <Link
               href={`mailto:careers@${orgSlug}.com`}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105 hover:shadow-lg"
-              style={{ background: 'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))', color: '#fff' }}
+              style={{
+                background:
+                  'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))',
+                color: '#fff',
+              }}
             >
               {t('careers.contactUs', 'Get in Touch')}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
               </svg>
             </Link>
           </div>
@@ -356,54 +555,91 @@ export default function CareersPage({ orgSlug }: { orgSlug: string }) {
       </section>
 
       {/* Vacancy Detail Modal */}
-      {selectedId && (
-        <VacancyModal vacancyId={selectedId} onClose={() => setSelectedId(null)} t={t} />
-      )}
+      {selectedId &&
+        createPortal(
+          <VacancyModal vacancyId={selectedId} onClose={() => setSelectedId(null)} t={t} />,
+          document.body,
+        )}
     </div>
   );
 }
 
 // ─── Vacancy Card ────────────────────────────────────────────
-function VacancyCard({ vacancy, onClick, t }: { vacancy: Vacancy; onClick: () => void; t: TFunction }) {
+function VacancyCard({
+  vacancy,
+  onClick,
+  t,
+}: {
+  vacancy: Vacancy;
+  onClick: () => void;
+  t: TFunction;
+}) {
   return (
     <button
       onClick={onClick}
-      className="text-left w-full rounded-xl p-5 md:p-6 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl group"
-      style={{ background: 'var(--landing-card-bg)', border: '1px solid var(--landing-card-border)' }}
+      className="text-left w-full rounded-xl p-5 md:p-6 transition-all duration-200 hover:shadow-xl group"
+      style={{
+        background: 'var(--landing-card-bg)',
+        border: '1px solid var(--landing-card-border)',
+      }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold truncate group-hover:underline underline-offset-4" style={{ color: 'var(--landing-text-primary)' }}>
+          <h3
+            className="text-lg font-bold truncate group-hover:underline underline-offset-4"
+            style={{ color: 'var(--landing-text-primary)' }}
+          >
             {vacancy.title}
           </h3>
           <div className="flex flex-wrap items-center gap-3 mt-2">
             {vacancy.department && (
-              <span className="inline-flex items-center gap-1 text-xs" style={{ color: 'var(--landing-text-muted)' }}>
+              <span
+                className="inline-flex items-center gap-1 text-xs"
+                style={{ color: 'var(--landing-text-muted)' }}
+              >
                 <BriefcaseIcon className="w-3 h-3" /> {vacancy.department}
               </span>
             )}
             {vacancy.location && (
-              <span className="inline-flex items-center gap-1 text-xs" style={{ color: 'var(--landing-text-muted)' }}>
+              <span
+                className="inline-flex items-center gap-1 text-xs"
+                style={{ color: 'var(--landing-text-muted)' }}
+              >
                 <MapPinIcon className="w-3 h-3" /> {vacancy.location}
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-xs" style={{ color: 'var(--landing-text-muted)' }}>
+            <span
+              className="inline-flex items-center gap-1 text-xs"
+              style={{ color: 'var(--landing-text-muted)' }}
+            >
               <ClockIcon className="w-3 h-3" /> {timeAgo(vacancy.createdAt)}
             </span>
           </div>
         </div>
-        <span className="shrink-0 px-2.5 py-1 rounded-lg text-xs font-semibold"
-          style={{ background: 'var(--landing-bg)', color: 'var(--primary)', border: '1px solid var(--landing-card-border)' }}>
+        <span
+          className="shrink-0 px-2.5 py-1 rounded-lg text-xs font-semibold"
+          style={{
+            background: 'var(--landing-bg)',
+            color: 'var(--primary)',
+            border: '1px solid var(--landing-card-border)',
+          }}
+        >
           {TYPE_LABELS[vacancy.employmentType] || vacancy.employmentType}
         </span>
       </div>
 
-      <p className="mt-3 text-sm line-clamp-2 leading-relaxed" style={{ color: 'var(--landing-text-secondary)' }}>
+      <p
+        className="mt-3 text-sm line-clamp-2 leading-relaxed"
+        style={{ color: 'var(--landing-text-secondary)' }}
+      >
         {vacancy.excerpt}
       </p>
 
       {vacancy.salary && (
-        <div className="flex items-center gap-1 mt-3 text-sm font-medium" style={{ color: 'var(--primary)' }}>
+        <div
+          className="flex items-center gap-1 mt-3 text-sm font-medium"
+          style={{ color: 'var(--primary)' }}
+        >
           <DollarIcon className="w-3.5 h-3.5" /> {formatSalary(vacancy.salary)}
         </div>
       )}
@@ -412,14 +648,36 @@ function VacancyCard({ vacancy, onClick, t }: { vacancy: Vacancy; onClick: () =>
 }
 
 // ─── Vacancy Detail Modal ────────────────────────────────────
-function VacancyModal({ vacancyId, onClose, t }: { vacancyId: Id<'vacancies'>; onClose: () => void; t: TFunction }) {
+function VacancyModal({
+  vacancyId,
+  onClose,
+  t,
+}: {
+  vacancyId: Id<'vacancies'>;
+  onClose: () => void;
+  t: TFunction;
+}) {
   const details = useQuery(api.careers.getVacancyDetails, { vacancyId });
   const apply = useMutation(api.careers.applyToVacancy);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', resumeText: '', consent: false });
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    resumeText: '',
+    consent: false,
+  });
+
+  // Block background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const handleApply = async () => {
     if (!form.name.trim() || !form.email.trim()) {
@@ -450,21 +708,30 @@ function VacancyModal({ vacancyId, onClose, t }: { vacancyId: Id<'vacancies'>; o
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden"
+      onClick={onClose}
+    >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
       {/* Modal content */}
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
-        style={{ background: 'var(--landing-bg)', border: '1px solid var(--landing-card-border)' }}
+        className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl"
+        style={{
+          background: 'var(--landing-modal-bg)',
+          border: '1px solid var(--landing-card-border)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-10 hover:opacity-80"
-          style={{ background: 'var(--landing-card-bg)', border: '1px solid var(--landing-card-border)' }}
+          style={{
+            background: 'var(--landing-card-bg)',
+            border: '1px solid var(--landing-card-border)',
+          }}
         >
           <XIcon className="w-4 h-4" />
         </button>
@@ -475,23 +742,44 @@ function VacancyModal({ vacancyId, onClose, t }: { vacancyId: Id<'vacancies'>; o
           </div>
         ) : submitted ? (
           <div className="p-12 text-center">
-            <CheckCircleIcon className="mx-auto mb-4" style={{ color: 'var(--primary)' } as React.CSSProperties} />
-            <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--landing-text-primary)' }}>
+            <CheckCircleIcon
+              className="mx-auto mb-4"
+              style={{ color: 'var(--primary)' } as React.CSSProperties}
+            />
+            <h2
+              className="text-2xl font-bold mb-2"
+              style={{ color: 'var(--landing-text-primary)' }}
+            >
               {t('careers.applied', 'Application Submitted!')}
             </h2>
             <p style={{ color: 'var(--landing-text-secondary)' }}>
-              {t('careers.appliedHint', 'Thank you for your interest. We\'ll review your application and get back to you soon.')}
+              {t(
+                'careers.appliedHint',
+                "Thank you for your interest. We'll review your application and get back to you soon.",
+              )}
             </p>
             <button
               onClick={onClose}
               className="mt-6 px-6 py-2.5 rounded-xl font-medium text-sm transition-all hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))', color: '#fff' }}
+              style={{
+                background:
+                  'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))',
+                color: '#fff',
+              }}
             >
               {t('careers.close', 'Close')}
             </button>
           </div>
         ) : showForm ? (
-          <ApplicationForm form={form} setForm={setForm} error={error} loading={loading} onSubmit={handleApply} onBack={() => setShowForm(false)} t={t} />
+          <ApplicationForm
+            form={form}
+            setForm={setForm}
+            error={error}
+            loading={loading}
+            onSubmit={handleApply}
+            onBack={() => setShowForm(false)}
+            t={t}
+          />
         ) : (
           <VacancyDetails details={details} onApply={() => setShowForm(true)} t={t} />
         )}
@@ -501,35 +789,64 @@ function VacancyModal({ vacancyId, onClose, t }: { vacancyId: Id<'vacancies'>; o
 }
 
 // ─── Vacancy Details View ────────────────────────────────────
-function VacancyDetails({ details, onApply, t }: { details: VacancyDetail; onApply: () => void; t: TFunction }) {
+function VacancyDetails({
+  details,
+  onApply,
+  t,
+}: {
+  details: VacancyDetail;
+  onApply: () => void;
+  t: TFunction;
+}) {
   return (
     <div className="p-6 md:p-8">
       {/* Header */}
       <div className="mb-6">
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          <span className="px-2.5 py-1 rounded-lg text-xs font-semibold"
-            style={{ background: 'var(--landing-card-bg)', color: 'var(--primary)', border: '1px solid var(--landing-card-border)' }}>
+          <span
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold"
+            style={{
+              background: 'var(--landing-card-bg)',
+              color: 'var(--primary)',
+              border: '1px solid var(--landing-card-border)',
+            }}
+          >
             {TYPE_LABELS[details.employmentType] || details.employmentType}
           </span>
           {details.department && (
-            <span className="text-xs" style={{ color: 'var(--landing-text-muted)' }}>{details.department}</span>
+            <span className="text-xs" style={{ color: 'var(--landing-text-muted)' }}>
+              {details.department}
+            </span>
           )}
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--landing-text-primary)' }}>
+        <h2
+          className="text-2xl md:text-3xl font-bold"
+          style={{ color: 'var(--landing-text-primary)' }}
+        >
           {details.title}
         </h2>
         <div className="flex flex-wrap items-center gap-4 mt-3">
           {details.location && (
-            <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: 'var(--landing-text-muted)' }}>
+            <span
+              className="inline-flex items-center gap-1.5 text-sm"
+              style={{ color: 'var(--landing-text-muted)' }}
+            >
               <MapPinIcon /> {details.location}
             </span>
           )}
           {details.salary && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--primary)' }}>
-              <DollarIcon /> {formatSalary(details.salary)}
+            <span
+              className="inline-flex items-center gap-1.5 text-sm font-medium"
+              style={{ color: 'var(--primary)' }}
+            >
+              {' '}
+              {formatSalary(details.salary)}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: 'var(--landing-text-muted)' }}>
+          <span
+            className="inline-flex items-center gap-1.5 text-sm"
+            style={{ color: 'var(--landing-text-muted)' }}
+          >
             <ClockIcon /> {timeAgo(details.createdAt)}
           </span>
         </div>
@@ -537,10 +854,16 @@ function VacancyDetails({ details, onApply, t }: { details: VacancyDetail; onApp
 
       {/* Description */}
       <div className="mb-6">
-        <h3 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--landing-text-muted)' }}>
+        <h3
+          className="text-sm font-bold uppercase tracking-wider mb-3"
+          style={{ color: 'var(--landing-text-muted)' }}
+        >
           {t('careers.description', 'Description')}
         </h3>
-        <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--landing-text-secondary)' }}>
+        <div
+          className="text-sm leading-relaxed whitespace-pre-wrap"
+          style={{ color: 'var(--landing-text-secondary)' }}
+        >
           {details.description}
         </div>
       </div>
@@ -548,10 +871,16 @@ function VacancyDetails({ details, onApply, t }: { details: VacancyDetail; onApp
       {/* Requirements */}
       {details.requirements && (
         <div className="mb-6">
-          <h3 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--landing-text-muted)' }}>
+          <h3
+            className="text-sm font-bold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--landing-text-muted)' }}
+          >
             {t('careers.requirements', 'Requirements')}
           </h3>
-          <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--landing-text-secondary)' }}>
+          <div
+            className="text-sm leading-relaxed whitespace-pre-wrap"
+            style={{ color: 'var(--landing-text-secondary)' }}
+          >
             {details.requirements}
           </div>
         </div>
@@ -562,7 +891,11 @@ function VacancyDetails({ details, onApply, t }: { details: VacancyDetail; onApp
         <button
           onClick={onApply}
           className="w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105 hover:shadow-lg"
-          style={{ background: 'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))', color: '#fff' }}
+          style={{
+            background:
+              'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))',
+            color: '#fff',
+          }}
         >
           {t('careers.applyNow', 'Apply Now')}
         </button>
@@ -573,7 +906,13 @@ function VacancyDetails({ details, onApply, t }: { details: VacancyDetail; onApp
 
 // ─── Application Form ────────────────────────────────────────
 function ApplicationForm({
-  form, setForm, error, loading, onSubmit, onBack, t,
+  form,
+  setForm,
+  error,
+  loading,
+  onSubmit,
+  onBack,
+  t,
 }: {
   form: { name: string; email: string; phone: string; resumeText: string; consent: boolean };
   setForm: (f: typeof form | ((prev: typeof form) => typeof form)) => void;
@@ -596,8 +935,17 @@ function ApplicationForm({
         className="inline-flex items-center gap-1 text-sm mb-4 transition-colors hover:opacity-80"
         style={{ color: 'var(--primary)' }}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
         </svg>
         {t('careers.backToDetails', 'Back to details')}
       </button>
@@ -608,7 +956,10 @@ function ApplicationForm({
 
       <div className="space-y-4">
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--landing-text-muted)' }}>
+          <label
+            className="text-xs font-semibold uppercase tracking-wider block mb-1.5"
+            style={{ color: 'var(--landing-text-muted)' }}
+          >
             {t('careers.formName', 'Full Name')} *
           </label>
           <input
@@ -622,7 +973,10 @@ function ApplicationForm({
         </div>
 
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--landing-text-muted)' }}>
+          <label
+            className="text-xs font-semibold uppercase tracking-wider block mb-1.5"
+            style={{ color: 'var(--landing-text-muted)' }}
+          >
             {t('careers.formEmail', 'Email')} *
           </label>
           <input
@@ -636,7 +990,10 @@ function ApplicationForm({
         </div>
 
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--landing-text-muted)' }}>
+          <label
+            className="text-xs font-semibold uppercase tracking-wider block mb-1.5"
+            style={{ color: 'var(--landing-text-muted)' }}
+          >
             {t('careers.formPhone', 'Phone')}
           </label>
           <input
@@ -650,7 +1007,10 @@ function ApplicationForm({
         </div>
 
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--landing-text-muted)' }}>
+          <label
+            className="text-xs font-semibold uppercase tracking-wider block mb-1.5"
+            style={{ color: 'var(--landing-text-muted)' }}
+          >
             {t('careers.formResume', 'Resume / Cover Letter')}
           </label>
           <textarea
@@ -659,7 +1019,10 @@ function ApplicationForm({
             rows={5}
             className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none focus:ring-2"
             style={inputStyle}
-            placeholder={t('careers.resumePlaceholder', 'Tell us about yourself, your experience, and why you\'re interested in this role...')}
+            placeholder={t(
+              'careers.resumePlaceholder',
+              "Tell us about yourself, your experience, and why you're interested in this role...",
+            )}
           />
         </div>
 
@@ -672,21 +1035,28 @@ function ApplicationForm({
             className="mt-0.5 w-4 h-4 rounded"
           />
           <span className="text-xs leading-relaxed" style={{ color: 'var(--landing-text-muted)' }}>
-            {t('careers.consentText', 'I agree to the processing of my personal data in accordance with the Privacy Policy. My data will be used solely for recruitment purposes.')}
+            {t(
+              'careers.consentText',
+              'I agree to the processing of my personal data in accordance with the Privacy Policy. My data will be used solely for recruitment purposes.',
+            )}
           </span>
         </label>
 
-        {error && (
-          <p className="text-sm text-red-500 font-medium">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
 
         <button
           onClick={onSubmit}
           disabled={loading}
           className="w-full px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: 'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))', color: '#fff' }}
+          style={{
+            background:
+              'linear-gradient(135deg, var(--landing-gradient-from), var(--landing-gradient-to))',
+            color: '#fff',
+          }}
         >
-          {loading ? t('careers.submitting', 'Submitting...') : t('careers.submitApplication', 'Submit Application')}
+          {loading
+            ? t('careers.submitting', 'Submitting...')
+            : t('careers.submitApplication', 'Submit Application')}
         </button>
       </div>
     </div>

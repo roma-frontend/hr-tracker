@@ -31,7 +31,9 @@ interface CookieCategory {
   color: string;
 }
 
-const cookieCategories: (category: ReturnType<typeof useTranslation>['t']) => CookieCategory[] = (t) => [
+const cookieCategories: (category: ReturnType<typeof useTranslation>['t']) => CookieCategory[] = (
+  t,
+) => [
   {
     id: 'necessary',
     name: t('cookies.essentialCookies'),
@@ -115,7 +117,12 @@ export function CookiePreferences() {
   };
 
   const handleReset = () => {
-    if (confirm(t('cookies.resetConfirm') || 'This will reset your cookie consent and show the banner again. Continue?')) {
+    if (
+      confirm(
+        t('cookies.resetConfirm') ||
+          'This will reset your cookie consent and show the banner again. Continue?',
+      )
+    ) {
       resetConsent();
       toast.info(t('toasts.cookieConsentReset'));
     }
@@ -148,7 +155,10 @@ export function CookiePreferences() {
               href="/privacy"
               target="_blank"
               className="font-semibold underline hover:text-blue-700 dark:hover:text-blue-300"
-              aria-label={t('cookies.privacyPolicyLabel', { defaultValue: 'Privacy Policy - learn how we collect, use and protect your personal data' })}
+              aria-label={t('cookies.privacyPolicyLabel', {
+                defaultValue:
+                  'Privacy Policy - learn how we collect, use and protect your personal data',
+              })}
             >
               {t('cookies.privacyPolicy')}
             </Link>
@@ -157,7 +167,9 @@ export function CookiePreferences() {
               href="/terms"
               target="_blank"
               className="font-semibold underline hover:text-blue-700 dark:hover:text-blue-300"
-              aria-label={t('cookies.termsLabel', { defaultValue: 'Terms of Service - read the legal terms for using our platform' })}
+              aria-label={t('cookies.termsLabel', {
+                defaultValue: 'Terms of Service - read the legal terms for using our platform',
+              })}
             >
               {t('cookies.termsOfService')}
             </Link>
@@ -185,7 +197,7 @@ export function CookiePreferences() {
                     <div
                       className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                         isEnabled
-                          ? 'bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity'
+                          ? 'btn-gradient'
                           : 'bg-(--background-subtle) border border-(--border)'
                       }`}
                     >

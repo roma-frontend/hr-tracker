@@ -149,7 +149,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl text-white disabled:opacity-50 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl text-white disabled:opacity-50 btn-gradient"
           >
             {uploading ? (
               <ShieldLoader size="xs" variant="inline" />
@@ -265,7 +265,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                     download={preview.name}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium px-3 py-1.5 rounded-xl text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
+                    className="text-xs font-medium px-3 py-1.5 rounded-xl text-white btn-gradient"
                     onClick={(e) => e.stopPropagation()}
                   >
                     ⬇ {t('taskAttachments.download')}
@@ -305,7 +305,7 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
                       download={preview.name}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
+                      className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl text-white btn-gradient"
                     >
                       ⬇ {t('taskAttachments.downloadToView')}
                     </a>

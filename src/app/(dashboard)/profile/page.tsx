@@ -459,7 +459,7 @@ export default function ProfilePage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="w-full sm:w-auto bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
+          className="w-full sm:w-auto btn-gradient text-white"
         >
           <Save className="w-4 h-4 mr-2" />
           {saving ? t('ui.saving') : t('ui.saveChanges')}

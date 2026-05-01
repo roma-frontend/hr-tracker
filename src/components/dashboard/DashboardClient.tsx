@@ -392,7 +392,7 @@ export default function DashboardClient() {
               asChild
               size="sm"
               variant="default"
-              className="flex items-center gap-2 w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity font-medium shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 w-auto justify-center btn-gradient font-medium shadow-md hover:shadow-lg"
             >
               <Link href="/leaves">
                 <Plus className="w-4 h-4" />

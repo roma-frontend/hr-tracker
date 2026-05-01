@@ -146,7 +146,7 @@ export default function ForgotPasswordPage() {
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+                    className="btn-gradient w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
                   >
                     {isPending ? (
                       <>

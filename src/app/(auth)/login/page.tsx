@@ -600,7 +600,7 @@ export default function LoginPage() {
               >
                 {/* Logo */}
                 <div className="flex flex-col items-center mb-6">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-lg bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-lg btn-gradient">
                     <Building2 className="w-6 h-6 text-white" />
                   </div>
                   <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -683,7 +683,7 @@ export default function LoginPage() {
                       {isBackupCode && (
                         <Button
                           type="submit"
-                          className="w-full py-2 rounded-xl font-semibold text-sm text-white bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
+                          className="w-full py-2 rounded-xl font-semibold text-sm text-white btn-gradient"
                         >
                           Verify Backup Code
                         </Button>
@@ -852,7 +852,7 @@ export default function LoginPage() {
                         <Button
                           type="submit"
                           disabled={isPending}
-                          className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-2 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
+                          className="btn-gradient w-full py-2 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70"
                         >
                           {isPending ? (
                             <>

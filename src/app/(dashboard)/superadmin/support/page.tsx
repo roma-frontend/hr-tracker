@@ -124,7 +124,7 @@ export default function SupportTicketsPage() {
             </div>
             <Button
               onClick={() => setCreateDialogOpen(true)}
-              className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 w-full sm:w-auto justify-center btn-gradient text-white font-medium shadow-md hover:shadow-lg"
             >
               <Plus className="w-4 h-4 transition-transform duration-200" />
               <span>{t('superadmin.support.createTicket')}</span>
@@ -293,19 +293,23 @@ export default function SupportTicketsPage() {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-3xl max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl">{t('superadmin.support.createTicket')}</DialogTitle>
-            <DialogDescription className="text-sm">{t('superadmin.support.createDescription')}</DialogDescription>
+            <DialogTitle className="text-lg md:text-xl">
+              {t('superadmin.support.createTicket')}
+            </DialogTitle>
+            <DialogDescription className="text-sm">
+              {t('superadmin.support.createDescription')}
+            </DialogDescription>
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-y-auto">
             <CreateSupportTicketWizard
-            userId={user.id as Id<'users'>}
-            organizationId={user.organizationId as Id<'organizations'>}
-            onComplete={() => {
-              setCreateDialogOpen(false);
-              router.refresh();
-            }}
-            onCancel={() => setCreateDialogOpen(false)}
-          />
+              userId={user.id as Id<'users'>}
+              organizationId={user.organizationId as Id<'organizations'>}
+              onComplete={() => {
+                setCreateDialogOpen(false);
+                router.refresh();
+              }}
+              onCancel={() => setCreateDialogOpen(false)}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -703,8 +707,8 @@ function TicketDetailDialog({
     }
     try {
       // Use direct translated message to avoid storing translation keys
-      const defaultMessage = t('superadmin.support.chat.defaultActivateMessage', { 
-        ticketNumber: ticket.ticketNumber 
+      const defaultMessage = t('superadmin.support.chat.defaultActivateMessage', {
+        ticketNumber: ticket.ticketNumber,
       });
       const result = await activateTicketChat({
         ticketId: ticketId as Id<'supportTickets'>,
@@ -1142,21 +1146,28 @@ function TicketDetailDialog({
                   style={{ color: 'var(--text-muted)' }}
                 >
                   <MessageSquare className="w-4 h-4" />
-                  {ticketChatStatus?.hasChat ? t('superadmin.support.chat.title') : t('superadmin.support.chat.create')}
+                  {ticketChatStatus?.hasChat
+                    ? t('superadmin.support.chat.title')
+                    : t('superadmin.support.chat.create')}
                 </h4>
 
                 {ticketChatStatus?.hasChat ? (
                   <div className="space-y-2">
                     <div className="p-3 rounded-lg bg-(--background-subtle)">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                        <span
+                          className="text-xs font-medium"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
                           {t('superadmin.support.chat.status')}
                         </span>
                         <Badge
                           variant={ticketChatStatus.chatActivated ? 'default' : 'outline'}
                           className="text-xs"
                         >
-                          {ticketChatStatus.chatActivated ? t('superadmin.support.chat.active') : t('superadmin.support.chat.pending')}
+                          {ticketChatStatus.chatActivated
+                            ? t('superadmin.support.chat.active')
+                            : t('superadmin.support.chat.pending')}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mb-3">
@@ -1169,7 +1180,7 @@ function TicketDetailDialog({
                         <Button
                           onClick={handleActivateChat}
                           size="sm"
-                          className="w-full bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+                          className="w-full btn-gradient text-white font-medium shadow-md hover:shadow-lg"
                         >
                           <MessageSquare className="w-4 h-4 mr-2" />
                           {t('superadmin.support.chat.activate')}
@@ -1178,7 +1189,9 @@ function TicketDetailDialog({
 
                       {ticketChatStatus.chatActivated && (
                         <Button
-                          onClick={() => router.push(`/chat?conversation=${ticketChatStatus.chatId}`)}
+                          onClick={() =>
+                            router.push(`/chat?conversation=${ticketChatStatus.chatId}`)
+                          }
                           size="sm"
                           variant="outline"
                           className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
@@ -1194,7 +1207,7 @@ function TicketDetailDialog({
                     onClick={handleCreateChat}
                     size="sm"
                     disabled={creatingChat}
-                    className="w-full bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+                    className="w-full btn-gradient text-white font-medium shadow-md hover:shadow-lg"
                   >
                     {creatingChat ? (
                       <>

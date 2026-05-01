@@ -275,7 +275,7 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
             }}
             className="fixed top-24 sm:top-56.5 right-3 sm:right-6 z-100 w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-lg flex items-center justify-center transition-all"
             style={{
-              top: isPanelCollapsed ? undefined : '9.5rem',
+              top: isPanelCollapsed ? undefined : '10rem',
               background: 'var(--primary)',
               color: 'var(--primary-foreground)',
               boxShadow: '0 4px 20px rgba(37, 99, 235, 0.5)',

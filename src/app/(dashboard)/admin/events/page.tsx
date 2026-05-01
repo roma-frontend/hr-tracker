@@ -260,7 +260,7 @@ export default function CompanyEventsPage() {
             </Button>
             <Button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 w-full sm:w-auto justify-center btn-gradient text-white font-medium shadow-md hover:shadow-lg"
             >
               <Plus className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">{t('events.createEvent', 'Create Event')}</span>
@@ -713,7 +713,7 @@ export default function CompanyEventsPage() {
                   {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button
-                  className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white"
+                  className="btn-gradient text-white"
                   onClick={async () => {
                     try {
                       await updateEvent({

@@ -496,7 +496,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                 <button
                   type="submit"
                   disabled={submitting || !comment.trim()}
-                  className="px-4 py-2.5 rounded-xl bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white text-sm font-semibold disabled:opacity-50 shadow-sm"
+                  className="px-4 py-2.5 rounded-xl btn-gradient text-white text-sm font-semibold disabled:opacity-50 shadow-sm"
                 >
                   {t('buttons.send')}
                 </button>

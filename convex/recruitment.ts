@@ -337,13 +337,15 @@ export const deleteVacancy = mutation({
       await ctx.db.delete(app._id);
     }
 
-    // Delete interviews for this vacancy
-    const interviews = await ctx.db
-      .query('interviews')
-      .filter((q) => q.eq(q.field('vacancyId'), vacancyId))
-      .collect();
-    for (const interview of interviews) {
-      await ctx.db.delete(interview._id);
+    // Delete interviews for this vacancy (via applications)
+    for (const app of applications) {
+      const interviews = await ctx.db
+        .query('interviews')
+        .withIndex('by_application', (q) => q.eq('applicationId', app._id))
+        .collect();
+      for (const interview of interviews) {
+        await ctx.db.delete(interview._id);
+      }
     }
 
     await ctx.db.delete(vacancyId);
@@ -468,7 +470,7 @@ export const addCandidate = mutation({
     // 🔔 Notify org admins about new candidate
     const orgAdmins = await ctx.db
       .query('users')
-      .withIndex('by_organization', (q) => q.eq('organizationId', organizationId))
+      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .filter((q) => q.or(q.eq(q.field('role'), 'admin'), q.eq(q.field('role'), 'superadmin')))
       .collect();
 

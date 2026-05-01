@@ -6930,7 +6930,8 @@
     "emailDomainNotFound": "Email domain does not exist",
     "emailInvalid": "Invalid email address",
     "joinOrg": "Join this Organization",
-    "viewAll": "View all positions at"
+    "viewAll": "View all positions at",
+    "positionsCount": "positions"
   },
   "onboarding": {
     "title": "Onboarding",

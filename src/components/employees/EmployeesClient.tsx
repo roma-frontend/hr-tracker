@@ -274,7 +274,7 @@ export function EmployeesClient() {
           {canManage && (
             <Button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 w-full sm:w-auto justify-center bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 w-full sm:w-auto justify-center btn-gradient text-white font-medium shadow-md hover:shadow-lg"
               variant="default"
             >
               <Plus className="w-5 h-5" /> {t('employees.addEmployee')}
@@ -457,7 +457,7 @@ export function EmployeesClient() {
             {canManage && (
               <Button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md"
+                className="flex items-center gap-2 btn-gradient text-white font-medium shadow-md"
                 variant="default"
               >
                 <Plus className="w-4 h-4" /> {t('employees.addFirstEmployee', 'Add First Employee')}

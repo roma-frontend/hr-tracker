@@ -43,6 +43,24 @@ export const listAllOpenVacancies = query({
   },
 });
 
+// Public query: list all active organizations (for careers page filter)
+export const listActiveOrganizations = query({
+  args: {},
+  handler: async (ctx) => {
+    const orgs = await ctx.db.query('organizations').collect();
+    return orgs
+      .filter((o) => o.isActive)
+      .map((o) => ({
+        _id: o._id,
+        name: o.name,
+        slug: o.slug,
+        logoUrl: o.logoUrl,
+        industry: o.industry,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  },
+});
+
 // Public query: list open vacancies for an organization by slug
 export const listOpenVacancies = query({
   args: { orgSlug: v.string() },
@@ -187,7 +205,7 @@ export const applyToVacancy = mutation({
     // 🔔 Notify org admins about new application
     const orgAdmins = await ctx.db
       .query('users')
-      .withIndex('by_organization', (q) => q.eq('organizationId', orgId))
+      .withIndex('by_org', (q) => q.eq('organizationId', orgId))
       .filter((q) => q.or(q.eq(q.field('role'), 'admin'), q.eq(q.field('role'), 'superadmin')))
       .collect();
 

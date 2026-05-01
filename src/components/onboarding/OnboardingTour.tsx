@@ -526,7 +526,7 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
                     onClick={handleNext}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-4 py-1.5 rounded-lg font-semibold text-xs text-white flex items-center gap-1.5 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
+                    className="px-4 py-1.5 rounded-lg font-semibold text-xs text-white flex items-center gap-1.5 btn-gradient"
                   >
                     {currentStep === steps.length - 1 ? (
                       <>

@@ -181,7 +181,7 @@ html.light {
   --ring: #2563eb;
 
   /* Primary */
-  --primary: #2563eb;
+  --primary: linear-gradient(135deg, rgb(37, 99, 235), rgb(96, 165, 250));
   --primary-hover: #1d4ed8;
   --primary-foreground: #ffffff;
 
@@ -313,6 +313,7 @@ html.light {
   --landing-navbar-text-hover: #2563eb;
   --landing-card-bg: rgba(255, 255, 255, 0.5);
   --landing-card-border: rgba(199, 217, 245, 0.5);
+  --landing-modal-bg: #ffffff;
   --landing-gradient-from: #2563eb;
   --landing-gradient-to: #60a5fa;
   --landing-orb-1: rgba(37, 99, 235, 0.15);
@@ -479,6 +480,7 @@ html.light {
   --landing-navbar-text-hover: #60a5fa;
   --landing-card-bg: rgba(13, 30, 56, 0.4);
   --landing-card-border: rgba(26, 52, 96, 0.3);
+  --landing-modal-bg: #0f1f3d;
   --landing-gradient-from: #2563eb;
   --landing-gradient-to: #93c5fd;
   --landing-orb-1: rgba(37, 99, 235, 0.25);
@@ -1002,6 +1004,26 @@ body {
    CTA BUTTONS — Unified design for landing page
    Works with light/dark themes
    ═══════════════════════════════════════════════════════════════ */
+
+/* Primary button gradient — used for all default/primary buttons */
+.btn-gradient {
+  background: linear-gradient(135deg, rgb(37, 99, 235), rgb(96, 165, 250));
+  color: var(--primary-foreground);
+  transition: all 0.2s ease;
+}
+.btn-gradient:hover {
+  opacity: 0.9;
+  filter: brightness(1.05);
+}
+.btn-gradient:active {
+  opacity: 0.95;
+  transform: scale(0.98);
+}
+.btn-gradient:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
 
 .cta-btn-primary {
   @apply inline-flex items-center justify-center gap-3;

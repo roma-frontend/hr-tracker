@@ -352,7 +352,7 @@ function RegisterPageContent() {
           >
             {/* Logo */}
             <div className="flex flex-col items-center mb-6">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg btn-gradient">
                 <Building2 className="w-7 h-7 text-white" />
               </div>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -453,7 +453,7 @@ function RegisterPageContent() {
                     type="button"
                     onClick={handleOrgNext}
                     disabled={!selectedOrg && !inviteToken}
-                    className="bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-gradient w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('auth.continue', 'Continue')}
                     <ChevronRight className="w-4 h-4" />
@@ -570,7 +570,7 @@ function RegisterPageContent() {
                   <Button
                     type="submit"
                     disabled={isPending}
-                    className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity"
+                    className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 disabled:opacity-70 btn-gradient"
                   >
                     {isPending ? (
                       <>

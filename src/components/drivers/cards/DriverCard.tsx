@@ -103,16 +103,12 @@ export const DriverCard = memo(function DriverCard({
           <Button
             size="sm"
             onClick={() => onBook(driver._id)}
-            className="flex-1 drivers-btn-hover bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 transition-opacity text-white font-medium shadow-md hover:shadow-lg"
+            className="flex-1 drivers-btn-hover btn-gradient text-white font-medium shadow-md hover:shadow-lg"
           >
             {t('driver.book', 'Book')}
           </Button>
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onCalendar(driver._id)}
-            >
+            <Button size="sm" variant="outline" onClick={() => onCalendar(driver._id)}>
               <Calendar className="w-4 h-4 text-blue-400" />
             </Button>
             <Button

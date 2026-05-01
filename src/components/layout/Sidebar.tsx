@@ -336,13 +336,7 @@ export function Sidebar() {
               href="/"
               className="flex items-center gap-2 hover:opacity-80 cursor-pointer transition-opacity duration-300"
             >
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300"
-                style={{
-                  background:
-                    'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
-                }}
-              >
+              <div className="btn-gradient w-8 h-8 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300">
                 <span className="text-white font-bold text-sm">HR</span>
               </div>
               <div
@@ -652,13 +646,7 @@ export function MobileSidebar() {
           style={{ borderColor: 'var(--sidebar-border)' }}
         >
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 cursor-pointer">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300"
-              style={{
-                background:
-                  'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%)',
-              }}
-            >
+            <div className="btn-gradient w-8 h-8 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300">
               <span className="text-white font-bold text-sm">HR</span>
             </div>
             <div>
