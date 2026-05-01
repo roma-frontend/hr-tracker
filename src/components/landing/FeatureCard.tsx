@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Link from 'next/link';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -11,6 +12,7 @@ interface FeatureCardProps {
   accentColor: string;
   delay?: number;
   badge?: string;
+  href?: string;
 }
 
 export default function FeatureCard({
@@ -21,6 +23,7 @@ export default function FeatureCard({
   accentColor,
   delay = 0,
   badge,
+  href = '/features/leave-types',
 }: FeatureCardProps) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -127,13 +130,14 @@ export default function FeatureCard({
           </div>
 
           {/* Hover arrow — CSS slide-in */}
-          <div
+          <Link
+            href={href}
             className="mt-auto flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 transition-all duration-300"
             style={{ color: accentColor }}
           >
             <span>{t('landing.learnMore')}</span>
             <span className="arrow-bounce">→</span>
-          </div>
+          </Link>
         </div>
 
         {/* Corner glow decoration */}

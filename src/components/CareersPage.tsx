@@ -640,7 +640,8 @@ function VacancyCard({
           className="flex items-center gap-1 mt-3 text-sm font-medium"
           style={{ color: 'var(--primary)' }}
         >
-          <DollarIcon className="w-3.5 h-3.5" /> {formatSalary(vacancy.salary)}
+          {' '}
+          {formatSalary(vacancy.salary)}
         </div>
       )}
     </button>

@@ -2736,7 +2736,80 @@
       "feature3Title": "Team Collaboration",
       "feature3Desc": "Built-in chat, tasks, and project management",
       "feature4Title": "Advanced Analytics",
-      "feature4Desc": "Get insights with AI-powered reports and dashboards"
+      "feature4Desc": "Get insights with AI-powered reports and dashboards",
+      "leaveTypes": "Leave Types",
+      "manageLeaves": "Leave Management",
+      "manageLeavesDesc": "Learn about all the features of our leave management system",
+      "backToHome": "Back to Home",
+      "keyBenefits": "Key Features",
+      "readyToStart": "Ready to get started?",
+      "tryFree": "Try all features for free",
+      "getStarted": "Get Started Free",
+      "login": "Login",
+      "vacation": {
+        "title": "Vacation Tracking",
+        "subtitle": "Full control over employee vacations",
+        "description": "System for tracking paid vacation, leave days, and holidays with automatic balance calculation and notifications about upcoming deadlines.",
+        "benefit1": "Automatic vacation balance calculation",
+        "benefit2": "Holiday management",
+        "benefit3": "Vacation history and analytics",
+        "benefit4": "One-click request approval",
+        "stat1": "Days per year",
+        "stat1Value": "24-30",
+        "stat2": "Leave types",
+        "stat2Value": "5+",
+        "stat3": "Automation",
+        "stat3Value": "100%",
+        "tab": "Vacation"
+      },
+      "sick": {
+        "title": "Sick Leave",
+        "subtitle": "Illness absence management",
+        "description": "Tracking sick days, medical certificates, and automatic application of organizational policies. Compliance with legislation.",
+        "benefit1": "Sick leave certificate control",
+        "benefit2": "Automatic compensation calculation",
+        "benefit3": "Deadline notifications",
+        "benefit4": "Employee illness history",
+        "stat1": "Sick days",
+        "stat1Value": "up to 30",
+        "stat2": "Certificates per year",
+        "stat2Value": "∞",
+        "stat3": "Compliance",
+        "stat3Value": "100%",
+        "tab": "Sick Leave"
+      },
+      "family": {
+        "title": "Family Leave",
+        "subtitle": "Family employee support",
+        "description": "Parental leave, maternity/paternity leave, and family care time. Full support for all types of family leaves with automatic calculations and notifications.",
+        "benefit1": "Maternity/Paternity leave",
+        "benefit2": "Childcare leave",
+        "benefit3": "Family event days",
+        "benefit4": "Multi-child family support",
+        "stat1": "Leave types",
+        "stat1Value": "4+",
+        "stat2": "Years of maternity",
+        "stat2Value": "3",
+        "stat3": "Family days",
+        "stat3Value": "5",
+        "tab": "Family"
+      },
+      "doctor": {
+        "title": "Doctor Visits",
+        "subtitle": "Medical examinations and appointments",
+        "description": "Managing medical appointments, health check-ups, and preventive examinations. Tracking mandatory medical examinations.",
+        "benefit1": "Doctor appointment booking",
+        "benefit2": "Preventive examinations",
+        "benefit3": "Medical certificates",
+        "benefit4": "Examination reminders",
+        "stat1": "Exams per year",
+        "stat1Value": "2+",
+        "stat2": "Exam types",
+        "stat2Value": "8+",
+        "stat3": "Auto-reminders",
+        "stat3Value": "✓",
+        "tab": "Doctor"
+      }
     },
     "stats": {
       "stat1": "500+ Companies",
@@ -2983,6 +3056,127 @@
     "loginAlertsDesc": "Get notified when someone logs into your account",
     "securityTip": "Security Tip",
     "securityTipDesc": "Use a strong, unique password and enable 2FA for maximum security. Regularly review your login history for any suspicious activity."
+  },
+  "featuresPage": {
+    "badge": "All-in-One HR Platform",
+    "heroTitle": "Everything you need to manage your team",
+    "heroSubtitle": "From hiring to retirement — a complete suite of HR tools designed to streamline every aspect of people management.",
+    "learnMore": "Learn more",
+    "comingSoon": "Details coming soon",
+    "platformTitle": "Built for modern teams",
+    "platformSubtitle": "Enterprise-grade features that scale with your organization",
+    "ctaTitle": "Ready to transform your HR?",
+    "ctaSubtitle": "Join thousands of teams already using HR Office to manage their people effectively.",
+    "ctaButton": "Start free trial",
+    "ctaContact": "Contact sales",
+    "modules": {
+      "people": {
+        "title": "People Management",
+        "description": "Centralized employee directory with profiles, org charts, departments, and document management.",
+        "feature1": "Complete employee profiles & org chart",
+        "feature2": "Department and team management",
+        "feature3": "Document storage & templates",
+        "feature4": "Custom fields & employee timeline"
+      },
+      "leave": {
+        "title": "Leave Management",
+        "description": "Automated leave tracking with multiple types, policies, balance calculations, and approval workflows.",
+        "feature1": "Vacation, sick, family & custom leave types",
+        "feature2": "Automatic balance calculation",
+        "feature3": "Multi-level approval workflows",
+        "feature4": "Calendar view & conflict detection"
+      },
+      "attendance": {
+        "title": "Time & Attendance",
+        "description": "Real-time check-in/out with geolocation, face recognition, and comprehensive time reports.",
+        "feature1": "Clock in/out with geolocation",
+        "feature2": "Face recognition authentication",
+        "feature3": "Overtime tracking & reports",
+        "feature4": "Shift scheduling & timesheets"
+      },
+      "okr": {
+        "title": "OKR & Tasks",
+        "description": "Set objectives, track key results, and manage tasks with Kanban boards and progress tracking.",
+        "feature1": "Objectives & Key Results framework",
+        "feature2": "Kanban board & list views",
+        "feature3": "Task dependencies & priorities",
+        "feature4": "Progress tracking & analytics"
+      },
+      "performance": {
+        "title": "Performance Reviews",
+        "description": "360° performance evaluations with customizable review cycles, competency frameworks, and feedback.",
+        "feature1": "360° feedback from peers & managers",
+        "feature2": "Customizable review templates",
+        "feature3": "Competency-based assessments",
+        "feature4": "Performance history & trends"
+      },
+      "recognition": {
+        "title": "Recognition & Rewards",
+        "description": "Peer-to-peer recognition with a points system, badges, leaderboards, and reward marketplace.",
+        "feature1": "Peer-to-peer recognition & kudos",
+        "feature2": "Points system & leaderboard",
+        "feature3": "Custom badges & achievements",
+        "feature4": "Reward marketplace"
+      },
+      "surveys": {
+        "title": "Surveys & Pulse",
+        "description": "Create custom surveys, pulse checks, and engagement polls with real-time analytics.",
+        "feature1": "Custom survey builder",
+        "feature2": "Anonymous feedback options",
+        "feature3": "Engagement pulse checks",
+        "feature4": "Real-time analytics & reports"
+      },
+      "recruitment": {
+        "title": "Recruitment (ATS)",
+        "description": "Full applicant tracking system with career pages, pipeline management, and automated workflows.",
+        "feature1": "Public career page per organization",
+        "feature2": "Kanban pipeline management",
+        "feature3": "Email validation & screening",
+        "feature4": "Interview scheduling & scoring"
+      },
+      "esignatures": {
+        "title": "E-Signatures",
+        "description": "Send, sign, and manage documents electronically with legally binding digital signatures.",
+        "feature1": "Draw, type, or upload signatures",
+        "feature2": "Multi-party signing workflows",
+        "feature3": "Audit trail & legal compliance",
+        "feature4": "Template library"
+      },
+      "onboarding": {
+        "title": "Onboarding & Offboarding",
+        "description": "Structured workflows for new hires and departing employees with checklists and task automation.",
+        "feature1": "Customizable onboarding checklists",
+        "feature2": "Automated task assignments",
+        "feature3": "Progress tracking for new hires",
+        "feature4": "Offboarding & exit interviews"
+      }
+    },
+    "platform": {
+      "multiOrg": {
+        "title": "Multi-Organization",
+        "description": "Manage multiple organizations from a single account with role-based access control."
+      },
+      "documents": {
+        "title": "Document Management",
+        "description": "Centralized document storage with version control, templates, and e-signature integration."
+      },
+      "notifications": {
+        "title": "Smart Notifications",
+        "description": "Real-time alerts with sound notifications, email digests, and push notifications."
+      },
+      "multilingual": {
+        "title": "Multilingual (EN/RU/HY)",
+        "description": "Full localization support with automatic language detection and RTL support."
+      },
+      "security": {
+        "title": "Enterprise Security",
+        "description": "2FA, face recognition login, session management, and comprehensive audit logs."
+      },
+      "integrations": {
+        "title": "Integrations",
+        "description": "Connect with Google Calendar, Slack, Microsoft Teams, and more."
+      }
+    }
   },
   "tasksClient": {
     "list": "List",

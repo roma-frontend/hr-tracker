@@ -136,7 +136,7 @@ export default function Navbar() {
 
         <div className="relative hidden lg:flex items-center gap-6 xl:gap-8">
           {[
-            { name: t('landing.features'), href: '#features' },
+            { name: t('landing.features'), href: '/features' },
             { name: t('landing.pricing'), href: '#pricing' },
             { name: t('landing.testimonials'), href: '#testimonials' },
             { name: t('landing.faq'), href: '#faq' },
