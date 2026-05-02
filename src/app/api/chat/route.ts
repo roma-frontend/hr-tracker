@@ -866,11 +866,16 @@ When asked about specific employees, use the COMPLETE SYSTEM DATA above to give 
       messages,
     });
 
-    console.log('✅ OpenAI response received, usage:', result.usage);
+    console.log(
+      '📤 Messages to AI:',
+      messages.length,
+      'last:',
+      messages[messages.length - 1]?.content?.slice(0, 30),
+    );
+    console.log('✅ OpenAI response received');
     return result.toTextStreamResponse();
   } catch (error) {
     console.error('❌ Chat API error:', error);
-    console.error('Stack:', error instanceof Error ? error.stack : '');
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Unknown error',
