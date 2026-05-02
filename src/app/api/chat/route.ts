@@ -455,7 +455,21 @@ ${availableDriversContextInfo || 'No drivers available'}
 ${availableDriversInfo || ''}
 
 ACTIVE SURVEYS:
-${((data.surveys as any[]) || []).map((s: any) => `📝 "${s.title}" - Status: ${s.status || 'unknown'} | Responses: ${s.responseCount || 0}${s.description ? ` | ${s.description}` : ''}`).join('\n') || 'No surveys found'}
+${(() => {
+  const surveyList = (data.surveys as any[]) || [];
+  console.log(
+    '[AI Chat] Surveys in context:',
+    surveyList.length,
+    surveyList.map((s: any) => s.title),
+  );
+  if (surveyList.length === 0) return '📝 No surveys found in the system';
+  return surveyList
+    .map(
+      (s: any) =>
+        `📝 "${s.title}" - Status: ${s.status || 'unknown'} | Responses: ${s.responseCount || 0}${s.description ? ` | ${s.description}` : ''}`,
+    )
+    .join('\n');
+})()}
 `;
       }
     } catch (e) {
