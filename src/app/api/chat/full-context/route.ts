@@ -156,14 +156,14 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Fetch Unread Messages (Messenger)
+    // Fetch Unread Messages (chat module)
     let unreadMessages = 0;
     let unreadConversations: any[] = [];
     try {
-      unreadMessages = await fetchQuery(api.messenger.getUnreadMessageCount, {
+      unreadMessages = await fetchQuery((api.chat.queries as any).getTotalUnread, {
         userId: requesterId as any,
       });
-      const convos = await fetchQuery(api.chat.getUnreadConversations, {
+      const convos = await fetchQuery((api.chat.queries as any).getUnreadConversations, {
         userId: requesterId as any,
       });
       unreadConversations = (convos as any[]) || [];
@@ -175,6 +175,30 @@ export async function GET(req: NextRequest) {
       );
     } catch (e) {
       console.warn('Failed to fetch unread messages:', e);
+    }
+
+    // Fetch Unread Notifications
+    let unreadNotifications = 0;
+    try {
+      const notifData = await fetchQuery(api.notifications.getUnreadCount, {
+        userId: requesterId as any,
+      });
+      unreadNotifications = (notifData as any)?.count || 0;
+      console.log('[Full Context] Unread notifications:', unreadNotifications);
+    } catch (e) {
+      console.warn('Failed to fetch unread notifications:', e);
+    }
+
+    // Fetch Unread Leave Approvals (for supervisors/admins)
+    let unreadLeaveApprovals = 0;
+    try {
+      const leaveData = await fetchQuery(api.leaves.getUnreadCount, {
+        managerId: requesterId as any,
+      });
+      unreadLeaveApprovals = (leaveData as any)?.count || 0;
+      console.log('[Full Context] Unread leave approvals:', unreadLeaveApprovals);
+    } catch (e) {
+      console.warn('Failed to fetch unread approvals:', e);
     }
 
     // Fetch Unread Notifications
