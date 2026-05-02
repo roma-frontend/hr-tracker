@@ -518,7 +518,7 @@ DO NOT navigate! Just help them with their request using <ACTION> tags if needed
 
 ${dateContext}
 
-${userContext.slice(0, 500)}${aiInsights?.slice(0, 300) || ''}${fullContext?.slice(0, 1000) || ''}${conflictCheckData?.slice(0, 300) || ''}
+${userContext.slice(0, 200)}${aiInsights?.slice(0, 100) || ''}${fullContext?.slice(0, 400) || ''}${conflictCheckData?.slice(0, 100) || ''}
 ${userId ? `CURRENT USER ID: ${userId}` : ''}
 ${navigationHint}
 
@@ -749,7 +749,7 @@ When asked about specific employees, use the COMPLETE SYSTEM DATA above to give 
 
 ${dateContext}
 
-${userContext.slice(0, 500)}${aiInsights?.slice(0, 300) || ''}${fullContext?.slice(0, 1000) || ''}${conflictCheckData?.slice(0, 300) || ''}
+${userContext.slice(0, 200)}${aiInsights?.slice(0, 100) || ''}${fullContext?.slice(0, 400) || ''}${conflictCheckData?.slice(0, 100) || ''}
 ${userId ? `CURRENT USER ID: ${userId}` : ''}
 ${navigationHint}
 
