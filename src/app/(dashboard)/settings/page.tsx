@@ -310,7 +310,7 @@ export default function SettingsPage() {
                     key={tab.value}
                     value={tab.value}
                     data-value={tab.value}
-                    className="data-[state=active]:bg-(--primary) data-[state=active]:text-white data-[state=inactive]:text-(--text-muted) transition-colors rounded-lg py-2.5 px-3 h-auto whitespace-nowrap"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-400 data-[state=active]:text-white data-[state=inactive]:text-(--text-muted) data-[state=inactive]:hover:text-(--text-secondary) transition-all rounded-lg py-2.5 px-3 h-auto whitespace-nowrap"
                   >
                     <div className="flex items-center justify-center gap-2">
                       <Icon className="w-4 h-4" />

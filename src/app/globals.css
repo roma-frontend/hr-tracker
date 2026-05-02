@@ -1284,121 +1284,121 @@ body {
 
 /* ── Sonner Toast Custom Styling ────────────────────────────────── */
 [data-sonner-toast] {
-  background: var(--card) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  padding: 16px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-  backdrop-filter: blur(8px) !important;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
 }
 
 [data-sonner-toast][data-type='success'] {
-  background: var(--card) !important;
-  border-left: 3px solid var(--primary) !important;
+  background: var(--card);
+  border-left: 3px solid var(--primary);
 }
 
 [data-sonner-toast][data-type='success'] [data-icon] {
-  color: var(--primary) !important;
-  width: 20px !important;
-  height: 20px !important;
+  color: var(--primary);
+  width: 20px;
+  height: 20px;
 }
 
 [data-sonner-toast][data-type='error'] {
-  background: var(--card) !important;
-  border-left: 3px solid #ef4444 !important;
+  background: var(--card);
+  border-left: 3px solid #ef4444;
 }
 
 [data-sonner-toast][data-type='error'] [data-icon] {
-  color: #ef4444 !important;
-  width: 20px !important;
-  height: 20px !important;
+  color: #ef4444;
+  width: 20px;
+  height: 20px;
 }
 
 [data-sonner-toast][data-type='info'] {
-  background: var(--card) !important;
-  border-left: 3px solid var(--primary) !important;
+  background: var(--card);
+  border-left: 3px solid var(--primary);
 }
 
 [data-sonner-toast][data-type='info'] [data-icon] {
-  color: var(--primary) !important;
-  width: 20px !important;
-  height: 20px !important;
+  color: var(--primary);
+  width: 20px;
+  height: 20px;
 }
 
 [data-sonner-toast][data-type='warning'] {
-  background: var(--card) !important;
-  border-left: 3px solid #f59e0b !important;
+  background: var(--card);
+  border-left: 3px solid #f59e0b;
 }
 
 [data-sonner-toast][data-type='warning'] [data-icon] {
-  color: #f59e0b !important;
-  width: 20px !important;
-  height: 20px !important;
+  color: #f59e0b;
+  width: 20px;
+  height: 20px;
 }
 
 [data-sonner-toast] [data-title] {
-  color: var(--foreground) !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
-  line-height: 1.4 !important;
-  margin-bottom: 2px !important;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 2px;
 }
 
 [data-sonner-toast] [data-description] {
-  color: var(--text-muted) !important;
-  font-size: 13px !important;
-  line-height: 1.5 !important;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 [data-sonner-toast] [data-button] {
-  background: var(--primary) !important;
-  color: white !important;
-  border-radius: 6px !important;
-  padding: 6px 12px !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  transition: all 0.2s !important;
+  background: var(--primary);
+  color: white;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 [data-sonner-toast] [data-button]:hover {
-  opacity: 0.9 !important;
-  transform: scale(1.02) !important;
+  opacity: 0.9;
+  transform: scale(1.02);
 }
 
 [data-sonner-toast] [data-close-button] {
-  background: transparent !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 6px !important;
-  color: var(--text-muted) !important;
-  width: 20px !important;
-  height: 20px !important;
-  transition: all 0.2s !important;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s;
 }
 
 [data-sonner-toast] [data-close-button]:hover {
-  background: var(--background-subtle) !important;
-  border-color: var(--primary) !important;
-  color: var(--foreground) !important;
+  background: var(--background-subtle);
+  border-color: var(--primary);
+  color: var(--foreground);
 }
 
 /* Animate toast entrance — uses toast-slide-in defined above */
 
 /* Break Reminder Toast Specific Styling */
 .break-reminder-toast {
-  min-width: min(400px, calc(100vw - 2rem)) !important;
-  max-width: min(500px, calc(100vw - 2rem)) !important;
+  min-width: min(400px, calc(100vw - 2rem));
+  max-width: min(500px, calc(100vw - 2rem));
 }
 
 @media (max-width: 640px) {
   .break-reminder-toast {
-    min-width: 320px !important;
-    max-width: 100% !important;
+    min-width: 320px;
+    max-width: 100%;
   }
 }
 
 /* Native Date Picker z-index fix */
 input[type='date']::-webkit-calendar-picker-indicator {
-  z-index: 9999 !important;
+  z-index: 9999;
   cursor: pointer;
 }
 
@@ -1409,7 +1409,7 @@ input[type='date'] {
 
 /* Ensure date picker popup appears above everything */
 input[type='date']:focus {
-  z-index: 9999 !important;
+  z-index: 9999;
 }
 
 /* ── Dropdown Smooth Animations ─────────────────────────────────── */
