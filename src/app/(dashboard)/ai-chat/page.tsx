@@ -38,6 +38,8 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { MarkdownMessage } from '@/components/MarkdownMessage';
 
+type CsrfPair = { token: string; signature: string };
+
 type Message = {
   _id?: string;
   id: string;
@@ -84,6 +86,7 @@ function parseActions(content: string): { cleanContent: string; actions: AnyActi
     .replace(/<ACTION>[\s\S]*?<\/ACTION>/g, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
+
   return { cleanContent, actions };
 }
 
@@ -145,6 +148,8 @@ export default function AIChatPage() {
   const { user } = useAuthStore();
   const userId = user?.id as Id<'users'> | undefined;
 
+  const [csrf, setCsrf] = useState<CsrfPair | null>(null);
+
   // State
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -166,9 +171,7 @@ export default function AIChatPage() {
   // Handle conversation selection - close sidebar on mobile
   const handleSelectConversation = (conversationId: string) => {
     setActiveConversationId(conversationId);
-    if (isMobile) {
-      setSidebarOpen(false);
-    }
+    if (isMobile) setSidebarOpen(false);
   };
 
   // Convex queries
@@ -262,6 +265,26 @@ export default function AIChatPage() {
     }
   }, []);
 
+  // ✅ Load CSRF token once
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const r = await fetch('/api/csrf-token', { method: 'GET' });
+        if (!r.ok) throw new Error(`CSRF endpoint error: ${r.status}`);
+        const data = (await r.json()) as CsrfPair;
+        if (!cancelled) setCsrf(data);
+      } catch (e) {
+        console.error('[CSRF] Failed to fetch CSRF token:', e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // ═══════════════════════════════════════════════════════════════
   // Create new conversation
   // ═══════════════════════════════════════════════════════════════
@@ -300,16 +323,12 @@ export default function AIChatPage() {
     e.stopPropagation();
 
     try {
-      // Start animation
       _setDeletingConversationId(conversationId);
 
-      // Wait for animation
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Delete from Convex (also deletes all messages)
       await deleteConversation({ conversationId: conversationId as Id<'aiConversations'> });
 
-      // Update local state
       setConversations((prev) => prev.filter((c) => c._id !== conversationId));
 
       if (activeConversationId === conversationId) {
@@ -366,6 +385,12 @@ export default function AIChatPage() {
   // ═══════════════════════════════════════════════════════════════
   const handleSend = async () => {
     if (!input.trim() || !userId || isLoading) return;
+
+    // ✅ CSRF check FIRST (до optimistic UI и до Convex)
+    if (!csrf) {
+      toast.error('CSRF token is not ready yet');
+      return;
+    }
 
     const lang = detectLanguage(input);
     const userMessageContent = input.trim();
@@ -426,15 +451,44 @@ export default function AIChatPage() {
         message: userMessageContent,
       });
 
-      const res = await fetch('/api/chat', {
+      const payload = {
+        messages: [...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
+        userId,
+        lang,
+      };
+
+      let res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
-          userId,
-          lang,
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrf.token,
+          'X-CSRF-Token-Signature': csrf.signature,
+        },
+        body: JSON.stringify(payload),
       });
+
+      // ✅ retry 1 раз при 403 (обновим CSRF и повторим)
+      if (res.status === 403) {
+        try {
+          const r2 = await fetch('/api/csrf-token', { method: 'GET' });
+          if (r2.ok) {
+            const nextCsrf = (await r2.json()) as CsrfPair;
+            setCsrf(nextCsrf);
+
+            res = await fetch('/api/chat', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': nextCsrf.token,
+                'X-CSRF-Token-Signature': nextCsrf.signature,
+              },
+              body: JSON.stringify(payload),
+            });
+          }
+        } catch (e) {
+          console.error('[CSRF refresh failed]', e);
+        }
+      }
 
       if (!res.ok) {
         const errData = (await res.json().catch(() => ({}))) as { error?: string };
@@ -495,7 +549,7 @@ export default function AIChatPage() {
         console.error('[Save AI message error]:', error);
       }
 
-      // Auto-rename if first message (only user message in loaded messages)
+      // Auto-rename if first message
       if (savedMessages && savedMessages.length === 0 && currentConvId) {
         try {
           await autoRenameConversation({
@@ -528,7 +582,6 @@ export default function AIChatPage() {
       console.error('[AI Chat Page] Error:', error);
       toast.error(t('aiChat.error') || 'Failed to get response');
 
-      // Add error message
       setMessages((prev) => [
         ...prev,
         {
@@ -761,7 +814,9 @@ export default function AIChatPage() {
 
       {/* Main Chat */}
       <main
-        className={`flex-1 flex flex-col min-w-0 h-full overflow-hidden ${!isMobile && !sidebarOpen ? 'md:ml-0' : ''}`}
+        className={`flex-1 flex flex-col min-w-0 h-full overflow-hidden ${
+          !isMobile && !sidebarOpen ? 'md:ml-0' : ''
+        }`}
       >
         {/* Header */}
         <header className="flex items-center justify-between p-4 border-b border-(--border) bg-(--card)/50 backdrop-blur shrink-0">

@@ -14,6 +14,7 @@ const CSRF_SECRET =
 const secret: string = CSRF_SECRET;
 
 export const CSRF_TOKEN_NAME = 'X-CSRF-Token';
+export const CSRF_SIGNATURE_NAME = `${CSRF_TOKEN_NAME}-Signature`;
 export const CSRF_COOKIE_NAME = 'csrf-token';
 
 /**
@@ -38,19 +39,18 @@ export function createCsrfToken(): { token: string; signature: string } {
 export function verifyCsrfToken(token: string, signature: string): boolean {
   const expectedSignature = crypto.createHmac('sha256', secret).update(token).digest('hex');
 
-  // ✅ timingSafeEqual throws if buffers have different length
+  // timingSafeEqual throws if buffers have different length
   if (signature.length !== expectedSignature.length) return false;
 
-  // Use constant-time comparison to prevent timing attacks
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
 }
 
 /**
- * Extract and verify CSRF token from request
+ * Extract and verify CSRF token from request headers
  */
 export function verifyCsrfFromRequest(request: Request): boolean {
   const token = request.headers.get(CSRF_TOKEN_NAME);
-  const signature = request.headers.get(`${CSRF_TOKEN_NAME}-Signature`);
+  const signature = request.headers.get(CSRF_SIGNATURE_NAME);
 
   if (!token || !signature) return false;
 
