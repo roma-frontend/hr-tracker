@@ -1,5 +1,4 @@
 import { groq } from '@ai-sdk/groq';
-import { groq } from '@ai-sdk/groq';
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { buildRoleBasedPrompt, detectIntent } from '@/lib/aiAssistant';
