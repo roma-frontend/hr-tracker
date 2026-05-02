@@ -27,12 +27,12 @@ export async function GET(req: NextRequest) {
     const requesterId = req.nextUrl.searchParams.get('requesterId');
     if (!requesterId) return NextResponse.json({ error: 'requesterId required' }, { status: 400 });
 
-    // Get user role for filtering
+    // Get user role and organization from session
     const userRole = await getUserRoleFromSession(req);
     const isAdmin = userRole === 'admin' || userRole === 'superadmin';
     const isSupervisor = userRole === 'supervisor';
 
-    // Fetch core system data in parallel first
+    // Fetch core system data first (needed to get orgId)
     const [users, leaves, todayAttendance, allTasks, allTickets, automationWorkflows] =
       await Promise.all([
         fetchQuery(api.users.queries.getAllUsers, { requesterId: requesterId as any }),
@@ -50,18 +50,19 @@ export async function GET(req: NextRequest) {
         fetchQuery(api.automation.getActiveWorkflows, {}),
       ]);
 
-    // Get organizationId from first user for dependent queries
-    const orgId = (users as any[])?.[0]?.organizationId;
+    // Get organizationId from users list (first user with orgId)
+    const firstUserWithOrg = (users as any[])?.find((u: any) => u.organizationId);
+    const orgId = firstUserWithOrg?.organizationId;
 
-    // Fetch surveys after orgId is determined
-    let activeSurveys: any[] = [];
+    // Fetch all surveys (no status filter to see all)
+    let allSurveys: any[] = [];
     if (orgId) {
       try {
-        activeSurveys = await fetchQuery(api.surveys.listSurveys, {
+        allSurveys = await fetchQuery(api.surveys.listSurveys, {
           organizationId: orgId,
-          status: 'active',
-          limit: 10,
+          limit: 20,
         });
+        console.log('[Full Context] Surveys fetched:', allSurveys?.length);
       } catch (e) {
         console.warn('Failed to fetch surveys:', e);
       }
@@ -332,17 +333,17 @@ export async function GET(req: NextRequest) {
         vehicle: d.vehicle,
         status: d.status,
       })),
-      // Active Surveys
-      activeSurveys: (activeSurveys as any[]).map((s: any) => ({
+      // All Surveys
+      surveys: (allSurveys as any[]).map((s: any) => ({
         surveyId: s._id,
         title: s.title,
         description: s.description,
         status: s.status,
+        isAnonymous: s.isAnonymous,
         startsAt: s.startsAt,
         endsAt: s.endsAt,
         createdBy: s.creator?.name || 'Unknown',
-        questionsCount: s.questions?.length || 0,
-        responsesCount: s.responsesCount || 0,
+        responseCount: s.responseCount || 0,
       })),
     });
   } catch (error) {
@@ -356,7 +357,7 @@ export async function GET(req: NextRequest) {
       automationWorkflows: [],
       driverRequests: [],
       availableDrivers: [],
-      activeSurveys: [],
+      surveys: [],
     });
   }
 }

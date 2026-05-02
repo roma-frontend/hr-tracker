@@ -455,7 +455,7 @@ ${availableDriversContextInfo || 'No drivers available'}
 ${availableDriversInfo || ''}
 
 ACTIVE SURVEYS:
-${((data.activeSurveys as any[]) || []).map((s: any) => `📝 "${s.title}" - ${s.description || 'No description'} (Questions: ${s.questionsCount || 0}, Responses: ${s.responsesCount || 0})`).join('\n') || 'No active surveys'}
+${((data.surveys as any[]) || []).map((s: any) => `📝 "${s.title}" - Status: ${s.status || 'unknown'} | Responses: ${s.responseCount || 0}${s.description ? ` | ${s.description}` : ''}`).join('\n') || 'No surveys found'}
 `;
       }
     } catch (e) {
