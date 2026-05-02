@@ -36,6 +36,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { MarkdownMessage } from '@/components/MarkdownMessage';
 
 type Message = {
   _id?: string;
@@ -420,9 +421,9 @@ export default function AIChatPage() {
     }
 
     try {
-      console.error('🤖 [AI Chat Page] Sending message to AI:', {
+      console.log('🤖 [AI Chat Page] Sending message to AI:', {
         userId,
-        message: input,
+        message: userMessageContent,
       });
 
       const res = await fetch('/api/chat', {
@@ -778,7 +779,7 @@ export default function AIChatPage() {
               )}
             </Button>
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-(--primary) to-(--primary)/70 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg btn-gradient flex items-center justify-center shrink-0">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div className="min-w-0">
@@ -811,8 +812,8 @@ export default function AIChatPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center max-w-2xl px-4"
               >
-                <div className="w-24 h-24 rounded-2xl bg-linear-to-br from-(--primary) to-(--primary)/70 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-(--primary)/20">
-                  <Sparkles className="w-12 h-12 text-white" />
+                <div className="w-16 h-16 rounded-2xl btn-gradient flex items-center justify-center mx-auto mb-6 shadow-lg shadow-(--primary)/20">
+                  <Sparkles className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-(--text-primary) mb-2">
                   {t('aiChat.welcomeTitle') || 'Welcome!'} {user?.name}
@@ -852,7 +853,7 @@ export default function AIChatPage() {
                       className={
                         message.role === 'user'
                           ? 'bg-(--primary) text-white'
-                          : 'bg-linear-to-br from-(--primary) to-(--primary)/70 text-white'
+                          : 'btn-gradient text-white'
                       }
                     >
                       {message.role === 'user' ? (
@@ -864,16 +865,16 @@ export default function AIChatPage() {
                   </Avatar>
 
                   <div
-                    className={`flex-1 max-w-[85%] sm:max-w-[75%] ${message.role === 'user' ? 'text-right' : ''}`}
+                    className={`max-w-[85%] sm:max-w-[100%] ${message.role === 'user' ? 'text-right' : ''}`}
                   >
                     <Card
                       className={`p-4 border-0 shadow-sm ${
                         message.role === 'user'
-                          ? 'bg-(--primary) text-white'
+                          ? 'btn-gradient text-white'
                           : 'bg-(--card) border-(--border)'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <MarkdownMessage content={message.content} isUser={message.role === 'user'} />
                     </Card>
 
                     <div
@@ -922,25 +923,25 @@ export default function AIChatPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex gap-3"
+                  className="flex items-center gap-3"
                 >
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-linear-to-br from-(--primary) to-(--primary)/70 text-white">
+                    <AvatarFallback className="btn-gradient text-white">
                       <Bot className="w-4 h-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <Card className="p-4 bg-(--card) border-(--border)">
+                  <Card className="flex items-center justify-center p-2 h-5 bg-(--card) border-(--border)">
                     <div className="flex gap-1">
                       <span
-                        className="w-2 h-2 rounded-full bg-(--primary) animate-bounce"
+                        className="w-1 h-1 rounded-full btn-gradient animate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <span
-                        className="w-2 h-2 rounded-full bg-(--primary) animate-bounce"
+                        className="w-1 h-1 rounded-full btn-gradient animate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <span
-                        className="w-2 h-2 rounded-full bg-(--primary) animate-bounce"
+                        className="w-1 h-1 rounded-full btn-gradient animate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </div>
@@ -998,7 +999,7 @@ export default function AIChatPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={scrollToBottom}
-            className="absolute bottom-28 right-6 p-3 rounded-full bg-(--primary) text-white shadow-lg hover:shadow-xl transition-shadow"
+            className="absolute bottom-28 right-6 p-3 rounded-full btn-gradient text-white shadow-lg hover:shadow-xl transition-shadow"
           >
             <ArrowDown className="w-4 h-4" />
           </motion.button>

@@ -24,6 +24,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useUpgradeModal } from '@/components/subscription/PlanGate';
 import { usePlanFeatures } from '@/hooks/usePlanFeatures';
 import { getRoleSuggestions, type UserRole } from '@/lib/aiAssistant';
+import { formatMessageContent } from '@/components/ai/MarkdownTable';
 
 // SpeechRecognition type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -1147,7 +1148,7 @@ export function ChatWidget() {
                             : 'bg-(--background-subtle) text-(--text-primary) rounded-bl-sm'
                         }`}
                       >
-                        {m.content}
+                        {formatMessageContent(m.content)}
                       </div>
 
                       {/* Action cards */}

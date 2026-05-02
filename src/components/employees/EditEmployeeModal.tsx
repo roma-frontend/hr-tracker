@@ -384,7 +384,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
       <DialogContent className="max-w-lg max-h-[90vh] p-0">
         {/* Header with progress */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-br from-(--primary) to-(--primary)/70" />
+          <div className="absolute inset-0 btn-gradient" />
           <div className="relative z-10 px-6 pt-6 pb-4">
             <div className="flex items-center gap-3 mb-4">
               <AvatarUpload

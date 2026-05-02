@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   try {
     const organizationId = req.nextUrl.searchParams.get('organizationId');
 
-    if (!organizationId || !organizationId.startsWith('jn')) {
+    if (!organizationId || organizationId.length < 10) {
       return NextResponse.json({ error: 'Invalid or missing organizationId' }, { status: 400 });
     }
 

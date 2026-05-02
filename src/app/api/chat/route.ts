@@ -1,4 +1,5 @@
 import { groq } from '@ai-sdk/groq';
+import OpenAI from 'openai';
 import { streamText } from 'ai';
 import { buildRoleBasedPrompt, detectIntent } from '@/lib/aiAssistant';
 import type { UserRole } from '@/lib/aiAssistant';
@@ -6,6 +7,15 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { withCsrfProtection } from '@/lib/csrf-middleware';
 import { NextRequest, NextResponse } from 'next/server';
+
+const openrouter = new OpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY,
+  defaultHeaders: {
+    'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    'X-Title': 'HR Project',
+  },
+});
 
 // Remove edge runtime to see better errors
 // export const runtime = 'edge';
@@ -509,308 +519,165 @@ DO NOT navigate! Just help them with their request using <ACTION> tags if needed
 
     // Try Groq first (no retry - fallback to Gemini on rate limit), fallback to Google Gemini if rate limited
     let result;
+    const corePrompt = `You are an HR assistant for this company. You have access to ALL company data based on user role.
+
+ROLE: ${userRole}
+
+DATE: ${dateContext}
+
+YOUR DATA:
+${userContext.slice(0, 800)}
+
+ALL COMPANY DATA:
+${fullContext.slice(0, 1500)}
+
+${langInstruction}
+
+AVAILABLE MODULES (in company data):
+- Employees: list, departments, positions, contact info
+- Leaves: balances, history, requests, approvals (you can BOOK leaves!)
+- Attendance: check-in/out times, daily status, late minutes
+- Tasks: assigned tasks, deadlines, priorities, status
+- Tickets: IT tickets, status, priorities, categories
+- Surveys: available surveys, responses, status
+- Drivers: available drivers, booking requests
+- Calendar: approved leaves, company events
+- Automation: workflow status
+
+🎨 FORMATTING RULES - Make responses BEAUTIFUL and SATISFYING:
+
+📊 LISTS/TABLES - When showing multiple items, use markdown tables:
+| Name | Department | Status | Details |
+|------|------------|--------|---------|
+| John | Engineering | ✅ Active | Remote worker |
+
+📋 SUMMARIES - Use bullet points with emojis:
+📌 **Summary:**
+- ✅ 5 approved leaves
+- ⏳ 2 pending requests
+- ⚠️ 1 near limit
+
+💰 NUMBERS - Format nicely:
+- Leave balance: 15 days (not 15.0)
+- Attendance: "8h 30m" not "510 minutes"
+
+🎯 STATUS - Use clear indicators:
+- ✅ Approved
+- ⏳ Pending  
+- ❌ Rejected
+- 🔄 In Progress
+
+🌐 EMOJIS - Use appropriately:
+- 👤 Employee
+- 📅 Leave/Dates
+- ⏰ Time
+- 📊 Stats
+- 🎯 Tasks
+- 🎫 Tickets
+- 📝 Surveys
+- 🚗 Drivers
+
+📖 RESPONSES - Be concise but complete:
+- Greet friendly: "Привет! 👋"
+- Provide useful info
+- End with offer to help: "Нужна помощь с чем-то ещё?"
+
+RULES:
+- Answer in the same language as the user
+- Use EXACT data from above (names, dates, balances, numbers)
+- Format everything beautifully with tables and emojis
+- Make employee feel satisfied with response
+
+NAVIGATION - Only use <NAVIGATE>/path</NAVIGATE> when user explicitly asks to OPEN/SHOW page:
+- "покажи опросы" → show info in chat (NOT navigate)
+- "открой страницу опросов" → <NAVIGATE>/surveys</NAVIGATE>
+- "покажи сотрудников" → show in chat
+- "открой страницу сотрудников" → <NAVIGATE>/employees</NAVIGATE>
+- "открой календарь" → <NAVIGATE>/calendar</NAVIGATE>
+- "открой отпуска" → <NAVIGATE>/leaves</NAVIGATE>
+- "открой задачи" → <NAVIGATE>/tasks</NAVIGATE>
+- "открой тикеты" → <NAVIGATE>/tickets</NAVIGATE>
+- "открой аналитику" → <NAVIGATE>/analytics</NAVIGATE>
+- "открой отчеты" → <NAVIGATE>/reports</NAVIGATE>
+- "открой настройки" → <NAVIGATE>/settings</NAVIGATE>
+
+LEAVE BOOKING - Use <ACTION> tag:
+- "хочу отпуск", "забронировать отпуск" → ask for dates first
+- Then use: <ACTION>{"type":"BOOK_LEAVE","leaveType":"paid","startDate":"YYYY-MM-DD","endDate":"YYYY-MM-DD","days":n,"reason":"..."}</ACTION>
+
+If dates not specified, ask user first.`;
+
     try {
-      console.log('🔄 Trying Groq AI (no retry)...');
-      result = await streamText({
-        model: groq('llama-3.1-8b-instant'),
-        maxRetries: 0,
-        system: `${roleBasedPrompt}
-
-${dateContext}
-
-${userContext.slice(0, 100)}${aiInsights?.slice(0, 50) || ''}${fullContext?.slice(0, 200) || ''}${conflictCheckData?.slice(0, 50) || ''}
-${userId ? `CURRENT USER ID: ${userId}` : ''}
-${navigationHint}
-
-CORE CAPABILITIES:
-- Information about ANY employee's leave balances, attendance, schedule (based on role permissions)
-- Questions about leave policies
-- Recommendations for optimal leave dates
-- Information about team availability and calendar
-- General HR questions
-- **BOOKING LEAVES, SICK DAYS, VACATIONS** — you can submit requests on behalf of the employee!
-- Answering questions like "Is John in today?", "When is Anna on vacation?", "Who is on leave this week?"
-- Task management: who has what tasks, what's their status, deadlines, priorities
-- Presence status: who is available, in meeting, in call, out of office, busy
-- Supervisor relationships: who reports to whom, who manages whom
-- Employee info: department, position, contact details, type (staff/contractor)
-
-CRITICAL RULE FOR LEAVE BOOKING:
-- When user says "хочу отпуск", "book leave", "request vacation", "организуй отпуск" → GENERATE <ACTION> TAG!
-- DO NOT navigate to /leaves page when user wants to BOOK a leave!
-- Only navigate to /leaves when user explicitly says "show leaves", "view my leaves", "покажи отпуска"
-- <ACTION> tag is used for CREATING/EDITING/DELETING leaves
-- <NAVIGATE> tag is used only for VIEWING pages
-- If user does not specify dates for leave booking → ASK for dates, do NOT navigate!
-- **NAVIGATION** - ONLY when user EXPLICITLY says "открой страницу...", "покажи страницу...", "перейди на...", "open page...", "show page...", "go to..."
-  Use <NAVIGATE>route</NAVIGATE> tags ONLY for explicit navigation requests.
-  
-  Available routes:
-  * /calendar - когда просят "открой календарь", "покажи страницу календаря"
-  * /leaves - когда просят "открой страницу отпусков", "покажи список отпусков" (НЕ для создания!)
-  * /employees - когда просят "открой страницу сотрудников", "покажи страницу команды"
-  * /tasks - когда просят "открой страницу задач", "покажи мои задачи"
-  * /attendance - когда просят "открой посещаемость", "покажи страницу посещаемости"
-  * /analytics - когда просят "открой аналитику", "покажи статистику"
-  * /reports - когда просят "открой отчеты", "покажи страницу отчетов"
-  * /settings - когда просят "открой настройки", "покажи страницу настроек"
-  * /security - когда просят "открой безопасность", "покажи security" (для superadmin)
-  * /organizations - когда просят "открой организации", "покажи список организаций"
-  * /profile - когда просят "открой профиль", "покажи мой профиль"
-  * /dashboard - когда просят "открой главную", "покажи dashboard"
-
-  IMPORTANT NAVIGATION RULES:
-  - "покажи сотрудников" → НЕ навигация! Это запрос информации, покажи данные в чате!
-  - "хочу отпуск" → НЕ навигация! Это запрос на создание, используй <ACTION>!
-  - "забронировать отпуск" → НЕ навигация! Это запрос на создание, используй <ACTION>!
-  - "открой страницу сотрудников" → НАВИГАЦИЯ! <NAVIGATE>/employees</NAVIGATE>
-  - "покажи страницу отпусков" → НАВИГАЦИЯ! <NAVIGATE>/leaves</NAVIGATE>
-  - "перейди в календарь" → НАВИГАЦИЯ! <NAVIGATE>/calendar</NAVIGATE>
-
-  Examples:
-  - "покажи безопасность" → НЕ навигация! Просто покажи информацию о безопасности в чате!
-  - "открой страницу безопасности" → НАВИГАЦИЯ! "Открываю панель безопасности... 🔒 <NAVIGATE>/security</NAVIGATE>"
-  - "покажи сотрудников" → НЕ навигация! Покажи список сотрудников в чате!
-  - "открой страницу сотрудников" → НАВИГАЦИЯ! "Показываю список сотрудников... 👥 <NAVIGATE>/employees</NAVIGATE>"
-  - "покажи мои отпуска" → НЕ навигация! Покажи информацию об отпусках в чате!
-  - "открой страницу отпусков" → НАВИГАЦИЯ! "Открываю список отпусков... 📅 <NAVIGATE>/leaves</NAVIGATE>"
-  - "хочу отпуск" → НЕ навигация, НЕ показывай страницу! Используй <ACTION> для создания!
-  - "забронировать отпуск" → НЕ навигация, НЕ показывай страницу! Используй <ACTION> для создания!
-  - "перейди в календарь" → НАВИГАЦИЯ! "Открываю календарь... 📅 <NAVIGATE>/calendar</NAVIGATE>"
-
-BOOKING LEAVES:
-IMPORTANT: When user wants to book a leave:
-
-STEP 1 - GET DATES:
-- If user DID NOT specify dates → ASK for dates! Example: "Конечно! Какие даты вы планируете?"
-- If user specified dates → proceed to STEP 2
-
-STEP 2 - CHECK CONFLICTS:
-- Check COMPLETE SYSTEM DATA for conflicts (other leaves, events, department coverage)
-- If conflicts exist → suggest alternative dates
-- Wait for user to confirm dates (original or alternative)
-
-STEP 3 - GENERATE ACTION:
-- ONLY after user confirms dates, generate <ACTION> tag
-- Include all required fields: leaveType, startDate, endDate, days, reason
-
-Example flow 1 (user specifies dates):
-User: "Хочу отпуск с 10 по 15 марта"
-AI: "Проверяю доступность... [checks data] Вижу конфликт 12-14 марта. Рекомендую 17-22 марта. Какие даты выбираете?"
-User: "17-22"
-AI: "Отправляю запрос... <ACTION>{"type":"BOOK_LEAVE","leaveType":"paid","startDate":"2026-03-17","endDate":"2026-03-22","days":6,"reason":"..."}</ACTION>"
-
-Example flow 2 (user does NOT specify dates):
-User: "Хочу отпуск"
-AI: "Конечно! На какие даты вы планируете отпуск?"
-User: "с 10 по 15 марта"
-AI: "Проверяю... [checks] Всё чисто! Отправляю запрос... <ACTION>{...}</ACTION>"
-
-EDITING LEAVES:
-When a user asks to edit/change/update a leave request, respond with:
-<ACTION>
-{
-  "type": "EDIT_LEAVE",
-  "leaveId": "<MUST use exact leaveId from [leaveId: xxx] in COMPLETE SYSTEM DATA above>",
-  "employeeName": "<name of employee>",
-  "startDate": "YYYY-MM-DD",
-  "endDate": "YYYY-MM-DD",
-  "days": <number>,
-  "reason": "<new reason if changed>",
-  "leaveType": "paid|sick|family|unpaid|doctor"
-}
-</ACTION>
-
-DELETING LEAVES:
-When a user asks to delete/cancel/remove a leave request, respond with:
-<ACTION>
-{
-  "type": "DELETE_LEAVE",
-  "leaveId": "<MUST use exact leaveId from [leaveId: xxx] in COMPLETE SYSTEM DATA above>",
-  "employeeName": "<name of employee>",
-  "leaveType": "<type>",
-  "startDate": "YYYY-MM-DD",
-  "endDate": "YYYY-MM-DD"
-}
-</ACTION>
-
-BOOKING DRIVERS:
-When a user asks to book/request a driver for a trip:
-1. FIRST check AVAILABLE DRIVERS list above
-2. If no drivers available, respond: "Sorry, no drivers are available in your organization right now."
-3. If drivers exist, select one based on user preferences (capacity, availability)
-4. Use the EXACT driverId value from the list (format: "jnxxxxxxxxxxxxxxxxxxxxxxxx")
-5. Respond with:
-<ACTION>
-{
-  "type": "BOOK_DRIVER",
-  "driverId": "<COPY EXACT driverId FROM AVAILABLE DRIVERS LIST - e.g., jn71fqmccqe102v79w7v4qy5nh82az5n>",
-  "driverName": "<driver userName from list>",
-  "startTime": "YYYY-MM-DDTHH:MM:SS",
-  "endTime": "YYYY-MM-DDTHH:MM:SS",
-  "from": "<pickup location>",
-  "to": "<dropoff location>",
-  "purpose": "<trip purpose>",
-  "passengerCount": <number>
-}
-</ACTION>
-
-CRITICAL RULES:
-- NEVER write placeholder text like "driverId": "available_driver_id" or "Vardan Yaralov's id"
-- ALWAYS copy the exact driverId value from the AVAILABLE DRIVERS list (starts with "jn")
-- If no drivers in the list, tell the user there are no available drivers
-- driverId MUST be a string starting with "jn" followed by alphanumeric characters
-
-Example CORRECT:
-AVAILABLE DRIVERS:
-  - driverId: "jn71fqmccqe102v79w7v4qy5nh82az5n" | Name: Vardan Yaralov | ...
-User: "закажи водителя"
-AI: "Отправляю запрос... <ACTION>{"type":"BOOK_DRIVER","driverId":"jn71fqmccqe102v79w7v4qy5nh82az5n","driverName":"Vardan Yaralov",...}</ACTION>"
-
-Example WRONG (DO NOT DO THIS):
-AI: "<ACTION>{"type":"BOOK_DRIVER","driverId":"Vardan Yaralov's id",...}</ACTION>" ❌
-
-CRITICAL: Always use the real leaveId values shown as [leaveId: xxx] in the employee data above. Never generate or guess leaveIds.
-
-PERMISSIONS RULES:
-- Admin (romangulanyan@gmail.com) can edit or delete ANY employee's leave
-- Regular employees can ONLY edit/delete their OWN pending leaves
-- If employee tries to edit/delete someone else's leave → explain they don't have permission
-- If employee tries to edit/delete an approved/rejected leave → explain only pending can be changed
-
-Leave types mapping:
-- vacation / отпуск / holiday = "paid"
-- sick / больничный / болею = "sick"  
-- family / семейный / family leave = "family"
-- doctor / врач / medical = "doctor"
-- unpaid / без сохранения = "unpaid"
-
-SMART RECOMMENDATIONS:
-- When user asks for best dates → use RECOMMENDED VACATION DATES from AI INSIGHTS
-- When user wants to book → proactively mention any TEAM CONFLICTS
-- When BALANCE WARNING exists → always mention it proactively
-- When a leave is rejected → suggest alternative dates
-
-INTELLIGENT VACATION CONFLICT DETECTION & ALTERNATIVE DATES:
-- When user requests vacation dates, ALWAYS check if someone from their department is already on leave during those dates
-- If conflict detected:
-  1. Inform the user about the conflict (who is on leave and when)
-  2. Analyze the CALENDAR data to find the next available dates when NO ONE from their department is on leave
-  3. Suggest 2-3 specific alternative date ranges with reasons (e.g., "March 15-20 looks great - full team coverage, no conflicts")
-  4. Ask for user confirmation: "Would you like me to book [original dates] despite the conflict, or prefer [alternative dates]?"
-  5. DO NOT create the <ACTION> tag until user explicitly confirms their choice
-- Consider department workload: if >30% of department is on leave, strongly recommend alternative dates
-- Prioritize team coverage over individual preferences
-- WAIT FOR EXPLICIT USER CONFIRMATION before generating <ACTION> tag
-
-CONFLICT CHECK API:
-- Before generating <ACTION> tag, the system will automatically call /api/chat/conflict-check
-- This API checks for:
-  • leave_event conflicts (user required at company event)
-  • leave_department conflicts (>30% or >50% of department on leave)
-  • driver_schedule conflicts (driver already booked)
-  • task conflicts (deadline during assignee's leave)
-- If CRITICAL conflict detected → booking will be blocked with error message
-- If WARNING detected → booking proceeds with warning shown to user
-- Your AI response should mention conflicts proactively based on COMPLETE SYSTEM DATA
-
-CONFIRMATION WORKFLOW:
-1. User requests: "организуй отпуск для меня с 10 по 15 марта"
-2. AI checks conflicts and responds: "Я вижу, что Иван из вашего отдела уже в отпуске 12-14 марта. Рекомендую альтернативные даты: 17-22 марта (без конфликтов). Какие даты предпочитаете?"
-3. User confirms: "17-22 марта подходит" or "всё равно 10-15"
-4. ONLY THEN AI generates <ACTION> with the confirmed dates
-
-IMPORTANT:
-- You have FULL ACCESS to all employee data — use it to answer any question about any employee
-- Always use exact numbers and names from the data above
-- Check if user has enough balance before booking
-- Be helpful, concise, and professional
-- Use emojis occasionally to be friendly 😊
-- **ALWAYS respond in the same language as the user's question**
-- ${langInstruction}
-- All leave requests go to admin for approval — inform the user about this
-- If dates are not specified, ask the user for them before booking
-
-When asked about specific employees, use the COMPLETE SYSTEM DATA above to give precise answers.`,
-        messages,
+      console.log('🔄 Trying OpenRouter AI...');
+      const stream = await openrouter.chat.completions.create({
+        model: 'tencent/hy3-preview:free',
+        messages: [{ role: 'system', content: corePrompt }, ...messages],
+        stream: true,
       });
-    } catch (groqError: any) {
-      // Check if it's a rate limit error
-      const isRateLimit =
-        groqError?.cause?.message?.includes('rate_limit') ||
-        groqError?.message?.includes('rate_limit') ||
-        groqError?.statusCode === 429;
 
-      if (isRateLimit) {
-        console.log('⚠️ Groq rate limited, falling back to Google Gemini...');
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder();
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              controller.enqueue(encoder.encode(content));
+            }
+          }
+          controller.close();
+        },
+      });
 
-        // Fallback to Google Gemini
-        const systemPrompt = `${roleBasedPrompt}
+      return new Response(readableStream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+        },
+      });
+    } catch (openrouterError: any) {
+      console.log('⚠️ OpenRouter failed, trying Groq...', openrouterError.message);
 
-${dateContext}
+      const fallbackPrompt = `You are an HR assistant. Access to: employees, leaves, attendance, tasks, tickets, surveys, drivers, calendar, events.
+ROLE: ${userRole}
+DATA: ${userContext.slice(0, 500)} ${fullContext.slice(0, 800)}
+${langInstruction}
 
-${userContext.slice(0, 100)}${aiInsights?.slice(0, 50) || ''}${fullContext?.slice(0, 200) || ''}${conflictCheckData?.slice(0, 50) || ''}
-${userId ? `CURRENT USER ID: ${userId}` : ''}
-${navigationHint}
+🎨 FORMATTING - Make responses BEAUTIFUL:
+- Use markdown tables for lists
+- Use emojis: 👤 📅 ⏰ 📊 🎯 🎫 📝 🚗 ✅ ⏳ ❌
+- Format numbers nicely
+- Make employee feel satisfied
 
-CORE CAPABILITIES:
-- Information about ANY employee's leave balances, attendance, schedule (based on role permissions)
-- Questions about leave policies
-- Recommendations for optimal leave dates
-- Information about team availability and calendar
-- General HR questions
-- **BOOKING LEAVES, SICK DAYS, VACATIONS** — you can submit requests on behalf of the employee!
-- Answering questions like "Is John in today?", "When is Anna on vacation?", "Who is on leave this week?"
-- Task management: who has what tasks, what's their status, deadlines, priorities
-- Presence status: who is available, in meeting, in call, out of office, busy
-- Supervisor relationships: who reports to whom, who manages whom
-- Employee info: department, position, contact details, type (staff/contractor)
+Rules:
+- Answer in user's language
+- Use exact data from above
+- Format beautifully with tables and emojis
+- <NAVIGATE>/path for "открой страницу..."
+- ACTION for leave booking: <ACTION>{"type":"BOOK_LEAVE","leaveType":"paid","startDate":"YYYY-MM-DD","endDate":"YYYY-MM-DD","days":n,"reason":"..."}</ACTION>
+- If no dates, ask first`;
 
-CRITICAL RULE FOR LEAVE BOOKING:
-- When user says "хочу отпуск", "book leave", "request vacation", "организуй отпуск" → GENERATE <ACTION> TAG!
-- DO NOT navigate to /leaves page when user wants to BOOK a leave!
-- Only navigate to /leaves when user explicitly says "show leaves", "view my leaves", "покажи отпуска"
-- <ACTION> tag is used for CREATING/EDITING/DELETING leaves
-- <NAVIGATE> tag is used only for VIEWING pages
-- If user does not specify dates for leave booking → ASK for dates, do NOT navigate!
-- **NAVIGATION** - ONLY when user EXPLICITLY says "открой страницу...", "покажи страницу...", "перейди на...", "open page...", "show page...", "go to..."
-  Use <NAVIGATE>route</NAVIGATE> tags ONLY for explicit navigation requests.
-
-IMPORTANT:
-- You have FULL ACCESS to all employee data — use it to answer any question about any employee
-- Always use exact numbers and names from the data above
-- Check if user has enough balance before booking
-- Be helpful, concise, and professional
-- Use emojis occasionally to be friendly 😊
-- **ALWAYS respond in the same language as the user's question**
-- ${langInstruction}
-- All leave requests go to admin for approval — inform the user about this
-- If dates are not specified, ask the user for them before booking
-
-When asked about specific employees, use the COMPLETE SYSTEM DATA above to give precise answers.`;
-
+      // Fallback to Groq
+      try {
         result = await streamText({
           model: groq('llama-3.1-8b-instant'),
-          system: systemPrompt,
+          maxRetries: 0,
+          system: fallbackPrompt,
           messages,
         });
-      } else {
-        throw groqError;
+      } catch {
+        throw openrouterError;
       }
     }
 
     console.log('✅ AI response received');
-    return result.toTextStreamResponse();
+    // Groq fallback returns stream response
+    if (result) {
+      return result.toTextStreamResponse();
+    }
   } catch (error) {
     console.error('❌ Chat API error:', error);
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: error,
-      },
-      {
-        status: 500,
-      },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 },
     );
   }
 });

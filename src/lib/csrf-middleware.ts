@@ -6,34 +6,34 @@ import { verifyCsrfFromRequest, requiresCsrfProtection } from '@/lib/csrf';
  * Usage: Apply to all POST/PUT/DELETE/PATCH requests
  */
 export function withCsrfProtection(
-  handler: (req: NextRequest) => Promise<Response | NextResponse>,
+  handler: (req: NextRequest) => Promise<Response | NextResponse | undefined>,
 ) {
   return async (req: NextRequest): Promise<Response | NextResponse> => {
+    const result = await handler(req);
+    if (result === undefined) {
+      // Возвращаем 500, если handler не вернул ответ
+      return NextResponse.json(
+        { error: 'Internal Server Error: No response returned from handler.' },
+        { status: 500 },
+      );
+    }
     // Skip GET requests - they don't modify state
     if (req.method === 'GET') {
-      return handler(req);
+      const getResult = await handler(req);
+      if (getResult === undefined) {
+        return NextResponse.json(
+          { error: 'Internal Server Error: No response returned from handler.' },
+          { status: 500 },
+        );
+      }
+      return getResult;
     }
+    return result;
+  };
+}
 
-    // Check if method requires CSRF protection
-    if (!requiresCsrfProtection(req.method)) {
-      return handler(req);
-    }
 
-    // Allow internal requests (from same origin)
-    const referer = req.headers.get('referer');
-    const origin = req.headers.get('origin');
-    const host = req.headers.get('host');
 
-    // Skip CSRF for requests from same origin/browser
-    const isSameOrigin =
-      (referer && host && referer.includes(host)) || (origin && host && origin.includes(host));
-    if (isSameOrigin) {
-      return handler(req);
-    }
-
-    // For external requests, verify CSRF token
-    const isValid = verifyCsrfFromRequest(req);
-    if (!isValid) {
       return new NextResponse(JSON.stringify({ error: 'CSRF validation failed: Invalid token' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' },
