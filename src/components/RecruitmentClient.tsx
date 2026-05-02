@@ -1100,7 +1100,10 @@ export default function RecruitmentClient() {
                     <div className="flex gap-1 mt-3">
                       {STAGES.map((stage) => (
                         <div key={stage} className="flex-1">
-                          <div className="bg-muted dark:bg-input h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="h-1.5 rounded-full overflow-hidden"
+                            style={{ backgroundColor: 'var(--input)' }}
+                          >
                             <div
                               className={`h-full rounded-full ${getStageBadgeColor(stage).replace('text-', 'bg-').replace('-800', '-400')}`}
                               style={{

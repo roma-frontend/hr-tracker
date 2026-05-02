@@ -112,6 +112,7 @@ export const createUser = mutation({
         message: `${args.name} (${args.role}) has been added to ${org.name}.`,
         isRead: false,
         relatedId: userId,
+        route: '/employees',
         createdAt: Date.now(),
       });
     }
@@ -327,6 +328,7 @@ export const approveUser = mutation({
       title: '✅ Account Approved',
       message: `Your account has been approved by ${callerUser?.name ?? 'admin'}. Welcome to ${org?.name ?? 'the team'}!`,
       isRead: false,
+      route: '/organization',
       createdAt: Date.now(),
     });
 

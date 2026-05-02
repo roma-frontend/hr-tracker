@@ -65,6 +65,7 @@ export const approveRequest = mutation({
       message: `Your trip request has been approved by ${manager.name}. Driver will be assigned soon.`,
       isRead: false,
       relatedId: `driver_request:${requestId}`,
+      route: '/drivers',
       createdAt: Date.now(),
     });
 
@@ -97,6 +98,7 @@ export const approveRequest = mutation({
         message: `${request.tripInfo.purpose}: ${request.tripInfo.from} → ${request.tripInfo.to}`,
         isRead: false,
         relatedId: `driver_request:${requestId}`,
+        route: '/drivers',
         createdAt: Date.now(),
       });
     }
@@ -146,6 +148,7 @@ export const rejectRequest = mutation({
       message: `Your trip request has been declined: ${reason}`,
       isRead: false,
       relatedId: `driver_request:${requestId}`,
+      route: '/drivers',
       createdAt: Date.now(),
     });
 
@@ -418,6 +421,7 @@ export const autoAssignDriver = mutation({
       message: `${driverUser?.name} will pick you up at ${request.tripInfo.from}`,
       isRead: false,
       relatedId: `driver_request:${requestId}`,
+      route: '/drivers',
       createdAt: Date.now(),
     });
 

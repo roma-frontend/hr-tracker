@@ -26,6 +26,7 @@ export const notifications = {
     isRead: v.boolean(),
     relatedId: v.optional(v.string()),
     metadata: v.optional(v.string()),
+    route: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index('by_user', ['userId'])

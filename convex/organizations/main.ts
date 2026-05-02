@@ -515,6 +515,7 @@ export const requestToJoinOrganization = mutation({
         message: `${args.requestedByName} (${args.requestedByEmail}) wants to join ${org.name}.`,
         isRead: false,
         relatedId: inviteId,
+        route: '/organization',
         createdAt: Date.now(),
       });
     }
@@ -716,7 +717,8 @@ export const approveJoinRequest = mutation({
       title: '✅ Welcome to ' + org.name + '!',
       message: `Your request to join ${org.name} has been approved by ${admin.name}. You can now log in.`,
       isRead: false,
-      relatedId: userId, // Use userId instead of inviteId for proper navigation
+      relatedId: userId,
+      route: '/organization',
       createdAt: Date.now(),
     });
 

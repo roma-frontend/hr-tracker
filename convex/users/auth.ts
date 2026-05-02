@@ -246,6 +246,7 @@ export const recordFaceIdAttempt = mutation({
           message:
             'Your Face ID has been blocked due to too many failed attempts. Please use email/password login.',
           isRead: false,
+          route: '/security',
           createdAt: Date.now(),
         });
       }
@@ -306,6 +307,7 @@ export const unblockFaceId = mutation({
       title: '✅ Face ID Unlocked',
       message: `Your Face ID has been unlocked by ${admin.name}. You can try again.`,
       isRead: false,
+      route: '/security',
       createdAt: Date.now(),
     });
 
@@ -341,6 +343,7 @@ export const autoUnblockFaceId = mutation({
         title: '✅ Face ID Automatically Unlocked',
         message: 'Your Face ID has been automatically unlocked after successful password login.',
         isRead: false,
+        route: '/security',
         createdAt: Date.now(),
       });
     }

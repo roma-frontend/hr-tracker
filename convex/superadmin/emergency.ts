@@ -218,6 +218,7 @@ export const createIncident = mutation({
         message: args.title,
         isRead: false,
         relatedId: `incident:${incidentId}`,
+        route: '/security',
         createdAt: now,
       });
     }

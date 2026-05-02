@@ -110,6 +110,7 @@ export const createTask = mutation({
         message: `You assigned a task: "${args.title}"`,
         isRead: false,
         relatedId: taskId,
+        route: '/tasks',
         createdAt: now,
       });
     }
@@ -169,6 +170,7 @@ export const updateTaskStatus = mutation({
           message: `"${task.title}" has been ${args.status === 'completed' ? 'completed' : 'submitted for review'} by ${employee?.name ?? 'employee'}`,
           isRead: false,
           relatedId: args.taskId,
+          route: '/tasks',
           createdAt: now,
         });
       }

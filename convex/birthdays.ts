@@ -51,6 +51,7 @@ export const checkBirthdaysToday = mutation({
           title: `🎉 День рождения!`,
           message: `Сегодня день рождения у ${birthdayUser.name}! ${getAgeEmoji(age)}\n\n🎁 Поздравьте коллегу и подарите хорошее настроение!`,
           isRead: false,
+          route: '/employees',
           createdAt: Date.now(),
           metadata: JSON.stringify({
             birthdayUserId: birthdayUser._id,
@@ -68,6 +69,7 @@ export const checkBirthdaysToday = mutation({
         title: `🎂 С Днём Рождения!`,
         message: `${birthdayUser.name}, поздравляем Вас с Днём Рождения! 🎉\n\nЖелаем успехов, здоровья и отличного настроения! 🎁\n\nВаш возраст: ${age} ${getAgeWord(age)}`,
         isRead: false,
+        route: '/employees',
         createdAt: Date.now(),
         metadata: JSON.stringify({
           isBirthdayPerson: true,
@@ -156,6 +158,7 @@ export const checkUpcomingBirthdays = mutation({
               title: `🎁 Скоро день рождения!`,
               message: `Через 3 дня день рождения у ${birthdayUser.name}! Подумайте о поздравлении. 🎂`,
               isRead: false,
+              route: '/employees',
               createdAt: Date.now(),
               metadata: JSON.stringify({
                 birthdayUserId: birthdayUser._id,

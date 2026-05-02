@@ -27,15 +27,9 @@ export const getKudosFeed = query({
     if (kudos.length === 0) return [];
 
     // Batch load users
-    const userIds = [
-      ...new Set(kudos.flatMap((k) => [k.senderId, k.receiverId])),
-    ];
-    const users = await Promise.all(
-      userIds.map((id) => ctx.db.get(id)),
-    );
-    const userMap = new Map(
-      users.filter(Boolean).map((u) => [u!._id, u!]),
-    );
+    const userIds = [...new Set(kudos.flatMap((k) => [k.senderId, k.receiverId]))];
+    const users = await Promise.all(userIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(users.filter(Boolean).map((u) => [u!._id, u!]));
 
     return kudos.map((kudo) => ({
       ...kudo,
@@ -82,9 +76,7 @@ export const getKudosForUser = query({
 
     const senderIds = [...new Set(kudos.map((k) => k.senderId))];
     const senders = await Promise.all(senderIds.map((id) => ctx.db.get(id)));
-    const senderMap = new Map(
-      senders.filter(Boolean).map((u) => [u!._id, u!]),
-    );
+    const senderMap = new Map(senders.filter(Boolean).map((u) => [u!._id, u!]));
 
     return kudos.map((kudo) => ({
       ...kudo,
@@ -120,9 +112,7 @@ export const getKudosSentByUser = query({
 
     const receiverIds = [...new Set(kudos.map((k) => k.receiverId))];
     const receivers = await Promise.all(receiverIds.map((id) => ctx.db.get(id)));
-    const receiverMap = new Map(
-      receivers.filter(Boolean).map((u) => [u!._id, u!]),
-    );
+    const receiverMap = new Map(receivers.filter(Boolean).map((u) => [u!._id, u!]));
 
     return kudos.map((kudo) => ({
       ...kudo,
@@ -143,7 +133,15 @@ export const getKudosSentByUser = query({
 export const getLeaderboard = query({
   args: {
     organizationId: v.id('organizations'),
-    period: v.optional(v.union(v.literal('week'), v.literal('month'), v.literal('quarter'), v.literal('year'), v.literal('all'))),
+    period: v.optional(
+      v.union(
+        v.literal('week'),
+        v.literal('month'),
+        v.literal('quarter'),
+        v.literal('year'),
+        v.literal('all'),
+      ),
+    ),
   },
   handler: async (ctx, { organizationId, period }) => {
     let startDate = 0;
@@ -165,9 +163,8 @@ export const getLeaderboard = query({
       .order('desc')
       .collect();
 
-    const filteredKudos = startDate > 0
-      ? allKudos.filter((k) => k.createdAt >= startDate)
-      : allKudos;
+    const filteredKudos =
+      startDate > 0 ? allKudos.filter((k) => k.createdAt >= startDate) : allKudos;
 
     // Count kudos per receiver
     const counts = new Map<Id<'users'>, number>();
@@ -176,9 +173,7 @@ export const getLeaderboard = query({
     }
 
     // Sort by count desc, take top 20
-    const sorted = [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 20);
+    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20);
 
     // Batch load users
     const users = await Promise.all(sorted.map(([id]) => ctx.db.get(id)));
@@ -262,18 +257,14 @@ export const getUserBadges = query({
   handler: async (ctx, { organizationId, userId }) => {
     const awards = await ctx.db
       .query('kudosBadgeAwards')
-      .withIndex('by_org_user', (q) =>
-        q.eq('organizationId', organizationId).eq('userId', userId),
-      )
+      .withIndex('by_org_user', (q) => q.eq('organizationId', organizationId).eq('userId', userId))
       .collect();
 
     if (awards.length === 0) return [];
 
     const badgeIds = [...new Set(awards.map((a) => a.badgeId))];
     const badges = await Promise.all(badgeIds.map((id) => ctx.db.get(id)));
-    const badgeMap = new Map(
-      badges.filter(Boolean).map((b) => [b!._id, b!]),
-    );
+    const badgeMap = new Map(badges.filter(Boolean).map((b) => [b!._id, b!]));
 
     return awards.map((award) => ({
       ...award,
@@ -334,7 +325,9 @@ export const sendKudos = mutation({
 
     const currentBalance = userPointsRecord?.balance ?? 0;
     if (currentBalance < KUDOS_COST) {
-      throw new Error(`Not enough points. You need ${KUDOS_COST} points but have ${currentBalance}.`);
+      throw new Error(
+        `Not enough points. You need ${KUDOS_COST} points but have ${currentBalance}.`,
+      );
     }
 
     // Deduct points
@@ -377,6 +370,7 @@ export const sendKudos = mutation({
       message: `${sender.name} sent you kudos for ${args.category.replace('_', ' ')}!`,
       isRead: false,
       relatedId: kudoId,
+      route: '/recognition',
       createdAt: Date.now(),
     });
 
@@ -406,9 +400,7 @@ export const reactToKudos = mutation({
     const reactions = kudo.reactions ?? [];
 
     // Check if user already reacted with this emoji
-    const existingIndex = reactions.findIndex(
-      (r) => r.userId === userId && r.emoji === emoji,
-    );
+    const existingIndex = reactions.findIndex((r) => r.userId === userId && r.emoji === emoji);
 
     if (existingIndex >= 0) {
       // Remove reaction (toggle)
@@ -532,6 +524,7 @@ export const awardBadge = mutation({
       message: `${awarder.name} awarded you the "${badge.name}" badge!`,
       isRead: false,
       relatedId: awardId,
+      route: '/recognition',
       createdAt: Date.now(),
     });
 
@@ -558,9 +551,7 @@ export const getUserPoints = query({
   handler: async (ctx, { organizationId, userId }) => {
     const record = await ctx.db
       .query('userPoints')
-      .withIndex('by_org_user', (q) =>
-        q.eq('organizationId', organizationId).eq('userId', userId),
-      )
+      .withIndex('by_org_user', (q) => q.eq('organizationId', organizationId).eq('userId', userId))
       .first();
 
     return record ?? { balance: 0, totalEarned: 0, totalSpent: 0 };
@@ -630,11 +621,9 @@ export const awardAttendancePoints = mutation({
     if (existingToday) return; // Already awarded today
 
     // Get or create user points record
-    let userPointsRecord = await ctx.db
+    const userPointsRecord = await ctx.db
       .query('userPoints')
-      .withIndex('by_org_user', (q) =>
-        q.eq('organizationId', organizationId).eq('userId', userId),
-      )
+      .withIndex('by_org_user', (q) => q.eq('organizationId', organizationId).eq('userId', userId))
       .first();
 
     if (userPointsRecord) {
@@ -682,11 +671,9 @@ export const awardReviewPoints = mutation({
 
     const now = Date.now();
 
-    let userPointsRecord = await ctx.db
+    const userPointsRecord = await ctx.db
       .query('userPoints')
-      .withIndex('by_org_user', (q) =>
-        q.eq('organizationId', organizationId).eq('userId', userId),
-      )
+      .withIndex('by_org_user', (q) => q.eq('organizationId', organizationId).eq('userId', userId))
       .first();
 
     if (userPointsRecord) {
@@ -739,11 +726,9 @@ export const awardManualPoints = mutation({
 
     const now = Date.now();
 
-    let userPointsRecord = await ctx.db
+    const userPointsRecord = await ctx.db
       .query('userPoints')
-      .withIndex('by_org_user', (q) =>
-        q.eq('organizationId', organizationId).eq('userId', userId),
-      )
+      .withIndex('by_org_user', (q) => q.eq('organizationId', organizationId).eq('userId', userId))
       .first();
 
     if (userPointsRecord) {

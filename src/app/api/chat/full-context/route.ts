@@ -1,14 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '../../../../../convex/_generated/api';
+import { jwtVerify } from 'jose';
 
 // Opt out of static generation — uses request.url
 export const revalidate = 0;
+
+async function getUserRoleFromSession(req: NextRequest): Promise<string> {
+  try {
+    const token = req.cookies.get('hr-auth-token') || req.cookies.get('oauth-session');
+    if (!token) return 'employee';
+
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) return 'employee';
+
+    const secret = new TextEncoder().encode(jwtSecret);
+    const { payload } = await jwtVerify(token.value, secret);
+    return (payload.role as string) || 'employee';
+  } catch {
+    return 'employee';
+  }
+}
 
 export async function GET(req: NextRequest) {
   try {
     const requesterId = req.nextUrl.searchParams.get('requesterId');
     if (!requesterId) return NextResponse.json({ error: 'requesterId required' }, { status: 400 });
+
+    // Get user role for filtering
+    const userRole = await getUserRoleFromSession(req);
+    const isAdmin = userRole === 'admin' || userRole === 'superadmin';
+    const isSupervisor = userRole === 'supervisor';
 
     // Fetch core system data in parallel first
     const [users, leaves, todayAttendance, allTasks, allTickets, automationWorkflows] =
@@ -229,20 +251,28 @@ export async function GET(req: NextRequest) {
       totalEmployees: filteredUsers.length,
       currentlyAtWork: presentToday.filter((t: any) => t.status === 'checked_in').length,
       onLeaveToday: employeeData.filter((e: any) => e.currentLeave).length,
-      // Tickets
-      tickets: (allTickets as any[]).map((t: any) => ({
-        ticketId: t._id,
-        ticketNumber: t.ticketNumber,
-        title: t.title,
-        description: t.description,
-        status: t.status,
-        priority: t.priority,
-        category: t.category,
-        createdBy: t.creatorName ?? 'Unknown',
-        assignedTo: t.assigneeName,
-        createdAt: t.createdAt,
-        isOverdue: t.isOverdue,
-      })),
+      // Tickets - filter based on role
+      tickets: (() => {
+        let filtered = allTickets as any[];
+        if (!isAdmin && !isSupervisor) {
+          filtered = (allTickets as any[]).filter(
+            (t: any) => t.createdByUserId === requesterId || t.assignedTo === requesterId,
+          );
+        }
+        return filtered.map((t: any) => ({
+          ticketId: t._id,
+          ticketNumber: t.ticketNumber,
+          title: t.title,
+          description: t.description,
+          status: t.status,
+          priority: t.priority,
+          category: t.category,
+          createdBy: t.creatorName ?? 'Unknown',
+          assignedTo: t.assigneeName,
+          createdAt: t.createdAt,
+          isOverdue: t.isOverdue,
+        }));
+      })(),
       ticketStats: {
         total: (allTickets as any[]).length,
         open: (allTickets as any[]).filter((t: any) => t.status === 'open').length,

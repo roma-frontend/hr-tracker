@@ -76,6 +76,7 @@ export const startImpersonation = mutation({
       message: `${superadmin.name} has started an impersonation session on your account. Reason: ${args.reason}`,
       isRead: false,
       relatedId: `impersonation:${sessionId}`,
+      route: '/security',
       createdAt: now,
     });
 

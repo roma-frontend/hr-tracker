@@ -308,6 +308,7 @@ export const register = mutation({
             message: `${args.name} (${email}) wants to join ${org?.name ?? 'your organization'}.`,
             isRead: false,
             relatedId: userId,
+            route: '/organization',
             createdAt: Date.now(),
           });
         }
@@ -795,6 +796,7 @@ export const googleOAuthLogin = mutation({
           message: `${args.name} (${email}) signed up with Google and wants to join ${org.name || 'organization'}.`,
           isRead: false,
           relatedId: userId,
+          route: '/organization',
           createdAt: Date.now(),
         });
       }

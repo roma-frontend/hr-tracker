@@ -219,6 +219,7 @@ export const applyToVacancy = mutation({
         message: `${args.name} applied for "${vacancy.title}" via career page`,
         isRead: false,
         relatedId: applicationId,
+        route: '/recruitment',
         createdAt: now,
       });
     }

@@ -320,7 +320,7 @@ export const ConversationList = React.memo(function ConversationList({
           className="flex-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth"
           style={{ scrollBehavior: 'smooth' }}
         >
-          {(['all', 'chat', 'unread', 'groups', 'pinned', 'archived'] as const).map((f) => {
+          {(['all', 'chat', 'groups', 'unread', 'pinned', 'archived'] as const).map((f) => {
             const unreadCount = conversations.filter(
               (c) =>
                 c.membership.unreadCount > 0 &&
@@ -346,9 +346,9 @@ export const ConversationList = React.memo(function ConversationList({
               >
                 {f === 'all' && t('chat.filterAll', 'All')}
                 {f === 'chat' && t('chat.filterChat', 'Chat')}
+                {f === 'groups' && t('chat.filterGroups', 'Groups')}
                 {f === 'unread' &&
                   `${t('chat.filterUnread', 'Unread')} ${unreadCount > 0 ? `(${unreadCount})` : ''}`}
-                {f === 'groups' && t('chat.filterGroups', 'Groups')}
                 {f === 'pinned' && t('chat.filterPinned', 'Pinned')}
                 {f === 'archived' && t('chat.filterArchived', 'Archived')}
               </button>

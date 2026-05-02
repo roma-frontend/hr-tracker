@@ -175,6 +175,7 @@ export const sendMessage = mutation({
           message: `${sender?.name ?? 'Someone'} mentioned you: "${args.content.slice(0, 80)}"`,
           isRead: false,
           relatedId: args.conversationId,
+          route: '/messages',
           createdAt: now,
         });
       }

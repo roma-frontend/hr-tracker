@@ -190,7 +190,7 @@ function SendKudosModal({ open, onClose, organizationId, senderId }: SendKudosMo
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="px-5 pt-5 pb-0">
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle className="flex items-center gap-4">
             <span className="flex items-center gap-2">
               <Send className="h-5 w-5" />
               {t('recognition.sendKudos')}
@@ -264,7 +264,7 @@ function SendKudosModal({ open, onClose, organizationId, senderId }: SendKudosMo
                 <p className="text-sm text-muted-foreground mb-3">
                   {t('recognition.wizard.selectRecipientHint')}
                 </p>
-                <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto p-1">
                   {availableRecipients.map((user: any) => (
                     <button
                       key={user._id}

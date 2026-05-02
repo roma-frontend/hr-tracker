@@ -1,14 +1,14 @@
 /**
  * Company Events & Leave Conflict Detection
- * 
+ *
  * - Create/manage company events
  * - Detect leave conflicts with events
  * - Alert admins about conflicts
  */
 
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPANY EVENTS MANAGEMENT
@@ -19,42 +19,38 @@ import type { Id } from "./_generated/dataModel";
  */
 export const createCompanyEvent = mutation({
   args: {
-    organizationId: v.id("organizations"),
-    userId: v.id("users"),
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
     name: v.string(),
     description: v.optional(v.string()),
     startDate: v.number(),
     endDate: v.number(),
     isAllDay: v.optional(v.boolean()),
     requiredDepartments: v.array(v.string()),
-    requiredEmployeeIds: v.optional(v.array(v.id("users"))),
+    requiredEmployeeIds: v.optional(v.array(v.id('users'))),
     eventType: v.union(
-      v.literal("meeting"),
-      v.literal("conference"),
-      v.literal("training"),
-      v.literal("team_building"),
-      v.literal("holiday"),
-      v.literal("deadline"),
-      v.literal("other"),
+      v.literal('meeting'),
+      v.literal('conference'),
+      v.literal('training'),
+      v.literal('team_building'),
+      v.literal('holiday'),
+      v.literal('deadline'),
+      v.literal('other'),
     ),
-    priority: v.optional(v.union(
-      v.literal("high"),
-      v.literal("medium"),
-      v.literal("low"),
-    )),
+    priority: v.optional(v.union(v.literal('high'), v.literal('medium'), v.literal('low'))),
     notifyDaysBefore: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     // Verify user is admin/manager
     const user = await ctx.db.get(args.userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
-    const isAdmin = user.role === "admin" || user.role === "superadmin";
+    const isAdmin = user.role === 'admin' || user.role === 'superadmin';
     if (!isAdmin) {
-      throw new Error("Only admins can create company events");
+      throw new Error('Only admins can create company events');
     }
 
-    const eventId = await ctx.db.insert("companyEvents", {
+    const eventId = await ctx.db.insert('companyEvents', {
       organizationId: args.organizationId,
       name: args.name,
       description: args.description,
@@ -73,21 +69,21 @@ export const createCompanyEvent = mutation({
 
     // Notify all admins about the new event
     const admins = await ctx.db
-      .query("users")
-      .withIndex("by_org_role", (q) => 
-        q.eq("organizationId", args.organizationId)
-          .eq("role", "admin")
+      .query('users')
+      .withIndex('by_org_role', (q) =>
+        q.eq('organizationId', args.organizationId).eq('role', 'admin'),
       )
       .collect();
 
     for (const admin of admins) {
-      await ctx.db.insert("notifications", {
+      await ctx.db.insert('notifications', {
         organizationId: args.organizationId,
         userId: admin._id,
-        type: "system",
-        title: "📅 New Company Event Created",
+        type: 'system',
+        title: '📅 New Company Event Created',
         message: `${args.name} (${new Date(args.startDate).toLocaleDateString()})`,
         isRead: false,
+        route: '/events',
         createdAt: Date.now(),
       });
     }
@@ -101,31 +97,28 @@ export const createCompanyEvent = mutation({
  */
 export const updateCompanyEvent = mutation({
   args: {
-    eventId: v.id("companyEvents"),
-    userId: v.id("users"),
+    eventId: v.id('companyEvents'),
+    userId: v.id('users'),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     startDate: v.optional(v.number()),
     endDate: v.optional(v.number()),
     requiredDepartments: v.optional(v.array(v.string())),
-    requiredEmployeeIds: v.optional(v.array(v.id("users"))),
-    priority: v.optional(v.union(
-      v.literal("high"),
-      v.literal("medium"),
-      v.literal("low"),
-      v.literal(""),
-    )),
+    requiredEmployeeIds: v.optional(v.array(v.id('users'))),
+    priority: v.optional(
+      v.union(v.literal('high'), v.literal('medium'), v.literal('low'), v.literal('')),
+    ),
   },
   handler: async (ctx, args) => {
     const event = await ctx.db.get(args.eventId);
-    if (!event) throw new Error("Event not found");
+    if (!event) throw new Error('Event not found');
 
     const user = await ctx.db.get(args.userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
-    const isAdmin = user.role === "admin" || user.role === "superadmin";
+    const isAdmin = user.role === 'admin' || user.role === 'superadmin';
     if (!isAdmin && event.createdBy !== args.userId) {
-      throw new Error("Only event creator or admin can update");
+      throw new Error('Only event creator or admin can update');
     }
 
     const patch: any = { updatedAt: Date.now() };
@@ -136,17 +129,17 @@ export const updateCompanyEvent = mutation({
     if (args.requiredDepartments) patch.requiredDepartments = args.requiredDepartments;
     if (args.requiredEmployeeIds) patch.requiredEmployeeIds = args.requiredEmployeeIds;
     // Handle empty string as undefined (clear priority)
-    if (args.priority && (args.priority as string) !== "") patch.priority = args.priority;
-    if ((args.priority as string) === "") patch.priority = undefined; // Clear priority if empty string
+    if (args.priority && (args.priority as string) !== '') patch.priority = args.priority;
+    if ((args.priority as string) === '') patch.priority = undefined; // Clear priority if empty string
 
     await ctx.db.patch(args.eventId, patch);
 
     // Re-check conflicts for existing leave requests
     await ctx.db
-      .query("leaveConflictAlerts")
-      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .query('leaveConflictAlerts')
+      .withIndex('by_event', (q) => q.eq('eventId', args.eventId))
       .collect()
-      .then(alerts => {
+      .then((alerts) => {
         for (const alert of alerts) {
           ctx.db.patch(alert._id, { isReviewed: false });
         }
@@ -161,25 +154,25 @@ export const updateCompanyEvent = mutation({
  */
 export const deleteCompanyEvent = mutation({
   args: {
-    eventId: v.id("companyEvents"),
-    userId: v.id("users"),
+    eventId: v.id('companyEvents'),
+    userId: v.id('users'),
   },
   handler: async (ctx, { eventId, userId }) => {
     const event = await ctx.db.get(eventId);
-    if (!event) throw new Error("Event not found");
+    if (!event) throw new Error('Event not found');
 
     const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
-    const isAdmin = user.role === "admin" || user.role === "superadmin";
+    const isAdmin = user.role === 'admin' || user.role === 'superadmin';
     if (!isAdmin && event.createdBy !== userId) {
-      throw new Error("Only event creator or admin can delete");
+      throw new Error('Only event creator or admin can delete');
     }
 
     // Delete associated conflict alerts
     const alerts = await ctx.db
-      .query("leaveConflictAlerts")
-      .withIndex("by_event", (q) => q.eq("eventId", eventId))
+      .query('leaveConflictAlerts')
+      .withIndex('by_event', (q) => q.eq('eventId', eventId))
       .collect();
 
     for (const alert of alerts) {
@@ -196,30 +189,31 @@ export const deleteCompanyEvent = mutation({
  */
 export const getCompanyEvents = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
     startDate: v.optional(v.number()),
     endDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     let events;
-    
+
     if (args.startDate && args.endDate) {
       // Get events in date range
       const allEvents = await ctx.db
-        .query("companyEvents")
-        .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+        .query('companyEvents')
+        .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
         .collect();
-      
-      events = allEvents.filter(e => 
-        (e.startDate >= args.startDate! && e.startDate <= args.endDate!) ||
-        (e.endDate >= args.startDate! && e.endDate <= args.endDate!) ||
-        (e.startDate <= args.startDate! && e.endDate >= args.endDate!)
+
+      events = allEvents.filter(
+        (e) =>
+          (e.startDate >= args.startDate! && e.startDate <= args.endDate!) ||
+          (e.endDate >= args.startDate! && e.endDate <= args.endDate!) ||
+          (e.startDate <= args.startDate! && e.endDate >= args.endDate!),
       );
     } else {
       events = await ctx.db
-        .query("companyEvents")
-        .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
-        .order("desc")
+        .query('companyEvents')
+        .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+        .order('desc')
         .take(100);
     }
 
@@ -231,7 +225,7 @@ export const getCompanyEvents = query({
           ...event,
           creatorName: creator?.name,
         };
-      })
+      }),
     );
 
     return enriched;
@@ -247,35 +241,31 @@ export const getCompanyEvents = query({
  */
 export const checkLeaveConflictsManual = mutation({
   args: {
-    leaveRequestId: v.id("leaveRequests"),
-    userId: v.id("users"),
+    leaveRequestId: v.id('leaveRequests'),
+    userId: v.id('users'),
     startDate: v.number(),
     endDate: v.number(),
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, { leaveRequestId, userId, startDate, endDate, organizationId }) => {
     const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
     // Get department from user (not from leave request)
-    const userDepartment = user.department || "";
+    const userDepartment = user.department || '';
 
     console.log(`[Conflict Check] User: ${user.name}, Department: ${userDepartment}`);
 
     // Find overlapping company events
     const events = await ctx.db
-      .query("companyEvents")
-      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+      .query('companyEvents')
+      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .collect();
 
-
-    const overlappingEvents = events.filter(event => {
+    const overlappingEvents = events.filter((event) => {
       // Check if leave overlaps with event
-      return (
-        (startDate <= event.endDate && endDate >= event.startDate)
-      );
+      return startDate <= event.endDate && endDate >= event.startDate;
     });
-
 
     let conflictsCreated = 0;
 
@@ -283,28 +273,28 @@ export const checkLeaveConflictsManual = mutation({
     for (const event of overlappingEvents) {
       // Case-insensitive department check
       const isRequiredDept = event.requiredDepartments.some(
-        dept => dept.toLowerCase() === userDepartment.toLowerCase()
+        (dept) => dept.toLowerCase() === userDepartment.toLowerCase(),
       );
       const isRequiredEmployee = event.requiredEmployeeIds?.includes(userId);
-      
-      
+
       if (isRequiredDept || isRequiredEmployee) {
         // Check if alert already exists
         const existingAlert = await ctx.db
-          .query("leaveConflictAlerts")
-          .withIndex("by_leave_request", (q) => q.eq("leaveRequestId", leaveRequestId))
-          .filter((q) => q.eq(q.field("eventId"), event._id))
+          .query('leaveConflictAlerts')
+          .withIndex('by_leave_request', (q) => q.eq('leaveRequestId', leaveRequestId))
+          .filter((q) => q.eq(q.field('eventId'), event._id))
           .first();
 
         if (!existingAlert) {
-          await ctx.db.insert("leaveConflictAlerts", {
+          await ctx.db.insert('leaveConflictAlerts', {
             organizationId,
             leaveRequestId,
             eventId: event._id,
             userId,
             department: userDepartment,
-            conflictType: isRequiredEmployee ? "required_employee" : "required_department",
-            severity: event.priority === "high" ? "high" : event.priority === "medium" ? "medium" : "low",
+            conflictType: isRequiredEmployee ? 'required_employee' : 'required_department',
+            severity:
+              event.priority === 'high' ? 'high' : event.priority === 'medium' ? 'medium' : 'low',
             isReviewed: false,
             createdAt: Date.now(),
           });
@@ -323,76 +313,76 @@ export const checkLeaveConflictsManual = mutation({
  */
 export const checkLeaveConflicts = mutation({
   args: {
-    leaveRequestId: v.id("leaveRequests"),
-    userId: v.id("users"),
+    leaveRequestId: v.id('leaveRequests'),
+    userId: v.id('users'),
     startDate: v.number(),
     endDate: v.number(),
   },
   handler: async (ctx, { leaveRequestId, userId, startDate, endDate }) => {
     const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
-    const userDepartment = user.department || "";
+    const userDepartment = user.department || '';
 
     // Find overlapping company events
     const events = await ctx.db
-      .query("companyEvents")
-      .withIndex("by_org", (q) => q.eq("organizationId", user.organizationId!))
+      .query('companyEvents')
+      .withIndex('by_org', (q) => q.eq('organizationId', user.organizationId!))
       .collect();
 
-    const overlappingEvents = events.filter(event => {
+    const overlappingEvents = events.filter((event) => {
       // Check if leave overlaps with event
-      return (
-        (startDate <= event.endDate && endDate >= event.startDate)
-      );
+      return startDate <= event.endDate && endDate >= event.startDate;
     });
 
     // Create conflict alerts
     for (const event of overlappingEvents) {
       // Case-insensitive department check
       const isRequiredDept = event.requiredDepartments.some(
-        dept => dept.toLowerCase() === userDepartment.toLowerCase()
+        (dept) => dept.toLowerCase() === userDepartment.toLowerCase(),
       );
       const isRequiredEmployee = event.requiredEmployeeIds?.includes(userId);
-      
+
       if (isRequiredDept || isRequiredEmployee) {
         // Check if alert already exists
         const existingAlert = await ctx.db
-          .query("leaveConflictAlerts")
-          .withIndex("by_leave_request", (q) => q.eq("leaveRequestId", leaveRequestId))
-          .filter((q) => q.eq(q.field("eventId"), event._id))
+          .query('leaveConflictAlerts')
+          .withIndex('by_leave_request', (q) => q.eq('leaveRequestId', leaveRequestId))
+          .filter((q) => q.eq(q.field('eventId'), event._id))
           .first();
 
         if (!existingAlert) {
-          await ctx.db.insert("leaveConflictAlerts", {
+          await ctx.db.insert('leaveConflictAlerts', {
             organizationId: user.organizationId!,
             leaveRequestId,
             eventId: event._id,
             userId,
             department: userDepartment,
-            conflictType: isRequiredEmployee ? "required_employee" : "required_department",
-            severity: event.priority === "high" ? "high" : event.priority === "medium" ? "medium" : "low",
+            conflictType: isRequiredEmployee ? 'required_employee' : 'required_department',
+            severity:
+              event.priority === 'high' ? 'high' : event.priority === 'medium' ? 'medium' : 'low',
             isReviewed: false,
             createdAt: Date.now(),
           });
 
           // Notify admins about the conflict
           const admins = await ctx.db
-            .query("users")
-            .withIndex("by_org_role", (q) => 
-              q.eq("organizationId", user.organizationId!).eq("role", "admin")
+            .query('users')
+            .withIndex('by_org_role', (q) =>
+              q.eq('organizationId', user.organizationId!).eq('role', 'admin'),
             )
             .collect();
 
           for (const admin of admins) {
-            await ctx.db.insert("notifications", {
+            await ctx.db.insert('notifications', {
               organizationId: user.organizationId!,
               userId: admin._id,
-              type: "system",
-              title: "⚠️ Leave Request Conflict Detected",
+              type: 'system',
+              title: '⚠️ Leave Request Conflict Detected',
               message: `${user.name} requested leave during "${event.name}" (${new Date(event.startDate).toLocaleDateString()}). ${userDepartment} attendance required.`,
               isRead: false,
               relatedId: `leave_request:${leaveRequestId}`,
+              route: '/leaves',
               createdAt: Date.now(),
             });
           }
@@ -409,18 +399,18 @@ export const checkLeaveConflicts = mutation({
  */
 export const getLeaveConflictAlerts = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
     isReviewed: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     let alerts = await ctx.db
-      .query("leaveConflictAlerts")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
-      .order("desc")
+      .query('leaveConflictAlerts')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .order('desc')
       .take(100);
 
     if (args.isReviewed !== undefined) {
-      alerts = alerts.filter(a => a.isReviewed === args.isReviewed);
+      alerts = alerts.filter((a) => a.isReviewed === args.isReviewed);
     }
 
     // Enrich with event and user info
@@ -443,7 +433,7 @@ export const getLeaveConflictAlerts = query({
           leaveEndDate: leaveRequest?.endDate,
           leaveType: leaveRequest?.type,
         };
-      })
+      }),
     );
 
     return enriched;
@@ -455,37 +445,39 @@ export const getLeaveConflictAlerts = query({
  */
 export const reviewConflictAlert = mutation({
   args: {
-    alertId: v.id("leaveConflictAlerts"),
-    adminId: v.id("users"),
+    alertId: v.id('leaveConflictAlerts'),
+    adminId: v.id('users'),
     isApproved: v.boolean(), // Approve leave despite conflict
     reviewNotes: v.optional(v.string()),
   },
   handler: async (ctx, { alertId, adminId, isApproved, reviewNotes }) => {
     const alert = await ctx.db.get(alertId);
-    if (!alert) throw new Error("Alert not found");
+    if (!alert) throw new Error('Alert not found');
 
     const admin = await ctx.db.get(adminId);
-    if (!admin) throw new Error("Admin not found");
+    if (!admin) throw new Error('Admin not found');
 
     await ctx.db.patch(alertId, {
       isReviewed: true,
-      reviewNotes: reviewNotes || (isApproved ? "Approved despite conflict" : "Leave denied due to conflict"),
+      reviewNotes:
+        reviewNotes || (isApproved ? 'Approved despite conflict' : 'Leave denied due to conflict'),
       resolvedAt: Date.now(),
     });
 
     // Notify employee about the decision
-    const decisionMessage = isApproved 
-      ? "Your leave request has been approved despite the event conflict."
-      : "Your leave request conflicts with a company event and has been noted for review.";
+    const decisionMessage = isApproved
+      ? 'Your leave request has been approved despite the event conflict.'
+      : 'Your leave request conflicts with a company event and has been noted for review.';
 
-    await ctx.db.insert("notifications", {
+    await ctx.db.insert('notifications', {
       organizationId: alert.organizationId,
       userId: alert.userId,
-      type: "system",
-      title: isApproved ? "✅ Leave Approved" : "📋 Leave Under Review",
+      type: 'system',
+      title: isApproved ? '✅ Leave Approved' : '📋 Leave Under Review',
       message: decisionMessage,
       isRead: false,
       relatedId: `leave_request:${alert.leaveRequestId}`,
+      route: '/leaves',
       createdAt: Date.now(),
     });
 
@@ -498,8 +490,8 @@ export const reviewConflictAlert = mutation({
  */
 export const getEventAttendanceStatus = query({
   args: {
-    organizationId: v.id("organizations"),
-    eventId: v.id("companyEvents"),
+    organizationId: v.id('organizations'),
+    eventId: v.id('companyEvents'),
   },
   handler: async (ctx, { organizationId, eventId }) => {
     const event = await ctx.db.get(eventId);
@@ -507,13 +499,14 @@ export const getEventAttendanceStatus = query({
 
     // Get all users from required departments
     const users = await ctx.db
-      .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .collect();
 
-    const requiredUsers = users.filter(u => 
-      event.requiredDepartments.includes(u.department || "") ||
-      event.requiredEmployeeIds?.includes(u._id)
+    const requiredUsers = users.filter(
+      (u) =>
+        event.requiredDepartments.includes(u.department || '') ||
+        event.requiredEmployeeIds?.includes(u._id),
     );
 
     // Check for approved leave during event
@@ -523,18 +516,14 @@ export const getEventAttendanceStatus = query({
     const attendanceStatus = await Promise.all(
       requiredUsers.map(async (user) => {
         const leaveRequests = await ctx.db
-          .query("leaveRequests")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .query('leaveRequests')
+          .withIndex('by_user', (q) => q.eq('userId', user._id))
           .collect();
 
-        const hasApprovedLeave = leaveRequests.some(leave => {
+        const hasApprovedLeave = leaveRequests.some((leave) => {
           const leaveStart = new Date(leave.startDate).getTime();
           const leaveEnd = new Date(leave.endDate).getTime();
-          return (
-            leave.status === "approved" &&
-            leaveStart <= eventEnd &&
-            leaveEnd >= eventStart
-          );
+          return leave.status === 'approved' && leaveStart <= eventEnd && leaveEnd >= eventStart;
         });
 
         return {
@@ -544,13 +533,13 @@ export const getEventAttendanceStatus = query({
           isRequired: event.requiredEmployeeIds?.includes(user._id),
           hasConflict: hasApprovedLeave,
         };
-      })
+      }),
     );
 
     return {
       event,
       totalRequired: requiredUsers.length,
-      hasConflicts: attendanceStatus.filter(s => s.hasConflict).length,
+      hasConflicts: attendanceStatus.filter((s) => s.hasConflict).length,
       attendanceStatus,
     };
   },

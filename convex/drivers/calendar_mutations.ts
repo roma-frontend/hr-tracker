@@ -46,6 +46,7 @@ export const grantCalendarAccess = mutation({
       title: 'Calendar Access Granted',
       message: 'You now have access to view my calendar',
       isRead: false,
+      route: '/drivers',
       createdAt: Date.now(),
     });
 
@@ -81,6 +82,7 @@ export const requestCalendarAccess = mutation({
       title: 'Calendar Access Request',
       message: 'An employee wants to view your calendar availability',
       isRead: false,
+      route: '/drivers',
       metadata: JSON.stringify({
         type: 'calendar_access_request',
         requesterId,

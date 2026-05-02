@@ -133,6 +133,7 @@ export const suspendUser = mutation({
       title: '⚠️ Account Temporarily Suspended',
       message: `Your account has been suspended until ${new Date(suspendedUntil).toLocaleString()}. Reason: ${reason}. Contact your administrator for more information.`,
       isRead: false,
+      route: '/security',
       createdAt: Date.now(),
     });
 
@@ -190,6 +191,7 @@ export const unsuspendUser = mutation({
       title: '✅ Account Unsuspended',
       message: `Your account has been reactivated by ${(admin as Doc<'users'>).name}. You can now log in again.`,
       isRead: false,
+      route: '/security',
       createdAt: Date.now(),
     });
 
@@ -226,6 +228,7 @@ export const autoUnsuspendExpired = mutation({
           title: '✅ Suspension Expired',
           message: 'Your temporary suspension has ended. You can now log in again.',
           isRead: false,
+          route: '/security',
           createdAt: Date.now(),
         });
 

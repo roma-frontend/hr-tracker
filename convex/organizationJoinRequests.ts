@@ -1,13 +1,13 @@
 /**
  * Organization Join Requests
- * 
+ *
  * Allows users without organization to request joining an organization.
  * Admins can approve or reject these requests.
  */
 
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUERIES
@@ -18,8 +18,8 @@ export const getActiveOrganizations = query({
   args: {},
   handler: async (ctx) => {
     const organizations = await ctx.db
-      .query("organizations")
-      .filter((q) => q.eq(q.field("isActive"), true))
+      .query('organizations')
+      .filter((q) => q.eq(q.field('isActive'), true))
       .collect();
 
     return organizations.map((org) => ({
@@ -37,7 +37,7 @@ export const getActiveOrganizations = query({
 /** Get pending join requests for a user */
 export const getMyJoinRequests = query({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
   },
   handler: async (ctx, { userId }) => {
     // First get the user to get their email
@@ -45,9 +45,9 @@ export const getMyJoinRequests = query({
     if (!user || !user.email) return [];
 
     const requests = await ctx.db
-      .query("organizationInvites")
-      .withIndex("by_email", (q) => q.eq("requestedByEmail", user.email))
-      .filter((q) => q.eq(q.field("status"), "pending"))
+      .query('organizationInvites')
+      .withIndex('by_email', (q) => q.eq('requestedByEmail', user.email))
+      .filter((q) => q.eq(q.field('status'), 'pending'))
       .collect();
 
     // Return requests without organizationName to avoid Promise issues
@@ -61,12 +61,14 @@ export const getMyJoinRequests = query({
 /** Get pending join requests for an organization (for admins) */
 export const getOrgJoinRequests = query({
   args: {
-    organizationId: v.id("organizations"),
+    organizationId: v.id('organizations'),
   },
   handler: async (ctx, { organizationId }) => {
     const requests = await ctx.db
-      .query("organizationInvites")
-      .withIndex("by_org_status", (q) => q.eq("organizationId", organizationId).eq("status", "pending"))
+      .query('organizationInvites')
+      .withIndex('by_org_status', (q) =>
+        q.eq('organizationId', organizationId).eq('status', 'pending'),
+      )
       .collect();
 
     // Enrich with requester info
@@ -79,7 +81,7 @@ export const getOrgJoinRequests = query({
           requesterEmail: (requester as any)?.email || req.requestedByEmail,
           requesterAvatar: (requester as any)?.avatarUrl,
         };
-      })
+      }),
     );
 
     return enriched;
@@ -93,62 +95,58 @@ export const getOrgJoinRequests = query({
 /** Request to join an organization */
 export const requestJoinOrganization = mutation({
   args: {
-    userId: v.id("users"),
-    organizationId: v.id("organizations"),
+    userId: v.id('users'),
+    organizationId: v.id('organizations'),
     message: v.optional(v.string()),
   },
   handler: async (ctx, { userId, organizationId, message }) => {
     const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
-    if (user.organizationId) throw new Error("User already belongs to an organization");
+    if (!user) throw new Error('User not found');
+    if (user.organizationId) throw new Error('User already belongs to an organization');
 
     const org = await ctx.db.get(organizationId);
-    if (!org) throw new Error("Organization not found");
+    if (!org) throw new Error('Organization not found');
 
     // Check if request already exists
     const existing = await ctx.db
-      .query("organizationInvites")
-      .withIndex("by_email", (q) => q.eq("requestedByEmail", user.email))
-      .filter((q) => 
-        q.and(
-          q.eq(q.field("organizationId"), organizationId),
-          q.eq(q.field("status"), "pending")
-        )
+      .query('organizationInvites')
+      .withIndex('by_email', (q) => q.eq('requestedByEmail', user.email))
+      .filter((q) =>
+        q.and(q.eq(q.field('organizationId'), organizationId), q.eq(q.field('status'), 'pending')),
       )
       .first();
 
     if (existing) {
-      throw new Error("You already have a pending request to join this organization");
+      throw new Error('You already have a pending request to join this organization');
     }
 
     // Create join request
-    const requestId = await ctx.db.insert("organizationInvites", {
+    const requestId = await ctx.db.insert('organizationInvites', {
       organizationId,
       requestedByEmail: user.email,
       requestedByName: user.name,
       requestedAt: Date.now(),
-      status: "pending",
+      status: 'pending',
       userId,
       createdAt: Date.now(),
     });
 
     // Notify admins
     const admins = await ctx.db
-      .query("users")
-      .withIndex("by_org_role", (q) =>
-        q.eq("organizationId", organizationId).eq("role", "admin")
-      )
+      .query('users')
+      .withIndex('by_org_role', (q) => q.eq('organizationId', organizationId).eq('role', 'admin'))
       .collect();
 
     for (const admin of admins) {
-      await ctx.db.insert("notifications", {
+      await ctx.db.insert('notifications', {
         organizationId,
         userId: admin._id,
-        type: "join_request",
-        title: "🙋 New Join Request",
-        message: `${user.name} (${user.email}) wants to join ${org.name}.${message ? ` Message: ${message}` : ""}`,
+        type: 'join_request',
+        title: '🙋 New Join Request',
+        message: `${user.name} (${user.email}) wants to join ${org.name}.${message ? ` Message: ${message}` : ''}`,
         isRead: false,
         relatedId: requestId,
+        route: '/organization',
         createdAt: Date.now(),
       });
     }
@@ -160,28 +158,28 @@ export const requestJoinOrganization = mutation({
 /** Approve join request */
 export const approveJoinRequest = mutation({
   args: {
-    inviteId: v.id("organizationInvites"),
-    reviewerId: v.id("users"),
+    inviteId: v.id('organizationInvites'),
+    reviewerId: v.id('users'),
   },
   handler: async (ctx, { inviteId, reviewerId }) => {
     const invite = await ctx.db.get(inviteId);
-    if (!invite) throw new Error("Invite not found");
-    if (invite.status !== "pending") throw new Error("Invite is not pending");
+    if (!invite) throw new Error('Invite not found');
+    if (invite.status !== 'pending') throw new Error('Invite is not pending');
 
     const reviewer = await ctx.db.get(reviewerId);
-    if (!reviewer || !reviewer.organizationId) throw new Error("Reviewer not found");
-    if (reviewer.role !== "admin" && reviewer.role !== "superadmin") {
-      throw new Error("Only admins can approve join requests");
+    if (!reviewer || !reviewer.organizationId) throw new Error('Reviewer not found');
+    if (reviewer.role !== 'admin' && reviewer.role !== 'superadmin') {
+      throw new Error('Only admins can approve join requests');
     }
     if (invite.organizationId !== reviewer.organizationId) {
-      throw new Error("Access denied: cross-organization operation");
+      throw new Error('Access denied: cross-organization operation');
     }
 
     const userId = invite.userId;
-    if (!userId) throw new Error("Invite has no associated user");
+    if (!userId) throw new Error('Invite has no associated user');
 
     const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error('User not found');
 
     // Update user's organization
     await ctx.db.patch(userId, {
@@ -193,7 +191,7 @@ export const approveJoinRequest = mutation({
 
     // Update invite status
     await ctx.db.patch(inviteId, {
-      status: "approved",
+      status: 'approved',
       reviewedBy: reviewerId,
       reviewedAt: Date.now(),
       userId,
@@ -201,14 +199,15 @@ export const approveJoinRequest = mutation({
 
     // Notify user
     const org = await ctx.db.get(invite.organizationId);
-    await ctx.db.insert("notifications", {
+    await ctx.db.insert('notifications', {
       organizationId: invite.organizationId,
       userId,
-      type: "join_approved",
-      title: "✅ Welcome to the Team!",
+      type: 'join_approved',
+      title: '✅ Welcome to the Team!',
       message: `Your request to join ${org?.name} has been approved by ${reviewer.name}.`,
       isRead: false,
-      relatedId: userId, // Use userId for proper navigation
+      relatedId: userId,
+      route: '/organization',
       createdAt: Date.now(),
     });
 
@@ -219,27 +218,27 @@ export const approveJoinRequest = mutation({
 /** Reject join request */
 export const rejectJoinRequest = mutation({
   args: {
-    inviteId: v.id("organizationInvites"),
-    reviewerId: v.id("users"),
+    inviteId: v.id('organizationInvites'),
+    reviewerId: v.id('users'),
     reason: v.optional(v.string()),
   },
   handler: async (ctx, { inviteId, reviewerId, reason }) => {
     const invite = await ctx.db.get(inviteId);
-    if (!invite) throw new Error("Invite not found");
-    if (invite.status !== "pending") throw new Error("Invite is not pending");
+    if (!invite) throw new Error('Invite not found');
+    if (invite.status !== 'pending') throw new Error('Invite is not pending');
 
     const reviewer = await ctx.db.get(reviewerId);
-    if (!reviewer || !reviewer.organizationId) throw new Error("Reviewer not found");
-    if (reviewer.role !== "admin" && reviewer.role !== "superadmin") {
-      throw new Error("Only admins can reject join requests");
+    if (!reviewer || !reviewer.organizationId) throw new Error('Reviewer not found');
+    if (reviewer.role !== 'admin' && reviewer.role !== 'superadmin') {
+      throw new Error('Only admins can reject join requests');
     }
     if (invite.organizationId !== reviewer.organizationId) {
-      throw new Error("Access denied: cross-organization operation");
+      throw new Error('Access denied: cross-organization operation');
     }
 
     // Update invite status
     await ctx.db.patch(inviteId, {
-      status: "rejected",
+      status: 'rejected',
       reviewedBy: reviewerId,
       reviewedAt: Date.now(),
       rejectionReason: reason,
@@ -251,14 +250,15 @@ export const rejectJoinRequest = mutation({
       const user = await ctx.db.get(userId);
       if (user) {
         const org = await ctx.db.get(invite.organizationId);
-        await ctx.db.insert("notifications", {
+        await ctx.db.insert('notifications', {
           organizationId: invite.organizationId,
           userId,
-          type: "join_rejected",
-          title: "❌ Join Request Rejected",
-          message: `Your request to join ${org?.name} was rejected.${reason ? ` Reason: ${reason}` : ""}`,
+          type: 'join_rejected',
+          title: '❌ Join Request Rejected',
+          message: `Your request to join ${org?.name} was rejected.${reason ? ` Reason: ${reason}` : ''}`,
           isRead: false,
-          relatedId: userId, // Use userId for proper navigation
+          relatedId: userId,
+          route: '/organization',
           createdAt: Date.now(),
         });
       }

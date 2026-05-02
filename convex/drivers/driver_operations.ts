@@ -290,6 +290,7 @@ export const markDriverArrived = mutation({
       title: 'Driver Has Arrived',
       message: 'Your driver has arrived at the pickup location',
       isRead: false,
+      route: '/drivers',
       createdAt: Date.now(),
     });
 
@@ -350,6 +351,7 @@ export const updateETA = mutation({
       title: 'Driver ETA Updated',
       message: `Your driver will arrive in approximately ${etaMinutes} minutes`,
       isRead: false,
+      route: '/drivers',
       createdAt: Date.now(),
     });
 

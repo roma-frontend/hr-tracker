@@ -166,6 +166,7 @@ export const requestDriver = mutation({
         message: `${args.tripInfo.purpose}: ${args.tripInfo.from} → ${args.tripInfo.to}`,
         isRead: false,
         relatedId: `driver_request:${requestId}`,
+        route: '/drivers',
         createdAt: Date.now(),
       });
     }
@@ -260,6 +261,7 @@ export const respondToDriverRequest = mutation({
         : `Decline reason: ${declineReason || 'Not specified'}`,
       isRead: false,
       relatedId: `driver_request:${requestId}`,
+      route: '/drivers',
       createdAt: Date.now(),
     });
 
@@ -389,6 +391,7 @@ export const updateDriverRequest = mutation({
         message: `${tripInfo.purpose}: ${tripInfo.from} → ${tripInfo.to}`,
         isRead: false,
         relatedId: `driver_request:${args.requestId}`,
+        route: '/drivers',
         createdAt: Date.now(),
       });
     }
@@ -570,6 +573,7 @@ export const reassignDriverRequest = mutation({
         message: `${request.tripInfo.purpose}: ${request.tripInfo.from} → ${request.tripInfo.to}`,
         isRead: false,
         relatedId: `driver_request:${requestId}`,
+        route: '/drivers',
         createdAt: Date.now(),
       });
     }

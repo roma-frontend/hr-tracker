@@ -9,6 +9,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
+import { getRoleSuggestions, type UserRole } from '@/lib/aiAssistant';
 import {
   Sparkles,
   Send,
@@ -554,28 +555,45 @@ export default function AIChatPage() {
     toast.success(t('aiChat.copied') || 'Copied!');
   };
 
-  const initialSuggestions = [
-    {
-      icon: <Calendar className="w-4 h-4" />,
-      label: t('aiChat.quickLeave') || 'Отпуск',
-      query: 'Создать заявку на отпуск с 1 по 10 января',
-    },
-    {
-      icon: <ClipboardList className="w-4 h-4" />,
-      label: t('aiChat.quickTasks') || 'Задачи',
-      query: 'Показать мои задачи',
-    },
-    {
-      icon: <Users className="w-4 h-4" />,
-      label: t('aiChat.quickTeam') || 'Команда',
-      query: 'Показать сотрудников',
-    },
-    {
-      icon: <TrendingUp className="w-4 h-4" />,
-      label: t('aiChat.quickAttendance') || 'Посещаемость',
-      query: 'Моя посещаемость',
-    },
-  ];
+  const roleBasedSuggestions = getRoleSuggestions((user?.role as UserRole) || 'employee');
+
+  const initialSuggestions = roleBasedSuggestions.slice(0, 4).map((suggestion) => {
+    const cleanSuggestion = suggestion.replace(/^[\p{Emoji}\s]+/u, '').trim();
+    let icon = <Calendar className="w-4 h-4" />;
+
+    if (
+      cleanSuggestion.includes('задачи') ||
+      cleanSuggestion.includes('tasks') ||
+      cleanSuggestion.includes('задач')
+    ) {
+      icon = <ClipboardList className="w-4 h-4" />;
+    } else if (
+      cleanSuggestion.includes('команд') ||
+      cleanSuggestion.includes('сотрудник') ||
+      cleanSuggestion.includes('employees') ||
+      cleanSuggestion.includes('team')
+    ) {
+      icon = <Users className="w-4 h-4" />;
+    } else if (cleanSuggestion.includes('посещаемость') || cleanSuggestion.includes('attendance')) {
+      icon = <TrendingUp className="w-4 h-4" />;
+    } else if (
+      cleanSuggestion.includes('аналитик') ||
+      cleanSuggestion.includes('analytics') ||
+      cleanSuggestion.includes('статистик')
+    ) {
+      icon = <TrendingUp className="w-4 h-4" />;
+    } else if (cleanSuggestion.includes('организац') || cleanSuggestion.includes('organization')) {
+      icon = <Users className="w-4 h-4" />;
+    } else if (cleanSuggestion.includes('безопасн') || cleanSuggestion.includes('security')) {
+      icon = <Zap className="w-4 h-4" />;
+    }
+
+    return {
+      icon,
+      label: suggestion,
+      query: cleanSuggestion,
+    };
+  });
 
   return (
     <div

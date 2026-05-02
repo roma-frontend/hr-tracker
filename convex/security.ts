@@ -1,35 +1,35 @@
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
 
 // ── Default security settings ─────────────────────────────────────────────────
 export const SECURITY_FEATURES = [
   {
-    key: "audit_logging",
-    description: "Log all login attempts with IP, device, and risk score",
+    key: 'audit_logging',
+    description: 'Log all login attempts with IP, device, and risk score',
   },
   {
-    key: "adaptive_auth",
-    description: "Adaptive authentication — block or challenge high-risk logins",
+    key: 'adaptive_auth',
+    description: 'Adaptive authentication — block or challenge high-risk logins',
   },
   {
-    key: "device_fingerprinting",
-    description: "Track and recognize known devices per user",
+    key: 'device_fingerprinting',
+    description: 'Track and recognize known devices per user',
   },
   {
-    key: "keystroke_dynamics",
-    description: "Analyze typing patterns to verify user identity",
+    key: 'keystroke_dynamics',
+    description: 'Analyze typing patterns to verify user identity',
   },
   {
-    key: "continuous_face",
-    description: "Periodically verify user identity via Face ID in background",
+    key: 'continuous_face',
+    description: 'Periodically verify user identity via Face ID in background',
   },
   {
-    key: "failed_login_lockout",
-    description: "Auto-lock account after 5 failed login attempts",
+    key: 'failed_login_lockout',
+    description: 'Auto-lock account after 5 failed login attempts',
   },
   {
-    key: "new_device_alert",
-    description: "Send notification to admin when user logs in from new device",
+    key: 'new_device_alert',
+    description: 'Send notification to admin when user logs in from new device',
   },
 ] as const;
 
@@ -37,7 +37,7 @@ export const SECURITY_FEATURES = [
 export const getAllSettings = query({
   args: {},
   handler: async (ctx) => {
-    const settings = await ctx.db.query("securitySettings").collect();
+    const settings = await ctx.db.query('securitySettings').collect();
 
     // Merge with defaults so all features are always present
     return SECURITY_FEATURES.map((feature) => {
@@ -58,8 +58,8 @@ export const getSetting = query({
   args: { key: v.string() },
   handler: async (ctx, { key }) => {
     const setting = await ctx.db
-      .query("securitySettings")
-      .withIndex("by_key", (q) => q.eq("key", key))
+      .query('securitySettings')
+      .withIndex('by_key', (q) => q.eq('key', key))
       .unique();
     // Default to enabled if not set
     return setting ? setting.enabled : true;
@@ -71,18 +71,18 @@ export const toggleSetting = mutation({
   args: {
     key: v.string(),
     enabled: v.boolean(),
-    updatedBy: v.id("users"),
+    updatedBy: v.id('users'),
   },
   handler: async (ctx, { key, enabled, updatedBy }) => {
     const existing = await ctx.db
-      .query("securitySettings")
-      .withIndex("by_key", (q) => q.eq("key", key))
+      .query('securitySettings')
+      .withIndex('by_key', (q) => q.eq('key', key))
       .unique();
 
     if (existing) {
       await ctx.db.patch(existing._id, { enabled, updatedBy, updatedAt: Date.now() });
     } else {
-      await ctx.db.insert("securitySettings", {
+      await ctx.db.insert('securitySettings', {
         key,
         enabled,
         updatedBy,
@@ -93,12 +93,12 @@ export const toggleSetting = mutation({
     // Log this action in audit logs
     const user = await ctx.db.get(updatedBy);
     if (user) {
-      await ctx.db.insert("auditLogs", {
+      await ctx.db.insert('auditLogs', {
         organizationId: user.organizationId,
         userId: updatedBy,
-        action: "security_setting_changed",
+        action: 'security_setting_changed',
         target: key,
-        details: `Security feature "${key}" ${enabled ? "enabled" : "disabled"} by superadmin`,
+        details: `Security feature "${key}" ${enabled ? 'enabled' : 'disabled'} by superadmin`,
         createdAt: Date.now(),
       });
     }
@@ -111,14 +111,14 @@ export const toggleSetting = mutation({
 export const logLoginAttempt = mutation({
   args: {
     email: v.string(),
-    userId: v.optional(v.id("users")),
-    organizationId: v.optional(v.id("organizations")),
+    userId: v.optional(v.id('users')),
+    organizationId: v.optional(v.id('organizations')),
     success: v.boolean(),
     method: v.union(
-      v.literal("password"),
-      v.literal("face_id"),
-      v.literal("webauthn"),
-      v.literal("google"),
+      v.literal('password'),
+      v.literal('face_id'),
+      v.literal('webauthn'),
+      v.literal('google'),
     ),
     ip: v.optional(v.string()),
     userAgent: v.optional(v.string()),
@@ -128,7 +128,7 @@ export const logLoginAttempt = mutation({
     blockedReason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("loginAttempts", {
+    await ctx.db.insert('loginAttempts', {
       ...args,
       createdAt: Date.now(),
     });
@@ -138,21 +138,18 @@ export const logLoginAttempt = mutation({
       // Check failed attempts in last 15 minutes
       const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
       const recentFails = await ctx.db
-        .query("loginAttempts")
-        .withIndex("by_user", (q) => q.eq("userId", args.userId!))
+        .query('loginAttempts')
+        .withIndex('by_user', (q) => q.eq('userId', args.userId!))
         .filter((q) =>
-          q.and(
-            q.eq(q.field("success"), false),
-            q.gte(q.field("createdAt"), fifteenMinAgo)
-          )
+          q.and(q.eq(q.field('success'), false), q.gte(q.field('createdAt'), fifteenMinAgo)),
         )
         .collect();
 
       if (recentFails.length >= 5) {
         // Check if lockout feature is enabled
         const lockoutSetting = await ctx.db
-          .query("securitySettings")
-          .withIndex("by_key", (q) => q.eq("key", "failed_login_lockout"))
+          .query('securitySettings')
+          .withIndex('by_key', (q) => q.eq('key', 'failed_login_lockout'))
           .unique();
 
         if (!lockoutSetting || lockoutSetting.enabled) {
@@ -164,19 +161,20 @@ export const logLoginAttempt = mutation({
           const user = await ctx.db.get(args.userId);
           if (user?.organizationId) {
             const admins = await ctx.db
-              .query("users")
-              .withIndex("by_org_role", (q) =>
-                q.eq("organizationId", user.organizationId!).eq("role", "admin")
+              .query('users')
+              .withIndex('by_org_role', (q) =>
+                q.eq('organizationId', user.organizationId!).eq('role', 'admin'),
               )
               .collect();
             for (const admin of admins) {
-              await ctx.db.insert("notifications", {
+              await ctx.db.insert('notifications', {
                 organizationId: user.organizationId,
                 userId: admin._id,
-                type: "system",
-                title: "🚨 Account Locked",
+                type: 'system',
+                title: '🚨 Account Locked',
                 message: `${user.name} (${user.email}) was auto-locked after 5 failed login attempts.`,
                 isRead: false,
+                route: '/security',
                 createdAt: Date.now(),
               });
             }
@@ -192,15 +190,15 @@ export const logLoginAttempt = mutation({
 // ── Register / update device fingerprint ─────────────────────────────────────
 export const registerDevice = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     fingerprint: v.string(),
     userAgent: v.optional(v.string()),
   },
   handler: async (ctx, { userId, fingerprint, userAgent }) => {
     const existing = await ctx.db
-      .query("deviceFingerprints")
-      .withIndex("by_user_fingerprint", (q) =>
-        q.eq("userId", userId).eq("fingerprint", fingerprint)
+      .query('deviceFingerprints')
+      .withIndex('by_user_fingerprint', (q) =>
+        q.eq('userId', userId).eq('fingerprint', fingerprint),
       )
       .unique();
 
@@ -212,7 +210,7 @@ export const registerDevice = mutation({
       });
       return { isNew: false, isTrusted: existing.isTrusted };
     } else {
-      await ctx.db.insert("deviceFingerprints", {
+      await ctx.db.insert('deviceFingerprints', {
         userId,
         fingerprint,
         userAgent,
@@ -229,14 +227,14 @@ export const registerDevice = mutation({
 // ── Check if device is known ──────────────────────────────────────────────────
 export const checkDevice = query({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     fingerprint: v.string(),
   },
   handler: async (ctx, { userId, fingerprint }) => {
     const device = await ctx.db
-      .query("deviceFingerprints")
-      .withIndex("by_user_fingerprint", (q) =>
-        q.eq("userId", userId).eq("fingerprint", fingerprint)
+      .query('deviceFingerprints')
+      .withIndex('by_user_fingerprint', (q) =>
+        q.eq('userId', userId).eq('fingerprint', fingerprint),
       )
       .unique();
     return device ?? null;
@@ -245,12 +243,12 @@ export const checkDevice = query({
 
 // ── Get all devices for a user ────────────────────────────────────────────────
 export const getUserDevices = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     return await ctx.db
-      .query("deviceFingerprints")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .order("desc")
+      .query('deviceFingerprints')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .order('desc')
       .collect();
   },
 });
@@ -258,7 +256,7 @@ export const getUserDevices = query({
 // ── Save / update keystroke profile ──────────────────────────────────────────
 export const saveKeystrokeProfile = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     avgDwell: v.number(),
     avgFlight: v.number(),
     stdDevDwell: v.optional(v.number()),
@@ -267,8 +265,8 @@ export const saveKeystrokeProfile = mutation({
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
-      .query("keystrokeProfiles")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .query('keystrokeProfiles')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
       .unique();
 
     if (existing) {
@@ -286,7 +284,7 @@ export const saveKeystrokeProfile = mutation({
         updatedAt: Date.now(),
       });
     } else {
-      await ctx.db.insert("keystrokeProfiles", {
+      await ctx.db.insert('keystrokeProfiles', {
         ...args,
         updatedAt: Date.now(),
       });
@@ -297,11 +295,11 @@ export const saveKeystrokeProfile = mutation({
 
 // ── Get keystroke profile ─────────────────────────────────────────────────────
 export const getKeystrokeProfile = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     return await ctx.db
-      .query("keystrokeProfiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .query('keystrokeProfiles')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
       .unique();
   },
 });
@@ -309,15 +307,15 @@ export const getKeystrokeProfile = query({
 // ── Get login attempts stats (for dashboard) ──────────────────────────────────
 export const getLoginStats = query({
   args: {
-    organizationId: v.optional(v.id("organizations")),
+    organizationId: v.optional(v.id('organizations')),
     hours: v.optional(v.number()), // last N hours, default 24
   },
   handler: async (ctx, { organizationId, hours = 24 }) => {
     const since = Date.now() - hours * 60 * 60 * 1000;
 
     let attempts = await ctx.db
-      .query("loginAttempts")
-      .withIndex("by_created", (q) => q.gte("createdAt", since))
+      .query('loginAttempts')
+      .withIndex('by_created', (q) => q.gte('createdAt', since))
       .collect();
 
     if (organizationId) {
@@ -333,7 +331,7 @@ export const getLoginStats = query({
         acc[a.method] = (acc[a.method] ?? 0) + 1;
         return acc;
       },
-      {} as Record<string, number>
+      {} as Record<string, number>,
     );
 
     // Recent suspicious (failed + high risk)
@@ -349,22 +347,19 @@ export const getLoginStats = query({
 // ── Get recent audit logs ─────────────────────────────────────────────────────
 export const getRecentAuditLogs = query({
   args: {
-    organizationId: v.optional(v.id("organizations")),
+    organizationId: v.optional(v.id('organizations')),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { organizationId, limit = 50 }) => {
     let logs;
     if (organizationId) {
       logs = await ctx.db
-        .query("auditLogs")
-        .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
-        .order("desc")
+        .query('auditLogs')
+        .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+        .order('desc')
         .take(limit);
     } else {
-      logs = await ctx.db
-        .query("auditLogs")
-        .order("desc")
-        .take(limit);
+      logs = await ctx.db.query('auditLogs').order('desc').take(limit);
     }
 
     // Enrich with user names
@@ -373,10 +368,10 @@ export const getRecentAuditLogs = query({
         const user = await ctx.db.get(log.userId);
         return {
           ...log,
-          userName: user?.name ?? "Unknown",
-          userEmail: user?.email ?? "",
+          userName: user?.name ?? 'Unknown',
+          userEmail: user?.email ?? '',
         };
-      })
+      }),
     );
     return enriched;
   },
@@ -385,8 +380,8 @@ export const getRecentAuditLogs = query({
 // ── Unlock a locked account ───────────────────────────────────────────────────
 export const unlockAccount = mutation({
   args: {
-    userId: v.id("users"),
-    unlockedBy: v.id("users"),
+    userId: v.id('users'),
+    unlockedBy: v.id('users'),
   },
   handler: async (ctx, { userId, unlockedBy }) => {
     await ctx.db.patch(userId, {
@@ -396,10 +391,10 @@ export const unlockAccount = mutation({
     });
     const user = await ctx.db.get(userId);
     const unlocker = await ctx.db.get(unlockedBy);
-    await ctx.db.insert("auditLogs", {
+    await ctx.db.insert('auditLogs', {
       organizationId: user?.organizationId,
       userId: unlockedBy,
-      action: "account_unlocked",
+      action: 'account_unlocked',
       target: userId,
       details: `Account of ${user?.name} unlocked by ${unlocker?.name}`,
       createdAt: Date.now(),
@@ -411,13 +406,13 @@ export const unlockAccount = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 // NOTIFY SUPERADMIN about suspicious activity with quick action
 // ─────────────────────────────────────────────────────────────────────────────
-const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
+const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 const AUTO_BLOCK_THRESHOLD = 80; // Auto-block if risk score >= 80
 const AUTO_BLOCK_DURATION = 24; // 24 hours
 
 export const notifySuperadminSuspiciousActivity = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     email: v.string(),
     reason: v.string(),
     riskScore: v.number(),
@@ -429,26 +424,26 @@ export const notifySuperadminSuspiciousActivity = mutation({
   handler: async (ctx, args) => {
     // Find superadmin
     const superadmin = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", SUPERADMIN_EMAIL))
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', SUPERADMIN_EMAIL))
       .first();
 
     if (!superadmin) {
-      console.error("Superadmin not found for notification");
+      console.error('Superadmin not found for notification');
       return null;
     }
 
     // Get the suspicious user
     const user = await ctx.db.get(args.userId);
     if (!user) {
-      console.error("User not found for suspicious activity notification");
+      console.error('User not found for suspicious activity notification');
       return null;
     }
 
     // AUTO-BLOCK logic: if risk score is very high, block immediately
     let wasAutoBlocked = false;
     if (args.autoBlock !== false && args.riskScore >= AUTO_BLOCK_THRESHOLD) {
-      const suspendedUntil = Date.now() + (AUTO_BLOCK_DURATION * 60 * 60 * 1000);
+      const suspendedUntil = Date.now() + AUTO_BLOCK_DURATION * 60 * 60 * 1000;
 
       await ctx.db.patch(args.userId, {
         isSuspended: true,
@@ -461,44 +456,46 @@ export const notifySuperadminSuspiciousActivity = mutation({
       wasAutoBlocked = true;
 
       // Create audit log for auto-block
-      await ctx.db.insert("auditLogs", {
+      await ctx.db.insert('auditLogs', {
         organizationId: user.organizationId,
         userId: superadmin._id,
-        action: "user_auto_suspended",
+        action: 'user_auto_suspended',
         target: user.email,
-        details: `User auto-blocked for ${AUTO_BLOCK_DURATION}h due to high risk score (${args.riskScore}). Factors: ${args.riskFactors.join(", ")}`,
+        details: `User auto-blocked for ${AUTO_BLOCK_DURATION}h due to high risk score (${args.riskScore}). Factors: ${args.riskFactors.join(', ')}`,
         createdAt: Date.now(),
       });
 
       // Notify the blocked user
-      await ctx.db.insert("notifications", {
+      await ctx.db.insert('notifications', {
         organizationId: user.organizationId,
         userId: args.userId,
-        type: "system",
-        title: "🚫 Account Automatically Suspended",
+        type: 'system',
+        title: '🚫 Account Automatically Suspended',
         message: `Your account has been automatically suspended due to suspicious login activity (risk score: ${args.riskScore}). If this was you, please contact your administrator. Suspension will expire in ${AUTO_BLOCK_DURATION} hours.`,
         isRead: false,
+        route: '/security',
         createdAt: Date.now(),
       });
     }
 
     // Create notification for superadmin with action metadata
     const notificationTitle = wasAutoBlocked
-      ? "🚫 User Auto-Blocked (High Risk)"
-      : "🚨 Suspicious Login Activity Detected";
+      ? '🚫 User Auto-Blocked (High Risk)'
+      : '🚨 Suspicious Login Activity Detected';
 
     const notificationMessage = wasAutoBlocked
-      ? `User: ${args.email}\nRisk Score: ${args.riskScore}\nStatus: AUTOMATICALLY BLOCKED for ${AUTO_BLOCK_DURATION}h\nReasons: ${args.riskFactors.join(", ")}\nIP: ${args.ip || "Unknown"}\n\nUser was automatically suspended. Review and unsuspend if needed.`
-      : `User: ${args.email}\nRisk Score: ${args.riskScore}\nReasons: ${args.riskFactors.join(", ")}\nIP: ${args.ip || "Unknown"}\n\nReview this activity immediately.`;
+      ? `User: ${args.email}\nRisk Score: ${args.riskScore}\nStatus: AUTOMATICALLY BLOCKED for ${AUTO_BLOCK_DURATION}h\nReasons: ${args.riskFactors.join(', ')}\nIP: ${args.ip || 'Unknown'}\n\nUser was automatically suspended. Review and unsuspend if needed.`
+      : `User: ${args.email}\nRisk Score: ${args.riskScore}\nReasons: ${args.riskFactors.join(', ')}\nIP: ${args.ip || 'Unknown'}\n\nReview this activity immediately.`;
 
-    const notificationId = await ctx.db.insert("notifications", {
+    const notificationId = await ctx.db.insert('notifications', {
       organizationId: superadmin.organizationId,
       userId: superadmin._id,
-      type: "security_alert",
+      type: 'security_alert',
       title: notificationTitle,
       message: notificationMessage,
       isRead: false,
       relatedId: args.userId,
+      route: '/security',
       metadata: JSON.stringify({
         suspiciousUserId: args.userId,
         email: args.email,
@@ -508,7 +505,7 @@ export const notifySuperadminSuspiciousActivity = mutation({
         ip: args.ip,
         deviceInfo: args.deviceInfo,
         timestamp: Date.now(),
-        actionType: "suspicious_login",
+        actionType: 'suspicious_login',
         autoBlocked: wasAutoBlocked,
         blockDuration: wasAutoBlocked ? AUTO_BLOCK_DURATION : undefined,
       }),
@@ -516,22 +513,25 @@ export const notifySuperadminSuspiciousActivity = mutation({
     });
 
     // Log the security event
-    await ctx.db.insert("auditLogs" as any, {
-      userId: args.userId,
-      userName: user.name,
-      userEmail: args.email,
-      action: wasAutoBlocked ? "auto_blocked" : "superadmin_notified",
-      success: false,
-      blocked: wasAutoBlocked,
-      riskScore: args.riskScore,
-      riskFactors: args.riskFactors,
-      ip: args.ip,
-      deviceInfo: args.deviceInfo,
-      details: wasAutoBlocked
-        ? `User auto-blocked for ${AUTO_BLOCK_DURATION}h. Risk: ${args.riskScore}, Factors: ${args.riskFactors.join(", ")}`
-        : `Superadmin notified about suspicious activity. Risk: ${args.riskScore}, Factors: ${args.riskFactors.join(", ")}`,
-      createdAt: Date.now(),
-    } as any);
+    await ctx.db.insert(
+      'auditLogs' as any,
+      {
+        userId: args.userId,
+        userName: user.name,
+        userEmail: args.email,
+        action: wasAutoBlocked ? 'auto_blocked' : 'superadmin_notified',
+        success: false,
+        blocked: wasAutoBlocked,
+        riskScore: args.riskScore,
+        riskFactors: args.riskFactors,
+        ip: args.ip,
+        deviceInfo: args.deviceInfo,
+        details: wasAutoBlocked
+          ? `User auto-blocked for ${AUTO_BLOCK_DURATION}h. Risk: ${args.riskScore}, Factors: ${args.riskFactors.join(', ')}`
+          : `Superadmin notified about suspicious activity. Risk: ${args.riskScore}, Factors: ${args.riskFactors.join(', ')}`,
+        createdAt: Date.now(),
+      } as any,
+    );
 
     return { notificationId, autoBlocked: wasAutoBlocked };
   },
@@ -542,14 +542,14 @@ export const notifySuperadminSuspiciousActivity = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const getLoginAttemptsByUser = query({
   args: {
-    userId: v.id("users"),
-    limit: v.optional(v.number())
+    userId: v.id('users'),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, { userId, limit = 10 }) => {
     return await ctx.db
-      .query("loginAttempts")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .order("desc")
+      .query('loginAttempts')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .order('desc')
       .take(limit);
   },
 });
@@ -560,16 +560,14 @@ export const getLoginAttemptsByUser = query({
 export const getSuspendedUsers = query({
   args: {},
   handler: async (ctx) => {
-    const allUsers = await ctx.db.query("users").collect();
+    const allUsers = await ctx.db.query('users').collect();
 
     // Filter only suspended users
-    const suspendedUsers = allUsers.filter(user =>
-      user.isSuspended && user.suspendedUntil && user.suspendedUntil > Date.now()
+    const suspendedUsers = allUsers.filter(
+      (user) => user.isSuspended && user.suspendedUntil && user.suspendedUntil > Date.now(),
     );
 
     // Sort by most recently suspended
-    return suspendedUsers.sort((a, b) =>
-      (b.suspendedAt || 0) - (a.suspendedAt || 0)
-    );
+    return suspendedUsers.sort((a, b) => (b.suspendedAt || 0) - (a.suspendedAt || 0));
   },
 });

@@ -104,6 +104,7 @@ export const createTicket = mutation({
         message: `${args.title} (Приоритет: ${args.priority})`,
         isRead: false,
         relatedId: `support_ticket:${ticketId}`,
+        route: '/tickets',
         createdAt: now,
       });
     }
@@ -352,6 +353,7 @@ export const updateTicketStatus = mutation({
       message: `Новый статус: ${args.status}`,
       isRead: false,
       relatedId: `support_ticket:${args.ticketId}`,
+      route: '/tickets',
       createdAt: now,
     });
 
@@ -399,6 +401,7 @@ export const assignTicket = mutation({
         message: ticket.title,
         isRead: false,
         relatedId: `support_ticket:${args.ticketId}`,
+        route: '/tickets',
         createdAt: Date.now(),
       });
     }
@@ -455,6 +458,7 @@ export const addTicketComment = mutation({
         message: args.message.slice(0, 100),
         isRead: false,
         relatedId: `support_ticket:${args.ticketId}`,
+        route: '/tickets',
         createdAt: now,
       });
     }
@@ -507,6 +511,7 @@ export const resolveTicket = mutation({
       message: args.resolution,
       isRead: false,
       relatedId: `support_ticket:${args.ticketId}`,
+      route: '/tickets',
       createdAt: now,
     });
 
@@ -906,6 +911,7 @@ export const activateTicketChat = mutation({
       message: args.message.slice(0, 100),
       isRead: false,
       relatedId: `support_ticket:${args.ticketId}`,
+      route: '/tickets',
       createdAt: now,
     });
 

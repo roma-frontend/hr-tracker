@@ -485,6 +485,7 @@ export const addCandidate = mutation({
         message: `${name} was added to "${vacancy?.title || 'vacancy'}" (${source})`,
         isRead: false,
         relatedId: applicationId,
+        route: '/recruitment',
         createdAt: now,
       });
     }

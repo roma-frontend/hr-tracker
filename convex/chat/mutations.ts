@@ -452,6 +452,7 @@ export const sendMessage = mutation({
           message: args.content.slice(0, 100),
           isRead: false,
           relatedId: args.conversationId,
+          route: '/messages',
           createdAt: now,
         });
       }

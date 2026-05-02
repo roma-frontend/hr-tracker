@@ -315,12 +315,13 @@ export default function AttendancePage() {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white text-sm font-bold">
                                 {record.user?.avatarUrl ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
+                                  <Image
                                     src={record.user.avatarUrl}
                                     alt={record.user?.name ?? ''}
                                     className="w-full h-full object-cover"
                                     referrerPolicy="no-referrer"
+                                    width={40}
+                                    height={40}
                                   />
                                 ) : (
                                   (record.user?.name

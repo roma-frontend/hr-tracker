@@ -63,9 +63,7 @@ export function AppearanceSettings() {
                       <div className="p-2 rounded-lg bg-(--surface-hover)">
                         <t.icon className="w-5 h-5 text-(--text-muted)" />
                       </div>
-                      <span className="text-sm font-medium text-(--text-muted)">
-                        {t.label}
-                      </span>
+                      <span className="text-sm font-medium text-(--text-muted)">{t.label}</span>
                     </div>
                     <p className="text-xs text-(--text-muted)">{t.description}</p>
                   </div>
@@ -110,7 +108,7 @@ export function AppearanceSettings() {
                     }`}
                   >
                     {isActive && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-(--primary) flex items-center justify-center">
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full btn-gradient flex items-center justify-center">
                         <span className="text-white text-xs">✓</span>
                       </div>
                     )}

@@ -152,6 +152,7 @@ export const generateRecurringRequests = mutation({
           title: 'Recurring Trip Request',
           message: `${trip.tripInfo.purpose}: ${trip.tripInfo.from} → ${trip.tripInfo.to}`,
           isRead: false,
+          route: '/drivers',
           createdAt: Date.now(),
         });
       }

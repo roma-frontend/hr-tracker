@@ -83,6 +83,7 @@ export const createLeave = mutation({
       message: autoReplyMessage,
       isRead: false,
       relatedId: leaveId,
+      route: '/leaves',
       createdAt: Date.now(),
     });
 
@@ -96,6 +97,7 @@ export const createLeave = mutation({
         message: `${user.name} requested ${args.days} day(s) of ${args.type} leave (${args.startDate} → ${args.endDate})`,
         isRead: false,
         relatedId: leaveId,
+        route: '/leaves',
         createdAt: Date.now(),
       });
     }
@@ -179,6 +181,7 @@ export const approveLeave = mutation({
       message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) has been approved by ${reviewer.name}.${comment ? ` Note: ${comment}` : ''}`,
       isRead: false,
       relatedId: leaveId,
+      route: '/leaves',
       createdAt: now,
     });
 
@@ -289,6 +292,7 @@ export const rejectLeave = mutation({
       message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) was rejected by ${reviewer.name}.${comment ? ` Reason: ${comment}` : ''}`,
       isRead: false,
       relatedId: leaveId,
+      route: '/leaves',
       createdAt: now,
     });
 
@@ -387,6 +391,7 @@ export const updateLeave = mutation({
         message: `Your leave request (${leave.startDate} → ${leave.endDate}) was updated by ${requester.name}.`,
         isRead: false,
         relatedId: leaveId,
+        route: '/leaves',
         createdAt: Date.now(),
       });
     }
@@ -462,6 +467,7 @@ export const deleteLeave = mutation({
         message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) was deleted by ${requester.name}.`,
         isRead: false,
         relatedId: leaveId,
+        route: '/leaves',
         createdAt: Date.now(),
       });
     }
@@ -655,6 +661,7 @@ export const bulkApproveLeaves = mutation({
           message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) has been approved.${comment ? ` Note: ${comment}` : ''}`,
           isRead: false,
           relatedId: leaveId,
+          route: '/leaves',
           createdAt: now,
         });
 
@@ -782,6 +789,7 @@ export const bulkRejectLeaves = mutation({
           message: `Your ${leave.type} leave (${leave.startDate} → ${leave.endDate}) was rejected.${comment ? ` Reason: ${comment}` : ''}`,
           isRead: false,
           relatedId: leaveId,
+          route: '/leaves',
           createdAt: now,
         });
 

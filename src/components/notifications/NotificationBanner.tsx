@@ -11,6 +11,34 @@ import { MessageSquare } from 'lucide-react';
 import { playNotificationSound } from '@/lib/notificationSound';
 import { useTranslation } from 'react-i18next';
 
+const getRouteForType = (type: string): string => {
+  const routes: Record<string, string> = {
+    leave_request: '/leaves',
+    leave_approved: '/leaves',
+    leave_rejected: '/leaves',
+    driver_request: '/drivers',
+    driver_request_approved: '/drivers',
+    driver_request_rejected: '/drivers',
+    employee_added: '/employees',
+    join_request: '/organization',
+    join_approved: '/organization',
+    join_rejected: '/organization',
+    security_alert: '/security',
+    status_change: '/drivers',
+    message_mention: '/messages',
+    system: '/dashboard',
+    ticket: '/help',
+    task: '/tasks',
+    recognition: '/recognition',
+    event: '/events',
+    birthday: '/employees',
+    corporate: '/corporate',
+    kudos: '/recognition',
+    badge_awarded: '/recognition',
+  };
+  return routes[type] || '/dashboard';
+};
+
 /**
  * Real-time notification banner that slides in from top
  * when new unread notifications arrive (chat messages, leave requests, etc.)
@@ -32,6 +60,7 @@ export function NotificationBanner() {
     title: string;
     message: string;
     type: string;
+    route?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -62,6 +91,7 @@ export function NotificationBanner() {
           title: latest.title,
           message: latest.message,
           type: latest.type,
+          route: latest.route || getRouteForType(latest.type),
         });
       }
     }
@@ -100,31 +130,7 @@ export function NotificationBanner() {
           label: t('banners.view', 'View'),
           onClick: () => {
             handleDismiss();
-            if (
-              newNotification.type === 'leave_request' ||
-              newNotification.type === 'leave_approved' ||
-              newNotification.type === 'leave_rejected'
-            ) {
-              router.push('/leaves');
-            } else if (
-              newNotification.type === 'ticket_created' ||
-              newNotification.type === 'ticket_updated' ||
-              newNotification.type === 'ticket' ||
-              newNotification.type === 'system' ||
-              newNotification.message?.toLowerCase().includes('ticket') ||
-              newNotification.title?.toLowerCase().includes('ticket') ||
-              newNotification.title?.toLowerCase().includes('тикет') ||
-              newNotification.title?.includes('🎫')
-            ) {
-              // Redirect based on user role
-              if (user?.role === 'superadmin') {
-                router.push('/superadmin/support');
-              } else {
-                router.push('/help');
-              }
-            } else {
-              router.push('/dashboard');
-            }
+            router.push(newNotification.route || '/dashboard');
           },
         }}
       />
