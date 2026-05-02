@@ -560,6 +560,35 @@ ${(() => {
 })()}`
     : ''
 }
+
+YOUR NOTIFICATIONS & MESSAGES:
+${(() => {
+  const unreadMsg = (data.unreadMessages as number) || 0;
+  const unreadNotif = (data.unreadNotifications as number) || 0;
+  const unreadApprovals = (data.unreadLeaveApprovals as number) || 0;
+  const convos = (data.unreadConversations as any[]) || [];
+  if (unreadMsg === 0 && unreadNotif === 0 && unreadApprovals === 0)
+    return '✅ You have no unread notifications or messages!';
+  let result = '';
+  if (unreadMsg > 0) result += `💬 You have ${unreadMsg} unread message${unreadMsg > 1 ? 's' : ''}`;
+  if (convos.length > 0) {
+    result += '\nRecent unread conversations:\n';
+    result += convos
+      .map(
+        (c: any) =>
+          `• ${c.name}: ${c.lastMessage?.slice(0, 50) || 'No message'} (${c.unreadCount})`,
+      )
+      .join('\n');
+  }
+  if (unreadNotif > 0)
+    result += `\n🔔 You have ${unreadNotif} unread notification${unreadNotif > 1 ? 's' : ''}`;
+  if (
+    unreadApprovals > 0 &&
+    (userRole === 'admin' || userRole === 'supervisor' || userRole === 'superadmin')
+  )
+    result += `\n✅ You have ${unreadApprovals} pending leave request${unreadApprovals > 1 ? 's' : ''} to review!`;
+  return result;
+})()}
 `;
       }
     } catch (e) {
@@ -635,6 +664,7 @@ CORE CAPABILITIES:
 - Employee info: department, position, contact details, type (staff/contractor)
 - **SURVEYS** - When user asks about surveys, ALWAYS show the ACTUAL survey data from "ALL SURVEYS IN ORGANIZATION" section above. If there are surveys listed, show them to user. If truly empty, say "no surveys found in database".
 - **GOALS** - Show goals and OKRs from the system
+- **UNREAD MESSAGES & NOTIFICATIONS** - When user asks "есть ли непрочитанные?" or "unread messages" - ALWAYS use the "YOUR NOTIFICATIONS & MESSAGES" section to answer. Show exact count of unread messages and notifications.
 
 CRITICAL RULE FOR LEAVE BOOKING:
 - When user says "хочу отпуск", "book leave", "request vacation", "организуй отпуск" → GENERATE <ACTION> TAG!

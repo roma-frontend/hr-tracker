@@ -802,6 +802,12 @@ export function ChatWidget() {
         'покажи performance': '/performance',
         performance: '/performance',
         оценка: '/performance',
+
+        сообщения: '/messenger',
+        messages: '/messenger',
+        чат: '/messenger',
+        непрочитанные: '/messenger',
+        unread: '/messenger',
       };
 
       for (const [keyword, path] of Object.entries(navigationMap)) {

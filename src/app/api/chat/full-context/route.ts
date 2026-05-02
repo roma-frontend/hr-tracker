@@ -156,6 +156,49 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Fetch Unread Messages (Messenger)
+    let unreadMessages = 0;
+    let unreadConversations: any[] = [];
+    try {
+      unreadMessages = await fetchQuery(api.messenger.getUnreadMessageCount, {
+        userId: requesterId as any,
+      });
+      const convos = await fetchQuery(api.chat.getUnreadConversations, {
+        userId: requesterId as any,
+      });
+      unreadConversations = (convos as any[]) || [];
+      console.log(
+        '[Full Context] Unread messages:',
+        unreadMessages,
+        'conversations:',
+        unreadConversations?.length,
+      );
+    } catch (e) {
+      console.warn('Failed to fetch unread messages:', e);
+    }
+
+    // Fetch Unread Notifications
+    let unreadNotifications = 0;
+    try {
+      unreadNotifications = await fetchQuery(api.notifications.getUnreadCount, {
+        userId: requesterId as any,
+      });
+      console.log('[Full Context] Unread notifications:', unreadNotifications);
+    } catch (e) {
+      console.warn('Failed to fetch unread notifications:', e);
+    }
+
+    // Fetch Unread Leave Approvals (for supervisors/admins)
+    let unreadLeaveApprovals = 0;
+    try {
+      unreadLeaveApprovals = await fetchQuery(api.leaves.getUnreadCount, {
+        managerId: requesterId as any,
+      });
+      console.log('[Full Context] Unread leave approvals:', unreadLeaveApprovals);
+    } catch (e) {
+      console.warn('Failed to fetch unread approvals:', e);
+    }
+
     // Build rich employee map with leave info
     // Filter out superadmins from employee data
     const filteredUsers = (users as any[]).filter((u: any) => u.role !== 'superadmin');
@@ -455,6 +498,17 @@ export async function GET(req: NextRequest) {
         totalParticipants: c.totalParticipants || 0,
         completedReviews: c.completedReviews || 0,
       })),
+      // Unread counts
+      unreadMessages,
+      unreadConversations: (unreadConversations as any[]).slice(0, 5).map((c: any) => ({
+        conversationId: c._id,
+        name: c.name,
+        lastMessage: c.lastMessage?.content || c.lastMessagePreview,
+        unreadCount: c.unreadCount,
+        fromUser: c.lastMessage?.sender?.name || c.lastSenderName,
+      })),
+      unreadNotifications,
+      unreadLeaveApprovals,
     });
   } catch (error) {
     console.error('Full context error:', error);
@@ -474,6 +528,10 @@ export async function GET(req: NextRequest) {
       leaderboard: [],
       corporateDocs: [],
       performanceReviews: [],
+      unreadMessages: 0,
+      unreadConversations: [],
+      unreadNotifications: 0,
+      unreadLeaveApprovals: 0,
     });
   }
 }
