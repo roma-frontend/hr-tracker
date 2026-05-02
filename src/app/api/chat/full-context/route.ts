@@ -201,17 +201,6 @@ export async function GET(req: NextRequest) {
       console.warn('Failed to fetch unread approvals:', e);
     }
 
-    // Fetch Unread Notifications
-    let unreadNotifications = 0;
-    try {
-      unreadNotifications = await fetchQuery(api.notifications.getUnreadCount, {
-        userId: requesterId as any,
-      });
-      console.log('[Full Context] Unread notifications:', unreadNotifications);
-    } catch (e) {
-      console.warn('Failed to fetch unread notifications:', e);
-    }
-
     // Fetch Unread Leave Approvals (for supervisors/admins)
     let unreadLeaveApprovals = 0;
     try {
