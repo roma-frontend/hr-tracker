@@ -453,6 +453,9 @@ ${driverRequestsInfo || 'No pending driver requests'}
 AVAILABLE DRIVERS:
 ${availableDriversContextInfo || 'No drivers available'}
 ${availableDriversInfo || ''}
+
+ACTIVE SURVEYS:
+${((data.activeSurveys as any[]) || []).map((s: any) => `📝 "${s.title}" - ${s.description || 'No description'} (Questions: ${s.questionsCount || 0}, Responses: ${s.responsesCount || 0})`).join('\n') || 'No active surveys'}
 `;
       }
     } catch (e) {

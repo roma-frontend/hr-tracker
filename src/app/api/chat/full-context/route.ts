@@ -53,6 +53,20 @@ export async function GET(req: NextRequest) {
     // Get organizationId from first user for dependent queries
     const orgId = (users as any[])?.[0]?.organizationId;
 
+    // Fetch surveys after orgId is determined
+    let activeSurveys: any[] = [];
+    if (orgId) {
+      try {
+        activeSurveys = await fetchQuery(api.surveys.listSurveys, {
+          organizationId: orgId,
+          status: 'active',
+          limit: 10,
+        });
+      } catch (e) {
+        console.warn('Failed to fetch surveys:', e);
+      }
+    }
+
     // Fetch events if we have an organization
     let allEvents: any[] = [];
     if (orgId) {
@@ -318,6 +332,18 @@ export async function GET(req: NextRequest) {
         vehicle: d.vehicle,
         status: d.status,
       })),
+      // Active Surveys
+      activeSurveys: (activeSurveys as any[]).map((s: any) => ({
+        surveyId: s._id,
+        title: s.title,
+        description: s.description,
+        status: s.status,
+        startsAt: s.startsAt,
+        endsAt: s.endsAt,
+        createdBy: s.creator?.name || 'Unknown',
+        questionsCount: s.questions?.length || 0,
+        responsesCount: s.responsesCount || 0,
+      })),
     });
   } catch (error) {
     console.error('Full context error:', error);
@@ -330,6 +356,7 @@ export async function GET(req: NextRequest) {
       automationWorkflows: [],
       driverRequests: [],
       availableDrivers: [],
+      activeSurveys: [],
     });
   }
 }

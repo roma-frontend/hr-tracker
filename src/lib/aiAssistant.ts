@@ -501,6 +501,67 @@ export const AI_CAPABILITIES: AICapability[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
+  // SURVEYS
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'view_surveys',
+    name: 'View Surveys',
+    description: 'View active surveys and polls in the organization',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['surveys', 'опросы', 'голосование', 'poll', 'questionnaire', 'анкета'],
+    action: '/surveys',
+  },
+  {
+    id: 'take_survey',
+    name: 'Take Survey',
+    description: 'Complete a survey or poll',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['take survey', 'пройти опрос', 'ответить на вопросы', 'complete poll'],
+  },
+  {
+    id: 'create_survey',
+    name: 'Create Survey',
+    description: 'Create a new survey or poll',
+    requiredRole: ['admin', 'superadmin'],
+    keywords: ['create survey', 'создать опрос', 'new poll', 'новый опрос'],
+    action: '/surveys',
+  },
+  {
+    id: 'view_survey_results',
+    name: 'View Survey Results',
+    description: 'View analytics and results of surveys',
+    requiredRole: ['admin', 'superadmin'],
+    keywords: ['survey results', 'результаты опроса', 'analytics', 'статистика опросов'],
+    action: '/surveys',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // GOALS & OKR
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'view_goals',
+    name: 'View Goals',
+    description: 'View personal and team goals and OKRs',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['goals', 'цели', 'okr', 'objectives', 'ключевые результаты', ' targets'],
+    action: '/goals',
+  },
+  {
+    id: 'create_goal',
+    name: 'Create Goal',
+    description: 'Create a new goal or OKR',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['create goal', 'создать цель', 'new objective', 'новый окр'],
+  },
+  {
+    id: 'track_progress',
+    name: 'Track Progress',
+    description: 'Update progress on goals and OKRs',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: ['progress', 'прогресс', 'update', 'обновить', 'completion', 'выполнение'],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   // AUTOMATION
   // ═══════════════════════════════════════════════════════════════
   {
@@ -973,10 +1034,61 @@ Shield HR is a comprehensive HR management platform with these core modules:
 - Custom automation rules per organization
 - Workflow templates for common HR processes
 
-🏢 **Corporate Info & Policies**
+🏢 **Corporate Info & Policies** (/corporate)
 - Company policies and documentation
 - Employee handbook access
 - Corporate announcements
+
+📝 **Surveys & Polls** (/surveys)
+- Create and manage employee surveys
+- Multiple question types: text, rating, multiple choice
+- Anonymous responses option
+- Results and analytics dashboard
+- Active/Draft/Closed status
+
+🎯 **Goals & OKR** (/goals)
+- Set individual and team goals
+- OKR (Objectives and Key Results) tracking
+- Progress percentage and milestones
+- Goal alignment with company objectives
+
+📈 **Performance Reviews**
+- Annual performance evaluations
+- Self-assessment and manager assessment
+- 360-degree feedback
+- Performance ratings and history
+- Development plans
+
+👋 **Onboarding** (/onboarding)
+- New employee onboarding workflows
+- Task checklists for new hires
+- Progress tracking
+- Document collection
+
+👋 **Offboarding**
+- Employee exit workflows
+- Return of company assets
+- Exit interviews
+- Offboarding checklists
+
+⭐ **Recognition & Kudos** (/recognition)
+- Send kudos to colleagues
+- Badge system for achievements
+- Leaderboard and points
+- Categories: Teamwork, Innovation, Leadership, etc.
+
+📋 **Approvals Center** (/approvals)
+- Centralized approval dashboard for supervisors/admins
+- Pending leave requests with employee context
+- Bulk approval/rejection capabilities
+- Approval history and audit trail
+- Delegation support when supervisor is absent
+
+🎨 **AI Site Editor** (/ai-site-editor)
+- AI-powered site customization
+- Theme and layout adjustments
+- Branding configuration
+- Custom CSS and styling options
 - Policy acknowledgment tracking
 - Document version control
 
