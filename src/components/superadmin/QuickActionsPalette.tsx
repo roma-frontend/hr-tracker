@@ -20,6 +20,24 @@ import {
   Command,
   ArrowRight,
   HelpCircleIcon,
+  LayoutDashboard,
+  CheckSquare,
+  Calendar,
+  BarChart3,
+  Target,
+  TrendingUp,
+  DollarSign,
+  Clock,
+  Settings,
+  Building,
+  ClipboardList,
+  GraduationCap,
+  Briefcase,
+  Star,
+  ClipboardCheck,
+  Activity,
+  PieChart,
+  Mail,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -33,6 +51,8 @@ interface QuickAction {
   action: () => void;
   requiresSelection?: boolean;
   superadminOnly?: boolean;
+  adminOnly?: boolean;
+  supervisorOnly?: boolean;
 }
 
 export function QuickActionsPalette() {
@@ -49,13 +69,205 @@ export function QuickActionsPalette() {
   const isSuperadmin =
     user?.role === 'superadmin' || user?.email?.toLowerCase() === 'romangulanyan@gmail.com';
 
+  // Check if user is admin or supervisor
+  const isAdmin = user?.role === 'admin';
+  const isSupervisor = user?.role === 'supervisor';
+
   // Quick actions list - filtered by role
   const allActions: QuickAction[] = [
+    // Common navigation - available to all users
+    {
+      id: 'dashboard',
+      label: t('nav.dashboard', 'Dashboard'),
+      icon: <LayoutDashboard className="w-4 h-4" />,
+      shortcut: '⌘D',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/dashboard');
+      },
+    },
+    {
+      id: 'tasks',
+      label: t('nav.tasks', 'Tasks'),
+      icon: <CheckSquare className="w-4 h-4" />,
+      shortcut: '⌘T',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/tasks');
+      },
+    },
+    {
+      id: 'leaves',
+      label: t('nav.leaves', 'Leave'),
+      icon: <Clock className="w-4 h-4" />,
+      shortcut: '⌘L',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/leaves');
+      },
+    },
+    {
+      id: 'calendar',
+      label: t('nav.calendar', 'Calendar'),
+      icon: <Calendar className="w-4 h-4" />,
+      shortcut: '⌘C',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/calendar');
+      },
+    },
+    {
+      id: 'chat',
+      label: t('nav.chat', 'Chat'),
+      icon: <MessageSquare className="w-4 h-4" />,
+      shortcut: '⌘⇧C',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/chat');
+      },
+    },
+    // Admin/Supervisor only navigation
+    {
+      id: 'employees',
+      label: t('nav.employees', 'Employees'),
+      icon: <Users className="w-4 h-4" />,
+      shortcut: '⌘E',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/employees');
+      },
+      supervisorOnly: true,
+    },
+    {
+      id: 'attendance',
+      label: t('nav.attendance', 'Attendance'),
+      icon: <Activity className="w-4 h-4" />,
+      shortcut: '⌘A',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/attendance');
+      },
+      supervisorOnly: true,
+    },
+    {
+      id: 'goals',
+      label: t('nav.goals', 'Goals'),
+      icon: <Target className="w-4 h-4" />,
+      shortcut: '⌘G',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/goals');
+      },
+      supervisorOnly: true,
+    },
+    {
+      id: 'performance',
+      label: t('nav.performance', 'Performance'),
+      icon: <TrendingUp className="w-4 h-4" />,
+      shortcut: '⌘P',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/performance');
+      },
+      supervisorOnly: true,
+    },
+    {
+      id: 'payroll',
+      label: t('nav.payroll', 'Payroll'),
+      icon: <DollarSign className="w-4 h-4" />,
+      shortcut: '⌘⇧P',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/payroll');
+      },
+      adminOnly: true,
+    },
+    {
+      id: 'analytics',
+      label: t('nav.analytics', 'Analytics'),
+      icon: <BarChart3 className="w-4 h-4" />,
+      shortcut: '⌘⇧A',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/analytics');
+      },
+      adminOnly: true,
+    },
+    {
+      id: 'recruitment',
+      label: t('nav.recruitment', 'Recruitment'),
+      icon: <Briefcase className="w-4 h-4" />,
+      shortcut: '⌘R',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/recruitment');
+      },
+      adminOnly: true,
+    },
+    {
+      id: 'surveys',
+      label: t('nav.surveys', 'Surveys'),
+      icon: <ClipboardList className="w-4 h-4" />,
+      shortcut: '⌘S',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/surveys');
+      },
+      adminOnly: true,
+    },
+    {
+      id: 'onboarding',
+      label: t('nav.onboarding', 'Onboarding'),
+      icon: <GraduationCap className="w-4 h-4" />,
+      shortcut: '⌘O',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/onboarding');
+      },
+      adminOnly: true,
+    },
+    {
+      id: 'reports',
+      label: t('nav.reports', 'Reports'),
+      icon: <FileText className="w-4 h-4" />,
+      shortcut: '⌘⇧R',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/reports');
+      },
+      supervisorOnly: true,
+    },
+    {
+      id: 'settings',
+      label: t('nav.settings', 'Settings'),
+      icon: <Settings className="w-4 h-4" />,
+      shortcut: '⌘,',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/settings');
+      },
+    },
     {
       id: 'find-user',
       label: t('superadmin.quickActions.findUser'),
       icon: <Search className="w-4 h-4" />,
-      shortcut: '⌘U',
+      shortcut: '⌘F',
       category: 'action',
       action: () => {
         setIsOpen(false);
@@ -67,7 +279,7 @@ export function QuickActionsPalette() {
       id: 'create-ticket',
       label: t('superadmin.quickActions.createTicket'),
       icon: <Ticket className="w-4 h-4" />,
-      shortcut: '⌘T',
+      shortcut: '⌘N',
       category: 'action',
       action: () => {
         setIsOpen(false);
@@ -171,17 +383,6 @@ export function QuickActionsPalette() {
       superadminOnly: true,
     },
     {
-      id: 'dashboard',
-      label: t('superadmin.quickActions.dashboard'),
-      icon: <Command className="w-4 h-4" />,
-      shortcut: '⌘D',
-      category: 'navigation',
-      action: () => {
-        setIsOpen(false);
-        router.push('/dashboard');
-      },
-    },
-    {
       id: 'organizations',
       label: t('superadmin.quickActions.organizations'),
       icon: <Users className="w-4 h-4" />,
@@ -220,6 +421,12 @@ export function QuickActionsPalette() {
   // Filter actions based on user role
   const actions = allActions.filter((action) => {
     if (action.superadminOnly && !isSuperadmin) {
+      return false;
+    }
+    if (action.adminOnly && !isAdmin) {
+      return false;
+    }
+    if (action.supervisorOnly && !isSupervisor && !isAdmin) {
       return false;
     }
     return true;
@@ -288,7 +495,6 @@ export function QuickActionsPalette() {
     { action: [] as QuickAction[], navigation: [] as QuickAction[], user: [] as QuickAction[] },
   );
 
-
   return (
     <>
       {/* Trigger button (optional, can also use keyboard shortcut) */}
@@ -306,14 +512,14 @@ export function QuickActionsPalette() {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/10 dark:bg-black/50 z-50 backdrop-blur-sm"
+          className="fixed inset-0 flex- items-center justify-center bg-black/10 dark:bg-black/50 z-50 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Palette */}
       {isOpen && (
-        <div className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 animate-in fade-in zoom-in duration-200">
+        <div className="fixed top-1/2 left-1/2 -translate-1/2 w-full max-w-2xl z-50 animate-in fade-in zoom-in duration-200">
           <div className="bg-(--card) border border-(--border) rounded-xl shadow-2xl overflow-hidden">
             {/* Header with search */}
             <div className="border-b border-(--border) p-4 bg-(--background-subtle)/50">
@@ -484,10 +690,7 @@ function ActionButton({
       )}
     >
       <span
-        className={cn(
-          'shrink-0',
-          isSelected ? 'text-(--primary)' : 'text-(--muted-foreground)',
-        )}
+        className={cn('shrink-0', isSelected ? 'text-(--primary)' : 'text-(--muted-foreground)')}
       >
         {action.icon}
       </span>

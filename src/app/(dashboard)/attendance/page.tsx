@@ -22,6 +22,7 @@ import i18n from 'i18next';
 import type { Id } from '../../../../convex/_generated/dataModel';
 import type { AttendanceRecord } from '@/components/attendance/AttendanceDetailModal';
 import type { EmployeeInfo } from '@/components/attendance/EmployeeAttendanceDrawer';
+import Image from 'next/image';
 
 // Isolate Convex API refs to avoid infinite type instantiation
 const getTodaySummaryApi = api.timeTracking.getTodayAttendanceSummary;
@@ -603,14 +604,15 @@ export default function AttendancePage() {
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) flex items-center justify-center text-white text-sm font-bold">
+                          <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden btn-gradient flex items-center justify-center text-white text-sm font-bold">
                             {employee.avatarUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={employee.avatarUrl}
                                 alt={employee.name}
                                 className="w-full h-full object-cover"
                                 referrerPolicy="no-referrer"
+                                width={40}
+                                height={40}
                               />
                             ) : (
                               employee.name
@@ -622,12 +624,7 @@ export default function AttendancePage() {
                             )}
                           </div>
                           <div>
-                            <p
-                              className="text-sm font-medium"
-                              style={{ color: 'var(--text-primary)' }}
-                            >
-                              {employee.name}
-                            </p>
+                            <p className="text-sm font-medium">{employee.name}</p>
                             <p className="text-xs text-(--text-muted)">
                               {employee.position ??
                                 employee.department ??
@@ -638,8 +635,7 @@ export default function AttendancePage() {
                         </div>
                         <Button
                           size="sm"
-                          className="text-white hover:opacity-90 transition-opacity"
-                          style={{ background: 'var(--primary)' }}
+                          className="btn-gradient text-white hover:opacity-90 transition-opacity"
                           onClick={() =>
                             setSelectedEmployee({ id: employee._id, name: employee.name })
                           }
