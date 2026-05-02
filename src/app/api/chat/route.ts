@@ -1,4 +1,5 @@
 import { groq } from '@ai-sdk/groq';
+import { groq } from '@ai-sdk/groq';
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { buildRoleBasedPrompt, detectIntent } from '@/lib/aiAssistant';
@@ -791,7 +792,7 @@ IMPORTANT:
 When asked about specific employees, use the COMPLETE SYSTEM DATA above to give precise answers.`;
 
         result = await streamText({
-          model: google('gemini-2.0-flash'),
+          model: groq('llama-3.1-8b-instant'),
           system: systemPrompt,
           messages,
         });
