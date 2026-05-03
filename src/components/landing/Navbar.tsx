@@ -271,18 +271,18 @@ export default function Navbar() {
               <DropdownMenuContent
                 align="end"
                 sideOffset={8}
-                className="w-60 bg-(--card) border-(--border) shadow-xl max-h-[80vh] overflow-y-auto"
+                className="w-64 rounded-2xl bg-(--card) border border-(--border)/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl max-h-[80vh] overflow-y-auto p-2"
               >
-                <DropdownMenuLabel className="text-(--text-muted) text-xs">
+                <DropdownMenuLabel className="px-3 py-2.5 text-(--text-primary) font-semibold text-sm">
                   {t('landingExtra.myAccount')}
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-(--border)" />
+                <DropdownMenuSeparator className="bg-(--border)/50 my-1" />
                 <DropdownMenuItem
-                  className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
+                  className="text-(--text-primary) cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-(--background-subtle) focus:bg-(--background-subtle) focus:text-(--text-primary)"
                   onClick={() => router.push('/dashboard')}
                 >
                   <svg
-                    className="w-4 h-4 text-(--primary)"
+                    className="w-5 h-5 text-(--text-muted)"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -293,14 +293,14 @@ export default function Navbar() {
                     <rect x="14" y="14" width="7" height="7" />
                     <rect x="3" y="14" width="7" height="7" />
                   </svg>
-                  {t('nav.dashboard')}
+                  <span className="font-medium">{t('nav.dashboard')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
+                  className="text-(--text-primary) cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-(--background-subtle) focus:bg-(--background-subtle) focus:text-(--text-primary)"
                   onClick={() => router.push('/settings')}
                 >
                   <svg
-                    className="w-4 h-4 text-(--primary)"
+                    className="w-5 h-5 text-(--text-muted)"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -309,18 +309,18 @@ export default function Navbar() {
                     <circle cx="12" cy="12" r="3" />
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                   </svg>
-                  {t('nav.settings')}
+                  <span className="font-medium">{t('nav.settings')}</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-(--border)" />
+                <DropdownMenuSeparator className="bg-(--border)/50 my-1" />
                 {/* Show landing page links only when main navbar is hidden (screen < lg) */}
                 {!isDesktop && (
                   <>
                     <DropdownMenuItem
-                      className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
+                      className="text-(--text-primary) cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-(--background-subtle) focus:bg-(--background-subtle) focus:text-(--text-primary)"
                       onClick={() => router.push('/features')}
                     >
                       <svg
-                        className="w-4 h-4 text-(--primary)"
+                        className="w-5 h-5 text-(--text-muted)"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -328,14 +328,14 @@ export default function Navbar() {
                       >
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                       </svg>
-                      {t('landing.features')}
+                      <span className="font-medium">{t('landing.features')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
+                      className="text-(--text-primary) cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-(--background-subtle) focus:bg-(--background-subtle) focus:text-(--text-primary)"
                       onClick={() => router.push('/#pricing')}
                     >
                       <svg
-                        className="w-4 h-4 text-(--primary)"
+                        className="w-5 h-5 text-(--text-muted)"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -344,14 +344,14 @@ export default function Navbar() {
                         <line x1="12" y1="1" x2="12" y2="23" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                       </svg>
-                      {t('landing.pricing')}
+                      <span className="font-medium">{t('landing.pricing')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
+                      className="text-(--text-primary) cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-(--background-subtle) focus:bg-(--background-subtle) focus:text-(--text-primary)"
                       onClick={() => router.push('/#testimonials')}
                     >
                       <svg
-                        className="w-4 h-4 text-(--primary)"
+                        className="w-5 h-5 text-(--text-muted)"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -359,14 +359,14 @@ export default function Navbar() {
                       >
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                       </svg>
-                      {t('landing.testimonials')}
+                      <span className="font-medium">{t('landing.testimonials')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
+                      className="text-(--text-primary) cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-(--background-subtle) focus:bg-(--background-subtle) focus:text-(--text-primary)"
                       onClick={() => router.push('/#faq')}
                     >
                       <svg
-                        className="w-4 h-4 text-(--primary)"
+                        className="w-5 h-5 text-(--text-muted)"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -376,14 +376,14 @@ export default function Navbar() {
                         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                         <line x1="12" y1="17" x2="12.01" y2="17" />
                       </svg>
-                      {t('landing.faq')}
+                      <span className="font-medium">{t('landing.faq')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-(--text-primary) cursor-pointer hover:bg-(--background-subtle) focus:bg-(--background-subtle) gap-2"
+                      className="text-(--text-primary) cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-(--background-subtle) focus:bg-(--background-subtle) focus:text-(--text-primary)"
                       onClick={() => router.push('/careers')}
                     >
                       <svg
-                        className="w-4 h-4 text-(--primary)"
+                        className="w-5 h-5 text-(--text-muted)"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -394,17 +394,17 @@ export default function Navbar() {
                         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
-                      {t('nav.recruitment', 'Careers')}
+                      <span className="font-medium">{t('nav.recruitment', 'Careers')}</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-(--border)" />
+                    <DropdownMenuSeparator className="bg-(--border)/50 my-1" />
                   </>
                 )}
                 <DropdownMenuItem
-                  className="text-red-400 cursor-pointer hover:bg-red-500/10 focus:bg-red-500/10 hover:text-red-300 gap-2"
+                  className="text-red-500 cursor-pointer rounded-xl px-3 py-2.5 gap-3 transition-all duration-200 hover:bg-red-500/10 focus:bg-red-500/10 hover:text-red-600 focus:text-red-600 dark:hover:text-red-400 dark:focus:text-red-400"
                   onClick={handleLogout}
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="w-5 h-5"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -414,7 +414,7 @@ export default function Navbar() {
                     <polyline points="16 17 21 12 16 7" />
                     <line x1="21" y1="12" x2="9" y2="12" />
                   </svg>
-                  {t('landingExtra.logOut')}
+                  <span className="font-medium">{t('landingExtra.logOut')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
