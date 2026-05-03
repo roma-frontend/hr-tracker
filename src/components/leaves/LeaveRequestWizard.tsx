@@ -434,14 +434,16 @@ function TypeStep({ value, onChange }: { value?: LeaveType; onChange: (v: LeaveT
               className={cn(
                 'p-4 rounded-xl border-2 text-left transition-all duration-200 flex flex-col items-center text-center gap-2',
                 isSelected
-                  ? 'border-(--primary) bg-(--primary)/5 shadow-md'
+                  ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
                   : 'border-(--border) bg-(--background) hover:bg-(--background-subtle)',
               )}
             >
               <div
                 className={cn(
                   'p-2.5 rounded-full',
-                  isSelected ? 'bg-(--primary) text-white' : colorMap[type.color],
+                  isSelected
+                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                    : colorMap[type.color],
                 )}
               >
                 {type.icon}
@@ -449,8 +451,8 @@ function TypeStep({ value, onChange }: { value?: LeaveType; onChange: (v: LeaveT
               <div>
                 <p
                   className={cn(
-                    'text-sm font-semibold',
-                    isSelected ? 'text-(--primary)' : 'text-(--text-primary)',
+                    'text-sm font-bold',
+                    isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-(--text-primary)',
                   )}
                 >
                   {type.title}
@@ -460,7 +462,14 @@ function TypeStep({ value, onChange }: { value?: LeaveType; onChange: (v: LeaveT
                 </p>
               </div>
               {isSelected && (
-                <Badge className="bg-(--primary) text-white text-[10px] px-2 py-0.5 mt-1">✓</Badge>
+                <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] px-2 py-0.5 mt-1 shadow-sm">
+                  ✓{' '}
+                  {i18n.language === 'ru'
+                    ? 'Выбрано'
+                    : i18n.language === 'hy'
+                      ? 'Ընտրված'
+                      : 'Selected'}
+                </Badge>
               )}
             </button>
           );
