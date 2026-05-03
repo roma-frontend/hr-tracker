@@ -1,6 +1,7 @@
 {
   "ui": {
-    "skipToContent": "Перейти к контенту"
+    "skipToContent": "Перейти к контенту",
+    "selected": "Выбрано"
   },
   "landing": {
     "scroll": "Прокрутить",
@@ -1003,7 +1004,8 @@
         "categoryLabel": "Категория",
         "categoryPlaceholder": "Выберите категорию"
       },
-      "submit": "Создать тикет"
+      "submit": "Создать тикет",
+      "selected": "Выбрано"
     },
     "alerts": {
       "ticketCreated": "Тикет успешно создан",

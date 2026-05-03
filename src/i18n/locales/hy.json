@@ -1,6 +1,7 @@
 {
   "ui": {
-    "skipToContent": "Անցնել դեպի բովանդակություն"
+    "skipToContent": "Անցնել դեպի բովանդակություն",
+    "selected": "Ընտրված"
   },
   "landing": {
     "scroll": "Ոլորել",
@@ -989,7 +990,8 @@
         "categoryLabel": "Կատեգորիա",
         "categoryPlaceholder": "Ընտրել կատեգորիա"
       },
-      "submit": "Ստեղծել տիկետ"
+      "submit": "Ստեղծել տիկետ",
+      "selected": "Ընտրված"
     },
     "alerts": {
       "ticketCreated": "Տիկետը հաջողությամբ ստեղծվեց",

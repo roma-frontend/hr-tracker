@@ -1,6 +1,7 @@
 {
   "ui": {
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "selected": "Selected"
   },
   "landing": {
     "scroll": "Scroll",
@@ -998,7 +999,8 @@
         "categoryLabel": "Category",
         "categoryPlaceholder": "Select category"
       },
-      "submit": "Create Ticket"
+      "submit": "Create Ticket",
+      "selected": "Selected"
     },
     "alerts": {
       "ticketCreated": "Ticket created successfully",

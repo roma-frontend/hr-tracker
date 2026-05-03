@@ -108,7 +108,7 @@ export function Wizard({
   return (
     <div className={cn('flex flex-col', className)}>
       {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-5">
+      <div className="flex-1 overflow-y-auto overflow-x-clip px-0 py-4 md:px-6 md:py-5 scrollbar-hide">
         {/* Stepper */}
         {showStepper && (
           <div className="mb-5 md:mb-6">
@@ -215,7 +215,7 @@ export function Wizard({
       </div>
 
       {/* Navigation Buttons - Fixed at bottom */}
-      <div className="shrink-0 px-4 py-4 md:px-6 md:py-5 border-t border-(--border) bg-(--background)">
+      <div className="shrink-0 px-4 py-4 md:px-6 md:py-5 border-t border-(--border) bg-(--background) rounded-xl">
         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
           <Button
             variant="outline"

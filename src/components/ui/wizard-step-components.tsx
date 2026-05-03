@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -215,6 +216,7 @@ export function CardSelectionStep({
   required = false,
   columns = 2,
 }: CardSelectionStepProps) {
+  const { t, i18n } = useTranslation();
   const context = useWizardContext();
   const data = stepData ?? context.stepData;
   const update = updateStepData ?? context.updateStepData;
@@ -246,10 +248,10 @@ export function CardSelectionStep({
             <Card
               key={option.value}
               className={cn(
-                'cursor-pointer transition-all duration-200 hover:shadow-md',
+                'cursor-pointer transition-all duration-200',
                 isSelected
-                  ? 'border-(--primary) bg-(--primary)/5 shadow-md'
-                  : 'border-(--border) bg-(--background) hover:bg-(--background-subtle)',
+                  ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
+                  : 'border-(--border) bg-(--background) hover:bg-(--background-subtle) hover:shadow-md',
               )}
               onClick={() => update(field, option.value)}
             >
@@ -258,7 +260,7 @@ export function CardSelectionStep({
                   className={cn(
                     'p-2 md:p-3 rounded-full transition-colors',
                     isSelected
-                      ? 'bg-(--primary) text-white'
+                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
                       : option.color || 'bg-(--background-subtle) text-(--text-muted)',
                   )}
                 >
@@ -271,8 +273,8 @@ export function CardSelectionStep({
                 <div className="space-y-1 md:space-y-1.5">
                   <p
                     className={cn(
-                      'font-semibold text-xs md:text-sm leading-tight',
-                      isSelected ? 'text-(--primary)' : 'text-(--text-primary)',
+                      'font-bold text-xs md:text-sm leading-tight',
+                      isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-(--text-primary)',
                     )}
                   >
                     {option.title}
@@ -282,8 +284,13 @@ export function CardSelectionStep({
                   </p>
                 </div>
                 {isSelected && (
-                  <Badge className="bg-(--primary) text-white text-[10px] md:text-xs px-2 py-0.5">
-                    ✓ Выбрано
+                  <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] md:text-xs px-2 py-0.5 shadow-sm">
+                    ✓{' '}
+                    {i18n.language === 'ru'
+                      ? 'Выбрано'
+                      : i18n.language === 'hy'
+                        ? 'Ընտրված'
+                        : 'Selected'}
                   </Badge>
                 )}
               </CardContent>
