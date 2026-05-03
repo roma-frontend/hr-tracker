@@ -956,7 +956,17 @@ export function PerformanceClient() {
             <p className="text-muted-foreground text-sm">{t('performance.subtitle')}</p>
           </div>
           {canManageCycles && (
-            <Button onClick={() => setShowCreateWizard(true)} className="w-full sm:w-auto">
+            <Button
+              onClick={() => {
+                const mainEl = document.querySelector<HTMLElement>('main');
+                if (mainEl) {
+                  mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setShowCreateWizard(true);
+              }}
+              className="w-full sm:w-auto"
+            >
               <Plus className="h-4 w-4 mr-1" /> {t('performance.createCycle')}
             </Button>
           )}

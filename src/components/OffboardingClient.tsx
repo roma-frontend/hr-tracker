@@ -77,7 +77,17 @@ export default function OffboardingClient() {
             </p>
           </div>
           {isAdmin && (
-            <Button size="sm" onClick={() => setShowWizard(true)}>
+            <Button
+              size="sm"
+              onClick={() => {
+                const mainEl = document.querySelector<HTMLElement>('main');
+                if (mainEl) {
+                  mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setShowWizard(true);
+              }}
+            >
               <UserMinus className="h-4 w-4 mr-1" />
               {t('offboarding.startOffboarding', 'Start Offboarding')}
             </Button>

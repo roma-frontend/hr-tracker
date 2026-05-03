@@ -927,7 +927,17 @@ export function SurveysClient() {
             <p className="text-muted-foreground text-sm mt-1">{t('surveys.subtitle')}</p>
           </div>
           {isAdmin && (
-            <Button onClick={() => setShowCreateWizard(true)} className="gap-2 w-full sm:w-auto">
+            <Button
+              onClick={() => {
+                const mainEl = document.querySelector<HTMLElement>('main');
+                if (mainEl) {
+                  mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setShowCreateWizard(true);
+              }}
+              className="gap-2 w-full sm:w-auto"
+            >
               <Plus className="h-4 w-4" />
               {t('surveys.createSurvey')}
             </Button>
@@ -976,7 +986,14 @@ export function SurveysClient() {
                 <Button
                   variant="outline"
                   className="mt-3"
-                  onClick={() => setShowCreateWizard(true)}
+                  onClick={() => {
+                    const mainEl = document.querySelector<HTMLElement>('main');
+                    if (mainEl) {
+                      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setShowCreateWizard(true);
+                  }}
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   {t('surveys.createFirst')}

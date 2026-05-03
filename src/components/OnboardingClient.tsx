@@ -93,11 +93,32 @@ export default function OnboardingClient() {
           </div>
           {isAdmin && (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowTemplateWizard(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const mainEl = document.querySelector<HTMLElement>('main');
+                  if (mainEl) {
+                    mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setShowTemplateWizard(true);
+                }}
+              >
                 <FileText className="h-4 w-4 mr-1" />
                 {t('onboarding.newTemplate', 'New Template')}
               </Button>
-              <Button size="sm" onClick={() => setShowStartWizard(true)}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const mainEl = document.querySelector<HTMLElement>('main');
+                  if (mainEl) {
+                    mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setShowStartWizard(true);
+                }}
+              >
                 <Rocket className="h-4 w-4 mr-1" />
                 {t('onboarding.startOnboarding', 'Start Onboarding')}
               </Button>

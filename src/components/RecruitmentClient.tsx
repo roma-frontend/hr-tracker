@@ -918,7 +918,17 @@ export default function RecruitmentClient() {
             </p>
           </div>
           {isAdmin && (
-            <Button onClick={() => setShowWizard(true)} className="w-full sm:w-auto">
+            <Button
+              onClick={() => {
+                const mainEl = document.querySelector<HTMLElement>('main');
+                if (mainEl) {
+                  mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setShowWizard(true);
+              }}
+              className="w-full sm:w-auto"
+            >
               <Plus className="h-4 w-4 mr-1" /> {t('recruitment.createVacancy', 'New Vacancy')}
             </Button>
           )}
@@ -1024,7 +1034,17 @@ export default function RecruitmentClient() {
                 <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
                 <p className="font-medium">{t('recruitment.empty', 'No vacancies yet')}</p>
                 {isAdmin && (
-                  <Button className="mt-4" onClick={() => setShowWizard(true)}>
+                  <Button
+                    className="mt-4"
+                    onClick={() => {
+                      const mainEl = document.querySelector<HTMLElement>('main');
+                      if (mainEl) {
+                        mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      setShowWizard(true);
+                    }}
+                  >
                     <Plus className="h-4 w-4 mr-1" />{' '}
                     {t('recruitment.createVacancy', 'New Vacancy')}
                   </Button>

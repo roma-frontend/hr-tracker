@@ -577,7 +577,14 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-col sm:flex-row">
             {userRole === 'admin' && (
               <button
-                onClick={() => setShowAssign(true)}
+                onClick={() => {
+                  const mainEl = document.querySelector<HTMLElement>('main');
+                  if (mainEl) {
+                    mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setShowAssign(true);
+                }}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-(--border) text-(--text-secondary) hover:bg-(--background-subtle) transition-colors font-medium text-sm w-full sm:w-auto"
               >
                 {t('tasksClient.assignSupervisor')}
@@ -585,7 +592,14 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
             )}
             {canManage && (
               <button
-                onClick={() => setShowCreate(true)}
+                onClick={() => {
+                  const mainEl = document.querySelector<HTMLElement>('main');
+                  if (mainEl) {
+                    mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setShowCreate(true);
+                }}
                 className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-gradient text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all w-full sm:w-auto"
               >
                 {t('tasksClient.newTask')}

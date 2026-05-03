@@ -1052,7 +1052,17 @@ export default function GoalsClient() {
                 <SelectItem value="FY">FY</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={() => setShowWizard(true)} className="flex-1 sm:flex-initial">
+            <Button
+              onClick={() => {
+                const mainEl = document.querySelector<HTMLElement>('main');
+                if (mainEl) {
+                  mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setShowWizard(true);
+              }}
+              className="flex-1 sm:flex-initial"
+            >
               <Plus className="h-4 w-4 mr-1" /> {t('goals.create', 'New Objective')}
             </Button>
           </div>
@@ -1159,7 +1169,17 @@ export default function GoalsClient() {
                 <p className="text-sm text-muted-foreground mt-1">
                   {t('goals.emptyHint', 'Create your first objective to get started')}
                 </p>
-                <Button className="mt-4" onClick={() => setShowWizard(true)}>
+                <Button
+                  className="mt-4"
+                  onClick={() => {
+                    const mainEl = document.querySelector<HTMLElement>('main');
+                    if (mainEl) {
+                      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setShowWizard(true);
+                  }}
+                >
                   <Plus className="h-4 w-4 mr-1" /> {t('goals.create', 'New Objective')}
                 </Button>
               </CardContent>

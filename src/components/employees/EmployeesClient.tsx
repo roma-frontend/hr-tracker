@@ -273,7 +273,14 @@ export function EmployeesClient() {
           </div>
           {canManage && (
             <Button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+                const mainEl = document.querySelector<HTMLElement>('main');
+                if (mainEl) {
+                  mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setShowAddModal(true);
+              }}
               className="flex items-center gap-2 w-full sm:w-auto justify-center btn-gradient text-white font-medium shadow-md hover:shadow-lg"
               variant="default"
             >
@@ -456,7 +463,14 @@ export function EmployeesClient() {
             </div>
             {canManage && (
               <Button
-                onClick={() => setShowAddModal(true)}
+                onClick={() => {
+                  const mainEl = document.querySelector<HTMLElement>('main');
+                  if (mainEl) {
+                    mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setShowAddModal(true);
+                }}
                 className="flex items-center gap-2 btn-gradient text-white font-medium shadow-md"
                 variant="default"
               >

@@ -487,7 +487,17 @@ export function RecognitionClient() {
             <h1 className="text-2xl font-bold tracking-tight">{t('recognition.title')}</h1>
             <p className="text-muted-foreground">{t('recognition.subtitle')}</p>
           </div>
-          <Button onClick={() => setShowSendModal(true)} className="gap-2 w-full sm:w-auto">
+          <Button
+            onClick={() => {
+              const mainEl = document.querySelector<HTMLElement>('main');
+              if (mainEl) {
+                mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setShowSendModal(true);
+            }}
+            className="gap-2 w-full sm:w-auto"
+          >
             <Send className="h-4 w-4" />
             {t('recognition.sendKudos')}
           </Button>

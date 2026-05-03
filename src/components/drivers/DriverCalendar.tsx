@@ -356,7 +356,14 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
         </div>
         {role === 'driver' && (
           <Button
-            onClick={() => setShowBlockModal(true)}
+            onClick={() => {
+              const mainEl = document.querySelector<HTMLElement>('main');
+              if (mainEl) {
+                mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setShowBlockModal(true);
+            }}
             className="w-full sm:w-auto gap-2 rounded-xl bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm hover:shadow-md transition-all text-xs sm:text-sm"
           >
             <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

@@ -249,6 +249,11 @@ export default function ChatClient({
             currentUserId={uid}
             onSelect={handleSelectConversation}
             onNewConversation={() => {
+              const mainEl = document.querySelector<HTMLElement>('main');
+              if (mainEl) {
+                mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+              window.scrollTo({ top: 0, behavior: 'smooth' });
               setShowNewConv(true);
             }}
             onTogglePin={async (convId) => {
