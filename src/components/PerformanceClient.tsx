@@ -165,7 +165,7 @@ function CreateCycleWizard({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[85vh]">
+      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[90vh]">
         {/* Header */}
         <DialogHeader className="px-5 pt-5 pb-0">
           <DialogTitle className="flex items-center gap-2">
@@ -514,7 +514,7 @@ function FillReviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Star className="h-5 w-5" />
@@ -753,7 +753,7 @@ function ResultsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
@@ -1010,9 +1010,9 @@ export function PerformanceClient() {
 
       {/* Tabs */}
       <Tabs defaultValue="my-reviews">
-        <TabsList>
+        <TabsList className="w-full mb-4 gap-2 bg-transparent p-0 h-auto grid grid-cols-3">
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="my-reviews"
           >
             <UserCheck className="h-4 w-4 mr-1" />
@@ -1020,7 +1020,7 @@ export function PerformanceClient() {
           </TabsTrigger>
           {canManageCycles && (
             <TabsTrigger
-              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+              className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
               value="cycles"
             >
               <Calendar className="h-4 w-4 mr-1" />
@@ -1029,7 +1029,7 @@ export function PerformanceClient() {
           )}
           {canManageCycles && (
             <TabsTrigger
-              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+              className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
               value="results"
             >
               <BarChart3 className="h-4 w-4 mr-1" />

@@ -219,7 +219,7 @@ function CreateObjectiveWizard({
   ];
 
   return (
-    <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[85vh]">
+    <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[90vh]">
       {/* Header */}
       <DialogHeader className="px-5 pt-5 pb-0">
         <DialogTitle>{t('goals.wizard.title', 'Create Objective')}</DialogTitle>
@@ -1119,9 +1119,9 @@ export default function GoalsClient() {
 
       {/* Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="w-full sm:w-auto">
+        <TabsList className="w-full mb-4 gap-2 bg-transparent p-0 h-auto grid grid-cols-3">
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="my"
           >
             <User className="h-4 w-4 mr-1 hidden sm:inline" />
@@ -1133,14 +1133,14 @@ export default function GoalsClient() {
             )}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="team"
           >
             <Users className="h-4 w-4 mr-1 hidden sm:inline" />
             {t('goals.tabs.team', 'Team')}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="company"
           >
             <Building2 className="h-4 w-4 mr-1 hidden sm:inline" />

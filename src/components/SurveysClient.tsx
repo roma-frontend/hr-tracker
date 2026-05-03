@@ -937,27 +937,27 @@ export function SurveysClient() {
 
       {/* Status filter tabs */}
       <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-        <TabsList>
+        <TabsList className="w-full mb-4 gap-2 bg-transparent p-0 h-auto grid grid-cols-4">
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="all"
           >
             {t('surveys.filter.all')}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="active"
           >
             {t('surveys.filter.active')}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="draft"
           >
             {t('surveys.filter.draft')}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="closed"
           >
             {t('surveys.filter.closed')}

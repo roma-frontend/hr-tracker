@@ -130,7 +130,7 @@ function CreateVacancyWizard({
   };
 
   return (
-    <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[85vh]">
+    <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[90vh]">
       <DialogHeader className="px-5 pt-5 pb-0">
         <DialogTitle>{t('recruitment.wizard.title', 'Create Vacancy')}</DialogTitle>
       </DialogHeader>
@@ -985,21 +985,21 @@ export default function RecruitmentClient() {
 
       {/* Tabs */}
       <Tabs defaultValue="vacancies">
-        <TabsList className="w-full sm:w-auto">
+        <TabsList className="w-full mb-4 gap-2 bg-transparent p-0 h-auto grid grid-cols-3">
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
             value="vacancies"
           >
             {t('recruitment.tabs.vacancies', 'Vacancies')}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
             value="pipeline"
           >
             {t('recruitment.tabs.pipeline', 'Pipeline')}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium flex items-center justify-center"
             value="interviews"
           >
             {t('recruitment.tabs.interviews', 'My Interviews')}
@@ -1380,7 +1380,7 @@ function EditVacancyDialog({
     );
 
   return (
-    <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+    <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>{t('recruitment.editVacancy', 'Edit Vacancy')}</DialogTitle>
       </DialogHeader>

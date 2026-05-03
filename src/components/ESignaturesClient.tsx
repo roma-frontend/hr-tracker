@@ -1138,9 +1138,9 @@ export function ESignaturesClient() {
 
       {/* Tabs */}
       <Tabs defaultValue="pending">
-        <TabsList className="w-full sm:w-auto">
+        <TabsList className="w-full mb-4 gap-2 bg-transparent p-0 h-auto grid grid-cols-2">
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="pending"
           >
             {t('signatures.tabs.mySignatures', 'My Signatures')}
@@ -1154,7 +1154,7 @@ export function ESignaturesClient() {
             )}
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="documents"
           >
             {t('signatures.tabs.documents', 'Documents')}

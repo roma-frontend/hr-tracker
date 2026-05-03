@@ -335,7 +335,6 @@ export default function DashboardClient() {
                   size="sm"
                   variant="outline"
                   style={{
-                    borderColor: 'color-mix(in srgb, var(--primary) 40%, transparent)',
                     color: 'var(--primary)',
                   }}
                 >
@@ -364,7 +363,6 @@ export default function DashboardClient() {
                   size="sm"
                   variant="outline"
                   style={{
-                    borderColor: 'color-mix(in srgb, var(--primary) 30%, transparent)',
                     color: 'var(--primary)',
                   }}
                 >

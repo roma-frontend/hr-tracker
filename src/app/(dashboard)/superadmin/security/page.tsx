@@ -302,7 +302,10 @@ export default function SecurityDashboard() {
               <Shield className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: 'var(--primary)' }} />
             </div>
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h1
+                className="text-lg sm:text-2xl font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {t('superadminSecurity.securityControl')}
               </h1>
               <p
@@ -409,8 +412,8 @@ export default function SecurityDashboard() {
               onClick={() => setActiveTab(tab)}
               className="px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap shrink-0"
               style={{
-                background: activeTab === tab ? 'var(--card)' : 'transparent',
-                color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-muted)',
+                background: activeTab === tab ? '#3b82f6' : 'transparent',
+                color: activeTab === tab ? 'white' : 'var(--text-muted)',
                 borderColor: activeTab === tab ? 'var(--border)' : 'transparent',
                 border: activeTab === tab ? '1px solid var(--border)' : '1px solid transparent',
                 borderBottom: activeTab === tab ? '1px solid var(--card)' : '1px solid transparent',
@@ -450,7 +453,10 @@ export default function SecurityDashboard() {
           </p>
           {FEATURES.map((feature: any) => {
             const enabled = getSettingEnabled(feature.key);
-            const colors = COLOR_MAP[feature.color] || { accentBg: 'var(--card)', iconColor: 'var(--text-muted)' };
+            const colors = COLOR_MAP[feature.color] || {
+              accentBg: 'var(--card)',
+              iconColor: 'var(--text-muted)',
+            };
             const Icon = feature.icon;
             const isLoading = toggling[feature.key];
             const savedAt = settings?.find((s) => s.key === feature.key)?.updatedAt;

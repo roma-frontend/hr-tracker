@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useTransition } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../../convex/_generated/api';
@@ -466,6 +466,7 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
   const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
   const [search, setSearch] = useState('');
   const [activeTask, setActiveTask] = useState<any>(null);
+  const [isPending, startTransition] = useTransition();
 
   const convexId = userId as Id<'users'>;
   const canManage = userRole === 'admin' || userRole === 'supervisor';
@@ -687,13 +688,13 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
         {/* View toggle */}
         <div className="flex items-center bg-(--card) border border-(--border) rounded-xl p-1 ml-auto shrink-0">
           <button
-            onClick={() => setViewMode('kanban')}
+            onClick={() => startTransition(() => setViewMode('kanban'))}
             className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'kanban' ? 'btn-gradient shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
           >
             {t('tasksClient.kanban')}
           </button>
           <button
-            onClick={() => setViewMode('list')}
+            onClick={() => startTransition(() => setViewMode('list'))}
             className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewMode === 'list' ? 'btn-gradient shadow-sm' : 'text-(--text-muted) hover:text-(--text-primary)'}`}
           >
             {t('tasksClient.list')}
@@ -713,24 +714,25 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
             const task = tasks.find((t) => t._id === e.active.id);
             setActiveTask(task ?? null);
           }}
-          onDragEnd={async (e: DragEndEvent) => {
+          onDragEnd={(e: DragEndEvent) => {
             setActiveTask(null);
             const { active, over } = e;
             if (!over) return;
             const newStatus = over.id as Status;
             const task = tasks.find((t) => t._id === active.id);
             if (!task || task.status === newStatus) return;
-            try {
-              await updateOptimistic(task._id as Id<'tasks'>, newStatus, convexId, task.status);
-              toast.success(
-                t('tasks.status.moved', { status: t(STATUS_CONFIG[newStatus].labelKey) }),
-                {
-                  duration: 2000,
-                },
-              );
-            } catch {
-              toast.error('Failed to update status');
-            }
+            startTransition(() => {
+              updateOptimistic(task._id as Id<'tasks'>, newStatus, convexId, task.status)
+                .then(() => {
+                  toast.success(
+                    t('tasks.status.moved', { status: t(STATUS_CONFIG[newStatus].labelKey) }),
+                    { duration: 2000 },
+                  );
+                })
+                .catch(() => {
+                  toast.error('Failed to update status');
+                });
+            });
           }}
           onDragCancel={() => setActiveTask(null)}
         >

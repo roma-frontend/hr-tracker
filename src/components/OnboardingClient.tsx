@@ -144,19 +144,19 @@ export default function OnboardingClient() {
 
       {/* Tabs */}
       <Tabs defaultValue={myOnboarding ? 'my' : 'programs'}>
-        <TabsList>
+        <TabsList className="w-full mb-4 gap-2 bg-transparent p-0 h-auto grid grid-cols-3">
           {myOnboarding && (
             <TabsTrigger value="my">{t('onboarding.tabs.my', 'My Onboarding')}</TabsTrigger>
           )}
           <TabsTrigger
-            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
             value="programs"
           >
             {t('onboarding.tabs.programs', 'Programs')}
           </TabsTrigger>
           {isAdmin && (
             <TabsTrigger
-              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+              className="w-full px-4 py-2.5 rounded-xl data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium flex items-center justify-center"
               value="templates"
             >
               {t('onboarding.tabs.templates', 'Templates')}
@@ -460,7 +460,7 @@ function ProgramDetailDialog({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {program?.employeeName ?? '...'} — {t('onboarding.title', 'Onboarding')}
@@ -620,7 +620,7 @@ function StartOnboardingWizard({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="p-0 gap-0 overflow-hidden max-h-[85vh]">
+      <DialogContent className="p-0 gap-0 overflow-hidden max-h-[90vh]">
         {/* Stepper */}
         <div className="px-5 pt-5 pb-3">
           <DialogHeader>
@@ -824,7 +824,7 @@ function CreateTemplateWizard({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="p-0 gap-0 overflow-hidden max-h-[85vh]">
+      <DialogContent className="p-0 gap-0 overflow-hidden max-h-[90vh]">
         {/* Stepper */}
         <div className="px-5 pt-5 pb-3">
           <DialogHeader>
