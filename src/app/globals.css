@@ -159,7 +159,7 @@ html.light {
   /* Base */
   --background: #f0f6ff;
   --background-subtle: #ffffff;
-  --background-subtle-calendar: #4a6ea5e4;
+  --background-subtle-calendar: #738bb4;
   --foreground: #0c1a2e;
 
   /* Card / Surface */
@@ -184,6 +184,10 @@ html.light {
   --primary: linear-gradient(135deg, rgb(37, 99, 235), rgb(96, 165, 250));
   --primary-hover: #1d4ed8;
   --primary-foreground: #ffffff;
+
+  /* Tab active state */
+  --tab-active-bg: #2563eb;
+  --tab-active-text: #ffffff;
 
   /* Secondary */
   --secondary: #e8f0fe;
@@ -326,6 +330,7 @@ html.light {
   /* Base */
   --background: #060e1e;
   --background-subtle: #0d1e38;
+  --background-subtle-calendar: #29436f;
   --foreground: #e8f0fe;
 
   /* Card / Surface */
@@ -350,6 +355,10 @@ html.light {
   --primary: #3b82f6;
   --primary-hover: #2563eb;
   --primary-foreground: #ffffff;
+
+  /* Tab active state */
+  --tab-active-bg: #2563eb;
+  --tab-active-text: #ffffff;
 
   /* Secondary */
   --secondary: #0d1e38;

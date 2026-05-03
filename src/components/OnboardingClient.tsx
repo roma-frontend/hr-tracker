@@ -148,9 +148,17 @@ export default function OnboardingClient() {
           {myOnboarding && (
             <TabsTrigger value="my">{t('onboarding.tabs.my', 'My Onboarding')}</TabsTrigger>
           )}
-          <TabsTrigger value="programs">{t('onboarding.tabs.programs', 'Programs')}</TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="programs"
+          >
+            {t('onboarding.tabs.programs', 'Programs')}
+          </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="templates">
+            <TabsTrigger
+              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+              value="templates"
+            >
               {t('onboarding.tabs.templates', 'Templates')}
             </TabsTrigger>
           )}

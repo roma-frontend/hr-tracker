@@ -37,10 +37,10 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
   const getColor = (count: number) => {
     if (count === 0) return 'bg-[var(--background-subtle-calendar)]';
     const intensity = count / maxCount;
-    if (intensity > 0.75) return 'bg-red-500';
-    if (intensity > 0.5) return 'bg-orange-500';
-    if (intensity > 0.25) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (intensity > 0.75) return 'bg-blue-700';
+    if (intensity > 0.5) return 'bg-blue-500';
+    if (intensity > 0.25) return 'bg-sky-400';
+    return 'bg-sky-200';
   };
 
   return (
@@ -92,10 +92,10 @@ export function LeaveHeatmap({ leaves, month = new Date() }: LeaveHeatmapProps) 
         <span>{t('leaveHeatmap.less')}</span>
         <div className="flex gap-1">
           <div className="w-4 h-4 rounded bg-[var(--background-subtle-calendar)]" />
-          <div className="w-4 h-4 rounded bg-green-500" />
-          <div className="w-4 h-4 rounded bg-yellow-500" />
-          <div className="w-4 h-4 rounded bg-orange-500" />
-          <div className="w-4 h-4 rounded bg-red-500" />
+          <div className="w-4 h-4 rounded bg-sky-200" />
+          <div className="w-4 h-4 rounded bg-sky-400" />
+          <div className="w-4 h-4 rounded bg-blue-500" />
+          <div className="w-4 h-4 rounded bg-blue-700" />
         </div>
         <span>{t('leaveHeatmap.more')}</span>
       </div>

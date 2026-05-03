@@ -413,7 +413,7 @@ export function EmployeesClient() {
                 className={cn(
                   'p-2.5 transition-colors rounded-lg',
                   viewMode === 'grid'
-                    ? 'bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) text-white'
+                    ? 'btn-gradient text-white'
                     : 'bg-(--card) text-(--text-muted)',
                 )}
                 title={t('ariaLabels.gridView')}
@@ -425,7 +425,7 @@ export function EmployeesClient() {
                 className={cn(
                   'p-2.5 transition-colors rounded-lg',
                   viewMode === 'list'
-                    ? 'bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) text-white'
+                    ? 'btn-gradient text-white'
                     : 'bg-(--card) text-(--text-muted)',
                 )}
                 title={t('ariaLabels.listView')}

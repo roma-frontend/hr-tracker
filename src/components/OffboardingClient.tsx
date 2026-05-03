@@ -124,9 +124,19 @@ export default function OffboardingClient() {
       {/* Tabs */}
       <Tabs defaultValue="programs">
         <TabsList>
-          <TabsTrigger value="programs">{t('offboarding.tabs.programs', 'Programs')}</TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="programs"
+          >
+            {t('offboarding.tabs.programs', 'Programs')}
+          </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="insights">{t('offboarding.tabs.insights', 'Insights')}</TabsTrigger>
+            <TabsTrigger
+              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+              value="insights"
+            >
+              {t('offboarding.tabs.insights', 'Insights')}
+            </TabsTrigger>
           )}
         </TabsList>
 

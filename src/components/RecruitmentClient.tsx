@@ -986,11 +986,22 @@ export default function RecruitmentClient() {
       {/* Tabs */}
       <Tabs defaultValue="vacancies">
         <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="vacancies">
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium"
+            value="vacancies"
+          >
             {t('recruitment.tabs.vacancies', 'Vacancies')}
           </TabsTrigger>
-          <TabsTrigger value="pipeline">{t('recruitment.tabs.pipeline', 'Pipeline')}</TabsTrigger>
-          <TabsTrigger value="interviews">
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium"
+            value="pipeline"
+          >
+            {t('recruitment.tabs.pipeline', 'Pipeline')}
+          </TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] transition-all duration-200 shadow-sm font-medium"
+            value="interviews"
+          >
             {t('recruitment.tabs.interviews', 'My Interviews')}
             {myInterviews && myInterviews.length > 0 && (
               <Badge

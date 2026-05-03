@@ -120,15 +120,24 @@ export default function AISiteEditorPage() {
 
         <Tabs defaultValue="chat" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="chat">
+            <TabsTrigger
+              value="chat"
+              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Sparkles className="h-4 w-4 mr-2" />
               {t('aiSiteEditor.aiChat')}
             </TabsTrigger>
-            <TabsTrigger value="features">
+            <TabsTrigger
+              value="features"
+              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Info className="h-4 w-4 mr-2" />
               {t('aiSiteEditor.features')}
             </TabsTrigger>
-            <TabsTrigger value="guide">
+            <TabsTrigger
+              value="guide"
+              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <BookOpen className="h-4 w-4 mr-2" />
               {t('aiSiteEditor.guide')}
             </TabsTrigger>

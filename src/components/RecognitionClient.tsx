@@ -542,11 +542,17 @@ export function RecognitionClient() {
       {/* Tabs */}
       <Tabs defaultValue="feed" className="w-full">
         <TabsList>
-          <TabsTrigger value="feed" className="gap-2">
+          <TabsTrigger
+            value="feed"
+            className="gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)]"
+          >
             <Heart className="h-4 w-4" />
             {t('recognition.tabs.feed')}
           </TabsTrigger>
-          <TabsTrigger value="leaderboard" className="gap-2">
+          <TabsTrigger
+            value="leaderboard"
+            className="gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)]"
+          >
             <Trophy className="h-4 w-4" />
             {t('recognition.tabs.leaderboard')}
           </TabsTrigger>

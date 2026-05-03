@@ -1120,20 +1120,29 @@ export default function GoalsClient() {
       {/* Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="my">
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="my"
+          >
             <User className="h-4 w-4 mr-1 hidden sm:inline" />
             {t('goals.tabs.my', 'My Goals')}
             {myObjectives && (
-              <Badge variant="secondary" className="ml-1 text-xs">
+              <Badge variant="warning" className="ml-1 text-xs border-0">
                 {myObjectives.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="team">
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="team"
+          >
             <Users className="h-4 w-4 mr-1 hidden sm:inline" />
             {t('goals.tabs.team', 'Team')}
           </TabsTrigger>
-          <TabsTrigger value="company">
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="company"
+          >
             <Building2 className="h-4 w-4 mr-1 hidden sm:inline" />
             {t('goals.tabs.company', 'Company')}
           </TabsTrigger>

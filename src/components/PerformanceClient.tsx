@@ -1011,18 +1011,27 @@ export function PerformanceClient() {
       {/* Tabs */}
       <Tabs defaultValue="my-reviews">
         <TabsList>
-          <TabsTrigger value="my-reviews">
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="my-reviews"
+          >
             <UserCheck className="h-4 w-4 mr-1" />
             {t('performance.tabs.myReviews')}
           </TabsTrigger>
           {canManageCycles && (
-            <TabsTrigger value="cycles">
+            <TabsTrigger
+              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+              value="cycles"
+            >
               <Calendar className="h-4 w-4 mr-1" />
               {t('performance.tabs.cycles')}
             </TabsTrigger>
           )}
           {canManageCycles && (
-            <TabsTrigger value="results">
+            <TabsTrigger
+              className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+              value="results"
+            >
               <BarChart3 className="h-4 w-4 mr-1" />
               {t('performance.tabs.results')}
             </TabsTrigger>

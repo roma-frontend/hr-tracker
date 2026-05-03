@@ -163,7 +163,7 @@ export default function UserProfile360Page() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white">
                   <Button variant="outline" size="sm" className="gap-2">
                     <MessageSquare className="w-4 h-4" />
                     {t('superadmin.users.writeMessage')}
@@ -244,31 +244,52 @@ export default function UserProfile360Page() {
         {/* Tabs */}
         <Tabs defaultValue="leaves" className="space-y-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-7 h-auto">
-            <TabsTrigger value="leaves" className="flex items-center gap-2">
+            <TabsTrigger
+              value="leaves"
+              className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Calendar className="w-4 h-4" />
               <span className="hidden sm:inline">Отпуска</span>
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="flex items-center gap-2">
+            <TabsTrigger
+              value="tasks"
+              className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Briefcase className="w-4 h-4" />
               <span className="hidden sm:inline">Задачи</span>
             </TabsTrigger>
-            <TabsTrigger value="drivers" className="flex items-center gap-2">
+            <TabsTrigger
+              value="drivers"
+              className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Car className="w-4 h-4" />
               <span className="hidden sm:inline">Поездки</span>
             </TabsTrigger>
-            <TabsTrigger value="tickets" className="flex items-center gap-2">
+            <TabsTrigger
+              value="tickets"
+              className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Ticket className="w-4 h-4" />
               <span className="hidden sm:inline">Тикеты</span>
             </TabsTrigger>
-            <TabsTrigger value="activity" className="flex items-center gap-2">
+            <TabsTrigger
+              value="activity"
+              className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Clock className="w-4 h-4" />
               <span className="hidden sm:inline">Активность</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
+            <TabsTrigger
+              value="security"
+              className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">Безопасность</span>
             </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
+            <TabsTrigger
+              value="chat"
+              className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Чат</span>
             </TabsTrigger>
@@ -612,7 +633,7 @@ export default function UserProfile360Page() {
                         <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                       )}
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white">
                           <span
                             className="text-sm font-medium"
                             style={{ color: 'var(--text-primary)' }}

@@ -182,7 +182,7 @@ function DayCell({
       className={[
         'relative w-full min-h-10 sm:min-h-22.5 rounded-xl p-1.5 text-left transition-all duration-200 border',
         isSelected
-          ? 'bg-(--primary) border-(--primary) text-white shadow-lg shadow-(--primary)/20'
+          ? 'btn-gradient border-(--primary) text-white shadow-lg shadow-(--primary)/20'
           : isTodayDate
             ? 'bg-(--primary)/10 border-(--primary)/40'
             : isCurrentMonth

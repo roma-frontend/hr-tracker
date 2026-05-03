@@ -1139,7 +1139,10 @@ export function ESignaturesClient() {
       {/* Tabs */}
       <Tabs defaultValue="pending">
         <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="pending">
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="pending"
+          >
             {t('signatures.tabs.mySignatures', 'My Signatures')}
             {myPending && myPending.length > 0 && (
               <Badge
@@ -1150,7 +1153,12 @@ export function ESignaturesClient() {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="documents">{t('signatures.tabs.documents', 'Documents')}</TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="documents"
+          >
+            {t('signatures.tabs.documents', 'Documents')}
+          </TabsTrigger>
         </TabsList>
 
         {/* My Signatures Tab */}

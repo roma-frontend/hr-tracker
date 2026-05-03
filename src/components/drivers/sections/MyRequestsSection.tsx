@@ -293,15 +293,24 @@ export const MyRequestsSection = memo(function MyRequestsSection({
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="active" className="gap-2 flex items-center justify-center">
+            <TabsTrigger
+              value="active"
+              className="gap-2 flex items-center justify-center data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Clock className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">{t('driver.active', 'Active')}</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2 flex items-center justify-center">
+            <TabsTrigger
+              value="history"
+              className="gap-2 flex items-center justify-center data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <History className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">{t('driver.history', 'History')}</span>
             </TabsTrigger>
-            <TabsTrigger value="recurring" className="gap-2 flex items-center justify-center">
+            <TabsTrigger
+              value="recurring"
+              className="gap-2 flex items-center justify-center data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
+            >
               <Repeat className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">{t('driver.recurring', 'Recurring')}</span>
             </TabsTrigger>

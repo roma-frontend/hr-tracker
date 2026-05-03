@@ -592,7 +592,8 @@ function VacancyDetailModal({
                 className="inline-flex items-center gap-1 text-sm font-medium"
                 style={{ color: 'var(--landing-text-secondary)' }}
               >
-                <DollarSign className="w-3.5 h-3.5" /> {formatSalary(vacancy.salary)}
+                {' '}
+                {formatSalary(vacancy.salary)}
               </span>
             )}
           </div>

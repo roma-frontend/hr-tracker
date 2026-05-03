@@ -337,7 +337,7 @@ export const ConversationList = React.memo(function ConversationList({
                     : 'text-gray-500 opacity-60 hover:opacity-100',
                 )}
                 style={{
-                  background: activeFilters.includes(f) ? 'var(--primary)' : 'transparent',
+                  background: activeFilters.includes(f) ? '#3b82f6' : 'transparent',
                   cursor: 'pointer',
                 }}
                 title={

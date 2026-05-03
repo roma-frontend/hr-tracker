@@ -159,7 +159,7 @@ export default function OrganizationsPage() {
           >
             <TabsTrigger
               value="organizations"
-              className="flex items-center justify-center gap-2 py-2.5"
+              className="flex items-center justify-center gap-2 py-2.5 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
             >
               <Building2 className="w-4 h-4" />
               <span className="hidden sm:inline">{t('superadmin.organizations.title')}</span>
@@ -167,7 +167,7 @@ export default function OrganizationsPage() {
             </TabsTrigger>
             <TabsTrigger
               value="announcements"
-              className="flex items-center justify-center gap-2 py-2.5"
+              className="flex items-center justify-center gap-2 py-2.5 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
             >
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">{t('superadmin.announcements.title')}</span>
@@ -175,7 +175,7 @@ export default function OrganizationsPage() {
             </TabsTrigger>
             <TabsTrigger
               value="maintenance"
-              className="flex items-center justify-center gap-2 py-2.5"
+              className="flex items-center justify-center gap-2 py-2.5 data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white"
             >
               <Wrench className="w-4 h-4" />
               <span className="hidden sm:inline">{t('superadmin.maintenance.title')}</span>

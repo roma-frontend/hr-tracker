@@ -938,10 +938,30 @@ export function SurveysClient() {
       {/* Status filter tabs */}
       <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
         <TabsList>
-          <TabsTrigger value="all">{t('surveys.filter.all')}</TabsTrigger>
-          <TabsTrigger value="active">{t('surveys.filter.active')}</TabsTrigger>
-          <TabsTrigger value="draft">{t('surveys.filter.draft')}</TabsTrigger>
-          <TabsTrigger value="closed">{t('surveys.filter.closed')}</TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="all"
+          >
+            {t('surveys.filter.all')}
+          </TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="active"
+          >
+            {t('surveys.filter.active')}
+          </TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="draft"
+          >
+            {t('surveys.filter.draft')}
+          </TabsTrigger>
+          <TabsTrigger
+            className="data-[state=active]:bg-[#3b82f6] data-[state=active]:text-white data-[state=inactive]:bg-[var(--background-subtle)] shadow-sm font-medium"
+            value="closed"
+          >
+            {t('surveys.filter.closed')}
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
