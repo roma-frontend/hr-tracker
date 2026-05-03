@@ -2,9 +2,11 @@
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import '@/i18n/config';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
+import { useAuthStoreShallow } from '@/store/useAuthStore';
 import {
   Users,
   Calendar,
@@ -34,61 +36,70 @@ const MODULES = [
     icon: Users,
     color: '#2563eb',
     gradient: 'linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(96,165,250,0.06) 100%)',
+    dashboardLink: '/employees',
   },
   {
     id: 'leave',
     icon: Calendar,
     color: '#0ea5e9',
     gradient: 'linear-gradient(135deg, rgba(14,165,233,0.12) 0%, rgba(56,189,248,0.06) 100%)',
-    link: '/features/leave-types',
+    dashboardLink: '/leaves',
   },
   {
     id: 'attendance',
     icon: Clock,
     color: '#6366f1',
     gradient: 'linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(129,140,248,0.06) 100%)',
+    dashboardLink: '/attendance',
   },
   {
     id: 'okr',
     icon: Target,
     color: '#f59e0b',
     gradient: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(251,191,36,0.06) 100%)',
+    dashboardLink: '/goals',
   },
   {
     id: 'performance',
     icon: BarChart3,
     color: '#10b981',
     gradient: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(52,211,153,0.06) 100%)',
+    dashboardLink: '/performance',
   },
   {
     id: 'recognition',
     icon: Trophy,
     color: '#f97316',
     gradient: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(251,146,60,0.06) 100%)',
+    dashboardLink: '/recognition',
   },
   {
     id: 'surveys',
     icon: ClipboardList,
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(167,139,250,0.06) 100%)',
+    dashboardLink: '/surveys',
   },
   {
     id: 'recruitment',
     icon: Briefcase,
     color: '#ec4899',
     gradient: 'linear-gradient(135deg, rgba(236,72,153,0.12) 0%, rgba(244,114,182,0.06) 100%)',
+    dashboardLink: '/recruitment',
   },
   {
     id: 'esignatures',
     icon: PenTool,
     color: '#14b8a6',
     gradient: 'linear-gradient(135deg, rgba(20,184,166,0.12) 0%, rgba(45,212,191,0.06) 100%)',
+    dashboardLink: '/signatures',
   },
   {
     id: 'onboarding',
     icon: Rocket,
     color: '#6366f1',
     gradient: 'linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(165,180,252,0.06) 100%)',
+    dashboardLink: '/onboarding',
   },
 ] as const;
 
@@ -103,6 +114,18 @@ const PLATFORM_FEATURES = [
 
 export default function FeaturesPage() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { isAuthenticated, needsOnboarding } = useAuthStoreShallow();
+
+  const handleModuleClick = (mod: (typeof MODULES)[number]) => {
+    if (isAuthenticated) {
+      if ('dashboardLink' in mod && mod.dashboardLink) {
+        router.push(mod.dashboardLink);
+      }
+    } else {
+      router.push('/login');
+    }
+  };
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--landing-bg)' }}>
@@ -170,8 +193,9 @@ export default function FeaturesPage() {
 
                 <div className="relative">
                   <div
-                    className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
+                    className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5 cursor-pointer transition-transform hover:scale-105"
                     style={{ background: `${mod.color}15`, border: `1px solid ${mod.color}25` }}
+                    onClick={() => handleModuleClick(mod)}
                   >
                     <Icon className="w-7 h-7" style={{ color: mod.color }} />
                   </div>
@@ -202,14 +226,17 @@ export default function FeaturesPage() {
                     ))}
                   </ul>
 
-                  {'link' in mod && mod.link ? (
-                    <Link
-                      href={mod.link}
-                      className="inline-flex items-center gap-1.5 text-sm font-medium transition-all hover:gap-2.5"
+                  {'dashboardLink' in mod && mod.dashboardLink ? (
+                    <button
+                      onClick={() => handleModuleClick(mod)}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium transition-all hover:gap-2.5 bg-transparent border-none cursor-pointer p-0"
                       style={{ color: mod.color }}
                     >
-                      {t('featuresPage.learnMore')} <ArrowRight className="w-4 h-4" />
-                    </Link>
+                      {isAuthenticated
+                        ? t('featuresPage.openModule')
+                        : t('featuresPage.loginToUse')}{' '}
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   ) : (
                     <span
                       className="inline-flex items-center gap-1.5 text-sm font-medium opacity-50"
