@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-          <div className="bg-(--background) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
+          <div className="bg-(--background-subtle) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-(--text-muted)">
@@ -180,7 +180,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="bg-(--background) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
+          <div className="bg-(--background-subtle) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-(--text-muted)">
@@ -196,7 +196,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="bg-(--background) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
+          <div className="bg-(--background-subtle) rounded-2xl p-4 sm:p-6 shadow-lg border border-(--border)">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-(--text-muted)">

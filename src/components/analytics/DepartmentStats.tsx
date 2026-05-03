@@ -71,7 +71,7 @@ export function DepartmentStats({ users }: DepartmentStatsProps) {
   }));
 
   return (
-    <div className="bg-(--background) rounded-2xl p-6 shadow-lg border border-(--border)">
+    <div className="bg-(--background-subtle) rounded-2xl p-6 shadow-lg border border-(--border)">
       <h3 className="text-xl font-bold mb-4 text-(--text-primary)">
         🏢 {t('departmentStats.title')}
       </h3>

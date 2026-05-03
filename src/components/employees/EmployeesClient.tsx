@@ -578,7 +578,7 @@ export function EmployeesClient() {
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ delay: i * 0.03 }}
                           onClick={() => router.push(`/employees/${emp._id}`)}
-                          className="relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
+                          className="flex flex-col justify-between relative p-5 rounded-2xl border group cursor-pointer hover:shadow-lg transition-shadow"
                           style={{
                             background: 'var(--card)',
                             borderColor: emp.isActive ? 'var(--border)' : 'rgba(239,68,68,0.2)',
@@ -902,7 +902,7 @@ export function EmployeesClient() {
 
                           {/* Actions — view only on hover */}
                           <div
-                            className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md border"
+                            className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md border"
                             style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
                           >
                             <button
