@@ -225,7 +225,7 @@ export default function HelpSupportPage() {
               <AlertCircle className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden sm:inline">{t('help.tabs.open')}</span>
               <span className="sm:hidden">{t('help.tabs.open')}</span>
-              <Badge variant="warning" className="ml-1 md:ml-2 text-xs">
+              <Badge variant="warning" className="ml-1 md:ml-2 text-xs border-0">
                 {openTickets.length}
               </Badge>
             </TabsTrigger>
@@ -236,7 +236,7 @@ export default function HelpSupportPage() {
               <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden sm:inline">{t('help.tabs.closed')}</span>
               <span className="sm:hidden">{t('help.tabs.closed')}</span>
-              <Badge variant="destructive" className="ml-1 md:ml-2 text-xs">
+              <Badge variant="destructive" className="ml-1 md:ml-2 text-xs border-0">
                 {closedTickets.length}
               </Badge>
             </TabsTrigger>

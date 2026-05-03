@@ -6319,6 +6319,8 @@
     "filterByStatus": "Filter by Status",
     "filterByPeriod": "Filter by Period",
     "allStatuses": "All Statuses",
+    "notificationsDisabled": "Notifications Disabled",
+    "notificationsDisabledHint": "Email notifications are disabled for this organization",
     "taxCountry": "Tax Country",
     "taxRegion": "Tax Region",
     "payFrequency": "Pay Frequency",

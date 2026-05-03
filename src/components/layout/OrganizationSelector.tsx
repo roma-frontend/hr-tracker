@@ -8,6 +8,7 @@ import { useOrgSelectorStore } from '@/store/useOrgSelectorStore';
 import { Building2, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../ui/button';
 
 interface OrgSelectorProps {
   collapsed?: boolean;
@@ -50,24 +51,21 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
   return (
     <div className="px-2 py-3 border-t" style={{ borderColor: 'var(--sidebar-border)' }}>
       <div className="relative">
-        <button
+        <Button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all duration-200',
+            'w-full h-10 flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all duration-200',
             'hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-1',
             'text-sm font-medium',
           )}
-          style={{
-            borderColor: selectedOrgId ? 'var(--primary)' : 'var(--border)',
-            backgroundColor: selectedOrgId ? 'var(--primary)' : 'var(--background-subtle)',
-            color: selectedOrgId ? 'white' : 'var(--text-primary)',
-          }}
           title={selectedOrg?.name || t('employees.selectOrg')}
         >
           <Building2 className="w-4 h-4 shrink-0" />
           {!collapsed && (
             <>
-              <span className="flex-1 truncate text-left">{selectedOrg?.name || t('employees.selectOrg')}</span>
+              <span className="flex-1 truncate text-left">
+                {selectedOrg?.name || t('employees.selectOrg')}
+              </span>
               <ChevronDown
                 className={cn(
                   'w-4 h-4 shrink-0 transition-transform duration-300',
@@ -76,7 +74,7 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
               />
             </>
           )}
-        </button>
+        </Button>
 
         {/* Dropdown Menu */}
         {isOpen && !collapsed && (

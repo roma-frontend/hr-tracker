@@ -5879,6 +5879,8 @@
     "searchPlaceholder": "Որոնում ըստ աշխատակցի անվան կամ ժամանակաշրջանի...",
     "filterByStatus": "Ֆիլտր ըստ կարգավիճակի",
     "filterByPeriod": "Ֆիլտր ըստ ժամանակաշրջանի",
+    "notificationsDisabled": "Ծանուցումները անջատված են",
+    "notificationsDisabledHint": "Էլ. փոստով ծանուցումները անջատված են այս կազմակերպության համար",
     "allStatuses": "Բոլոր կարգավիճակները",
     "taxCountry": "Հարկման երկիր",
     "taxRegion": "Հարկման տարածաշրջան",

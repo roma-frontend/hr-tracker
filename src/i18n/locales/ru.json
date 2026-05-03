@@ -6507,6 +6507,8 @@
     "filterByStatus": "Фильтр по статусу",
     "filterByPeriod": "Фильтр по периоду",
     "allStatuses": "Все статусы",
+    "notificationsDisabled": "Уведомления отключены",
+    "notificationsDisabledHint": "Уведомления по email отключены для этой организации",
     "taxCountry": "Страна налогообложения",
     "taxRegion": "Регион налогообложения",
     "payFrequency": "Частота выплат",

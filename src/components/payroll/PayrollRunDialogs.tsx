@@ -273,7 +273,7 @@ export function CreatePayrollRunDialog({
         onOpenChange(o);
       }}
     >
-      <DialogContent className="sm:max-w-[640px] p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[640px] p-0 overflow-hidden gap-0 max-h-[95vh] flex flex-col">
         <div className="px-5 py-4 md:px-6 md:py-5 border-b border-(--border) bg-gradient-to-r from-(--primary)/10 to-transparent">
           <DialogTitle className="text-lg md:text-xl font-bold text-(--text-primary) flex items-center gap-2">
             <Calendar className="w-5 h-5 text-(--primary)" />
