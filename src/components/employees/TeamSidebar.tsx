@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { createPortal } from 'react-dom';
 import { useLayoutEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 
 interface TeamSidebarProps {
   userId?: Id<'users'>;
@@ -133,7 +134,11 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
   const mobileEase: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 
   // ===== Floating button animation =====
-  const targetTop = '10rem';
+
+  const floatingTop = isMobile
+    ? `calc(env(safe-area-inset-top) + 6rem)`
+    : `calc(env(safe-area-inset-top) + 10rem)`;
+
   const collapsedYOffset = 64;
 
   // меньше высота подъёма (у тебя уже -38)
@@ -434,11 +439,13 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
               >
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold text-white text-[10px] sm:text-xs bg-linear-to-br from-blue-500 to-sky-500">
                   {emp.avatarUrl ? (
-                    <img
+                    <Image
                       src={emp.avatarUrl}
                       alt={emp.name}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
+                      width={32}
+                      height={32}
                     />
                   ) : (
                     emp.name
@@ -632,19 +639,20 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
             }}
             className="fixed right-3 sm:right-6 z-[100] w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-lg flex items-center justify-center"
             style={{
-              top: isMobile ? undefined : targetTop,
-              bottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 33rem)' : undefined,
+              top: floatingTop,
+              right: '16px',
               background: 'var(--primary)',
               color: 'var(--primary-foreground)',
               boxShadow: '0 4px 20px rgba(37, 99, 235, 0.5)',
             }}
             animate={{
+              // ✅ на мобайле не трогаем y (стабильно)
               y: isMobile ? 0 : isPanelCollapsed ? closeY : openY,
               opacity: 1,
               scale: 1,
             }}
             transition={{
-              duration: isMobile ? 0.22 : 0.55,
+              duration: isMobile ? 0.18 : 0.55,
               ease: isMobile ? mobileEase : bezier,
               times: isMobile ? undefined : isPanelCollapsed ? closeTimes : openTimes,
             }}
