@@ -10,6 +10,7 @@ import { MAX_PAGE_SIZE } from './pagination';
 export const getCostAnalysis = query({
   args: {
     period: v.optional(v.union(v.literal('month'), v.literal('quarter'), v.literal('year'))),
+    organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, args) => {
     const period = args.period || 'month';
@@ -30,13 +31,18 @@ export const getCostAnalysis = query({
     const startTimestamp = startDate.getTime();
 
     // Get all approved leave requests in the period
-    const leaves = await ctx.db
+    let leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) =>
         q.and(q.eq(q.field('status'), 'approved'), q.gte(q.field('createdAt'), startTimestamp)),
       )
       .order('desc')
       .take(MAX_PAGE_SIZE);
+
+    // Filter by organization if provided
+    if (args.organizationId) {
+      leaves = leaves.filter((l) => l.organizationId === args.organizationId);
+    }
 
     // Get all users
     const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
@@ -88,14 +94,21 @@ export const getCostAnalysis = query({
  * Detect conflicts in leave schedules
  */
 export const detectConflicts = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    organizationId: v.optional(v.id('organizations')),
+  },
+  handler: async (ctx, { organizationId }) => {
     // Get all approved and pending leaves
-    const leaves = await ctx.db
+    let leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) => q.or(q.eq(q.field('status'), 'approved'), q.eq(q.field('status'), 'pending')))
       .order('desc')
       .take(MAX_PAGE_SIZE);
+
+    // Filter by organization if provided
+    if (organizationId) {
+      leaves = leaves.filter((l) => l.organizationId === organizationId);
+    }
 
     // Get all users
     const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
@@ -108,7 +121,8 @@ export const detectConflicts = query({
       date: string;
       employeesOut: string[];
       severity: 'critical' | 'warning' | 'info';
-      recommendation: string;
+      recommendationKey: string;
+      recommendationParams: Record<string, string | number>;
     }> = [];
 
     // Group leaves by department
@@ -161,7 +175,8 @@ export const detectConflicts = query({
             date,
             employeesOut: Array.from(employeesOut),
             severity: 'critical',
-            recommendation: `Critical: ${outCount}/${deptSize} employees out (${percentage.toFixed(0)}%). Consider rescheduling some leaves.`,
+            recommendationKey: 'conflicts.criticalRecommendation',
+            recommendationParams: { outCount, total: deptSize, percentage: percentage.toFixed(0) },
           });
         } else if (percentage >= 30) {
           conflicts.push({
@@ -170,7 +185,8 @@ export const detectConflicts = query({
             date,
             employeesOut: Array.from(employeesOut),
             severity: 'warning',
-            recommendation: `Warning: ${outCount}/${deptSize} employees out (${percentage.toFixed(0)}%). Monitor workload.`,
+            recommendationKey: 'conflicts.warningRecommendation',
+            recommendationParams: { outCount, total: deptSize, percentage: percentage.toFixed(0) },
           });
         }
       }
@@ -187,23 +203,32 @@ export const detectConflicts = query({
  * Get smart suggestions for leave scheduling
  */
 export const getSmartSuggestions = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    organizationId: v.optional(v.id('organizations')),
+  },
+  handler: async (ctx, { organizationId }) => {
     const suggestions: Array<{
       id: string;
-      title: string;
-      description: string;
+      titleKey: string;
+      descriptionKey: string;
+      descriptionParams: Record<string, string | number>;
       impact: 'high' | 'medium' | 'low';
       category: 'optimization' | 'cost' | 'conflict' | 'policy';
     }> = [];
 
     // Get all users and leaves
-    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
-    const leaves = await ctx.db
+    let users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
+    let leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) => q.eq(q.field('status'), 'approved'))
       .order('desc')
       .take(MAX_PAGE_SIZE);
+
+    // Filter by organization if provided
+    if (organizationId) {
+      users = users.filter((u) => u.organizationId === organizationId);
+      leaves = leaves.filter((l) => l.organizationId === organizationId);
+    }
 
     // Suggestion 1: Users with high leave balances
     const highBalanceUsers = users.filter((u) => {
@@ -214,8 +239,9 @@ export const getSmartSuggestions = query({
     if (highBalanceUsers.length > 0) {
       suggestions.push({
         id: 'high-balance',
-        title: 'Encourage Leave Usage',
-        description: `${highBalanceUsers.length} employees have high leave balances (>30 days). Encourage them to use their leave to avoid year-end issues.`,
+        titleKey: 'suggestion.highBalanceTitle',
+        descriptionKey: 'suggestion.highBalanceDesc',
+        descriptionParams: { count: highBalanceUsers.length },
         impact: 'medium',
         category: 'policy',
       });
@@ -230,8 +256,9 @@ export const getSmartSuggestions = query({
     if (lowBalanceUsers.length > 0) {
       suggestions.push({
         id: 'low-balance',
-        title: 'Review Leave Policies',
-        description: `${lowBalanceUsers.length} employees have very low leave balances (<5 days). Consider reviewing workload distribution.`,
+        titleKey: 'suggestion.lowBalanceTitle',
+        descriptionKey: 'suggestion.lowBalanceDesc',
+        descriptionParams: { count: lowBalanceUsers.length },
         impact: 'high',
         category: 'policy',
       });
@@ -253,8 +280,9 @@ export const getSmartSuggestions = query({
     if (deptsWithoutLeaves.length > 0) {
       suggestions.push({
         id: 'no-planned-leaves',
-        title: 'Departments Without Planned Leaves',
-        description: `${deptsWithoutLeaves.join(', ')} have no upcoming leaves. This might indicate burnout risk.`,
+        titleKey: 'suggestion.noPlannedLeavesTitle',
+        descriptionKey: 'suggestion.noPlannedLeavesDesc',
+        descriptionParams: { departments: deptsWithoutLeaves.join(', ') },
         impact: 'medium',
         category: 'optimization',
       });
@@ -272,8 +300,13 @@ export const getSmartSuggestions = query({
 
       suggestions.push({
         id: 'contractor-costs',
-        title: 'Contractor Leave Costs',
-        description: `${contractorLeaves.length} contractor leaves totaling ${totalDays} days. Estimated cost: $${estimatedCost.toLocaleString()}.`,
+        titleKey: 'suggestion.contractorCostsTitle',
+        descriptionKey: 'suggestion.contractorCostsDesc',
+        descriptionParams: {
+          count: contractorLeaves.length,
+          totalDays,
+          cost: estimatedCost.toLocaleString(),
+        },
         impact: 'high',
         category: 'cost',
       });
@@ -290,14 +323,20 @@ export const getCalendarExportData = query({
   args: {
     startDate: v.optional(v.string()),
     endDate: v.optional(v.string()),
+    organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, args) => {
     // Get all approved leaves
-    const leaves = await ctx.db
+    let leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) => q.eq(q.field('status'), 'approved'))
       .order('desc')
       .take(MAX_PAGE_SIZE);
+
+    // Filter by organization if provided
+    if (args.organizationId) {
+      leaves = leaves.filter((l) => l.organizationId === args.organizationId);
+    }
 
     // Get all users
     const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);

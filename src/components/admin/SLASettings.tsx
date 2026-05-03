@@ -65,10 +65,10 @@ function SLASettings() {
           </div>
           <div>
             <CardTitle className="text-lg font-bold text-(--text-primary)">
-              SLA Configuration
+              {t('sla.title')}
             </CardTitle>
             <CardDescription className="text-sm text-(--text-muted)">
-              Configure response time targets and thresholds
+              {t('sla.description')}
             </CardDescription>
           </div>
         </div>
@@ -77,7 +77,7 @@ function SLASettings() {
         {/* Target Response Time */}
         <div className="space-y-2">
           <Label htmlFor="target" className="text-sm font-medium text-(--text-primary)">
-            Target Response Time (hours)
+            {t('sla.targetHours')}
           </Label>
           <Input
             id="target"
@@ -96,7 +96,7 @@ function SLASettings() {
         {/* Warning Threshold */}
         <div className="space-y-2">
           <Label htmlFor="warning" className="text-sm font-medium text-(--text-primary)">
-            Warning Threshold (%)
+            {t('sla.warningThreshold')}
           </Label>
           <div className="flex items-center gap-3">
             <Input
@@ -109,7 +109,7 @@ function SLASettings() {
               className="max-w-xs"
             />
             <span className="text-sm text-(--text-muted)">
-              = {Math.round((targetHours * warningThreshold) / 100)} hours
+              = {Math.round((targetHours * warningThreshold) / 100)} {t('common.hoursShort')}
             </span>
           </div>
           <p className="text-xs text-(--text-muted)">
@@ -120,7 +120,7 @@ function SLASettings() {
         {/* Critical Threshold */}
         <div className="space-y-2">
           <Label htmlFor="critical" className="text-sm font-medium text-(--text-primary)">
-            Critical Threshold (%)
+            {t('sla.criticalThreshold')}
           </Label>
           <div className="flex items-center gap-3">
             <Input
@@ -133,7 +133,7 @@ function SLASettings() {
               className="max-w-xs"
             />
             <span className="text-sm text-(--text-muted)">
-              = {Math.round((targetHours * criticalThreshold) / 100)} hours
+              = {Math.round((targetHours * criticalThreshold) / 100)} {t('common.hoursShort')}
             </span>
           </div>
           <p className="text-xs text-(--text-muted)">

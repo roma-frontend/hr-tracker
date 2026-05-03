@@ -12,9 +12,18 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Users, Shield, Building2, CheckCircle, Eye, LogOut } from 'lucide-react';
+import ResponseTimeSLA from '@/components/admin/ResponseTimeSLA';
+import SLADashboard from '@/components/admin/SLADashboard';
+import SLASettings from '@/components/admin/SLASettings';
 import type { Id } from '@/convex/_generated/dataModel';
 import type { Doc } from '@/convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
+import HolidayCalendarSync from '@/components/admin/HolidayCalendarSync';
+import SmartSuggestions from '@/components/admin/SmartSuggestions';
+import ConflictDetection from '@/components/admin/ConflictDetection';
+import CostAnalysis from '@/components/admin/CostAnalysis';
+import { MaintenanceModeManager } from '@/components/admin/MaintenanceModeManager';
+import { SuperadminBroadcastsPanel } from '@/components/admin/SuperadminBroadcastsPanel';
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -72,7 +81,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col gap-4">
+    <div className="mx-auto flex flex-col gap-4">
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--primary)/60 border-b border-(--border)">
         <div>
@@ -226,6 +235,38 @@ export default function AdminPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* SLA & Operations Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('admin.slaDashboard')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <SLADashboard organizationId={selectedOrgId || undefined} />
+          <SLASettings />
+          <ResponseTimeSLA organizationId={selectedOrgId || undefined} />
+          <HolidayCalendarSync organizationId={selectedOrgId || undefined} />
+          {selectedOrgId && (
+            <>
+              <MaintenanceModeManager
+                organizationId={selectedOrgId as Id<'organizations'>}
+                userId={user.id as Id<'users'>}
+              />
+              <SuperadminBroadcastsPanel
+                organizationId={selectedOrgId as Id<'organizations'>}
+                userId={user.id as Id<'users'>}
+              />
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Analytics & Insights */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <SmartSuggestions organizationId={selectedOrgId || undefined} />
+        <ConflictDetection organizationId={selectedOrgId || undefined} />
+      </div>
+      <CostAnalysis organizationId={selectedOrgId || undefined} />
     </div>
   );
 }

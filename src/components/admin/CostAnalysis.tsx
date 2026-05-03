@@ -9,11 +9,18 @@ import { Button } from '@/components/ui/button';
 import { DollarSign } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
-export default function CostAnalysis() {
+interface CostAnalysisProps {
+  organizationId?: string;
+}
+
+export default function CostAnalysis({ organizationId }: CostAnalysisProps) {
   const { t } = useTranslation();
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
 
-  const data = useQuery(api.admin.getCostAnalysis, { period });
+  const data = useQuery(api.admin.getCostAnalysis, {
+    period,
+    organizationId: organizationId as any,
+  });
 
   if (!data) {
     return (
@@ -31,7 +38,7 @@ export default function CostAnalysis() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-green-500" />
-            Cost Analysis
+            {t('costAnalysis.title')}
           </CardTitle>
           <div className="flex gap-2">
             <Button
@@ -39,21 +46,21 @@ export default function CostAnalysis() {
               size="sm"
               onClick={() => setPeriod('month')}
             >
-              Month
+              {t('costAnalysis.month')}
             </Button>
             <Button
               variant={period === 'quarter' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setPeriod('quarter')}
             >
-              Quarter
+              {t('costAnalysis.quarter')}
             </Button>
             <Button
               variant={period === 'year' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setPeriod('year')}
             >
-              Year
+              {t('costAnalysis.year')}
             </Button>
           </div>
         </div>
@@ -68,7 +75,8 @@ export default function CostAnalysis() {
                 ${data.totalCost.toLocaleString()}
               </p>
               <p className="mt-1 text-xs text-(--text-secondary)">
-                {data.totalLeaves} leaves В· {data.totalDays} days
+                {data.totalLeaves} {t('costAnalysis.leaves')} · {data.totalDays}{' '}
+                {t('costAnalysis.days')}
               </p>
             </div>
           </div>
@@ -129,9 +137,7 @@ export default function CostAnalysis() {
         )}
 
         {data.totalCost === 0 && (
-          <p className="text-center text-sm text-(--text-secondary)">
-            {t('costAnalysis.noData')}
-          </p>
+          <p className="text-center text-sm text-(--text-secondary)">{t('costAnalysis.noData')}</p>
         )}
       </CardContent>
     </Card>

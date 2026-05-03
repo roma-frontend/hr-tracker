@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
@@ -16,6 +17,8 @@ interface MaintenanceModeManagerProps {
 }
 
 export function MaintenanceModeManager({ organizationId, userId }: MaintenanceModeManagerProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'hy' ? 'hy-AM' : 'en-US';
   const [disabling, setDisabling] = useState(false);
   const maintenance = useQuery(
     api.admin.getMaintenanceMode,
@@ -48,13 +51,13 @@ export function MaintenanceModeManager({ organizationId, userId }: MaintenanceMo
   const endTime = maintenance.endTime ? new Date(maintenance.endTime) : null;
 
   return (
-    <Card className="border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20">
+    <Card className="border-destructive/30 bg-destructive/10">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-destructive mt-0.5" />
             <div>
-              <CardTitle className="text-red-700 dark:text-red-300">Сайт На Обслуживании</CardTitle>
+              <CardTitle className="text-destructive">{t('maintenance.siteMaintenance')}</CardTitle>
               <CardDescription>{maintenance.title}</CardDescription>
             </div>
           </div>
@@ -63,60 +66,64 @@ export function MaintenanceModeManager({ organizationId, userId }: MaintenanceMo
 
       <CardContent className="space-y-4">
         {/* Status Message */}
-        <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg border border-red-200 dark:border-red-800">
-          <p className="text-sm text-red-800 dark:text-red-200">{maintenance.message}</p>
+        <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+          <p className="text-sm text-destructive">{maintenance.message}</p>
         </div>
 
         {/* Timeline */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Начало обслуживания</p>
-            <p className="text-sm font-semibold">{startTime.toLocaleString('ru-RU')}</p>
+            <p className="text-xs text-muted-foreground font-medium">
+              {t('maintenance.maintenanceStarted')}
+            </p>
+            <p className="text-sm font-semibold">{startTime.toLocaleString(locale)}</p>
           </div>
 
           {maintenance.estimatedDuration && (
             <div>
-              <p className="text-xs text-muted-foreground font-medium">Примерная длительность</p>
+              <p className="text-xs text-muted-foreground font-medium">
+                {t('maintenance.estimatedDuration')}
+              </p>
               <p className="text-sm font-semibold">{maintenance.estimatedDuration}</p>
             </div>
           )}
 
           {endTime && (
             <div>
-              <p className="text-xs text-muted-foreground font-medium">Ожидаемое окончание</p>
-              <p className="text-sm font-semibold">{endTime.toLocaleString('ru-RU')}</p>
+              <p className="text-xs text-muted-foreground font-medium">
+                {t('maintenance.expectedEnd')}
+              </p>
+              <p className="text-sm font-semibold">{endTime.toLocaleString(locale)}</p>
             </div>
           )}
         </div>
 
         {/* Warning */}
-        <div className="bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
-          <p className="text-xs text-yellow-800 dark:text-yellow-200">
-            ⚠️ <strong>Внимание:</strong> Сайт в настоящее время недоступен для всех пользователей,
-            кроме SuperAdmin.
-          </p>
+        <div className="bg-warning/10 p-3 rounded-lg border border-warning/20">
+          <p className="text-xs text-warning">{t('maintenance.warning')}</p>
         </div>
 
         {/* Action Button */}
         <Button
           onClick={handleDisable}
           disabled={disabling}
-          className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white gap-2"
+          className="w-full bg-success hover:bg-success/90 text-white gap-2"
         >
           {disabling ? (
             <>
               <ShieldLoader size="xs" variant="inline" />
-              Включение сайта...
+              {t('maintenance.enablingSite')}
             </>
           ) : (
             <>
-              <PowerOff className="w-4 h-4" />✅ Включить сайт
+              <PowerOff className="w-4 h-4" />
+              {t('maintenance.enableSite')}
             </>
           )}
         </Button>
 
         <p className="text-xs text-muted-foreground text-center">
-          Сайт снова станет доступен для всех пользователей
+          {t('maintenance.siteWillBeAvailable')}
         </p>
       </CardContent>
     </Card>

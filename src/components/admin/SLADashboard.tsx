@@ -10,6 +10,7 @@
 
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,8 +41,15 @@ interface SLAMetric {
   createdAt: number;
 }
 
-export function SLADashboard() {
-  const slaMetrics = useQuery(api.sla.getSLAStats as any) ?? [];
+interface SLADashboardProps {
+  organizationId?: string;
+}
+
+function SLADashboard({ organizationId }: SLADashboardProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'hy' ? 'hy-AM' : 'en-US';
+  const slaMetricsRaw = useQuery(api.sla.getSLAStats, { organizationId: organizationId as any });
+  const slaMetrics = Array.isArray(slaMetricsRaw) ? slaMetricsRaw : [];
   const slaConfig = useQuery(api.sla.getSLAConfig);
 
   // Calculate statistics
@@ -104,21 +112,26 @@ export function SLADashboard() {
       {/* Average Response Time */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
-          <Timer className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">{t('slaDashboard.avgResponseTime')}</CardTitle>
+          <Timer className="h-4 w-4 text-(--text-muted)" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{avgResponseTime.toFixed(1)}h</div>
-          <p className="text-xs text-muted-foreground">Target: {targetHours}h</p>
+          <div className="text-2xl font-bold">
+            {avgResponseTime.toFixed(1)}
+            {t('common.hoursShort')}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {t('slaDashboard.targetHours', { hours: targetHours })}
+          </p>
           {avgResponseTime <= targetHours ? (
-            <div className="flex items-center text-green-600 text-xs mt-1">
+            <div className="flex items-center text-success text-xs mt-1">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Within target
+              {t('slaDashboard.withinTarget')}
             </div>
           ) : (
-            <div className="flex items-center text-red-600 text-xs mt-1">
+            <div className="flex items-center text-destructive text-xs mt-1">
               <AlertCircle className="h-3 w-3 mr-1" />
-              Above target
+              {t('slaDashboard.aboveTarget')}
             </div>
           )}
         </CardContent>
@@ -127,21 +140,21 @@ export function SLADashboard() {
       {/* SLA Compliance Rate */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">SLA Compliance</CardTitle>
-          <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">{t('slaDashboard.slaCompliance')}</CardTitle>
+          <CheckCircle2 className="h-4 w-4 text-(--text-muted)" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{complianceRate.toFixed(1)}%</div>
           <Progress value={complianceRate} className="mt-2" />
           <div
-            className={`flex items-center text-xs mt-1 ${isImproving ? 'text-green-600' : 'text-red-600'}`}
+            className={`flex items-center text-xs mt-1 ${isImproving ? 'text-success' : 'text-destructive'}`}
           >
             {isImproving ? (
               <TrendingUp className="h-3 w-3 mr-1" />
             ) : (
               <TrendingDown className="h-3 w-3 mr-1" />
             )}
-            {Math.abs(trend).toFixed(1)}% vs last week
+            {t('slaDashboard.vsLastWeek', { trend: Math.abs(trend).toFixed(1) })}
           </div>
         </CardContent>
       </Card>
@@ -149,17 +162,17 @@ export function SLADashboard() {
       {/* Pending Requests */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
-          <Clock className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">{t('slaDashboard.pendingRequests')}</CardTitle>
+          <Clock className="h-4 w-4 text-(--text-muted)" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{pendingMetrics}</div>
           <p className="text-xs text-muted-foreground">
-            {onTimeMetrics} on-time, {breachedMetrics} breached
+            {t('slaDashboard.onTimeBreached', { onTime: onTimeMetrics, breached: breachedMetrics })}
           </p>
           {pendingMetrics > 0 && (
             <Badge variant="secondary" className="mt-2">
-              Needs attention
+              {t('slaDashboard.needsAttention')}
             </Badge>
           )}
         </CardContent>
@@ -168,63 +181,63 @@ export function SLADashboard() {
       {/* Alerts */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Alerts</CardTitle>
-          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">{t('slaDashboard.alerts')}</CardTitle>
+          <AlertTriangle className="h-4 w-4 text-(--text-muted)" />
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <div>
-              <div className="text-2xl font-bold text-yellow-600">{warningCount}</div>
-              <p className="text-xs text-muted-foreground">Warnings</p>
+              <div className="text-2xl font-bold text-warning">{warningCount}</div>
+              <p className="text-xs text-muted-foreground">{t('slaDashboard.warnings')}</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-red-600">{criticalCount}</div>
-              <p className="text-xs text-muted-foreground">Critical</p>
+              <div className="text-2xl font-bold text-destructive">{criticalCount}</div>
+              <p className="text-xs text-muted-foreground">{t('slaDashboard.critical')}</p>
             </div>
           </div>
           {(warningCount > 0 || criticalCount > 0) && (
             <Badge variant="destructive" className="mt-2">
-              Action required
+              {t('slaDashboard.actionRequired')}
             </Badge>
           )}
         </CardContent>
       </Card>
 
       {/* Detailed SLA Breakdown */}
-      <Card className="md:col-span-2 lg:col-span-4">
+      <Card className="md:col-span-2 lg:col-span-4 my-6">
         <CardHeader>
-          <CardTitle>SLA Performance Breakdown</CardTitle>
-          <CardDescription>Response time distribution for the last 30 days</CardDescription>
+          <CardTitle>{t('slaDashboard.performanceBreakdown')}</CardTitle>
+          <CardDescription>{t('slaDashboard.responseTimeDistribution')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {/* On-time requests */}
             <div className="flex items-center gap-4">
-              <div className="w-32 text-sm font-medium">On Time</div>
+              <div className="w-32 text-sm font-medium">{t('slaDashboard.onTime')}</div>
               <div className="flex-1">
                 <Progress value={complianceRate} className="h-2" />
               </div>
               <div className="w-20 text-right text-sm">
                 {onTimeMetrics} ({complianceRate.toFixed(0)}%)
               </div>
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <CheckCircle2 className="h-5 w-5 text-success" />
             </div>
 
             {/* Breached requests */}
             <div className="flex items-center gap-4">
-              <div className="w-32 text-sm font-medium">Breached</div>
+              <div className="w-32 text-sm font-medium">{t('slaDashboard.breached')}</div>
               <div className="flex-1">
                 <Progress value={100 - complianceRate} className="h-2 [&>div]:bg-destructive" />
               </div>
               <div className="w-20 text-right text-sm">
                 {breachedMetrics} ({(100 - complianceRate).toFixed(0)}%)
               </div>
-              <AlertCircle className="h-5 w-5 text-red-600" />
+              <AlertCircle className="h-5 w-5 text-destructive" />
             </div>
 
             {/* Pending requests */}
             <div className="flex items-center gap-4">
-              <div className="w-32 text-sm font-medium">Pending</div>
+              <div className="w-32 text-sm font-medium">{t('slaDashboard.pending')}</div>
               <div className="flex-1">
                 <Progress
                   value={(pendingMetrics / totalMetrics) * 100}
@@ -241,15 +254,17 @@ export function SLADashboard() {
 
           {/* SLA Config Info */}
           {slaConfig && (
-            <div className="mt-6 p-4 bg-muted rounded-lg">
+            <div className="mt-6 p-4 bg-(--background-subtle) rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">SLA Configuration</p>
+                  <p className="text-sm font-medium">{t('slaDashboard.slaConfiguration')}</p>
                   <p className="text-xs text-muted-foreground">
-                    Target response time: {slaConfig.targetResponseTimeHours}h
+                    {t('slaDashboard.targetResponseTime', {
+                      hours: slaConfig.targetResponseTimeHours,
+                    })}
                   </p>
                 </div>
-                <Badge variant="outline">24/7</Badge>
+                <Badge variant="outline">{t('slaDashboard.fullTime')}</Badge>
               </div>
             </div>
           )}
@@ -258,3 +273,5 @@ export function SLADashboard() {
     </div>
   );
 }
+
+export default SLADashboard;

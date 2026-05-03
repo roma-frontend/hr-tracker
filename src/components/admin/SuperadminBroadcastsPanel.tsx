@@ -81,7 +81,7 @@ export function SuperadminBroadcastsPanel({
           </div>
         </CardContent>
 
-        {/* Dialog для создания нового объявления */}
+        {/* Dialog for creating a new broadcast */}
         <ServiceBroadcastDialog
           open={broadcastDialogOpen}
           onOpenChange={setBroadcastDialogOpen}

@@ -120,7 +120,7 @@ export function TripDetailsModal({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: 20 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full h-full flex flex-col"
+      className="w-full h-[85vh] flex flex-col"
     >
       <div className="rounded-2xl shadow-2xl overflow-hidden w-full h-full flex flex-col">
         {/* Header with gradient */}

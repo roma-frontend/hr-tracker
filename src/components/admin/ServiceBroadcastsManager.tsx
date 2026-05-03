@@ -18,7 +18,7 @@ import {
 import { Edit2, Trash2, MessageCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { enUS, ru, hy } from 'date-fns/locale';
-import i18n from 'i18next';
+import { useTranslation } from 'react-i18next';
 import type { Id } from '../../../convex/_generated/dataModel';
 
 interface ServiceBroadcastsManagerProps {
@@ -30,6 +30,7 @@ export function ServiceBroadcastsManager({
   organizationId,
   userId,
 }: ServiceBroadcastsManagerProps) {
+  const { t, i18n } = useTranslation();
   const broadcasts = useQuery(api.chat.queries.getServiceBroadcasts, {
     organizationId,
   });
@@ -65,7 +66,7 @@ export function ServiceBroadcastsManager({
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[ServiceBroadcastsManager] ✗ Failed to delete broadcast:', errorMsg);
-      alert(`Не удалось удалить объявление: ${errorMsg}`);
+      alert(t('broadcasts.deleteFailed', { error: errorMsg }));
     } finally {
       setIsDeleting(false);
     }
@@ -77,7 +78,7 @@ export function ServiceBroadcastsManager({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
-            История объявлений
+            {t('broadcasts.historyTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -95,13 +96,13 @@ export function ServiceBroadcastsManager({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
-            История объявлений
+            {t('broadcasts.historyTitle')}
           </CardTitle>
-          <CardDescription>Нет отправленных объявлений в этой организации</CardDescription>
+          <CardDescription>{t('broadcasts.noAnnouncements')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            Создавайте новые объявления, используя кнопку выше →
+            {t('broadcasts.createNewAbove')}
           </div>
         </CardContent>
       </Card>
@@ -114,11 +115,9 @@ export function ServiceBroadcastsManager({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
-            История объявлений ({broadcasts.length})
+            {t('broadcasts.historyTitle')} ({broadcasts.length})
           </CardTitle>
-          <CardDescription>
-            Просмотр, редактирование и удаление отправленных сообщений
-          </CardDescription>
+          <CardDescription>{t('broadcasts.manageBroadcasts')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -160,12 +159,7 @@ export function ServiceBroadcastsManager({
                           locale: dateFnsLocale,
                         })}
                       </div>
-                      <div>
-                        от{' '}
-                        <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {broadcast.senderName}
-                        </span>
-                      </div>
+                      <div>{t('broadcasts.fromSender', { sender: broadcast.senderName })}</div>
                     </div>
                   </div>
                 </div>
@@ -177,7 +171,7 @@ export function ServiceBroadcastsManager({
                     size="sm"
                     className="gap-2"
                     disabled
-                    title="Редактирование объявлений вскоре"
+                    title={t('broadcasts.editSoon')}
                     style={{
                       backgroundColor: 'var(--background-subtle)',
                       borderColor: 'var(--border)',
@@ -214,7 +208,7 @@ export function ServiceBroadcastsManager({
                     }}
                   >
                     <Trash2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Удалить</span>
+                    <span className="hidden sm:inline">{t('broadcasts.delete')}</span>
                   </Button>
                 </div>
               </div>
@@ -234,11 +228,10 @@ export function ServiceBroadcastsManager({
         >
           <AlertDialogHeader>
             <AlertDialogTitle style={{ color: 'var(--text-primary)' }}>
-              Удалить объявление?
+              {t('broadcasts.deleteConfirmTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription style={{ color: 'var(--text-muted)' }}>
-              Это объявление будет удалено для всех пользователей организации. Это действие не может
-              быть отменено.
+              {t('broadcasts.deleteConfirmDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogCancel
@@ -259,7 +252,7 @@ export function ServiceBroadcastsManager({
               (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--background-subtle)';
             }}
           >
-            Отменить
+            {t('common.cancel')}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirmDelete}
@@ -278,7 +271,7 @@ export function ServiceBroadcastsManager({
               (e.currentTarget as HTMLElement).style.opacity = '1';
             }}
           >
-            {isDeleting ? 'Удаление...' : 'Удалить навсегда'}
+            {isDeleting ? t('broadcasts.deleting') : t('broadcasts.deleteForever')}
           </AlertDialogAction>
         </AlertDialogContent>
       </AlertDialog>

@@ -503,7 +503,7 @@ export function QuickActionsPalette() {
         className="flex items-center gap-2 px-3 py-2 text-sm text-(--muted-foreground) hover:text-(--foreground) transition-colors"
       >
         <Command className="w-4 h-4" />
-        <span className="hidden md:inline">{t('superadmin.quickActions.title') || 'Команды'}</span>
+        <span className="hidden md:inline">{t('superadmin.quickActions.title')}</span>
         <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-(--background-subtle) border border-(--border) rounded text-[10px] font-medium text-(--muted-foreground)">
           <span>⌘K</span>
         </kbd>
@@ -569,7 +569,7 @@ export function QuickActionsPalette() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center py-8 text-muted-foreground">
-                    <p>{t('superadmin.quickActions.noResults') || 'Ничего не найдено'}</p>
+                    <p>{t('superadmin.quickActions.noResults')}</p>
                   </div>
                 )
               ) : (

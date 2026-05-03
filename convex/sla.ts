@@ -1,5 +1,5 @@
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
 
 // ── Helper: Calculate response time in hours ──────────────────────────────
 function calculateResponseTime(
@@ -8,7 +8,7 @@ function calculateResponseTime(
   businessHoursOnly: boolean,
   businessStartHour: number,
   businessEndHour: number,
-  excludeWeekends: boolean
+  excludeWeekends: boolean,
 ): number {
   if (!businessHoursOnly) {
     // Simple calculation: total hours
@@ -19,23 +19,23 @@ function calculateResponseTime(
   let totalHours = 0;
   const start = new Date(submittedAt);
   const end = new Date(respondedAt);
-  
+
   let current = new Date(start);
-  
+
   while (current < end) {
     const dayOfWeek = current.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    
+
     if (excludeWeekends && isWeekend) {
       // Skip to next day
       current.setDate(current.getDate() + 1);
       current.setHours(businessStartHour, 0, 0, 0);
       continue;
     }
-    
+
     const currentHour = current.getHours();
     const currentMinutes = current.getMinutes();
-    
+
     if (currentHour < businessStartHour) {
       // Before business hours - skip to start
       current.setHours(businessStartHour, 0, 0, 0);
@@ -47,7 +47,7 @@ function calculateResponseTime(
       // During business hours - count this hour
       const nextHour = new Date(current);
       nextHour.setHours(currentHour + 1, 0, 0, 0);
-      
+
       if (nextHour > end) {
         // Last partial hour
         totalHours += (end.getTime() - current.getTime()) / (1000 * 60 * 60);
@@ -65,7 +65,7 @@ function calculateResponseTime(
       }
     }
   }
-  
+
   return totalHours;
 }
 
@@ -74,7 +74,7 @@ function calculateSLAScore(responseTimeHours: number, targetHours: number): numb
   if (responseTimeHours <= targetHours) {
     // On time: scale from 100 (instant) to 80 (at target)
     const ratio = responseTimeHours / targetHours;
-    return Math.max(80, 100 - (ratio * 20));
+    return Math.max(80, 100 - ratio * 20);
   } else {
     // Breached: scale from 79 (just over) to 0 (3x target)
     const overageRatio = (responseTimeHours - targetHours) / targetHours;
@@ -87,7 +87,7 @@ function calculateSLAScore(responseTimeHours: number, targetHours: number): numb
 export const getSLAConfig = query({
   args: {},
   handler: async (ctx) => {
-    const config = await ctx.db.query("slaConfig").first();
+    const config = await ctx.db.query('slaConfig').first();
     if (!config) {
       // Return default config without creating
       return {
@@ -108,12 +108,12 @@ export const getSLAConfig = query({
 export const getOrCreateSLAConfig = query({
   args: {},
   handler: async (ctx) => {
-    const configs = await ctx.db.query("slaConfig").collect();
-    
+    const configs = await ctx.db.query('slaConfig').collect();
+
     if (configs.length > 0) {
       return configs[0];
     }
-    
+
     // Return default config (will be created on first update)
     return {
       targetResponseTime: 24, // 24 hours
@@ -133,7 +133,7 @@ export const getOrCreateSLAConfig = query({
 // ── Update SLA Configuration ──────────────────────────────────────────────
 export const updateSLAConfig = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     targetResponseTime: v.number(),
     warningThreshold: v.number(),
     criticalThreshold: v.number(),
@@ -147,9 +147,9 @@ export const updateSLAConfig = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, ...config } = args;
-    
-    const existing = await ctx.db.query("slaConfig").first();
-    
+
+    const existing = await ctx.db.query('slaConfig').first();
+
     if (existing) {
       await ctx.db.patch(existing._id, {
         ...config,
@@ -158,7 +158,7 @@ export const updateSLAConfig = mutation({
       });
       return existing._id;
     } else {
-      return await ctx.db.insert("slaConfig", {
+      return await ctx.db.insert('slaConfig', {
         ...config,
         updatedBy: userId,
         updatedAt: Date.now(),
@@ -170,20 +170,20 @@ export const updateSLAConfig = mutation({
 // ── Create SLA Metric (when leave request is created) ────────────────────
 export const createSLAMetric = mutation({
   args: {
-    leaveRequestId: v.id("leaveRequests"),
+    leaveRequestId: v.id('leaveRequests'),
   },
   handler: async (ctx, { leaveRequestId }) => {
     const leave = await ctx.db.get(leaveRequestId);
-    if (!leave) throw new Error("Leave request not found");
-    
-    const config = await ctx.db.query("slaConfig").first();
+    if (!leave) throw new Error('Leave request not found');
+
+    const config = await ctx.db.query('slaConfig').first();
     const targetResponseTime = config?.targetResponseTime ?? 24;
-    
-    return await ctx.db.insert("slaMetrics", {
+
+    return await ctx.db.insert('slaMetrics', {
       leaveRequestId,
       submittedAt: leave.createdAt,
       targetResponseTime,
-      status: "pending",
+      status: 'pending',
       warningTriggered: false,
       criticalTriggered: false,
       createdAt: Date.now(),
@@ -194,40 +194,40 @@ export const createSLAMetric = mutation({
 // ── Update SLA Metric (when leave is approved/rejected) ──────────────────
 export const updateSLAMetric = mutation({
   args: {
-    leaveRequestId: v.id("leaveRequests"),
+    leaveRequestId: v.id('leaveRequests'),
   },
   handler: async (ctx, { leaveRequestId }) => {
     const leave = await ctx.db.get(leaveRequestId);
-    if (!leave || !leave.reviewedAt) throw new Error("Leave not reviewed");
-    
+    if (!leave || !leave.reviewedAt) throw new Error('Leave not reviewed');
+
     const metric = await ctx.db
-      .query("slaMetrics")
-      .withIndex("by_leave", (q) => q.eq("leaveRequestId", leaveRequestId))
+      .query('slaMetrics')
+      .withIndex('by_leave', (q) => q.eq('leaveRequestId', leaveRequestId))
       .first();
-    
-    if (!metric) throw new Error("SLA metric not found");
-    
-    const config = await ctx.db.query("slaConfig").first();
-    
+
+    if (!metric) throw new Error('SLA metric not found');
+
+    const config = await ctx.db.query('slaConfig').first();
+
     const responseTimeHours = calculateResponseTime(
       metric.submittedAt,
       leave.reviewedAt,
       config?.businessHoursOnly ?? false,
       config?.businessStartHour ?? 9,
       config?.businessEndHour ?? 17,
-      config?.excludeWeekends ?? false
+      config?.excludeWeekends ?? false,
     );
-    
+
     const slaScore = calculateSLAScore(responseTimeHours, metric.targetResponseTime);
-    const status = responseTimeHours <= metric.targetResponseTime ? "on_time" : "breached";
-    
+    const status = responseTimeHours <= metric.targetResponseTime ? 'on_time' : 'breached';
+
     await ctx.db.patch(metric._id, {
       respondedAt: leave.reviewedAt,
       responseTimeHours,
       slaScore,
       status,
     });
-    
+
     return metric._id;
   },
 });
@@ -237,10 +237,16 @@ export const getSLAStats = query({
   args: {
     startDate: v.optional(v.number()),
     endDate: v.optional(v.number()),
+    organizationId: v.optional(v.id('organizations')),
   },
-  handler: async (ctx, { startDate, endDate }) => {
-    let metrics = await ctx.db.query("slaMetrics").collect();
-    
+  handler: async (ctx, { startDate, endDate, organizationId }) => {
+    let metrics = await ctx.db.query('slaMetrics').collect();
+
+    // Filter by organization if provided
+    if (organizationId) {
+      metrics = metrics.filter((m) => m.organizationId === organizationId);
+    }
+
     // Filter by date range if provided
     if (startDate) {
       metrics = metrics.filter((m) => m.submittedAt >= startDate);
@@ -248,41 +254,46 @@ export const getSLAStats = query({
     if (endDate) {
       metrics = metrics.filter((m) => m.submittedAt <= endDate);
     }
-    
+    if (endDate) {
+      metrics = metrics.filter((m) => m.submittedAt <= endDate);
+    }
+
     const total = metrics.length;
-    const pending = metrics.filter((m) => m.status === "pending").length;
-    const onTime = metrics.filter((m) => m.status === "on_time").length;
-    const breached = metrics.filter((m) => m.status === "breached").length;
-    
+    const pending = metrics.filter((m) => m.status === 'pending').length;
+    const onTime = metrics.filter((m) => m.status === 'on_time').length;
+    const breached = metrics.filter((m) => m.status === 'breached').length;
+
     const completed = metrics.filter((m) => m.responseTimeHours !== undefined);
-    const avgResponseTime = completed.length > 0
-      ? completed.reduce((sum, m) => sum + (m.responseTimeHours ?? 0), 0) / completed.length
-      : 0;
-    
-    const avgSLAScore = completed.length > 0
-      ? completed.reduce((sum, m) => sum + (m.slaScore ?? 0), 0) / completed.length
-      : 0;
-    
+    const avgResponseTime =
+      completed.length > 0
+        ? completed.reduce((sum, m) => sum + (m.responseTimeHours ?? 0), 0) / completed.length
+        : 0;
+
+    const avgSLAScore =
+      completed.length > 0
+        ? completed.reduce((sum, m) => sum + (m.slaScore ?? 0), 0) / completed.length
+        : 0;
+
     const complianceRate = total > 0 ? (onTime / (onTime + breached)) * 100 : 100;
-    
+
     // Get config
-    const config = await ctx.db.query("slaConfig").first();
+    const config = await ctx.db.query('slaConfig').first();
     const targetResponseTime = config?.targetResponseTime ?? 24;
-    
+
     // Check pending requests for warnings
     const now = Date.now();
     const warningCount = metrics.filter((m) => {
-      if (m.status !== "pending") return false;
+      if (m.status !== 'pending') return false;
       const elapsed = (now - m.submittedAt) / (1000 * 60 * 60);
       return elapsed >= (config?.warningThreshold ?? 18);
     }).length;
-    
+
     const criticalCount = metrics.filter((m) => {
-      if (m.status !== "pending") return false;
+      if (m.status !== 'pending') return false;
       const elapsed = (now - m.submittedAt) / (1000 * 60 * 60);
       return elapsed >= (config?.criticalThreshold ?? 22);
     }).length;
-    
+
     return {
       total,
       pending,
@@ -300,45 +311,52 @@ export const getSLAStats = query({
 
 // ── Get Pending Requests with SLA Info ────────────────────────────────────
 export const getPendingWithSLA = query({
-  args: {},
-  handler: async (ctx) => {
-    const pendingLeaves = await ctx.db
-      .query("leaveRequests")
-      .withIndex("by_status", (q) => q.eq("status", "pending"))
+  args: {
+    organizationId: v.optional(v.id('organizations')),
+  },
+  handler: async (ctx, { organizationId }) => {
+    let pendingLeaves = await ctx.db
+      .query('leaveRequests')
+      .withIndex('by_status', (q) => q.eq('status', 'pending'))
       .collect();
-    
-    const config = await ctx.db.query("slaConfig").first();
+
+    // Filter by organization if provided
+    if (organizationId) {
+      pendingLeaves = pendingLeaves.filter((l) => l.organizationId === organizationId);
+    }
+
+    const config = await ctx.db.query('slaConfig').first();
     const now = Date.now();
-    
+
     return await Promise.all(
       pendingLeaves.map(async (leave) => {
         const user = await ctx.db.get(leave.userId);
         const metric = await ctx.db
-          .query("slaMetrics")
-          .withIndex("by_leave", (q) => q.eq("leaveRequestId", leave._id))
+          .query('slaMetrics')
+          .withIndex('by_leave', (q) => q.eq('leaveRequestId', leave._id))
           .first();
-        
+
         const elapsedHours = (now - leave.createdAt) / (1000 * 60 * 60);
         const targetHours = metric?.targetResponseTime ?? config?.targetResponseTime ?? 24;
         const remainingHours = Math.max(0, targetHours - elapsedHours);
         const progressPercent = Math.min(100, (elapsedHours / targetHours) * 100);
-        
-        let slaStatus: "normal" | "warning" | "critical" | "breached";
+
+        let slaStatus: 'normal' | 'warning' | 'critical' | 'breached';
         if (elapsedHours >= targetHours) {
-          slaStatus = "breached";
+          slaStatus = 'breached';
         } else if (elapsedHours >= (config?.criticalThreshold ?? 22)) {
-          slaStatus = "critical";
+          slaStatus = 'critical';
         } else if (elapsedHours >= (config?.warningThreshold ?? 18)) {
-          slaStatus = "warning";
+          slaStatus = 'warning';
         } else {
-          slaStatus = "normal";
+          slaStatus = 'normal';
         }
-        
+
         return {
           ...leave,
-          userName: user?.name ?? "Unknown",
-          userEmail: user?.email ?? "",
-          userDepartment: user?.department ?? "",
+          userName: user?.name ?? 'Unknown',
+          userEmail: user?.email ?? '',
+          userDepartment: user?.department ?? '',
           userAvatarUrl: user?.avatarUrl,
           sla: {
             elapsedHours: Math.round(elapsedHours * 10) / 10,
@@ -348,7 +366,7 @@ export const getPendingWithSLA = query({
             status: slaStatus,
           },
         };
-      })
+      }),
     );
   },
 });
@@ -357,29 +375,38 @@ export const getPendingWithSLA = query({
 export const getSLATrend = query({
   args: {
     days: v.number(), // Last N days
+    organizationId: v.optional(v.id('organizations')),
   },
-  handler: async (ctx, { days }) => {
-    const startDate = Date.now() - (days * 24 * 60 * 60 * 1000);
-    const metrics = await ctx.db
-      .query("slaMetrics")
-      .withIndex("by_submitted")
-      .filter((q) => q.gte(q.field("submittedAt"), startDate))
+  handler: async (ctx, { days, organizationId }) => {
+    const startDate = Date.now() - days * 24 * 60 * 60 * 1000;
+    let metrics = await ctx.db
+      .query('slaMetrics')
+      .withIndex('by_submitted')
+      .filter((q) => q.gte(q.field('submittedAt'), startDate))
       .collect();
-    
+
+    // Filter by organization if provided
+    if (organizationId) {
+      metrics = metrics.filter((m) => m.organizationId === organizationId);
+    }
+
     // Group by day
-    const dailyData: Record<string, { date: string; onTime: number; breached: number; avgResponseTime: number; count: number }> = {};
+    const dailyData: Record<
+      string,
+      { date: string; onTime: number; breached: number; avgResponseTime: number; count: number }
+    > = {};
 
     metrics.forEach((metric) => {
-      const date = new Date(metric.submittedAt).toISOString().split("T")[0] || "";
+      const date = new Date(metric.submittedAt).toISOString().split('T')[0] || '';
       if (!date) return;
 
       if (!dailyData[date]) {
         dailyData[date] = { date, onTime: 0, breached: 0, avgResponseTime: 0, count: 0 };
       }
 
-      if (metric.status === "on_time") {
+      if (metric.status === 'on_time') {
         dailyData[date]!.onTime++;
-      } else if (metric.status === "breached") {
+      } else if (metric.status === 'breached') {
         dailyData[date]!.breached++;
       }
 
@@ -388,25 +415,29 @@ export const getSLATrend = query({
         dailyData[date]!.count++;
       }
     });
-    
+
     // Calculate averages and convert to array
-    return Object.values(dailyData).map((day) => ({
-      date: day.date,
-      onTime: day.onTime,
-      breached: day.breached,
-      avgResponseTime: day.count > 0 ? Math.round((day.avgResponseTime / day.count) * 10) / 10 : 0,
-      complianceRate: (day.onTime + day.breached) > 0 
-        ? Math.round((day.onTime / (day.onTime + day.breached)) * 100) 
-        : 100,
-    })).sort((a, b) => a.date.localeCompare(b.date));
+    return Object.values(dailyData)
+      .map((day) => ({
+        date: day.date,
+        onTime: day.onTime,
+        breached: day.breached,
+        avgResponseTime:
+          day.count > 0 ? Math.round((day.avgResponseTime / day.count) * 10) / 10 : 0,
+        complianceRate:
+          day.onTime + day.breached > 0
+            ? Math.round((day.onTime / (day.onTime + day.breached)) * 100)
+            : 100,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
   },
 });
-  
-"// �� Get All SLA Metrics (for dashboard) �����������������������������������"  
-"export const getAllSLAMetrics = query({"  
-"  args: {},"  
-"  handler: async (ctx) => {"  
-"    const metrics = await ctx.db.query(\"slaMetrics\").collect();"  
-"    return metrics;"  
-"  },"  
-"});" 
+
+('// �� Get All SLA Metrics (for dashboard) �����������������������������������');
+('export const getAllSLAMetrics = query({');
+('  args: {},');
+('  handler: async (ctx) => {');
+('    const metrics = await ctx.db.query("slaMetrics").collect();');
+('    return metrics;');
+('  },');
+('});');

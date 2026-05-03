@@ -8,9 +8,15 @@ import { Badge } from '@/components/ui/badge';
 import { Lightbulb, Sparkles } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
-export default function SmartSuggestions() {
+interface SmartSuggestionsProps {
+  organizationId?: string;
+}
+
+export default function SmartSuggestions({ organizationId }: SmartSuggestionsProps) {
   const { t } = useTranslation();
-  const suggestions = useQuery(api.admin.getSmartSuggestions);
+  const suggestions = useQuery(api.admin.getSmartSuggestions, {
+    organizationId: organizationId as any,
+  });
 
   if (!suggestions) {
     return (
@@ -34,19 +40,6 @@ export default function SmartSuggestions() {
         return 'bg-sky-400/10 text-sky-400 border-sky-400/30';
       default:
         return 'bg-gray-500/10 text-gray-500 border-gray-500/30';
-    }
-  };
-
-  const getImpactBadge = (impact: string) => {
-    switch (impact) {
-      case 'high':
-        return <Badge variant="destructive">High Impact</Badge>;
-      case 'medium':
-        return <Badge variant="secondary">Medium Impact</Badge>;
-      case 'low':
-        return <Badge variant="outline">Low Impact</Badge>;
-      default:
-        return null;
     }
   };
 
@@ -78,18 +71,32 @@ export default function SmartSuggestions() {
                   <div className="flex-1">
                     <div className="mb-1 flex items-center gap-2">
                       <Lightbulb className="h-4 w-4" />
-                      <p className="font-semibold text-(--text-primary)">{suggestion.title}</p>
+                      <p className="font-semibold text-(--text-primary)">
+                        {t(
+                          suggestion.titleKey,
+                          suggestion.descriptionParams as Record<string, unknown>,
+                        )}
+                      </p>
                     </div>
                     <p className="text-sm text-(--text-primary) opacity-90">
-                      {suggestion.description}
+                      {t(
+                        suggestion.descriptionKey,
+                        suggestion.descriptionParams as Record<string, unknown>,
+                      )}
                     </p>
                   </div>
-                  {getImpactBadge(suggestion.impact)}
+                  {suggestion.impact === 'high' ? (
+                    <Badge variant="destructive">{t('aiSuggestions.highImpact')}</Badge>
+                  ) : suggestion.impact === 'medium' ? (
+                    <Badge variant="secondary">{t('aiSuggestions.mediumImpact')}</Badge>
+                  ) : suggestion.impact === 'low' ? (
+                    <Badge variant="outline">{t('aiSuggestions.lowImpact')}</Badge>
+                  ) : null}
                 </div>
 
                 <div className="mt-2">
                   <Badge variant="outline" className="text-xs capitalize">
-                    {suggestion.category}
+                    {t(`suggestion.category.${suggestion.category}`)}
                   </Badge>
                 </div>
               </div>

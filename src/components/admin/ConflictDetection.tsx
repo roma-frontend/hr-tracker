@@ -8,9 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Users } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 
-export default function ConflictDetection() {
-  const { t } = useTranslation();
-  const conflicts = useQuery(api.admin.detectConflicts);
+interface ConflictDetectionProps {
+  organizationId?: string;
+}
+
+export default function ConflictDetection({ organizationId }: ConflictDetectionProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'hy' ? 'hy-AM' : 'en-US';
+  const conflicts = useQuery(api.admin.detectConflicts, { organizationId: organizationId as any });
 
   if (!conflicts) {
     return (
@@ -31,7 +36,7 @@ export default function ConflictDetection() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-orange-500" />
-            Conflict Detection
+            {t('conflicts.title')}
           </CardTitle>
           <div className="flex gap-2">
             {criticalCount > 0 && (
@@ -71,7 +76,7 @@ export default function ConflictDetection() {
                   <div>
                     <p className="font-medium text-(--text-primary)">{conflict.department}</p>
                     <p className="text-xs text-(--text-secondary)">
-                      {new Date(conflict.date).toLocaleDateString('en-US', {
+                      {new Date(conflict.date).toLocaleDateString(locale, {
                         weekday: 'short',
                         year: 'numeric',
                         month: 'short',
@@ -80,11 +85,16 @@ export default function ConflictDetection() {
                     </p>
                   </div>
                   <Badge variant={conflict.severity === 'critical' ? 'destructive' : 'secondary'}>
-                    {conflict.severity}
+                    {t(`conflicts.severity.${conflict.severity}`)}
                   </Badge>
                 </div>
 
-                <p className="mb-2 text-sm text-(--text-primary)">{conflict.recommendation}</p>
+                <p className="mb-2 text-sm text-(--text-primary)">
+                  {t(
+                    conflict.recommendationKey,
+                    conflict.recommendationParams as Record<string, unknown>,
+                  )}
+                </p>
 
                 <div className="text-xs text-(--text-secondary)">
                   <p className="mb-1 font-medium">{t('conflicts.employeesOut')}</p>

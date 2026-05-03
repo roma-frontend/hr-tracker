@@ -70,7 +70,8 @@ interface StripeData {
 }
 
 export default function StripeDashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'hy' ? 'hy-AM' : 'en-US';
   const router = useRouter();
   const { user: currentUser } = useAuthStore();
   const [loading, setLoading] = useState(true);
@@ -93,12 +94,12 @@ export default function StripeDashboardPage() {
 
       setData(result);
       if (isRefresh) {
-        toast.success('Данные обновлены');
+        toast.success(t('stripeDashboard.dataUpdated'));
       }
     } catch (err: any) {
       setError(err.message);
       if (isRefresh) {
-        toast.error('Ошибка при обновлении данных');
+        toast.error(t('stripeDashboard.updateError'));
       }
     } finally {
       setLoading(false);
@@ -163,14 +164,14 @@ export default function StripeDashboardPage() {
           <CardHeader>
             <CardTitle className="text-red-500 flex items-center gap-2">
               <AlertCircle className="w-5 h-5" />
-              Ошибка загрузки данных
+              {t('stripeDashboard.dataLoadError')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={() => fetchStripeData()}>
               <RefreshCw className="w-4 h-4 mr-2" />
-              Попробовать снова
+              {t('stripeDashboard.tryAgain')}
             </Button>
           </CardContent>
         </Card>
@@ -198,11 +199,11 @@ export default function StripeDashboardPage() {
       string,
       { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
     > = {
-      active: { label: 'Активна', variant: 'default' },
-      trialing: { label: 'Триал', variant: 'default' },
-      canceled: { label: 'Отменена', variant: 'destructive' },
-      past_due: { label: 'Просрочена', variant: 'outline' },
-      incomplete: { label: 'Неполная', variant: 'secondary' },
+      active: { label: t('stripeDashboard.activeSubs'), variant: 'default' },
+      trialing: { label: t('stripeDashboard.trialSubs'), variant: 'default' },
+      canceled: { label: t('stripeDashboard.canceledSubs'), variant: 'destructive' },
+      past_due: { label: t('stripeDashboard.pastDueSubs'), variant: 'outline' },
+      incomplete: { label: t('stripeDashboard.incompleteSubs'), variant: 'secondary' },
     };
     return variants[status] || { label: status, variant: 'secondary' as const };
   };
@@ -247,7 +248,8 @@ export default function StripeDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.totalSubscriptions}</div>
             <p className="text-xs text-muted-foreground">
-              {metrics.active} активных, {metrics.trialing} триальных
+              {metrics.active} {t('stripeDashboard.activeSubs')}, {metrics.trialing}{' '}
+              {t('stripeDashboard.trialSubs')}
             </p>
           </CardContent>
         </Card>
@@ -260,7 +262,7 @@ export default function StripeDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">${metrics.mrr}</div>
             <p className="text-xs text-muted-foreground">
-              За 30 дней: ${metrics.last30DaysRevenue}
+              {t('stripeDashboard.last30DaysRevenue', { revenue: metrics.last30DaysRevenue })}
             </p>
           </CardContent>
         </Card>
@@ -298,8 +300,8 @@ export default function StripeDashboardPage() {
       {/* Revenue Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Общая выручка</CardTitle>
-          <CardDescription>Всего получено от всех подписок</CardDescription>
+          <CardTitle>{t('stripeDashboard.totalRevenue')}</CardTitle>
+          <CardDescription>{t('stripeDashboard.totalRevenueDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-green-600">${metrics.totalRevenue}</div>
@@ -311,28 +313,28 @@ export default function StripeDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
-            Последние транзакции
+            {t('stripeDashboard.recentTransactions')}
           </CardTitle>
           <CardDescription>
-            Последние {recentTransactions.length} платежей из Stripe
+            {t('stripeDashboard.recentTransactionsDesc', { count: recentTransactions.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {recentTransactions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <CreditCard className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Нет транзакций</p>
+              <p>{t('stripeDashboard.noTransactions')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-3 font-semibold">Клиент</th>
-                    <th className="pb-3 font-semibold">Сумма</th>
-                    <th className="pb-3 font-semibold">Статус</th>
-                    <th className="pb-3 font-semibold">Описание</th>
-                    <th className="pb-3 font-semibold">Дата</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.customer')}</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.amount')}</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.status')}</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.description')}</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.date')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -357,15 +359,15 @@ export default function StripeDashboardPage() {
                           className="capitalize"
                         >
                           {tx.status === 'succeeded'
-                            ? 'Успешно'
+                            ? t('stripeDashboard.succeeded')
                             : tx.status === 'failed'
-                              ? 'Ошибка'
+                              ? t('stripeDashboard.failed')
                               : tx.status}
                         </Badge>
                       </td>
                       <td className="py-3 text-sm text-muted-foreground">{tx.description}</td>
                       <td className="py-3 text-sm text-muted-foreground">
-                        {new Date(tx.date).toLocaleDateString('ru-RU')}
+                        {new Date(tx.date).toLocaleDateString(locale)}
                       </td>
                     </tr>
                   ))}
@@ -381,27 +383,29 @@ export default function StripeDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5" />
-            Активные подписки
+            {t('stripeDashboard.activeSubscriptions')}
           </CardTitle>
           <CardDescription>
-            {subscriptions.filter((s) => s.status === 'active').length} активных подписок
+            {t('stripeDashboard.activeSubscriptionsCount', {
+              count: subscriptions.filter((s) => s.status === 'active').length,
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {subscriptions.filter((s) => s.status === 'active').length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Нет активных подписок</p>
+              <p>{t('stripeDashboard.noActiveSubscriptions')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-3 font-semibold">Клиент</th>
-                    <th className="pb-3 font-semibold">План</th>
-                    <th className="pb-3 font-semibold">Сумма/мес</th>
-                    <th className="pb-3 font-semibold">Период заканчивается</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.customer')}</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.plan')}</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.amountPerMonth')}</th>
+                    <th className="pb-3 font-semibold">{t('stripeDashboard.periodEnds')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -431,7 +435,7 @@ export default function StripeDashboardPage() {
                         <td className="py-3 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            {new Date(sub.currentPeriodEnd).toLocaleDateString('ru-RU')}
+                            {new Date(sub.currentPeriodEnd).toLocaleDateString(locale)}
                           </div>
                         </td>
                       </tr>
@@ -446,19 +450,34 @@ export default function StripeDashboardPage() {
       {/* All Subscriptions by Status */}
       <Card>
         <CardHeader>
-          <CardTitle>Все подписки по статусу</CardTitle>
+          <CardTitle>{t('stripeDashboard.allSubscriptionsByStatus')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {[
-            { label: 'Активные', count: metrics.active, color: 'bg-green-500', icon: CheckCircle },
-            { label: 'Триальные', count: metrics.trialing, color: 'bg-blue-500', icon: Clock },
             {
-              label: 'Просроченные',
+              label: t('stripeDashboard.activeLabel'),
+              count: metrics.active,
+              color: 'bg-green-500',
+              icon: CheckCircle,
+            },
+            {
+              label: t('stripeDashboard.trialLabel'),
+              count: metrics.trialing,
+              color: 'bg-blue-500',
+              icon: Clock,
+            },
+            {
+              label: t('stripeDashboard.pastDueLabel'),
               count: metrics.pastDue,
               color: 'bg-yellow-500',
               icon: AlertCircle,
             },
-            { label: 'Отмененные', count: metrics.canceled, color: 'bg-red-500', icon: XCircle },
+            {
+              label: t('stripeDashboard.canceledLabel'),
+              count: metrics.canceled,
+              color: 'bg-red-500',
+              icon: XCircle,
+            },
           ].map((item) => (
             <div key={item.label} className="flex items-center justify-between">
               <div className="flex items-center gap-2">

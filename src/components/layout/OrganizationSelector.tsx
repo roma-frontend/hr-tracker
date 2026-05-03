@@ -58,6 +58,7 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
             'hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-1',
             'text-sm font-medium',
           )}
+          variant="outline"
           title={selectedOrg?.name || t('employees.selectOrg')}
         >
           <Building2 className="w-4 h-4 shrink-0" />

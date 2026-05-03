@@ -173,6 +173,14 @@ export default function DriversPage() {
     shouldFilterByOrg ? { organizationId: effectiveOrgId, role: 'driver' } : { role: 'driver' },
   );
 
+  // Sync optimistic state with server data when it loads
+  useEffect(() => {
+    if (favoriteDrivers && favoriteDrivers.length > 0) {
+      const serverIds = new Set(favoriteDrivers.filter(Boolean).map((fav) => String(fav!._id)));
+      setOptimisticFavoriteIds(serverIds);
+    }
+  }, [favoriteDrivers]);
+
   // 5. Redirect effect
   useEffect(() => {
     if (driverRecord && user?.role !== 'admin' && user?.role !== 'superadmin') {
@@ -304,6 +312,12 @@ export default function DriversPage() {
     async (id: string) => {
       if (!userId) return;
 
+      // Need organization to add/remove favorites
+      if (!effectiveOrgId && isSuperadmin) {
+        toast.error(t('driver.selectOrgForFavorite', 'Select an organization first'));
+        return;
+      }
+
       // Optimistic update
       const wasFavorite = optimisticFavoriteIds.has(id);
       const newSet = new Set(optimisticFavoriteIds);
@@ -313,12 +327,6 @@ export default function DriversPage() {
         newSet.add(id);
       }
       setOptimisticFavoriteIds(newSet);
-
-      // Need organization to add/remove favorites
-      if (!effectiveOrgId && isSuperadmin) {
-        toast.error(t('driver.selectOrgForFavorite', 'Select an organization first'));
-        return;
-      }
 
       try {
         if (wasFavorite) {

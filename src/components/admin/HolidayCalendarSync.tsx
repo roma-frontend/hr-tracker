@@ -19,14 +19,20 @@ import {
 import { useUpgradeModal } from '@/components/subscription/PlanGate';
 import { usePlanFeatures } from '@/hooks/usePlanFeatures';
 
-export default function HolidayCalendarSync() {
+interface HolidayCalendarSyncProps {
+  organizationId?: string;
+}
+
+export default function HolidayCalendarSync({ organizationId }: HolidayCalendarSyncProps) {
   const { t } = useTranslation();
   const [isExporting, setIsExporting] = useState(false);
   const [isSyncingGoogle, setIsSyncingGoogle] = useState(false);
   const [isSyncingOutlook, setIsSyncingOutlook] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
-  const calendarData = useQuery(api.admin.getCalendarExportData, {});
+  const calendarData = useQuery(api.admin.getCalendarExportData, {
+    organizationId: organizationId as any,
+  });
 
   // Plan gating
   const { canAccess } = usePlanFeatures();
@@ -60,7 +66,9 @@ export default function HolidayCalendarSync() {
     setIsExporting(true);
     try {
       const icsContent = generateICalendar(calendarData);
-      const filename = `company-leaves-${new Date().toISOString().split('T')[0]}.ics`;
+      const filename = t('calendarSync.icsFilename', {
+        date: new Date().toISOString().split('T')[0],
+      });
       downloadICalFile(icsContent, filename);
       toast.success(t('calendarSync.icalDownloadSuccess', 'iCal file downloaded successfully'));
     } catch (error) {
@@ -172,22 +180,20 @@ export default function HolidayCalendarSync() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-500" />
-            Calendar Sync
+            {t('calendarSync.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Stats */}
           <div className="rounded-lg bg-linear-to-br from-blue-500/10 to-cyan-500/10 p-4">
-            <p className="text-sm text-(--text-secondary)">
-              {t('calendarSync.upcomingLeaves')}
-            </p>
+            <p className="text-sm text-(--text-secondary)">{t('calendarSync.upcomingLeaves')}</p>
             <p className="text-3xl font-bold text-(--text-primary)">{calendarData.length}</p>
           </div>
 
           {/* Export Options */}
           <div className="space-y-2">
             <h4 className="mb-2 text-sm font-semibold text-(--text-primary)">
-              Export Calendar
+              {t('calendarSync.exportCalendar')}
             </h4>
 
             <Button
@@ -201,7 +207,7 @@ export default function HolidayCalendarSync() {
               ) : (
                 <Download className="mr-2 h-4 w-4" />
               )}
-              Download iCal (.ics)
+              {t('calendarSync.downloadIcal')}
             </Button>
 
             <div className="relative">
@@ -209,9 +215,8 @@ export default function HolidayCalendarSync() {
                 onClick={() => {
                   if (!hasCalendarSync) {
                     openModal({
-                      featureTitle: 'Google Calendar Sync',
-                      featureDescription:
-                        'Sync leave schedules with Google Calendar. Available on Professional plan and above.',
+                      featureTitle: t('calendarSync.googleCalendarSync'),
+                      featureDescription: t('calendarSync.googleCalendarSyncDesc'),
                       recommendedPlan: 'professional',
                     });
                     return;
@@ -240,7 +245,7 @@ export default function HolidayCalendarSync() {
                   variant="secondary"
                   className="absolute -right-2 -top-2 bg-green-500 text-white"
                 >
-                  Connected
+                  {t('calendarSync.connected')}
                 </Badge>
               )}
               {!hasCalendarSync && (
@@ -248,7 +253,7 @@ export default function HolidayCalendarSync() {
                   variant="secondary"
                   className="absolute -right-2 -top-2 bg-linear-to-r from-amber-500 to-orange-500 text-white text-[10px]"
                 >
-                  Pro
+                  {t('calendarSync.pro')}
                 </Badge>
               )}
             </div>
@@ -258,9 +263,8 @@ export default function HolidayCalendarSync() {
                 onClick={() => {
                   if (!hasCalendarSync) {
                     openModal({
-                      featureTitle: 'Outlook Calendar Sync',
-                      featureDescription:
-                        'Sync leave schedules with Outlook Calendar. Available on Professional plan and above.',
+                      featureTitle: t('calendarSync.outlookCalendarSync'),
+                      featureDescription: t('calendarSync.outlookCalendarSyncDesc'),
                       recommendedPlan: 'professional',
                     });
                     return;
@@ -289,7 +293,7 @@ export default function HolidayCalendarSync() {
                   variant="secondary"
                   className="absolute -right-2 -top-2 bg-green-500 text-white"
                 >
-                  Connected
+                  {t('calendarSync.connected')}
                 </Badge>
               )}
               {!hasCalendarSync && (
@@ -297,7 +301,7 @@ export default function HolidayCalendarSync() {
                   variant="secondary"
                   className="absolute -right-2 -top-2 bg-linear-to-r from-amber-500 to-orange-500 text-white text-[10px]"
                 >
-                  Pro
+                  {t('calendarSync.pro')}
                 </Badge>
               )}
             </div>
