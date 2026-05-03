@@ -38,6 +38,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { useAuthUser } from '@/store/useAuthStore';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
 // ============ TYPES ============
 
@@ -940,7 +941,10 @@ function ObjectiveDetailDialog({
 export default function GoalsClient() {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const organizationId = user?.organizationId as Id<'organizations'> | undefined;
+  const selectedOrgId = useSelectedOrganization();
+  const organizationId = (selectedOrgId ?? user?.organizationId ?? undefined) as
+    | Id<'organizations'>
+    | undefined;
   const userId = user?.id as Id<'users'> | undefined;
   const userRole = user?.role || 'employee';
 
@@ -1011,12 +1015,12 @@ export default function GoalsClient() {
   };
 
   return (
-    <div className="space-y-6 p-0 sm:p-4 sm:p-6 lg:p-8">
+    <div className="">
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
               {t('goals.title', 'OKR & Goals')}
             </h1>
             <p className="text-sm text-muted-foreground">

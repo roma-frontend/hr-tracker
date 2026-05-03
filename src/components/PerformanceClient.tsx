@@ -36,6 +36,7 @@ import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -895,9 +896,13 @@ function ResultsDialog({
 
 export function PerformanceClient() {
   const { t } = useTranslation();
-  const { currentUser, organizationId } = useAuthStore(
+  const { currentUser, organizationId: userOrgId } = useAuthStore(
     useShallow((s) => ({ currentUser: s.user, organizationId: s.user?.organizationId })),
   );
+  const selectedOrgId = useSelectedOrganization();
+  const organizationId = (selectedOrgId ?? userOrgId ?? undefined) as
+    | Id<'organizations'>
+    | undefined;
 
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
@@ -947,12 +952,14 @@ export function PerformanceClient() {
   };
 
   return (
-    <div className="p-0 sm:p-6 lg:p-8 space-y-6">
+    <div className="">
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">{t('performance.title')}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              {t('performance.title')}
+            </h1>
             <p className="text-muted-foreground text-sm">{t('performance.subtitle')}</p>
           </div>
           {canManageCycles && (

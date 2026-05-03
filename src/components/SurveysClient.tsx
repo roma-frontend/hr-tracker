@@ -35,6 +35,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -857,12 +858,15 @@ function SurveyResultsDialog({
 export function SurveysClient() {
   const { t } = useTranslation();
   const user = useAuthStore(useShallow((s) => s.user));
+  const selectedOrgId = useSelectedOrganization();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [takingSurveyId, setTakingSurveyId] = useState<Id<'surveys'> | null>(null);
   const [viewingResultsId, setViewingResultsId] = useState<Id<'surveys'> | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'active' | 'closed'>('all');
 
-  const orgId = user?.organizationId as Id<'organizations'> | undefined;
+  const orgId = (selectedOrgId ?? user?.organizationId ?? undefined) as
+    | Id<'organizations'>
+    | undefined;
   const isAdmin = user?.role === 'admin' || user?.role === 'supervisor';
 
   const surveys = useQuery(
@@ -918,12 +922,14 @@ export function SurveysClient() {
   }
 
   return (
-    <div className="space-y-6 p-0 sm:p-6 lg:p-8">
+    <div className="">
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">{t('surveys.title')}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              {t('surveys.title')}
+            </h1>
             <p className="text-muted-foreground text-sm mt-1">{t('surveys.subtitle')}</p>
           </div>
           {isAdmin && (

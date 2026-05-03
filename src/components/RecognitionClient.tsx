@@ -32,6 +32,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 
 // ── Category Config ──────────────────────────────────────────────────────────
 
@@ -426,12 +427,15 @@ function SendKudosModal({ open, onClose, organizationId, senderId }: SendKudosMo
 export function RecognitionClient() {
   const { t } = useTranslation();
   const user = useAuthStore(useShallow((s) => s.user));
+  const selectedOrgId = useSelectedOrganization();
   const [showSendModal, setShowSendModal] = useState(false);
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<
     'week' | 'month' | 'quarter' | 'year' | 'all'
   >('month');
 
-  const orgId = user?.organizationId as Id<'organizations'> | undefined;
+  const orgId = (selectedOrgId ?? user?.organizationId ?? undefined) as
+    | Id<'organizations'>
+    | undefined;
 
   // Queries
   const kudosFeed = useQuery(
@@ -479,7 +483,7 @@ export function RecognitionClient() {
   }
 
   return (
-    <div className="space-y-6 p-0 sm:p-4 sm:p-6 lg:p-8">
+    <div className="">
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
