@@ -330,7 +330,9 @@
     "optional": "Необязательно",
     "sending": "Отправка...",
     "selectAll": "Выбрать всех",
-    "deleted": "Удалено"
+    "deleted": "Удалено",
+    "today": "Сегодня",
+    "to": "по"
   },
   "nav": {
     "home": "Главная",
@@ -4561,7 +4563,12 @@
     "readOnlyChannel": "🔒 Канал только для чтения",
     "readOnlyChannelDesc": "Это информационный канал. Сообщения отправляют только администраторы.",
     "youPrefix": "Вы",
+    "you": "Вы",
+    "conversationInfo": "Информация о разговоре",
     "filterAll": "Все",
+    "searchUsers": "Поиск пользователей…",
+    "addMembers": "Добавить участников",
+    "selectOrganization": "Организация",
     "filterChat": "Чат",
     "filterUnread": "Непрочитанные",
     "filterGroups": "Группы",
@@ -5401,13 +5408,17 @@
     "eventCreated": "Мероприятие создано",
     "editEvent": "Редактировать мероприятие",
     "eventName": "Название",
+    "eventNamePlaceholder": "Название мероприятия...",
     "description": "Описание",
+    "briefDescriptionPlaceholder": "Краткое описание...",
     "startDate": "Дата начала",
     "endDate": "Дата окончания",
     "searchPlaceholder": "Поиск мероприятий...",
     "noResults": "Нет мероприятий по вашим фильтрам",
     "resetFilters": "Сбросить",
     "fillRequired": "Заполните все обязательные поля",
+    "more": "+ ещё",
+    "dateRangeSeparator": " — ",
     "eventUpdated": "Мероприятие обновлено",
     "updateFailed": "Не удалось обновить мероприятие",
     "stats": {
@@ -5440,6 +5451,7 @@
       "team_building": "Тимбилдинг",
       "holiday": "Праздник",
       "deadline": "Дедлайн",
+      "celebration": "Празднование",
       "other": "Другое"
     },
     "pendingConflictReviews": "Ожидают проверки",
@@ -7919,9 +7931,6 @@
     "editStart": "Редактировать начало",
     "editPriority": "Редактировать приоритет",
     "slaDashboard": "SLA Дашборд"
-  },
-  "events": {
-    "more": "+ ещё"
   },
   "globalSearch": {
     "placeholder": "Поиск по всей системе...",

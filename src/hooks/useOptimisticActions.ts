@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useOptimistic, useCallback, useState } from 'react';
+import { useOptimistic, useCallback, useState, startTransition } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
@@ -103,7 +103,7 @@ export function useOptimisticSendMessage(
       };
 
       try {
-        addOptimisticMessage(optimisticMsg);
+        startTransition(() => addOptimisticMessage(optimisticMsg));
 
         await sendMessage({
           conversationId,
@@ -186,7 +186,7 @@ export function useOptimisticThreadReply(
       };
 
       try {
-        addOptimisticReply(optimisticReply);
+        startTransition(() => addOptimisticReply(optimisticReply));
 
         await sendReply({
           parentMessageId,
@@ -203,7 +203,15 @@ export function useOptimisticThreadReply(
         throw err;
       }
     },
-    [parentMessageId, conversationId, userId, organizationId, sendReply, addOptimisticReply, userName],
+    [
+      parentMessageId,
+      conversationId,
+      userId,
+      organizationId,
+      sendReply,
+      addOptimisticReply,
+      userName,
+    ],
   );
 
   return {
@@ -227,7 +235,8 @@ export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<
     { emojiKey: string; userId: Id<'users'>; toggle: boolean }
   >({}, (current, action) => {
     const next = { ...current };
-    const existing = next[action.emojiKey]; const users = existing ? [...existing] : [];
+    const existing = next[action.emojiKey];
+    const users = existing ? [...existing] : [];
 
     if (action.toggle) {
       if (!users.includes(action.userId)) {
@@ -256,7 +265,7 @@ export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<
       const hasReaction = currentUsers.includes(userId);
 
       try {
-        setOptimisticReactions({ emojiKey, userId, toggle: !hasReaction });
+        startTransition(() => setOptimisticReactions({ emojiKey, userId, toggle: !hasReaction }));
 
         await toggleReaction({
           messageId,
@@ -311,7 +320,7 @@ export function useOptimisticTaskStatus() {
       oldStatus: string,
     ) => {
       try {
-        setOptimisticUpdate({ taskId, newStatus: status, oldStatus });
+        startTransition(() => setOptimisticUpdate({ taskId, newStatus: status, oldStatus }));
 
         await updateTaskStatus({ taskId, status, userId });
 
@@ -360,7 +369,9 @@ export function useOptimisticLeaveActions() {
   const approveOptimistic = useCallback(
     async (leaveId: Id<'leaveRequests'>, reviewerId: Id<'users'>, comment?: string) => {
       try {
-        setOptimisticAction({ leaveId, action: 'approve', previousStatus: 'pending' });
+        startTransition(() =>
+          setOptimisticAction({ leaveId, action: 'approve', previousStatus: 'pending' }),
+        );
 
         await approveLeave({ leaveId, reviewerId, comment });
 
@@ -377,7 +388,9 @@ export function useOptimisticLeaveActions() {
   const rejectOptimistic = useCallback(
     async (leaveId: Id<'leaveRequests'>, reviewerId: Id<'users'>, comment?: string) => {
       try {
-        setOptimisticAction({ leaveId, action: 'reject', previousStatus: 'pending' });
+        startTransition(() =>
+          setOptimisticAction({ leaveId, action: 'reject', previousStatus: 'pending' }),
+        );
 
         await rejectLeave({ leaveId, reviewerId, comment });
 
@@ -394,7 +407,7 @@ export function useOptimisticLeaveActions() {
   const deleteOptimistic = useCallback(
     async (leaveId: Id<'leaveRequests'>, requesterId: Id<'users'>) => {
       try {
-        setOptimisticAction({ leaveId, action: 'delete' });
+        startTransition(() => setOptimisticAction({ leaveId, action: 'delete' }));
 
         await deleteLeave({ leaveId, requesterId });
 
@@ -465,7 +478,13 @@ export function useOptimisticDriverRequest() {
         passengerCount: number;
         notes?: string;
       },
-      tripCategory: 'client_meeting' | 'airport' | 'office_transfer' | 'emergency' | 'team_event' | 'personal',
+      tripCategory:
+        | 'client_meeting'
+        | 'airport'
+        | 'office_transfer'
+        | 'emergency'
+        | 'team_event'
+        | 'personal',
     ) => {
       const optimisticRequest: OptimisticDriverRequest = {
         requestId: `temp-driver-${Date.now()}`,
@@ -481,7 +500,7 @@ export function useOptimisticDriverRequest() {
       };
 
       try {
-        addOptimisticRequest(optimisticRequest);
+        startTransition(() => addOptimisticRequest(optimisticRequest));
 
         const result = await requestDriver({
           organizationId,

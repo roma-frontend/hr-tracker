@@ -388,7 +388,7 @@ export const MessageBubble = React.memo(function MessageBubble({
         <div className="w-8 shrink-0" />
         <div
           className="px-3 py-2 rounded-2xl text-xs italic animate-fade-in"
-          style={{ background: 'var(--background-subtle)', color: 'var(--text-disabled)' }}
+          style={{ background: 'var(--secondary)', color: 'var(--text-disabled)' }}
         >
           🗑 {L.deleted}
         </div>
@@ -701,7 +701,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           <div
             className="relative rounded-2xl px-3 py-2 text-sm wrap-break-words transition-all duration-200 hover:brightness-105 max-w-65 xs:max-w-[280px] sm:max-w-[320px] md:max-w-90 w-full min-w-45"
             style={{
-              background: isOwn ? 'btn-gradient' : 'var(--background-subtle)',
+              background: isOwn ? 'var(--primary)' : 'var(--secondary)',
               color: isOwn ? 'white' : 'var(--text-primary)',
               borderBottomRightRadius: isOwn ? '4px' : undefined,
               borderBottomLeftRadius: !isOwn ? '4px' : undefined,

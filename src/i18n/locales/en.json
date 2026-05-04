@@ -1572,6 +1572,7 @@
     "allDepartments": "All Departments",
     "allTypes": "All Types",
     "allStatuses": "All Statuses",
+    "filter_all": "All",
     "backToEmployees": "Back to Employees",
     "employeeNotFound": "Employee Not Found",
     "employeeNotFoundDesc": "The employee you're looking for doesn't exist or has been removed.",
@@ -4523,7 +4524,12 @@
     "readOnlyChannel": "🔒 Read-Only Channel",
     "readOnlyChannelDesc": "This is an information-only channel. Messages are sent by administrators only.",
     "youPrefix": "You",
+    "you": "You",
+    "conversationInfo": "Conversation Info",
     "filterAll": "All",
+    "searchUsers": "Search users…",
+    "addMembers": "Add Members",
+    "selectOrganization": "Organization",
     "filterChat": "Chat",
     "filterUnread": "Unread",
     "filterGroups": "Groups",
@@ -5184,13 +5190,17 @@
     "eventCreated": "Event created successfully",
     "editEvent": "Edit Event",
     "eventName": "Event Name",
+    "eventNamePlaceholder": "Event name...",
     "description": "Description",
+    "briefDescriptionPlaceholder": "Brief description...",
     "startDate": "Start Date",
     "endDate": "End Date",
     "searchPlaceholder": "Search events...",
     "noResults": "No events match your filters",
     "resetFilters": "Reset",
     "fillRequired": "Please fill required fields",
+    "more": "+ more",
+    "dateRangeSeparator": " — ",
     "stats": {
       "totalEvents": "Total Events",
       "upcoming": "Upcoming",
@@ -7729,9 +7739,6 @@
     "editStart": "Edit Start",
     "editPriority": "Edit Priority",
     "slaDashboard": "SLA Dashboard"
-  },
-  "events": {
-    "more": "+ more"
   },
   "globalSearch": {
     "placeholder": "Search across the entire system...",

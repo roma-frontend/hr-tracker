@@ -4375,7 +4375,12 @@
     "readOnlyChannel": "🔒 Միայն ընթերցման համար",
     "readOnlyChannelDesc": "Սա տեղեկատվական էջ է: Հաղորդագրություններ են ուղարկում միայն վարչակազմը:",
     "youPrefix": "Դու",
+    "you": "Դու",
+    "conversationInfo": "Զրույցի տեղեկություն",
     "filterAll": "Բոլորը",
+    "searchUsers": "Որոնել օգտատերեր…",
+    "addMembers": "Ավելացնել մասնակիցներ",
+    "selectOrganization": "Կազմակերպություն",
     "filterChat": "Չատ",
     "filterUnread": "Չընթերցված",
     "filterGroups": "Խմբեր",
@@ -4903,13 +4908,17 @@
     "eventCreated": "Միջոցառումը ստեղծված է",
     "editEvent": "Խմբագրել միջոցառումը",
     "eventName": "Միջոցառման անվանումը",
+    "eventNamePlaceholder": "Միջոցառման անվանում...",
     "description": "Նկարագրություն",
+    "briefDescriptionPlaceholder": "Համառոտ նկարագրություն...",
     "startDate": "Սկսման ամսաթիվ",
     "endDate": "Ավարտի ամսաթիվ",
     "searchPlaceholder": "Փնտրել միջոցառումներ...",
     "noResults": "Ձեր ֆիլտրերին համապատասխան միջոցառումներ չկան",
     "resetFilters": "Վերականգնել",
     "fillRequired": "Խնդրում ենք լրացնել պարտադիր դաշտերը",
+    "more": "+ ավելին",
+    "dateRangeSeparator": " — ",
     "stats": {
       "totalEvents": "Ընդամենը միջոցառումներ",
       "upcoming": "Սպասվող",
@@ -7397,9 +7406,6 @@
     "editStart": "Խմբագրել սկիզբը",
     "editPriority": "Խմբագրել առաջնահերթությունը",
     "slaDashboard": "SLA Վահանակ"
-  },
-  "events": {
-    "more": "+ ավելին"
   },
   "globalSearch": {
     "placeholder": "Որոնում ամբողջ համակարգում...",

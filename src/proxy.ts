@@ -262,7 +262,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   // Cross-Origin headers for additional security
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
 
   // Remove Next.js powered-by header
   response.headers.delete('x-powered-by');

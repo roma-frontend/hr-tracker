@@ -76,16 +76,26 @@ interface CompanyEvent {
 }
 const PRIORITY_CONFIG: Record<
   Priority,
-  { color: string; bg: string; label: string; icon: string }
+  { color: string; bg: string; labelKey: string; icon: string }
 > = {
-  high: { color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-500/10', label: 'High', icon: '🔴' },
+  high: {
+    color: 'text-red-600',
+    bg: 'bg-red-50 dark:bg-red-500/10',
+    labelKey: 'events.priority.high',
+    icon: '🔴',
+  },
   medium: {
     color: 'text-amber-600',
     bg: 'bg-amber-50 dark:bg-amber-500/10',
-    label: 'Medium',
+    labelKey: 'events.priority.medium',
     icon: '🟡',
   },
-  low: { color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-500/10', label: 'Low', icon: '🔵' },
+  low: {
+    color: 'text-blue-600',
+    bg: 'bg-blue-50 dark:bg-blue-500/10',
+    labelKey: 'events.priority.low',
+    icon: '🔵',
+  },
 };
 
 const EVENT_TYPE_ICONS: Record<string, string> = {
@@ -236,7 +246,7 @@ export default function CompanyEventsPage() {
   return (
     <div className="space-y-6">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-4 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -498,7 +508,7 @@ export default function CompanyEventsPage() {
                                 <span className="text-lg">{typeIcon}</span>
                                 <h3 className="font-semibold text-base truncate">{event.name}</h3>
                                 <Badge variant="outline" className="shrink-0 text-[10px]">
-                                  {priorityCfg.icon} {priorityCfg.label}
+                                  {priorityCfg.icon} {t(priorityCfg.labelKey)}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
@@ -507,12 +517,15 @@ export default function CompanyEventsPage() {
                               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Calendar className="w-3 h-3" />
-                                  {formatDate(event.startDate)} — {formatDate(event.endDate)}
+                                  {formatDate(event.startDate)}
+                                  {t('events.dateRangeSeparator', ' — ')}
+                                  {formatDate(event.endDate)}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Users className="w-3 h-3" />
                                   {event.requiredDepartments?.slice(0, 3).join(', ')}
-                                  {event.requiredDepartments?.length > 3 && ' + more'}
+                                  {event.requiredDepartments?.length > 3 &&
+                                    ` ${t('events.more', '+ more')}`}
                                 </span>
                                 {'location' in event && (
                                   <span className="flex items-center gap-1">
@@ -641,7 +654,7 @@ export default function CompanyEventsPage() {
                 <Input
                   defaultValue={selectedEvent.name}
                   id="edit-name"
-                  placeholder="Event name..."
+                  placeholder={t('events.eventNamePlaceholder', 'Event name...')}
                 />
               </div>
               <div>
@@ -652,7 +665,7 @@ export default function CompanyEventsPage() {
                   defaultValue={selectedEvent.description || ''}
                   id="edit-description"
                   rows={3}
-                  placeholder="Brief description..."
+                  placeholder={t('events.briefDescriptionPlaceholder', 'Brief description...')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">

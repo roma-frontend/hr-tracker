@@ -560,7 +560,7 @@ export default function LoginPage() {
           {isOAuthSyncing && <div style={{ display: 'none' }} />}
 
           {/* Onboarding Tour */}
-          {!isOAuthSyncing && (
+          {!isOAuthSyncing && status !== 'authenticated' && (
             <OnboardingTour
               steps={loginTourSteps}
               tourId={mounted ? t('auth.loginTour') : 'login-tour'}
