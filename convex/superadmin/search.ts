@@ -13,6 +13,7 @@ export const globalSearch = query({
   args: {
     query: v.string(),
     limit: v.optional(v.number()),
+    organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, args) => {
     const searchQuery = args.query.toLowerCase().trim();
@@ -29,6 +30,9 @@ export const globalSearch = query({
         total: 0,
       };
     }
+
+    // OPTIMIZED: Add org-scoping when available to reduce dataset size
+    const orgFilter = args.organizationId;
 
     // Parallel search across all tables
     const [users, organizations, leaveRequests, driverRequests, tasks, supportTickets] =
@@ -47,14 +51,29 @@ export const globalSearch = query({
           .filter((q) => q.eq(q.field('slug'), searchQuery))
           .take(MAX_PAGE_SIZE),
 
-        // Search leave requests
-        ctx.db.query('leaveRequests').withIndex('by_status').take(MAX_PAGE_SIZE),
+        // OPTIMIZED: Filter leave requests by org if provided
+        orgFilter
+          ? ctx.db
+              .query('leaveRequests')
+              .withIndex('by_org', (q) => q.eq('organizationId', orgFilter))
+              .take(MAX_PAGE_SIZE)
+          : ctx.db.query('leaveRequests').withIndex('by_status').take(MAX_PAGE_SIZE),
 
-        // Search driver requests
-        ctx.db.query('driverRequests').take(MAX_PAGE_SIZE),
+        // OPTIMIZED: Filter driver requests by org if provided
+        orgFilter
+          ? ctx.db
+              .query('driverRequests')
+              .withIndex('by_org', (q) => q.eq('organizationId', orgFilter))
+              .take(MAX_PAGE_SIZE)
+          : ctx.db.query('driverRequests').take(MAX_PAGE_SIZE),
 
-        // Search tasks
-        ctx.db.query('tasks').take(MAX_PAGE_SIZE),
+        // OPTIMIZED: Filter tasks by org if provided
+        orgFilter
+          ? ctx.db
+              .query('tasks')
+              .withIndex('by_org', (q) => q.eq('organizationId', orgFilter))
+              .take(MAX_PAGE_SIZE)
+          : ctx.db.query('tasks').take(MAX_PAGE_SIZE),
 
         // Search support tickets
         ctx.db
@@ -79,90 +98,100 @@ export const globalSearch = query({
       )
       .slice(0, limit);
 
-    // Enrich leave requests with user data
-    const enrichedLeaves = await Promise.all(
-      leaveRequests
-        .filter((l) => {
-          const startDate = l.startDate.includes(searchQuery);
-          const endDate = l.endDate.includes(searchQuery);
-          return startDate || endDate;
-        })
-        .slice(0, limit)
-        .map(async (leave) => {
-          const user = await ctx.db.get(leave.userId);
-          return {
-            ...leave,
-            userName: user?.name || 'Unknown',
-            userEmail: user?.email || '',
-            userAvatar: user?.avatarUrl,
-          };
-        }),
-    );
+    // OPTIMIZED: Batch load all user IDs needed for enrichment
+    const leaveUserIds = [...new Set(leaveRequests.map((l) => l.userId))];
+    const driverUserIds = [
+      ...new Set(driverRequests.flatMap((d) => [d.requesterId, d.driverId]).filter(Boolean)),
+    ];
+    const taskUserIds = [
+      ...new Set(tasks.flatMap((t) => [t.assignedTo, t.assignedBy]).filter(Boolean)),
+    ];
+    const ticketUserIds = [
+      ...new Set(supportTickets.flatMap((t) => [t.createdBy, t.assignedTo]).filter(Boolean)),
+    ];
+
+    const allUserIdsToLoad = [...leaveUserIds, ...driverUserIds, ...taskUserIds, ...ticketUserIds];
+    const uniqueUserIds = [...new Set(allUserIdsToLoad)];
+
+    // Batch load all users at once
+    const allUsers = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id)));
+    const userEnrichmentMap = new Map(allUsers.filter(Boolean).map((u) => [u._id, u]));
+
+    // Enrich leave requests
+    const enrichedLeaves = leaveRequests
+      .filter((l) => {
+        const startDate = l.startDate.includes(searchQuery);
+        const endDate = l.endDate.includes(searchQuery);
+        return startDate || endDate;
+      })
+      .slice(0, limit)
+      .map((leave) => {
+        const user = userEnrichmentMap.get(leave.userId);
+        return {
+          ...leave,
+          userName: user?.name || 'Unknown',
+          userEmail: user?.email || '',
+          userAvatar: user?.avatarUrl,
+        };
+      });
 
     // Enrich driver requests
-    const enrichedDrivers = await Promise.all(
-      driverRequests
-        .filter((d) => {
-          const from = d.tripInfo?.from?.toLowerCase().includes(searchQuery);
-          const to = d.tripInfo?.to?.toLowerCase().includes(searchQuery);
-          const purpose = d.tripInfo?.purpose?.toLowerCase().includes(searchQuery);
-          return from || to || purpose;
-        })
-        .slice(0, limit)
-        .map(async (request) => {
-          const requester = await ctx.db.get(request.requesterId);
-          const driver = await ctx.db.get(request.driverId);
-          const driverUser = driver ? await ctx.db.get(driver.userId) : null;
-          return {
-            ...request,
-            requesterName: requester?.name || 'Unknown',
-            requesterEmail: requester?.email || '',
-            driverName: driverUser?.name || 'Unknown',
-          };
-        }),
-    );
+    const enrichedDrivers = driverRequests
+      .filter((d) => {
+        const from = d.tripInfo?.from?.toLowerCase().includes(searchQuery);
+        const to = d.tripInfo?.to?.toLowerCase().includes(searchQuery);
+        const purpose = d.tripInfo?.purpose?.toLowerCase().includes(searchQuery);
+        return from || to || purpose;
+      })
+      .slice(0, limit)
+      .map((request) => {
+        const requester = userEnrichmentMap.get(request.requesterId);
+        const driver = userEnrichmentMap.get(request.driverId);
+        return {
+          ...request,
+          requesterName: requester?.name || 'Unknown',
+          requesterEmail: requester?.email || '',
+          driverName: driver?.name || 'Unknown',
+        };
+      });
 
     // Enrich tasks
-    const enrichedTasks = await Promise.all(
-      tasks
-        .filter(
-          (t) =>
-            t.title.toLowerCase().includes(searchQuery) ||
-            t.description?.toLowerCase().includes(searchQuery),
-        )
-        .slice(0, limit)
-        .map(async (task) => {
-          const assignee = task.assignedTo ? await ctx.db.get(task.assignedTo) : null;
-          const creator = await ctx.db.get(task.assignedBy);
-          return {
-            ...task,
-            assigneeName: assignee?.name || 'Unknown',
-            creatorName: creator?.name || 'Unknown',
-          };
-        }),
-    );
+    const enrichedTasks = tasks
+      .filter(
+        (t) =>
+          t.title.toLowerCase().includes(searchQuery) ||
+          t.description?.toLowerCase().includes(searchQuery),
+      )
+      .slice(0, limit)
+      .map((task) => {
+        const assignee = task.assignedTo ? userEnrichmentMap.get(task.assignedTo) : null;
+        const creator = userEnrichmentMap.get(task.assignedBy);
+        return {
+          ...task,
+          assigneeName: assignee?.name || 'Unknown',
+          creatorName: creator?.name || 'Unknown',
+        };
+      });
 
     // Enrich tickets
-    const enrichedTickets = await Promise.all(
-      supportTickets
-        .filter(
-          (t) =>
-            t.title.toLowerCase().includes(searchQuery) ||
-            t.description.toLowerCase().includes(searchQuery) ||
-            t.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
-        .slice(0, limit)
-        .map(async (ticket) => {
-          const creator = await ctx.db.get(ticket.createdBy);
-          const assignee = ticket.assignedTo ? await ctx.db.get(ticket.assignedTo) : null;
-          return {
-            ...ticket,
-            creatorName: creator?.name || 'Unknown',
-            creatorEmail: creator?.email || '',
-            assigneeName: assignee?.name || null,
-          };
-        }),
-    );
+    const enrichedTickets = supportTickets
+      .filter(
+        (t) =>
+          t.title.toLowerCase().includes(searchQuery) ||
+          t.description.toLowerCase().includes(searchQuery) ||
+          t.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+      .slice(0, limit)
+      .map((ticket) => {
+        const creator = userEnrichmentMap.get(ticket.createdBy);
+        const assignee = ticket.assignedTo ? userEnrichmentMap.get(ticket.assignedTo) : null;
+        return {
+          ...ticket,
+          creatorName: creator?.name || 'Unknown',
+          creatorEmail: creator?.email || '',
+          assigneeName: assignee?.name || null,
+        };
+      });
 
     return {
       users: filteredUsers,

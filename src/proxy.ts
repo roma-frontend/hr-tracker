@@ -4,12 +4,13 @@
  * Provides:
  * - Auth guard for protected routes
  * - Security headers (CSP, HSTS, X-Frame-Options, etc.)
- * - Rate limiting hints
+ * - Rate limiting for API routes
  * - Redirect logic for unauthenticated users
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { checkRateLimit, blockKey } from '@/lib/redis';
 
 // ═══════════════════════════════════════════════════════════════
 // PUBLIC PATHS (no auth required)
@@ -107,6 +108,94 @@ function hasAuthCookie(request: NextRequest): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// RATE LIMITING
+// ═══════════════════════════════════════════════════════════════
+
+interface RateLimitRule {
+  pattern: (pathname: string) => boolean;
+  maxRequests: number;
+  windowMs: number;
+  blockDurationMs?: number;
+}
+
+const RATE_LIMIT_RULES: RateLimitRule[] = [
+  // Auth endpoints — strict
+  {
+    pattern: (p) => p.startsWith('/api/auth/'),
+    maxRequests: 10,
+    windowMs: 15 * 60 * 1000,
+    blockDurationMs: 30 * 60 * 1000,
+  },
+  // AI endpoints — moderate
+  {
+    pattern: (p) => p.startsWith('/api/chat/') || p.startsWith('/api/ai-site-editor/'),
+    maxRequests: 30,
+    windowMs: 15 * 60 * 1000,
+  },
+  // Payment endpoints — strict
+  {
+    pattern: (p) => p.startsWith('/api/stripe/'),
+    maxRequests: 20,
+    windowMs: 15 * 60 * 1000,
+  },
+  // General API — loose
+  {
+    pattern: (p) => p.startsWith('/api/'),
+    maxRequests: 100,
+    windowMs: 15 * 60 * 1000,
+  },
+];
+
+function getClientKey(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() ?? 'unknown';
+  const userAgent = request.headers.get('user-agent') ?? '';
+  return `${ip}:${userAgent.slice(0, 64)}`;
+}
+
+async function applyRateLimit(
+  request: NextRequest,
+  pathname: string,
+): Promise<NextResponse | null> {
+  const rule = RATE_LIMIT_RULES.find((r) => r.pattern(pathname));
+  if (!rule) return null;
+
+  const key = `rl:${rule.maxRequests}:${getClientKey(request)}`;
+  const result = await checkRateLimit(key, rule.maxRequests, rule.windowMs);
+
+  if (!result.allowed) {
+    if (rule.blockDurationMs && result.remaining <= -rule.maxRequests) {
+      await blockKey(
+        getClientKey(request),
+        rule.blockDurationMs,
+        `Rate limit exceeded: ${pathname}`,
+      );
+    }
+
+    const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Too many requests',
+        retryAfter,
+        message: `Rate limit: ${rule.maxRequests} requests per ${rule.windowMs / 60000}min`,
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(retryAfter),
+          'X-RateLimit-Limit': String(rule.maxRequests),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(result.resetAt),
+        },
+      },
+    );
+  }
+
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // SECURITY HEADERS
 // ═══════════════════════════════════════════════════════════════
 function applySecurityHeaders(response: NextResponse): NextResponse {
@@ -116,7 +205,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   // SECURITY: In production, remove 'unsafe-eval' and 'unsafe-inline' from script-src.
   // In development, keep 'unsafe-eval' because React/Next.js requires eval() for debugging features.
   const scriptSrc = isProduction
-    ? "script-src 'self' 'unsafe-inline' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://vercel-analytics.vercel.app https://*.vitals.vercel-insights.com blob:"
+    ? "script-src 'self' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://vercel-analytics.vercel.app https://*.vitals.vercel-insights.com blob: 'nonce-{{NONCE}}'"
     : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://vercel-analytics.vercel.app https://*.vitals.vercel-insights.com blob: https://vitals.vercel-insights.com";
 
   response.headers.set(
@@ -156,6 +245,11 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     'camera=self, microphone=self, geolocation=self, fullscreen=self, clipboard-write=self, payment=(), usb=()',
   );
 
+  // Cross-Origin headers for additional security
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+
   // Remove Next.js powered-by header
   response.headers.delete('x-powered-by');
 
@@ -165,7 +259,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 // ═══════════════════════════════════════════════════════════════
 // MIDDLEWARE
 // ═══════════════════════════════════════════════════════════════
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip Next.js internal paths and static files
@@ -174,6 +268,12 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/api/') ||
     STATIC_EXTENSIONS.some((ext) => pathname.endsWith(ext))
   ) {
+    // Apply rate limiting to API routes
+    if (pathname.startsWith('/api/')) {
+      const rateLimitResponse = await applyRateLimit(request, pathname);
+      if (rateLimitResponse) return applySecurityHeaders(rateLimitResponse);
+    }
+
     // Still apply security headers to API responses
     const response = NextResponse.next();
     return applySecurityHeaders(response);

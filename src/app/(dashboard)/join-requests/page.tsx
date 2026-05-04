@@ -118,7 +118,7 @@ export default function JoinRequestsPage() {
         adminId: userId,
         inviteId,
         role: 'employee',
-        passwordHash: Math.random().toString(36).slice(2) + Date.now().toString(36),
+        passwordHash: crypto.randomUUID().replace(/-/g, '') + Date.now().toString(36),
       });
       toast.success(t('joinRequestsPage.requestApproved'));
     } catch (e) {

@@ -214,58 +214,11 @@ const nextConfig = {
   // ═══════════════════════════════════════════════════════════════
   // CACHE HEADERS
   // NOTE: Security headers (CSP, HSTS, X-Frame-Options, etc.)
-  //       are set ONLY in src/middleware.ts to avoid conflicts.
+  //       are set ONLY in src/proxy.ts to avoid conflicts.
+  //       next.config.js headers are only used for CDN-level caching.
   // ═══════════════════════════════════════════════════════════════
   async headers() {
     return [
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          // Content Security Policy
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              // SECURITY: 'unsafe-eval' is needed in development for React debugging features.
-              // In production, the middleware applies a stricter CSP without 'unsafe-eval'.
-              process.env.NODE_ENV === 'production'
-                ? "script-src 'self' 'unsafe-inline' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com blob:"
-                : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com blob:",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com https://*.sentry.io",
-              "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://*.convex.cloud https://*.convex.site https://*.sentry.io https://vercel.live https://*.stripe.com https://*.js.stripe.com https://va.vercel-scripts.com wss://*.convex.cloud wss://*.vercel.live",
-              "worker-src 'self' blob:",
-              "frame-src 'none'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-            ].join('; '),
-          },
-          // CORS
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project.vercel.app',
-          },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With',
-          },
-          { key: 'Access-Control-Max-Age', value: '86400' },
-          // Security headers
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          {
-            key: 'Permissions-Policy',
-            value:
-              'camera=self, microphone=self, geolocation=self, fullscreen=self, clipboard-write=self, payment=(), usb=()',
-          },
-        ],
-      },
       // Face recognition models — immutable cache
       {
         source: '/models/:path*',

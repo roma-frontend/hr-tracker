@@ -463,7 +463,7 @@ export const requestPasswordReset = mutation({
 
     if (!user) return { success: true }; // prevent email enumeration
 
-    const token = `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+    const token = `${Date.now()}-${crypto.randomUUID()}`;
     const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
 
     await ctx.db.patch(user._id, {

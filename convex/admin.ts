@@ -92,6 +92,7 @@ export const getCostAnalysis = query({
 
 /**
  * Detect conflicts in leave schedules
+ * OPTIMIZED: Uses interval-based approach instead of daily iteration
  */
 export const detectConflicts = query({
   args: {
@@ -114,7 +115,16 @@ export const detectConflicts = query({
     const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
     const userMap = new Map(users.map((u) => [u._id, u]));
 
-    // Group by department and date
+    // Group leaves by department
+    const deptLeaves = new Map<string, typeof leaves>();
+    for (const leave of leaves) {
+      const user = userMap.get(leave.userId);
+      if (!user) continue;
+      const dept = user.department || 'Unknown';
+      if (!deptLeaves.has(dept)) deptLeaves.set(dept, []);
+      deptLeaves.get(dept)!.push(leave);
+    }
+
     const conflicts: Array<{
       id: string;
       department: string;
@@ -125,65 +135,74 @@ export const detectConflicts = query({
       recommendationParams: Record<string, string | number>;
     }> = [];
 
-    // Group leaves by department
-    const deptLeaves = new Map<string, typeof leaves>();
-    for (const leave of leaves) {
-      const user = userMap.get(leave.userId);
-      if (!user) continue;
-
-      const dept = user.department || 'Unknown';
-      if (!deptLeaves.has(dept)) {
-        deptLeaves.set(dept, []);
-      }
-      deptLeaves.get(dept)!.push(leave);
-    }
-
-    // Check each department for conflicts
+    // OPTIMIZED: Use interval-based approach for each department
     for (const [dept, deptLeaveList] of deptLeaves.entries()) {
-      // Get department size
       const deptUsers = users.filter((u) => (u.department || 'Unknown') === dept);
       const deptSize = deptUsers.length;
+      if (deptSize === 0) continue;
 
-      // Check each day for overlaps
-      const dateOverlaps = new Map<string, Set<string>>();
+      // Collect all interval events (start/end dates)
+      const events: { date: number; type: 'start' | 'end'; employeeName: string }[] = [];
 
       for (const leave of deptLeaveList) {
-        const start = new Date(leave.startDate);
-        const end = new Date(leave.endDate);
+        const user = userMap.get(leave.userId);
+        if (!user) continue;
+        const start = new Date(leave.startDate).getTime();
+        const end = new Date(leave.endDate).getTime() + 86400000; // +1 day for inclusive end
 
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          const dateStr = d.toISOString().split('T')[0];
-          if (dateStr && !dateOverlaps.has(dateStr)) {
-            dateOverlaps.set(dateStr, new Set());
-          }
-          const user = userMap.get(leave.userId);
-          if (user && dateStr) {
-            dateOverlaps.get(dateStr)?.add(user.name);
-          }
-        }
+        events.push({ date: start, type: 'start', employeeName: user.name });
+        events.push({ date: end, type: 'end', employeeName: user.name });
       }
 
-      // Identify conflicts
-      for (const [date, employeesOut] of dateOverlaps.entries()) {
-        const outCount = employeesOut.size;
+      // Sort events by date
+      events.sort((a, b) => a.date - b.date);
+
+      // Process events at each unique date
+      const uniqueDates = [...new Set(events.map((e) => e.date))].sort((a, b) => a - b);
+      const activeEmployees = new Set<string>();
+      let eventIndex = 0;
+
+      for (const date of uniqueDates) {
+        // Process all events at this date
+        while (eventIndex < events.length && events[eventIndex]!.date === date) {
+          const event = events[eventIndex]!;
+          if (event.type === 'start') {
+            activeEmployees.add(event.employeeName);
+          } else {
+            activeEmployees.delete(event.employeeName);
+          }
+          eventIndex++;
+        }
+
+        // Check if this date falls within a reasonable range (last 365 days to next 365 days)
+        const now = Date.now();
+        const oneYearAgo = now - 365 * 86400000;
+        const oneYearFromNow = now + 365 * 86400000;
+        if (date < oneYearAgo || date > oneYearFromNow) continue;
+
+        const outCount = activeEmployees.size;
         const percentage = deptSize > 0 ? (outCount / deptSize) * 100 : 0;
 
         if (percentage >= 50) {
+          const dateStr = new Date(date).toISOString().split('T')[0];
+          if (!dateStr) continue;
           conflicts.push({
-            id: `${dept}-${date}`,
+            id: `${dept}-${dateStr}`,
             department: dept,
-            date,
-            employeesOut: Array.from(employeesOut),
+            date: dateStr,
+            employeesOut: Array.from(activeEmployees),
             severity: 'critical',
             recommendationKey: 'conflicts.criticalRecommendation',
             recommendationParams: { outCount, total: deptSize, percentage: percentage.toFixed(0) },
           });
         } else if (percentage >= 30) {
+          const dateStr = new Date(date).toISOString().split('T')[0];
+          if (!dateStr) continue;
           conflicts.push({
-            id: `${dept}-${date}`,
+            id: `${dept}-${dateStr}`,
             department: dept,
-            date,
-            employeesOut: Array.from(employeesOut),
+            date: dateStr,
+            employeesOut: Array.from(activeEmployees),
             severity: 'warning',
             recommendationKey: 'conflicts.warningRecommendation',
             recommendationParams: { outCount, total: deptSize, percentage: percentage.toFixed(0) },

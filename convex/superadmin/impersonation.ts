@@ -36,7 +36,7 @@ export const startImpersonation = mutation({
     }
 
     // Generate unique token
-    const token = `imp_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    const token = `imp_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 26)}`;
 
     // Create impersonation session
     const sessionId = await ctx.db.insert('impersonationSessions', {

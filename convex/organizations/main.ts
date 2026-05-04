@@ -808,8 +808,8 @@ export const generateInviteToken = mutation({
       throw new Error('Only org admins can generate invite links');
     }
 
-    // Generate a secure random token
-    const token = Array.from({ length: 32 }, () => Math.random().toString(36).charAt(2)).join('');
+    // Generate a cryptographically secure random token
+    const token = crypto.randomUUID().replace(/-/g, '');
 
     const expiryHours = args.expiryHours ?? 72;
     const expiry = Date.now() + expiryHours * 60 * 60 * 1000;

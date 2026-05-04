@@ -434,7 +434,7 @@ export default function Navbar() {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
-                {t('landingExtra.signIn')}
+                {mounted ? t('landingExtra.signIn') : 'Sign In'}
               </Link>
               <Link
                 href="/register"

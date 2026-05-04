@@ -366,13 +366,13 @@ async function detectDepartmentConflicts(
 ): Promise<Conflict[]> {
   const conflicts: Conflict[] = [];
 
-  // Получаем всех пользователей
+  // Get all users in organization
   const users = await ctx.db
     .query('users')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
     .take(MAX_PAGE_SIZE);
 
-  // Получаем все одобренные отпуска
+  // Get all approved leaves
   const leaves = await ctx.db
     .query('leaveRequests')
     .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
@@ -380,92 +380,109 @@ async function detectDepartmentConflicts(
 
   const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
-  // Группируем по отделам
-  const deptUsers = new Map<string, typeof users>();
-  const deptLeaves = new Map<string, typeof approvedLeaves>();
-
+  // Build department user counts
+  const deptUserCounts = new Map<string, number>();
+  const deptUserIds = new Map<string, Id<'users'>[]>();
   for (const user of users) {
     const dept = user.department || 'Unknown';
-    if (!deptUsers.has(dept)) deptUsers.set(dept, []);
-    deptUsers.get(dept)!.push(user);
+    deptUserCounts.set(dept, (deptUserCounts.get(dept) || 0) + 1);
+    if (!deptUserIds.has(dept)) deptUserIds.set(dept, []);
+    deptUserIds.get(dept)!.push(user._id);
   }
 
   // Build user map for O(1) lookups
-  const userMapForDepts = new Map(users.map((u: any) => [u._id, u]));
+  type UserDoc = { _id: Id<'users'>; department?: string; name: string };
+  const userMap = new Map<Id<'users'>, UserDoc>(users.map((u: UserDoc) => [u._id, u]));
+
+  // OPTIMIZED: Use interval-based approach instead of daily iteration
+  // Collect all "events" (leave start/end) and process only at change points
+  const events: { date: number; type: 'start' | 'end'; dept: string; userId: Id<'users'> }[] = [];
 
   for (const leave of approvedLeaves) {
-    const user = userMapForDepts.get(leave.userId);
+    const leaveStart = new Date(leave.startDate).getTime();
+    const leaveEnd = new Date(leave.endDate).getTime();
+    const user = userMap.get(leave.userId) as UserDoc | undefined;
     if (!user) continue;
+    const dept = user.department || 'Unknown';
 
-    const dept = (user as any).department || 'Unknown';
-    if (!deptLeaves.has(dept)) deptLeaves.set(dept, []);
-    deptLeaves.get(dept)!.push(leave);
+    events.push({ date: leaveStart, type: 'start', dept, userId: leave.userId });
+    events.push({ date: leaveEnd + 86400000, type: 'end', dept, userId: leave.userId }); // +1 day to make end inclusive
   }
 
-  // Проверяем каждый день в периоде
-  const startDate = new Date(args.startDate);
-  const endDate = new Date(args.endDate);
+  // Sort events by date
+  events.sort((a, b) => a.date - b.date);
 
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    const dateStr = d.toISOString().split('T')[0];
-    if (!dateStr) continue;
+  // Track active leaves per department using a map
+  const activeLeavesPerDept = new Map<string, Set<Id<'users'>>>();
+  let eventIndex = 0;
 
-    const timestamp = d.getTime();
+  // Process events at each unique date point
+  const uniqueDates = [...new Set(events.map((e) => e.date))].sort((a, b) => a - b);
 
-    for (const [dept, deptUserList] of deptUsers.entries()) {
-      const deptSize = deptUserList.length;
-      if (deptSize === 0) continue;
+  for (const date of uniqueDates) {
+    // Process all events at this date
+    while (eventIndex < events.length && events[eventIndex]!.date === date) {
+      const event = events[eventIndex]!;
+      if (!activeLeavesPerDept.has(event.dept)) {
+        activeLeavesPerDept.set(event.dept, new Set());
+      }
+      const activeSet = activeLeavesPerDept.get(event.dept)!;
 
-      // Считаем, кто в отпуске в этот день
-      const leavesOnThisDay =
-        deptLeaves.get(dept)?.filter((leave: any) => {
-          const leaveStart = new Date(leave.startDate).getTime();
-          const leaveEnd = new Date(leave.endDate).getTime();
-          return timestamp >= leaveStart && timestamp <= leaveEnd;
-        }) || [];
+      if (event.type === 'start') {
+        activeSet.add(event.userId);
+      } else {
+        activeSet.delete(event.userId);
+      }
+      eventIndex++;
+    }
 
-      const outCount = leavesOnThisDay.length;
+    // Check if this date falls within the requested range
+    if (date < args.startDate || date > args.endDate) continue;
+
+    // Only check departments that have active leaves
+    for (const [dept, activeSet] of activeLeavesPerDept.entries()) {
+      const outCount = activeSet.size;
+      const deptSize = deptUserCounts.get(dept) || 0;
+      if (deptSize === 0 || outCount === 0) continue;
+
       const percentage = outCount / deptSize;
 
-      // Если конкретный userId указан, проверяем только его отдел
+      // If specific userId is provided, only check their department
       if (args.userId) {
-        const currentUser = await ctx.db.get(args.userId);
+        const currentUser = userMap.get(args.userId);
         if (currentUser?.department !== dept) continue;
       }
 
-      if (percentage >= THRESHOLDS.DEPARTMENT_CRITICAL) {
-        conflicts.push({
-          id: `dept-critical-${dept}-${dateStr}`,
-          type: 'leave_department',
-          severity: 'critical',
-          title: `Критическая нехватка сотрудников в "${dept}"`,
-          message: `${outCount}/${deptSize} сотрудников (${(percentage * 100).toFixed(0)}%) в отпуске. Работа отдела может быть парализована.`,
-          suggestion: 'Рекомендуем отозвать кого-то из отпуска или перераспределить задачи.',
-          date: dateStr,
-          affectedUsers: leavesOnThisDay.map((l: any) => l.userId),
-          affectedDepartments: [dept],
-          metadata: {
-            percentage: Math.round(percentage * 100),
-            departmentSize: deptSize,
-          },
-        });
-      } else if (percentage >= THRESHOLDS.DEPARTMENT_WARNING) {
-        conflicts.push({
-          id: `dept-warning-${dept}-${dateStr}`,
-          type: 'leave_department',
-          severity: 'warning',
-          title: `Внимание: ${outCount} сотрудников из "${dept}" в отпуске`,
-          message: `${outCount}/${deptSize} сотрудников (${(percentage * 100).toFixed(0)}%) отсутствуют. Возможны задержки.`,
-          suggestion: 'Планируйте нагрузку с учётом отсутствия сотрудников.',
-          date: dateStr,
-          affectedUsers: leavesOnThisDay.map((l: any) => l.userId),
-          affectedDepartments: [dept],
-          metadata: {
-            percentage: Math.round(percentage * 100),
-            departmentSize: deptSize,
-          },
-        });
-      }
+      // Only generate conflict if threshold is met
+      if (percentage < THRESHOLDS.DEPARTMENT_WARNING) continue;
+
+      const dateStr = new Date(date).toISOString().split('T')[0];
+      if (!dateStr) continue;
+
+      const severity = percentage >= THRESHOLDS.DEPARTMENT_CRITICAL ? 'critical' : 'warning';
+      const affectedUsers = [...activeSet];
+
+      conflicts.push({
+        id: `dept-${severity}-${dept}-${dateStr}`,
+        type: 'leave_department',
+        severity,
+        title:
+          severity === 'critical'
+            ? `Критическая нехватка в "${dept}"`
+            : `Внимание: ${outCount} из "${dept}" в отпуске`,
+        message: `${outCount}/${deptSize} сотрудников (${(percentage * 100).toFixed(0)}%) в отпуске. ${severity === 'critical' ? 'Работа отдела может быть парализована.' : 'Возможны задержки.'}`,
+        suggestion:
+          severity === 'critical'
+            ? 'Рекомендуем отозвать кого-то из отпуска или перераспределить задачи.'
+            : 'Планируйте нагрузка с учётом отсутствия сотрудников.',
+        date: dateStr,
+        affectedUsers,
+        affectedDepartments: [dept],
+        metadata: {
+          percentage: Math.round(percentage * 100),
+          departmentSize: deptSize,
+        },
+      });
     }
   }
 
