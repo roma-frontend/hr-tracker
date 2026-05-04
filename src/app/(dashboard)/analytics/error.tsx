@@ -1,16 +1,31 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw } from 'lucide-react';
 
 export default function AnalyticsError({
-  _error,
+  error,
   reset,
 }: {
-  _error: Error & { digest?: string };
+  error: Error & { digest?: string };
   reset: () => void;
 }) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    console.error('Analytics error:', error);
+
+    // Send to Sentry if available
+    if (typeof window !== 'undefined' && (window as any).Sentry) {
+      (window as any).Sentry.captureException(error, {
+        extra: {
+          digest: error.digest,
+          location: 'analytics-error.tsx',
+        },
+      });
+    }
+  }, [error]);
 
   return (
     <div className="p-6 flex flex-col items-center justify-center min-h-[400px] gap-4">

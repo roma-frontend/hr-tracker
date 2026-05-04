@@ -12,8 +12,17 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log to error reporting service (Sentry is auto-captured)
     console.error('Dashboard error:', error);
+
+    // Send to Sentry if available
+    if (typeof window !== 'undefined' && (window as any).Sentry) {
+      (window as any).Sentry.captureException(error, {
+        extra: {
+          digest: error.digest,
+          location: 'dashboard-error.tsx',
+        },
+      });
+    }
   }, [error]);
 
   return (

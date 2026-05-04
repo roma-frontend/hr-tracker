@@ -13,6 +13,16 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error('Global error:', error);
+
+    // Send to Sentry if available
+    if (typeof window !== 'undefined' && (window as any).Sentry) {
+      (window as any).Sentry.captureException(error, {
+        extra: {
+          digest: error.digest,
+          location: 'error.tsx',
+        },
+      });
+    }
   }, [error]);
 
   return (
