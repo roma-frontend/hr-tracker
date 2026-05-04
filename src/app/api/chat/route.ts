@@ -185,8 +185,9 @@ FORMAT RULES:
 
       console.log(`✅ Groq response streamed in ${Date.now() - startTime}ms`);
       return result.toTextStreamResponse();
-    } catch (groqError: any) {
-      console.log('⚠️ Groq failed, trying OpenRouter...', groqError.message);
+    } catch (groqError) {
+      const groqErrorMessage = groqError instanceof Error ? groqError.message : 'Groq failed';
+      console.log('⚠️ Groq failed, trying OpenRouter...', groqErrorMessage);
 
       try {
         const stream = await openrouter.chat.completions.create({
@@ -212,8 +213,10 @@ FORMAT RULES:
         return new Response(readableStream, {
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         });
-      } catch (openrouterError: any) {
-        console.error('❌ Both providers failed:', openrouterError.message);
+      } catch (openrouterError) {
+        const openrouterErrorMessage =
+          openrouterError instanceof Error ? openrouterError.message : 'OpenRouter failed';
+        console.error('❌ Both providers failed:', openrouterErrorMessage);
         throw groqError;
       }
     }

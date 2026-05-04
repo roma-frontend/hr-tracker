@@ -159,22 +159,19 @@ export default function DashboardClient() {
   const organizationsList = useQuery(
     api.organizations.getOrganizationsForPicker,
     userId ? { userId } : 'skip',
-  ) as any[] | null | undefined;
+  );
 
   const selectedOrganization = organizationsList?.find((o) => o._id === selectedOrgId);
 
   // If no org selected, show all data (superadmin sees all); otherwise filter locally
-  const leaves = useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : 'skip') as
-    | any[]
-    | null
-    | undefined;
+  const leaves = useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : 'skip');
 
   const usersFromConvex = useQuery(
     api.users.queries.getAllUsers,
     userId ? { requesterId: userId } : 'skip',
-  ) as any[] | null | undefined;
+  );
   // Convert Convex _id to id for User type compatibility
-  const users = (usersFromConvex || []).map((u: any) => ({ ...u, id: u._id })) as unknown as User[];
+  const users = (usersFromConvex || []).map((u) => ({ ...u, id: u._id })) as unknown as User[];
   const organization = useQuery(
     api.organizations.getMyOrganization,
     userId ? { userId } : 'skip',

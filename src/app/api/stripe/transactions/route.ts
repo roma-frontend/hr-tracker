@@ -153,11 +153,19 @@ export async function GET(req: NextRequest) {
 
     // Subscriptions with customer info
     const subscriptionList = subscriptions.data.map((sub) => {
-      const customer = sub.customer as Stripe.Customer;
+      const customer = sub.customer as Stripe.Customer | Stripe.DeletedCustomer | string | null;
       const price = sub.items.data[0]?.price;
       const priceId = price?.id || '';
       const amount = price?.unit_amount ? price.unit_amount / 100 : 0;
-      const subAny = sub as any;
+
+      const customerEmail =
+        typeof customer === 'object' && customer !== null && 'email' in customer
+          ? (customer.email ?? 'N/A')
+          : 'N/A';
+      const customerName =
+        typeof customer === 'object' && customer !== null && 'name' in customer
+          ? (customer.name ?? 'N/A')
+          : 'N/A';
 
       return {
         id: sub.id,
@@ -165,13 +173,16 @@ export async function GET(req: NextRequest) {
         plan: price?.nickname || priceId || 'unknown',
         amount,
         customer: {
-          email: (customer as any).email || 'N/A',
-          name: (customer as any).name || 'N/A',
+          email: customerEmail,
+          name: customerName,
         },
-        currentPeriodEnd: subAny.current_period_end * 1000,
-        currentPeriodStart: subAny.current_period_start * 1000,
+        currentPeriodEnd:
+          ('current_period_end' in sub ? (sub.current_period_end as number) : 0) * 1000,
+        currentPeriodStart:
+          ('current_period_start' in sub ? (sub.current_period_start as number) : 0) * 1000,
         cancelAtPeriodEnd: sub.cancel_at_period_end || false,
-        trialEnd: subAny.trial_end ? subAny.trial_end * 1000 : undefined,
+        trialEnd:
+          'trial_end' in sub && sub.trial_end ? (sub.trial_end as number) * 1000 : undefined,
         created: sub.created * 1000,
       };
     });
@@ -193,11 +204,9 @@ export async function GET(req: NextRequest) {
       subscriptions: subscriptionList,
       recentTransactions,
     });
-  } catch (error: any) {
-    console.error('[Stripe API] Error:', error.message);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch Stripe data' },
-      { status: 500 },
-    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch Stripe data';
+    console.error('[Stripe API] Error:', errorMessage);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

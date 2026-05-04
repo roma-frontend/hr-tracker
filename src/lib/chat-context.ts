@@ -24,6 +24,95 @@ interface ContextResult {
   userOrgId: string;
 }
 
+interface ContextUser {
+  name: string;
+  role: string;
+  department: string;
+  position: string;
+  email: string;
+  organizationId: string;
+}
+
+interface ContextLeaveBalance {
+  paid: number;
+  sick: number;
+  family: number;
+  unpaid: number;
+}
+
+interface ContextStats {
+  totalDaysTaken: number;
+  pendingDays: number;
+}
+
+interface ContextLeaveEntry {
+  type: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+}
+
+interface ContextTeamMember {
+  userName: string;
+  startDate: string;
+  endDate: string;
+}
+
+interface ContextEmployee {
+  name: string;
+  department: string;
+  presenceStatus: string;
+  currentLeave?: ContextLeaveEntry | null;
+  pendingLeaves?: ContextLeaveEntry[];
+}
+
+interface ContextCalendarEvent {
+  employee: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+}
+
+interface ContextAttendanceEntry {
+  name: string;
+  status: string;
+  checkIn?: string | null;
+  isLate?: boolean;
+  lateMinutes?: number;
+}
+
+interface ContextTicket {
+  ticketNumber: string;
+  title: string;
+  status: string;
+  isOverdue?: boolean;
+}
+
+interface ContextDriver {
+  userName: string;
+  vehicleInfo: { model: string };
+}
+
+interface ContextFullData {
+  employees?: ContextEmployee[];
+  calendarEvents?: ContextCalendarEvent[];
+  todayAttendance?: ContextAttendanceEntry[];
+  tickets?: ContextTicket[];
+  availableDrivers?: ContextDriver[];
+  totalEmployees?: number;
+  currentlyAtWork?: number;
+  onLeaveToday?: number;
+  ticketStats?: { total: number };
+}
+
+interface ContextApiResponse {
+  user: ContextUser;
+  leaveBalances: ContextLeaveBalance;
+  stats: ContextStats;
+  recentLeaves?: ContextLeaveEntry[];
+  teamAvailability?: ContextTeamMember[];
+}
+
 async function fetchWithTimeout(
   url: string,
   options: RequestInit,
@@ -95,7 +184,7 @@ async function processUserContext(
     };
   }
 
-  const context = await res.json();
+  const context = (await res.json()) as ContextApiResponse;
   return {
     userContext: `
 USER: ${context.user.name} | Role: ${context.user.role} | Dept: ${context.user.department}
@@ -104,13 +193,13 @@ Stats: Taken=${context.stats.totalDaysTaken}d, Pending=${context.stats.pendingDa
 Recent leaves: ${
       context.recentLeaves
         ?.slice(0, 3)
-        .map((l: any) => `${l.type} ${l.startDate}-${l.endDate} (${l.status})`)
+        .map((l) => `${l.type} ${l.startDate}-${l.endDate} (${l.status})`)
         .join(', ') || 'none'
     }
 Team on leave: ${
       context.teamAvailability
         ?.slice(0, 5)
-        .map((l: any) => `${l.userName} (${l.startDate}-${l.endDate})`)
+        .map((l) => `${l.userName} (${l.startDate}-${l.endDate})`)
         .join(', ') || 'none'
     }
 `.trim(),
@@ -210,11 +299,11 @@ async function processFullContext(
     );
     if (!res.ok) return { fullContext: '', availableDriversInfo: '' };
 
-    const data = await res.json();
+    const data = (await res.json()) as ContextFullData;
 
     const employeesSummary = (data.employees ?? [])
       .slice(0, 15)
-      .map((e: any) => {
+      .map((e) => {
         const status =
           e.presenceStatus === 'available'
             ? '🟢'
@@ -235,25 +324,25 @@ async function processFullContext(
 
     const calendarSummary = (data.calendarEvents ?? [])
       .slice(0, 10)
-      .map((ev: any) => `📅 ${ev.employee}: ${ev.type} ${ev.startDate}-${ev.endDate}`)
+      .map((ev) => `📅 ${ev.employee}: ${ev.type} ${ev.startDate}-${ev.endDate}`)
       .join('\n');
 
     const attendanceSummary = (data.todayAttendance ?? [])
       .slice(0, 10)
       .map(
-        (t: any) =>
+        (t) =>
           `${t.status === 'checked_in' ? '🟢' : '🔴'} ${t.name}: ${t.checkIn || '—'}${t.isLate ? ` (LATE ${t.lateMinutes}min)` : ''}`,
       )
       .join('\n');
 
     const ticketsSummary = (data.tickets ?? [])
       .slice(0, 5)
-      .map((t: any) => `🎫 ${t.ticketNumber}: ${t.title} [${t.status}] ${t.isOverdue ? '⚠️' : ''}`)
+      .map((t) => `🎫 ${t.ticketNumber}: ${t.title} [${t.status}] ${t.isOverdue ? '⚠️' : ''}`)
       .join('\n');
 
     const driversSummary = (data.availableDrivers ?? [])
       .slice(0, 5)
-      .map((d: any) => `🚘 ${d.name}: ${d.vehicle || 'No vehicle'} [${d.status || 'Available'}]`)
+      .map((d) => `🚘 ${d.userName}: ${d.vehicleInfo?.model || 'No vehicle'} [Available]`)
       .join('\n');
 
     const fullContext = `
@@ -284,9 +373,9 @@ ${driversSummary || 'No drivers'}
           3000,
         );
         if (driversRes.ok) {
-          const drivers = await driversRes.json();
+          const drivers = (await driversRes.json()) as ContextDriver[];
           if (drivers?.length) {
-            availableDriversInfo = `Available drivers: ${drivers.map((d: any) => `${d.userName} (${d.vehicleInfo.model})`).join(', ')}`;
+            availableDriversInfo = `Available drivers: ${drivers.map((d) => `${d.userName} (${d.vehicleInfo.model})`).join(', ')}`;
           }
         }
       } catch {
