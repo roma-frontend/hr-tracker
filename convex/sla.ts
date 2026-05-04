@@ -328,46 +328,52 @@ export const getPendingWithSLA = query({
     const config = await ctx.db.query('slaConfig').first();
     const now = Date.now();
 
-    return await Promise.all(
-      pendingLeaves.map(async (leave) => {
-        const user = await ctx.db.get(leave.userId);
-        const metric = await ctx.db
-          .query('slaMetrics')
-          .withIndex('by_leave', (q) => q.eq('leaveRequestId', leave._id))
-          .first();
-
-        const elapsedHours = (now - leave.createdAt) / (1000 * 60 * 60);
-        const targetHours = metric?.targetResponseTime ?? config?.targetResponseTime ?? 24;
-        const remainingHours = Math.max(0, targetHours - elapsedHours);
-        const progressPercent = Math.min(100, (elapsedHours / targetHours) * 100);
-
-        let slaStatus: 'normal' | 'warning' | 'critical' | 'breached';
-        if (elapsedHours >= targetHours) {
-          slaStatus = 'breached';
-        } else if (elapsedHours >= (config?.criticalThreshold ?? 22)) {
-          slaStatus = 'critical';
-        } else if (elapsedHours >= (config?.warningThreshold ?? 18)) {
-          slaStatus = 'warning';
-        } else {
-          slaStatus = 'normal';
-        }
-
-        return {
-          ...leave,
-          userName: user?.name ?? 'Unknown',
-          userEmail: user?.email ?? '',
-          userDepartment: user?.department ?? '',
-          userAvatarUrl: user?.avatarUrl,
-          sla: {
-            elapsedHours: Math.round(elapsedHours * 10) / 10,
-            remainingHours: Math.round(remainingHours * 10) / 10,
-            targetHours,
-            progressPercent: Math.round(progressPercent),
-            status: slaStatus,
-          },
-        };
-      }),
+    // Batch-load all unique user IDs upfront to avoid N+1 queries
+    const uniqueUserIds = [...new Set(pendingLeaves.map((l) => l.userId))];
+    const usersBatch = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(
+      usersBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
     );
+
+    // Batch-load all SLA metrics for the pending leaves
+    const allMetrics = await ctx.db.query('slaMetrics').collect();
+    const metricsByLeave = new Map(allMetrics.map((m) => [m.leaveRequestId, m]));
+
+    return pendingLeaves.map((leave) => {
+      const user = userMap.get(leave.userId);
+      const metric = metricsByLeave.get(leave._id);
+
+      const elapsedHours = (now - leave.createdAt) / (1000 * 60 * 60);
+      const targetHours = metric?.targetResponseTime ?? config?.targetResponseTime ?? 24;
+      const remainingHours = Math.max(0, targetHours - elapsedHours);
+      const progressPercent = Math.min(100, (elapsedHours / targetHours) * 100);
+
+      let slaStatus: 'normal' | 'warning' | 'critical' | 'breached';
+      if (elapsedHours >= targetHours) {
+        slaStatus = 'breached';
+      } else if (elapsedHours >= (config?.criticalThreshold ?? 22)) {
+        slaStatus = 'critical';
+      } else if (elapsedHours >= (config?.warningThreshold ?? 18)) {
+        slaStatus = 'warning';
+      } else {
+        slaStatus = 'normal';
+      }
+
+      return {
+        ...leave,
+        userName: user?.name ?? 'Unknown',
+        userEmail: user?.email ?? '',
+        userDepartment: user?.department ?? '',
+        userAvatarUrl: user?.avatarUrl,
+        sla: {
+          elapsedHours: Math.round(elapsedHours * 10) / 10,
+          remainingHours: Math.round(remainingHours * 10) / 10,
+          targetHours,
+          progressPercent: Math.round(progressPercent),
+          status: slaStatus,
+        },
+      };
+    });
   },
 });
 

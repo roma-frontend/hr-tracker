@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
+import type { Id } from '../_generated/dataModel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CALLS - Audio/Video calling using WebRTC (similar to web version)
@@ -169,20 +170,41 @@ export const getIncomingCalls = query({
       .withIndex('by_user', (q) => q.eq('userId', userId))
       .take(MAX_PAGE_SIZE);
 
-    // Find active calls in these conversations
-    for (const membership of memberships) {
-      const messages = await ctx.db
-        .query('chatMessages')
-        .withIndex('by_conversation', (q) => q.eq('conversationId', membership.conversationId))
-        .order('desc')
-        .take(3);
+    // Batch-load recent messages for all conversations upfront
+    const conversationIds = memberships.map((m) => m.conversationId);
+    const allMessages = await Promise.all(
+      conversationIds.map((convId) =>
+        ctx.db
+          .query('chatMessages')
+          .withIndex('by_conversation', (q) => q.eq('conversationId', convId))
+          .order('desc')
+          .take(3),
+      ),
+    );
 
+    // Collect unique sender IDs from potential incoming calls
+    const uniqueSenderIds = new Set<Id<'users'>>();
+    for (const messages of allMessages) {
+      for (const msg of messages) {
+        if (msg.type === 'call' && msg.senderId !== userId && msg.callStatus === 'missed') {
+          uniqueSenderIds.add(msg.senderId as Id<'users'>);
+        }
+      }
+    }
+
+    // Batch-load all potential initiators
+    const sendersBatch = await Promise.all([...uniqueSenderIds].map((id) => ctx.db.get(id)));
+    const senderMap = new Map(sendersBatch.filter(Boolean).map((s: any) => [s._id, s]));
+
+    // Find active calls in these conversations
+    for (let i = 0; i < memberships.length; i++) {
+      const messages = allMessages[i] || [];
       const incomingCall = messages.find(
         (m) => m.type === 'call' && m.senderId !== userId && m.callStatus === 'missed',
       );
 
       if (incomingCall) {
-        const initiator = await ctx.db.get(incomingCall.senderId);
+        const initiator = senderMap.get(incomingCall.senderId);
         return {
           callId: incomingCall._id,
           conversationId: incomingCall.conversationId,

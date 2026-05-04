@@ -5,11 +5,36 @@ import { Id } from './_generated/dataModel';
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const DEFAULT_COMPETENCIES = [
-  { id: 'quality', name: 'Quality of Work', description: 'Accuracy, thoroughness, and reliability of output', weight: 20 },
-  { id: 'communication', name: 'Communication', description: 'Clarity, effectiveness, and frequency of communication', weight: 20 },
-  { id: 'teamwork', name: 'Teamwork', description: 'Collaboration, support, and positive team contribution', weight: 20 },
-  { id: 'initiative', name: 'Initiative', description: 'Proactiveness, innovation, and problem-solving', weight: 20 },
-  { id: 'leadership', name: 'Leadership', description: 'Guiding others, decision-making, accountability', weight: 20 },
+  {
+    id: 'quality',
+    name: 'Quality of Work',
+    description: 'Accuracy, thoroughness, and reliability of output',
+    weight: 20,
+  },
+  {
+    id: 'communication',
+    name: 'Communication',
+    description: 'Clarity, effectiveness, and frequency of communication',
+    weight: 20,
+  },
+  {
+    id: 'teamwork',
+    name: 'Teamwork',
+    description: 'Collaboration, support, and positive team contribution',
+    weight: 20,
+  },
+  {
+    id: 'initiative',
+    name: 'Initiative',
+    description: 'Proactiveness, innovation, and problem-solving',
+    weight: 20,
+  },
+  {
+    id: 'leadership',
+    name: 'Leadership',
+    description: 'Guiding others, decision-making, accountability',
+    weight: 20,
+  },
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -21,11 +46,16 @@ export const listCycles = query({
   args: {
     organizationId: v.id('organizations'),
     status: v.optional(
-      v.union(v.literal('draft'), v.literal('active'), v.literal('completed'), v.literal('cancelled')),
+      v.union(
+        v.literal('draft'),
+        v.literal('active'),
+        v.literal('completed'),
+        v.literal('cancelled'),
+      ),
     ),
   },
   handler: async (ctx, args) => {
-    let q = ctx.db
+    const q = ctx.db
       .query('reviewCycles')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId));
 
@@ -158,22 +188,31 @@ export const getRevieweeResults = query({
     const competencyAverages = Object.entries(competencyScores).map(([id, data]) => ({
       id,
       name: data.name,
-      average: data.scores.length > 0
-        ? Math.round((data.scores.reduce((s, v) => s + v, 0) / data.scores.length) * 10) / 10
-        : 0,
+      average:
+        data.scores.length > 0
+          ? Math.round((data.scores.reduce((s, v) => s + v, 0) / data.scores.length) * 10) / 10
+          : 0,
       count: data.scores.length,
     }));
 
-    const overallAvg = responses.length > 0
-      ? Math.round((responses.reduce((s, r) => s + r.overallScore, 0) / responses.length) * 10) / 10
-      : 0;
+    const overallAvg =
+      responses.length > 0
+        ? Math.round((responses.reduce((s, r) => s + r.overallScore, 0) / responses.length) * 10) /
+          10
+        : 0;
 
     return {
       reviewee: await ctx.db.get(args.revieweeId),
       cycle,
       overallScore: overallAvg,
       competencyAverages,
-      selfReview: selfReview ? { overallScore: selfReview.overallScore, strengths: selfReview.strengths, improvements: selfReview.improvements } : null,
+      selfReview: selfReview
+        ? {
+            overallScore: selfReview.overallScore,
+            strengths: selfReview.strengths,
+            improvements: selfReview.improvements,
+          }
+        : null,
       managerReviews: managerReviews.map((r) => ({
         overallScore: r.overallScore,
         strengths: r.strengths,
@@ -221,19 +260,25 @@ export const getCycleSummary = query({
       byReviewee[key]!.types.push(r.type);
     }
 
-    const summaries = await Promise.all(
-      Object.entries(byReviewee).map(async ([revieweeId, data]) => {
-        const user = await ctx.db.get(revieweeId as Id<'users'>);
-        return {
-          revieweeId,
-          name: user?.name || 'Unknown',
-          avatar: user?.avatarUrl || user?.faceImageUrl || '',
-          averageScore: Math.round((data.scores.reduce((s, v) => s + v, 0) / data.scores.length) * 10) / 10,
-          reviewCount: data.scores.length,
-          types: [...new Set(data.types)],
-        };
-      }),
+    // Batch-load all unique reviewee IDs upfront
+    const uniqueRevieweeIds = Object.keys(byReviewee) as Id<'users'>[];
+    const revieweesBatch = await Promise.all(uniqueRevieweeIds.map((id) => ctx.db.get(id)));
+    const revieweeMap = new Map(
+      revieweesBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
     );
+
+    const summaries = Object.entries(byReviewee).map(([revieweeId, data]) => {
+      const user = revieweeMap.get(revieweeId as Id<'users'>);
+      return {
+        revieweeId,
+        name: user?.name || 'Unknown',
+        avatar: user?.avatarUrl || user?.faceImageUrl || '',
+        averageScore:
+          Math.round((data.scores.reduce((s, v) => s + v, 0) / data.scores.length) * 10) / 10,
+        reviewCount: data.scores.length,
+        types: [...new Set(data.types)],
+      };
+    });
 
     return {
       cycle,
@@ -469,9 +514,7 @@ export const addPeerAssignment = mutation({
       )
       .collect();
 
-    const duplicate = existing.find(
-      (a) => a.revieweeId === args.revieweeId && a.type === 'peer',
-    );
+    const duplicate = existing.find((a) => a.revieweeId === args.revieweeId && a.type === 'peer');
     if (duplicate) throw new Error('Assignment already exists');
 
     return ctx.db.insert('reviewAssignments', {
@@ -518,8 +561,7 @@ export const submitReview = mutation({
     }
 
     const now = Date.now();
-    const overallScore =
-      args.ratings.reduce((sum, r) => sum + r.score, 0) / args.ratings.length;
+    const overallScore = args.ratings.reduce((sum, r) => sum + r.score, 0) / args.ratings.length;
 
     // Create response
     const responseId = await ctx.db.insert('reviewResponses', {
@@ -655,10 +697,7 @@ export const getEligibleParticipants = query({
     const users = await ctx.db.query('users').collect();
     return users
       .filter(
-        (u) =>
-          u.organizationId === args.organizationId &&
-          u.isActive &&
-          u.role !== 'superadmin',
+        (u) => u.organizationId === args.organizationId && u.isActive && u.role !== 'superadmin',
       )
       .map((u) => ({
         _id: u._id,

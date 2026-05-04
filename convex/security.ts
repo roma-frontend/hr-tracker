@@ -362,17 +362,21 @@ export const getRecentAuditLogs = query({
       logs = await ctx.db.query('auditLogs').order('desc').take(limit);
     }
 
-    // Enrich with user names
-    const enriched = await Promise.all(
-      logs.map(async (log) => {
-        const user = await ctx.db.get(log.userId);
-        return {
-          ...log,
-          userName: user?.name ?? 'Unknown',
-          userEmail: user?.email ?? '',
-        };
-      }),
+    // Enrich with user names - batch load all unique user IDs
+    const uniqueUserIds = [...new Set(logs.map((log) => log.userId).filter(Boolean))];
+    const usersBatch = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(
+      usersBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
     );
+
+    const enriched = logs.map((log) => {
+      const user = userMap.get(log.userId);
+      return {
+        ...log,
+        userName: user?.name ?? 'Unknown',
+        userEmail: user?.email ?? '',
+      };
+    });
     return enriched;
   },
 });

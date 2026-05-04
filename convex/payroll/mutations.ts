@@ -157,8 +157,15 @@ export const calculatePayrollRun = mutation({
     let processed = 0;
     const skipped: { userId: Id<'users'>; reason: string }[] = [];
 
+    // Batch-load all unique user IDs upfront to avoid N+1 queries
+    const uniqueUserIds = [...new Set(employees.map((emp) => emp.userId))];
+    const usersBatch = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(
+      usersBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
+    );
+
     for (const emp of employees) {
-      const user = await ctx.db.get(emp.userId);
+      const user = userMap.get(emp.userId);
       if (!user) {
         skipped.push({ userId: emp.userId, reason: 'user_not_found' });
         continue;

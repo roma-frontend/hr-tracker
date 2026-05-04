@@ -71,18 +71,28 @@ export const getOrgJoinRequests = query({
       )
       .collect();
 
-    // Enrich with requester info
-    const enriched = await Promise.all(
-      requests.map(async (req) => {
-        const requester = req.userId ? await ctx.db.get(req.userId) : null;
-        return {
-          ...req,
-          requesterName: (requester as any)?.name || req.requestedByName,
-          requesterEmail: (requester as any)?.email || req.requestedByEmail,
-          requesterAvatar: (requester as any)?.avatarUrl,
-        };
-      }),
+    // Enrich with requester info - batch load all unique user IDs
+    const uniqueUserIds = [
+      ...new Set(
+        requests
+          .map((req) => req.userId)
+          .filter((id): id is Id<'users'> => id !== undefined && id !== null),
+      ),
+    ];
+    const usersBatch = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(
+      usersBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
     );
+
+    const enriched = requests.map((req) => {
+      const requester = req.userId ? userMap.get(req.userId) : null;
+      return {
+        ...req,
+        requesterName: (requester as any)?.name || req.requestedByName,
+        requesterEmail: (requester as any)?.email || req.requestedByEmail,
+        requesterAvatar: (requester as any)?.avatarUrl,
+      };
+    });
 
     return enriched;
   },

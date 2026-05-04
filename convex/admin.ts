@@ -265,9 +265,10 @@ export const getSmartSuggestions = query({
     }
 
     // Suggestion 3: Departments with no planned leaves
+    const userMap = new Map(users.map((u) => [u._id, u]));
     const deptLeaves = new Map<string, number>();
     for (const leave of leaves) {
-      const user = users.find((u) => u._id === leave.userId);
+      const user = userMap.get(leave.userId);
       if (user) {
         const dept = user.department || 'Unknown';
         deptLeaves.set(dept, (deptLeaves.get(dept) || 0) + 1);

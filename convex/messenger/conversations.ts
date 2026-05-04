@@ -371,14 +371,19 @@ export const addParticipants = mutation({
     const admin = await ctx.db.get(adminUserId);
     const addedNames: string[] = [];
 
+    // Batch-load all users upfront to avoid N+1 queries
+    const usersBatch = await Promise.all(userIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(usersBatch.filter(Boolean).map((u: any) => [u._id, u]));
+
+    // Batch-check existing memberships
+    const allMemberships = await ctx.db
+      .query('chatMembers')
+      .withIndex('by_conversation', (q: any) => q.eq('conversationId', conversationId))
+      .collect();
+    const existingMemberIds = new Set(allMemberships.map((m: any) => m.userId));
+
     for (const uid of userIds) {
-      const existing = await ctx.db
-        .query('chatMembers')
-        .withIndex('by_conversation_user', (q) =>
-          q.eq('conversationId', conversationId).eq('userId', uid),
-        )
-        .first();
-      if (existing) continue;
+      if (existingMemberIds.has(uid)) continue;
 
       await ctx.db.insert('chatMembers', {
         conversationId,
@@ -390,7 +395,7 @@ export const addParticipants = mutation({
         joinedAt: now,
       });
 
-      const user = await ctx.db.get(uid);
+      const user = userMap.get(uid);
       if (user) addedNames.push(user.name);
     }
 

@@ -302,6 +302,11 @@ async function detectLeaveEventConflicts(
 
   const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
+  // Batch-load all unique user IDs upfront to avoid N+1 queries
+  const uniqueUserIds = [...new Set(approvedLeaves.map((l: any) => l.userId))];
+  const usersForLeaves = await Promise.all(uniqueUserIds.map((id: any) => ctx.db.get(id)));
+  const userMap = new Map(usersForLeaves.filter(Boolean).map((u: any) => [u._id, u]));
+
   for (const event of events) {
     for (const leave of approvedLeaves) {
       const overlaps =
@@ -310,7 +315,7 @@ async function detectLeaveEventConflicts(
 
       if (!overlaps) continue;
 
-      const user = await ctx.db.get(leave.userId);
+      const user = userMap.get(leave.userId);
       if (!user) continue;
 
       const userDepartment = user.department || '';
@@ -385,11 +390,14 @@ async function detectDepartmentConflicts(
     deptUsers.get(dept)!.push(user);
   }
 
+  // Build user map for O(1) lookups
+  const userMapForDepts = new Map(users.map((u: any) => [u._id, u]));
+
   for (const leave of approvedLeaves) {
-    const user = users.find((u: any) => u._id === leave.userId);
+    const user = userMapForDepts.get(leave.userId);
     if (!user) continue;
 
-    const dept = user.department || 'Unknown';
+    const dept = (user as any).department || 'Unknown';
     if (!deptLeaves.has(dept)) deptLeaves.set(dept, []);
     deptLeaves.get(dept)!.push(leave);
   }
@@ -555,9 +563,14 @@ async function detectTaskConflicts(
 
   const approvedLeaves = leaves.filter((l: any) => l.status === 'approved');
 
+  // Batch-load all unique assignee IDs upfront
+  const uniqueAssigneeIds = [...new Set(activeTasks.map((t: any) => t.assigneeId).filter(Boolean))];
+  const assigneeUsers = await Promise.all(uniqueAssigneeIds.map((id: any) => ctx.db.get(id)));
+  const assigneeMap = new Map(assigneeUsers.filter(Boolean).map((u: any) => [u._id, u]));
+
   // Проверяем каждую задачу
   for (const task of activeTasks) {
-    const assignee = await ctx.db.get(task.assigneeId);
+    const assignee = assigneeMap.get(task.assigneeId);
     if (!assignee) continue;
 
     const taskDeadline = task.dueDate ? new Date(task.dueDate).getTime() : null;

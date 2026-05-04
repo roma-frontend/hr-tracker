@@ -627,9 +627,24 @@ export const bulkApproveLeaves = mutation({
     const approved: Id<'leaveRequests'>[] = [];
     const errors: string[] = [];
 
+    // Batch-load all leaves upfront to avoid N+1 queries
+    const leavesBatch = await Promise.all(leaveIds.map((id) => ctx.db.get(id)));
+    const leavesMap = new Map(leaveIds.map((id, i) => [id, leavesBatch[i]]));
+
+    // Batch-load all unique user IDs for balance updates
+    const uniqueUserIds = [
+      ...new Set(
+        leaveIds
+          .map((_, i) => leavesBatch[i]?.userId)
+          .filter((id): id is Id<'users'> => id !== undefined),
+      ),
+    ];
+    const usersBatch = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(usersBatch.filter(Boolean).map((u: any) => [u._id, u]));
+
     for (const leaveId of leaveIds) {
       try {
-        const leave = await ctx.db.get(leaveId);
+        const leave = leavesMap.get(leaveId);
         if (!leave) {
           errors.push(`Leave ${leaveId} not found`);
           continue;
@@ -666,7 +681,7 @@ export const bulkApproveLeaves = mutation({
         });
 
         // Deduct balance
-        const user = await ctx.db.get(leave.userId);
+        const user = userMap.get(leave.userId);
         if (user) {
           if (leave.type === 'paid') {
             await ctx.db.patch(leave.userId, {

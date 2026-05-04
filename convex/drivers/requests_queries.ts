@@ -117,32 +117,60 @@ export const getCompletedTrips = query({
 
     // Filter to approved requests where trip is completed
     const completedRequests = [];
+
+    // Batch-load all schedules for these requests upfront
+    const allSchedules = await ctx.db.query('driverSchedules').collect();
+    const scheduleMap = new Map<string, any>();
+    for (const schedule of allSchedules) {
+      if (schedule.status === 'completed') {
+        const key = `${schedule.driverId}:${schedule.userId}:${schedule.startTime}`;
+        scheduleMap.set(key, schedule);
+      }
+    }
+
+    // Batch-load all unique driver IDs and their user IDs
+    const uniqueDriverIds = [
+      ...new Set(requests.filter((r) => r.status === 'approved').map((r) => r.driverId)),
+    ];
+    const driversBatch = await Promise.all(uniqueDriverIds.map((id) => ctx.db.get(id)));
+    const driverMap = new Map(
+      driversBatch.filter((d): d is NonNullable<typeof d> => d !== null).map((d) => [d._id, d]),
+    );
+
+    // Batch-load all unique driver user IDs
+    const uniqueDriverUserIds = [
+      ...new Set(
+        driversBatch
+          .filter((d): d is NonNullable<typeof d> => d !== null)
+          .map((d) => d.userId)
+          .filter(Boolean),
+      ),
+    ];
+    const driverUsersBatch = await Promise.all(uniqueDriverUserIds.map((id) => ctx.db.get(id)));
+    const driverUserMap = new Map(
+      driverUsersBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
+    );
+
+    // Batch-load all ratings
+    const allRatings = await ctx.db.query('passengerRatings').collect();
+    const ratingMap = new Map<string, any>();
+    for (const rating of allRatings) {
+      if (rating.passengerId === userId) {
+        ratingMap.set(rating.scheduleId, rating);
+      }
+    }
+
     for (const request of requests) {
       if (request.status !== 'approved') continue;
 
-      // Find associated schedule
-      const schedule = await ctx.db
-        .query('driverSchedules')
-        .withIndex('by_driver', (q) => q.eq('driverId', request.driverId))
-        .filter((q) =>
-          q.and(
-            q.eq(q.field('userId'), request.requesterId),
-            q.eq(q.field('startTime'), request.startTime),
-            q.eq(q.field('status'), 'completed'),
-          ),
-        )
-        .first();
+      // Find associated schedule from pre-loaded map
+      const scheduleKey = `${request.driverId}:${request.requesterId}:${request.startTime}`;
+      const schedule = scheduleMap.get(scheduleKey);
 
       if (schedule) {
-        const driver = await ctx.db.get(request.driverId);
-        const driverUser = driver ? await ctx.db.get(driver.userId) : null;
-
-        // Check if rated
-        const rating = await ctx.db
-          .query('passengerRatings')
-          .withIndex('by_schedule', (q) => q.eq('scheduleId', schedule._id))
-          .filter((q) => q.eq(q.field('passengerId'), userId))
-          .first();
+        const driver = driverMap.get(request.driverId);
+        const driverUser = driver ? driverUserMap.get(driver.userId) : null;
+        const rating = ratingMap.get(schedule._id);
 
         completedRequests.push({
           ...request,
@@ -197,19 +225,38 @@ export const getRecurringTrips = query({
       trips = trips.filter((t) => t.isActive);
     }
 
-    // Enrich with driver info
-    const enriched = await Promise.all(
-      trips.map(async (trip) => {
-        const driver = await ctx.db.get(trip.driverId);
-        const driverUser = driver ? await ctx.db.get(driver.userId) : null;
-        return {
-          ...trip,
-          driverName: driverUser?.name,
-          driverAvatar: driverUser?.avatarUrl,
-          driverVehicle: driver?.vehicleInfo,
-        };
-      }),
+    // Batch-load all unique driver IDs upfront
+    const uniqueDriverIds = [...new Set(trips.map((t) => t.driverId))];
+    const driversBatch = await Promise.all(uniqueDriverIds.map((id) => ctx.db.get(id)));
+    const driverMap = new Map(
+      driversBatch.filter((d): d is NonNullable<typeof d> => d !== null).map((d) => [d._id, d]),
     );
+
+    // Batch-load all unique driver user IDs
+    const uniqueDriverUserIds = [
+      ...new Set(
+        driversBatch
+          .filter((d): d is NonNullable<typeof d> => d !== null)
+          .map((d) => d.userId)
+          .filter(Boolean),
+      ),
+    ];
+    const driverUsersBatch = await Promise.all(uniqueDriverUserIds.map((id) => ctx.db.get(id)));
+    const driverUserMap = new Map(
+      driverUsersBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
+    );
+
+    // Enrich with driver info using pre-loaded maps
+    const enriched = trips.map((trip) => {
+      const driver = driverMap.get(trip.driverId);
+      const driverUser = driver ? driverUserMap.get(driver.userId) : null;
+      return {
+        ...trip,
+        driverName: driverUser?.name,
+        driverAvatar: driverUser?.avatarUrl,
+        driverVehicle: driver?.vehicleInfo,
+      };
+    });
 
     return enriched;
   },
@@ -226,22 +273,45 @@ export const getFavoriteDrivers = query({
       .withIndex('by_user', (q) => q.eq('userId', userId))
       .take(MAX_PAGE_SIZE);
 
-    // Enrich with driver info
-    const enriched = await Promise.all(
-      favorites.map(async (fav) => {
-        const driver = await ctx.db.get(fav.driverId);
-        if (!driver) return null;
-
-        const driverUser = await ctx.db.get(driver.userId);
-        return {
-          ...driver,
-          userName: driverUser?.name ?? 'Unknown',
-          userAvatar: driverUser?.avatarUrl,
-          userPosition: driverUser?.position,
-          favoritedAt: fav.createdAt,
-        };
-      }),
+    // Batch-load all unique driver IDs upfront
+    const uniqueDriverIds = [...new Set(favorites.map((fav) => fav.driverId))];
+    const driversBatch = await Promise.all(uniqueDriverIds.map((id) => ctx.db.get(id)));
+    const driverMap = new Map(
+      driversBatch
+        .filter((d): d is NonNullable<typeof d> => d !== null)
+        .map((d: any) => [d._id, d]),
     );
+
+    // Batch-load all unique driver user IDs
+    const uniqueDriverUserIds = [
+      ...new Set(
+        driversBatch
+          .filter((d): d is NonNullable<typeof d> => d !== null)
+          .map((d: any) => d.userId)
+          .filter(Boolean),
+      ),
+    ];
+    const driverUsersBatch = await Promise.all(uniqueDriverUserIds.map((id) => ctx.db.get(id)));
+    const driverUserMap = new Map(
+      driverUsersBatch
+        .filter((u): u is NonNullable<typeof u> => u !== null)
+        .map((u: any) => [u._id, u]),
+    );
+
+    // Enrich with driver info using pre-loaded maps
+    const enriched = favorites.map((fav) => {
+      const driver = driverMap.get(fav.driverId);
+      if (!driver) return null;
+
+      const driverUser = driverUserMap.get(driver.userId);
+      return {
+        ...driver,
+        userName: driverUser?.name ?? 'Unknown',
+        userAvatar: driverUser?.avatarUrl,
+        userPosition: driverUser?.position,
+        favoritedAt: fav.createdAt,
+      };
+    });
 
     return enriched.filter(Boolean);
   },

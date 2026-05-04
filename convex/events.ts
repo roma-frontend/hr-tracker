@@ -217,16 +217,20 @@ export const getCompanyEvents = query({
         .take(100);
     }
 
-    // Enrich with creator info
-    const enriched = await Promise.all(
-      events.map(async (event) => {
-        const creator = await ctx.db.get(event.createdBy);
-        return {
-          ...event,
-          creatorName: creator?.name,
-        };
-      }),
+    // Enrich with creator info - batch load all unique creator IDs
+    const uniqueCreatorIds = [...new Set(events.map((e) => e.createdBy).filter(Boolean))];
+    const creatorsBatch = await Promise.all(uniqueCreatorIds.map((id) => ctx.db.get(id)));
+    const creatorMap = new Map(
+      creatorsBatch.filter((c): c is NonNullable<typeof c> => c !== null).map((c) => [c._id, c]),
     );
+
+    const enriched = events.map((event) => {
+      const creator = creatorMap.get(event.createdBy);
+      return {
+        ...event,
+        creatorName: creator?.name,
+      };
+    });
 
     return enriched;
   },
