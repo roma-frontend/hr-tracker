@@ -113,11 +113,11 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   const isProduction = process.env.NODE_ENV === 'production';
 
   // Content Security Policy
-  // SECURITY: In production, remove 'unsafe-eval' to prevent XSS attacks.
-  // In development, keep it because React/Next.js requires eval() for debugging features.
+  // SECURITY: In production, remove 'unsafe-eval' and 'unsafe-inline' from script-src.
+  // In development, keep 'unsafe-eval' because React/Next.js requires eval() for debugging features.
   const scriptSrc = isProduction
-    ? "script-src 'self' 'unsafe-inline' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://vercel-analytics.vercel.app https://*.vitals.vercel-insights.com blob:"
-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://vercel-analytics.vercel.app https://*.vitals.vercel-insights.com blob: https://vitals.vercel-insights.com";
+    ? "script-src 'self' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://vercel-analytics.vercel.app https://*.vitals.vercel-insights.com blob:"
+    : "script-src 'self' 'unsafe-eval' https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://vercel-analytics.vercel.app https://*.vitals.vercel-insights.com blob: https://vitals.vercel-insights.com";
 
   response.headers.set(
     'Content-Security-Policy',
@@ -134,6 +134,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
+      ...(isProduction ? ['report-uri https://*.sentry.io'] : []),
     ].join('; '),
   );
 

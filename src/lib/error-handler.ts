@@ -39,6 +39,7 @@ export class UserError extends AppError {
   constructor(message: string, details?: Record<string, unknown>) {
     super(message, { code: 'USER_ERROR', statusCode: 400, details });
     this.name = 'UserError';
+    Object.setPrototypeOf(this, UserError.prototype);
   }
 }
 
@@ -46,6 +47,7 @@ export class AuthError extends AppError {
   constructor(message = 'Authentication required', details?: Record<string, unknown>) {
     super(message, { code: 'AUTH_ERROR', statusCode: 401, details });
     this.name = 'AuthError';
+    Object.setPrototypeOf(this, AuthError.prototype);
   }
 }
 
@@ -53,6 +55,7 @@ export class PermissionError extends AppError {
   constructor(message = 'Insufficient permissions', details?: Record<string, unknown>) {
     super(message, { code: 'PERMISSION_ERROR', statusCode: 403, details });
     this.name = 'PermissionError';
+    Object.setPrototypeOf(this, PermissionError.prototype);
   }
 }
 
@@ -60,6 +63,7 @@ export class NotFoundError extends AppError {
   constructor(resource = 'Resource', details?: Record<string, unknown>) {
     super(`${resource} not found`, { code: 'NOT_FOUND', statusCode: 404, details });
     this.name = 'NotFoundError';
+    Object.setPrototypeOf(this, NotFoundError.prototype);
   }
 }
 
@@ -67,6 +71,7 @@ export class NetworkError extends AppError {
   constructor(message = 'Network error occurred', details?: Record<string, unknown>) {
     super(message, { code: 'NETWORK_ERROR', statusCode: 503, details });
     this.name = 'NetworkError';
+    Object.setPrototypeOf(this, NetworkError.prototype);
   }
 }
 
@@ -74,19 +79,18 @@ export class ServerError extends AppError {
   constructor(message = 'Internal server error', details?: Record<string, unknown>) {
     super(message, { code: 'SERVER_ERROR', statusCode: 500, details });
     this.name = 'ServerError';
+    Object.setPrototypeOf(this, ServerError.prototype);
   }
 }
 
 export class ValidationError extends UserError {
   public readonly fieldErrors: Record<string, string>;
 
-  constructor(
-    message: string,
-    fieldErrors: Record<string, string> = {},
-  ) {
+  constructor(message: string, fieldErrors: Record<string, string> = {}) {
     super(message);
     this.name = 'ValidationError';
     Object.defineProperty(this, 'code', { value: 'VALIDATION_ERROR', enumerable: true });
+    Object.setPrototypeOf(this, ValidationError.prototype);
     this.fieldErrors = fieldErrors;
   }
 }
@@ -159,9 +163,7 @@ export function getErrorStatusCode(error: unknown): number | undefined {
  * const [data, error] = await safeAsync(fetchUsers());
  * if (error) { toast.error(getErrorMessage(error)); return; }
  */
-export async function safeAsync<T>(
-  promise: Promise<T>,
-): Promise<[T | null, Error | null]> {
+export async function safeAsync<T>(promise: Promise<T>): Promise<[T | null, Error | null]> {
   try {
     const data = await promise;
     return [data, null];
@@ -181,12 +183,18 @@ export function toAppError(error: unknown): AppError {
   const message = getErrorMessage(error);
 
   // Auth-related errors
-  if (message.toLowerCase().includes('unauthorized') || message.toLowerCase().includes('not logged in')) {
+  if (
+    message.toLowerCase().includes('unauthorized') ||
+    message.toLowerCase().includes('not logged in')
+  ) {
     return new AuthError(message);
   }
 
   // Permission errors
-  if (message.toLowerCase().includes('permission') || message.toLowerCase().includes('not allowed')) {
+  if (
+    message.toLowerCase().includes('permission') ||
+    message.toLowerCase().includes('not allowed')
+  ) {
     return new PermissionError(message);
   }
 
