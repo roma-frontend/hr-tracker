@@ -554,7 +554,7 @@ export function RecognitionClient() {
       )}
 
       {/* Tabs */}
-      <Tabs defaultValue="feed" className="w-full my-6">
+      <Tabs defaultValue="feed" className="w-full my-4">
         <TabsList className="w-full mb-4 gap-2 bg-transparent p-0 h-auto grid grid-cols-2">
           <TabsTrigger
             value="feed"

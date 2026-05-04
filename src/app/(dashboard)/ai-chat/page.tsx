@@ -609,7 +609,7 @@ export default function AIChatPage() {
     toast.success(t('aiChat.copied') || 'Copied!');
   };
 
-  const roleBasedSuggestions = getRoleSuggestions((user?.role as UserRole) || 'employee');
+  const roleBasedSuggestions = getRoleSuggestions((user?.role as UserRole) || 'employee', t);
 
   const initialSuggestions = roleBasedSuggestions.slice(0, 4).map((suggestion) => {
     const cleanSuggestion = suggestion.replace(/^[\p{Emoji}\s]+/u, '').trim();
@@ -877,7 +877,7 @@ export default function AIChatPage() {
                   {t('aiChat.welcomeSubtitle') || "I'm your AI assistant. How can I help?"}
                 </p>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-4">
                   {initialSuggestions.map((suggestion, index) => (
                     <button
                       key={index}

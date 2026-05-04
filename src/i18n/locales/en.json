@@ -3571,7 +3571,18 @@
     "bookDriver": "Book Driver",
     "submitting": "Submitting...",
     "openAssistant": "Open AI assistant",
-    "closeChat": "Close chat"
+    "closeChat": "Close chat",
+    "bookVacation": "📆 Book a vacation",
+    "requestSickLeave": "🤒 Request sick leave",
+    "showLeaveHistory": "📊 Show my leave history",
+    "bookSickLeave": "🤒 Book sick leave for today",
+    "bookDoctorVisit": "👨‍⚕️ Book a doctor visit",
+    "showTeamCalendar": "📅 Show team calendar",
+    "myLeaveBalance": "📋 My leave balance",
+    "bookTimeOff": "📆 Book time off",
+    "showPendingLeaves": "📋 Show my pending leaves",
+    "bookNewLeave": "📆 Book new leave",
+    "whoOnLeaveThisWeek": "👥 Who is on leave this week?"
   },
   "analytics": {
     "approvalRate": "Approval Rate",
@@ -5712,7 +5723,41 @@
     "inputPlaceholder": "Ask anything...",
     "disclaimer": "AI may make mistakes. Please verify important information.",
     "copied": "Copied to clipboard!",
-    "noConversations": "No conversations yet"
+    "noConversations": "No conversations yet",
+    "suggestions": {
+      "employee": [
+        "How many vacation days do I have left?",
+        "Who is on leave today?",
+        "I want to take sick leave",
+        "My tasks for today",
+        "Open chat",
+        "Show my attendance"
+      ],
+      "supervisor": [
+        "Who from the team is at work today?",
+        "Pending leave requests",
+        "Who was late today?",
+        "Create a task for the team",
+        "Show team calendar",
+        "Team statistics"
+      ],
+      "admin": [
+        "Show analytics",
+        "List all employees",
+        "Join requests",
+        "Leave report",
+        "Assign a task",
+        "Today's attendance"
+      ],
+      "superadmin": [
+        "All organizations",
+        "Check security",
+        "Stripe subscriptions",
+        "Send announcement",
+        "Platform statistics",
+        "All users"
+      ]
+    }
   },
   "automation": {
     "runSuccess": "Automation started successfully",

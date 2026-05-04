@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useMemo, useRef, useCallback, useTransition } from 'react';
+import { useState, useMemo, useRef, useCallback, useTransition, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../../convex/_generated/api';
@@ -468,6 +468,25 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
   const [search, setSearch] = useState('');
   const [activeTask, setActiveTask] = useState<any>(null);
   const [isPending, startTransition] = useTransition();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const mainEl = document.querySelector<HTMLElement>('main');
+    const handleScroll = () => {
+      if (mainEl) {
+        setIsScrolled(mainEl.scrollTop > 10);
+      }
+    };
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleScroll, { passive: true });
+      handleScroll();
+    }
+    return () => {
+      if (mainEl) {
+        mainEl.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
 
   const convexId = userId as Id<'users'>;
   const canManage = userRole === 'admin' || userRole === 'supervisor';
@@ -558,7 +577,9 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
   return (
     <div className="min-h-screen">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+      <div
+        className={`sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-6 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 transition-all duration-200 ${isScrolled ? '' : 'border-b border-(--border)'}`}
+      >
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1

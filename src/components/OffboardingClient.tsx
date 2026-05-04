@@ -96,7 +96,7 @@ export default function OffboardingClient() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-4">
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{activeCount}</p>

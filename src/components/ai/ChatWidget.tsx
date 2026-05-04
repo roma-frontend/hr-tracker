@@ -200,16 +200,19 @@ const LEAVE_TYPE_LABELS: Record<string, string> = {
 };
 
 // Dynamic suggestions based on user role - will be set in component
-const getInitialSuggestions = (role: UserRole | undefined): string[] => {
+const getInitialSuggestions = (
+  role: UserRole | undefined,
+  t: (key: string) => string,
+): string[] => {
   if (!role)
     return [
-      '💰 Show my leave balance',
-      '📆 Book a vacation',
-      '🤒 I feel sick today',
-      '👥 Who is on leave this week?',
+      t('chatWidget.showBalance'),
+      t('chatWidget.bookVacation'),
+      t('chatWidget.sickLeave'),
+      t('chatWidget.whoOnLeaveWeek'),
     ];
 
-  return getRoleSuggestions(role as UserRole);
+  return getRoleSuggestions(role as UserRole, t);
 };
 
 export function ChatWidget() {
@@ -392,8 +395,13 @@ export function ChatWidget() {
     const rec = new SR();
     rec.continuous = true;
     rec.interimResults = true;
-    // Default to Russian for voice input
-    rec.lang = 'ru-RU';
+    // Use current language for voice input
+    const langMap: Record<string, string> = {
+      ru: 'ru-RU',
+      hy: 'hy-AM',
+      en: 'en-US',
+    };
+    rec.lang = langMap[i18n.language] || 'en-US';
     voiceRecogRef.current = rec;
 
     setIsListening(true);
@@ -1119,7 +1127,7 @@ export function ChatWidget() {
                     })}
                   </p>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {getInitialSuggestions(user?.role as UserRole).map((s) => (
+                    {getInitialSuggestions(user?.role as UserRole, t).map((s) => (
                       <button
                         key={s}
                         onClick={() => handleSuggestion(s)}

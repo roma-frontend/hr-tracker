@@ -186,7 +186,7 @@ export default function OrganizationsPage() {
           {/* Tab Content - Organizations */}
           <TabsContent value="organizations" className="space-y-6">
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-4">
               <div
                 className="p-4 rounded-lg border"
                 style={{ background: 'var(--background-subtle)' }}

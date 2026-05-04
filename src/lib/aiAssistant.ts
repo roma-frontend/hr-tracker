@@ -1173,43 +1173,44 @@ export function hasPermission(userRole: UserRole, requiredRoles: UserRole[]): bo
 }
 
 /**
- * Get available actions/suggestions based on role — trilingual with emojis
+ * Get available actions/suggestions based on role — uses i18n keys
  */
-export function getRoleSuggestions(role: UserRole): string[] {
-  const allSuggestions: Record<UserRole, string[]> = {
+export function getRoleSuggestions(role: UserRole, t: (key: string) => string): string[] {
+  const keyMap: Record<UserRole, string[]> = {
     employee: [
-      '📋 Сколько дней отпуска осталось?',
-      '📅 Кто сегодня в отпуске?',
-      '🤒 Хочу взять больничный',
-      '✅ Мои задачи на сегодня',
-      '💬 Открой чат',
-      '📊 Покажи мою посещаемость',
+      'aiChat.suggestions.employee.0',
+      'aiChat.suggestions.employee.1',
+      'aiChat.suggestions.employee.2',
+      'aiChat.suggestions.employee.3',
+      'aiChat.suggestions.employee.4',
+      'aiChat.suggestions.employee.5',
     ],
     supervisor: [
-      '👥 Кто из команды сегодня на работе?',
-      '📋 Ожидающие заявки на отпуск',
-      '⏰ Кто опоздал сегодня?',
-      '✅ Создать задачу для команды',
-      '📅 Покажи календарь команды',
-      '📊 Статистика команды',
+      'aiChat.suggestions.supervisor.0',
+      'aiChat.suggestions.supervisor.1',
+      'aiChat.suggestions.supervisor.2',
+      'aiChat.suggestions.supervisor.3',
+      'aiChat.suggestions.supervisor.4',
+      'aiChat.suggestions.supervisor.5',
     ],
     admin: [
-      '📊 Показать аналитику',
-      '👥 Список всех сотрудников',
-      '📋 Заявки на присоединение',
-      '📈 Отчет по отпускам',
-      '✅ Назначить задачу',
-      '⏰ Посещаемость за сегодня',
+      'aiChat.suggestions.admin.0',
+      'aiChat.suggestions.admin.1',
+      'aiChat.suggestions.admin.2',
+      'aiChat.suggestions.admin.3',
+      'aiChat.suggestions.admin.4',
+      'aiChat.suggestions.admin.5',
     ],
     superadmin: [
-      '🏢 Все организации',
-      '🔒 Проверить безопасность',
-      '💳 Stripe подписки',
-      '📢 Отправить объявление',
-      '📊 Статистика платформы',
-      '👥 Все пользователи',
+      'aiChat.suggestions.superadmin.0',
+      'aiChat.suggestions.superadmin.1',
+      'aiChat.suggestions.superadmin.2',
+      'aiChat.suggestions.superadmin.3',
+      'aiChat.suggestions.superadmin.4',
+      'aiChat.suggestions.superadmin.5',
     ],
   };
 
-  return allSuggestions[role] || allSuggestions.employee;
+  const keys = keyMap[role] || keyMap.employee;
+  return keys.map((key) => t(key));
 }
