@@ -57,6 +57,7 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
       { status: 401 },
     );
   }
+  const authOrgId = auth.organizationId || '';
 
   try {
     const body = await req.json();
@@ -65,7 +66,7 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
     const validation = chatRequestSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request body', details: validation.error.errors },
+        { error: 'Invalid request body', details: validation.error.issues },
         { status: 400 },
       );
     }
@@ -134,8 +135,10 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
               /с (\d{1,2})[\/\.-](\d{1,2})|from (\d{1,2})[\/\.-](\d{1,2})|(\d{1,2})[\/\.-](\d{1,2})/i,
             );
             if (!dateMatch) return null;
-            const day1 = parseInt(dateMatch[1] || dateMatch[3] || dateMatch[5]);
+            const dayStr = dateMatch[1] || dateMatch[3] || dateMatch[5];
             const monthStr = dateMatch[2] || dateMatch[4] || dateMatch[6];
+            if (!dayStr || !monthStr) return null;
+            const day1 = parseInt(dayStr);
             const monthMap: Record<string, number> = {
               '1': 0,
               '2': 1,
@@ -156,7 +159,7 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
             const endDate = new Date(year, month, day1 + 7).getTime();
             const requestType = /водитель|driver/i.test(lastUserMessage) ? 'driver' : 'leave';
             return fetchWithTimeout(
-              `${origin}/api/chat/conflict-check?userId=${userId}&organizationId=${encodeURIComponent(userOrgId)}&requestType=${requestType}&startDate=${startDate}&endDate=${endDate}`,
+              `${origin}/api/chat/conflict-check?userId=${userId}&organizationId=${encodeURIComponent(authOrgId)}&requestType=${requestType}&startDate=${startDate}&endDate=${endDate}`,
               { headers: authHeaders },
               4000,
             );
@@ -475,7 +478,11 @@ FORMAT RULES:
 /**
  * Verify JWT auth token for chat API.
  */
-async function verifyChatAuth(): Promise<{ userId: string; role: string } | null> {
+async function verifyChatAuth(): Promise<{
+  userId: string;
+  role: string;
+  organizationId?: string;
+} | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('hr-auth-token') || cookieStore.get('oauth-session');
@@ -486,7 +493,11 @@ async function verifyChatAuth(): Promise<{ userId: string; role: string } | null
 
     const secret = new TextEncoder().encode(jwtSecret);
     const { payload } = await jwtVerify(token.value, secret);
-    return { userId: payload.sub as string, role: (payload.role as string) || 'employee' };
+    return {
+      userId: payload.sub as string,
+      role: (payload.role as string) || 'employee',
+      organizationId: payload.organizationId as string | undefined,
+    };
   } catch {
     return null;
   }

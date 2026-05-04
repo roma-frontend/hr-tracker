@@ -138,9 +138,15 @@ export const authConfig: NextAuthConfig = {
       session.user.email = token.email as string;
       session.user.name = (token.name as string) || token.email?.split('@')[0] || 'User';
       session.user.image = token.picture as string | undefined;
-      session.user.role = token.role;
-      session.user.organizationId = token.organizationId;
-      session.user.isApproved = token.isApproved;
+      session.user.role = token.role as
+        | 'superadmin'
+        | 'admin'
+        | 'supervisor'
+        | 'employee'
+        | 'driver'
+        | undefined;
+      session.user.organizationId = token.organizationId as string | undefined;
+      session.user.isApproved = token.isApproved as boolean | undefined;
 
       return session;
     },

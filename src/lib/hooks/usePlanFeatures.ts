@@ -6,54 +6,114 @@ import { useSubscription, type Plan } from './useSubscription';
 // Add new features here as the product grows
 export interface PlanFeatures {
   analytics: boolean; // Advanced Analytics page
+  advancedAnalytics: boolean; // professional+
   reports: boolean; // Reports & CSV export
+  exportReports: boolean; // professional+
   aiChat: boolean; // AI Leave Assistant / Chat
+  aiInsights: boolean; // professional+
+  aiLeaveAssistant: boolean; // professional+
+  aiSiteEditor: boolean; // all plans
+  aiSiteEditorDesignChanges: number;
+  aiSiteEditorContentChanges: number;
+  aiSiteEditorLayoutChanges: number;
+  aiSiteEditorLogicChanges: boolean;
+  aiSiteEditorFullControl: boolean;
   sla: boolean; // SLA settings & monitoring
+  slaSettings: boolean; // professional+
   apiAccess: boolean; // API access
   customPolicies: boolean; // Custom leave policies
   calendarSync: boolean; // Google/Outlook calendar sync
+  integrations: boolean; // enterprise only
   maxEmployees: number | null; // null = unlimited
 }
 
 const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   free: {
     analytics: true,
+    advancedAnalytics: false,
     reports: true,
-    aiChat: true,
-    sla: true,
-    apiAccess: true,
-    customPolicies: true,
-    calendarSync: true,
+    exportReports: false,
+    aiChat: false,
+    aiInsights: false,
+    aiLeaveAssistant: false,
+    aiSiteEditor: true,
+    aiSiteEditorDesignChanges: 3,
+    aiSiteEditorContentChanges: 5,
+    aiSiteEditorLayoutChanges: 1,
+    aiSiteEditorLogicChanges: false,
+    aiSiteEditorFullControl: false,
+    sla: false,
+    slaSettings: false,
+    apiAccess: false,
+    customPolicies: false,
+    calendarSync: false,
+    integrations: false,
     maxEmployees: 50,
   },
   starter: {
     analytics: true,
+    advancedAnalytics: false,
     reports: true,
+    exportReports: true,
     aiChat: true,
+    aiInsights: false,
+    aiLeaveAssistant: true,
+    aiSiteEditor: true,
+    aiSiteEditorDesignChanges: 5,
+    aiSiteEditorContentChanges: 10,
+    aiSiteEditorLayoutChanges: 2,
+    aiSiteEditorLogicChanges: false,
+    aiSiteEditorFullControl: false,
     sla: true,
+    slaSettings: true,
     apiAccess: true,
     customPolicies: true,
     calendarSync: true,
+    integrations: false,
     maxEmployees: 50,
   },
   professional: {
     analytics: true,
+    advancedAnalytics: true,
     reports: true,
+    exportReports: true,
     aiChat: true,
+    aiInsights: true,
+    aiLeaveAssistant: true,
+    aiSiteEditor: true,
+    aiSiteEditorDesignChanges: Infinity,
+    aiSiteEditorContentChanges: Infinity,
+    aiSiteEditorLayoutChanges: Infinity,
+    aiSiteEditorLogicChanges: true,
+    aiSiteEditorFullControl: true,
     sla: true,
+    slaSettings: true,
     apiAccess: true,
     customPolicies: true,
     calendarSync: true,
+    integrations: false,
     maxEmployees: 200,
   },
   enterprise: {
     analytics: true,
+    advancedAnalytics: true,
     reports: true,
+    exportReports: true,
     aiChat: true,
+    aiInsights: true,
+    aiLeaveAssistant: true,
+    aiSiteEditor: true,
+    aiSiteEditorDesignChanges: Infinity,
+    aiSiteEditorContentChanges: Infinity,
+    aiSiteEditorLayoutChanges: Infinity,
+    aiSiteEditorLogicChanges: true,
+    aiSiteEditorFullControl: true,
     sla: true,
+    slaSettings: true,
     apiAccess: true,
     customPolicies: true,
     calendarSync: true,
+    integrations: true,
     maxEmployees: null,
   },
 };
@@ -63,6 +123,13 @@ export const PLAN_LABELS: Record<Plan, string> = {
   starter: 'Starter',
   professional: 'Professional',
   enterprise: 'Enterprise',
+};
+
+export const PLAN_PRICES: Record<Plan, string> = {
+  free: '$0/mo',
+  starter: '$29/mo',
+  professional: '$79/mo',
+  enterprise: 'Custom',
 };
 
 export const UPGRADE_PLAN: Record<Plan, Plan | null> = {

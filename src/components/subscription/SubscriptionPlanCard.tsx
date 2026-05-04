@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useSubscription } from '@/hooks/useSubscription';
-import { usePlanFeatures, PLAN_LABELS, PLAN_PRICES } from '@/hooks/usePlanFeatures';
+import { useSubscription } from '@/lib/hooks/useSubscription';
+import { usePlanFeatures, PLAN_LABELS, PLAN_PRICES } from '@/lib/hooks/usePlanFeatures';
 import { UpgradeModal } from './UpgradeModal';
 
 const PLAN_ICONS: Record<string, React.ReactNode> = {
@@ -70,8 +70,14 @@ function StatusBadge({
 
 export function SubscriptionPlanCard() {
   const { t } = useTranslation();
-  const { subscription, isLoading, plan, isTrialing, isPastDue, trialDaysLeft } =
-    useSubscription();
+  const { subscription, loading } = useSubscription();
+  const isLoading = loading;
+  const plan = subscription.plan;
+  const isTrialing = subscription.isTrial;
+  const isPastDue = subscription.isPastDue;
+  const trialDaysLeft = subscription.trialEnd
+    ? Math.max(0, Math.ceil((subscription.trialEnd - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
 
   const { features } = usePlanFeatures();
   const [modalOpen, setModalOpen] = useState(false);
@@ -85,7 +91,7 @@ export function SubscriptionPlanCard() {
     { label: t('billing.integrations'), enabled: features.integrations },
     {
       label:
-        features.maxEmployees === Infinity
+        features.maxEmployees === Infinity || features.maxEmployees === null
           ? t('billing.unlimitedEmployees')
           : t('billing.upToEmployees', { count: features.maxEmployees }),
       enabled: true,
