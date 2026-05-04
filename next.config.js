@@ -16,8 +16,15 @@ const nextConfig = {
   // TypeScript: DO NOT ignore build errors — catch type issues early
   typescript: { ignoreBuildErrors: false },
 
-  // Transpile Radix UI icons
-  transpilePackages: ['@radix-ui/react-icons', '@vladmandic/face-api'],
+  // Transpile Radix UI icons (face-api is pre-built, no transpilation needed)
+  transpilePackages: ['@radix-ui/react-icons'],
+
+  // ═══════════════════════════════════════════════════════════════
+  // NFT TRACING — exclude dynamic fs routes to prevent warnings
+  // ═══════════════════════════════════════════════════════════════
+  outputFileTracingExcludes: {
+    '/api/ai-site-editor/apply': ['**/node_modules/@vladmandic/face-api/**'],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // IMAGES — OPTIMIZED
@@ -82,6 +89,7 @@ const nextConfig = {
 
   // Enable Turbopack for production builds (faster, smaller bundles)
   turbopack: {
+    root: __dirname,
     rules: {
       '*.svg': { loaders: ['@svgr/webpack'], as: '*.js' },
     },
@@ -194,6 +202,12 @@ const nextConfig = {
       config.devtool = false;
     }
 
+    // Suppress face-api bundle size warning — it's lazy-loaded and not critical for initial render
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      { module: /@vladmandic\/face-api/, message: /exceeds the recommended size limit/ },
+    ];
+
     return config;
   },
 
@@ -255,11 +269,6 @@ const nextConfig = {
       // Face recognition models — immutable cache
       {
         source: '/models/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-      // Static Next.js assets — immutable cache
-      {
-        source: '/_next/static/:path*',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       // Images — cache 7 days + stale-while-revalidate

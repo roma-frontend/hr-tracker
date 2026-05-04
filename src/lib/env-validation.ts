@@ -22,8 +22,9 @@ const ENV_CONFIG: EnvConfig = {
     'GROQ_API_KEY',
     'STRIPE_SECRET_KEY',
     'STRIPE_WEBHOOK_SECRET',
-    'REDIS_URL',
-    'SENTRY_DSN',
+    'UPSTASH_REDIS_REST_URL',
+    'UPSTASH_REDIS_REST_TOKEN',
+    'NEXT_PUBLIC_SENTRY_DSN',
     'CSRF_SECRET',
     // Legacy vars (for backwards compatibility)
     'NEXTAUTH_SECRET',

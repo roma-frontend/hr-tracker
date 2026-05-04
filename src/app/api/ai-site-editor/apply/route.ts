@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { withCsrfProtection } from '@/lib/csrf-middleware';
 
+export const dynamic = 'force-dynamic';
+
 // ─── Whitelist / Blacklist (дублируем для изоляции endpoint) ──────────────────
 
 const ALLOWED_DIRECTORIES = ['src/app', 'src/components', 'src/i18n/locales'];
@@ -35,7 +37,7 @@ function isPathAllowed(filePath: string): boolean {
   return false;
 }
 
-const BACKUP_DIR = () => path.join(process.cwd(), '.ai-editor-backups');
+const BACKUP_DIR = () => path.join(/* turbopackIgnore: true */ process.cwd(), '.ai-editor-backups');
 
 // ─── GET: список всех backup-ов ───────────────────────────────────────────────
 

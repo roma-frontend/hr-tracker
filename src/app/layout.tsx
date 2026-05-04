@@ -15,7 +15,7 @@ const ibmPlexSans = IBM_Plex_Sans({
   variable: '--font-ibm-plex',
   subsets: ['latin', 'cyrillic'],
   display: 'swap',
-  preload: true,
+  preload: false,
   weight: ['400', '500', '600', '700'],
   fallback: ['sans-serif'],
   adjustFontFallback: true,
@@ -26,7 +26,7 @@ const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin', 'cyrillic'],
   display: 'swap',
-  preload: true,
+  preload: false,
   weight: ['400', '500', '600'],
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
   adjustFontFallback: true,
@@ -145,7 +145,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         {/* Safari pinned tab */}
         <link rel="mask-icon" href="/favicon.svg?v=3" color="#2563eb" />
