@@ -629,7 +629,7 @@ function StartOffboardingWizard({
       toast.success(t('offboarding.wizard.success', 'Offboarding started'));
       onClose();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      toast.error(e instanceof Error ? e.message : t('common.error', 'Error'));
     }
   };
 
@@ -671,7 +671,10 @@ function StartOffboardingWizard({
                 <Input
                   value={employeeId}
                   onChange={(e) => setEmployeeId(e.target.value)}
-                  placeholder="User ID of departing employee"
+                  placeholder={t(
+                    'offboarding.fields.employeeIdPlaceholder',
+                    'User ID of departing employee',
+                  )}
                   className="mt-1"
                 />
               </div>
@@ -682,7 +685,10 @@ function StartOffboardingWizard({
                 <Input
                   value={managerId}
                   onChange={(e) => setManagerId(e.target.value)}
-                  placeholder="User ID of their manager"
+                  placeholder={t(
+                    'offboarding.fields.managerIdPlaceholder',
+                    'User ID of their manager',
+                  )}
                   className="mt-1"
                 />
               </div>

@@ -218,7 +218,7 @@ export default function PayrollRecordsTable() {
                           </div>
                           <div>
                             <p className="font-medium text-(--text-primary)">
-                              {record.user?.name || 'Unknown'}
+                              {record.user?.name || t('common.unknownUser', 'Unknown')}
                             </p>
                             <p className="text-xs text-(--text-muted)">{record.user?.email}</p>
                           </div>

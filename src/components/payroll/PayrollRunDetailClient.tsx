@@ -96,7 +96,7 @@ export default function PayrollRunDetailClient({ params }: { params: Promise<{ i
       await fn();
       toast.success(t(successKey) || 'Done');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      toast.error(e instanceof Error ? e.message : t('common.error', 'Error'));
     } finally {
       setActionLoading(false);
     }
@@ -306,7 +306,7 @@ export default function PayrollRunDetailClient({ params }: { params: Promise<{ i
                           </div>
                           <div>
                             <p className="font-medium text-(--text-primary)">
-                              {record.user?.name || 'Unknown'}
+                              {record.user?.name || t('common.unknownUser', 'Unknown')}
                             </p>
                             <p className="text-xs text-(--text-muted)">{record.user?.email}</p>
                           </div>

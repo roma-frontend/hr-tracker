@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from '@/lib/dynamic-imports';
 import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from 'date-fns';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 interface LeavesTrendChartProps {
   leaves: Array<{
@@ -23,7 +24,8 @@ interface LeavesTrendChartProps {
 }
 
 export function LeavesTrendChart({ leaves }: LeavesTrendChartProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dfLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
   // Generate last 6 months
   const now = new Date();
   const months = eachMonthOfInterval({
@@ -51,7 +53,7 @@ export function LeavesTrendChart({ leaves }: LeavesTrendChartProps) {
     const rejected = monthLeaves.filter((l) => l.status === 'rejected').length;
 
     return {
-      month: format(month, 'MMM yyyy'),
+      month: format(month, 'MMM yyyy', { locale: dfLocale }),
       approved,
       pending,
       rejected,

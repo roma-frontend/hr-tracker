@@ -73,6 +73,9 @@ const UI_LABELS: Record<
     declined: string;
     download: string;
     reply: string;
+    preview: string;
+    me: string;
+    unknown: string;
   }
 > = {
   en: {
@@ -94,6 +97,9 @@ const UI_LABELS: Record<
     declined: 'Declined',
     download: 'Download',
     reply: 'Reply',
+    preview: 'Preview',
+    me: 'Me',
+    unknown: 'Unknown',
   },
   ru: {
     deleted: 'Это сообщение было удалено',
@@ -114,6 +120,9 @@ const UI_LABELS: Record<
     declined: 'Отклонён',
     download: 'Скачать',
     reply: 'Ответить',
+    preview: 'Предпросмотр',
+    me: 'Я',
+    unknown: 'Неизвестно',
   },
   hy: {
     deleted: 'Այս հաղորդագրությունը ջնջված է',
@@ -134,6 +143,9 @@ const UI_LABELS: Record<
     declined: 'Մերժված',
     download: 'Ներբեռնել',
     reply: 'Պատասխանել',
+    preview: 'Նախադիտում',
+    me: 'Ես',
+    unknown: 'Անհայտ',
   },
 };
 
@@ -566,7 +578,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lightboxSrc}
-            alt="Preview"
+            alt={L.preview}
             className="max-w-[90vw] max-h-[90vh] rounded-xl object-contain shadow-2xl transition-all duration-300 scale-100"
             onClick={(e) => e.stopPropagation()}
           />
@@ -657,7 +669,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             <Avatar className="w-7 h-7">
               {currentUserAvatar && <AvatarImage src={currentUserAvatar} />}
               <AvatarFallback className="btn-gradient text-[10px] font-bold text-white">
-                {getInitials(currentUserName ?? 'Me')}
+                {getInitials(currentUserName ?? L.me)}
               </AvatarFallback>
             </Avatar>
           ) : (
@@ -676,7 +688,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               className="text-[11px] font-medium mb-0.5 px-1"
               style={{ color: 'var(--text-muted)' }}
             >
-              {message.sender?.name ?? 'Unknown'}
+              {message.sender?.name ?? L.unknown}
             </span>
           )}
 

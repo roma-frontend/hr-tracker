@@ -27,8 +27,8 @@ function getDateFnsLocale(lang?: string) {
 }
 
 export function DashboardHeader({ selectedOrganization, userRole }: DashboardHeaderProps) {
-  const { t } = useTranslation();
-  const dateFnsLocale = getDateFnsLocale();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = getDateFnsLocale(i18n.language);
   const today = new Date();
 
   return (

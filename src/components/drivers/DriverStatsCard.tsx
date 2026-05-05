@@ -57,8 +57,8 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
       .filter((s) => s.type === 'trip' && s.status === 'completed')
       .map((s) => ({
         date: new Date(s.startTime).toLocaleDateString(locale),
-        driver: s.userName || 'Unknown',
-        passenger: s.userName || 'Unknown',
+        driver: s.userName || t('common.unknownUser', 'Unknown'),
+        passenger: s.userName || t('common.unknownUser', 'Unknown'),
         from: s.tripInfo?.from || 'N/A',
         to: s.tripInfo?.to || 'N/A',
         purpose: s.tripInfo?.purpose || 'N/A',
@@ -78,8 +78,8 @@ export function DriverStatsCard({ driverId, organizationId }: DriverStatsCardPro
       .filter((s) => s.type === 'trip' && s.status === 'completed')
       .map((s) => ({
         date: new Date(s.startTime).toLocaleDateString(locale),
-        driver: s.userName || 'Unknown',
-        passenger: s.userName || 'Unknown',
+        driver: s.userName || t('common.unknownUser', 'Unknown'),
+        passenger: s.userName || t('common.unknownUser', 'Unknown'),
         from: s.tripInfo?.from || 'N/A',
         to: s.tripInfo?.to || 'N/A',
         purpose: s.tripInfo?.purpose || 'N/A',

@@ -7,8 +7,6 @@ import { TrendingUp, CalendarDays } from 'lucide-react';
 import {
   PieChart,
   Pie,
-  Cell,
-  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   BarChart,
   Bar,
@@ -17,6 +15,7 @@ import {
   CartesianGrid,
   Legend,
 } from '@/lib/dynamic-imports';
+import { Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LeaveChartsProps {
@@ -113,7 +112,6 @@ export function LeaveCharts({ monthlyTrend, pieData }: LeaveChartsProps) {
                     cy="50%"
                     labelLine={false}
                     outerRadius={80}
-                    fill="#8884d8"
                     dataKey="value"
                   >
                     {pieData.map((entry, index) => (

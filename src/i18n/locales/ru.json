@@ -328,7 +328,9 @@
     "selectAll": "Выбрать всех",
     "deleted": "Удалено",
     "today": "Сегодня",
-    "to": "по"
+    "to": "по",
+    "error": "Ошибка",
+    "unknownUser": "Неизвестный"
   },
   "nav": {
     "home": "Главная",
@@ -2132,7 +2134,8 @@
     "selectADay": "Выберите день",
     "unknown": "Неизвестно",
     "openInGoogle": "Открыть в Google Календаре",
-    "description": "Описание"
+    "description": "Описание",
+    "googleCalendar": "Google Calendar"
   },
   "labels": {
     "fullName": "Полное имя",
@@ -4583,7 +4586,57 @@
     "unmute": "Включить звук",
     "delete": "Удалить",
     "groupLabel": "Группа",
-    "unknownUser": "Неизвестный"
+    "unknownUser": "Неизвестный",
+    "loadingMessages": "Загрузка сообщений",
+    "chatMessagesLabel": "Сообщения чата",
+    "voiceMessageContent": "Голосовое сообщение",
+    "searchResults": "результат",
+    "searchResultsPlural": "результаты",
+    "scrollToBottom": "Прокрутить вниз",
+    "voiceMessageTitle": "Голосовое сообщение",
+    "messageDeleted": "Это сообщение было удалено",
+    "messageSingular": "сообщение",
+    "messagePlural": "сообщения",
+    "removeFromSaved": "Удалить из сохраненных",
+    "viewProfile": "Просмотреть профиль",
+    "me": "Я",
+    "unknown": "Неизвестный",
+    "messageEdited": "(изменено)",
+    "receipt": {
+      "sent": "Отправлено",
+      "delivered": "Доставлено",
+      "seen": "Просмотрено"
+    },
+    "poll": {
+      "closed": "Опрос закрыт",
+      "votes": "голосов",
+      "closePoll": "Закрыть опрос"
+    },
+    "action": {
+      "copy": "Копировать",
+      "pin": "Закрепить",
+      "unpin": "Открепить",
+      "edit": "Редактировать",
+      "deleteForMe": "Удалить у меня",
+      "deleteForEveryone": "Удалить у всех",
+      "deleteMessage": "Удалить сообщение",
+      "deleteDesc": "Выберите способ удаления этого сообщения.",
+      "deleteTimeLimit": "Удалить у всех можно только в течение 5 минут",
+      "cancel": "Отмена",
+      "download": "Скачать",
+      "reply": "Ответить"
+    },
+    "call": {
+      "missed": "Пропущен",
+      "declined": "Отклонён"
+    },
+    "thread": {
+      "replies": "ответ",
+      "repliesPlural": "ответы"
+    },
+    "notification": {
+      "attachment": "Вложение"
+    }
   },
   "broadcasts": {
     "title": "Сервисные Объявления",
@@ -5371,7 +5424,8 @@
       "endConfirm": "Завершить смену",
       "history": "История смен",
       "noHistory": "История смен пока пуста",
-      "overtime": "Переработка"
+      "overtime": "Переработка",
+      "now": "Сейчас"
     },
     "openInMap": "Открыть в карте",
     "selectMapApp": "Выберите приложение",
@@ -7328,7 +7382,9 @@
       "reqPlaceholder": "Навыки, опыт, образование...",
       "salaryMin": "Мин. зарплата",
       "salaryMax": "Макс. зарплата",
-      "currency": "Валюта"
+      "currency": "Валюта",
+      "namePlaceholder": "Иван Иванов",
+      "emailPlaceholder": "john@example.com"
     },
     "type": {
       "fullTime": "Полная занятость",
@@ -7534,7 +7590,11 @@
       "descPlaceholder": "Для чего этот шаблон?",
       "department": "Отдел",
       "deptPlaceholder": "напр. Разработка",
-      "taskTitle": "Название задачи"
+      "taskTitle": "Название задачи",
+      "employeeIdPlaceholder": "Вставьте ID пользователя нового сотрудника",
+      "managerIdPlaceholder": "ID пользователя руководителя",
+      "buddyIdPlaceholder": "ID пользователя наставника",
+      "dayPlaceholder": "День"
     }
   },
   "offboarding": {
@@ -7615,7 +7675,9 @@
       "lastDay": "Последний рабочий день",
       "reason": "Причина",
       "note": "Заметка (необязательно)",
-      "notePlaceholder": "Дополнительный контекст..."
+      "notePlaceholder": "Дополнительный контекст...",
+      "employeeIdPlaceholder": "ID пользователя увольняющегося сотрудника",
+      "managerIdPlaceholder": "ID пользователя их руководителя"
     },
     "exitForm": {
       "title": "Форма Exit-интервью",

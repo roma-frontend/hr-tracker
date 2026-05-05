@@ -72,9 +72,10 @@ function TripCard({
   onOpenDetails?: (item: ScheduleItem) => void;
   role?: 'admin' | 'driver';
 }) {
-  const { t } = useTranslation();
-  const startTime = format(new Date(item.startTime), 'HH:mm');
-  const endTime = format(new Date(item.endTime), 'HH:mm');
+  const { t, i18n } = useTranslation();
+  const dfLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
+  const startTime = format(new Date(item.startTime), 'HH:mm', { locale: dfLocale });
+  const endTime = format(new Date(item.endTime), 'HH:mm', { locale: dfLocale });
 
   const isTimeOff = item.type === 'time_off';
   const isBlocked = item.type === 'blocked';
@@ -489,7 +490,7 @@ export function DriverCalendar({ driverId, organizationId, userId, role }: Drive
                           isSelected ? '' : today ? 'text-primary' : ''
                         }`}
                       >
-                        {format(day, 'd')}
+                        {format(day, 'd', { locale: dateFnsLocale })}
                       </span>
                       {daySchedule.length > 0 && (
                         <div

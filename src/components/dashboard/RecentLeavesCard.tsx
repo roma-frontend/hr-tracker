@@ -5,6 +5,8 @@ import { motion } from '@/lib/cssMotion';
 import { useTranslation } from 'react-i18next';
 import { Clock, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { enUS, ru, hy } from 'date-fns/locale';
+import i18n from 'i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { LeaveEnriched } from '@/lib/convex-types';
@@ -18,7 +20,9 @@ function formatDate(dateStr: string | undefined | null, fmt: string): string {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return '—';
-  return format(d, fmt);
+  const lang = i18n.language || 'en';
+  const dfLocale = lang === 'ru' ? ru : lang === 'hy' ? hy : enUS;
+  return format(d, fmt, { locale: dfLocale });
 }
 
 const StatusBadgeMemo = React.memo(({ status, label }: { status: LeaveStatus; label: string }) => {

@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Clock, Play, Square, Pause, Coffee, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 interface DriverShiftControlsProps {
   driverId: Id<'drivers'>;
@@ -33,7 +34,8 @@ export function DriverShiftControls({
   userId,
   organizationId,
 }: DriverShiftControlsProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dfLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
   const [showEndShiftModal, setShowEndShiftModal] = useState(false);
   const [breakTime, setBreakTime] = useState('');
   const [driverNotes, setDriverNotes] = useState('');
@@ -171,7 +173,7 @@ export function DriverShiftControls({
                     {t('driver.shift.startedAt', 'Started')}
                   </p>
                   <p className="text-xs sm:text-sm font-medium text-(--text-primary)">
-                    {format(currentShift.startTime, 'HH:mm')}
+                    {format(currentShift.startTime, 'HH:mm', { locale: dfLocale })}
                   </p>
                 </div>
               </div>

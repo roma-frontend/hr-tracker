@@ -200,7 +200,7 @@ export function EditPayrollRecordDialog({ open, onOpenChange, record }: Props) {
       toast.success(t('payroll.recordUpdated'));
       onOpenChange(false);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      toast.error(e instanceof Error ? e.message : t('common.error', 'Error'));
     }
   };
 
@@ -219,7 +219,7 @@ export function EditPayrollRecordDialog({ open, onOpenChange, record }: Props) {
       toast.success(t('payroll.recordDeleted'));
       onOpenChange(false);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      toast.error(e instanceof Error ? e.message : t('common.error', 'Error'));
     } finally {
       setDeleting(false);
     }

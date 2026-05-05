@@ -451,7 +451,11 @@ function AddCandidateDialog({
       <div className="space-y-4">
         <div>
           <Label>{t('recruitment.candidate.name', 'Full Name')}</Label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" />
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('recruitment.fields.namePlaceholder', 'John Doe')}
+          />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -463,7 +467,7 @@ function AddCandidateDialog({
                 setEmail(e.target.value);
                 setEmailError('');
               }}
-              placeholder="john@example.com"
+              placeholder={t('recruitment.fields.emailPlaceholder', 'john@example.com')}
               className={emailError ? 'border-red-500' : ''}
             />
             {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
@@ -511,7 +515,7 @@ function AddCandidateDialog({
             {t('common.cancel', 'Cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting ? '...' : t('recruitment.candidate.add', 'Add')}
+            {submitting ? t('common.loading', '...') : t('recruitment.candidate.add', 'Add')}
           </Button>
         </div>
       </div>

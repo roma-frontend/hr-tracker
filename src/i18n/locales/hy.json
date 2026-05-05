@@ -322,7 +322,9 @@
     "back": "Հետ",
     "next": "Հաջորդ",
     "employee": "Աշխատակից",
-    "optional": "Ոչ պարտադիր"
+    "optional": "Ոչ պարտադիր",
+    "error": "Սխալ",
+    "unknownUser": "Անհայտ"
   },
   "nav": {
     "home": "Գլխավոր",
@@ -1975,7 +1977,8 @@
     "unknown": "Անհայտ",
     "newLeave": "Նոր արձակուրդ",
     "openInGoogle": "Բացել Google Օրացույցում",
-    "description": "Նկարագրություն"
+    "description": "Նկարագրություն",
+    "googleCalendar": "Google Calendar"
   },
   "labels": {
     "fullName": "Լրիվ անուն",
@@ -4396,7 +4399,57 @@
     "unmute": "Միացնել ձայնը",
     "delete": "Ջնջել",
     "groupLabel": "Խումբ",
-    "unknownUser": "Անհայտ"
+    "unknownUser": "Անհայտ",
+    "loadingMessages": "Հաղորդագրությունների բեռնում",
+    "chatMessagesLabel": "Չատի հաղորդագրություններ",
+    "voiceMessageContent": "Ձայնային հաղորդագրություն",
+    "searchResults": "արդյունք",
+    "searchResultsPlural": "արդյունքներ",
+    "scrollToBottom": "Պտտել ներքև",
+    "voiceMessageTitle": "Ձայնային հաղորդագրություն",
+    "messageDeleted": "Այս հաղորդագրությունը ջնջված է",
+    "messageSingular": "հաղորդագրություն",
+    "messagePlural": "հաղորդագրություններ",
+    "removeFromSaved": "Հեռացնել պահպանվածներից",
+    "viewProfile": "Դիտել պրոֆիլը",
+    "me": "Ես",
+    "unknown": "Անհայտ",
+    "messageEdited": "(խմբագրված)",
+    "receipt": {
+      "sent": "Ուղարկված",
+      "delivered": "Հասցված",
+      "seen": "Դիտված"
+    },
+    "poll": {
+      "closed": "Հարցումը փակված է",
+      "votes": "ձայն",
+      "closePoll": "Փակել հարցումը"
+    },
+    "action": {
+      "copy": "Պատճենել",
+      "pin": "Ամրացնել",
+      "unpin": "Ապամրացնել",
+      "edit": "Խմբագրել",
+      "deleteForMe": "Ջնջել ինձ համար",
+      "deleteForEveryone": "Ջնջել բոլորի համար",
+      "deleteMessage": "Ջնջել հաղորդագրությունը",
+      "deleteDesc": "Ընտրեք, թե ինչպես ջնջել այս հաղորդագրությունը:",
+      "deleteTimeLimit": "Կարելի է ջնջել բոլորի համար միայն 5 րոպեի ընթացքում",
+      "cancel": "Չեղարկել",
+      "download": "Ներբեռնել",
+      "reply": "Պատասխանել"
+    },
+    "call": {
+      "missed": "Բաց թողնված",
+      "declined": "Մերժված"
+    },
+    "thread": {
+      "replies": "պատասխան",
+      "repliesPlural": "պատասխաններ"
+    },
+    "notification": {
+      "attachment": "Կցորդ"
+    }
   },
   "broadcasts": {
     "title": "Ծառայության հայտարարություններ",
@@ -4872,7 +4925,8 @@
       "endConfirm": "Ավարտել հերթափոխը",
       "history": "Հերթափոխերի պատմություն",
       "noHistory": "Հերթափոխերի պատմություն դեռ չկա",
-      "overtime": "Գերժամյա"
+      "overtime": "Գերժամյա",
+      "now": "Հիմա"
     },
     "openInMap": "Բացել քարտեզում",
     "selectMapApp": "Ընտրեք քարտեզի հավելված",
@@ -6804,7 +6858,9 @@
       "reqPlaceholder": "Հմտություններ, փորձ, կրթություն...",
       "salaryMin": "Նվազագույն աշխատավարձ",
       "salaryMax": "Առավելագույն աշխատավարձ",
-      "currency": "Արժույթ"
+      "currency": "Արժույթ",
+      "namePlaceholder": "Անուն Ազգանուն",
+      "emailPlaceholder": "john@example.com"
     },
     "type": {
       "fullTime": "Լիաժամկետ",
@@ -7010,7 +7066,11 @@
       "descPlaceholder": "Այս տիպարը ինչի համար է նախատեսված?",
       "department": "Բաժին",
       "deptPlaceholder": "օրինակ՝ Ինժեներական",
-      "taskTitle": "Առաջադրանքի վերնագիր"
+      "taskTitle": "Առաջադրանքի վերնագիր",
+      "employeeIdPlaceholder": "Տեղադրեք նոր աշխատակցի օգտատերի ID",
+      "managerIdPlaceholder": "Ղեկավարի օգտատերի ID",
+      "buddyIdPlaceholder": "Ուղեկցորդի/մենթորի օգտատերի ID",
+      "dayPlaceholder": "Օր"
     }
   },
   "offboarding": {
@@ -7091,7 +7151,9 @@
       "lastDay": "Վերջին աշխատանքային օրը",
       "reason": "Պատճառ",
       "note": "Նշում (ըստ ցանկության)",
-      "notePlaceholder": "Լրացուցիչ տեղեկություններ..."
+      "notePlaceholder": "Լրացուցիչ տեղեկություններ...",
+      "employeeIdPlaceholder": "Հեռացվող աշխատակցի օգտատերի ID",
+      "managerIdPlaceholder": "Նրա ղեկավարի օգտատերի ID"
     },
     "exitForm": {
       "title": "Ելքի հարցազրույցի ձև",

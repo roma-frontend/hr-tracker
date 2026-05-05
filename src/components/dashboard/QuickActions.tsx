@@ -179,7 +179,10 @@ export function QuickActions() {
                 >
                   <div className="flex items-start gap-3">
                     <div className="p-2 rounded-lg bg-(--muted) group-hover:bg-(--primary)/10 transition-colors duration-200">
-                      <Icon className="w-4 h-4 text-(--muted-foreground) group-hover:text-(--primary) transition-colors duration-200" />
+                      {React.createElement(Icon, {
+                        className:
+                          'w-4 h-4 text-(--muted-foreground) group-hover:text-(--primary) transition-colors duration-200',
+                      })}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-(--text-primary) group-hover:text-(--primary) transition-colors duration-200">

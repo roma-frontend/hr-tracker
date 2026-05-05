@@ -326,7 +326,9 @@
     "optional": "Optional",
     "sending": "Sending...",
     "selectAll": "Select All",
-    "deleted": "Deleted"
+    "deleted": "Deleted",
+    "error": "Error",
+    "unknownUser": "Unknown"
   },
   "nav": {
     "home": "Home",
@@ -2129,7 +2131,8 @@
     "selectADay": "Select a day",
     "unknown": "Unknown",
     "openInGoogle": "Open in Google Calendar",
-    "description": "Description"
+    "description": "Description",
+    "googleCalendar": "Google Calendar"
   },
   "labels": {
     "fullName": "Full Name",
@@ -4545,7 +4548,57 @@
     "unmute": "Unmute",
     "delete": "Delete",
     "groupLabel": "Group",
-    "unknownUser": "Unknown"
+    "unknownUser": "Unknown",
+    "loadingMessages": "Loading messages",
+    "chatMessagesLabel": "Chat messages",
+    "voiceMessageContent": "Voice message",
+    "searchResults": "result",
+    "searchResultsPlural": "results",
+    "scrollToBottom": "Scroll to bottom",
+    "voiceMessageTitle": "Voice message",
+    "messageDeleted": "This message was deleted",
+    "messageSingular": "message",
+    "messagePlural": "messages",
+    "removeFromSaved": "Remove from saved",
+    "viewProfile": "View profile",
+    "me": "Me",
+    "unknown": "Unknown",
+    "receipt": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "seen": "Seen"
+    },
+    "poll": {
+      "closed": "Poll closed",
+      "votes": "votes",
+      "closePoll": "Close poll"
+    },
+    "action": {
+      "copy": "Copy",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "edit": "Edit",
+      "deleteForMe": "Delete for me",
+      "deleteForEveryone": "Delete for everyone",
+      "deleteMessage": "Delete message",
+      "deleteDesc": "Choose how to delete this message.",
+      "deleteTimeLimit": "Can only delete for everyone within 5 minutes",
+      "cancel": "Cancel",
+      "download": "Download",
+      "reply": "Reply"
+    },
+    "call": {
+      "missed": "Missed",
+      "declined": "Declined"
+    },
+    "thread": {
+      "replies": "reply",
+      "repliesPlural": "replies"
+    },
+    "messageEdited": "(edited)",
+    "notification": {
+      "attachment": "Attachment"
+    }
   },
   "broadcasts": {
     "title": "Service Announcements",
@@ -5154,7 +5207,8 @@
       "endConfirm": "End Shift",
       "history": "Shift History",
       "noHistory": "No shift history yet",
-      "overtime": "Overtime"
+      "overtime": "Overtime",
+      "now": "Now"
     },
     "openInMap": "Open in Map",
     "selectMapApp": "Select Map App",
@@ -7138,7 +7192,9 @@
       "reqPlaceholder": "Skills, experience, education...",
       "salaryMin": "Min Salary",
       "salaryMax": "Max Salary",
-      "currency": "Currency"
+      "currency": "Currency",
+      "namePlaceholder": "John Doe",
+      "emailPlaceholder": "john@example.com"
     },
     "type": {
       "fullTime": "Full-time",
@@ -7332,19 +7388,23 @@
     },
     "fields": {
       "employeeId": "Employee ID",
+      "employeeIdPlaceholder": "Paste user ID of the new hire",
       "employeeHint": "The user must already exist in the system",
       "template": "Template",
       "selectTemplate": "Select a template (optional)",
       "startDate": "Start Date",
       "managerId": "Manager ID",
+      "managerIdPlaceholder": "User ID of the manager",
       "buddyId": "Buddy ID (optional)",
+      "buddyIdPlaceholder": "User ID of the buddy/mentor",
       "templateName": "Template Name",
       "templateNamePlaceholder": "e.g. Engineering Onboarding",
       "description": "Description",
       "descPlaceholder": "What is this template for?",
       "department": "Department",
       "deptPlaceholder": "e.g. Engineering",
-      "taskTitle": "Task title"
+      "taskTitle": "Task title",
+      "dayPlaceholder": "Day"
     }
   },
   "offboarding": {
@@ -7421,7 +7481,9 @@
     },
     "fields": {
       "employeeId": "Employee ID",
+      "employeeIdPlaceholder": "User ID of departing employee",
       "managerId": "Manager ID",
+      "managerIdPlaceholder": "User ID of their manager",
       "lastDay": "Last Working Day",
       "reason": "Reason",
       "note": "Note (optional)",

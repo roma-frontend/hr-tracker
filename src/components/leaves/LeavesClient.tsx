@@ -303,7 +303,7 @@ export function LeavesClient() {
         <Card>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="p-6">
+              <div className="overflow-x-auto">
                 <SkeletonTable rows={5} />
               </div>
             ) : filtered.length === 0 ? (
@@ -347,8 +347,7 @@ export function LeavesClient() {
                     {filtered.map((req, i) => (
                       <React.Fragment key={req._id}>
                         <tr
-                          className="hover:bg-(--background-subtle) transition-colors cursor-pointer animate-fade-in"
-                          style={{ animationDelay: `${i * 30}ms` }}
+                          className="hover:bg-(--background-subtle) transition-colors cursor-pointer"
                           onClick={() =>
                             isAdmin &&
                             req.status === 'pending' &&

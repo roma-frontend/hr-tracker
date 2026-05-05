@@ -142,7 +142,9 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                   )}
                 </div>
                 <div className="pb-1">
-                  <h2 className="text-xl font-bold text-white">{record.user?.name ?? 'Unknown'}</h2>
+                  <h2 className="text-xl font-bold text-white">
+                    {record.user?.name ?? t('common.unknownUser', 'Unknown')}
+                  </h2>
                   <p className="text-white/70 text-sm">
                     {record.user?.position ?? record.user?.role ?? 'Employee'}
                   </p>
@@ -354,8 +356,8 @@ export function AttendanceDetailModal({ record, open, onClose }: AttendanceDetai
                         <div className="flex items-center gap-2">
                           {r.checkInTime ? (
                             <span className="text-xs text-muted-foreground">
-                              {formatTime(r.checkInTime)} →{' '}
-                              {r.checkOutTime ? formatTime(r.checkOutTime) : '...'}
+                              {formatTime(r.checkInTime, i18n.language)} →{' '}
+                              {r.checkOutTime ? formatTime(r.checkOutTime, i18n.language) : '...'}
                             </span>
                           ) : null}
                           {r.isLate && (

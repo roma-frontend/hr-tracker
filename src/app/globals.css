@@ -144,6 +144,7 @@ html {
   /* scroll-behavior: smooth removed — prevents bfcache restoration (back/forward cache) */
   color-scheme: light dark;
   /* overflow-x: hidden removed - it breaks sticky positioning */
+  overflow-y: scroll;
 }
 
 html.dark {

@@ -635,7 +635,7 @@ function StartOnboardingWizard({
       toast.success(t('onboarding.wizard.success', 'Onboarding started!'));
       onClose();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      toast.error(e instanceof Error ? e.message : t('common.error', 'Error'));
     }
   };
 
@@ -677,7 +677,10 @@ function StartOnboardingWizard({
                 <Input
                   value={employeeId}
                   onChange={(e) => setEmployeeId(e.target.value)}
-                  placeholder="Paste user ID of the new hire"
+                  placeholder={t(
+                    'onboarding.fields.employeeIdPlaceholder',
+                    'Paste user ID of the new hire',
+                  )}
                   className="mt-1"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
@@ -734,7 +737,10 @@ function StartOnboardingWizard({
                 <Input
                   value={managerId}
                   onChange={(e) => setManagerId(e.target.value)}
-                  placeholder="User ID of the manager"
+                  placeholder={t(
+                    'onboarding.fields.managerIdPlaceholder',
+                    'User ID of the manager',
+                  )}
                   className="mt-1"
                 />
               </div>
@@ -745,7 +751,10 @@ function StartOnboardingWizard({
                 <Input
                   value={buddyId}
                   onChange={(e) => setBuddyId(e.target.value)}
-                  placeholder="User ID of the buddy/mentor"
+                  placeholder={t(
+                    'onboarding.fields.buddyIdPlaceholder',
+                    'User ID of the buddy/mentor',
+                  )}
                   className="mt-1"
                 />
               </div>
@@ -839,7 +848,7 @@ function CreateTemplateWizard({
       toast.success(t('onboarding.templateWizard.success', 'Template created!'));
       onClose();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      toast.error(e instanceof Error ? e.message : t('common.error', 'Error'));
     }
   };
 
@@ -987,7 +996,7 @@ function CreateTemplateWizard({
                     onChange={(e) =>
                       setNewTask({ ...newTask, dayOffset: parseInt(e.target.value) || 0 })
                     }
-                    placeholder="Day"
+                    placeholder={t('onboarding.fields.dayPlaceholder', 'Day')}
                     className="text-xs"
                   />
                 </div>

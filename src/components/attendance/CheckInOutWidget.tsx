@@ -11,9 +11,11 @@ import { Clock, LogIn, LogOut, TrendingUp, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { format } from 'date-fns';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 export function CheckInOutWidget() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dfLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
   const { user } = useAuthStore();
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
@@ -55,7 +57,7 @@ export function CheckInOutWidget() {
   const isCheckedOut = todayStatus?.status === 'checked_out';
 
   const formatTime = (timestamp: number) => {
-    return format(new Date(timestamp), 'HH:mm:ss');
+    return format(new Date(timestamp), 'HH:mm:ss', { locale: dfLocale });
   };
 
   const formatDuration = (minutes: number) => {
@@ -73,7 +75,7 @@ export function CheckInOutWidget() {
             {t('attendance.timeTracker')}
           </CardTitle>
           <div className="text-2xl font-mono">
-            {currentTime ? format(currentTime, 'HH:mm:ss') : '--:--:--'}
+            {currentTime ? format(currentTime, 'HH:mm:ss', { locale: dfLocale }) : '--:--:--'}
           </div>
         </div>
       </CardHeader>

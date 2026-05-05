@@ -34,12 +34,7 @@ export function Skeleton({
 
   return (
     <div
-      className={cn(
-        'bg-white/5',
-        shapeClasses[variant],
-        animationClass,
-        className,
-      )}
+      className={cn('bg-white/5', shapeClasses[variant], animationClass, className)}
       style={style}
     />
   );
@@ -78,21 +73,62 @@ export function SkeletonCard({ className }: { className?: string }) {
 
 export function SkeletonTable({ rows = 5, className }: { rows?: number; className?: string }) {
   return (
-    <div className={cn('space-y-2', className)}>
-      {/* Header */}
-      <div className="grid grid-cols-4 gap-4 p-3 bg-(--background-subtle) rounded-lg">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} variant="text" width="60%" />
+    <table className={cn('w-full', className)}>
+      <thead>
+        <tr className="border-b border-(--border)">
+          <th className="text-left px-6 py-3">
+            <Skeleton variant="text" width="60%" height="0.75rem" />
+          </th>
+          <th className="text-left px-4 py-3">
+            <Skeleton variant="text" width="60%" height="0.75rem" />
+          </th>
+          <th className="text-left px-4 py-3 hidden md:table-cell">
+            <Skeleton variant="text" width="60%" height="0.75rem" />
+          </th>
+          <th className="text-left px-4 py-3 hidden sm:table-cell">
+            <Skeleton variant="text" width="60%" height="0.75rem" />
+          </th>
+          <th className="text-left px-4 py-3 hidden lg:table-cell">
+            <Skeleton variant="text" width="60%" height="0.75rem" />
+          </th>
+          <th className="text-left px-4 py-3">
+            <Skeleton variant="text" width="60%" height="0.75rem" />
+          </th>
+          <th className="text-left px-4 py-3">
+            <Skeleton variant="text" width="60%" height="0.75rem" />
+          </th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-(--border)">
+        {Array.from({ length: rows }).map((_, rowIdx) => (
+          <tr key={rowIdx} style={{ height: '3.25rem' }}>
+            <td className="px-6 py-3">
+              <div className="space-y-1">
+                <Skeleton variant="text" width="80%" height="0.875rem" />
+                <Skeleton variant="text" width="50%" height="0.75rem" />
+              </div>
+            </td>
+            <td className="px-4 py-3">
+              <Skeleton variant="text" width="60%" height="1.5rem" />
+            </td>
+            <td className="px-4 py-3 hidden md:table-cell">
+              <Skeleton variant="text" width="70%" height="0.875rem" />
+            </td>
+            <td className="px-4 py-3 hidden sm:table-cell">
+              <Skeleton variant="text" width="40%" height="1rem" />
+            </td>
+            <td className="px-4 py-3 hidden lg:table-cell">
+              <Skeleton variant="text" width="90%" height="0.875rem" />
+            </td>
+            <td className="px-4 py-3">
+              <Skeleton variant="text" width="50%" height="1.5rem" />
+            </td>
+            <td className="px-4 py-3">
+              <Skeleton variant="text" width="2rem" height="2rem" />
+            </td>
+          </tr>
         ))}
-      </div>
-      {/* Rows */}
-      {Array.from({ length: rows }).map((_, rowIdx) => (
-        <div key={rowIdx} className="grid grid-cols-4 gap-4 p-3 border-b border-(--border)">
-          {Array.from({ length: 4 }).map((_, colIdx) => (
-            <Skeleton key={colIdx} variant="text" width={colIdx === 0 ? '80%' : '60%'} />
-          ))}
-        </div>
-      ))}
-    </div>
+      </tbody>
+    </table>
   );
 }

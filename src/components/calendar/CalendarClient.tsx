@@ -685,7 +685,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   className="w-3 h-3 rounded-full shrink-0"
                   style={{ background: GOOGLE_EVENT_COLOR }}
                 />
-                <span className="text-xs text-(--text-muted)">Google Calendar</span>
+                <span className="text-xs text-(--text-muted)">
+                  {t('calendar.googleCalendar', 'Google Calendar')}
+                </span>
               </div>
             )}
             <div className="flex items-center gap-2">
@@ -706,7 +708,9 @@ export const CalendarClient = React.memo(function CalendarClient() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm uppercase tracking-wider text-(--text-muted)">
-                {selectedDay ? format(selectedDay, 'EEEE, MMM d') : t('calendar.selectADay')}
+                {selectedDay
+                  ? format(selectedDay, 'EEEE, MMM d', { locale: dateFnsLocale })
+                  : t('calendar.selectADay')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
@@ -764,7 +768,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">
                             <p className="text-xs font-semibold text-(--text-primary) truncate">
-                              {leave.userName ?? 'Unknown'}
+                              {leave.userName ?? t('common.unknownUser', 'Unknown')}
                             </p>
                             <StatusIcon status={leave.status as LeaveStatus} />
                           </div>
@@ -837,12 +841,15 @@ export const CalendarClient = React.memo(function CalendarClient() {
                           </div>
                           {evt.startTime && (
                             <p className="text-[10px] text-(--text-muted) mt-0.5">
-                              {format(new Date(evt.startTime), 'HH:mm')}
-                              {evt.endTime && ` – ${format(new Date(evt.endTime), 'HH:mm')}`}
+                              {format(new Date(evt.startTime), 'HH:mm', { locale: dateFnsLocale })}
+                              {evt.endTime &&
+                                ` – ${format(new Date(evt.endTime), 'HH:mm', { locale: dateFnsLocale })}`}
                             </p>
                           )}
                           {!evt.startTime && (
-                            <p className="text-[10px] text-(--text-muted) mt-0.5">All day</p>
+                            <p className="text-[10px] text-(--text-muted) mt-0.5">
+                              {t('calendar.allDay', 'All day')}
+                            </p>
                           )}
                           {evt.location && (
                             <p className="text-[10px] text-(--text-muted) mt-0.5 truncate">
@@ -855,7 +862,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                               style={{ background: GOOGLE_EVENT_COLOR }}
                             />
                             <span className="text-[10px] text-(--text-secondary)">
-                              Google Calendar
+                              {t('calendar.googleCalendar', 'Google Calendar')}
                             </span>
                           </div>
                         </div>
@@ -899,8 +906,8 @@ export const CalendarClient = React.memo(function CalendarClient() {
                             </Badge>
                           </div>
                           <p className="text-[10px] text-(--text-muted) mt-0.5">
-                            {format(new Date(evt.startTime), 'HH:mm')} –{' '}
-                            {format(new Date(evt.endTime), 'HH:mm')}
+                            {format(new Date(evt.startTime), 'HH:mm', { locale: dateFnsLocale })} –{' '}
+                            {format(new Date(evt.endTime), 'HH:mm', { locale: dateFnsLocale })}
                           </p>
                           {evt.tripInfo && (
                             <p className="text-[10px] text-(--text-muted) mt-0.5 truncate">
@@ -929,7 +936,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm uppercase tracking-wider text-(--text-muted)">
-                {format(currentMonth, 'MMMM')} {t('calendar.summary')}
+                {format(currentMonth, 'MMMM', { locale: dateFnsLocale })} {t('calendar.summary')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 space-y-2">
@@ -993,7 +1000,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     </Avatar>
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-(--text-primary) truncate">
-                        {l.userName ?? 'Unknown'}
+                        {l.userName ?? t('common.unknownUser', 'Unknown')}
                       </p>
                       <p className="text-[10px] text-(--text-muted)">
                         {getLeaveTypeLabel(l.type as LeaveType, t)}
@@ -1083,7 +1090,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold leading-tight drop-shadow-md">
-                        {selectedLeave.userName ?? 'Unknown'}
+                        {selectedLeave.userName ?? t('common.unknownUser', 'Unknown')}
                       </h3>
                       <p className="text-sm mt-0.5 drop-shadow">
                         {selectedLeave.userDepartment ?? ''}
@@ -1292,7 +1299,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold leading-tight">
-                        {selectedDriverEvent.driverName ?? 'Unknown'}
+                        {selectedDriverEvent.driverName ?? t('common.unknownUser', 'Unknown')}
                       </h3>
                       <p className="text-sm mt-0.5">
                         {selectedDriverEvent.driverVehicle?.model || ''}
@@ -1616,9 +1623,11 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
                       <span className="text-sm text-(--text-secondary)">
-                        {format(new Date(selectedGoogleEvent.startTime), 'h:mm a')}
+                        {format(new Date(selectedGoogleEvent.startTime), 'h:mm a', {
+                          locale: dateFnsLocale,
+                        })}
                         {selectedGoogleEvent.endTime &&
-                          ` – ${format(new Date(selectedGoogleEvent.endTime), 'h:mm a')}`}
+                          ` – ${format(new Date(selectedGoogleEvent.endTime), 'h:mm a', { locale: dateFnsLocale })}`}
                       </span>
                     </div>
                   ) : (

@@ -471,7 +471,7 @@ export const ChatWindow = React.memo(function ChatWindow({
           senderId: currentUserId,
           organizationId,
           type: 'audio',
-          content: `Voice message (${duration}s)`,
+          content: t('chat.voiceMessage', 'Voice message') + ` (${duration}s)`,
           attachments: [
             {
               url: result.url,
@@ -488,7 +488,8 @@ export const ChatWindow = React.memo(function ChatWindow({
         setIsRecording(false);
       } catch (err) {
         console.error('Error sending voice message:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        const errorMessage =
+          err instanceof Error ? err.message : t('common.unknownError', 'Unknown error');
         console.error('Error details:', errorMessage);
         toast.error(`${t('chat.voiceMessageFailed')}: ${errorMessage}`);
         setShowVoiceRecorder(false);
@@ -810,7 +811,11 @@ export const ChatWindow = React.memo(function ChatWindow({
           style={{ background: 'var(--background)' }}
         >
           {allMessages === undefined ? (
-            <div className="space-y-3 animate-pulse" role="status" aria-label="Loading messages">
+            <div
+              className="space-y-3 animate-pulse"
+              role="status"
+              aria-label={t('chat.loadingMessages', 'Loading messages')}
+            >
               {[...Array(5)].map((_: any, i: any) => (
                 <div key={i} className={cn('flex gap-3', i % 2 === 0 ? '' : 'flex-row-reverse')}>
                   <div className="w-8 h-8 rounded-full bg-white/5 shrink-0" />
@@ -830,7 +835,7 @@ export const ChatWindow = React.memo(function ChatWindow({
           ) : (
             <div
               role="log"
-              aria-label="Chat messages"
+              aria-label={t('chat.chatMessages', 'Chat messages')}
               aria-live="polite"
               aria-relevant="additions"
               style={{
@@ -1223,7 +1228,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                   color:
                     showVoiceRecorder || isRecording ? 'var(--primary)' : 'var(--text-disabled)',
                 }}
-                title="Voice message"
+                title={t('chat.voiceMessage', 'Voice message')}
               >
                 <Mic className="w-4 xs:w-4.5 h-4 xs:h-4.5" />
               </button>
@@ -1258,7 +1263,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                           </AvatarFallback>
                         </Avatar>
                         <span className="truncate font-medium text-[9px] xs:text-xs">
-                          {m.user?.name ?? 'Unknown'}
+                          {m.user?.name ?? t('common.unknownUser', 'Unknown')}
                         </span>
                         {m.user?.department && (
                           <span

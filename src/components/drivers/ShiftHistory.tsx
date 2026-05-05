@@ -9,13 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { History, Clock, TrendingUp, CheckCircle, Coffee } from 'lucide-react';
 import { format } from 'date-fns';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 interface ShiftHistoryProps {
   driverId: Id<'drivers'>;
 }
 
 export function ShiftHistory({ driverId }: ShiftHistoryProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dfLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
   const shifts = useQuery(api.drivers.shifts_mutations.getShiftHistory, { driverId, limit: 10 });
 
   if (!shifts) return null;
@@ -82,11 +84,13 @@ export function ShiftHistory({ driverId }: ShiftHistoryProps) {
                     </div>
                     <div>
                       <p className="font-semibold text-sm sm:text-base">
-                        {format(shift.startTime, 'MMM dd, yyyy')}
+                        {format(shift.startTime, 'MMM dd, yyyy', { locale: dfLocale })}
                       </p>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        {format(shift.startTime, 'HH:mm')} -{' '}
-                        {shift.endTime ? format(shift.endTime, 'HH:mm') : 'Now'}
+                        {format(shift.startTime, 'HH:mm', { locale: dfLocale })} -{' '}
+                        {shift.endTime
+                          ? format(shift.endTime, 'HH:mm', { locale: dfLocale })
+                          : t('driver.shift.now', 'Now')}
                       </p>
                     </div>
                   </div>

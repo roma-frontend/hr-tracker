@@ -50,14 +50,17 @@ function formatSalary(salary: { min: number; max: number; currency: string }) {
   return `${fmt(salary.min)} – ${fmt(salary.max)} ${salary.currency}`;
 }
 
-function timeAgo(ts: number): string {
+function timeAgo(ts: number, t: TFunction): string {
   const diff = Date.now() - ts;
   const days = Math.floor(diff / 86400000);
-  if (days === 0) return 'Today';
-  if (days === 1) return '1 day ago';
-  if (days < 30) return `${days} days ago`;
+  if (days === 0) return t('careers.postedToday', 'Today');
+  if (days === 1) return t('careers.postedOneDayAgo', '1 day ago');
+  if (days < 30) return t('careers.postedDaysAgo', '{{days}} days ago', { days });
   const months = Math.floor(days / 30);
-  return `${months} month${months > 1 ? 's' : ''} ago`;
+  return t('careers.postedMonthsAgo', '{{months}} month{{plural}} ago', {
+    months,
+    plural: months > 1 ? 's' : '',
+  });
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -590,7 +593,7 @@ function VacancyCard({
               className="inline-flex items-center gap-1 text-xs"
               style={{ color: 'var(--landing-text-muted)' }}
             >
-              <ClockIcon className="w-3 h-3" /> {timeAgo(vacancy.createdAt)}
+              <ClockIcon className="w-3 h-3" /> {timeAgo(vacancy.createdAt, t)}
             </span>
           </div>
         </div>
@@ -680,7 +683,9 @@ function VacancyModal({
       });
       setSubmitted(true);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Something went wrong');
+      setError(
+        e instanceof Error ? e.message : t('common.somethingWentWrong', 'Something went wrong'),
+      );
     } finally {
       setLoading(false);
     }
@@ -826,7 +831,7 @@ function VacancyDetails({
             className="inline-flex items-center gap-1.5 text-sm"
             style={{ color: 'var(--landing-text-muted)' }}
           >
-            <ClockIcon /> {timeAgo(details.createdAt)}
+            <ClockIcon /> {timeAgo(details.createdAt, t)}
           </span>
         </div>
       </div>
@@ -947,7 +952,7 @@ function ApplicationForm({
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             className="w-full px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2"
             style={inputStyle}
-            placeholder="John Doe"
+            placeholder={t('careers.formNamePlaceholder', 'John Doe')}
           />
         </div>
 
