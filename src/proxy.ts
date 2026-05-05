@@ -228,11 +228,11 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
       "default-src 'self'",
       scriptSrc,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com https://*.sentry.io https://vercel.live https://va.vercel-scripts.com",
+      "img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com https://*.sentry.io https://vercel.live https://va.vercel-scripts.com https://i.ytimg.com https://*.ytimg.com",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://*.convex.cloud https://*.convex.site https://*.sentry.io https://vercel.live https://*.stripe.com https://*.js.stripe.com https://va.vercel-scripts.com https://vitals.vercel-insights.com wss://*.convex.cloud wss://*.vercel.live",
       "worker-src 'self' blob:",
-      "frame-src 'none'",
+      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -262,7 +262,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   // Cross-Origin headers for additional security
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  // Note: Cross-Origin-Embedder-Policy is intentionally omitted to allow YouTube/Vimeo iframes
 
   // Remove Next.js powered-by header
   response.headers.delete('x-powered-by');

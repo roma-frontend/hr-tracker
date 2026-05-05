@@ -333,7 +333,11 @@
     "unknownUser": "Неизвестный",
     "nodes": "узлов",
     "edges": "связей",
-    "create": "Создать"
+    "create": "Создать",
+    "edit": "Редактировать"
+  },
+  "lessons": {
+    "title": "Уроки"
   },
   "nav": {
     "home": "Главная",
@@ -8257,6 +8261,10 @@
     "expiresOn": "Истекает",
     "expired": "Истек",
     "valid": "Действителен",
-    "certificateId": "ID сертификата"
+    "certificateId": "ID сертификата",
+    "lessonDescriptionPlaceholder": "Введите описание урока",
+    "durationMinutes": "Продолжительность (минуты)",
+    "durationPlaceholder": "например, 30",
+    "updateLesson": "Обновить урок"
   }
 }

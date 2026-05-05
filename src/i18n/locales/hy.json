@@ -327,7 +327,11 @@
     "unknownUser": "Անհայտ",
     "nodes": "կետեր",
     "edges": "կողմեր",
-    "create": "Ստեղծել"
+    "create": "Ստեղծել",
+    "edit": "Խմբագրել"
+  },
+  "lessons": {
+    "title": "Դասեր"
   },
   "nav": {
     "home": "Գլխավոր",
@@ -7733,6 +7737,10 @@
     "expiresOn": "Ժամկետը լրանում է",
     "expired": "Ժամկետը լրացել է",
     "valid": "Վավեր",
-    "certificateId": "Սերտիֆիկատի ID"
+    "certificateId": "Սերտիֆիկատի ID",
+    "lessonDescriptionPlaceholder": "Մուտքագրեք դասի նկարագրությունը",
+    "durationMinutes": "Տևողություն (րոպեներ)",
+    "durationPlaceholder": "օրինակ՝ 30",
+    "updateLesson": "Թարմացնել դասը"
   }
 }

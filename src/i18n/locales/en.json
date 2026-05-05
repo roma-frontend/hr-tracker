@@ -329,7 +329,11 @@
     "deleted": "Deleted",
     "error": "Error",
     "unknownUser": "Unknown",
-    "create": "Create"
+    "create": "Create",
+    "edit": "Edit"
+  },
+  "lessons": {
+    "title": "Lessons"
   },
   "nav": {
     "home": "Home",
@@ -8064,6 +8068,10 @@
     "expiresOn": "Expires On",
     "expired": "Expired",
     "valid": "Valid",
-    "certificateId": "Certificate ID"
+    "certificateId": "Certificate ID",
+    "lessonDescriptionPlaceholder": "Enter lesson description",
+    "durationMinutes": "Duration (minutes)",
+    "durationPlaceholder": "e.g. 30",
+    "updateLesson": "Update Lesson"
   }
 }
