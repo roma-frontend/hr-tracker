@@ -7690,6 +7690,21 @@
     "continueCourse": "Շարունակել",
     "courseTitle": "Դասընթացի անվանում",
     "tags": "Պիտակներ",
-    "createCourseDesc": "Դասընթացի ստեղծման ձևը կիրականացվի այստեղ"
+    "createCourseDesc": "Դասընթացի ստեղծման ձևը կիրականացվի այստեղ",
+    "lessonTitle": "Դասի անվանում",
+    "lessonTitlePlaceholder": "Մուտքագրեք դասի անվանումը",
+    "lessonDescription": "Նկարագրություն",
+    "lessonDescPlaceholder": "Դասի համառոտ նկարագրություն",
+    "videoUrlPlaceholder": "https://youtube.com/watch?v=...",
+    "textContentPlaceholder": "Մուտքագրեք դասի բովանդակությունը (աջակցում է HTML/Markdown)",
+    "noLessons": "Դեռ դասեր չեն ավելացվել",
+    "noLessonsToPublish": "Հրապարակելուց առաջ ավելացրեք գոնե մեկ դաս",
+    "coursePublished": "Դասընթացը հաջողությամբ հրապարակվեց",
+    "coursePublishError": "Չհաջողվեց հրապարակել դասընթացը",
+    "lessonCreateError": "Չհաջողվեց ստեղծել դասը",
+    "lessonUpdateError": "Չհաջողվեց թարմացնել դասը",
+    "lessonDeleteError": "Չհաջողվեց ջնջել դասը",
+    "editLesson": "Խմբագրել դասը",
+    "publish": "Հրապարակել"
   }
 }

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -123,6 +124,20 @@ export default function LearningClient() {
   const [lessonProgress, setLessonProgress] = useState<Record<string, boolean>>({});
   const [startTime, setStartTime] = useState<number>(0);
 
+  // Lesson management state
+  const [showCreateLesson, setShowCreateLesson] = useState(false);
+  const [showEditLesson, setShowEditLesson] = useState(false);
+  const [editingLesson, setEditingLesson] = useState<any>(null);
+  const [lessonForm, setLessonForm] = useState({
+    title: '',
+    description: '',
+    contentType: 'text' as 'video' | 'text' | 'quiz' | 'mixed',
+    videoUrl: '',
+    textContent: '',
+    durationMinutes: '',
+    isPreview: false,
+  });
+
   // Fetch data
   const courses = useQuery(
     api.learning.listCourses,
@@ -167,10 +182,26 @@ export default function LearningClient() {
       : 'skip',
   );
 
+  // Fetch lesson progress for the active lesson in the player
+  const activeLessonProgress = useQuery(
+    api.learning.getLessonProgress,
+    showLessonPlayer && courseLessons.length > 0 && effectiveOrgId && user?.id
+      ? {
+          organizationId: effectiveOrgId as Id<'organizations'>,
+          requesterId: user.id as Id<'users'>,
+          lessonId: courseLessons[activeLessonIndex]?._id as Id<'lessons'>,
+        }
+      : 'skip',
+  );
+
   // Mutations
   const enrollMutation = useMutation(api.learning.enrollInCourse);
   const createCourseMutation = useMutation(api.learning.createCourse);
   const updateLessonProgressMutation = useMutation(api.learning.updateLessonProgress);
+  const createLessonMutation = useMutation(api.learning.createLesson);
+  const updateLessonMutation = useMutation(api.learning.updateLesson);
+  const deleteLessonMutation = useMutation(api.learning.deleteLesson);
+  const updateCourseMutation = useMutation(api.learning.updateCourse);
 
   // Filter courses
   const filteredCourses = useMemo(() => {
@@ -281,39 +312,12 @@ export default function LearningClient() {
     setShowLessonPlayer(true);
     setStartTime(Date.now());
 
-    // Fetch lesson progress for this course
+    // Initialize progress map from existing lessons
     const progressMap: Record<string, boolean> = {};
     for (const lesson of lessons) {
-      try {
-        const progress = await fetchLessonProgress(lesson._id);
-        progressMap[lesson._id] = progress?.isCompleted ?? false;
-      } catch {
-        progressMap[lesson._id] = false;
-      }
+      progressMap[lesson._id] = false;
     }
     setLessonProgress(progressMap);
-  };
-
-  const fetchLessonProgress = async (lessonId: Id<'lessons'>) => {
-    if (!effectiveOrgId || !user?.id) return null;
-
-    try {
-      const response = await fetch('/api/learning/lesson-progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organizationId: effectiveOrgId,
-          requesterId: user.id,
-          lessonId,
-        }),
-      });
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch {
-      // Silently fail - progress is not critical
-    }
-    return null;
   };
 
   const handleCompleteLesson = async () => {
@@ -367,6 +371,131 @@ export default function LearningClient() {
       setActiveLessonIndex((prev) => prev - 1);
       setStartTime(Date.now());
     }
+  };
+
+  const resetLessonForm = () => {
+    setLessonForm({
+      title: '',
+      description: '',
+      contentType: 'text',
+      videoUrl: '',
+      textContent: '',
+      durationMinutes: '',
+      isPreview: false,
+    });
+  };
+
+  const handleCreateLesson = async () => {
+    if (!effectiveOrgId || !user?.id || !selectedCourse) return;
+    if (!lessonForm.title.trim()) {
+      toast.error(t('errors.required', 'Title is required'));
+      return;
+    }
+
+    try {
+      await createLessonMutation({
+        organizationId: effectiveOrgId as Id<'organizations'>,
+        requesterId: user.id as Id<'users'>,
+        courseId: selectedCourse._id,
+        title: lessonForm.title.trim(),
+        description: lessonForm.description.trim() || undefined,
+        order: courseLessons.length,
+        contentType: lessonForm.contentType,
+        videoUrl: lessonForm.videoUrl.trim() || undefined,
+        textContent: lessonForm.textContent.trim() || undefined,
+        durationMinutes: lessonForm.durationMinutes
+          ? parseInt(lessonForm.durationMinutes, 10)
+          : undefined,
+        isPreview: lessonForm.isPreview,
+      });
+
+      toast.success(t('learning.lessonCreated', 'Lesson created successfully'));
+      setShowCreateLesson(false);
+      resetLessonForm();
+    } catch {
+      toast.error(t('learning.lessonCreateError', 'Failed to create lesson'));
+    }
+  };
+
+  const handleEditLesson = async () => {
+    if (!editingLesson) return;
+    if (!lessonForm.title.trim()) {
+      toast.error(t('errors.required', 'Title is required'));
+      return;
+    }
+
+    try {
+      await updateLessonMutation({
+        lessonId: editingLesson._id,
+        requesterId: user!.id as Id<'users'>,
+        title: lessonForm.title.trim(),
+        description: lessonForm.description.trim() || undefined,
+        contentType: lessonForm.contentType,
+        videoUrl: lessonForm.videoUrl.trim() || undefined,
+        textContent: lessonForm.textContent.trim() || undefined,
+        durationMinutes: lessonForm.durationMinutes
+          ? parseInt(lessonForm.durationMinutes, 10)
+          : undefined,
+        isPreview: lessonForm.isPreview,
+      });
+
+      toast.success(t('learning.lessonUpdated', 'Lesson updated successfully'));
+      setShowEditLesson(false);
+      setEditingLesson(null);
+      resetLessonForm();
+    } catch {
+      toast.error(t('learning.lessonUpdateError', 'Failed to update lesson'));
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: Id<'lessons'>) => {
+    if (!user?.id) return;
+
+    try {
+      await deleteLessonMutation({
+        lessonId,
+        requesterId: user.id as Id<'users'>,
+      });
+
+      toast.success(t('learning.lessonDeleted', 'Lesson deleted successfully'));
+    } catch {
+      toast.error(t('learning.lessonDeleteError', 'Failed to delete lesson'));
+    }
+  };
+
+  const handlePublishCourse = async () => {
+    if (!selectedCourse || !user?.id) return;
+    if (courseLessons.length === 0) {
+      toast.error(t('learning.noLessonsToPublish', 'Add at least one lesson before publishing'));
+      return;
+    }
+
+    try {
+      await updateCourseMutation({
+        courseId: selectedCourse._id,
+        requesterId: user.id as Id<'users'>,
+        isPublished: true,
+      });
+
+      toast.success(t('learning.coursePublished', 'Course published successfully'));
+      setShowCourseDetail(false);
+    } catch {
+      toast.error(t('learning.coursePublishError', 'Failed to publish course'));
+    }
+  };
+
+  const openEditLessonDialog = (lesson: any) => {
+    setEditingLesson(lesson);
+    setLessonForm({
+      title: lesson.title || '',
+      description: lesson.description || '',
+      contentType: lesson.contentType || 'text',
+      videoUrl: lesson.videoUrl || '',
+      textContent: lesson.textContent || '',
+      durationMinutes: lesson.durationMinutes?.toString() || '',
+      isPreview: lesson.isPreview || false,
+    });
+    setShowEditLesson(true);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -836,18 +965,36 @@ export default function LearningClient() {
               </div>
 
               {/* Lessons List */}
-              {courseWithLessons?.lessons && courseWithLessons.lessons.length > 0 && (
-                <div className="space-y-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
                   <h3 className="font-semibold">{t('lessons.title', 'Lessons')}</h3>
-                  {courseWithLessons.lessons.map((lesson: any, index: number) => (
+                  {isAdmin && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        resetLessonForm();
+                        setShowCreateLesson(true);
+                      }}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      {t('learning.createLesson', 'Add Lesson')}
+                    </Button>
+                  )}
+                </div>
+
+                {courseWithLessons?.lessons && courseWithLessons.lessons.length > 0 ? (
+                  courseWithLessons.lessons.map((lesson: any, index: number) => (
                     <div
                       key={lesson._id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                      onClick={() =>
-                        openLessonPlayer(selectedCourse, courseWithLessons.lessons, index)
-                      }
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
+                      <div
+                        className="flex items-center gap-3 flex-1 cursor-pointer"
+                        onClick={() =>
+                          openLessonPlayer(selectedCourse, courseWithLessons.lessons, index)
+                        }
+                      >
                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
                           {index + 1}
                         </div>
@@ -867,16 +1014,47 @@ export default function LearningClient() {
                           </div>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      {isAdmin && (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => openEditLessonDialog(lesson)}
+                          >
+                            {t('common.edit', 'Edit')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteLesson(lesson._id)}
+                          >
+                            {t('common.delete', 'Delete')}
+                          </Button>
+                        </div>
+                      )}
+                      {!isAdmin && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                     </div>
-                  ))}
-                </div>
-              )}
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    {t('learning.noLessons', 'No lessons added yet')}
+                  </p>
+                )}
+              </div>
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowCourseDetail(false)}>
                   {t('common.close', 'Close')}
                 </Button>
+                {isAdmin &&
+                  courseWithLessons?.lessons &&
+                  courseWithLessons.lessons.length > 0 &&
+                  !selectedCourse.isPublished && (
+                    <Button onClick={handlePublishCourse}>
+                      {t('learning.publish', 'Publish Course')}
+                    </Button>
+                  )}
                 {!isEnrolled(selectedCourse._id) && (
                   <Button onClick={() => handleEnroll(selectedCourse._id)}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -1028,7 +1206,7 @@ export default function LearningClient() {
                 onChange={(e) =>
                   setCourseForm((prev) => ({ ...prev, description: e.target.value }))
                 }
-                placeholder={t('placeholders.enterDescription', 'Enter course description')}
+                placeholder={t('learning.courseDescription', 'Course description')}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -1039,7 +1217,7 @@ export default function LearningClient() {
                 <Input
                   value={courseForm.category}
                   onChange={(e) => setCourseForm((prev) => ({ ...prev, category: e.target.value }))}
-                  placeholder={t('placeholders.enterCategory', 'e.g. Compliance, Technical')}
+                  placeholder={t('learning.enterCategory', 'e.g. Compliance, Technical')}
                 />
               </div>
               <div>
@@ -1080,7 +1258,7 @@ export default function LearningClient() {
                   onChange={(e) =>
                     setCourseForm((prev) => ({ ...prev, estimatedHours: e.target.value }))
                   }
-                  placeholder="e.g. 4"
+                  placeholder={t('learning.estimatedHours', 'Estimated Hours')}
                 />
               </div>
               <div>
@@ -1088,7 +1266,7 @@ export default function LearningClient() {
                 <Input
                   value={courseForm.tags}
                   onChange={(e) => setCourseForm((prev) => ({ ...prev, tags: e.target.value }))}
-                  placeholder={t('placeholders.commaSeparated', 'Comma separated')}
+                  placeholder={t('learning.commaSeparated', 'Comma separated')}
                 />
               </div>
             </div>

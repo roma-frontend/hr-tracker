@@ -8214,6 +8214,21 @@
     "continueCourse": "Продолжить",
     "courseTitle": "Название курса",
     "tags": "Теги",
-    "createCourseDesc": "Форма создания курса будет реализована здесь"
+    "createCourseDesc": "Форма создания курса будет реализована здесь",
+    "lessonTitle": "Название урока",
+    "lessonTitlePlaceholder": "Введите название урока",
+    "lessonDescription": "Описание",
+    "lessonDescPlaceholder": "Краткое описание урока",
+    "videoUrlPlaceholder": "https://youtube.com/watch?v=...",
+    "textContentPlaceholder": "Введите содержимое урока (поддерживает HTML/Markdown)",
+    "noLessons": "Уроки еще не добавлены",
+    "noLessonsToPublish": "Добавьте хотя бы один урок перед публикацией",
+    "coursePublished": "Курс успешно опубликован",
+    "coursePublishError": "Не удалось опубликовать курс",
+    "lessonCreateError": "Не удалось создать урок",
+    "lessonUpdateError": "Не удалось обновить урок",
+    "lessonDeleteError": "Не удалось удалить урок",
+    "editLesson": "Редактировать урок",
+    "publish": "Опубликовать"
   }
 }

@@ -8021,6 +8021,21 @@
     "continueCourse": "Continue",
     "courseTitle": "Course title",
     "tags": "Tags",
-    "createCourseDesc": "Course creation form will be implemented here"
+    "createCourseDesc": "Course creation form will be implemented here",
+    "lessonTitle": "Lesson Title",
+    "lessonTitlePlaceholder": "Enter lesson title",
+    "lessonDescription": "Description",
+    "lessonDescPlaceholder": "Brief description of the lesson",
+    "videoUrlPlaceholder": "https://youtube.com/watch?v=...",
+    "textContentPlaceholder": "Enter lesson content (supports HTML/Markdown)",
+    "noLessons": "No lessons added yet",
+    "noLessonsToPublish": "Add at least one lesson before publishing",
+    "coursePublished": "Course published successfully",
+    "coursePublishError": "Failed to publish course",
+    "lessonCreateError": "Failed to create lesson",
+    "lessonUpdateError": "Failed to update lesson",
+    "lessonDeleteError": "Failed to delete lesson",
+    "editLesson": "Edit Lesson",
+    "publish": "Publish"
   }
 }
