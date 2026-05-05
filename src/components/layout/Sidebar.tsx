@@ -38,6 +38,7 @@ import {
   Briefcase,
   Rocket,
   UserMinus,
+  Network,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/useSidebarStore';
@@ -158,6 +159,12 @@ const navItems = [
     labelKey: 'nav.offboarding',
     icon: UserMinus,
     roles: ['admin', 'supervisor'],
+  },
+  {
+    href: '/org-chart',
+    labelKey: 'nav.orgChart',
+    icon: Network,
+    roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
   },
   {
     href: '/payroll',

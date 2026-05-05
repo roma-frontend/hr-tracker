@@ -29,6 +29,7 @@ import { goals } from './goals';
 import { recruitment } from './recruitment';
 import { onboarding } from './onboarding';
 import { offboarding } from './offboarding';
+import { orgchart } from './orgchart';
 
 export default defineSchema({
   ...organizations,
@@ -61,6 +62,7 @@ export default defineSchema({
   ...recruitment,
   ...onboarding,
   ...offboarding,
+  ...orgchart,
 });
 
 export {
@@ -94,4 +96,5 @@ export {
   recruitment,
   onboarding,
   offboarding,
+  orgchart,
 };
