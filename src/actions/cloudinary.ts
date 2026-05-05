@@ -182,6 +182,57 @@ export async function deleteAvatarFromCloudinary(userId: string): Promise<void> 
   }
 }
 
+export async function uploadDocument(
+  base64File: string,
+  fileName: string,
+  mimeType?: string,
+): Promise<{ url: string; name: string; size: number; type: string }> {
+  console.log('📄 Document upload starting...');
+
+  const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 60);
+  const publicId = `doc_${Date.now()}_${safeFileName}`;
+
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit for documents
+  const decodedSize = Math.round((base64File.length * 3) / 4);
+  if (decodedSize > MAX_FILE_SIZE) {
+    const sizeMB = (decodedSize / (1024 * 1024)).toFixed(2);
+    throw new Error(`File size (${sizeMB}MB) exceeds the 10MB limit.`);
+  }
+
+  let resourceType: 'image' | 'video' | 'raw' | 'auto' = 'auto';
+  if (mimeType) {
+    if (mimeType.startsWith('image/')) resourceType = 'image';
+    else if (mimeType.startsWith('video/')) resourceType = 'video';
+    else if (mimeType.startsWith('audio/')) resourceType = 'video';
+  }
+
+  let uploadData = base64File;
+  if (mimeType && !base64File.startsWith('data:')) {
+    uploadData = `data:${mimeType};base64,${base64File}`;
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(uploadData, {
+      folder: 'hr-office/documents',
+      public_id: publicId,
+      resource_type: resourceType,
+      overwrite: false,
+      unique_filename: true,
+    });
+
+    console.log('✅ Document uploaded:', result.secure_url);
+    return {
+      url: result.secure_url,
+      name: fileName,
+      size: decodedSize,
+      type: mimeType || result.resource_type,
+    };
+  } catch (error: any) {
+    console.error('❌ Document upload failed:', error);
+    throw new Error(error instanceof Error ? error.message : 'Upload failed');
+  }
+}
+
 export async function deleteTaskAttachmentFromCloudinary(url: string): Promise<void> {
   console.log('🗑️ Cloudinary task attachment delete starting...');
   console.log('🔗 URL:', url);

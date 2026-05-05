@@ -9,7 +9,6 @@ import {
   CalendarDays,
   Calendar,
   Users,
-  FileText,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -40,6 +39,7 @@ import {
   UserMinus,
   Network,
   GraduationCap,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/useSidebarStore';
@@ -171,6 +171,12 @@ const navItems = [
     href: '/learning',
     labelKey: 'nav.learning',
     icon: GraduationCap,
+    roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
+  },
+  {
+    href: '/documents',
+    labelKey: 'nav.documents',
+    icon: FileText,
     roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
   },
   {

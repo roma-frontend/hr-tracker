@@ -1,0 +1,440 @@
+'use client';
+
+import { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { Id } from '../../../convex/_generated/dataModel';
+import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '@/store/useAuthStore';
+import { ShieldLoader } from '@/components/ui/ShieldLoader';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FileText, Upload, Eye, BarChart3, FolderOpen, CheckCircle, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import DocumentUploadWizard from '@/components/documents/DocumentUploadWizard';
+
+type DocumentWithUploader = {
+  _id: Id<'documents'>;
+  _creationTime: number;
+  organizationId: Id<'organizations'>;
+  title: string;
+  description?: string;
+  category: 'policy' | 'contract' | 'report' | 'template' | 'form' | 'certificate' | 'other';
+  fileUrl: string;
+  fileName: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedBy: Id<'users'>;
+  isPublished?: boolean;
+  isMandatory?: boolean;
+  expiresAt?: number;
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
+  uploaderName: string;
+};
+
+type DocumentView = {
+  _id: Id<'documentViews'>;
+  _creationTime: number;
+  organizationId: Id<'organizations'>;
+  documentId: Id<'documents'>;
+  userId: Id<'users'>;
+  viewedAt: number;
+  acknowledged?: boolean;
+};
+
+export default function DocumentsClient() {
+  const { t } = useTranslation();
+  const { user } = useAuthStore();
+  const selectedOrgId = useSelectedOrganization();
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+  const effectiveOrgId = selectedOrgId ?? user?.organizationId;
+
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [showUploadWizard, setShowUploadWizard] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentWithUploader | null>(null);
+
+  // Fetch data
+  const documents = useQuery(
+    api.documents.listDocuments,
+    effectiveOrgId && user?.id
+      ? {
+          organizationId: effectiveOrgId as Id<'organizations'>,
+          requesterId: user.id as Id<'users'>,
+          category: categoryFilter !== 'all' ? categoryFilter : undefined,
+          search: searchQuery || undefined,
+          includeUnpublished: isAdmin,
+        }
+      : 'skip',
+  );
+
+  const myViews = useQuery(
+    api.documents.getMyDocumentViews,
+    effectiveOrgId && user?.id
+      ? {
+          organizationId: effectiveOrgId as Id<'organizations'>,
+          requesterId: user.id as Id<'users'>,
+        }
+      : 'skip',
+  );
+
+  const teamOverview = useQuery(
+    api.documents.getTeamDocumentOverview,
+    effectiveOrgId && user?.id && isAdmin
+      ? {
+          organizationId: effectiveOrgId as Id<'organizations'>,
+          requesterId: user.id as Id<'users'>,
+        }
+      : 'skip',
+  );
+
+  const categories = useQuery(
+    api.documents.getDocumentCategories,
+    effectiveOrgId && user?.id
+      ? {
+          organizationId: effectiveOrgId as Id<'organizations'>,
+          requesterId: user.id as Id<'users'>,
+        }
+      : 'skip',
+  );
+
+  // Mutations
+  const updateDocumentMutation = useMutation(api.documents.updateDocument);
+  const deleteDocumentMutation = useMutation(api.documents.deleteDocument);
+  const recordViewMutation = useMutation(api.documents.recordDocumentView);
+
+  const handleWizardSuccess = () => {
+    setShowUploadWizard(false);
+  };
+
+  const handleViewDocument = async (doc: DocumentWithUploader) => {
+    if (!effectiveOrgId || !user?.id) return;
+
+    try {
+      await recordViewMutation({
+        organizationId: effectiveOrgId as Id<'organizations'>,
+        requesterId: user.id as Id<'users'>,
+        documentId: doc._id,
+      });
+      setSelectedDocument(doc);
+      window.open(doc.fileUrl, '_blank');
+    } catch {
+      toast.error(t('documents.viewError', 'Failed to record document view'));
+    }
+  };
+
+  const handleDeleteDocument = async (documentId: Id<'documents'>) => {
+    if (!user?.id) return;
+
+    try {
+      await deleteDocumentMutation({
+        documentId,
+        requesterId: user.id as Id<'users'>,
+      });
+
+      toast.success(t('documents.documentDeleted', 'Document deleted successfully'));
+    } catch {
+      toast.error(t('documents.deleteError', 'Failed to delete document'));
+    }
+  };
+
+  const handlePublishDocument = async (documentId: Id<'documents'>) => {
+    if (!user?.id) return;
+
+    try {
+      await updateDocumentMutation({
+        documentId,
+        requesterId: user.id as Id<'users'>,
+        isPublished: true,
+      });
+
+      toast.success(t('documents.documentPublished', 'Document published successfully'));
+    } catch {
+      toast.error(t('documents.publishError', 'Failed to publish document'));
+    }
+  };
+
+  const isViewed = (documentId: Id<'documents'>) => {
+    return myViews?.some((v) => v.documentId === documentId);
+  };
+
+  const isAcknowledged = (documentId: Id<'documents'>) => {
+    return myViews?.some((v) => v.documentId === documentId && v.acknowledged);
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString();
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'policy':
+        return <FileText className="h-5 w-5 text-blue-500" />;
+      case 'contract':
+        return <FileText className="h-5 w-5 text-green-500" />;
+      case 'report':
+        return <BarChart3 className="h-5 w-5 text-purple-500" />;
+      case 'template':
+        return <FolderOpen className="h-5 w-5 text-orange-500" />;
+      case 'form':
+        return <FileText className="h-5 w-5 text-cyan-500" />;
+      case 'certificate':
+        return <CheckCircle className="h-5 w-5 text-yellow-500" />;
+      default:
+        return <FileText className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  // Loading state
+  if (documents === undefined) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <ShieldLoader message={t('documents.loading', 'Loading documents...')} />
+      </div>
+    );
+  }
+
+  // Filter documents by tab
+  const filteredDocuments = documents.filter((doc) => {
+    if (activeTab === 'mandatory') return doc.isMandatory;
+    if (activeTab === 'unpublished') return !doc.isPublished;
+    return true;
+  });
+
+  return (
+    <div className="mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+            {t('documents.title', 'Document Management')}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {t('documents.subtitle', 'Manage and organize your organization documents')}
+          </p>
+        </div>
+
+        {isAdmin && (
+          <Button onClick={() => setShowUploadWizard(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            {t('documents.uploadDocument', 'Upload Document')}
+          </Button>
+        )}
+      </div>
+
+      {/* Stats Cards */}
+      {isAdmin && teamOverview && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-2xl font-bold">{teamOverview.totalDocuments}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('documents.totalDocuments', 'Total Documents')}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-2xl font-bold">{teamOverview.publishedDocuments}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('documents.publishedDocuments', 'Published Documents')}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <Eye className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-2xl font-bold">{teamOverview.totalViews}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('documents.totalViews', 'Total Views')}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-2xl font-bold">{teamOverview.acknowledgmentRate}%</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('documents.acknowledgmentRate', 'Acknowledgment Rate')}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder={t('documents.searchDocuments', 'Search documents...')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div className="w-full sm:w-48">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="all">{t('documents.allCategories', 'All Categories')}</option>
+            <option value="policy">{t('documents.categoryPolicy', 'Policy')}</option>
+            <option value="contract">{t('documents.categoryContract', 'Contract')}</option>
+            <option value="report">{t('documents.categoryReport', 'Report')}</option>
+            <option value="template">{t('documents.categoryTemplate', 'Template')}</option>
+            <option value="form">{t('documents.categoryForm', 'Form')}</option>
+            <option value="certificate">{t('documents.categoryCertificate', 'Certificate')}</option>
+            <option value="other">{t('documents.categoryOther', 'Other')}</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            {t('documents.allDocuments', 'All Documents')}
+          </TabsTrigger>
+          <TabsTrigger value="mandatory" className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            {t('documents.mandatoryDocuments', 'Mandatory')}
+          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="unpublished" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              {t('documents.unpublishedDocuments', 'Unpublished')}
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        {/* Documents List */}
+        <TabsContent value={activeTab} className="space-y-4">
+          {filteredDocuments.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold">
+                  {t('documents.noDocuments', 'No documents available')}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('documents.noDocumentsDesc', 'Check back later or contact your admin')}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredDocuments.map((doc) => (
+                <Card key={doc._id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-3">
+                      {getCategoryIcon(doc.category)}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold truncate">{doc.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                          {doc.description ||
+                            t('documents.noDescription', 'No description available')}
+                        </p>
+                        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                          <span>{doc.uploaderName}</span>
+                          <span>{formatDate(doc.createdAt)}</span>
+                          {doc.fileSize && <span>{formatFileSize(doc.fileSize)}</span>}
+                        </div>
+                        <div className="flex items-center gap-2 mt-3">
+                          {doc.isMandatory && (
+                            <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-medium">
+                              {t('documents.mandatory', 'Mandatory')}
+                            </span>
+                          )}
+                          {!doc.isPublished && (
+                            <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium">
+                              {t('documents.unpublished', 'Unpublished')}
+                            </span>
+                          )}
+                          {isAcknowledged(doc._id) && (
+                            <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                              {t('documents.acknowledged', 'Acknowledged')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDocument(doc)}
+                        className="flex-1"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        {t('documents.view', 'View')}
+                      </Button>
+                      {isAdmin && !doc.isPublished && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePublishDocument(doc._id)}
+                        >
+                          {t('documents.publish', 'Publish')}
+                        </Button>
+                      )}
+                      {isAdmin && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteDocument(doc._id)}
+                        >
+                          {t('common.delete', 'Delete')}
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Upload Wizard */}
+      {showUploadWizard && (
+        <DocumentUploadWizard
+          onClose={() => setShowUploadWizard(false)}
+          onSuccess={handleWizardSuccess}
+        />
+      )}
+    </div>
+  );
+}
