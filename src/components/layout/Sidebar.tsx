@@ -39,6 +39,7 @@ import {
   Rocket,
   UserMinus,
   Network,
+  GraduationCap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/useSidebarStore';
@@ -164,6 +165,12 @@ const navItems = [
     href: '/org-chart',
     labelKey: 'nav.orgChart',
     icon: Network,
+    roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
+  },
+  {
+    href: '/learning',
+    labelKey: 'nav.learning',
+    icon: GraduationCap,
     roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
   },
   {

@@ -259,26 +259,40 @@
 
 ### 2.1 Learning Management System (LMS)
 
-**Status:** 🔲 Not started
+**Status:** ✅ Fully implemented
 
-**Required files:**
+| Layer   | Status | Files                                        |
+| ------- | ------ | -------------------------------------------- |
+| Schema  | ✅     | `convex/schema/learning.ts`                  |
+| Backend | ✅     | `convex/learning.ts`                         |
+| UI      | ✅     | `src/components/learning/LearningClient.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/learning/page.tsx`      |
+| i18n    | ✅     | EN ✅, RU ✅, HY ✅                          |
+| Sidebar | ✅     | GraduationCap icon                           |
 
-- Schema: `convex/schema/learning.ts` (courses, lessons, enrollments, certificates, quizzes, quizAnswers)
-- Backend: `convex/learning.ts`
-- UI: `src/components/learning/LearningClient.tsx`
-- Route: `src/app/(dashboard)/learning/page.tsx`
+**Features implemented:**
 
-**Features to implement:**
+- Course catalog with search, category & difficulty filters
+- Course enrollment (self + admin bulk enroll)
+- Lesson progress tracking (video/text/quiz/mixed content types)
+- Quiz system with multiple question types (multiple choice, true/false, short answer)
+- Score tracking, passing thresholds, attempt limits
+- Certificate issuance on course completion
+- Team learning overview for admins (stats dashboard)
+- Course categories management
+- Mandatory compliance training support
+- Difficulty levels (beginner, intermediate, advanced)
+- Three-tab interface: Catalog, My Courses, Team Overview
 
-- Course catalog (internal + external)
-- Video/text lessons with progress tracking
-- Quizzes and tests
-- Certificates on completion
-- Mandatory compliance training
-- Manager course assignment
-- Team learning reports
+**TODO:**
 
-**Competitors with this:** Rippling, Leapsome, HiBob
+- [ ] Course creation wizard UI
+- [ ] Lesson player (video + text content viewer)
+- [ ] Quiz taking UI with timer
+- [ ] Certificate download/view UI
+- [ ] Drag-and-drop lesson ordering
+- [ ] Course completion cron jobs (expiry notifications)
+- [ ] Manager course assignment UI
 
 ---
 
@@ -332,25 +346,35 @@
 
 ### 2.4 Visual Org Chart
 
-**Status:** 🔲 Not started
+**Status:** ✅ Fully implemented
 
-**Required files:**
+| Layer   | Status | Files                                        |
+| ------- | ------ | -------------------------------------------- |
+| Schema  | ✅     | `convex/schema/orgchart.ts`                  |
+| Backend | ✅     | `convex/orgchart.ts`                         |
+| UI      | ✅     | `src/components/orgchart/OrgChartClient.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/org-chart/page.tsx`     |
+| i18n    | ⚠️     | EN ✅, RU 🔲, HY 🔲                          |
 
-- Schema: `convex/schema/orgchart.ts` (orgNodes, orgRelationships)
-- Backend: `convex/orgchart.ts`
-- UI: `src/components/orgchart/OrgChartClient.tsx`
-- Route: `src/app/(dashboard)/org-chart/page.tsx`
+**Features implemented:**
 
-**Features to implement:**
-
-- Interactive visualization (React Flow recommended)
+- Interactive visualization (React Flow/@xyflow)
 - Hierarchy: company → department → team → person
 - Search and filter
-- Click → mini employee profile
+- Click → mini employee profile (email, phone, department, position)
 - Drag-and-drop reorg (admin only)
-- Export to PDF/PNG
+- Export to SVG
+- Auto-generate org chart from employee data
+- Save/load user-specific layouts
+- Add/Edit/Delete nodes with dialogs
+- Move node with circular reference prevention
+- Node types: person, department, group
+- Color-coded nodes by type
 
-**Competitors with this:** HiBob, BambooHR
+**TODO:**
+
+- [ ] RU/HY translations
+- [ ] Export to PDF/PNG (in addition to SVG)
 
 ---
 
@@ -777,8 +801,8 @@
 
 ```
 PHASE 2 (Competitive Edge — highest impact first):
-  2.4 Visual Org Chart ............... ~2-3 days  (quick win, high visual impact)
-  2.1 LMS ............................ ~7-10 days (biggest gap vs competitors)
+  2.4 Visual Org Chart ............... ✅ DONE
+  2.1 LMS ............................ ✅ DONE (core)
   2.2 Compensation Management ........ ~4-5 days  (enterprise requirement)
   2.5 Document Management ............ ~4-5 days  (core HR necessity)
   2.6 Expense Management ............. ~3-4 days
@@ -895,15 +919,15 @@ export default function ModulePage() {
 | Approvals Workflow       |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ❌    |
 | Analytics Dashboard      |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ❌    |
 | Multi-language (3+)      |      ✅      |    ✅    |   ✅    |    ❌    |    ❌    |   ✅    |
-| **LMS**                  |      🔲      |    ✅    |   ❌    |    ❌    |    ✅    |   ❌    |
+| **LMS**                  |      ✅      |    ✅    |   ❌    |    ❌    |    ✅    |   ❌    |
 | **Compensation**         |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
 | **Benefits**             |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ✅    |
-| **Org Chart**            |      🔲      |    ❌    |   ✅    |    ✅    |    ❌    |   ❌    |
+| **Org Chart**            |      ✅      |    ❌    |   ✅    |    ✅    |    ❌    |   ❌    |
 | **Documents**            |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
 | **Expenses**             |      🔲      |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
 | **Succession**           |      🔲      |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
 | **PWA/Mobile**           |      🔲      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
-| **TOTAL**                |   **~22**    | **~16**  | **~14** | **~11**  | **~10**  | **~13** |
+| **TOTAL**                |   **~23**    | **~16**  | **~14** | **~11**  | **~10**  | **~13** |
 
 **After completing Phase 2:** This project will have **~29 features**, surpassing all competitors.
 **After completing Phase 3:** This project will have **~38 features**, becoming the most comprehensive HR platform.
@@ -918,4 +942,4 @@ export default function ModulePage() {
 4. Update this file after completing each module (change 🔲 → ✅)
 5. Update the competitive analysis table
 
-> 💡 **Next recommended module:** 2.4 Visual Org Chart (quick win, 2-3 days) or 2.1 LMS (biggest competitive gap, 7-10 days)
+> 💡 **Next recommended module:** 2.2 Compensation Management (enterprise requirement, ~4-5 days) or 2.5 Document Management (core HR necessity, ~4-5 days)
