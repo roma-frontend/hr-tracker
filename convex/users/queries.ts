@@ -59,7 +59,8 @@ export const getAllUsers = query({
       if (cursor) {
         query = (query as any).startAfter(cursor);
       }
-      return await query.take(effectiveLimit + 1);
+      const users = await query.take(effectiveLimit + 1);
+      return users.filter((u) => u.role !== 'superadmin');
     }
 
     // Everyone else only sees their organization
@@ -70,7 +71,7 @@ export const getAllUsers = query({
     let query = ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
-      .filter((q) => q.eq(q.field('isActive'), true));
+      .filter((q) => q.and(q.eq(q.field('isActive'), true), q.neq(q.field('role'), 'superadmin')));
 
     if (cursor) {
       query = (query as any).startAfter(cursor);
@@ -107,7 +108,7 @@ export const getUsersByOrganizationId = query({
     let query = ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .filter((q) => q.eq(q.field('isActive'), true));
+      .filter((q) => q.and(q.eq(q.field('isActive'), true), q.neq(q.field('role'), 'superadmin')));
 
     if (cursor) {
       query = (query as any).startAfter(cursor);
@@ -445,17 +446,19 @@ export const listAll = query({
 
     // Superadmin sees all users across all organizations
     if (currentUser.email.toLowerCase() === SUPERADMIN_EMAIL) {
-      return await ctx.db.query('users').take(MAX_PAGE_SIZE);
+      const allUsers = await ctx.db.query('users').take(MAX_PAGE_SIZE);
+      return allUsers.filter((u) => u.role !== 'superadmin');
     }
 
     // Admin sees only users from their organization
     if (currentUser.role === 'admin') {
       if (!currentUser.organizationId) return [];
 
-      return await ctx.db
+      const users = await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', currentUser.organizationId))
         .take(MAX_PAGE_SIZE);
+      return users.filter((u) => u.role !== 'superadmin');
     }
 
     return [];

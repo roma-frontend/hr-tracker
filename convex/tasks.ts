@@ -456,7 +456,7 @@ export const getUsersForAssignment = query({
   args: { requesterId: v.optional(v.id('users')) },
   handler: async (ctx, args) => {
     // If requesterId provided, filter by organization
-    let users = await ctx.db.query('users').collect();
+    let users = (await ctx.db.query('users').collect()).filter((u) => u.role !== 'superadmin');
 
     if (args.requesterId) {
       const requester = await ctx.db.get(args.requesterId);

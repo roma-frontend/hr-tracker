@@ -45,7 +45,9 @@ export const getCostAnalysis = query({
     }
 
     // Get all users
-    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
+    const users = (await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE)).filter(
+      (u) => u.role !== 'superadmin',
+    );
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Calculate costs by department
@@ -112,7 +114,9 @@ export const detectConflicts = query({
     }
 
     // Get all users
-    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
+    const users = (await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE)).filter(
+      (u) => u.role !== 'superadmin',
+    );
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Group leaves by department
@@ -236,7 +240,9 @@ export const getSmartSuggestions = query({
     }> = [];
 
     // Get all users and leaves
-    let users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
+    let users = (await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE)).filter(
+      (u) => u.role !== 'superadmin',
+    );
     let leaves = await ctx.db
       .query('leaveRequests')
       .filter((q) => q.eq(q.field('status'), 'approved'))
@@ -359,7 +365,9 @@ export const getCalendarExportData = query({
     }
 
     // Get all users
-    const users = await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE);
+    const users = (await ctx.db.query('users').order('desc').take(MAX_PAGE_SIZE)).filter(
+      (u) => u.role !== 'superadmin',
+    );
     const userMap = new Map(users.map((u) => [u._id, u]));
 
     // Filter by date range if provided
@@ -826,7 +834,7 @@ export const getSuperadminDashboard = query({
     const orgs = await ctx.db.query('organizations').collect();
 
     // Batch load all data (superadmin needs global view)
-    const allUsers = await ctx.db.query('users').collect();
+    const allUsers = (await ctx.db.query('users').collect()).filter((u) => u.role !== 'superadmin');
     const allLeaves = await ctx.db.query('leaveRequests').collect();
     const allSubscriptions = await ctx.db.query('subscriptions').collect();
 

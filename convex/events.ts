@@ -502,10 +502,12 @@ export const getEventAttendanceStatus = query({
     if (!event) return null;
 
     // Get all users from required departments
-    const users = await ctx.db
-      .query('users')
-      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+    const users = (
+      await ctx.db
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+        .collect()
+    ).filter((u) => u.role !== 'superadmin');
 
     const requiredUsers = users.filter(
       (u) =>

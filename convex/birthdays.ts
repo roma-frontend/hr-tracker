@@ -22,10 +22,12 @@ export const checkBirthdaysToday = mutation({
     console.warn(`[Birthday Check] Checking for ${currentDay}.${currentMonth}`);
 
     // Получить всех сотрудников организации
-    const users = await ctx.db
-      .query('users')
-      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+    const users = (
+      await ctx.db
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+        .collect()
+    ).filter((u) => u.role !== 'superadmin');
 
     // Найти тех, у кого день рождения сегодня
     const birthdayUsers = users.filter((user) => {
@@ -115,10 +117,12 @@ export const checkUpcomingBirthdays = mutation({
     }> = [];
 
     // Получить всех сотрудников
-    const users = await ctx.db
-      .query('users')
-      .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+    const users = (
+      await ctx.db
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+        .collect()
+    ).filter((u) => u.role !== 'superadmin');
 
     // Проверить следующие N дней
     for (let i = 1; i <= daysAhead; i++) {
@@ -194,10 +198,12 @@ export const getBirthdaysForMonth = query({
   handler: async (ctx, args) => {
     const targetMonth = args.month || new Date().getMonth() + 1;
 
-    const users = await ctx.db
-      .query('users')
-      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+    const users = (
+      await ctx.db
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+        .collect()
+    ).filter((u) => u.role !== 'superadmin');
 
     const birthdayUsers = users.filter((user) => {
       if (!user.dateOfBirth) return false;

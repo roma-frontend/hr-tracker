@@ -564,7 +564,8 @@ export const getOrgUsers = query({
             u._id !== args.currentUserId &&
             u.isActive &&
             u.isApproved &&
-            u.email !== SUPERADMIN_EMAIL,
+            u.email !== SUPERADMIN_EMAIL &&
+            u.role !== 'superadmin',
         )
         .map(async (u) => {
           // Check if user has an approved leave today

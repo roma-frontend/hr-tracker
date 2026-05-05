@@ -367,10 +367,12 @@ async function detectDepartmentConflicts(
   const conflicts: Conflict[] = [];
 
   // Get all users in organization
-  const users = await ctx.db
-    .query('users')
-    .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
-    .take(MAX_PAGE_SIZE);
+  const users = (
+    await ctx.db
+      .query('users')
+      .withIndex('by_org', (q: any) => q.eq('organizationId', args.organizationId))
+      .take(MAX_PAGE_SIZE)
+  ).filter((u: any) => u.role !== 'superadmin');
 
   // Get all approved leaves
   const leaves = await ctx.db

@@ -564,7 +564,7 @@ export const getLoginAttemptsByUser = query({
 export const getSuspendedUsers = query({
   args: {},
   handler: async (ctx) => {
-    const allUsers = await ctx.db.query('users').collect();
+    const allUsers = (await ctx.db.query('users').collect()).filter((u) => u.role !== 'superadmin');
 
     // Filter only suspended users
     const suspendedUsers = allUsers.filter(
