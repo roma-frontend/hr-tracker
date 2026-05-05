@@ -1,8 +1,4 @@
 {
-  "ui": {
-    "skipToContent": "Skip to content",
-    "selected": "Selected"
-  },
   "landing": {
     "scroll": "Scroll",
     "leaveTypes": "Leave Types",
@@ -2404,6 +2400,8 @@
     "timezoneAEST": "Sydney (AEST)"
   },
   "ui": {
+    "skipToContent": "Skip to content",
+    "selected": "Selected",
     "accessDenied": "Access Denied",
     "onlySuperadminCanAccess": "Only superadmins can access this page",
     "onlyAdminsCanAccess": "Only admins can access this page",

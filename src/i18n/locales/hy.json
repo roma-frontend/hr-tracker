@@ -1,8 +1,4 @@
 {
-  "ui": {
-    "skipToContent": "Անցնել դեպի բովանդակություն",
-    "selected": "Ընտրված"
-  },
   "landing": {
     "scroll": "Ոլորել",
     "leaveTypes": "Արձակուրդների տեսակներ",
@@ -2250,6 +2246,8 @@
     "timezoneAEST": "Սիդնեյ (AEST)"
   },
   "ui": {
+    "skipToContent": "Անցնել դեպի բովանդակություն",
+    "selected": "Ընտրված",
     "accessDenied": "Մուտքը արգելված է",
     "onlySuperadminCanAccess": "Միայն սուպեր-ադմինները կարող են մուտք գործել այս էջ",
     "onlyAdminsCanAccess": "Միայն ադմինները կարող են մուտք գործել այս էջ",
