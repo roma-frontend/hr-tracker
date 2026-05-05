@@ -1,347 +1,921 @@
-# 🗺️ HR Office — Roadmap интеграции новых модулей
+# HR Office — Project Roadmap & Status
 
-> Сравнение с топовыми HR-платформами (Rippling, HiBob, BambooHR, Leapsome, Deel)
-> Дата создания: 2026-05-01
-
----
-
-## 📊 Статус
-
-- ✅ = Реализовано
-- 🔲 = Запланировано
-- 🚧 = В процессе
+> **Last updated:** 2026-05-05
+> **Stack:** Next.js 16 (App Router) + Convex + Shadcn/ui + Tailwind CSS
+> **i18n:** EN / RU / HY (Armenian)
+> **Auth:** Convex Auth (session-based)
+> **RBAC Roles:** superadmin, admin, supervisor, employee, driver
 
 ---
 
-## 🏆 Фаза 1 — Высокий приоритет (Core HR Features)
+## Status Legend
+
+| Symbol | Meaning                                                |
+| ------ | ------------------------------------------------------ |
+| ✅     | Fully implemented (schema + backend + UI + i18n + nav) |
+| ⚠️     | Mostly implemented, minor gaps remain                  |
+| 🔲     | Not started                                            |
+| 🚧     | In progress                                            |
+
+---
+
+## Phase 1 — Core HR Features (MVP Complete)
 
 ### 1.1 Performance Reviews / 360° Feedback
-- ✅ Создать схему `convex/schema/performance.ts` (reviewCycles, reviewTemplates, reviewAssignments, reviewResponses, reviewRatings)
-- ✅ Backend `convex/performance.ts`: listCycles, getCycleDetails, getMyAssignments, getRevieweeResults, getCycleSummary, listTemplates + createTemplate, createCycle, launchCycle, addPeerAssignment, submitReview, closeCycle, cancelCycle, deleteCycle, getEligibleParticipants
-- ✅ UI: PerformanceClient (My Reviews, Cycles, Results tabs)
-- ✅ CreateCycleWizard (3-step: Basic Info → Review Types → Competencies)
-- ✅ FillReviewDialog (per-competency 1-5 rating + comments + strengths/improvements)
-- ✅ LaunchCycleDialog (select participants, auto-assign self/manager)
-- ✅ ResultsDialog (overall score, competency bars, grouped by type)
-- ✅ CycleSummaryCard (all employees ranked by score)
-- ✅ Mirror manager reviews → supervisorRatings (backward compat)
-- ✅ Immutable competency snapshot at cycle creation
-- ✅ Peer anonymity threshold (configurable, default 2)
-- ✅ Sidebar nav item добавлен
-- ✅ i18n: EN + RU переводы
-- 🔲 Создать `src/app/(dashboard)/performance/page.tsx` (нужен mkdir)
-- 🔲 Уведомления о дедлайнах ревью
-- 🔲 Экспорт результатов
+
+**Status:** ⚠️ Mostly implemented
+
+| Layer   | Status | Files                                                                                                                                                                                                                                                                                                |
+| ------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema  | ✅     | `convex/schema/performance.ts`                                                                                                                                                                                                                                                                       |
+| Backend | ✅     | `convex/performance.ts`                                                                                                                                                                                                                                                                              |
+| UI      | ✅     | `src/components/PerformanceClient.tsx`, `src/components/performance/CreateCycleWizard.tsx`, `src/components/performance/FillReviewDialog.tsx`, `src/components/performance/LaunchCycleDialog.tsx`, `src/components/performance/ResultsDialog.tsx`, `src/components/performance/CycleSummaryCard.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/performance/page.tsx`                                                                                                                                                                                                                                                           |
+| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                                                                                                                                                                                                                                                                                  |
+| Sidebar | ✅     | Nav item added                                                                                                                                                                                                                                                                                       |
+
+**Features implemented:**
+
+- Review cycles, templates, assignments, responses, ratings
+- 3-step CreateCycleWizard (Basic Info → Review Types → Competencies)
+- FillReviewDialog (1-5 rating per competency + comments + strengths/improvements)
+- LaunchCycleDialog (select participants, auto-assign self/manager)
+- ResultsDialog (overall score, competency bars, grouped by type)
+- CycleSummaryCard (all employees ranked by score)
+- Mirror manager reviews → supervisorRatings (backward compat)
+- Immutable competency snapshot at cycle creation
+- Peer anonymity threshold (configurable, default 2)
+
+**TODO:**
+
+- [ ] Deadline notifications for reviews
+- [ ] Export results (PDF/CSV)
+- [ ] HY translations
+
+---
 
 ### 1.2 OKR / Goals Management
-- ✅ Схема Convex: objectives, keyResults, goalCheckins (convex/schema/goals.ts)
-- ✅ Backend convex/goals.ts: listObjectives, getObjective, getMyObjectives, getTeamProgress, getCheckinHistory + createObjective, updateObjective, deleteObjective, addKeyResult, updateKeyResult, deleteKeyResult, checkin, completeObjective, cancelObjective
-- ✅ UI: GoalsClient (My Goals, Team, Company tabs)
-- ✅ CreateObjectiveWizard (3-step: Basic Info → Key Results → Review)
-- ✅ CheckinDialog (update KR value + confidence + note)
-- ✅ ObjectiveDetailDialog (KRs с прогресс-барами + check-in history + aligned goals)
-- ✅ Прогресс-бар для каждого KR (0-100%) с direction (increase/decrease)
-- ✅ Дерево целей (company → team → individual) через parentObjectiveId
-- ✅ Фильтрация по периоду (Q1-Q4, H1-H2, FY) и году
-- ✅ Визуализация прогресса команды (stats cards)
-- ✅ Team scope через department field
-- ✅ Sidebar nav item добавлен (Crosshair icon)
-- ✅ i18n: EN + RU переводы
-- 🔲 Создать `src/app/(dashboard)/goals/page.tsx` (нужен mkdir)
-- 🔲 i18n: HY переводы
-- 🔲 Связь OKR с Performance Reviews
-- 🔲 Check-in обновления (еженедельные напоминания)
 
-### 1.3 Recruitment / ATS (Applicant Tracking System)
-- ✅ Создать модуль `src/app/(dashboard)/recruitment/`
-- ✅ Схема Convex: vacancies, candidateProfiles, applications, applicationEvents, interviews, interviewScorecards
-- ✅ UI: список вакансий (CRUD)
-- ✅ Kanban pipeline кандидатов (Applied → Screening → Interview → Offer → Hired)
-- ✅ Карточка кандидата (резюме, контакты, заметки)
-- ✅ Планирование интервью (scheduling)
-- ✅ Scorecard для интервьюеров
-- 🔲 Email-шаблоны для кандидатов (через Resend)
-- ✅ Карьерная страница (публичная) — `/careers/[slug]` с формой подачи заявки
-- 🔲 Аналитика воронки найма
+**Status:** ⚠️ Mostly implemented
+
+| Layer   | Status | Files                                                                                                                                                                          |
+| ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Schema  | ✅     | `convex/schema/goals.ts`                                                                                                                                                       |
+| Backend | ✅     | `convex/goals.ts`                                                                                                                                                              |
+| UI      | ✅     | `src/components/GoalsClient.tsx`, `src/components/goals/CreateObjectiveWizard.tsx`, `src/components/goals/CheckinDialog.tsx`, `src/components/goals/ObjectiveDetailDialog.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/goals/page.tsx`                                                                                                                                           |
+| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                                                                                                                                                            |
+| Sidebar | ✅     | Crosshair icon                                                                                                                                                                 |
+
+**Features implemented:**
+
+- Objectives, keyResults, goalCheckins
+- 3-step CreateObjectiveWizard
+- CheckinDialog (update KR value + confidence + note)
+- ObjectiveDetailDialog (KRs with progress bars + check-in history + aligned goals)
+- Progress bar per KR (0-100%) with direction (increase/decrease)
+- Goal tree (company → team → individual) via parentObjectiveId
+- Filtering by period (Q1-Q4, H1-H2, FY) and year
+- Team progress visualization (stats cards)
+- Team scope via department field
+
+**TODO:**
+
+- [ ] HY translations
+- [ ] Link OKR with Performance Reviews
+- [ ] Weekly check-in reminders (cron)
+
+---
+
+### 1.3 Recruitment / ATS
+
+**Status:** ⚠️ Mostly implemented
+
+| Layer       | Status | Files                                      |
+| ----------- | ------ | ------------------------------------------ |
+| Schema      | ✅     | `convex/schema/recruitment.ts`             |
+| Backend     | ✅     | `convex/recruitment.ts`                    |
+| UI          | ✅     | `src/components/RecruitmentClient.tsx`     |
+| Route       | ✅     | `src/app/(dashboard)/recruitment/page.tsx` |
+| Public page | ✅     | `src/app/careers/[slug]/page.tsx`          |
+| i18n        | ✅     | EN, RU                                     |
+
+**Features implemented:**
+
+- Vacancies CRUD
+- Kanban pipeline (Applied → Screening → Interview → Offer → Hired)
+- Candidate cards (resume, contacts, notes)
+- Interview scheduling
+- Scorecard for interviewers
+- Public careers page with application form
+
+**TODO:**
+
+- [ ] Email templates for candidates (Resend integration)
+- [ ] Recruitment funnel analytics
+
+---
 
 ### 1.4 Onboarding Workflows
-- ✅ Создать модуль `src/app/(dashboard)/onboarding/`
-- ✅ Схема Convex: onboardingTemplates, onboardingPrograms, onboardingTasks
-- ✅ Шаблоны онбординга (по отделу/должности)
-- ✅ Автоматические чеклисты для нового сотрудника (spawn from template)
-- ✅ Назначение buddy/mentor
-- ✅ Прогресс-трекер (% завершения, computed server-side)
-- ✅ Автоматические задачи для IT/HR/менеджера (assigneeType + dayOffset)
-- ✅ Welcome-страница для нового сотрудника (My Onboarding tab)
-- 🔲 Интеграция с Tasks (автосоздание задач)
-- 🔲 Связь с Recruitment (auto-trigger при hired)
+
+**Status:** ⚠️ Mostly implemented
+
+| Layer   | Status | Files                                     |
+| ------- | ------ | ----------------------------------------- |
+| Schema  | ✅     | `convex/schema/onboarding.ts`             |
+| Backend | ✅     | `convex/onboarding.ts`                    |
+| UI      | ✅     | `src/components/OnboardingClient.tsx`     |
+| Route   | ✅     | `src/app/(dashboard)/onboarding/page.tsx` |
+| i18n    | ✅     | EN, RU                                    |
+
+**Features implemented:**
+
+- Onboarding templates, programs, tasks
+- Templates by department/position
+- Automatic checklists (spawn from template)
+- Buddy/mentor assignment
+- Progress tracker (% completion, server-side)
+- Auto tasks for IT/HR/manager (assigneeType + dayOffset)
+- Welcome page (My Onboarding tab)
+
+**TODO:**
+
+- [ ] Integration with Tasks module (auto-create tasks)
+- [ ] Link with Recruitment (auto-trigger on hired)
+
+---
 
 ### 1.5 Offboarding Workflows
-- ✅ Создать модуль `src/app/(dashboard)/offboarding/`
-- ✅ Схема Convex: offboardingPrograms, offboardingTasks, exitInterviews (convex/schema/offboarding.ts)
-- ✅ Backend: listPrograms, getProgram, getRetentionInsights + startOffboarding, completeTask, skipTask, addTask, submitExitInterview, completeProgram, cancelProgram
-- ✅ Чеклист увольнения (8 default tasks: access revoke, equipment return, knowledge transfer, etc.)
-- ✅ Exit Interview форма (5-point experience, recommend, feedback, improvements)
-- ✅ Аналитика причин увольнения (retention insights: reason breakdown, avg experience, recommend rate)
-- ✅ StartOffboardingWizard (3-step: Employee → Details → Confirm)
-- ✅ ProgramDetailDialog (checklist + exit interview panel)
-- ✅ Sidebar nav + i18n (EN/RU)
+
+**Status:** ✅ Fully implemented
+
+| Layer   | Status | Files                                      |
+| ------- | ------ | ------------------------------------------ |
+| Schema  | ✅     | `convex/schema/offboarding.ts`             |
+| Backend | ✅     | `convex/offboarding.ts`                    |
+| UI      | ✅     | `src/components/OffboardingClient.tsx`     |
+| Route   | ✅     | `src/app/(dashboard)/offboarding/page.tsx` |
+| i18n    | ✅     | EN, RU                                     |
+
+**Features implemented:**
+
+- Offboarding programs, tasks, exitInterviews
+- 8 default tasks (access revoke, equipment return, knowledge transfer, etc.)
+- Exit Interview form (5-point experience, recommend, feedback, improvements)
+- Retention analytics (reason breakdown, avg experience, recommend rate)
+- StartOffboardingWizard (3-step)
+- ProgramDetailDialog (checklist + exit interview panel)
+
+---
 
 ### 1.6 E-Signatures
-- ✅ Собственная реализация (без DocuSign)
-- ✅ Схема Convex: documentTemplates, signatureDocuments, signatureRequests, signatureAuditLog
-- ✅ Backend: listTemplates, listDocuments, getDocument, getMyPendingSignatures, getAuditLog, getStats + createTemplate, createDocument, signDocument, declineDocument, cancelDocument, sendReminder, deleteTemplate
-- ✅ UI: ESignaturesClient (Tabs: My Signatures, Documents)
-- ✅ CreateDocumentWizard (3-step: Doc Info → Signers → Review)
-- ✅ SignDocumentDialog (document preview + Canvas signature pad + sign/decline)
-- ✅ DocumentDetailDialog (status, signers progress, audit log)
-- ✅ TemplateManager (CRUD шаблонов с категориями)
-- ✅ Canvas/Pad для рисования подписи (mouse + touch)
-- ✅ Аудит-лог (created, sent, viewed, signed, declined, cancelled, reminder_sent)
-- ✅ Шаблоны документов (NDA, Offer, Contract, Policy, Custom)
-- ✅ Иммутабельный снапшот документа при отправке (content hash)
-- ✅ Последовательная подпись (signing order enforcement)
-- ✅ Sidebar nav item добавлен (admin, supervisor, employee)
-- ✅ i18n: EN + RU переводы
-- 🔲 Создать `src/app/(dashboard)/signatures/page.tsx` (нужен mkdir)
-- 🔲 i18n: HY nav key (не удалось из-за ограничений инструмента)
-- 🔲 PDF-генерация подписанного документа (отложено)
+
+**Status:** ⚠️ Mostly implemented
+
+| Layer   | Status | Files                                     |
+| ------- | ------ | ----------------------------------------- |
+| Schema  | ✅     | `convex/schema/signatures.ts`             |
+| Backend | ✅     | `convex/signatures.ts`                    |
+| UI      | ✅     | `src/components/ESignaturesClient.tsx`    |
+| Route   | ✅     | `src/app/(dashboard)/signatures/page.tsx` |
+| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                       |
+
+**Features implemented:**
+
+- Document templates, signature documents, signature requests, audit log
+- 3-step CreateDocumentWizard
+- SignDocumentDialog (Canvas signature pad, mouse + touch)
+- DocumentDetailDialog (status, signers progress, audit log)
+- TemplateManager (CRUD with categories: NDA, Offer, Contract, Policy, Custom)
+- Immutable document snapshot on send (content hash)
+- Sequential signing order enforcement
+- Audit log (created, sent, viewed, signed, declined, cancelled, reminder_sent)
+
+**TODO:**
+
+- [ ] HY nav key
+- [ ] PDF generation of signed document
+
+---
 
 ### 1.7 Employee Engagement / Pulse Surveys
-- ✅ Схема Convex: surveys, surveyQuestions, surveyResponses, surveyAnswers (convex/schema/surveys.ts)
-- ✅ Backend: listSurveys, getSurveyWithQuestions, getSurveyResults, hasUserResponded
-- ✅ Backend mutations: createSurvey, publishSurvey, closeSurvey, deleteSurvey, submitResponse
-- ✅ UI: SurveysClient (list, filter tabs, wizard создания, TakeSurveyDialog, ResultsDialog)
-- ✅ Типы вопросов: rating, multiple_choice, text, yes_no, nps
-- ✅ Анонимные ответы
-- ✅ eNPS (Employee Net Promoter Score) — тип вопроса nps (0-10)
-- ✅ Sidebar nav item добавлен (для всех ролей)
-- ✅ i18n: EN + RU переводы
-- 🔲 Создать `src/app/(dashboard)/surveys/page.tsx` (нужен mkdir)
-- 🔲 Конструктор опросов (drag-and-drop порядок вопросов)
-- 🔲 Автоматические pulse-опросы (cron: еженедельно/ежемесячно)
-- 🔲 Дашборд результатов с трендами
-- 🔲 Сегментация по отделам
+
+**Status:** ⚠️ Mostly implemented
+
+| Layer   | Status | Files                                  |
+| ------- | ------ | -------------------------------------- |
+| Schema  | ✅     | `convex/schema/surveys.ts`             |
+| Backend | ✅     | `convex/surveys.ts`                    |
+| UI      | ✅     | `src/components/SurveysClient.tsx`     |
+| Route   | ✅     | `src/app/(dashboard)/surveys/page.tsx` |
+| i18n    | ✅     | EN, RU                                 |
+
+**Features implemented:**
+
+- Surveys, surveyQuestions, surveyResponses, surveyAnswers
+- Question types: rating, multiple_choice, text, yes_no, nps
+- Anonymous responses
+- eNPS (0-10 scale)
+- Create survey wizard
+- TakeSurveyDialog, ResultsDialog
+
+**TODO:**
+
+- [ ] Drag-and-drop survey builder (question ordering)
+- [ ] Automatic pulse surveys (cron: weekly/monthly)
+- [ ] Results dashboard with trends
+- [ ] Department segmentation
+
+---
 
 ### 1.8 Recognition & Kudos
-- ✅ Схема Convex: kudos, kudosBadges, kudosBadgeAwards (convex/schema/recognition.ts)
-- ✅ Backend queries: getKudosFeed, getKudosForUser, getLeaderboard, getUserKudosStats, getBadges
-- ✅ Backend mutations: sendKudos, reactToKudos, deleteKudos, createBadge, awardBadge
-- ✅ UI: RecognitionClient (Feed, Leaderboard tabs, Stats cards)
-- ✅ SendKudos Wizard (3-step: Recipient → Category → Message+Confirm)
-- ✅ Sidebar nav item добавлен (для всех ролей)
-- ✅ i18n: EN + RU переводы
-- ✅ Points Economy: userPoints + pointTransactions схема
-- ✅ Points: баланс отображается в UI (wizard header + stats card)
-- ✅ Points: sendKudos списывает 3 очка (с проверкой баланса)
-- ✅ Points: +1 за посещаемость (интеграция в timeTracking.checkIn)
-- ✅ Points: +3 за положительный отзыв ≥4★ (интеграция в supervisorRatings.createRating)
-- 🔲 i18n: HY перевод (нужны армянские переводы)
-- 🔲 Создать `src/app/(dashboard)/recognition/page.tsx` (нужен mkdir)
-- 🔲 Переместить компонент из `src/components/RecognitionClient.tsx` → `src/components/recognition/`
+
+**Status:** ⚠️ Mostly implemented
+
+| Layer   | Status | Files                                      |
+| ------- | ------ | ------------------------------------------ |
+| Schema  | ✅     | `convex/schema/recognition.ts`             |
+| Backend | ✅     | `convex/recognition.ts`                    |
+| UI      | ✅     | `src/components/RecognitionClient.tsx`     |
+| Route   | ✅     | `src/app/(dashboard)/recognition/page.tsx` |
+| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                        |
+
+**Features implemented:**
+
+- Kudos feed, leaderboard, stats cards
+- SendKudos Wizard (3-step)
+- Points Economy (userPoints + pointTransactions)
+- Points: -3 for sending kudos, +1 for attendance, +3 for positive review ≥4★
+- Badge system (kudosBadges, kudosBadgeAwards)
+
+**TODO:**
+
+- [ ] HY translations
+- [ ] Move component: `src/components/RecognitionClient.tsx` → `src/components/recognition/RecognitionClient.tsx`
 
 ---
 
-## 🥈 Фаза 2 — Средний приоритет (Competitive Edge)
+## Phase 2 — Competitive Edge (Not Started)
 
 ### 2.1 Learning Management System (LMS)
-- 🔲 Создать модуль `src/app/(dashboard)/learning/`
-- 🔲 Схема Convex: courses, lessons, enrollments, certificates
-- 🔲 Каталог курсов (внутренних и внешних)
-- 🔲 Видео/текстовые уроки
-- 🔲 Тесты и квизы
-- 🔲 Прогресс обучения (% завершения)
-- 🔲 Сертификаты по завершении
-- 🔲 Обязательные тренинги (compliance)
-- 🔲 Назначение курсов менеджером
-- 🔲 Отчёт по обучению команды
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/learning.ts` (courses, lessons, enrollments, certificates, quizzes, quizAnswers)
+- Backend: `convex/learning.ts`
+- UI: `src/components/learning/LearningClient.tsx`
+- Route: `src/app/(dashboard)/learning/page.tsx`
+
+**Features to implement:**
+
+- Course catalog (internal + external)
+- Video/text lessons with progress tracking
+- Quizzes and tests
+- Certificates on completion
+- Mandatory compliance training
+- Manager course assignment
+- Team learning reports
+
+**Competitors with this:** Rippling, Leapsome, HiBob
+
+---
 
 ### 2.2 Compensation Management
-- 🔲 Создать модуль `src/app/(dashboard)/compensation/`
-- 🔲 Схема Convex: salary_bands, compensation_reviews, bonuses
-- 🔲 Salary bands по должностям (min/mid/max)
-- 🔲 Визуализация: позиция сотрудника в salary band
-- 🔲 Циклы пересмотра зарплат
-- 🔲 Бонусы и премии
-- 🔲 Бюджетирование повышений
-- 🔲 Сравнение с рынком (benchmarking)
-- 🔲 История изменений compensation
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/compensation.ts` (salaryBands, compensationReviews, bonuses, salaryHistory)
+- Backend: `convex/compensation.ts`
+- UI: `src/components/compensation/CompensationClient.tsx`
+- Route: `src/app/(dashboard)/compensation/page.tsx`
+
+**Features to implement:**
+
+- Salary bands by position (min/mid/max)
+- Employee position visualization within band
+- Compensation review cycles
+- Bonuses and premiums
+- Raise budgeting
+- Market benchmarking
+- Compensation history
+
+**Competitors with this:** Rippling, BambooHR
+
+---
 
 ### 2.3 Benefits Administration
-- 🔲 Создать модуль `src/app/(dashboard)/benefits/`
-- 🔲 Схема Convex: benefit_plans, enrollments, claims
-- 🔲 Каталог бенефитов (страховка, фитнес, обучение)
-- 🔲 Self-service enrollment
-- 🔲 Баланс бенефитов (flexible benefits budget)
-- 🔲 Подтверждение/одобрение claims
-- 🔲 Интеграция с payroll
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/benefits.ts` (benefitPlans, benefitEnrollments, claims)
+- Backend: `convex/benefits.ts`
+- UI: `src/components/benefits/BenefitsClient.tsx`
+- Route: `src/app/(dashboard)/benefits/page.tsx`
+
+**Features to implement:**
+
+- Benefits catalog (insurance, fitness, education)
+- Self-service enrollment
+- Flexible benefits budget
+- Claims submission and approval
+- Payroll integration for reimbursements
+
+**Competitors with this:** Rippling, Deel, BambooHR
+
+---
 
 ### 2.4 Visual Org Chart
-- 🔲 Создать модуль `src/app/(dashboard)/org-chart/`
-- 🔲 Интерактивная визуализация (D3.js или React Flow)
-- 🔲 Уровни: company → department → team → person
-- 🔲 Поиск и фильтрация
-- 🔲 Клик на человека → мини-профиль
-- 🔲 Drag-and-drop для реорганизации (admin)
-- 🔲 Экспорт в PDF/PNG
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/orgchart.ts` (orgNodes, orgRelationships)
+- Backend: `convex/orgchart.ts`
+- UI: `src/components/orgchart/OrgChartClient.tsx`
+- Route: `src/app/(dashboard)/org-chart/page.tsx`
+
+**Features to implement:**
+
+- Interactive visualization (React Flow recommended)
+- Hierarchy: company → department → team → person
+- Search and filter
+- Click → mini employee profile
+- Drag-and-drop reorg (admin only)
+- Export to PDF/PNG
+
+**Competitors with this:** HiBob, BambooHR
+
+---
 
 ### 2.5 Document Management System
-- 🔲 Создать модуль `src/app/(dashboard)/documents/`
-- 🔲 Схема Convex: documents, folders, document_access
-- 🔲 Иерархия папок (по отделу, типу, сотруднику)
-- 🔲 Загрузка/скачивание файлов
-- 🔲 Контроль доступа (кто может видеть)
-- 🔲 Версионирование документов
-- 🔲 Шаблоны документов
-- 🔲 Поиск по содержимому
-- 🔲 Интеграция с E-Signatures
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/documents.ts` (documents, folders, documentAccess, documentVersions)
+- Backend: `convex/documents.ts`
+- UI: `src/components/documents/DocumentsClient.tsx`
+- Route: `src/app/(dashboard)/documents/page.tsx`
+
+**Features to implement:**
+
+- Folder hierarchy (by department, type, employee)
+- File upload/download (Convex file storage)
+- Access control (who can view/edit)
+- Document versioning
+- Document templates
+- Full-text search
+- E-Signatures integration
+
+**Competitors with this:** Rippling, BambooHR
+
+---
 
 ### 2.6 Expense Management
-- 🔲 Создать модуль `src/app/(dashboard)/expenses/`
-- 🔲 Схема Convex: expense_reports, expense_items, receipts
-- 🔲 Подача расходов (фото чека, сумма, категория)
-- 🔲 Одобрение менеджером
-- 🔲 Политики расходов (лимиты по категориям)
-- 🔲 Отчёты по расходам (по отделу, периоду)
-- 🔲 Интеграция с payroll (reimbursement)
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/expenses.ts` (expenseReports, expenseItems, receipts, expensePolicies)
+- Backend: `convex/expenses.ts`
+- UI: `src/components/expenses/ExpensesClient.tsx`
+- Route: `src/app/(dashboard)/expenses/page.tsx`
+
+**Features to implement:**
+
+- Expense submission (receipt photo, amount, category)
+- Manager approval workflow
+- Expense policies (category limits)
+- Reports by department/period
+- Payroll integration (reimbursement)
+
+**Competitors with this:** Rippling
+
+---
 
 ### 2.7 Succession Planning
-- 🔲 Создать модуль `src/app/(dashboard)/succession/`
-- 🔲 Схема Convex: key_positions, successors, development_plans
-- 🔲 9-Box Grid (Performance vs Potential)
-- 🔲 Определение ключевых позиций
-- 🔲 Назначение потенциальных преемников
-- 🔲 Планы развития (linked to LMS)
-- 🔲 Risk assessment (что если человек уйдёт)
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/succession.ts` (keyPositions, successors, developmentPlans, nineBoxRatings)
+- Backend: `convex/succession.ts`
+- UI: `src/components/succession/SuccessionClient.tsx`
+- Route: `src/app/(dashboard)/succession/page.tsx`
+
+**Features to implement:**
+
+- 9-Box Grid (Performance vs Potential)
+- Key position identification
+- Successor assignment
+- Development plans (linked to LMS)
+- Risk assessment (what if someone leaves)
+
+**Competitors with this:** Leapsome, HiBob
 
 ---
 
-## 🥉 Фаза 3 — Дополнительные фичи (Differentiation)
+## Phase 3 — Differentiation (Not Started)
 
 ### 3.1 Mobile App (PWA)
-- 🔲 Настроить PWA manifest + service worker
-- 🔲 Responsive design для всех модулей
-- 🔲 Push-уведомления (Web Push API)
-- 🔲 Offline mode (кэширование)
-- 🔲 Быстрые действия: одобрить leave, отметить attendance
-- 🔲 Или: React Native app (iOS + Android)
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- `public/manifest.json`
+- `public/sw.js` (service worker)
+- `src/app/(dashboard)/layout.tsx` — add PWA registration
+
+**Features to implement:**
+
+- PWA manifest + service worker
+- Responsive design for all modules
+- Push notifications (Web Push API)
+- Offline mode (caching)
+- Quick actions: approve leave, mark attendance
+- Alternative: React Native (iOS + Android)
+
+---
 
 ### 3.2 Compliance & Audit Trail
-- 🔲 Схема Convex: audit_logs (who, what, when, IP, before/after)
-- 🔲 Автоматическое логирование ВСЕХ действий
-- 🔲 UI: просмотр аудит-лога (фильтры по user, action, date)
-- 🔲 GDPR-инструменты (data export, right to delete)
-- 🔲 Compliance дашборд
-- 🔲 Retention policies для данных
+
+**Status:** ⚠️ Partially implemented
+
+**Existing:**
+
+- Schema: `convex/schema/security.ts`
+- Backend: `convex/security.ts`
+- `convex/admin.ts` — auditLogs query
+
+**TODO:**
+
+- [ ] Full audit logging for ALL actions (who, what, when, IP, before/after)
+- [ ] Audit log UI with filters (user, action, date)
+- [ ] GDPR tools (data export, right to delete)
+- [ ] Compliance dashboard
+- [ ] Data retention policies
+
+---
 
 ### 3.3 Asset / IT Equipment Management
-- 🔲 Создать модуль `src/app/(dashboard)/assets/`
-- 🔲 Схема Convex: assets, asset_assignments, asset_categories
-- 🔲 Инвентарь оборудования (ноутбуки, телефоны, ключи)
-- 🔲 Выдача/возврат (связь с onboarding/offboarding)
-- 🔲 Статусы: available, assigned, repair, retired
-- 🔲 QR-коды для быстрого scan
-- 🔲 Напоминания о возврате
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/assets.ts` (assets, assetAssignments, assetCategories)
+- Backend: `convex/assets.ts`
+- UI: `src/components/assets/AssetsClient.tsx`
+- Route: `src/app/(dashboard)/assets/page.tsx`
+
+**Features to implement:**
+
+- Equipment inventory (laptops, phones, keys)
+- Assignment/return (linked to onboarding/offboarding)
+- Statuses: available, assigned, repair, retired
+- QR codes for quick scanning
+- Return reminders
+
+---
 
 ### 3.4 Company News Feed / Announcements
-- 🔲 Создать модуль `src/app/(dashboard)/news/`
-- 🔲 Схема Convex: announcements, reactions, comments
-- 🔲 Лента новостей компании
-- 🔲 Категории: news, events, birthdays, achievements
-- 🔲 Rich-text editor для постов
-- 🔲 Реакции и комментарии
-- 🔲 Pin важных объявлений
-- 🔲 Таргетинг (по отделу, роли)
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/news.ts` (announcements, reactions, comments)
+- Backend: `convex/news.ts`
+- UI: `src/components/news/NewsClient.tsx`
+- Route: `src/app/(dashboard)/news/page.tsx`
+
+**Features to implement:**
+
+- Company news feed
+- Categories: news, events, birthdays, achievements
+- Rich-text editor for posts
+- Reactions and comments
+- Pin important announcements
+- Targeting (by department, role)
+
+---
 
 ### 3.5 Custom Workflow Builder (Visual)
-- 🔲 Визуальный конструктор (React Flow / xyflow)
-- 🔲 Drag-and-drop ноды (trigger → condition → action)
-- 🔲 Триггеры: new employee, leave approved, birthday, etc.
-- 🔲 Действия: send email, create task, notify, update field
-- 🔲 Шаблоны готовых workflow
-- 🔲 Логирование выполнения
+
+**Status:** ⚠️ Partially implemented
+
+**Existing:**
+
+- Schema: `convex/schema/automation.ts`
+- Backend: `convex/automation.ts`, `convex/automationActions.ts`, `convex/automationMutations.ts`, `convex/automationTest.ts`
+
+**TODO:**
+
+- [ ] Visual drag-and-drop builder (React Flow / xyflow)
+- [ ] Nodes: trigger → condition → action
+- [ ] Triggers: new employee, leave approved, birthday, etc.
+- [ ] Actions: send email, create task, notify, update field
+- [ ] Workflow templates
+- [ ] Execution logging
+
+---
 
 ### 3.6 Employee Directory
-- 🔲 Создать модуль `src/app/(dashboard)/directory/`
-- 🔲 Поиск по имени, отделу, должности, навыкам
-- 🔲 Карточки сотрудников (фото, контакты, department)
-- 🔲 Фильтрация и сортировка
-- 🔲 Quick actions (написать в чат, позвонить)
-- 🔲 Карта офиса (кто где сидит) — опционально
+
+**Status:** ⚠️ Partially implemented
+
+**Existing:**
+
+- `src/app/(dashboard)/employees/page.tsx`
+- `src/components/employees/EmployeesClient.tsx`
+
+**TODO:**
+
+- [ ] Advanced search (name, department, position, skills)
+- [ ] Employee cards (photo, contacts, department)
+- [ ] Filtering and sorting
+- [ ] Quick actions (chat, call)
+- [ ] Office map (who sits where) — optional
+
+---
 
 ### 3.7 PDF Reports / Export
-- 🔲 Библиотека генерации PDF (react-pdf или puppeteer)
-- 🔲 Экспорт: employee profile, payslip, leave report
-- 🔲 Экспорт: attendance report, team report
-- 🔲 Шаблоны отчётов (customizable)
-- 🔲 Bulk export (несколько сотрудников)
-- 🔲 Scheduled reports (автоматическая отправка по email)
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- `src/lib/pdf.ts` (react-pdf or puppeteer wrapper)
+- Export utilities for each module
+
+**Features to implement:**
+
+- Export: employee profile, payslip, leave report
+- Export: attendance report, team report
+- Customizable report templates
+- Bulk export (multiple employees)
+- Scheduled reports (auto-email)
+
+---
 
 ### 3.8 Career Development Paths
-- 🔲 Создать модуль `src/app/(dashboard)/careers/`
-- 🔲 Skill Matrix (навыки по должностям)
-- 🔲 Career tracks (Junior → Mid → Senior → Lead)
-- 🔲 Gap analysis (что нужно для повышения)
-- 🔲 Связь с LMS (рекомендованные курсы)
-- 🔲 Менторство (назначение менторов)
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/careers.ts` (skillMatrices, careerTracks, gapAnalyses, mentorships)
+- Backend: `convex/careers.ts`
+- UI: `src/components/careers/CareersClient.tsx`
+- Route: `src/app/(dashboard)/careers/page.tsx`
+
+**Features to implement:**
+
+- Skill Matrix (skills by position)
+- Career tracks (Junior → Mid → Senior → Lead)
+- Gap analysis (what's needed for promotion)
+- LMS integration (recommended courses)
+- Mentorship assignments
+
+---
 
 ### 3.9 Shift Scheduling
-- 🔲 Создать модуль `src/app/(dashboard)/shifts/`
-- 🔲 Схема Convex: shifts, shift_templates, shift_swaps
-- 🔲 Визуальное расписание смен (week/month view)
-- 🔲 Шаблоны смен (утренняя, вечерняя, ночная)
-- 🔲 Запросы на замену (swap requests)
-- 🔲 Автоматическое распределение
-- 🔲 Уведомления об изменениях
-- 🔲 Связь с attendance tracking
+
+**Status:** 🔲 Not started
+
+**Required files:**
+
+- Schema: `convex/schema/shifts.ts` (shifts, shiftTemplates, shiftSwaps)
+- Backend: `convex/shifts.ts`
+- UI: `src/components/shifts/ShiftsClient.tsx`
+- Route: `src/app/(dashboard)/shifts/page.tsx`
+
+**Features to implement:**
+
+- Visual shift schedule (week/month view)
+- Shift templates (morning, evening, night)
+- Swap requests
+- Auto-distribution
+- Change notifications
+- Attendance tracking integration
 
 ---
 
-## 📈 Порядок реализации (рекомендация)
+## Already Implemented (Not in Roadmap)
+
+### Dashboard
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/dashboard/page.tsx`
+- Component: `src/components/dashboard/DashboardClient.tsx`
+
+### Employees
+
+**Status:** ✅ Fully implemented
+
+- Routes: `src/app/(dashboard)/employees/page.tsx`, `src/app/(dashboard)/employees/[id]/page.tsx`
+- Components: `src/components/employees/EmployeesClient.tsx`, `src/components/employees/EmployeeProfilePageClient.tsx`
+- Schema: `convex/schema/employees.ts`
+
+### Leaves
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/leaves/page.tsx`
+- Component: `src/components/leaves/LeavesClient.tsx`
+- Schema: `convex/schema/leaves.ts`
+- Backend: `convex/leaves.ts`
+
+### Attendance / Time Tracking
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/attendance/page.tsx`
+- Component: `src/components/attendance/AttendanceDashboard.tsx`
+- Backend: `convex/timeTracking.ts`
+
+### Tasks
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/tasks/page.tsx`
+- Component: `src/components/tasks/TasksClient.tsx`
+- Schema: `convex/schema/tasks.ts`
+- Backend: `convex/tasks.ts`
+
+### Chat
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/chat/page.tsx`
+- Component: `src/components/chat/ChatClient.tsx`
+- Schema: `convex/schema/chat.ts`
+- Backend: `convex/chat.ts`, `convex/chatAction.ts`
+
+### Calendar
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/calendar/page.tsx`
+- Component: `src/components/calendar/CalendarClient.tsx`
+- Schema: `convex/schema/calendar.ts`
+
+### Analytics
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/analytics/page.tsx`
+- Backend: `convex/analytics.ts`
+- Components: LeavesTrendChart, DepartmentStats, LeaveHeatmap, StatsCard
+
+### Payroll
+
+**Status:** ✅ Fully implemented
+
+- Routes: `src/app/(dashboard)/payroll/page.tsx`, `payroll/[id]/page.tsx`, `payroll/runs/page.tsx`, `payroll/settings/page.tsx`
+- Schema: `convex/schema/payroll.ts`
+- Components: PayrollDashboard, PayrollRecordsTable, PayrollCalculator, PayrollRunDialogs, EditPayrollRecordDialog, PayrollRunDetailClient
+
+### Drivers
+
+**Status:** ✅ Fully implemented (unique feature)
+
+- Routes: `src/app/(dashboard)/drivers/page.tsx`, `drivers/dashboard/page.tsx`, `drivers/favorites/page.tsx`
+- Schema: `convex/schema/drivers.ts`
+- Backend: `convex/drivers.ts`, `convex/driverAI.ts`
+- Components: 40+ files in `src/components/drivers/`
+
+### Approvals
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/approvals/page.tsx`
+- Component: `src/components/approvals/ApprovalsClient.tsx`
+
+### AI Chat
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/ai-chat/page.tsx`
+- Component: `src/components/ai-chat/AIChatClient.tsx`
+- Schema: `convex/schema/ai.ts`
+- Backend: `convex/aiChat.ts`, `convex/aiChatMutations.ts`
+
+### Help / Tickets
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/help/page.tsx`
+- Schema: `convex/schema/tickets.ts`, `convex/schema/sla.ts`
+- Backend: `convex/tickets.ts`, `convex/sla.ts`
+- Component: `src/components/help/CreateTicketWizard.tsx`
+
+### Settings
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/settings/page.tsx`
+- Schema: `convex/schema/settings.ts`
+- Backend: `convex/settings.ts`
+- Components: 10 sub-components (Appearance, Cookie, Security, Localization, Integration, Advanced Security, Dashboard Customization, Profile, Productivity, Notification)
+
+### Profile
+
+**Status:** ✅ Fully implemented
+
+- Route: `src/app/(dashboard)/profile/page.tsx`
+
+### Organization Management
+
+**Status:** ✅ Fully implemented
+
+- Schema: `convex/schema/organizations.ts`
+- Backend: `convex/organizations.ts`, `convex/organizationJoinRequests.ts`, `convex/organizationRequests.ts`
+- Routes: `src/app/(dashboard)/join-requests/page.tsx`, `src/app/(dashboard)/org-requests/page.tsx`
+
+### Admin Panel
+
+**Status:** ✅ Fully implemented
+
+- Routes: `src/app/(dashboard)/admin/page.tsx`, `admin/events/page.tsx`, `admin/join-requests/page.tsx`
+- Backend: `convex/admin.ts`, `convex/events.ts`
+
+### Superadmin Panel
+
+**Status:** ✅ Fully implemented
+
+- Routes: 15+ pages (users, organizations, subscriptions, security, automation, impersonation, emergency, bulk actions, create-org, support, stripe-dashboard)
+- Backend: `convex/superadmin.ts`, `convex/subscriptions.ts`, `convex/subscriptions_admin.ts`, `convex/security.ts`, `convex/automation*.ts`
+
+### Birthdays
+
+**Status:** ✅ Fully implemented
+
+- Backend: `convex/birthdays.ts`
+
+### Conflicts
+
+**Status:** ✅ Fully implemented
+
+- Backend: `convex/conflicts/main.ts`
+
+---
+
+## Implementation Priority Order
 
 ```
-Фаза 1 (MVP фичи — делают платформу полноценной):
-  1.8 Recognition & Kudos ............ ~2-3 дня  (простая, быстрый результат)
-  1.7 Pulse Surveys .................. ~3-4 дня
-  1.4 Onboarding Workflows ........... ~4-5 дней
-  1.1 Performance Reviews ............ ~5-7 дней
-  1.2 OKR / Goals .................... ~4-5 дней
-  1.6 E-Signatures ................... ~3-4 дня
-  1.3 Recruitment / ATS .............. ~7-10 дней
-  1.5 Offboarding .................... ~2-3 дня
+PHASE 2 (Competitive Edge — highest impact first):
+  2.4 Visual Org Chart ............... ~2-3 days  (quick win, high visual impact)
+  2.1 LMS ............................ ~7-10 days (biggest gap vs competitors)
+  2.2 Compensation Management ........ ~4-5 days  (enterprise requirement)
+  2.5 Document Management ............ ~4-5 days  (core HR necessity)
+  2.6 Expense Management ............. ~3-4 days
+  2.3 Benefits Administration ........ ~3-4 days
+  2.7 Succession Planning ............ ~3-4 days
 
-Фаза 2 (конкурентное преимущество):
-  2.4 Visual Org Chart ............... ~2-3 дня
-  2.5 Document Management ............ ~4-5 дней
-  2.6 Expense Management ............. ~3-4 дня
-  2.2 Compensation Management ........ ~4-5 дней
-  2.1 LMS ............................ ~7-10 дней
-  2.3 Benefits ....................... ~3-4 дня
-  2.7 Succession Planning ............ ~3-4 дня
+PHASE 3 (Differentiation):
+  3.7 PDF Reports .................... ~2-3 days  (quick win)
+  3.4 Company News Feed .............. ~2-3 days
+  3.6 Employee Directory ............. ~2-3 days
+  3.2 Compliance & Audit Trail ....... ~3-4 days
+  3.1 Mobile App (PWA) ............... ~5-7 days
+  3.3 Asset Management ............... ~3-4 days
+  3.5 Custom Workflow Builder ........ ~7-10 days
+  3.8 Career Development ............. ~4-5 days
+  3.9 Shift Scheduling ............... ~4-5 days
 
-Фаза 3 (differentiation):
-  3.7 PDF Reports .................... ~2-3 дня
-  3.4 Company News Feed .............. ~2-3 дня
-  3.6 Employee Directory ............. ~2-3 дня
-  3.2 Compliance & Audit Trail ....... ~3-4 дня
-  3.1 Mobile App (PWA) ............... ~5-7 дней
-  3.3 Asset Management ............... ~3-4 дня
-  3.5 Custom Workflow Builder ......... ~7-10 дней
-  3.8 Career Development ............. ~4-5 дней
-  3.9 Shift Scheduling ............... ~4-5 дней
+PHASE 1 (Remaining TODOs):
+  1.8 Recognition HY translations .... ~1 day
+  1.7 Survey builder + cron .......... ~3-4 days
+  1.6 E-Signatures PDF generation .... ~2-3 days
+  1.2 OKR HY + reminders ............. ~2-3 days
+  1.1 Performance notifications ........ ~2-3 days
+  1.4 Onboarding integrations ........ ~2-3 days
+  1.3 Recruitment email templates .... ~2-3 days
 ```
 
 ---
 
-## 🔧 Технические заметки
+## Technical Standards for New Modules
 
-- **Все модули** используют существующий стек: Next.js 16 + Convex + Shadcn/ui + Tailwind
-- **Схемы БД** добавляются в `convex/schema/` или `convex/schema.ts`
-- **i18n** — каждый новый модуль должен поддерживать EN/RU/HY
-- **RBAC** — каждый модуль имеет permission checks (Superadmin/Admin/Supervisor/Employee)
-- **Real-time** — использовать Convex subscriptions для live-updates
-- **Тесты** — unit tests (Jest) + E2E (Playwright) для каждого нового модуля
+Every new module MUST follow these conventions:
+
+### File Structure
+
+```
+convex/schema/{module}.ts          — Database schema (defineTable)
+convex/{module}.ts                  — Backend queries + mutations
+src/app/(dashboard)/{module}/page.tsx — Server wrapper with nextDynamic
+src/components/{module}/{Module}Client.tsx — Client component
+src/components/{module}/            — Sub-components (wizards, dialogs, cards)
+src/i18n/locales/en.json            — English translations
+src/i18n/locales/ru.json            — Russian translations
+src/i18n/locales/hy.json            — Armenian translations
+```
+
+### Server Wrapper Pattern
+
+```tsx
+import nextDynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/Skeleton';
+
+export const dynamic = 'force-dynamic';
+
+const ModuleClient = nextDynamic(() => import('@/components/module/ModuleClient'), {
+  loading: () => <Skeleton className="h-96 w-full" />,
+});
+
+export default function ModulePage() {
+  return <ModuleClient />;
+}
+```
+
+### Client Component Rules
+
+- Use `'use client'` directive at top
+- Accept NO `params` props — use `useParams()` hook instead
+- Import Skeleton from `@/components/ui/Skeleton` (capital S)
+- Import Convex API from `@/convex/_generated/api` (alias, not relative)
+
+### Backend Rules
+
+- All queries must filter `role !== 'superadmin'` from user lists
+- Use `MAX_PAGE_SIZE` from `convex/pagination`
+- Use indexes (`withIndex`) whenever possible, avoid `.collect()` unless necessary
+- All mutations must check RBAC permissions
+- Use `SUPERADMIN_EMAIL` from `convex/lib/auth` for superadmin checks
+
+### i18n Rules
+
+- Every new module needs EN + RU + HY translations
+- Add nav keys to `src/i18n/locales/{en,ru,hy}.json` under `nav.{module}`
+- Use `useTranslation()` hook in client components
+
+### RBAC Rules
+
+- Every module must define which roles can access it
+- Permission checks in backend mutations
+- UI shows/hides features based on role
 
 ---
 
-> 💡 Чтобы продолжить — просто скажи номер фичи (например "1.1") и я начну реализацию.
+## Competitive Analysis Summary
+
+| Feature                  | This Project | Rippling |  HiBob  | BambooHR | Leapsome |  Deel   |
+| ------------------------ | :----------: | :------: | :-----: | :------: | :------: | :-----: |
+| Employee Management      |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ✅    |
+| Leave Management         |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| Attendance/Time Tracking |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ❌    |
+| Task Management          |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Chat/Messaging           |      ✅      |    ❌    |   ✅    |    ❌    |    ❌    |   ❌    |
+| Calendar                 |      ✅      |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Recruitment/ATS          |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ✅    |
+| Onboarding               |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| Offboarding              |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| Performance Reviews      |      ✅      |    ✅    |   ✅    |    ❌    |    ✅    |   ❌    |
+| OKR/Goals                |      ✅      |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
+| E-Signatures             |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ✅    |
+| Pulse Surveys            |      ✅      |    ❌    |   ✅    |    ❌    |    ✅    |   ❌    |
+| Recognition/Kudos        |      ✅      |    ❌    |   ✅    |    ❌    |    ✅    |   ❌    |
+| AI Assistant             |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Payroll                  |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ✅    |
+| Driver Management        |      ✅      |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Approvals Workflow       |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ❌    |
+| Analytics Dashboard      |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ❌    |
+| Multi-language (3+)      |      ✅      |    ✅    |   ✅    |    ❌    |    ❌    |   ✅    |
+| **LMS**                  |      🔲      |    ✅    |   ❌    |    ❌    |    ✅    |   ❌    |
+| **Compensation**         |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
+| **Benefits**             |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ✅    |
+| **Org Chart**            |      🔲      |    ❌    |   ✅    |    ✅    |    ❌    |   ❌    |
+| **Documents**            |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
+| **Expenses**             |      🔲      |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
+| **Succession**           |      🔲      |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
+| **PWA/Mobile**           |      🔲      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| **TOTAL**                |   **~22**    | **~16**  | **~14** | **~11**  | **~10**  | **~13** |
+
+**After completing Phase 2:** This project will have **~29 features**, surpassing all competitors.
+**After completing Phase 3:** This project will have **~38 features**, becoming the most comprehensive HR platform.
+
+---
+
+## How to Use This File
+
+1. Pick a module number (e.g., "2.1" for LMS)
+2. Check the "Required files" section for what needs to be created
+3. Follow the "Technical Standards" for file structure and patterns
+4. Update this file after completing each module (change 🔲 → ✅)
+5. Update the competitive analysis table
+
+> 💡 **Next recommended module:** 2.4 Visual Org Chart (quick win, 2-3 days) or 2.1 LMS (biggest competitive gap, 7-10 days)
