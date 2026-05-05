@@ -194,64 +194,57 @@ export function OnboardingTour({ steps, tourId, onComplete, onSkip }: Onboarding
     setTooltipPosition({ x, y });
   }, []);
 
-  // Update target element position (simple and stable)
+  // Update target element position (synchronous — no jumps)
   const updateTargetPosition = useCallback(() => {
     const step = steps[currentStep];
     if (!step?.target) return;
 
     const element = document.querySelector(step.target);
-    if (element) {
-      const rect = element.getBoundingClientRect();
+    if (!element) return;
 
-      // Define safe viewport margins (leave space for tooltip above/below)
-      const tooltipSpace = 200; // Space needed for tooltip
-      const safeTop = tooltipSpace;
-      const safeBottom = window.innerHeight - tooltipSpace;
+    const rect = element.getBoundingClientRect();
 
-      // Check if element is off-screen or too close to edges
-      const isOffScreen =
-        rect.top < safeTop ||
-        rect.bottom > safeBottom ||
-        rect.left < 20 ||
-        rect.right > window.innerWidth - 20;
+    // Always calculate position synchronously first — prevents visible jump
+    setTargetRect(rect);
+    positionTooltip(rect, step.placement || 'bottom');
 
-      if (isOffScreen) {
-        // Scroll element into view with smooth behavior — only when truly needed
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-        });
+    // Define safe viewport margins
+    const tooltipSpace = 200;
+    const safeTop = tooltipSpace;
+    const safeBottom = window.innerHeight - tooltipSpace;
 
-        // Update position using requestAnimationFrame for smooth updates
-        let frameId: number;
-        const updateCallback = () => {
-          // Read first, then write to avoid forced reflow
-          const updatedRect = element.getBoundingClientRect();
-          setTargetRect(updatedRect);
-          positionTooltip(updatedRect, step.placement || 'bottom');
-        };
+    const isOffScreen =
+      rect.top < safeTop ||
+      rect.bottom > safeBottom ||
+      rect.left < 20 ||
+      rect.right > window.innerWidth - 20;
 
-        // Start updating after a minimal delay (let scroll start)
-        setTimeout(() => {
-          frameId = requestAnimationFrame(updateCallback);
-        }, 100);
+    if (isOffScreen) {
+      // Use 'instant' to avoid smooth scroll animation during tour
+      element.scrollIntoView({
+        behavior: 'instant',
+        block: 'center',
+      });
 
-        return () => cancelAnimationFrame(frameId);
-      } else {
-        setTargetRect(rect);
-        positionTooltip(rect, step.placement || 'bottom');
-      }
+      // Recalculate position after scroll completes
+      requestAnimationFrame(() => {
+        const updatedRect = element.getBoundingClientRect();
+        setTargetRect(updatedRect);
+        positionTooltip(updatedRect, step.placement || 'bottom');
+      });
     }
   }, [currentStep, steps, positionTooltip]);
 
-  // Initialize tour
+  // Initialize tour — calculate position BEFORE showing to prevent jump
   useEffect(() => {
     if (shouldShowTour) {
-      // Minimal delay to ensure DOM is ready
-      setTimeout(() => {
+      // Calculate position synchronously before showing
+      updateTargetPosition();
+
+      // Minimal delay to ensure DOM is ready and position is set
+      requestAnimationFrame(() => {
         setIsVisible(true);
-        updateTargetPosition();
-      }, 100);
+      });
     }
   }, [shouldShowTour, updateTargetPosition]);
 
