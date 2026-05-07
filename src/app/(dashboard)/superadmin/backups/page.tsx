@@ -22,9 +22,10 @@ import {
   FileBox,
   Building,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import type { Id } from '@/convex/_generated/dataModel';
 import {
   DropdownMenu,
@@ -40,6 +41,7 @@ const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 export default function BackupsManagementPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
+  const globalSelectedOrgId = useSelectedOrganization();
 
   const backupStats = useQuery(api.backups.getBackupStats);
   const allOrganizations = useQuery(
@@ -59,7 +61,28 @@ export default function BackupsManagementPage() {
   const restoreEmployeeBackup = useMutation(api.backups.restoreEmployeeBackup);
   const createOrgBackups = useMutation(api.backups.createOrgBackups);
   const [runningBackup, setRunningBackup] = useState<string | null>(null);
-  const [selectedOrg, setSelectedOrg] = useState<{ id: string; name: string } | null>(null);
+  const [localSelectedOrg, setLocalSelectedOrg] = useState<{ id: string; name: string } | null>(
+    null,
+  );
+
+  const enterpriseOrgs = allOrganizations?.filter((org: any) => org.plan === 'enterprise') ?? [];
+
+  const defaultOrgId =
+    globalSelectedOrgId && enterpriseOrgs.some((o: any) => o._id === globalSelectedOrgId)
+      ? globalSelectedOrgId
+      : null;
+
+  const effectiveOrgId = localSelectedOrg?.id ?? defaultOrgId;
+
+  const filteredOrgs = useMemo(() => {
+    if (!effectiveOrgId) return enterpriseOrgs;
+    return enterpriseOrgs.filter((org: any) => org._id === effectiveOrgId);
+  }, [enterpriseOrgs, effectiveOrgId]);
+
+  const selectedOrgData = useMemo(() => {
+    if (!effectiveOrgId) return null;
+    return enterpriseOrgs.find((org: any) => org._id === effectiveOrgId) ?? null;
+  }, [enterpriseOrgs, effectiveOrgId]);
 
   if (!user) {
     return (
@@ -143,9 +166,8 @@ export default function BackupsManagementPage() {
   };
 
   const handleSingleOrgBackup = async () => {
-    if (!selectedOrg) return;
-    await handleManualBackup(selectedOrg.id, selectedOrg.name);
-    setSelectedOrg(null);
+    if (!effectiveOrgId || !selectedOrgData) return;
+    await handleManualBackup(selectedOrgData._id, selectedOrgData.name);
   };
 
   const confirmRestore = async () => {
@@ -184,8 +206,6 @@ export default function BackupsManagementPage() {
       },
     );
   };
-
-  const enterpriseOrgs = allOrganizations?.filter((org: any) => org.plan === 'enterprise') ?? [];
 
   const handleRunAllBackups = async () => {
     setRunningBackup('all');
@@ -230,16 +250,20 @@ export default function BackupsManagementPage() {
               {t('superadmin.backups.subtitle')}
             </p>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  disabled={!!runningBackup || enterpriseOrgs.length === 0}
+                  disabled={!allOrganizations || enterpriseOrgs.length === 0}
                   className="flex items-center gap-2 border-(--border) text-(--text-primary) hover:bg-(--background-subtle) disabled:opacity-50"
                 >
                   <Building className="w-4 h-4" />
-                  {selectedOrg ? selectedOrg.name : t('superadmin.backups.selectOrg')}
+                  {selectedOrgData?.name ??
+                    (globalSelectedOrgId
+                      ? (enterpriseOrgs.find((o: any) => o._id === globalSelectedOrgId)?.name ??
+                        t('superadmin.backups.selectOrg'))
+                      : t('superadmin.backups.selectOrg'))}
                   <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
@@ -249,8 +273,8 @@ export default function BackupsManagementPage() {
                 {enterpriseOrgs.map((org: any) => (
                   <DropdownMenuItem
                     key={org._id}
-                    onClick={() => setSelectedOrg({ id: org._id, name: org.name })}
-                    className={selectedOrg?.id === org._id ? 'bg-(--primary)/10' : ''}
+                    onClick={() => setLocalSelectedOrg({ id: org._id, name: org.name })}
+                    className={effectiveOrgId === org._id ? 'bg-(--primary)/10' : ''}
                   >
                     <Building2 className="w-4 h-4 mr-2" />
                     {org.name}
@@ -260,17 +284,17 @@ export default function BackupsManagementPage() {
             </DropdownMenu>
             <Button
               onClick={handleSingleOrgBackup}
-              disabled={!!runningBackup || !selectedOrg}
+              disabled={!allOrganizations || !!runningBackup || !effectiveOrgId}
               className="flex items-center gap-2 bg-(--accent) text-white hover:bg-(--accent)/90 disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
-              {runningBackup === selectedOrg?.id
+              {runningBackup === effectiveOrgId
                 ? t('superadmin.backups.runningBackup')
                 : t('superadmin.backups.backupSelectedOrg')}
             </Button>
             <Button
               onClick={handleRunAllBackups}
-              disabled={!!runningBackup}
+              disabled={!allOrganizations || !!runningBackup || enterpriseOrgs.length === 0}
               className="flex items-center gap-2 bg-(--primary) text-white hover:bg-(--primary)/90 disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
@@ -347,7 +371,7 @@ export default function BackupsManagementPage() {
             {t('superadmin.backups.orgBackupsTitle')}
           </CardTitle>
           <CardDescription>
-            {enterpriseOrgs.length} {t('superadmin.backups.enterpriseOrgs')}
+            {filteredOrgs.length} {t('superadmin.backups.enterpriseOrgs')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -355,14 +379,14 @@ export default function BackupsManagementPage() {
             <div className="flex items-center justify-center py-8">
               <ShieldLoader size="sm" />
             </div>
-          ) : enterpriseOrgs.length === 0 ? (
+          ) : filteredOrgs.length === 0 ? (
             <div className="text-center py-8 text-(--text-muted)">
               <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>{t('superadmin.backups.noOrgsFound')}</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {enterpriseOrgs.map((org: any) => (
+              {filteredOrgs.map((org: any) => (
                 <OrgBackups
                   key={org._id}
                   org={org}
