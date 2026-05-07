@@ -31,10 +31,7 @@ export const getOrgChart = query({
     const users = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .filter((q) => q.and(
-        q.eq(q.field('isActive'), true),
-        q.neq(q.field('role'), 'superadmin'),
-      ))
+      .filter((q) => q.and(q.eq(q.field('isActive'), true), q.neq(q.field('role'), 'superadmin')))
       .take(MAX_PAGE_SIZE);
 
     const userMap = new Map(users.map((u) => [u._id, u]));
@@ -142,10 +139,7 @@ export const generateOrgChartFromUsers = mutation({
     const users = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .filter((q) => q.and(
-        q.eq(q.field('isActive'), true),
-        q.neq(q.field('role'), 'superadmin'),
-      ))
+      .filter((q) => q.and(q.eq(q.field('isActive'), true), q.neq(q.field('role'), 'superadmin')))
       .take(MAX_PAGE_SIZE);
 
     // Clear existing nodes
@@ -193,9 +187,7 @@ export const generateOrgChartFromUsers = mutation({
       });
 
       // Find department head (admin or first user with supervisor role)
-      const _deptHead = deptUsers.find(
-        (u) => u.role === 'admin' || u.role === 'supervisor',
-      );
+      const _deptHead = deptUsers.find((u) => u.role === 'admin' || u.role === 'supervisor');
 
       // Create user nodes under department
       let userOrder = 0;
@@ -388,7 +380,12 @@ export const moveNode = mutation({
       if (!newParent) throw new Error('New parent not found');
 
       // Check if newParent is a descendant of node
-      const isDescendant = await checkIsDescendant(ctx, node.organizationId, args.nodeId, args.newParentId);
+      const isDescendant = await checkIsDescendant(
+        ctx,
+        node.organizationId,
+        args.nodeId,
+        args.newParentId,
+      );
       if (isDescendant) {
         throw new Error('Cannot move a node to its own descendant');
       }
@@ -419,7 +416,12 @@ async function checkIsDescendant(
 
   for (const child of children) {
     if (child._id === potentialDescendantId) return true;
-    const isDescendant = await checkIsDescendant(ctx, organizationId, child._id, potentialDescendantId);
+    const isDescendant = await checkIsDescendant(
+      ctx,
+      organizationId,
+      child._id,
+      potentialDescendantId,
+    );
     if (isDescendant) return true;
   }
 
@@ -472,6 +474,205 @@ export const saveLayout = mutation({
     });
 
     return layoutId;
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX: Move all person nodes to their correct department based on user.department
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+export const fixOrgChartDepartments = mutation({
+  args: {
+    organizationId: v.id('organizations'),
+    requesterId: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    const requester = await ctx.db.get(args.requesterId);
+    if (!requester) throw new Error('Requester not found');
+
+    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const isAdmin = requester.role === 'admin';
+    if (!isSuperadmin && !isAdmin) {
+      throw new Error('Access denied');
+    }
+
+    // Get all nodes
+    const nodes = await ctx.db
+      .query('orgChartNodes')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .take(MAX_PAGE_SIZE);
+
+    // Build map of department name -> department node id (case-insensitive)
+    const deptMap = new Map<string, Id<'orgChartNodes'>>();
+    const deptNames: string[] = [];
+    for (const node of nodes) {
+      if (node.type === 'department') {
+        const normalizedName = node.name.toLowerCase().trim();
+        deptMap.set(normalizedName, node._id);
+        deptNames.push(normalizedName);
+        // Also add common variations
+        deptMap.set(normalizedName.replace(/\s+/g, ''), node._id);
+      }
+    }
+
+    // Get all users to map userId -> department and name -> department
+    const users = await ctx.db
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .take(MAX_PAGE_SIZE);
+
+    const userDeptMap = new Map<string, string>();
+    const nameDeptMap = new Map<string, string>();
+    for (const user of users) {
+      const dept = user.department || 'Unassigned';
+      userDeptMap.set(user._id, dept);
+      nameDeptMap.set(user.name.toLowerCase().trim(), dept);
+      // Also map by email
+      if (user.email) {
+        nameDeptMap.set(user.email.toLowerCase().trim(), dept);
+      }
+    }
+
+    // Helper to find matching department
+    const findDeptId = (deptName: string): Id<'orgChartNodes'> | null => {
+      const normalized = deptName.toLowerCase().trim();
+      if (deptMap.has(normalized)) return deptMap.get(normalized)!;
+      // Try partial match
+      for (const [key, id] of deptMap) {
+        if (key.includes(normalized) || normalized.includes(key)) {
+          return id;
+        }
+      }
+      return null;
+    };
+
+    let fixedCount = 0;
+    const debug: string[] = [];
+
+    // Log all department nodes for reference
+    for (const [name, id] of deptMap) {
+      debug.push(`DEPT: "${name}" -> ${id}`);
+    }
+
+    // Fix person nodes that are under wrong department
+    for (const node of nodes) {
+      if (node.type === 'person') {
+        let userDept: string | undefined;
+        let matchMethod = '';
+
+        // Try userId first
+        if (node.userId) {
+          userDept = userDeptMap.get(node.userId);
+          if (userDept) matchMethod = 'userId';
+        }
+
+        // Fallback: try matching by name
+        if (!userDept) {
+          userDept = nameDeptMap.get(node.name.toLowerCase().trim());
+          if (userDept) matchMethod = 'name';
+        }
+
+        const currentParentId = node.parentId || 'null (root)';
+        debug.push(
+          `Node "${node.name}": userId=${node.userId || 'none'}, dept=${userDept || 'not found'}, method=${matchMethod}, currentParentId=${currentParentId}`,
+        );
+
+        if (userDept) {
+          const correctDeptId = findDeptId(userDept);
+          if (correctDeptId) {
+            if (node.parentId !== correctDeptId) {
+              await ctx.db.patch(node._id, {
+                parentId: correctDeptId,
+                updatedAt: Date.now(),
+              });
+              fixedCount++;
+              debug.push(`  -> FIXED: ${currentParentId} -> ${correctDeptId} ("${userDept}")`);
+            } else {
+              debug.push(`  -> Already correct (parentId=${correctDeptId})`);
+            }
+          } else {
+            debug.push(`  -> No matching dept node for "${userDept}"`);
+          }
+        } else {
+          debug.push(`  -> Could not determine department`);
+        }
+      }
+    }
+
+    console.log('fixOrgChartDepartments debug:', JSON.stringify(debug, null, 2));
+
+    return { success: true, fixedCount, debug };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEBUG: Dump org chart structure
+// ─────────────────────────────────────────────────────────────────────────────
+export const debugOrgChart = query({
+  args: {
+    organizationId: v.id('organizations'),
+    requesterId: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    const requester = await ctx.db.get(args.requesterId);
+    if (!requester) throw new Error('Requester not found');
+
+    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const isAdmin = requester.role === 'admin';
+    if (!isSuperadmin && !isAdmin) {
+      throw new Error('Access denied');
+    }
+
+    const nodes = await ctx.db
+      .query('orgChartNodes')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .take(MAX_PAGE_SIZE);
+
+    // Get users for name lookup
+    const users = await ctx.db
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .take(MAX_PAGE_SIZE);
+
+    const userMap = new Map(users.map((u) => [u._id, u]));
+
+    // Build node map
+    const nodeMap = new Map<string, any>();
+    nodes.forEach((node) => {
+      const userData = node.userId ? userMap.get(node.userId) : null;
+      nodeMap.set(node._id, {
+        _id: node._id,
+        name: node.name,
+        type: node.type,
+        parentId: node.parentId || null,
+        userId: node.userId || null,
+        userDepartment: userData?.department || null,
+        children: [],
+      });
+    });
+
+    // Build tree
+    const roots: any[] = [];
+    nodes.forEach((node) => {
+      const nodeData = nodeMap.get(node._id)!;
+      if (node.parentId && nodeMap.has(node.parentId)) {
+        const parent = nodeMap.get(node.parentId)!;
+        parent.children.push(nodeData);
+      } else {
+        roots.push(nodeData);
+      }
+    });
+
+    return {
+      flatNodes: nodes.map((n) => ({
+        _id: n._id,
+        name: n.name,
+        type: n.type,
+        parentId: n.parentId || null,
+        userId: n.userId || null,
+      })),
+      tree: roots,
+      totalNodes: nodes.length,
+    };
   },
 });
 

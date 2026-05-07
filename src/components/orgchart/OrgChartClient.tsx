@@ -30,8 +30,6 @@ import {
   ReactFlow,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
   Node,
   Edge,
   Position,
@@ -39,6 +37,8 @@ import {
   Panel,
   BackgroundVariant,
   Handle,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -170,8 +170,16 @@ export default function OrgChartClient() {
 
   const orgIdToQuery = selectedOrgId || (user?.role === 'admin' ? user?.organizationId : null);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>([]);
+  const [nodes, setNodes] = useState<FlowNode[]>([]);
+  const [edges, setEdges] = useState<FlowEdge[]>([]);
+
+  const onNodesChange = useCallback((changes: any) => {
+    setNodes((nds) => applyNodeChanges(changes, nds));
+  }, []);
+
+  const onEdgesChange = useCallback((changes: any) => {
+    setEdges((eds) => applyEdgeChanges(changes, eds));
+  }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -211,80 +219,96 @@ export default function OrgChartClient() {
   const updateNode = useMutation(api.orgchart.updateNode);
   const deleteNode = useMutation(api.orgchart.deleteNode);
   const saveLayout = useMutation(api.orgchart.saveLayout);
+  const fixDepartments = useMutation(api.orgchart.fixOrgChartDepartments);
 
-  // Ref for recursive call (must be declared before buildFlowElements)
-  const buildFlowElementsRef = useRef<
-    (
-      treeData: unknown[],
-      parentId: string | null,
-      depth: number,
-      indexInSiblings: number,
-    ) => { nodes: FlowNode[]; edges: FlowEdge[] }
-  >(() => ({ nodes: [], edges: [] }));
-
-  // Build React Flow nodes and edges from tree data
+  // Build React Flow nodes and edges from tree data with proper tree layout
   const buildFlowElements = useCallback(
-    (
-      treeData: unknown[],
-      parentId: string | null = null,
-      depth = 0,
-      indexInSiblings = 0,
-    ): { nodes: FlowNode[]; edges: FlowEdge[] } => {
-      const newNodes: FlowNode[] = [];
-      const newEdges: FlowEdge[] = [];
+    (treeData: unknown[]): { nodes: FlowNode[]; edges: FlowEdge[] } => {
+      const NODE_WIDTH = 220;
+      const NODE_GAP = 60;
+      const LEVEL_HEIGHT = 220;
 
-      treeData.forEach((node: any, idx) => {
-        const nodeId = node._id;
-        const x = indexInSiblings * 250 + idx * 300;
-        const y = depth * 200;
+      // Calculate subtree leaf count for proper positioning
+      const getLeafCount = (node: any): number => {
+        if (!node.children || node.children.length === 0) return 1;
+        return node.children.reduce((sum: number, child: any) => sum + getLeafCount(child), 0);
+      };
 
-        newNodes.push({
-          id: nodeId,
-          type: 'orgNode',
-          position: { x, y },
-          data: {
-            ...node,
-            label: node.name,
-            children: node.children || [],
-          },
-          sourcePosition: Position.Bottom,
-          targetPosition: Position.Top,
-        });
+      // Build layout: position each node based on its subtree
+      const layoutNodes: { node: any; x: number; y: number }[] = [];
+      const layoutEdges: FlowEdge[] = [];
 
-        if (parentId) {
-          newEdges.push({
-            id: `e-${parentId}-${nodeId}`,
-            source: parentId,
-            target: nodeId,
-            sourceHandle: 'bottom',
-            targetHandle: 'top',
-            type: 'smoothstep',
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 20,
-              height: 20,
-            },
-            style: {
-              stroke: '#94a3b8',
-              strokeWidth: 2,
-            },
-          });
+      const layoutTree = (
+        nodes: any[],
+        startX: number,
+        depth: number,
+        parentId: string | null,
+      ): number => {
+        if (nodes.length === 0) return startX;
+
+        // Calculate total width needed for all children
+        const totalLeafCount = nodes.reduce((sum, n) => sum + getLeafCount(n), 0);
+        const totalWidth = totalLeafCount * (NODE_WIDTH + NODE_GAP) - NODE_GAP;
+
+        let currentX = startX;
+        const y = depth * LEVEL_HEIGHT;
+
+        for (const node of nodes) {
+          const leafCount = getLeafCount(node);
+          const subtreeWidth = leafCount * (NODE_WIDTH + NODE_GAP) - NODE_GAP;
+          const nodeX = currentX + subtreeWidth / 2;
+
+          layoutNodes.push({ node, x: nodeX, y });
+
+          if (parentId) {
+            layoutEdges.push({
+              id: `e-${parentId}-${node._id}`,
+              source: parentId,
+              target: node._id,
+              sourceHandle: 'bottom',
+              targetHandle: 'top',
+              type: 'smoothstep',
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 20,
+                height: 20,
+              },
+              style: {
+                stroke: '#94a3b8',
+                strokeWidth: 2,
+              },
+            });
+          }
+
+          if (node.children && node.children.length > 0) {
+            layoutTree(node.children, currentX, depth + 1, node._id);
+          }
+
+          currentX += subtreeWidth + NODE_GAP;
         }
 
-        if (node.children && node.children.length > 0) {
-          const childElements = buildFlowElementsRef.current(node.children, nodeId, depth + 1, idx);
-          newNodes.push(...childElements.nodes);
-          newEdges.push(...childElements.edges);
-        }
-      });
+        return currentX;
+      };
 
-      return { nodes: newNodes, edges: newEdges };
+      layoutTree(treeData, 0, 0, null);
+
+      const flowNodes: FlowNode[] = layoutNodes.map(({ node, x, y }) => ({
+        id: node._id,
+        type: 'orgNode',
+        position: { x, y },
+        data: {
+          ...node,
+          label: node.name,
+          children: node.children || [],
+        },
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+      }));
+
+      return { nodes: flowNodes, edges: layoutEdges };
     },
     [],
   );
-
-  // Update ref to point to latest buildFlowElements
-  buildFlowElementsRef.current = buildFlowElements;
 
   // Update flow elements when tree data changes
   useEffect(() => {
@@ -440,6 +464,34 @@ export default function OrgChartClient() {
     }
   };
 
+  const handleFixDepartments = async () => {
+    if (!orgIdToQuery || !user?.id) return;
+
+    try {
+      const result = await fixDepartments({
+        organizationId: orgIdToQuery as Id<'organizations'>,
+        requesterId: user.id as Id<'users'>,
+      });
+
+      if (result.fixedCount > 0) {
+        toast.success(
+          t('orgChart.fixDepartmentsSuccess', 'Fixed {{count}} departments', {
+            count: result.fixedCount,
+          }),
+        );
+      } else {
+        toast.info(
+          t('orgChart.fixDepartmentsNoChanges', 'No changes needed. Debug: {{debug}}', {
+            debug: JSON.stringify(result.debug || []),
+          }),
+        );
+      }
+    } catch (e) {
+      toast.error(t('orgChart.fixDepartmentsError', 'Failed to fix departments'));
+      console.error('Fix departments error:', e);
+    }
+  };
+
   const handleExportSVG = () => {
     const svgElement = document.querySelector('.react-flow');
     if (svgElement) {
@@ -505,6 +557,11 @@ export default function OrgChartClient() {
               <Button variant="outline" size="sm" onClick={() => setShowAddDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 {t('orgChart.addNode', 'Add Node')}
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={handleFixDepartments}>
+                <Users className="h-4 w-4 mr-2" />
+                {t('orgChart.fixDepartments', 'Fix Departments')}
               </Button>
 
               <Button variant="outline" size="sm" onClick={handleGenerateOrgChart}>
@@ -574,6 +631,10 @@ export default function OrgChartClient() {
             </div>
           ) : (
             <ReactFlow
+              key={edges
+                .map((e) => `${e.source}-${e.target}`)
+                .sort()
+                .join('|')}
               nodes={filteredNodes}
               edges={edges}
               onNodesChange={onNodesChange}

@@ -7725,7 +7725,10 @@
     "expandAll": "Expand All",
     "collapseAll": "Collapse All",
     "noOrgSelected": "No organization selected",
-    "selectOrgToView": "Please select an organization to view or create its org chart."
+    "selectOrgToView": "Please select an organization to view or create its org chart.",
+    "fixDepartments": "Fix Departments",
+    "fixDepartmentsSuccess": "Fixed {{count}} departments",
+    "fixDepartmentsError": "Failed to fix departments"
   },
   "learning": {
     "title": "Learning Center",
