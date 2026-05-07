@@ -38,6 +38,7 @@ import {
   Activity,
   PieChart,
   Mail,
+  Database,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -369,6 +370,18 @@ export function QuickActionsPalette() {
         setIsOpen(false);
         router.push('/reports');
       },
+    },
+    {
+      id: 'backups',
+      label: t('superadmin.quickActions.backups'),
+      icon: <Database className="w-4 h-4" />,
+      shortcut: '⌘B',
+      category: 'navigation',
+      action: () => {
+        setIsOpen(false);
+        router.push('/superadmin/backups');
+      },
+      superadminOnly: true,
     },
     {
       id: 'security',

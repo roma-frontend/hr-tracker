@@ -86,16 +86,21 @@ const EMPLOYMENT_TYPE_KEYS: Record<string, string> = {
 
 // ─── Main Page ───────────────────────────────────────────────
 export default function CareersGlobalPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const vacancies = useQuery(api.careers.listAllOpenVacancies);
   const allOrgs = useQuery(api.careers.listActiveOrganizations);
+  const [isMounted, setIsMounted] = useState(false);
 
   const [search, setSearch] = useState('');
   const [selectedOrg, setSelectedOrg] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedDept, setSelectedDept] = useState<string>('');
   const [selectedVacancy, setSelectedVacancy] = useState<VacancyItem | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Derive filter options
   const orgs = useMemo(() => {
@@ -131,12 +136,20 @@ export default function CareersGlobalPage() {
 
   const activeFilters = [selectedOrg, selectedType, selectedDept].filter(Boolean).length;
 
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen" style={{ background: 'var(--landing-bg)' }}>
+        <Navbar />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--landing-bg)' }}>
       <Navbar />
 
       {/* Hero */}
-      <section className="pt-20 sm:pt-32 pb-16 px-4 text-center relative overflow-hidden">
+      <section className="pt-20 sm:pt-32 pb-16 px-4 text-center relative">
         <div className="absolute inset-0 pointer-events-none">
           <div
             className="absolute top-20 left-1/4 w-72 h-72 rounded-full opacity-20 blur-3xl"
@@ -159,7 +172,7 @@ export default function CareersGlobalPage() {
             <Briefcase className="w-4 h-4" />
             {vacancies
               ? `${vacancies.length} ${t('careers.openPositions', 'open positions')}`
-              : t('common.loading', 'Loading...')}
+              : '...'}
           </div>
           <h1
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight"

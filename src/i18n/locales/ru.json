@@ -874,10 +874,18 @@
       "manualBackupPartial": "Не удалось создать бэкап для {{count}} сотрудников",
       "runningBackup": "Выполняется...",
       "runAllBackups": "Запустить все бэкапы",
-      "enterpriseOrgs": "корпоративных организаций",
+      "orgsCount": "организаций",
       "selectOrg": "Выбрать организацию",
       "selectOrgLabel": "Выберите организацию",
-      "backupSelectedOrg": "Бэкап выбранной"
+      "backupSelectedOrg": "Бэкап выбранной",
+      "backup": "Бэкап",
+      "refresh": "Обновить",
+      "noEmployeesFound": "Сотрудники в этой организации не найдены",
+      "employeeBackupSuccess": "Бэкап сотрудника успешно запущен",
+      "employeeBackupFailed": "Ошибка бэкапа: {{reason}}",
+      "employeeBackupError": "Ошибка при запуске бэкапа сотрудника",
+      "status": "Статус",
+      "actions": "Действия"
     },
     "user360": {
       "back": "Назад",

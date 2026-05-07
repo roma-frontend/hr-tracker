@@ -484,7 +484,7 @@ export default function OrgChartClient() {
   return (
     <div className="mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-2">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
             {t('orgChart.title', 'Organization Chart')}
@@ -494,7 +494,7 @@ export default function OrgChartClient() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={handleExportSVG}>
             <Download className="h-4 w-4 mr-2" />
             {t('common.exportSVG', 'Export SVG')}

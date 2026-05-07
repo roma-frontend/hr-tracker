@@ -17,6 +17,7 @@ import {
   MicOff,
   Car,
   Maximize2,
+  Database,
 } from 'lucide-react';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { Button } from '@/components/ui/button';
@@ -127,7 +128,33 @@ interface BookDriverAction {
   notes?: string;
 }
 
-type AnyAction = BookLeaveAction | EditLeaveAction | DeleteLeaveAction | BookDriverAction;
+interface BackupOrgAction {
+  type: 'BACKUP_ORG';
+  organizationId: string;
+  organizationName: string;
+}
+
+interface BackupEmployeeAction {
+  type: 'BACKUP_EMPLOYEE';
+  organizationId: string;
+  userId: string;
+  userName: string;
+}
+
+interface RestoreBackupAction {
+  type: 'RESTORE_BACKUP';
+  backupId: string;
+  employeeName: string;
+}
+
+type AnyAction =
+  | BookLeaveAction
+  | EditLeaveAction
+  | DeleteLeaveAction
+  | BookDriverAction
+  | BackupOrgAction
+  | BackupEmployeeAction
+  | RestoreBackupAction;
 
 function parseActions(content: string): { cleanContent: string; actions: AnyAction[] } {
   const actionMatches = [...content.matchAll(/<ACTION>([\s\S]*?)<\/ACTION>/g)];
@@ -618,6 +645,25 @@ export function ChatWidget() {
             notes: action.notes,
           },
         };
+      } else if (action.type === 'BACKUP_ORG') {
+        url = '/api/chat/backup-org';
+        body = {
+          userId: user.id,
+          organizationId: action.organizationId,
+        };
+      } else if (action.type === 'BACKUP_EMPLOYEE') {
+        url = '/api/chat/backup-employee';
+        body = {
+          userId: user.id,
+          organizationId: action.organizationId,
+          employeeId: action.userId,
+        };
+      } else if (action.type === 'RESTORE_BACKUP') {
+        url = '/api/chat/restore-backup';
+        body = {
+          userId: user.id,
+          backupId: action.backupId,
+        };
       }
 
       console.log('[ChatWidget] Sending request to:', url, body);
@@ -805,7 +851,31 @@ export function ChatWidget() {
         политики: '/corporate',
         'покажи политики': '/corporate',
         corporate: '/corporate',
-        документы: '/corporate',
+
+        документы: '/documents',
+        'покажи документы': '/documents',
+        'открой документы': '/documents',
+        'show documents': '/documents',
+        'view documents': '/documents',
+        documents: '/documents',
+
+        обучение: '/learning',
+        'покажи обучение': '/learning',
+        'открой обучение': '/learning',
+        'show learning': '/learning',
+        'view learning': '/learning',
+        learning: '/learning',
+        курсы: '/learning',
+        'покажи курсы': '/learning',
+        courses: '/learning',
+
+        бэкапы: '/superadmin/backups',
+        'покажи бэкапы': '/superadmin/backups',
+        'открой бэкапы': '/superadmin/backups',
+        'show backups': '/superadmin/backups',
+        'view backups': '/superadmin/backups',
+        backups: '/superadmin/backups',
+        'резервные копии': '/superadmin/backups',
 
         'performance review': '/performance',
         'покажи performance': '/performance',
@@ -1167,6 +1237,9 @@ export function ChatWidget() {
                             const isDelete = action.type === 'DELETE_LEAVE';
                             const isEdit = action.type === 'EDIT_LEAVE';
                             const isBookDriver = action.type === 'BOOK_DRIVER';
+                            const isBackupOrg = action.type === 'BACKUP_ORG';
+                            const isBackupEmployee = action.type === 'BACKUP_EMPLOYEE';
+                            const isRestoreBackup = action.type === 'RESTORE_BACKUP';
 
                             return (
                               <motion.div
@@ -1180,7 +1253,9 @@ export function ChatWidget() {
                                       ? 'border-yellow-500/20 bg-yellow-500/5'
                                       : isBookDriver
                                         ? 'border-purple-500/20 bg-purple-500/5'
-                                        : 'border-[#2563eb]/20 bg-[#2563eb]/5'
+                                        : isBackupOrg || isBackupEmployee || isRestoreBackup
+                                          ? 'border-emerald-500/20 bg-emerald-500/5'
+                                          : 'border-[#2563eb]/20 bg-[#2563eb]/5'
                                 }`}
                               >
                                 <div className="flex items-center gap-2 font-semibold text-(--text-primary)">
@@ -1190,6 +1265,8 @@ export function ChatWidget() {
                                     <Pencil className="w-3.5 h-3.5 text-yellow-500" />
                                   ) : isBookDriver ? (
                                     <Car className="w-3.5 h-3.5 text-purple-500" />
+                                  ) : isBackupOrg || isBackupEmployee || isRestoreBackup ? (
+                                    <Database className="w-3.5 h-3.5 text-emerald-500" />
                                   ) : (
                                     <Calendar className="w-3.5 h-3.5 text-[#2563eb]" />
                                   )}
@@ -1199,12 +1276,33 @@ export function ChatWidget() {
                                       ? t('chatWidget.updateLeave')
                                       : isBookDriver
                                         ? t('chatWidget.bookDriver', 'Book Driver')
-                                        : (LEAVE_TYPE_LABELS[
-                                            (action as BookLeaveAction).leaveType
-                                          ] ?? t('chatWidget.leaveRequest'))}
+                                        : isBackupOrg
+                                          ? `Backup: ${(action as BackupOrgAction).organizationName}`
+                                          : isBackupEmployee
+                                            ? `Backup: ${(action as BackupEmployeeAction).userName}`
+                                            : isRestoreBackup
+                                              ? `Restore: ${(action as RestoreBackupAction).employeeName}`
+                                              : (LEAVE_TYPE_LABELS[
+                                                  (action as BookLeaveAction).leaveType
+                                                ] ?? t('chatWidget.leaveRequest'))}
                                 </div>
                                 <div className="text-(--text-muted) space-y-0.5">
-                                  {isBookDriver ? (
+                                  {isBackupOrg ? (
+                                    <>
+                                      <p>🏢 {(action as BackupOrgAction).organizationName}</p>
+                                      <p>💾 Backing up all employees</p>
+                                    </>
+                                  ) : isBackupEmployee ? (
+                                    <>
+                                      <p>👤 {(action as BackupEmployeeAction).userName}</p>
+                                      <p>💾 Backing up employee data</p>
+                                    </>
+                                  ) : isRestoreBackup ? (
+                                    <>
+                                      <p>👤 {(action as RestoreBackupAction).employeeName}</p>
+                                      <p>🔄 Restoring from backup snapshot</p>
+                                    </>
+                                  ) : isBookDriver ? (
                                     <>
                                       <p>🚗 {(action as BookDriverAction).driverName}</p>
                                       <p>

@@ -625,6 +625,215 @@ export const AI_CAPABILITIES: AICapability[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
+  // DOCUMENTS
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'view_documents',
+    name: 'View Documents',
+    description:
+      'Browse, view, and acknowledge organizational documents (policies, contracts, reports, templates, forms, certificates)',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: [
+      'documents',
+      'документы',
+      'document',
+      'документ',
+      'policies',
+      'политики',
+      'contracts',
+      'контракты',
+      'templates',
+      'шаблоны',
+      'forms',
+      'формы',
+      'certificates',
+      'сертификаты',
+      'reports',
+      'отчеты',
+      'mandatory documents',
+      'обязательные документы',
+    ],
+    action: '/documents',
+  },
+  {
+    id: 'upload_document',
+    name: 'Upload Document',
+    description:
+      'Upload new documents with categories, tags, and mandatory acknowledgment settings',
+    requiredRole: ['admin', 'superadmin'],
+    keywords: [
+      'upload document',
+      'загрузить документ',
+      'add document',
+      'добавить документ',
+      'new document',
+      'новый документ',
+      'publish document',
+      'опубликовать документ',
+    ],
+    action: '/documents',
+  },
+  {
+    id: 'manage_documents',
+    name: 'Manage Documents',
+    description:
+      'Manage organizational documents — publish, unpublish, delete, track views and acknowledgments',
+    requiredRole: ['admin', 'superadmin'],
+    keywords: [
+      'manage documents',
+      'управление документами',
+      'document management',
+      'управление документами',
+      'document stats',
+      'статистика документов',
+      'acknowledgment rate',
+      'процент ознакомления',
+    ],
+    action: '/documents',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // LEARNING
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'view_learning',
+    name: 'View Learning Center',
+    description:
+      'Browse course catalog, view enrolled courses, track progress, and see certificates',
+    requiredRole: ['employee', 'supervisor', 'admin', 'superadmin'],
+    keywords: [
+      'learning',
+      'обучение',
+      'courses',
+      'курсы',
+      'course catalog',
+      'каталог курсов',
+      'my courses',
+      'мои курсы',
+      'certificates',
+      'сертификаты',
+      'training',
+      'тренинг',
+      'lessons',
+      'уроки',
+      'quiz',
+      'тест',
+      'professional development',
+      'профессиональное развитие',
+    ],
+    action: '/learning',
+  },
+  {
+    id: 'create_course',
+    name: 'Create Course',
+    description: 'Create new training courses with lessons (video, text, quiz)',
+    requiredRole: ['admin', 'superadmin'],
+    keywords: [
+      'create course',
+      'создать курс',
+      'new course',
+      'новый курс',
+      'add course',
+      'добавить курс',
+      'create lesson',
+      'создать урок',
+      'add lesson',
+      'добавить урок',
+    ],
+    action: '/learning',
+  },
+  {
+    id: 'manage_learning',
+    name: 'Manage Learning',
+    description: 'Manage courses, lessons, enrollments, track team progress and completion rates',
+    requiredRole: ['admin', 'superadmin'],
+    keywords: [
+      'manage learning',
+      'управление обучением',
+      'team learning',
+      'обучение команды',
+      'completion rate',
+      'процент завершения',
+      'learning analytics',
+      'аналитика обучения',
+      'mandatory courses',
+      'обязательные курсы',
+      'enroll employee',
+      'записать сотрудника',
+    ],
+    action: '/learning',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // BACKUPS
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'view_backups',
+    name: 'View Backups',
+    description: 'View backup statistics and organization backup status',
+    requiredRole: ['superadmin'],
+    keywords: [
+      'backups',
+      'бэкапы',
+      'backup',
+      'резервная копия',
+      'data backup',
+      'резервное копирование',
+      'restore data',
+      'восстановить данные',
+      'backup stats',
+      'статистика бэкапов',
+    ],
+    action: '/superadmin/backups',
+  },
+  {
+    id: 'run_backup',
+    name: 'Run Backup',
+    description: 'Manually trigger employee data backups for organizations or individual employees',
+    requiredRole: ['superadmin'],
+    keywords: [
+      'run backup',
+      'запустить бэкап',
+      'create backup',
+      'создать бэкап',
+      'backup now',
+      'бэкап сейчас',
+      'backup organization',
+      'бэкап организации',
+      'backup all',
+      'бэкап всех',
+      'backup employee',
+      'бэкап сотрудника',
+      'backup user',
+      'бэкап пользователя',
+      'сделай бэкап',
+      'создай бэкап',
+      'запусти бэкап',
+      'run backup for',
+      'сделай бэкап для',
+      'забэкапь',
+    ],
+    action: '/superadmin/backups',
+  },
+  {
+    id: 'restore_backup',
+    name: 'Restore Backup',
+    description: 'Restore employee data from a previous backup snapshot',
+    requiredRole: ['superadmin'],
+    keywords: [
+      'restore backup',
+      'восстановить бэкап',
+      'restore data',
+      'восстановить данные',
+      'rollback',
+      'откат',
+      'восстановление',
+      'restore from backup',
+    ],
+    action: '/superadmin/backups',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   // APPROVALS
   // ═══════════════════════════════════════════════════════════════
   {
@@ -761,6 +970,32 @@ You are speaking to the **platform owner**. Full system access. You can:
 - Cross-org metrics, growth trends
 - User engagement, feature usage
 
+📄 **Document Management** (/documents)
+- Full access to all organizational documents across all orgs
+- Upload, publish, unpublish, delete documents
+- Track views and acknowledgments per employee
+- View team document overview with acknowledgment rates
+
+📚 **Learning Center** (/learning)
+- Create and manage training courses across all orgs
+- Full course creation, lesson management, enrollment control
+- Track team progress, completion rates, and certificates
+- View learning analytics dashboard
+
+💾 **Employee Backups** (/superadmin/backups)
+ - Automated backups every 6 hours, 48-hour retention
+ - Manual backup triggers per organization or for individual employees
+ - View backup history, restore employee data from snapshots
+ - Backup covers: user data, leaves, tasks, reviews, kudos, documents, and more
+ - **AI Action Support**: When the user asks to run a backup, generate an <ACTION> tag:
+   - For organization backup: \`<ACTION>{"type":"BACKUP_ORG","organizationId":"xxx","organizationName":"Name"}</ACTION>\`
+   - For employee backup: \`<ACTION>{"type":"BACKUP_EMPLOYEE","organizationId":"xxx","userId":"yyy","userName":"Name"}</ACTION>\`
+   - For restore backup: \`<ACTION>{"type":"RESTORE_BACKUP","backupId":"xxx","employeeName":"Name"}</ACTION>\`
+   - If the user says "backup Test Corp" → use BACKUP_ORG with that org's ID
+   - If the user says "backup John Doe" → ask which org, then use BACKUP_EMPLOYEE
+   - If the user says "restore backup for John Doe" → use RESTORE_BACKUP with the backup ID
+   - Always confirm the target before generating the action
+
 ⚠️ SECURITY: Be careful with destructive actions. Always confirm before deletion.
 `;
       break;
@@ -809,6 +1044,23 @@ You are speaking to an **organization admin**. Full org-level access:
 - Direct messages and group channels
 - System notification channel "System Announcements"
 
+📄 **Document Management** (/documents)
+- Upload and publish organizational documents
+- Set categories: policy, contract, report, template, form, certificate
+- Mark documents as mandatory for employee acknowledgment
+- Track who viewed and acknowledged each document
+- View team document overview with acknowledgment rates
+- Delete or unpublish documents
+
+📚 **Learning Center** (/learning)
+- Create training courses with multiple lessons
+- Lesson types: video, text, quiz, mixed
+- Enroll employees in courses (mandatory or optional)
+- Track team progress and completion rates
+- View learning analytics dashboard
+- Manage course publishing and lesson ordering
+- Issue certificates upon course completion
+
 SCOPE: Actions limited to YOUR organization only.
 `;
       break;
@@ -840,6 +1092,18 @@ You manage your direct reports:
 - Track progress and deadlines
 - Set priorities for your team's work
 
+📄 **Documents**
+- View organizational documents (policies, contracts, templates)
+- Search and filter documents by category
+- View mandatory documents and acknowledge them
+- Track which documents your team has viewed
+
+📚 **Learning Center**
+- Browse course catalog and enroll in courses
+- View enrolled courses and track your progress
+- Complete lessons (video, text, quiz)
+- View earned certificates
+
 SCOPE: You can manage ONLY employees assigned to you as supervisor.
 `;
       break;
@@ -866,6 +1130,19 @@ You can help with personal data and self-service:
 ✅ **Tasks**
 - View assigned tasks, priorities, and deadlines
 - Track task status updates
+
+📄 **Documents**
+- View organizational documents (policies, contracts, templates, forms, certificates)
+- Search and filter documents by category
+- View mandatory documents and acknowledge them
+- Track which documents you've viewed
+
+📚 **Learning Center**
+- Browse course catalog and enroll in courses
+- View enrolled courses and track progress
+- Complete lessons (video, text, quiz)
+- View earned certificates
+- Take quizzes and see results
 
 👥 **Team Info**
 - View team calendar — see who is on leave
@@ -1089,21 +1366,44 @@ Shield HR is a comprehensive HR management platform with these core modules:
 - Theme and layout adjustments
 - Branding configuration
 - Custom CSS and styling options
-- Policy acknowledgment tracking
-- Document version control
 
-📋 **Approvals Center** (/approvals)
-- Centralized approval dashboard for supervisors/admins
-- Pending leave requests with employee context
-- Bulk approval/rejection capabilities
-- Approval history and audit trail
-- Delegation support when supervisor is absent
+📄 **Documents** (/documents)
+- Centralized document management for the organization
+- Document categories: Policy, Contract, Report, Template, Form, Certificate, Other
+- Upload wizard for admins with metadata (title, description, tags, category)
+- Mandatory documents require employee acknowledgment
+- Track views and acknowledgments per employee
+- Search and filter by category or keyword
+- Admin stats: total documents, published count, total views, acknowledgment rate
+- Tabs: All Documents, Mandatory, Unpublished (admin only)
+- Employees can view, search, and acknowledge documents
+- Admins can upload, publish, unpublish, and delete documents
 
-🎨 **AI Site Editor** (/ai-site-editor)
-- AI-powered site customization
-- Theme and layout adjustments
-- Branding configuration
-- Custom CSS and styling options
+📚 **Learning Center** (/learning)
+- Full training and development platform
+- Course catalog with search, category, and difficulty filters
+- Course creation (admin): title, description, category, difficulty (beginner/intermediate/advanced), estimated hours, tags
+- Lesson types: Video, Text, Quiz, Mixed
+- Lesson player with progress tracking and time spent
+- Quiz system with scoring and pass/fail results
+- Enrollment workflow: self-enroll or admin-enroll employees
+- Mandatory courses assigned by admins
+- Certificates issued upon course completion
+- Tabs: Course Catalog, My Courses, Certificates, Team Overview (admin)
+- Admin stats: total courses, total enrollments, completion rate, mandatory courses
+- Team overview shows per-employee progress across all courses
+
+💾 **Employee Backups** (/superadmin/backups) — Superadmin only
+- Automated employee data backups every 6 hours
+- Backup retention: 48 hours (auto-cleanup of expired backups)
+- Backups cover: user profile, employee profile, leave requests, tasks, company events, review cycles, review assignments, kudos, user points, objectives, documents, notes, performance metrics, time tracking, ratings, signatures
+- Organization dropdown to select specific org for backup
+- "Backup Selected" — manual backup for one organization
+- "Run All Backups" — trigger backups for all organizations
+- View backup history per organization and per employee
+- Restore employee data from any active backup snapshot
+- Backup stats: total backups, storage used, organizations backed up
+- Expired backups are automatically cleaned up hourly
 
 ═══════════════════════════════════════════════════════════════
 HR POLICIES & RULES

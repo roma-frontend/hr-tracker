@@ -860,10 +860,17 @@
       "manualBackupPartial": "{{count}} աշխատակիցների պատճենումը ձախողվել է",
       "runningBackup": "Կատարվում է...",
       "runAllBackups": "Գործարկել բոլոր պատճենները",
-      "enterpriseOrgs": "ձեռնարկությունների կազմակերպություններ",
+      "orgsCount": "կազմակերպություններ",
       "selectOrg": "Ընտրել կազմակերպությունը",
       "selectOrgLabel": "Ընտրեք կազմակերպությունը",
-      "backupSelectedOrg": "Պատճենել ընտրվածը"
+      "backupSelectedOrg": "Պատճենել ընտրվածը",
+      "backup": "Պատճեն",
+      "noEmployeesFound": "Այս կազմակերպությունում աշխատակիցներ չեն գտնվել",
+      "employeeBackupSuccess": "Աշխատակցի պատճենը հաջողությամբ սկսվել է",
+      "employeeBackupFailed": "Պատճենման սխալ՝ {{reason}}",
+      "employeeBackupError": "Սխալ աշխատակցի պատճենման գործարկման ժամանակ",
+      "status": "Կարգավիճակ",
+      "actions": "Գործողություններ"
     },
     "user360": {
       "back": "Հետ",

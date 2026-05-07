@@ -252,6 +252,7 @@ const pricingTiers: PricingTier[] = [
       'pricing.advancedSecurity',
       'pricing.prioritySupport',
       'pricing.priorityProcessing',
+      'pricing.automatedBackups',
     ],
     buttonTextKey: 'pricing.contactSales',
     accentFrom: '#0ea5e9',

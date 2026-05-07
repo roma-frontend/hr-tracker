@@ -1,7 +1,6 @@
 /**
  * Employee Backup System
  * Автоматические бэкапы данных сотрудников (каждые 6 часов)
- * Только для Enterprise организаций
  *
  * Tables referenced (from schema):
  *   users, employeeProfiles, leaveRequests, tasks, companyEvents,
@@ -39,8 +38,8 @@ export const createEmployeeBackup = mutation({
     }
 
     const org = await ctx.db.get(args.organizationId);
-    if (!org || org.plan !== 'enterprise') {
-      return { success: false, reason: 'not_enterprise' };
+    if (!org) {
+      return { success: false, reason: 'org_not_found' };
     }
 
     const snapshot = await buildEmployeeSnapshot(ctx, args.organizationId, args.userId);
@@ -79,7 +78,7 @@ export const createEmployeeBackupInternal = internalMutation({
     if (!user) return;
 
     const org = await ctx.db.get(args.organizationId);
-    if (!org || org.plan !== 'enterprise') return;
+    if (!org) return;
 
     const snapshot = await buildEmployeeSnapshot(ctx, args.organizationId, args.userId);
 
@@ -100,7 +99,7 @@ export const createEmployeeBackupInternal = internalMutation({
 });
 
 /**
- * Создать бэкапы для всех сотрудников Enterprise организации
+ * Создать бэкапы для всех сотрудников организации
  */
 export const createOrgBackups = mutation({
   args: {
@@ -108,8 +107,8 @@ export const createOrgBackups = mutation({
   },
   handler: async (ctx, args) => {
     const org = await ctx.db.get(args.organizationId);
-    if (!org || org.plan !== 'enterprise') {
-      return { success: false, reason: 'not_enterprise' };
+    if (!org) {
+      return { success: false, reason: 'org_not_found' };
     }
 
     const employees = await ctx.db
@@ -334,7 +333,7 @@ export const createOrgBackupsInternal = internalMutation({
   },
   handler: async (ctx, args) => {
     const org = await ctx.db.get(args.organizationId);
-    if (!org || org.plan !== 'enterprise') return;
+    if (!org) return;
 
     const employees = await ctx.db
       .query('users')
@@ -418,7 +417,7 @@ export const hasBackupAccess = query({
   },
   handler: async (ctx, args) => {
     const org = await ctx.db.get(args.organizationId);
-    return org?.plan === 'enterprise';
+    return !!org;
   },
 });
 
@@ -471,7 +470,7 @@ async function buildEmployeeSnapshot(
 
   const reviewResponses = await ctx.db
     .query('reviewResponses')
-    .withIndex('by_cycle_reviewee', (q: any) => q.eq('revieweeId', userId))
+    .filter((q: any) => q.eq(q.field('revieweeId'), userId))
     .collect();
 
   const kudos = await ctx.db
@@ -524,9 +523,14 @@ async function buildEmployeeSnapshot(
     .withIndex('by_employee', (q: any) => q.eq('employeeId', userId))
     .collect();
 
-  const signatures = await ctx.db
-    .query('signatures')
-    .withIndex('by_user', (q: any) => q.eq('userId', userId))
+  const signatureDocs = await ctx.db
+    .query('signatureDocuments')
+    .withIndex('by_creator', (q: any) => q.eq('createdBy', userId))
+    .collect();
+
+  const signatureRequests = await ctx.db
+    .query('signatureRequests')
+    .withIndex('by_signer', (q: any) => q.eq('signerId', userId))
     .collect();
 
   const sanitizedUser = user
@@ -564,7 +568,8 @@ async function buildEmployeeSnapshot(
     performanceMetrics,
     timeTracking,
     ratings,
-    signatures,
+    signatureDocs,
+    signatureRequests,
     snapshotTimestamp: Date.now(),
   };
 }

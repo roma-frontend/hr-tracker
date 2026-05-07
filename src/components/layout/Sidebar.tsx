@@ -40,6 +40,7 @@ import {
   Network,
   GraduationCap,
   FileText,
+  Database,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/useSidebarStore';
@@ -242,6 +243,12 @@ const navItems = [
     href: '/superadmin/subscriptions',
     labelKey: 'nav.subscriptions',
     icon: CreditCard,
+    roles: ['superadmin'],
+  },
+  {
+    href: '/superadmin/backups',
+    labelKey: 'nav.backups',
+    icon: Database,
     roles: ['superadmin'],
   },
   {

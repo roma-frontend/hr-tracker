@@ -216,7 +216,7 @@ export default function DocumentsClient() {
   return (
     <div className="mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
             {t('documents.title', 'Document Management')}

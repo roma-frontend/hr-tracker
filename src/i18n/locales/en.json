@@ -873,10 +873,17 @@
       "manualBackupPartial": "{{count}} employees failed to backup",
       "runningBackup": "Running...",
       "runAllBackups": "Run All Backups",
-      "enterpriseOrgs": "enterprise organizations",
+      "orgsCount": "organizations",
       "selectOrg": "Select Organization",
       "selectOrgLabel": "Choose an organization",
-      "backupSelectedOrg": "Backup Selected"
+      "backupSelectedOrg": "Backup Selected",
+      "backup": "Backup",
+      "noEmployeesFound": "No employees found in this organization",
+      "employeeBackupSuccess": "Employee backup started successfully",
+      "employeeBackupFailed": "Backup failed: {{reason}}",
+      "employeeBackupError": "Error running employee backup",
+      "status": "Status",
+      "actions": "Actions"
     },
     "user360": {
       "back": "Back",

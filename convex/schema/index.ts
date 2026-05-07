@@ -32,6 +32,7 @@ import { offboarding } from './offboarding';
 import { orgchart } from './orgchart';
 import { learning } from './learning';
 import { documents } from './documents';
+import { backups } from './backups';
 
 export default defineSchema({
   ...organizations,
@@ -67,6 +68,7 @@ export default defineSchema({
   ...orgchart,
   ...learning,
   ...documents,
+  ...backups,
 });
 
 export {
@@ -103,4 +105,5 @@ export {
   orgchart,
   learning,
   documents,
+  backups,
 };

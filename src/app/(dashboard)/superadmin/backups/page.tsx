@@ -21,8 +21,9 @@ import {
   Calendar,
   FileBox,
   Building,
+  RefreshCw,
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
@@ -60,29 +61,45 @@ export default function BackupsManagementPage() {
 
   const restoreEmployeeBackup = useMutation(api.backups.restoreEmployeeBackup);
   const createOrgBackups = useMutation(api.backups.createOrgBackups);
+  const createEmployeeBackup = useMutation(api.backups.createEmployeeBackup);
   const [runningBackup, setRunningBackup] = useState<string | null>(null);
   const [localSelectedOrg, setLocalSelectedOrg] = useState<{ id: string; name: string } | null>(
     null,
   );
 
-  const enterpriseOrgs = allOrganizations?.filter((org: any) => org.plan === 'enterprise') ?? [];
+  const refreshData = useCallback(() => {
+    window.location.reload();
+  }, []);
 
+  const orgs = allOrganizations ?? [];
+  const isLoading = !allOrganizations;
+
+  // Если на дашборде выбрана организация — используем её по умолчанию
   const defaultOrgId =
-    globalSelectedOrgId && enterpriseOrgs.some((o: any) => o._id === globalSelectedOrgId)
+    globalSelectedOrgId && orgs.some((o: any) => o._id === globalSelectedOrgId)
       ? globalSelectedOrgId
       : null;
 
   const effectiveOrgId = localSelectedOrg?.id ?? defaultOrgId;
 
+  // Если выбрана конкретная организация — показываем только её, иначе все
   const filteredOrgs = useMemo(() => {
-    if (!effectiveOrgId) return enterpriseOrgs;
-    return enterpriseOrgs.filter((org: any) => org._id === effectiveOrgId);
-  }, [enterpriseOrgs, effectiveOrgId]);
+    if (!effectiveOrgId) return orgs;
+    return orgs.filter((org: any) => org._id === effectiveOrgId);
+  }, [orgs, effectiveOrgId]);
 
   const selectedOrgData = useMemo(() => {
     if (!effectiveOrgId) return null;
-    return enterpriseOrgs.find((org: any) => org._id === effectiveOrgId) ?? null;
-  }, [enterpriseOrgs, effectiveOrgId]);
+    return orgs.find((org: any) => org._id === effectiveOrgId) ?? null;
+  }, [orgs, effectiveOrgId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <ShieldLoader size="lg" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -155,6 +172,8 @@ export default function BackupsManagementPage() {
         toast.success(
           t('superadmin.backups.manualBackupSuccess', { name: orgName, count: result.backedUp }),
         );
+        // Auto-expand the organization so user can see the backups
+        setExpandedOrgs((prev) => new Set(prev).add(orgId));
       } else {
         toast.error(t('superadmin.backups.manualBackupFailed', { reason: result.reason }));
       }
@@ -168,6 +187,25 @@ export default function BackupsManagementPage() {
   const handleSingleOrgBackup = async () => {
     if (!effectiveOrgId || !selectedOrgData) return;
     await handleManualBackup(selectedOrgData._id, selectedOrgData.name);
+  };
+
+  const handleBackupEmployee = async (orgId: string, userId: string) => {
+    setRunningBackup(userId);
+    try {
+      const result = await createEmployeeBackup({
+        organizationId: orgId as Id<'organizations'>,
+        userId: userId as Id<'users'>,
+      });
+      if (result.success) {
+        toast.success(t('superadmin.backups.employeeBackupSuccess'));
+      } else {
+        toast.error(t('superadmin.backups.employeeBackupFailed', { reason: result.reason }));
+      }
+    } catch (error) {
+      toast.error(t('superadmin.backups.employeeBackupError'));
+    } finally {
+      setRunningBackup(null);
+    }
   };
 
   const confirmRestore = async () => {
@@ -213,7 +251,7 @@ export default function BackupsManagementPage() {
       let totalBackedUp = 0;
       let totalFailed = 0;
 
-      for (const org of enterpriseOrgs) {
+      for (const org of orgs) {
         try {
           const result = await createOrgBackups({ organizationId: org._id as Id<'organizations'> });
           if (result.success) {
@@ -255,13 +293,13 @@ export default function BackupsManagementPage() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  disabled={!allOrganizations || enterpriseOrgs.length === 0}
+                  disabled={orgs.length === 0}
                   className="flex items-center gap-2 border-(--border) text-(--text-primary) hover:bg-(--background-subtle) disabled:opacity-50"
                 >
                   <Building className="w-4 h-4" />
                   {selectedOrgData?.name ??
                     (globalSelectedOrgId
-                      ? (enterpriseOrgs.find((o: any) => o._id === globalSelectedOrgId)?.name ??
+                      ? (orgs.find((o: any) => o._id === globalSelectedOrgId)?.name ??
                         t('superadmin.backups.selectOrg'))
                       : t('superadmin.backups.selectOrg'))}
                   <ChevronDown className="w-3 h-3 ml-1" />
@@ -270,7 +308,7 @@ export default function BackupsManagementPage() {
               <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
                 <DropdownMenuLabel>{t('superadmin.backups.selectOrgLabel')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {enterpriseOrgs.map((org: any) => (
+                {orgs.map((org: any) => (
                   <DropdownMenuItem
                     key={org._id}
                     onClick={() => setLocalSelectedOrg({ id: org._id, name: org.name })}
@@ -284,7 +322,7 @@ export default function BackupsManagementPage() {
             </DropdownMenu>
             <Button
               onClick={handleSingleOrgBackup}
-              disabled={!allOrganizations || !!runningBackup || !effectiveOrgId}
+              disabled={!!runningBackup || !effectiveOrgId}
               className="flex items-center gap-2 bg-(--accent) text-white hover:bg-(--accent)/90 disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
@@ -294,13 +332,21 @@ export default function BackupsManagementPage() {
             </Button>
             <Button
               onClick={handleRunAllBackups}
-              disabled={!allOrganizations || !!runningBackup || enterpriseOrgs.length === 0}
+              disabled={!!runningBackup || orgs.length === 0}
               className="flex items-center gap-2 bg-(--primary) text-white hover:bg-(--primary)/90 disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
               {runningBackup
                 ? t('superadmin.backups.runningBackup')
                 : t('superadmin.backups.runAllBackups')}
+            </Button>
+            <Button
+              onClick={refreshData}
+              variant="outline"
+              className="flex items-center gap-2 border-(--border) text-(--text-primary) hover:bg-(--background-subtle)"
+            >
+              <RefreshCw className="w-4 h-4" />
+              {t('superadmin.backups.refresh', 'Refresh')}
             </Button>
           </div>
         </div>
@@ -371,15 +417,11 @@ export default function BackupsManagementPage() {
             {t('superadmin.backups.orgBackupsTitle')}
           </CardTitle>
           <CardDescription>
-            {filteredOrgs.length} {t('superadmin.backups.enterpriseOrgs')}
+            {filteredOrgs.length} {t('superadmin.backups.orgsCount')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!allOrganizations ? (
-            <div className="flex items-center justify-center py-8">
-              <ShieldLoader size="sm" />
-            </div>
-          ) : filteredOrgs.length === 0 ? (
+          {filteredOrgs.length === 0 ? (
             <div className="text-center py-8 text-(--text-muted)">
               <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>{t('superadmin.backups.noOrgsFound')}</p>
@@ -396,10 +438,12 @@ export default function BackupsManagementPage() {
                   onToggleEmployee={toggleEmployee}
                   onRestore={handleRestore}
                   onManualBackup={handleManualBackup}
+                  onBackupEmployee={handleBackupEmployee}
                   runningBackup={runningBackup}
                   formatSize={formatSize}
                   formatDate={formatDate}
                   t={t}
+                  superadminUserId={user.id}
                 />
               ))}
             </div>
@@ -474,10 +518,12 @@ function OrgBackups({
   onToggleEmployee,
   onRestore,
   onManualBackup,
+  onBackupEmployee,
   runningBackup,
   formatSize,
   formatDate,
   t,
+  superadminUserId,
 }: {
   org: any;
   isExpanded: boolean;
@@ -491,15 +537,40 @@ function OrgBackups({
     createdAt: number,
   ) => void;
   onManualBackup: (orgId: string, orgName: string) => void;
+  onBackupEmployee: (orgId: string, userId: string) => void;
   runningBackup: string | null;
   formatSize: (bytes: number) => string;
   formatDate: (timestamp: number) => string;
   t: (key: string, params?: Record<string, any>) => string;
+  superadminUserId: string;
 }) {
   const orgBackups = useQuery(
     api.backups.getOrgBackups,
     isExpanded ? { organizationId: org._id as Id<'organizations'> } : 'skip',
   );
+
+  const employees = useQuery(
+    api.users.queries.getUsersByOrganizationId,
+    isExpanded
+      ? {
+          requesterId: superadminUserId as Id<'users'>,
+          organizationId: org._id as Id<'organizations'>,
+        }
+      : 'skip',
+  );
+
+  const backupMap = useMemo(() => {
+    const map = new Map<string, any>();
+    orgBackups?.forEach((emp: any) => {
+      map.set(String(emp.userId), emp);
+    });
+    return map;
+  }, [orgBackups]);
+
+  const employeeList = useMemo(() => {
+    if (!employees) return [];
+    return employees.filter((emp: any) => emp.role !== 'superadmin');
+  }, [employees]);
 
   return (
     <div className="border border-(--border) rounded-lg overflow-hidden">
@@ -551,26 +622,30 @@ function OrgBackups({
         </Button>
       </div>
 
-      {isExpanded && orgBackups && (
+      {isExpanded && employeeList && (
         <div className="border-t border-(--border) bg-(--background-subtle)">
-          {orgBackups.length === 0 ? (
+          {employeeList.length === 0 ? (
             <div className="p-6 text-center text-(--text-muted)">
-              <Database className="w-8 h-8 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">{t('superadmin.backups.noBackupsForUser')}</p>
+              <User className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <p className="text-sm">{t('superadmin.backups.noEmployeesFound')}</p>
             </div>
           ) : (
             <div className="space-y-1 p-2">
-              {orgBackups.map((emp: any) => {
-                const empKey = `${org._id}:${emp.userId}`;
+              {employeeList.map((emp: any) => {
+                const empKey = `${org._id}:${emp._id}`;
                 const isEmpExpanded = expandedEmployees.has(empKey);
+                const backupData = backupMap.get(String(emp._id));
                 return (
                   <EmployeeBackups
-                    key={emp.userId}
+                    key={emp._id}
                     emp={emp}
                     orgId={org._id}
                     isExpanded={isEmpExpanded}
-                    onToggle={() => onToggleEmployee(org._id, emp.userId)}
+                    onToggle={() => onToggleEmployee(org._id, emp._id)}
                     onRestore={onRestore}
+                    onBackup={() => onBackupEmployee(org._id, emp._id)}
+                    backupData={backupData}
+                    runningBackup={runningBackup}
                     formatSize={formatSize}
                     formatDate={formatDate}
                     t={t}
@@ -591,6 +666,9 @@ function EmployeeBackups({
   isExpanded,
   onToggle,
   onRestore,
+  onBackup,
+  backupData,
+  runningBackup,
   formatSize,
   formatDate,
   t,
@@ -605,6 +683,9 @@ function EmployeeBackups({
     userEmail: string,
     createdAt: number,
   ) => void;
+  onBackup: () => void;
+  backupData?: any;
+  runningBackup: string | null;
   formatSize: (bytes: number) => string;
   formatDate: (timestamp: number) => string;
   t: (key: string, params?: Record<string, any>) => string;
@@ -612,15 +693,27 @@ function EmployeeBackups({
   const userBackups = useQuery(
     api.backups.getUserBackups,
     isExpanded
-      ? { organizationId: orgId as Id<'organizations'>, userId: emp.userId as Id<'users'> }
+      ? { organizationId: orgId as Id<'organizations'>, userId: emp._id as Id<'users'> }
       : 'skip',
   );
 
+  const isBackingUp = runningBackup === emp._id;
+  const backupCount = backupData?.backupCount ?? 0;
+  const latestBackup = backupData?.latestBackup;
+
   return (
     <div className="border border-(--border) rounded-lg overflow-hidden bg-(--card)">
-      <button
+      <div
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-3 hover:bg-(--background-subtle) transition-colors text-left"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        className="w-full flex items-center justify-between p-3 hover:bg-(--background-subtle) transition-colors text-left cursor-pointer"
       >
         <div className="flex items-center gap-2">
           {isExpanded ? (
@@ -630,24 +723,42 @@ function EmployeeBackups({
           )}
           <User className="w-4 h-4 text-(--text-muted)" />
           <div>
-            <p className="font-medium text-(--text-primary) text-sm">{emp.userName}</p>
-            <p className="text-xs text-(--text-muted)">{emp.userEmail}</p>
+            <p className="font-medium text-(--text-primary) text-sm">{emp.name}</p>
+            <p className="text-xs text-(--text-muted)">{emp.email}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-3 text-sm">
           <Badge
             variant="outline"
             className="bg-(--primary)/10 text-(--primary) border-(--primary)/20"
           >
-            {emp.backupCount}{' '}
-            {t('superadmin.backups.employeeBackupsCount', { count: emp.backupCount })}
+            {backupCount} {t('superadmin.backups.employeeBackupsCount', { count: backupCount })}
           </Badge>
-          <div className="flex items-center gap-1 text-(--text-muted)">
-            <Calendar className="w-3 h-3" />
-            {formatDate(emp.latestBackup)}
-          </div>
+          {latestBackup && (
+            <div className="flex items-center gap-1 text-(--text-muted)">
+              <Calendar className="w-3 h-3" />
+              {formatDate(latestBackup)}
+            </div>
+          )}
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onBackup();
+            }}
+            disabled={isBackingUp || runningBackup === 'all'}
+            variant="outline"
+            size="sm"
+            className="border-(--primary) text-(--primary) hover:bg-(--primary)/10 disabled:opacity-50"
+          >
+            {isBackingUp ? (
+              <ShieldLoader size="xs" variant="inline" />
+            ) : (
+              <Database className="w-3 h-3" />
+            )}
+            <span className="ml-1 text-xs font-medium">{t('superadmin.backups.backup')}</span>
+          </Button>
         </div>
-      </button>
+      </div>
 
       {isExpanded && userBackups && (
         <div className="border-t border-(--border) bg-(--background-subtle)">

@@ -5,26 +5,27 @@ import { useSubscription, type Plan } from './useSubscription';
 // ── Feature matrix per plan ────────────────────────────────────────────────────
 // Add new features here as the product grows
 export interface PlanFeatures {
-  analytics: boolean; // Advanced Analytics page
-  advancedAnalytics: boolean; // professional+
-  reports: boolean; // Reports & CSV export
-  exportReports: boolean; // professional+
-  aiChat: boolean; // AI Leave Assistant / Chat
-  aiInsights: boolean; // professional+
-  aiLeaveAssistant: boolean; // professional+
-  aiSiteEditor: boolean; // all plans
+  analytics: boolean;
+  advancedAnalytics: boolean;
+  reports: boolean;
+  exportReports: boolean;
+  aiChat: boolean;
+  aiInsights: boolean;
+  aiLeaveAssistant: boolean;
+  aiSiteEditor: boolean;
   aiSiteEditorDesignChanges: number;
   aiSiteEditorContentChanges: number;
   aiSiteEditorLayoutChanges: number;
   aiSiteEditorLogicChanges: boolean;
   aiSiteEditorFullControl: boolean;
-  sla: boolean; // SLA settings & monitoring
-  slaSettings: boolean; // professional+
-  apiAccess: boolean; // API access
-  customPolicies: boolean; // Custom leave policies
-  calendarSync: boolean; // Google/Outlook calendar sync
-  integrations: boolean; // enterprise only
-  maxEmployees: number | null; // null = unlimited
+  sla: boolean;
+  slaSettings: boolean;
+  apiAccess: boolean;
+  customPolicies: boolean;
+  calendarSync: boolean;
+  integrations: boolean;
+  employeeBackups: boolean;
+  maxEmployees: number | null;
 }
 
 const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
@@ -48,6 +49,7 @@ const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     customPolicies: false,
     calendarSync: false,
     integrations: false,
+    employeeBackups: false,
     maxEmployees: 50,
   },
   starter: {
@@ -70,6 +72,7 @@ const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     customPolicies: true,
     calendarSync: true,
     integrations: false,
+    employeeBackups: false,
     maxEmployees: 50,
   },
   professional: {
@@ -92,6 +95,7 @@ const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     customPolicies: true,
     calendarSync: true,
     integrations: false,
+    employeeBackups: false,
     maxEmployees: 200,
   },
   enterprise: {
@@ -114,6 +118,7 @@ const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     customPolicies: true,
     calendarSync: true,
     integrations: true,
+    employeeBackups: true,
     maxEmployees: null,
   },
 };
