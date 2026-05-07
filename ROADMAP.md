@@ -1,6 +1,6 @@
 # HR Office — Project Roadmap & Status
 
-> **Last updated:** 2026-05-05
+> **Last updated:** 2026-05-07
 > **Stack:** Next.js 16 (App Router) + Convex + Shadcn/ui + Tailwind CSS
 > **i18n:** EN / RU / HY (Armenian)
 > **Auth:** Convex Auth (session-based)
@@ -259,13 +259,13 @@
 
 ### 2.1 Learning Management System (LMS)
 
-**Status:** ✅ Fully implemented
+**Status:** ⚠️ Mostly implemented
 
 | Layer   | Status | Files                                        |
 | ------- | ------ | -------------------------------------------- |
 | Schema  | ✅     | `convex/schema/learning.ts`                  |
 | Backend | ✅     | `convex/learning.ts`                         |
-| UI      | ✅     | `src/components/learning/LearningClient.tsx` |
+| UI      | ⚠️     | `src/components/learning/LearningClient.tsx` |
 | Route   | ✅     | `src/app/(dashboard)/learning/page.tsx`      |
 | i18n    | ✅     | EN ✅, RU ✅, HY ✅                          |
 | Sidebar | ✅     | GraduationCap icon                           |
@@ -283,11 +283,14 @@
 - Mandatory compliance training support
 - Difficulty levels (beginner, intermediate, advanced)
 - Three-tab interface: Catalog, My Courses, Team Overview
+- CreateCourseDialog (course creation)
+- LessonFormDialog (lesson management)
+- LessonPlayerDialog (content viewer)
+- CourseDetailDialog
+- CertificatesTab
 
 **TODO:**
 
-- [ ] Course creation wizard UI
-- [ ] Lesson player (video + text content viewer)
 - [ ] Quiz taking UI with timer
 - [ ] Certificate download/view UI
 - [ ] Drag-and-drop lesson ordering
@@ -354,11 +357,12 @@
 | Backend | ✅     | `convex/orgchart.ts`                         |
 | UI      | ✅     | `src/components/orgchart/OrgChartClient.tsx` |
 | Route   | ✅     | `src/app/(dashboard)/org-chart/page.tsx`     |
-| i18n    | ⚠️     | EN ✅, RU 🔲, HY 🔲                          |
+| i18n    | ✅     | EN ✅, RU ✅, HY ✅                          |
 
 **Features implemented:**
 
 - Interactive visualization (React Flow/@xyflow)
+- Proper tree layout algorithm (subtree-centering)
 - Hierarchy: company → department → team → person
 - Search and filter
 - Click → mini employee profile (email, phone, department, position)
@@ -370,10 +374,10 @@
 - Move node with circular reference prevention
 - Node types: person, department, group
 - Color-coded nodes by type
+- Fix departments mutation (auto-correct parent-child relationships)
 
 **TODO:**
 
-- [ ] RU/HY translations
 - [ ] Export to PDF/PNG (in addition to SVG)
 
 ---
@@ -801,8 +805,8 @@
 
 ```
 PHASE 2 (Competitive Edge — highest impact first):
-  2.4 Visual Org Chart ............... ✅ DONE
-  2.1 LMS ............................ ✅ DONE (core)
+  2.4 Visual Org Chart ............... ✅ DONE (full i18n, tree layout)
+  2.1 LMS ............................ ⚠️ DONE (core + UI, quiz timer + cert PDF pending)
   2.2 Compensation Management ........ ~4-5 days  (enterprise requirement)
   2.5 Document Management ............ ~4-5 days  (core HR necessity)
   2.6 Expense Management ............. ~3-4 days
