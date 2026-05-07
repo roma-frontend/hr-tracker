@@ -883,7 +883,12 @@
       "employeeBackupFailed": "Backup failed: {{reason}}",
       "employeeBackupError": "Error running employee backup",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "totalBackupsCount": "{{count}} total backups",
+      "storageInfo": "{{used}} of {{total}} used",
+      "orgsBackedUpCount": "{{count}} organizations backed up",
+      "totalEmployees": "Total Employees",
+      "totalEmployeesCount": "{{count}} employees"
     },
     "user360": {
       "back": "Back",
@@ -7718,7 +7723,9 @@
     "noDirectReports": "No direct reports",
     "searchOrgChart": "Search org chart...",
     "expandAll": "Expand All",
-    "collapseAll": "Collapse All"
+    "collapseAll": "Collapse All",
+    "noOrgSelected": "No organization selected",
+    "selectOrgToView": "Please select an organization to view or create its org chart."
   },
   "learning": {
     "title": "Learning Center",

@@ -885,7 +885,12 @@
       "employeeBackupFailed": "Ошибка бэкапа: {{reason}}",
       "employeeBackupError": "Ошибка при запуске бэкапа сотрудника",
       "status": "Статус",
-      "actions": "Действия"
+      "actions": "Действия",
+      "totalBackupsCount": "{{count}} всего копий",
+      "storageInfo": "Использовано {{used}} из {{total}}",
+      "orgsBackedUpCount": "{{count}} организаций с копиями",
+      "totalEmployees": "Всего сотрудников",
+      "totalEmployeesCount": "{{count}} сотрудников"
     },
     "user360": {
       "back": "Назад",
@@ -7752,7 +7757,9 @@
     "noDirectReports": "Нет подчинённых",
     "searchOrgChart": "Поиск по оргструктуре...",
     "expandAll": "Развернуть все",
-    "collapseAll": "Свернуть все"
+    "collapseAll": "Свернуть все",
+    "noOrgSelected": "Организация не выбрана",
+    "selectOrgToView": "Пожалуйста, выберите организацию для просмотра или создайте её оргструктуру."
   },
   "learning": {
     "title": "Центр обучения",

@@ -870,7 +870,12 @@
       "employeeBackupFailed": "Պատճենման սխալ՝ {{reason}}",
       "employeeBackupError": "Սխալ աշխատակցի պատճենման գործարկման ժամանակ",
       "status": "Կարգավիճակ",
-      "actions": "Գործողություններ"
+      "actions": "Գործողություններ",
+      "totalBackupsCount": "{{count}} ընդհանուր պատճեններ",
+      "storageInfo": "Օգտագործված է {{used}} {{total}}-ից",
+      "orgsBackedUpCount": "{{count}} կազմակերպություններ պատճեններով",
+      "totalEmployees": "Ընդհանուր աշխատակիցներ",
+      "totalEmployeesCount": "{{count}} աշխատակիցներ"
     },
     "user360": {
       "back": "Հետ",
@@ -7432,7 +7437,9 @@
     "noDirectReports": "Ենթականեր չկան",
     "searchOrgChart": "Որոնում կազմակերպչական կառուցվածքում...",
     "expandAll": "Բացել բոլորը",
-    "collapseAll": "Փակել բոլորը"
+    "collapseAll": "Փակել բոլորը",
+    "noOrgSelected": "Կազմակերպությունը ընտրված չէ",
+    "selectOrgToView": "Խնդրում ենք ընտրել կազմակերպություն դիտելու կամ ստեղծել դրա կազմակերպչական կառուցվածքը:"
   },
   "learning": {
     "title": "Ուսուցման կենտրոն",

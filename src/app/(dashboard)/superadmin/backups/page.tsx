@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
   User,
+  Users,
   Calendar,
   FileBox,
   Building,
@@ -277,157 +278,156 @@ export default function BackupsManagementPage() {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-4 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
-        <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-          <div className="w-full">
-            <h1 className="text-2xl md:text-3xl font-bold text-(--text-primary)">
-              {t('superadmin.backups.title')}
-            </h1>
-            <p className="text-sm md:text-base text-(--text-muted) mt-1">
-              {t('superadmin.backups.subtitle')}
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <div className="mx-auto max-w-7xl">
+        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-4 bg-(--background)/95 backdrop-blur supports-[backdrop-filter]:bg-(--background)/60 border-b border-(--border)">
+          <h1
+            className="text-3xl md:text-4xl font-bold mb-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {t('superadmin.backups.title')}
+          </h1>
+          <p className="text-muted-foreground">{t('superadmin.backups.subtitle')}</p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                disabled={orgs.length === 0}
+                className="flex items-center gap-2 disabled:opacity-50"
+              >
+                <Building className="w-4 h-4" />
+                {selectedOrgData?.name ??
+                  (globalSelectedOrgId
+                    ? (orgs.find((o: any) => o._id === globalSelectedOrgId)?.name ??
+                      t('superadmin.backups.selectOrg'))
+                    : t('superadmin.backups.selectOrg'))}
+                <ChevronDown className="w-3 h-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
+              <DropdownMenuLabel>{t('superadmin.backups.selectOrgLabel')}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {orgs.map((org: any) => (
+                <DropdownMenuItem
+                  key={org._id}
+                  onClick={() => setLocalSelectedOrg({ id: org._id, name: org.name })}
+                  className={effectiveOrgId === org._id ? 'bg-(--primary)/10' : ''}
+                >
+                  <Building2 className="w-4 h-4 mr-2" />
+                  {org.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            onClick={handleSingleOrgBackup}
+            disabled={!!runningBackup || !effectiveOrgId}
+            className="flex items-center gap-2 btn-gradient text-white font-medium shadow-md hover:shadow-lg disabled:opacity-50"
+          >
+            <Database className="w-4 h-4" />
+            {runningBackup === effectiveOrgId
+              ? t('superadmin.backups.runningBackup')
+              : t('superadmin.backups.backupSelectedOrg')}
+          </Button>
+          <Button
+            onClick={handleRunAllBackups}
+            disabled={!!runningBackup || orgs.length === 0}
+            className="flex items-center gap-2 btn-gradient text-white font-medium shadow-md hover:shadow-lg disabled:opacity-50"
+          >
+            <Database className="w-4 h-4" />
+            {runningBackup
+              ? t('superadmin.backups.runningBackup')
+              : t('superadmin.backups.runAllBackups')}
+          </Button>
+          <Button onClick={refreshData} variant="outline" className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            {t('superadmin.backups.refresh', 'Refresh')}
+          </Button>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-4">
+          <div className="p-4 rounded-lg border" style={{ background: 'var(--background-subtle)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Database className="w-4 h-4 text-blue-500" />
+              <p className="text-xs text-muted-foreground">
+                {t('superadmin.backups.totalBackups')}
+              </p>
+            </div>
+            <p className="text-2xl font-bold">{backupStats?.totalBackups ?? '...'}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t('superadmin.backups.totalBackupsCount')}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  disabled={orgs.length === 0}
-                  className="flex items-center gap-2 border-(--border) text-(--text-primary) hover:bg-(--background-subtle) disabled:opacity-50"
-                >
-                  <Building className="w-4 h-4" />
-                  {selectedOrgData?.name ??
-                    (globalSelectedOrgId
-                      ? (orgs.find((o: any) => o._id === globalSelectedOrgId)?.name ??
-                        t('superadmin.backups.selectOrg'))
-                      : t('superadmin.backups.selectOrg'))}
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
-                <DropdownMenuLabel>{t('superadmin.backups.selectOrgLabel')}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {orgs.map((org: any) => (
-                  <DropdownMenuItem
-                    key={org._id}
-                    onClick={() => setLocalSelectedOrg({ id: org._id, name: org.name })}
-                    className={effectiveOrgId === org._id ? 'bg-(--primary)/10' : ''}
-                  >
-                    <Building2 className="w-4 h-4 mr-2" />
-                    {org.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              onClick={handleSingleOrgBackup}
-              disabled={!!runningBackup || !effectiveOrgId}
-              className="flex items-center gap-2 bg-(--accent) text-white hover:bg-(--accent)/90 disabled:opacity-50"
-            >
-              <Database className="w-4 h-4" />
-              {runningBackup === effectiveOrgId
-                ? t('superadmin.backups.runningBackup')
-                : t('superadmin.backups.backupSelectedOrg')}
-            </Button>
-            <Button
-              onClick={handleRunAllBackups}
-              disabled={!!runningBackup || orgs.length === 0}
-              className="flex items-center gap-2 bg-(--primary) text-white hover:bg-(--primary)/90 disabled:opacity-50"
-            >
-              <Database className="w-4 h-4" />
-              {runningBackup
-                ? t('superadmin.backups.runningBackup')
-                : t('superadmin.backups.runAllBackups')}
-            </Button>
-            <Button
-              onClick={refreshData}
-              variant="outline"
-              className="flex items-center gap-2 border-(--border) text-(--text-primary) hover:bg-(--background-subtle)"
-            >
-              <RefreshCw className="w-4 h-4" />
-              {t('superadmin.backups.refresh', 'Refresh')}
-            </Button>
+          <div className="p-4 rounded-lg border" style={{ background: 'var(--background-subtle)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <HardDrive className="w-4 h-4 text-orange-500" />
+              <p className="text-xs text-muted-foreground">{t('superadmin.backups.storageUsed')}</p>
+            </div>
+            <p className="text-2xl font-bold">
+              {backupStats ? formatSize(backupStats.totalSize) : '...'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t('superadmin.backups.storageInfo')}
+            </p>
+          </div>
+          <div className="p-4 rounded-lg border" style={{ background: 'var(--background-subtle)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Building2 className="w-4 h-4 text-green-500" />
+              <p className="text-xs text-muted-foreground">
+                {t('superadmin.backups.orgsBackedUp')}
+              </p>
+            </div>
+            <p className="text-2xl font-bold text-green-500">
+              {backupStats?.orgsBackedUp ?? '...'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t('superadmin.backups.orgsBackedUpCount')}
+            </p>
+          </div>
+          <div className="p-4 rounded-lg border" style={{ background: 'var(--background-subtle)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4 text-purple-500" />
+              <p className="text-xs text-muted-foreground">
+                {t('superadmin.backups.totalEmployees')}
+              </p>
+            </div>
+            <p className="text-2xl font-bold">
+              {filteredOrgs?.reduce((sum: number, o: any) => sum + (o.totalEmployees || 0), 0) || 0}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t('superadmin.backups.totalEmployeesCount')}
+            </p>
           </div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-(--card)">
-          <CardHeader className="pb-2">
-            <CardDescription>{t('superadmin.backups.totalBackups')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-(--primary)/10">
-                <Database className="w-5 h-5 text-(--primary)" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-(--text-primary)">
-                  {backupStats?.totalBackups ?? '...'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Organizations List */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+              {t('superadmin.backups.orgBackupsTitle')}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {filteredOrgs.length} {t('superadmin.backups.orgsCount')}
+            </p>
+          </div>
 
-        <Card className="bg-(--card)">
-          <CardHeader className="pb-2">
-            <CardDescription>{t('superadmin.backups.storageUsed')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-(--primary)/10">
-                <HardDrive className="w-5 h-5 text-(--primary)" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-(--text-primary)">
-                  {backupStats ? formatSize(backupStats.totalSize) : '...'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-(--card)">
-          <CardHeader className="pb-2">
-            <CardDescription>{t('superadmin.backups.orgsBackedUp')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-(--primary)/10">
-                <Building2 className="w-5 h-5 text-(--primary)" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-(--text-primary)">
-                  {backupStats?.orgsBackedUp ?? '...'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Organizations List */}
-      <Card className="bg-(--card)">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            {t('superadmin.backups.orgBackupsTitle')}
-          </CardTitle>
-          <CardDescription>
-            {filteredOrgs.length} {t('superadmin.backups.orgsCount')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
           {filteredOrgs.length === 0 ? (
-            <div className="text-center py-8 text-(--text-muted)">
-              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>{t('superadmin.backups.noOrgsFound')}</p>
+            <div
+              className="text-center py-12 rounded-lg"
+              style={{ background: 'var(--background-subtle)' }}
+            >
+              <Building2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-30" />
+              <h3 className="font-semibold text-lg mb-1" style={{ color: 'var(--text-primary)' }}>
+                {t('superadmin.backups.noOrgsFound')}
+              </h3>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {filteredOrgs.map((org: any) => (
                 <OrgBackups
                   key={org._id}
@@ -448,64 +448,66 @@ export default function BackupsManagementPage() {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Restore Confirmation Dialog */}
-      {restoreConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <Card className="w-full max-w-md mx-4 bg-(--card) border-(--border)">
-            <CardHeader>
-              <div className="flex items-center gap-2 text-amber-500">
-                <AlertCircle className="w-5 h-5" />
-                <CardTitle>{t('superadmin.backups.restoreConfirmTitle')}</CardTitle>
-              </div>
-              <CardDescription>
-                {t('superadmin.backups.restoreConfirmDesc', {
-                  userName: restoreConfirm.userName,
-                  date: formatDate(restoreConfirm.createdAt),
-                })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg bg-(--background-subtle) p-3 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-(--text-muted)">{t('superadmin.user')}</span>
-                  <span className="text-(--text-primary) font-medium">
-                    {restoreConfirm.userName}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-(--text-muted)">{t('superadmin.email')}</span>
-                  <span className="text-(--text-primary)">{restoreConfirm.userEmail}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-(--text-muted)">{t('superadmin.backups.backupDate')}</span>
-                  <span className="text-(--text-primary)">
-                    {formatDate(restoreConfirm.createdAt)}
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setRestoreConfirm(null)}
-                  className="border-(--border) text-(--text-primary)"
-                >
-                  {t('superadmin.backups.cancelBtn')}
-                </Button>
-                <Button
-                  onClick={confirmRestore}
-                  className="bg-(--primary) text-white hover:bg-(--primary)/90"
-                >
-                  <RotateCcw className="w-4 h-4 mr-1" />
-                  {t('superadmin.backups.restoreConfirmBtn')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
-      )}
+
+        {/* Restore Confirmation Dialog */}
+        {restoreConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <Card className="w-full max-w-md mx-4 bg-(--card) border-(--border)">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-amber-500">
+                  <AlertCircle className="w-5 h-5" />
+                  <CardTitle>{t('superadmin.backups.restoreConfirmTitle')}</CardTitle>
+                </div>
+                <CardDescription>
+                  {t('superadmin.backups.restoreConfirmDesc', {
+                    userName: restoreConfirm.userName,
+                    date: formatDate(restoreConfirm.createdAt),
+                  })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg bg-(--background-subtle) p-3 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-(--text-muted)">{t('superadmin.user')}</span>
+                    <span className="text-(--text-primary) font-medium">
+                      {restoreConfirm.userName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-(--text-muted)">{t('superadmin.email')}</span>
+                    <span className="text-(--text-primary)">{restoreConfirm.userEmail}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-(--text-muted)">
+                      {t('superadmin.backups.backupDate')}
+                    </span>
+                    <span className="text-(--text-primary)">
+                      {formatDate(restoreConfirm.createdAt)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setRestoreConfirm(null)}
+                    className="border-(--border) text-(--text-primary)"
+                  >
+                    {t('superadmin.backups.cancelBtn')}
+                  </Button>
+                  <Button
+                    onClick={confirmRestore}
+                    className="bg-(--primary) text-white hover:bg-(--primary)/90"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-1" />
+                    {t('superadmin.backups.restoreConfirmBtn')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -573,64 +575,69 @@ function OrgBackups({
   }, [employees]);
 
   return (
-    <div className="border border-(--border) rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between">
-        <button
-          onClick={onToggle}
-          className="flex-1 flex items-center justify-between p-4 hover:bg-(--background-subtle) transition-colors text-left"
-        >
-          <div className="flex items-center gap-3">
-            {isExpanded ? (
-              <ChevronDown className="w-4 h-4 text-(--text-muted)" />
-            ) : (
-              <ChevronRight className="w-4 h-4 text-(--text-muted)" />
-            )}
-            <div>
-              <p className="font-medium text-(--text-primary)">{org.name}</p>
-              <p className="text-xs text-(--text-muted)">{org.slug}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1 text-(--text-muted)">
-              <Database className="w-3 h-3" />
-              <span>{orgBackups?.reduce((sum, emp) => sum + emp.backupCount, 0) ?? 0}</span>
-            </div>
-            {orgBackups && orgBackups.length > 0 && (
-              <div className="flex items-center gap-1 text-(--text-muted)">
-                <Clock className="w-3 h-3" />
-                <span>{formatDate(Math.max(...orgBackups.map((e: any) => e.latestBackup)))}</span>
-              </div>
-            )}
+    <div
+      className="p-4 rounded-lg border hover:border-blue-400/50 transition-all hover:shadow-md"
+      style={{ background: 'var(--card)' }}
+    >
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+        <button onClick={onToggle} className="flex-1 flex items-center gap-3 text-left min-w-0">
+          {isExpanded ? (
+            <ChevronDown className="w-4 h-4 text-(--text-muted) shrink-0" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-(--text-muted) shrink-0" />
+          )}
+          <div className="min-w-0">
+            <p className="font-medium text-(--text-primary) truncate">{org.name}</p>
+            <p className="text-xs text-(--text-muted) font-mono mt-1">{org.slug}</p>
           </div>
         </button>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            onManualBackup(org._id, org.name);
-          }}
-          disabled={runningBackup === org._id || runningBackup === 'all'}
-          variant="ghost"
-          size="sm"
-          className="mr-2 text-(--primary) hover:text-(--primary) hover:bg-(--primary)/10 disabled:opacity-50"
-        >
-          {runningBackup === org._id ? (
-            <ShieldLoader size="xs" variant="inline" />
-          ) : (
-            <Database className="w-4 h-4" />
+        <div className="flex items-center gap-2 text-sm shrink-0 flex-wrap">
+          <div className="flex items-center gap-1 text-(--text-muted)">
+            <Database className="w-3 h-3" />
+            <span>{orgBackups?.reduce((sum, emp) => sum + emp.backupCount, 0) ?? 0}</span>
+          </div>
+          {orgBackups && orgBackups.length > 0 && (
+            <div className="flex items-center gap-1 text-(--text-muted)">
+              <Clock className="w-3 h-3" />
+              <span className="hidden sm:inline">
+                {formatDate(Math.max(...orgBackups.map((e: any) => e.latestBackup)))}
+              </span>
+              <span className="sm:hidden">
+                {new Date(
+                  Math.max(...orgBackups.map((e: any) => e.latestBackup)),
+                ).toLocaleDateString()}
+              </span>
+            </div>
           )}
-          <span className="ml-1 text-xs">{t('superadmin.backups.backupOrg')}</span>
-        </Button>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onManualBackup(org._id, org.name);
+            }}
+            disabled={runningBackup === org._id || runningBackup === 'all'}
+            variant="ghost"
+            size="sm"
+            className="text-(--primary) hover:text-(--primary) hover:bg-(--primary)/10 disabled:opacity-50"
+          >
+            {runningBackup === org._id ? (
+              <ShieldLoader size="xs" variant="inline" />
+            ) : (
+              <Database className="w-4 h-4" />
+            )}
+            <span className="ml-1 text-xs">{t('superadmin.backups.backupOrg')}</span>
+          </Button>
+        </div>
       </div>
 
       {isExpanded && employeeList && (
-        <div className="border-t border-(--border) bg-(--background-subtle)">
+        <div className="border-t pt-3 mt-3" style={{ borderColor: 'var(--border)' }}>
           {employeeList.length === 0 ? (
             <div className="p-6 text-center text-(--text-muted)">
               <User className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">{t('superadmin.backups.noEmployeesFound')}</p>
             </div>
           ) : (
-            <div className="space-y-1 p-2">
+            <div className="space-y-2">
               {employeeList.map((emp: any) => {
                 const empKey = `${org._id}:${emp._id}`;
                 const isEmpExpanded = expandedEmployees.has(empKey);
@@ -702,7 +709,10 @@ function EmployeeBackups({
   const latestBackup = backupData?.latestBackup;
 
   return (
-    <div className="border border-(--border) rounded-lg overflow-hidden bg-(--card)">
+    <div
+      className="p-3 rounded-lg border hover:border-blue-400/50 transition-all"
+      style={{ background: 'var(--card)' }}
+    >
       <div
         onClick={onToggle}
         onKeyDown={(e) => {
@@ -713,31 +723,34 @@ function EmployeeBackups({
         }}
         role="button"
         tabIndex={0}
-        className="w-full flex items-center justify-between p-3 hover:bg-(--background-subtle) transition-colors text-left cursor-pointer"
+        className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           {isExpanded ? (
-            <ChevronDown className="w-3 h-3 text-(--text-muted)" />
+            <ChevronDown className="w-3 h-3 text-(--text-muted) shrink-0" />
           ) : (
-            <ChevronRight className="w-3 h-3 text-(--text-muted)" />
+            <ChevronRight className="w-3 h-3 text-(--text-muted) shrink-0" />
           )}
-          <User className="w-4 h-4 text-(--text-muted)" />
-          <div>
-            <p className="font-medium text-(--text-primary) text-sm">{emp.name}</p>
-            <p className="text-xs text-(--text-muted)">{emp.email}</p>
+          <User className="w-4 h-4 text-(--text-muted) shrink-0" />
+          <div className="min-w-0">
+            <p className="font-medium text-(--text-primary) text-sm truncate">{emp.name}</p>
+            <p className="text-xs text-(--text-muted) font-mono truncate">{emp.email}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-2 text-sm sm:gap-3 pl-6 sm:pl-0">
           <Badge
             variant="outline"
-            className="bg-(--primary)/10 text-(--primary) border-(--primary)/20"
+            className="bg-(--primary)/10 text-(--primary) border-(--primary)/20 shrink-0"
           >
             {backupCount} {t('superadmin.backups.employeeBackupsCount', { count: backupCount })}
           </Badge>
           {latestBackup && (
-            <div className="flex items-center gap-1 text-(--text-muted)">
-              <Calendar className="w-3 h-3" />
-              {formatDate(latestBackup)}
+            <div className="flex items-center gap-1 text-(--text-muted) shrink-0">
+              <Calendar className="w-3 h-3 hidden sm:block" />
+              <span className="hidden sm:inline">{formatDate(latestBackup)}</span>
+              <span className="sm:hidden text-xs">
+                {new Date(latestBackup).toLocaleDateString()}
+              </span>
             </div>
           )}
           <Button
@@ -748,20 +761,22 @@ function EmployeeBackups({
             disabled={isBackingUp || runningBackup === 'all'}
             variant="outline"
             size="sm"
-            className="border-(--primary) text-(--primary) hover:bg-(--primary)/10 disabled:opacity-50"
+            className="border-(--primary) text-(--primary) hover:bg-(--primary)/10 disabled:opacity-50 shrink-0"
           >
             {isBackingUp ? (
               <ShieldLoader size="xs" variant="inline" />
             ) : (
               <Database className="w-3 h-3" />
             )}
-            <span className="ml-1 text-xs font-medium">{t('superadmin.backups.backup')}</span>
+            <span className="ml-1 text-xs font-medium hidden sm:inline">
+              {t('superadmin.backups.backup')}
+            </span>
           </Button>
         </div>
       </div>
 
       {isExpanded && userBackups && (
-        <div className="border-t border-(--border) bg-(--background-subtle)">
+        <div className="border-t pt-3 mt-3" style={{ borderColor: 'var(--border)' }}>
           {userBackups.length === 0 ? (
             <div className="p-4 text-center text-(--text-muted) text-sm">
               {t('superadmin.backups.noBackupsForUser')}
@@ -770,20 +785,20 @@ function EmployeeBackups({
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-(--border)">
-                    <th className="text-left py-2 px-4 text-(--text-muted) font-semibold text-xs">
+                  <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-semibold text-xs">
                       {t('superadmin.backups.backupDate')}
                     </th>
-                    <th className="text-left py-2 px-4 text-(--text-muted) font-semibold text-xs">
+                    <th className="text-left py-2 px-2 text-muted-foreground font-semibold text-xs">
                       {t('superadmin.backups.backupExpires')}
                     </th>
-                    <th className="text-left py-2 px-4 text-(--text-muted) font-semibold text-xs">
+                    <th className="text-left py-2 px-2 text-muted-foreground font-semibold text-xs">
                       {t('superadmin.backups.backupSize')}
                     </th>
-                    <th className="text-left py-2 px-4 text-(--text-muted) font-semibold text-xs">
+                    <th className="text-left py-2 px-2 text-muted-foreground font-semibold text-xs">
                       {t('superadmin.backups.status')}
                     </th>
-                    <th className="text-left py-2 px-4 text-(--text-muted) font-semibold text-xs">
+                    <th className="text-left py-2 px-2 text-muted-foreground font-semibold text-xs">
                       {t('superadmin.backups.actions')}
                     </th>
                   </tr>
@@ -795,18 +810,19 @@ function EmployeeBackups({
                     return (
                       <tr
                         key={backup.id}
-                        className="border-b border-(--border) hover:bg-(--background-subtle) transition-colors"
+                        className="border-b hover:bg-(--background-subtle) transition-colors"
+                        style={{ borderColor: 'var(--border)' }}
                       >
-                        <td className="py-2 px-4 text-sm text-(--text-primary)">
+                        <td className="py-2 px-2 text-sm text-(--text-primary)">
                           {formatDate(backup.createdAt)}
                         </td>
-                        <td className="py-2 px-4 text-sm text-(--text-muted)">
+                        <td className="py-2 px-2 text-sm text-(--text-muted)">
                           {formatDate(backup.expiresAt)}
                         </td>
-                        <td className="py-2 px-4 text-sm text-(--text-primary)">
+                        <td className="py-2 px-2 text-sm text-(--text-primary)">
                           {formatSize(backup.snapshotSize)}
                         </td>
-                        <td className="py-2 px-4">
+                        <td className="py-2 px-2">
                           <Badge
                             variant="outline"
                             className={
@@ -820,7 +836,7 @@ function EmployeeBackups({
                               : t('superadmin.backups.active')}
                           </Badge>
                         </td>
-                        <td className="py-2 px-4">
+                        <td className="py-2 px-2">
                           <Button
                             variant="ghost"
                             size="sm"

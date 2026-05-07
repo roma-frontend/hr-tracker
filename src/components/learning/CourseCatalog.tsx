@@ -162,8 +162,8 @@ export function CourseCatalog({
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-wrap items-center gap-2">
+              <Filter className="hidden sm:block h-4 w-4 text-muted-foreground" />
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder={t('learning.allCategories', 'All Categories')} />
