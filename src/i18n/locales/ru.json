@@ -404,6 +404,23 @@
     "learning": "Обучение",
     "documents": "Документы"
   },
+  "navGroups": {
+    "main": "Главное",
+    "people": "Люди",
+    "performance": "Развитие",
+    "finance": "Финансы",
+    "analytics": "Аналитика",
+    "superadmin": "Админ",
+    "settings": "Аккаунт"
+  },
+  "navSections": {
+    "team": "Команда",
+    "lifecycle": "Жизненный цикл",
+    "growth": "Рост",
+    "development": "Развитие",
+    "tools": "Инструменты",
+    "system": "Система"
+  },
   "superadmin": {
     "quickActions": {
       "findUser": "Найти пользователя",

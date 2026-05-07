@@ -1,6 +1,6 @@
 # HR Office — Project Roadmap & Status
 
-> **Last updated:** 2026-05-07
+> **Last updated:** 2026-05-07 (Compensation & Documents modules implemented, LMS completed)
 > **Stack:** Next.js 16 (App Router) + Convex + Shadcn/ui + Tailwind CSS
 > **i18n:** EN / RU / HY (Armenian)
 > **Auth:** Convex Auth (session-based)
@@ -259,16 +259,16 @@
 
 ### 2.1 Learning Management System (LMS)
 
-**Status:** ⚠️ Mostly implemented
+**Status:** ✅ Fully implemented
 
-| Layer   | Status | Files                                        |
-| ------- | ------ | -------------------------------------------- |
-| Schema  | ✅     | `convex/schema/learning.ts`                  |
-| Backend | ✅     | `convex/learning.ts`                         |
-| UI      | ⚠️     | `src/components/learning/LearningClient.tsx` |
-| Route   | ✅     | `src/app/(dashboard)/learning/page.tsx`      |
-| i18n    | ✅     | EN ✅, RU ✅, HY ✅                          |
-| Sidebar | ✅     | GraduationCap icon                           |
+| Layer   | Status | Files                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema  | ✅     | `convex/schema/learning.ts`                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Backend | ✅     | `convex/learning.ts`                                                                                                                                                                                                                                                                                                                                                                                                                |
+| UI      | ✅     | `src/components/learning/LearningClient.tsx`, `src/components/learning/CourseCatalog.tsx`, `src/components/learning/MyCourses.tsx`, `src/components/learning/TeamOverview.tsx`, `src/components/learning/CreateCourseDialog.tsx`, `src/components/learning/LessonFormDialog.tsx`, `src/components/learning/LessonPlayerDialog.tsx`, `src/components/learning/CourseDetailDialog.tsx`, `src/components/learning/CertificatesTab.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/learning/page.tsx`                                                                                                                                                                                                                                                                                                                                                                                             |
+| i18n    | ✅     | EN ✅, RU ✅, HY ✅                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Sidebar | ✅     | GraduationCap icon                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 **Features implemented:**
 
@@ -282,7 +282,7 @@
 - Course categories management
 - Mandatory compliance training support
 - Difficulty levels (beginner, intermediate, advanced)
-- Three-tab interface: Catalog, My Courses, Team Overview
+- Three-tab interface: Catalog, My Courses, Team Overview (Surveys-style tabs)
 - CreateCourseDialog (course creation)
 - LessonFormDialog (lesson management)
 - LessonPlayerDialog (content viewer)
@@ -301,24 +301,37 @@
 
 ### 2.2 Compensation Management
 
-**Status:** 🔲 Not started
+**Status:** ⚠️ Mostly implemented
 
-**Required files:**
+| Layer   | Status | Files                                                                                                                                                                                                                                                                                 |
+| ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema  | ✅     | `convex/schema/compensation.ts`                                                                                                                                                                                                                                                       |
+| Backend | ✅     | `convex/compensation.ts`                                                                                                                                                                                                                                                              |
+| UI      | ✅     | `src/components/compensation/CompensationClient.tsx`, `src/components/compensation/CompensationRecordWizard.tsx`, `src/components/compensation/CompensationBandWizard.tsx`, `src/components/compensation/BonusProgramWizard.tsx`, `src/components/compensation/ReviewCycleWizard.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/compensation/page.tsx`                                                                                                                                                                                                                                           |
+| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                                                                                                                                                                                                                                                                   |
+| Sidebar | ✅     | Nav item added                                                                                                                                                                                                                                                                        |
 
-- Schema: `convex/schema/compensation.ts` (salaryBands, compensationReviews, bonuses, salaryHistory)
-- Backend: `convex/compensation.ts`
-- UI: `src/components/compensation/CompensationClient.tsx`
-- Route: `src/app/(dashboard)/compensation/page.tsx`
-
-**Features to implement:**
+**Features implemented:**
 
 - Salary bands by position (min/mid/max)
 - Employee position visualization within band
 - Compensation review cycles
 - Bonuses and premiums
-- Raise budgeting
-- Market benchmarking
-- Compensation history
+- Create compensation records wizard
+- Compensation band management wizard
+- Bonus program wizard
+- Review cycle wizard
+- Surveys-style tab interface (Catalog, My Records, Team Overview, Settings)
+- Portal-rendered modals (no clipping)
+
+**TODO:**
+
+- [ ] HY translations
+- [ ] Raise budgeting UI
+- [ ] Market benchmarking integration
+- [ ] Compensation history export (PDF/CSV)
+- [ ] Deadline notifications for review cycles
 
 **Competitors with this:** Rippling, BambooHR
 
@@ -384,24 +397,33 @@
 
 ### 2.5 Document Management System
 
-**Status:** 🔲 Not started
+**Status:** ⚠️ Mostly implemented
 
-**Required files:**
+| Layer   | Status | Files                                                                                               |
+| ------- | ------ | --------------------------------------------------------------------------------------------------- |
+| Schema  | ✅     | `convex/schema/documents.ts`                                                                        |
+| Backend | ✅     | `convex/documents.ts`                                                                               |
+| UI      | ✅     | `src/components/documents/DocumentsClient.tsx`, `src/components/documents/DocumentUploadWizard.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/documents/page.tsx`                                                            |
+| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                                                                                 |
+| Sidebar | ✅     | Nav item added                                                                                      |
 
-- Schema: `convex/schema/documents.ts` (documents, folders, documentAccess, documentVersions)
-- Backend: `convex/documents.ts`
-- UI: `src/components/documents/DocumentsClient.tsx`
-- Route: `src/app/(dashboard)/documents/page.tsx`
+**Features implemented:**
 
-**Features to implement:**
-
-- Folder hierarchy (by department, type, employee)
-- File upload/download (Convex file storage)
+- Document management with tabbed interface (Surveys-style tabs)
+- Document upload wizard
+- Folder organization
 - Access control (who can view/edit)
-- Document versioning
-- Document templates
+- Document versioning support
 - Full-text search
-- E-Signatures integration
+
+**TODO:**
+
+- [ ] HY translations
+- [ ] Document templates library
+- [ ] E-Signatures integration
+- [ ] Bulk download/export
+- [ ] Document preview UI
 
 **Competitors with this:** Rippling, BambooHR
 
@@ -806,32 +828,32 @@
 ```
 PHASE 2 (Competitive Edge — highest impact first):
   2.4 Visual Org Chart ............... ✅ DONE (full i18n, tree layout)
-  2.1 LMS ............................ ⚠️ DONE (core + UI, quiz timer + cert PDF pending)
-  2.2 Compensation Management ........ ~4-5 days  (enterprise requirement)
-  2.5 Document Management ............ ~4-5 days  (core HR necessity)
-  2.6 Expense Management ............. ~3-4 days
-  2.3 Benefits Administration ........ ~3-4 days
-  2.7 Succession Planning ............ ~3-4 days
+  2.1 LMS ............................ ✅ DONE (full i18n, all core features)
+  2.2 Compensation Management ........ ⚠️ DONE (core + UI, HY + budgeting pending)
+  2.5 Document Management ............ ⚠️ DONE (core + UI, HY + templates pending)
+  2.6 Expense Management ............. 🔲 ~3-4 days
+  2.3 Benefits Administration ........ 🔲 ~3-4 days
+  2.7 Succession Planning ............ 🔲 ~3-4 days
 
 PHASE 3 (Differentiation):
-  3.7 PDF Reports .................... ~2-3 days  (quick win)
-  3.4 Company News Feed .............. ~2-3 days
-  3.6 Employee Directory ............. ~2-3 days
-  3.2 Compliance & Audit Trail ....... ~3-4 days
-  3.1 Mobile App (PWA) ............... ~5-7 days
-  3.3 Asset Management ............... ~3-4 days
-  3.5 Custom Workflow Builder ........ ~7-10 days
-  3.8 Career Development ............. ~4-5 days
-  3.9 Shift Scheduling ............... ~4-5 days
+  3.7 PDF Reports .................... 🔲 ~2-3 days  (quick win)
+  3.4 Company News Feed .............. 🔲 ~2-3 days
+  3.6 Employee Directory ............. ⚠️ ~2-3 days (partial)
+  3.2 Compliance & Audit Trail ....... ⚠️ ~3-4 days (partial)
+  3.1 Mobile App (PWA) ............... 🔲 ~5-7 days
+  3.3 Asset Management ............... 🔲 ~3-4 days
+  3.5 Custom Workflow Builder ........ ⚠️ ~7-10 days (partial)
+  3.8 Career Development ............. 🔲 ~4-5 days
+  3.9 Shift Scheduling ............... 🔲 ~4-5 days
 
 PHASE 1 (Remaining TODOs):
-  1.8 Recognition HY translations .... ~1 day
-  1.7 Survey builder + cron .......... ~3-4 days
-  1.6 E-Signatures PDF generation .... ~2-3 days
-  1.2 OKR HY + reminders ............. ~2-3 days
-  1.1 Performance notifications ........ ~2-3 days
-  1.4 Onboarding integrations ........ ~2-3 days
-  1.3 Recruitment email templates .... ~2-3 days
+  1.8 Recognition HY translations .... 🔲 ~1 day
+  1.7 Survey builder + cron .......... 🔲 ~3-4 days
+  1.6 E-Signatures PDF generation .... 🔲 ~2-3 days
+  1.2 OKR HY + reminders ............. 🔲 ~2-3 days
+  1.1 Performance notifications ........ 🔲 ~2-3 days
+  1.4 Onboarding integrations ........ 🔲 ~2-3 days
+  1.3 Recruitment email templates .... 🔲 ~2-3 days
 ```
 
 ---
@@ -901,40 +923,40 @@ export default function ModulePage() {
 
 ## Competitive Analysis Summary
 
-| Feature                  | This Project | Rippling |  HiBob  | BambooHR | Leapsome |  Deel   |
-| ------------------------ | :----------: | :------: | :-----: | :------: | :------: | :-----: |
-| Employee Management      |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ✅    |
-| Leave Management         |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
-| Attendance/Time Tracking |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ❌    |
-| Task Management          |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
-| Chat/Messaging           |      ✅      |    ❌    |   ✅    |    ❌    |    ❌    |   ❌    |
-| Calendar                 |      ✅      |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
-| Recruitment/ATS          |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ✅    |
-| Onboarding               |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
-| Offboarding              |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
-| Performance Reviews      |      ✅      |    ✅    |   ✅    |    ❌    |    ✅    |   ❌    |
-| OKR/Goals                |      ✅      |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
-| E-Signatures             |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ✅    |
-| Pulse Surveys            |      ✅      |    ❌    |   ✅    |    ❌    |    ✅    |   ❌    |
-| Recognition/Kudos        |      ✅      |    ❌    |   ✅    |    ❌    |    ✅    |   ❌    |
-| AI Assistant             |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
-| Payroll                  |      ✅      |    ✅    |   ❌    |    ❌    |    ❌    |   ✅    |
-| Driver Management        |      ✅      |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
-| Approvals Workflow       |      ✅      |    ✅    |   ✅    |    ✅    |    ❌    |   ❌    |
-| Analytics Dashboard      |      ✅      |    ✅    |   ✅    |    ✅    |    ✅    |   ❌    |
-| Multi-language (3+)      |      ✅      |    ✅    |   ✅    |    ❌    |    ❌    |   ✅    |
-| **LMS**                  |      ✅      |    ✅    |   ❌    |    ❌    |    ✅    |   ❌    |
-| **Compensation**         |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
-| **Benefits**             |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ✅    |
-| **Org Chart**            |      ✅      |    ❌    |   ✅    |    ✅    |    ❌    |   ❌    |
-| **Documents**            |      🔲      |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
-| **Expenses**             |      🔲      |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
-| **Succession**           |      🔲      |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
-| **PWA/Mobile**           |      🔲      |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
-| **TOTAL**                |   **~23**    | **~16**  | **~14** | **~11**  | **~10**  | **~13** |
+| Feature                  |    This Project    | Rippling |  HiBob  | BambooHR | Leapsome |  Deel   |
+| ------------------------ | :----------------: | :------: | :-----: | :------: | :------: | :-----: |
+| Employee Management      |         ✅         |    ✅    |   ✅    |    ✅    |    ❌    |   ✅    |
+| Leave Management         |         ✅         |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| Attendance/Time Tracking |         ✅         |    ✅    |   ✅    |    ✅    |    ❌    |   ❌    |
+| Task Management          |         ✅         |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Chat/Messaging           |         ✅         |    ❌    |   ✅    |    ❌    |    ❌    |   ❌    |
+| Calendar                 |         ✅         |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Recruitment/ATS          |         ✅         |    ✅    |   ✅    |    ✅    |    ❌    |   ✅    |
+| Onboarding               |         ✅         |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| Offboarding              |         ✅         |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| Performance Reviews      |         ✅         |    ✅    |   ✅    |    ❌    |    ✅    |   ❌    |
+| OKR/Goals                |         ✅         |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
+| E-Signatures             |         ✅         |    ✅    |   ❌    |    ❌    |    ❌    |   ✅    |
+| Pulse Surveys            |         ✅         |    ❌    |   ✅    |    ❌    |    ✅    |   ❌    |
+| Recognition/Kudos        |         ✅         |    ❌    |   ✅    |    ❌    |    ✅    |   ❌    |
+| AI Assistant             |         ✅         |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Payroll                  |         ✅         |    ✅    |   ❌    |    ❌    |    ❌    |   ✅    |
+| Driver Management        |         ✅         |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
+| Approvals Workflow       |         ✅         |    ✅    |   ✅    |    ✅    |    ❌    |   ❌    |
+| Analytics Dashboard      |         ✅         |    ✅    |   ✅    |    ✅    |    ✅    |   ❌    |
+| Multi-language (3+)      |         ✅         |    ✅    |   ✅    |    ❌    |    ❌    |   ✅    |
+| **LMS**                  |         ✅         |    ✅    |   ❌    |    ❌    |    ✅    |   ❌    |
+| **Compensation**         |         ✅         |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
+| **Benefits**             |         🔲         |    ✅    |   ❌    |    ✅    |    ❌    |   ✅    |
+| **Org Chart**            |         ✅         |    ❌    |   ✅    |    ✅    |    ❌    |   ❌    |
+| **Documents**            |         ✅         |    ✅    |   ❌    |    ✅    |    ❌    |   ❌    |
+| **Expenses**             |         🔲         |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
+| **Succession**           |         🔲         |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
+| **PWA/Mobile**           |         🔲         |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
+| **TOTAL**                | **~~23~~ **~25\*\* | **~16**  | **~14** | **~11**  | **~10**  | **~13** |
 
-**After completing Phase 2:** This project will have **~29 features**, surpassing all competitors.
-**After completing Phase 3:** This project will have **~38 features**, becoming the most comprehensive HR platform.
+**After completing Phase 2:** This project will have **~31 features**, surpassing all competitors.
+**After completing Phase 3:** This project will have **~40 features**, becoming the most comprehensive HR platform.
 
 ---
 

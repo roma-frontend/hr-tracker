@@ -405,6 +405,23 @@
     "userMenu": "User menu",
     "documents": "Documents"
   },
+  "navGroups": {
+    "main": "Main",
+    "people": "People",
+    "performance": "Growth",
+    "finance": "Finance",
+    "analytics": "Insights",
+    "superadmin": "Admin",
+    "settings": "Account"
+  },
+  "navSections": {
+    "team": "Team",
+    "lifecycle": "Lifecycle",
+    "growth": "Growth",
+    "development": "Development",
+    "tools": "Tools",
+    "system": "System"
+  },
   "superadmin": {
     "quickActions": {
       "findUser": "Find User",

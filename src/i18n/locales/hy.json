@@ -394,6 +394,23 @@
     "learning": "Ուսուցում",
     "documents": "Փաստաթղթեր"
   },
+  "navGroups": {
+    "main": "Հիմնական",
+    "people": "Մարդիկ",
+    "performance": "Աճ",
+    "finance": "Ֆինանսներ",
+    "analytics": "Վերլուծություն",
+    "superadmin": "Ադմին",
+    "settings": "Հաշիվ"
+  },
+  "navSections": {
+    "team": "Թիմ",
+    "lifecycle": "Կենսացիկլ",
+    "growth": "Աճ",
+    "development": "Զարգացում",
+    "tools": "Գործիքներ",
+    "system": "Համակարգ"
+  },
   "superadmin": {
     "quickActions": {
       "findUser": "Գտնել օգտատեր",
