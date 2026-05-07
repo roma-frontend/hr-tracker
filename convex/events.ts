@@ -490,6 +490,26 @@ export const reviewConflictAlert = mutation({
 });
 
 /**
+ * Get a single event by ID for detail view
+ */
+export const getEventById = query({
+  args: {
+    eventId: v.id('companyEvents'),
+  },
+  handler: async (ctx, { eventId }) => {
+    const event = await ctx.db.get(eventId);
+    if (!event) return null;
+
+    const creator = await ctx.db.get(event.createdBy);
+
+    return {
+      ...event,
+      creatorName: creator?.name,
+    };
+  },
+});
+
+/**
  * Get upcoming events with attendance status
  */
 export const getEventAttendanceStatus = query({

@@ -464,3 +464,54 @@ export const listAll = query({
     return [];
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET USERS BY DEPARTMENT — for department detail pages
+// ─────────────────────────────────────────────────────────────────────────────
+export const getUsersByDepartment = query({
+  args: { departmentId: v.id('departments') },
+  handler: async (ctx, { departmentId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const currentUser = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', identity.email!))
+      .first();
+
+    if (!currentUser) return [];
+
+    // Superadmin and admin can see all users in department
+    if (currentUser.email.toLowerCase() === SUPERADMIN_EMAIL || currentUser.role === 'admin') {
+      const users = await ctx.db
+        .query('users')
+        .filter((q) => q.eq(q.field('departmentId'), departmentId))
+        .take(MAX_PAGE_SIZE);
+      return users.filter((u) => u.isActive);
+    }
+
+    // Supervisor sees users in their org's departments
+    if (currentUser.role === 'supervisor' && currentUser.organizationId) {
+      const users = await ctx.db
+        .query('users')
+        .filter((q) => q.eq(q.field('departmentId'), departmentId))
+        .take(MAX_PAGE_SIZE);
+      return users.filter((u) => u.isActive && u.organizationId === currentUser.organizationId);
+    }
+
+    // Employee sees only themselves
+    return [];
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET PENDING USER BY ID — for approval detail page
+// ─────────────────────────────────────────────────────────────────────────────
+export const getPendingUserById = query({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
+    return user;
+  },
+});

@@ -330,11 +330,18 @@
     "unknownUser": "Unknown",
     "create": "Create",
     "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
     "yes": "Yes",
     "no": "No",
     "exportSVG": "Export SVG",
     "nodes": "nodes",
-    "edges": "edges"
+    "edges": "edges",
+    "details": "Details",
+    "status": "Status",
+    "approve": "Approve",
+    "reject": "Reject",
+    "saving": "Saving..."
   },
   "lessons": {
     "title": "Lessons"
@@ -343,6 +350,9 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "employees": "Employees",
+    "employees.all": "All Employees",
+    "employees.departments": "Departments",
+    "employees.positions": "Positions",
     "leave": "Leave",
     "leaves": "Leaves",
     "attendance": "Attendance",
@@ -356,6 +366,26 @@
     "myLeaves": "My Leaves",
     "myAttendance": "My Attendance",
     "teamLeaves": "Team Leaves",
+    "groups": {
+      "people": "People",
+      "timeLeave": "Time & Leave",
+      "workspace": "Workspace",
+      "performance": "Performance",
+      "talent": "Talent",
+      "organization": "Organization",
+      "finance": "Finance",
+      "communication": "Communication",
+      "admin": "Admin",
+      "help": "Help",
+      "superadmin": "Superadmin",
+      "account": "Account",
+      "reports": "Reports"
+    },
+    "talent": "Talent",
+    "finance": "Finance",
+    "organization": "Organization",
+    "people": "People",
+    "communication": "Communication",
     "approvals": "Approvals",
     "automation": "Automation",
     "joinRequests": "Join Requests",
@@ -1194,6 +1224,7 @@
     "cancel": "Cancel"
   },
   "auth": {
+    "loginRequired": "Please log in to continue",
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
@@ -1515,7 +1546,16 @@
       "unpaid": "Unpaid Leave",
       "unpaidDesc": "Leave without pay"
     },
-    "reason": "Reason"
+    "reason": "Reason",
+    "requestDetails": "Leave Request Details",
+    "requestFrom": "Request from {{name}}",
+    "leaveDetails": "Leave Details",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "timeline": "Timeline",
+    "requestSubmitted": "Request Submitted",
+    "byAdmin": "Reviewed by Admin"
   },
   "leaveRequest": {
     "newLeaveRequest": "New Leave Request",
@@ -1693,6 +1733,90 @@
     "noEmployees": "No employees yet",
     "noEmployeesDesc": "Get started by adding your first team member",
     "addFirstEmployee": "Add First Employee"
+  },
+  "departmentWizard": {
+    "steps": {
+      "details": {
+        "title": "Department Details",
+        "description": "Enter basic information about the department",
+        "nameLabel": "Department Name",
+        "namePlaceholder": "e.g. Engineering, Marketing, HR",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Brief description of the department's purpose"
+      },
+      "appearance": {
+        "title": "Appearance",
+        "description": "Choose a color to visually identify the department",
+        "colorLabel": "Department Color",
+        "colorDescription": "This color will be used in charts and lists"
+      },
+      "review": {
+        "title": "Review & Create",
+        "description": "Review the department details before creating",
+        "summaryLabel": "Summary",
+        "nameLabel": "Name",
+        "descriptionLabel": "Description",
+        "colorLabel": "Color"
+      }
+    },
+    "toast": {
+      "nameRequired": "Please enter a department name",
+      "createSuccess": "Department created successfully",
+      "updateSuccess": "Department updated successfully",
+      "error": "Failed to save department"
+    },
+    "submit": "Create Department",
+    "update": "Update Department"
+  },
+  "positionWizard": {
+    "steps": {
+      "details": {
+        "title": "Position Details",
+        "description": "Enter basic information about the position",
+        "titleLabel": "Position Title",
+        "titlePlaceholder": "e.g. Senior Developer, Product Manager",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Brief description of responsibilities and requirements"
+      },
+      "classification": {
+        "title": "Classification",
+        "description": "Set the department and level for this position",
+        "departmentLabel": "Department",
+        "departmentPlaceholder": "Select department",
+        "noDepartments": "No departments available",
+        "levelLabel": "Level",
+        "levelPlaceholder": "e.g. Senior, Mid, Entry, Lead"
+      },
+      "compensation": {
+        "title": "Compensation",
+        "description": "Define the salary range for this position",
+        "salaryMinLabel": "Minimum Salary",
+        "salaryMinPlaceholder": "50000",
+        "salaryMaxLabel": "Maximum Salary",
+        "salaryMaxPlaceholder": "80000",
+        "currencyLabel": "Currency"
+      },
+      "review": {
+        "title": "Review & Create",
+        "description": "Review the position details before creating",
+        "summaryLabel": "Summary",
+        "titleLabel": "Title",
+        "descriptionLabel": "Description",
+        "departmentLabel": "Department",
+        "levelLabel": "Level",
+        "salaryRangeLabel": "Salary Range",
+        "notSpecified": "Not specified"
+      }
+    },
+    "toast": {
+      "titleRequired": "Please enter a position title",
+      "salaryInvalid": "Maximum salary must be greater than minimum",
+      "createSuccess": "Position created successfully",
+      "updateSuccess": "Position updated successfully",
+      "error": "Failed to save position"
+    },
+    "submit": "Create Position",
+    "update": "Update Position"
   },
   "leaveStats": {
     "burnoutPrevention": "Burnout Prevention",
@@ -2761,6 +2885,11 @@
     "orgSubtitleFull": "HR Management System"
   },
   "employeeTypes": {
+    "full_time": "Full Time",
+    "part_time": "Part Time",
+    "contract": "Contract",
+    "intern": "Intern",
+    "freelance": "Freelance",
     "staff": "Staff",
     "contractor": "Contractor",
     "contractors": "Contractors"
@@ -2772,6 +2901,72 @@
     "supervisors": "Supervisors",
     "employee": "Employee",
     "driver": "Driver"
+  },
+  "goalStatus": {
+    "active": "Active",
+    "completed": "Completed",
+    "at_risk": "At Risk",
+    "on_hold": "On Hold"
+  },
+  "goalLevel": {
+    "company": "Company",
+    "team": "Team",
+    "individual": "Individual"
+  },
+  "eventTypes": {
+    "meeting": "Meeting",
+    "conference": "Conference",
+    "training": "Training",
+    "team_building": "Team Building",
+    "holiday": "Holiday",
+    "deadline": "Deadline",
+    "other": "Other"
+  },
+  "recognitionCategories": {
+    "teamwork": "Teamwork",
+    "innovation": "Innovation",
+    "leadership": "Leadership",
+    "dedication": "Dedication",
+    "customer_focus": "Customer Focus",
+    "mentorship": "Mentorship",
+    "excellence": "Excellence",
+    "above_and_beyond": "Above & Beyond"
+  },
+  "priority": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "priority": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "priority": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "surveyStatus": {
+    "draft": "Draft",
+    "active": "Active",
+    "closed": "Closed"
+  },
+  "surveyQuestionTypes": {
+    "multiple_choice": "Multiple Choice",
+    "text": "Text",
+    "rating": "Rating",
+    "yes_no": "Yes/No",
+    "scale": "Scale"
+  },
+  "documentCategories": {
+    "policy": "Policy",
+    "contract": "Contract",
+    "report": "Report",
+    "template": "Template",
+    "form": "Form",
+    "certificate": "Certificate",
+    "other": "Other"
   },
   "reportsPageComplete": {
     "cumulativeLeaveDays": "Cumulative Leave Days",
@@ -2853,7 +3048,6 @@
       "readyToStart": "Ready to get started?",
       "tryFree": "Try all features for free",
       "getStarted": "Get Started Free",
-      "login": "Login",
       "vacation": {
         "title": "Vacation Tracking",
         "subtitle": "Full control over employee vacations",
@@ -3328,7 +3522,20 @@
     "total": "Total",
     "allPriorities": "All Priorities",
     "allStatuses": "All Statuses",
-    "deleteTask": "Delete Task"
+    "deleteTask": "Delete Task",
+    "details": "Details",
+    "timeline": "Timeline",
+    "created": "Created",
+    "updated": "Updated",
+    "daysRemaining": "Days Remaining",
+    "daysOverdue": "days overdue",
+    "daysLeft": "days left",
+    "download": "Download",
+    "comments": "Comments",
+    "comment": "Comment",
+    "commentsCount": "comments",
+    "viewAllComments": "View All Comments",
+    "attachments": "Attachments"
   },
   "attendanceExtra": {
     "daysWorked": "Days Worked",
@@ -5387,7 +5594,26 @@
     "flagForDiscussion": "Flag for Discussion",
     "approveDespiteConflict": "Approve Despite Conflict",
     "conflictType.required_employee": "Required Employee",
-    "conflictType.required_department": "Required Department"
+    "conflictType.required_department": "Required Department",
+    "createdBy": "Created by {{name}}",
+    "created": "Created",
+    "past": "Past",
+    "upcoming": "Upcoming",
+    "ongoing": "Ongoing",
+    "daysUntil": "days until event",
+    "attendance": "Attendance",
+    "confirmed": "Confirmed",
+    "invited": "Invited",
+    "datetime": "Date & Time",
+    "allDay": "All Day",
+    "yes": "Yes",
+    "requirements": "Requirements",
+    "departments": "Departments",
+    "requiredEmployees": "Required Employees",
+    "notifyBefore": "Notify Before",
+    "days": "days",
+    "conflicts": "Conflicts",
+    "typeLabel": "Type"
   },
   "onboarding": {
     "title": "Onboarding",
@@ -6869,7 +7095,20 @@
       "fillAllFields": "Please fill all required fields",
       "sendFailed": "Failed to send kudos",
       "reactFailed": "Failed to add reaction"
-    }
+    },
+    "kudoDetails": "Kudos Details",
+    "from": "From",
+    "to": "To",
+    "sender": "Sender",
+    "receiver": "Receiver",
+    "reactions": "Reactions",
+    "public": "Public",
+    "private": "Private",
+    "context": "Context",
+    "category": "Category",
+    "visibility": "Visibility",
+    "date": "Date",
+    "time": "Time"
   },
   "surveys": {
     "title": "Pulse Surveys",
@@ -6939,6 +7178,11 @@
       "deleteFailed": "Failed to delete survey",
       "submitFailed": "Failed to submit response",
       "requiredFields": "Please answer all required questions"
+    },
+    "questions": "Questions",
+    "average": "Average",
+    "form": {
+      "optional": "Optional"
     }
   },
   "performance": {
@@ -7234,6 +7478,10 @@
       "success": "Check-in recorded",
       "yes": "Yes",
       "no": "No"
+    },
+    "errors": {
+      "completeFailed": "Failed to complete objective",
+      "deleteFailed": "Failed to delete objective"
     }
   },
   "recruitment": {

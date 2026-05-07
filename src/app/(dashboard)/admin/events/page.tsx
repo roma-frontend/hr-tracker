@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
@@ -127,6 +128,7 @@ const daysUntil = (ts: number) => {
 
 export default function CompanyEventsPage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CompanyEvent | null>(null);
@@ -475,9 +477,10 @@ export default function CompanyEventsPage() {
                     >
                       <Card
                         className={cn(
-                          'group hover:shadow-md transition-all duration-200',
+                          'group hover:shadow-md transition-all duration-200 cursor-pointer',
                           isPast ? 'opacity-60' : '',
                         )}
+                        onClick={() => router.push(`/events/${event._id}`)}
                       >
                         <CardContent className="p-4">
                           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
@@ -544,7 +547,8 @@ export default function CompanyEventsPage() {
                                 variant="ghost"
                                 size="icon"
                                 className="w-8 h-8"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setSelectedEvent(event);
                                   setShowEditModal(true);
                                 }}
@@ -555,7 +559,8 @@ export default function CompanyEventsPage() {
                                 variant="ghost"
                                 size="icon"
                                 className="w-8 h-8"
-                                onClick={async () => {
+                                onClick={async (e) => {
+                                  e.stopPropagation();
                                   if (
                                     confirm(
                                       t('events.confirmDelete', 'Delete event "{{name}}"?', {

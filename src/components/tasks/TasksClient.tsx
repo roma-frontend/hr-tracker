@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useMemo, useRef, useCallback, useTransition, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../../convex/_generated/api';
@@ -9,7 +10,6 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { CreateTaskWizard } from './CreateTaskWizard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CustomSelect } from '@/components/ui/CustomSelect';
-import { TaskDetailModal } from './TaskDetailModal';
 import { AssignSupervisorModal } from './AssignSupervisorModal';
 import {
   DndContext,
@@ -277,7 +277,10 @@ function DraggableTaskCard({ task, onOpen }: { task: any; onOpen: () => void }) 
       {...listeners}
       {...attributes}
       className="relative group cursor-grab active:cursor-grabbing"
-      onClick={onOpen}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpen();
+      }}
     >
       {/* Drag indicator icon - visible on hover */}
       <div
@@ -459,10 +462,10 @@ interface TasksClientProps {
 
 export const TasksClient = memo(function TasksClient({ userId, userRole }: TasksClientProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [showCreate, setShowCreate] = useState(false);
   const [showAssign, setShowAssign] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
   const [search, setSearch] = useState('');
@@ -782,7 +785,7 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
                 key={status}
                 status={status}
                 tasks={tasksByStatus[status]}
-                onOpen={setSelectedTask}
+                onOpen={(task) => router.push(`/tasks/${task._id}`)}
               />
             ))}
           </div>
@@ -829,7 +832,11 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
               </thead>
               <tbody>
                 {tasks.map((task) => (
-                  <TaskRow key={task._id} task={task} onOpen={() => setSelectedTask(task)} />
+                  <TaskRow
+                    key={task._id}
+                    task={task}
+                    onOpen={() => router.push(`/tasks/${task._id}`)}
+                  />
                 ))}
               </tbody>
             </table>
@@ -856,14 +863,6 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
           </div>
         </DialogContent>
       </Dialog>
-      {selectedTask && (
-        <TaskDetailModal
-          task={selectedTask}
-          currentUserId={convexId}
-          userRole={userRole as 'admin' | 'supervisor' | 'employee'}
-          onClose={() => setSelectedTask(null)}
-        />
-      )}
       {showAssign && <AssignSupervisorModal onClose={() => setShowAssign(false)} />}
     </div>
   );

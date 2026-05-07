@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import {
   Heart,
@@ -426,6 +427,7 @@ function SendKudosModal({ open, onClose, organizationId, senderId }: SendKudosMo
 
 export function RecognitionClient() {
   const { t } = useTranslation();
+  const router = useRouter();
   const user = useAuthStore(useShallow((s) => s.user));
   const selectedOrgId = useSelectedOrganization();
   const [showSendModal, setShowSendModal] = useState(false);
@@ -597,6 +599,7 @@ export function RecognitionClient() {
                   currentUserId={user.id as Id<'users'>}
                   onReact={handleReact}
                   t={t}
+                  onClick={() => router.push(`/recognition/${kudo._id}`)}
                 />
               ))}
             </div>
@@ -686,9 +689,10 @@ interface KudoCardProps {
   currentUserId: Id<'users'>;
   onReact: (kudoId: Id<'kudos'>, emoji: string) => void;
   t: (key: string) => string;
+  onClick?: () => void;
 }
 
-function KudoCard({ kudo, onReact, t }: KudoCardProps) {
+function KudoCard({ kudo, onReact, t, onClick }: KudoCardProps) {
   const config = CATEGORY_CONFIG[kudo.category as string] ?? CATEGORY_CONFIG.teamwork!;
   const IconComponent = config.icon;
 
@@ -704,7 +708,10 @@ function KudoCard({ kudo, onReact, t }: KudoCardProps) {
   );
 
   return (
-    <Card className="overflow-hidden">
+    <Card
+      className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+      onClick={onClick}
+    >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <Avatar className="h-10 w-10 shrink-0">
@@ -735,7 +742,10 @@ function KudoCard({ kudo, onReact, t }: KudoCardProps) {
               {Object.entries(reactionCounts).map(([emoji, count]) => (
                 <button
                   key={emoji}
-                  onClick={() => onReact(kudo._id, emoji)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReact(kudo._id, emoji);
+                  }}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted hover:bg-muted/80 text-xs transition-colors"
                 >
                   <span>{emoji}</span>
@@ -747,7 +757,10 @@ function KudoCard({ kudo, onReact, t }: KudoCardProps) {
                 .map((emoji) => (
                   <button
                     key={emoji}
-                    onClick={() => onReact(kudo._id, emoji)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onReact(kudo._id, emoji);
+                    }}
                     className="inline-flex items-center px-2 py-0.5 rounded-full border border-dashed border-muted-foreground/30 hover:bg-muted text-xs text-muted-foreground transition-colors"
                   >
                     {emoji}

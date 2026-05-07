@@ -66,6 +66,17 @@ export function Wizard({
     useState<Record<string, string | number | boolean | null | string[]>>(defaultStepData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const prevDefaultRef = React.useRef(defaultStepData);
+
+  React.useEffect(() => {
+    const prevJson = JSON.stringify(prevDefaultRef.current);
+    const currJson = JSON.stringify(defaultStepData);
+    if (prevJson !== currJson) {
+      prevDefaultRef.current = defaultStepData;
+      setStepData((prev) => ({ ...prev, ...defaultStepData }));
+    }
+  }, [defaultStepData]);
+
   const currentStepData = steps[currentStep];
 
   const canGoNext = useCallback(() => {

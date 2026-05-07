@@ -72,7 +72,20 @@ export const getDocument = query({
     if (!doc || doc.organizationId !== args.organizationId) {
       throw new Error('Document not found');
     }
-    return doc;
+    const uploader = await ctx.db.get(doc.uploadedBy);
+    return { ...doc, uploaderName: uploader?.name ?? 'Unknown' };
+  },
+});
+
+export const getDocumentById = query({
+  args: {
+    documentId: v.id('documents'),
+  },
+  handler: async (ctx, args) => {
+    const doc = await ctx.db.get(args.documentId);
+    if (!doc) return null;
+    const uploader = await ctx.db.get(doc.uploadedBy);
+    return { ...doc, uploaderName: uploader?.name ?? 'Unknown' };
   },
 });
 

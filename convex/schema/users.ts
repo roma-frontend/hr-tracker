@@ -18,7 +18,9 @@ export const users = {
     ),
     employeeType: v.union(v.literal('staff'), v.literal('contractor')),
     department: v.optional(v.string()),
+    departmentId: v.optional(v.id('departments')),
     position: v.optional(v.string()),
+    positionId: v.optional(v.id('positions')),
     phone: v.optional(v.string()),
     location: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
@@ -105,7 +107,9 @@ export const users = {
     .index('by_org_email', ['organizationId', 'email'])
     .index('by_org_created', ['organizationId', 'createdAt'])
     .index('by_session_token', ['sessionToken'])
-    .index('by_reset_token', ['resetPasswordToken']),
+    .index('by_reset_token', ['resetPasswordToken'])
+    .index('by_department', ['departmentId'])
+    .index('by_position', ['positionId']),
 
   webauthnCredentials: defineTable({
     userId: v.id('users'),

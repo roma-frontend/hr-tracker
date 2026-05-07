@@ -326,7 +326,14 @@
     "nodes": "կետեր",
     "edges": "կողմեր",
     "create": "Ստեղծել",
-    "edit": "Խմբագրել"
+    "edit": "Խմբագրել",
+    "add": "Ավելացնել",
+    "search": "Որոնում",
+    "details": "Մանրամասներ",
+    "status": "Կարգավիճակ",
+    "approve": "Հաստատել",
+    "reject": "Մերժել",
+    "saving": "Պահպանում..."
   },
   "lessons": {
     "title": "Դասեր"
@@ -335,6 +342,9 @@
     "home": "Գլխավոր",
     "dashboard": "Վահանակ",
     "employees": "Աշխատակիցներ",
+    "employees.all": "Բոլոր աշխատակիցներ",
+    "employees.departments": "Բաժիններ",
+    "employees.positions": "Պաշտոններ",
     "leave": "Արձակուրդ",
     "leaves": "Արձակուրդներ",
     "attendance": "Ներկայություն",
@@ -350,6 +360,26 @@
     "teamLeaves": "Թիմի արձակուրդներ",
     "approvals": "Հաստատումներ",
     "automation": "Ավտոմատացում",
+    "groups": {
+      "people": "Մարդիկ",
+      "timeLeave": "Ժամանակ և արձակուրդ",
+      "workspace": "Աշխատատարածք",
+      "performance": "Արդյունավետություն",
+      "talent": "Տաղանդներ",
+      "organization": "Կազմակերպություն",
+      "finance": "Ֆինանսներ",
+      "communication": "Հաղորդակցություն",
+      "admin": "Ադմինիստրացիա",
+      "help": "Օգնություն",
+      "superadmin": "Սուպերադմին",
+      "account": "Հաշիվ",
+      "reports": "Հաշվետվություններ"
+    },
+    "talent": "Տաղանդներ",
+    "finance": "Ֆինանսներ",
+    "organization": "Կազմակերպություն",
+    "people": "Մարդիկ",
+    "communication": "Հաղորդակցություն",
     "joinRequests": "Միացման հայտեր",
     "admin": "Ադմինիստրատոր",
     "events": "Միջոցառումներ",
@@ -1181,6 +1211,7 @@
     "cancel": "Չեղարկել"
   },
   "auth": {
+    "loginRequired": "Խնդրում ենք մուտք գործել",
     "login": "Մուտք",
     "register": "Գրանցում",
     "logout": "Դուրս գալ",
@@ -1474,6 +1505,62 @@
     "allEmployeesRated": "Բոլոր աշխատակիցները գնահատված են այս ամիս! ✅",
     "checkBackNextMonth": "Վերադարձեք հաջորդ ամիս"
   },
+  "leave": {
+    "title": "Արձակուրդի հայտեր",
+    "manageAndTrack": "Կառավարեք և հետևեք աշխատակիցների արձակուրդի հայտերը",
+    "requestLeave": "Հայտ ներկայացնել",
+    "pending": "Սպասվում է",
+    "approved": "Հաստատված",
+    "rejected": "Մերժված",
+    "approvedSuccess": "Արձակուրդի հայտը հաջողությամբ հաստատվեց",
+    "rejectedSuccess": "Արձակուրդի հայտը հաջողությամբ մերժվեց",
+    "deletedSuccess": "Արձակուրդի հայտը հաջողությամբ ջնջվեց",
+    "approveFailed": "Չհաջողվեց հաստատել արձակուրդի հայտը",
+    "rejectFailed": "Չհաջողվեց մերժել արձակուրդի հայտը",
+    "deleteFailed": "Չհաջողվեց ջնջել արձակուրդի հայտը",
+    "noLeaves": "Արձակուրդի հայտեր չեն գտնվել",
+    "createFirst": "Ստեղծել առաջին հայտը",
+    "allStatuses": "Բոլոր կարգավիճակները",
+    "allTypes": "Բոլոր տեսակները",
+    "requests": "Հայտեր",
+    "days": "Օրեր",
+    "day": "օր",
+    "daysSuffix": "օ",
+    "types": {
+      "paid": "Վճարովի արձակուրդ",
+      "paidDesc": "Տարեկան արձակուրդ",
+      "sick": "Հիվանդության արձակուրդ",
+      "sickDesc": "Հիվանդություն կամ բժշկական այց",
+      "family": "Ընտանեկան արձակուրդ",
+      "familyDesc": "Ընտանեկան հանգամանքներ",
+      "unpaid": "Չվճարվող արձակուրդ",
+      "unpaidDesc": "Արձակուրդ առանց վճարի"
+    },
+    "reason": "Պատճառ",
+    "requestDetails": "Արձակուրդի հայտի մանրամասներ",
+    "requestFrom": "Հայտ {{name}}-ից",
+    "leaveDetails": "Արձակուրդի մանրամասներ",
+    "startDate": "Սկզբի ամսաթիվ",
+    "endDate": "Վերջի ամսաթիվ",
+    "status": "Կարգավիճակ",
+    "timeline": "Ժամանակացույց",
+    "requestSubmitted": "Հայտը ներկայացված է",
+    "byAdmin": "Վերանայված ադմինի կողմից"
+  },
+  "leaveRequest": {
+    "newLeaveRequest": "Նոր արձակուրդի հայտ",
+    "adminDesc": "Ներկայացրեք արձակուրդի հայտ աշխատակցի համար",
+    "selfDesc": "Ներկայացրեք արձակուրդի հայտ ինքներդ ձեզ համար",
+    "pickDate": "Ընտրեք ամսաթիվ",
+    "reasonRequired": "Պատճառ *",
+    "reasonPlaceholder": "Մուտքագրեք արձակուրդի պատճառը...",
+    "additionalComments": "Լրացուցիչ մեկնաբանություններ",
+    "commentsPlaceholder": "Ավելացնել մեկնաբանություններ",
+    "attachDocuments": "Կցել փաստաթղթեր",
+    "cancel": "Չեղարկել",
+    "submitRequest": "Ներկայացնել հայտը",
+    "submitting": "Ներկայացում..."
+  },
   "employees": {
     "addEmployee": "Ավելացնել աշխատակից",
     "total": "ընդամենը",
@@ -1533,6 +1620,90 @@
     "allRolesFilter": "Բոլոր դերերը",
     "allTypesFilter": "Բոլոր տեսակները",
     "allStatusesFilter": "Բոլոր կարգավիճակները"
+  },
+  "departmentWizard": {
+    "steps": {
+      "details": {
+        "title": "Բաժնի տվյալներ",
+        "description": "Մուտքագրեք բաժնի հիմնական տեղեկությունները",
+        "nameLabel": "Բաժնի անվանում",
+        "namePlaceholder": "օրինակ՝ Ինժեներական, Մարքեթինգ, HR",
+        "descriptionLabel": "Նկարագրություն",
+        "descriptionPlaceholder": "Բաժնի նպատակի համառոտ նկարագրություն"
+      },
+      "appearance": {
+        "title": "Արտաքին տեսք",
+        "description": "Ընտրեք գույն բաժնի վիզուալ նույնականացման համար",
+        "colorLabel": "Բաժնի գույն",
+        "colorDescription": "Այս գույնը կօգտագործվի գրաֆիկներում և ցուցակներում"
+      },
+      "review": {
+        "title": "Ստուգում և ստեղծում",
+        "description": "Ստուգեք բաժնի տվյալները ստեղծելուց առաջ",
+        "summaryLabel": "Ամփոփում",
+        "nameLabel": "Անվանում",
+        "descriptionLabel": "Նկարագրություն",
+        "colorLabel": "Գույն"
+      }
+    },
+    "toast": {
+      "nameRequired": "Խնդրում ենք մուտքագրել բաժնի անվանումը",
+      "createSuccess": "Բաժինը հաջողությամբ ստեղծվեց",
+      "updateSuccess": "Բաժինը հաջողությամբ թարմացվեց",
+      "error": "Սխալ բաժնի պահպանման ժամանակ"
+    },
+    "submit": "Ստեղծել բաժին",
+    "update": "Թարմացնել բաժին"
+  },
+  "positionWizard": {
+    "steps": {
+      "details": {
+        "title": "Պաշտոնի տվյալներ",
+        "description": "Մուտքագրեք պաշտոնի հիմնական տեղեկությունները",
+        "titleLabel": "Պաշտոնի անվանում *",
+        "titlePlaceholder": "օրինակ՝ Ավագ ծրագրավորող, Մթերքի մենեջեր",
+        "descriptionLabel": "Նկարագրություն",
+        "descriptionPlaceholder": "Պարտականությունների և պահանջների համառոտ նկարագրություն"
+      },
+      "classification": {
+        "title": "Դասակարգում",
+        "description": "Սահմանեք բաժինը և մակարդակը այս պաշտոնի համար",
+        "departmentLabel": "Բաժին",
+        "departmentPlaceholder": "Ընտրեք բաժին",
+        "noDepartments": "Բաժիններ չկան",
+        "levelLabel": "Մակարդակ",
+        "levelPlaceholder": "օրինակ՝ Ավագ, Միջին, Սկսնակ, Վարող"
+      },
+      "compensation": {
+        "title": "Աշխատավարձ",
+        "description": "Սահմանեք աշխատավարձի միջակայքը այս պաշտոնի համար",
+        "salaryMinLabel": "Նվազագույն աշխատավարձ",
+        "salaryMinPlaceholder": "50000",
+        "salaryMaxLabel": "Առավելագույն աշխատավարձ",
+        "salaryMaxPlaceholder": "80000",
+        "currencyLabel": "Արժույթ"
+      },
+      "review": {
+        "title": "Ստուգում և ստեղծում",
+        "description": "Ստուգեք պաշտոնի տվյալները ստեղծելուց առաջ",
+        "summaryLabel": "Ամփոփում",
+        "titleLabel": "Անվանում",
+        "descriptionLabel": "Նկարագրություն",
+        "departmentLabel": "Բաժին",
+        "levelLabel": "Մակարդակ",
+        "salaryRangeLabel": "Աշխատավարձի միջակայք",
+        "notSpecified": "Նշված չէ"
+      }
+    },
+    "toast": {
+      "titleRequired": "Խնդրում ենք մուտքագրել պաշտոնի անվանումը",
+      "salaryInvalid": "Առավելագույն աշխատավարձը պետք է մեծ լինի նվազագույնից",
+      "createSuccess": "Պաշտոնը հաջողությամբ ստեղծվեց",
+      "updateSuccess": "Պաշտոնը հաջողությամբ թարմացվեց",
+      "error": "Սխալ պաշտոնի պահպանման ժամանակ"
+    },
+    "submit": "Ստեղծել պաշտոն",
+    "update": "Թարմացնել պաշտոն"
   },
   "leaveStats": {
     "burnoutPrevention": "Հոգնածության կանխարգելում",
@@ -2596,6 +2767,11 @@
     "closeSidebar": "Փակել կողային վահանակը"
   },
   "employeeTypes": {
+    "full_time": "Լրիվ դրույք",
+    "part_time": "Կես դրույք",
+    "contract": "Պայմանագիր",
+    "intern": "Պրակտիկանտ",
+    "freelance": "Ֆրիլանսեր",
     "staff": "Աշխատակազմ",
     "contractor": "Աշխատակազմ",
     "contractors": "Կապալառուներ"
@@ -2607,6 +2783,57 @@
     "supervisors": "Վերակացուներ",
     "employee": "Աշխատակից",
     "driver": "Վարորդ"
+  },
+  "goalStatus": {
+    "active": "Ակտիվ",
+    "completed": "Ավարտված",
+    "at_risk": "Ռիսկային",
+    "on_hold": "Դադարեցված"
+  },
+  "goalLevel": {
+    "company": "Ընկերություն",
+    "team": "Թիմ",
+    "individual": "Անհատական"
+  },
+  "eventTypes": {
+    "meeting": "Հանդիպում",
+    "conference": "Կոնֆերանս",
+    "training": "Վերապատրաստում",
+    "team_building": "Թիմբիլդինգ",
+    "holiday": "Տոն",
+    "deadline": "Ժամկետ",
+    "other": "Այլ"
+  },
+  "recognitionCategories": {
+    "teamwork": "Թիմային աշխատանք",
+    "innovation": "Նորարարություն",
+    "leadership": "Առաջնորդություն",
+    "dedication": "Նվիրվածություն",
+    "customer_focus": "Հաճախորդների սպասարկում",
+    "mentorship": "Վերապատրաստում",
+    "excellence": "Գերազանցություն",
+    "above_and_beyond": "Սպասելիքներից վեր"
+  },
+  "surveyStatus": {
+    "draft": "Սևագիր",
+    "active": "Ակտիվ",
+    "closed": "Փակ"
+  },
+  "surveyQuestionTypes": {
+    "multiple_choice": "Բազմակի ընտրություն",
+    "text": "Տեքստ",
+    "rating": "Գնահատական",
+    "yes_no": "Այո/Ոչ",
+    "scale": "Սանդղակ"
+  },
+  "documentCategories": {
+    "policy": "Քաղաքականություն",
+    "contract": "Պայմանագիր",
+    "report": "Հաշվետվություն",
+    "template": "Կաղապար",
+    "form": "Ձևաթուղթ",
+    "certificate": "Վկայական",
+    "other": "Այլ"
   },
   "reportsPageComplete": {
     "cumulativeLeaveDays": "Կուտակային արձակուրդային օրեր",
@@ -5126,7 +5353,26 @@
     "flagForDiscussion": "Քննարկել",
     "approveDespiteConflict": "Հաստատել չնայած հակասությանը",
     "conflictType.required_employee": "Պահանջվող աշխատակից",
-    "conflictType.required_department": "Պահանջվող բաժին"
+    "conflictType.required_department": "Պահանջվող բաժին",
+    "createdBy": "Ստեղծել է {{name}}",
+    "created": "Ստեղծված",
+    "past": "Անցած",
+    "upcoming": "Առաջիկա",
+    "ongoing": "Ընթացիկ",
+    "daysUntil": "օր մինչև միջոցառումը",
+    "attendance": "Ներկայություն",
+    "confirmed": "Հաստատված",
+    "invited": "Հրավիրված",
+    "datetime": "Ամսաթիվ և ժամ",
+    "allDay": "Ամբողջ օր",
+    "yes": "Այո",
+    "requirements": "Պահանջներ",
+    "departments": "Բաժիններ",
+    "requiredEmployees": "Պահանջվող աշխատակիցներ",
+    "notifyBefore": "Ծանուցել նախքան",
+    "days": "օր",
+    "conflicts": "Հակասություններ",
+    "typeLabel": "Տեսակ"
   },
   "onboarding": {
     "title": "Նոր աշխատակիցների ինտեգրում",
@@ -7227,6 +7473,13 @@
       "improvements": "Բարելավման առաջարկներ",
       "submit": "Ներկայացնել"
     }
+  },
+  "leaveTypes": {
+    "paid": "Վճարովի արձակուրդ",
+    "unpaid": "Չվճարվող արձակուրդ",
+    "sick": "Հիվանդության արձակուրդ",
+    "family": "Ընտանեկան արձակուրդ",
+    "doctor": "Բժշկի այց"
   },
   "features": {
     "leaveTypes": "Արձակուրդների տեսակներ",

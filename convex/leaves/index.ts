@@ -7,6 +7,7 @@ export {
   getLeaveStats,
   getUnreadCount,
   getLeavesPagederated,
+  getLeaveById,
 } from './queries';
 export {
   createLeave,

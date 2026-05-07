@@ -19,10 +19,15 @@ export function useSelectedOrganization() {
     setHydrated(true);
   }, []);
 
-  // Only superadmins can filter by org selection
-  if (!hydrated || user?.role !== 'superadmin') {
+  if (!hydrated) {
     return null;
   }
 
-  return selectedOrgId;
+  // For superadmins, return selected org (can be null for "all orgs" mode)
+  if (user?.role === 'superadmin') {
+    return selectedOrgId ?? null;
+  }
+
+  // All other users use their own organization
+  return user?.organizationId ?? null;
 }

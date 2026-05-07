@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import {
@@ -858,6 +859,7 @@ function SurveyResultsDialog({
 
 export function SurveysClient() {
   const { t } = useTranslation();
+  const router = useRouter();
   const user = useAuthStore(useShallow((s) => s.user));
   const selectedOrgId = useSelectedOrganization();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
@@ -1010,7 +1012,11 @@ export function SurveysClient() {
           </Card>
         ) : (
           surveys.map((survey: any) => (
-            <Card key={survey._id} className="hover:shadow-sm transition-shadow">
+            <Card
+              key={survey._id}
+              className="hover:shadow-sm transition-shadow cursor-pointer"
+              onClick={() => router.push(`/surveys/${survey._id}`)}
+            >
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -1049,7 +1055,10 @@ export function SurveysClient() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setTakingSurveyId(survey._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTakingSurveyId(survey._id);
+                        }}
                         className="gap-1"
                       >
                         <Send className="h-3 w-3" />
@@ -1061,7 +1070,10 @@ export function SurveysClient() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => setViewingResultsId(survey._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setViewingResultsId(survey._id);
+                          }}
                           title={t('surveys.viewResults')}
                         >
                           <BarChart3 className="h-4 w-4" />
@@ -1071,7 +1083,10 @@ export function SurveysClient() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handlePublish(survey._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePublish(survey._id);
+                              }}
                               title={t('surveys.publish')}
                             >
                               <Play className="h-4 w-4 text-green-600" />
@@ -1079,7 +1094,10 @@ export function SurveysClient() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleDelete(survey._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(survey._id);
+                              }}
                               title={t('surveys.delete')}
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
@@ -1090,7 +1108,10 @@ export function SurveysClient() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleClose(survey._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClose(survey._id);
+                            }}
                             title={t('surveys.close')}
                           >
                             <Square className="h-4 w-4 text-red-600" />

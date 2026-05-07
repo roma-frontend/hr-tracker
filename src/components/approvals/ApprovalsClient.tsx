@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { motion } from '@/lib/cssMotion';
 import { UserCheck, UserX, Clock, Mail, Calendar, CheckCircle } from 'lucide-react';
@@ -19,6 +20,7 @@ import type { Id } from '@/convex/_generated/dataModel';
 
 export default function ApprovalsClient() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
   const isSuperadmin = user?.role === 'superadmin';
@@ -107,7 +109,11 @@ export default function ApprovalsClient() {
       ) : (
         <div className="grid gap-3 sm:gap-4">
           {pendingUsers?.map((pendingUser) => (
-            <Card key={pendingUser._id}>
+            <Card
+              key={pendingUser._id}
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => router.push(`/approvals/${pendingUser._id}`)}
+            >
               <CardHeader className="pb-3 p-4 sm:p-6">
                 <div className="flex items-start gap-2 sm:gap-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-linear-to-br from-[#2563eb] to-[#0ea5e9] flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
@@ -185,7 +191,10 @@ export default function ApprovalsClient() {
                 <div className="flex gap-2 pt-2 border-t border-(--border)">
                   <Button
                     size="sm"
-                    onClick={() => handleApprove(pendingUser._id, pendingUser.name)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleApprove(pendingUser._id, pendingUser.name);
+                    }}
                     className="flex-1 text-xs sm:text-sm"
                   >
                     <UserCheck className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -194,7 +203,10 @@ export default function ApprovalsClient() {
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleReject(pendingUser._id, pendingUser.name)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReject(pendingUser._id, pendingUser.name);
+                    }}
                     className="flex-1 text-xs sm:text-sm"
                   >
                     <UserX className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />

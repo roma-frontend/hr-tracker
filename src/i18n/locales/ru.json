@@ -332,7 +332,15 @@
     "nodes": "узлов",
     "edges": "связей",
     "create": "Создать",
-    "edit": "Редактировать"
+    "edit": "Редактировать",
+    "add": "Добавить",
+    "search": "Поиск",
+    "noResults": "Ничего не найдено",
+    "details": "Детали",
+    "status": "Статус",
+    "approve": "Одобрить",
+    "reject": "Отклонить",
+    "saving": "Сохранение..."
   },
   "lessons": {
     "title": "Уроки"
@@ -341,6 +349,9 @@
     "home": "Главная",
     "dashboard": "Панель",
     "employees": "Сотрудники",
+    "employees.all": "Все сотрудники",
+    "employees.departments": "Отделы",
+    "employees.positions": "Должности",
     "leave": "Отпуск",
     "leaves": "Отпуска",
     "attendance": "Посещаемость",
@@ -356,6 +367,26 @@
     "teamLeaves": "Отпуска команды",
     "approvals": "Утверждения",
     "automation": "Автоматизация",
+    "groups": {
+      "people": "Люди",
+      "timeLeave": "Время и отпуска",
+      "workspace": "Рабочее пространство",
+      "performance": "Эффективность",
+      "talent": "Таланты",
+      "organization": "Организация",
+      "finance": "Финансы",
+      "communication": "Коммуникации",
+      "admin": "Администрирование",
+      "help": "Помощь",
+      "superadmin": "Суперадмин",
+      "account": "Аккаунт",
+      "reports": "Отчёты"
+    },
+    "talent": "Таланты",
+    "finance": "Финансы",
+    "organization": "Организация",
+    "people": "Люди",
+    "communication": "Коммуникации",
     "joinRequests": "Запросы на присоединение",
     "admin": "Администратор",
     "events": "Мероприятия",
@@ -1199,6 +1230,7 @@
     "cancel": "Отмена"
   },
   "auth": {
+    "loginRequired": "Пожалуйста, войдите в систему",
     "login": "Вход",
     "register": "Регистрация",
     "logout": "Выход",
@@ -1520,7 +1552,16 @@
       "unpaid": "Без оплаты",
       "unpaidDesc": "Отпуск без содержания"
     },
-    "reason": "Причина"
+    "reason": "Причина",
+    "requestDetails": "Детали заявки на отпуск",
+    "requestFrom": "Заявка от {{name}}",
+    "leaveDetails": "Детали отпуска",
+    "startDate": "Дата начала",
+    "endDate": "Дата окончания",
+    "status": "Статус",
+    "timeline": "Хронология",
+    "requestSubmitted": "Заявка отправлена",
+    "byAdmin": "Проверено администратором"
   },
   "leaveRequest": {
     "newLeaveRequest": "Новая заявка на отпуск",
@@ -1693,6 +1734,90 @@
     "allRolesFilter": "Все роли",
     "allTypesFilter": "Все типы",
     "allStatusesFilter": "Все статусы"
+  },
+  "departmentWizard": {
+    "steps": {
+      "details": {
+        "title": "Информация об отделе",
+        "description": "Введите основную информацию об отделе",
+        "nameLabel": "Название отдела",
+        "namePlaceholder": "например, Инженерия, Маркетинг, HR",
+        "descriptionLabel": "Описание",
+        "descriptionPlaceholder": "Краткое описание назначения отдела"
+      },
+      "appearance": {
+        "title": "Внешний вид",
+        "description": "Выберите цвет для визуальной идентификации отдела",
+        "colorLabel": "Цвет отдела",
+        "colorDescription": "Этот цвет будет использоваться в графиках и списках"
+      },
+      "review": {
+        "title": "Проверка и создание",
+        "description": "Проверьте данные отдела перед созданием",
+        "summaryLabel": "Сводка",
+        "nameLabel": "Название",
+        "descriptionLabel": "Описание",
+        "colorLabel": "Цвет"
+      }
+    },
+    "toast": {
+      "nameRequired": "Введите название отдела",
+      "createSuccess": "Отдел успешно создан",
+      "updateSuccess": "Отдел успешно обновлен",
+      "error": "Ошибка при сохранении отдела"
+    },
+    "submit": "Создать отдел",
+    "update": "Обновить отдел"
+  },
+  "positionWizard": {
+    "steps": {
+      "details": {
+        "title": "Информация о должности",
+        "description": "Введите основную информацию о должности",
+        "titleLabel": "Название должности",
+        "titlePlaceholder": "например, Старший разработчик, Менеджер продукта",
+        "descriptionLabel": "Описание",
+        "descriptionPlaceholder": "Краткое описание обязанностей и требований"
+      },
+      "classification": {
+        "title": "Классификация",
+        "description": "Установите отдел и уровень для этой должности",
+        "departmentLabel": "Отдел",
+        "departmentPlaceholder": "Выберите отдел",
+        "noDepartments": "Нет доступных отделов",
+        "levelLabel": "Уровень",
+        "levelPlaceholder": "например, Старший, Средний, Начальный, Ведущий"
+      },
+      "compensation": {
+        "title": "Оплата труда",
+        "description": "Определите диапазон зарплаты для этой должности",
+        "salaryMinLabel": "Минимальная зарплата",
+        "salaryMinPlaceholder": "50000",
+        "salaryMaxLabel": "Максимальная зарплата",
+        "salaryMaxPlaceholder": "80000",
+        "currencyLabel": "Валюта"
+      },
+      "review": {
+        "title": "Проверка и создание",
+        "description": "Проверьте данные должности перед созданием",
+        "summaryLabel": "Сводка",
+        "titleLabel": "Название",
+        "descriptionLabel": "Описание",
+        "departmentLabel": "Отдел",
+        "levelLabel": "Уровень",
+        "salaryRangeLabel": "Диапазон зарплаты",
+        "notSpecified": "Не указано"
+      }
+    },
+    "toast": {
+      "titleRequired": "Введите название должности",
+      "salaryInvalid": "Максимальная зарплата должна быть больше минимальной",
+      "createSuccess": "Должность успешно создана",
+      "updateSuccess": "Должность успешно обновлена",
+      "error": "Ошибка при сохранении должности"
+    },
+    "submit": "Создать должность",
+    "update": "Обновить должность"
   },
   "leaveStats": {
     "burnoutPrevention": "Профилактика выгорания",
@@ -2783,6 +2908,11 @@
     "orgSubtitleFull": "HR Management System"
   },
   "employeeTypes": {
+    "full_time": "Полный рабочий день",
+    "part_time": "Неполный рабочий день",
+    "contract": "Контракт",
+    "intern": "Стажер",
+    "freelance": "Фриланс",
     "staff": "Штатный сотрудник",
     "contractor": "Подрядчик",
     "contractors": "Подрядчики"
@@ -2794,6 +2924,57 @@
     "supervisors": "Супервайзеры",
     "employee": "Сотрудник",
     "driver": "Водитель"
+  },
+  "goalStatus": {
+    "active": "Активная",
+    "completed": "Завершена",
+    "at_risk": "Под риском",
+    "on_hold": "Приостановлена"
+  },
+  "goalLevel": {
+    "company": "Компания",
+    "team": "Команда",
+    "individual": "Индивидуальная"
+  },
+  "eventTypes": {
+    "meeting": "Встреча",
+    "conference": "Конференция",
+    "training": "Обучение",
+    "team_building": "Тимбилдинг",
+    "holiday": "Праздник",
+    "deadline": "Срок",
+    "other": "Другое"
+  },
+  "recognitionCategories": {
+    "teamwork": "Командная работа",
+    "innovation": "Инновации",
+    "leadership": "Лидерство",
+    "dedication": "Преданность",
+    "customer_focus": "Клиентоориентированность",
+    "mentorship": "Наставничество",
+    "excellence": "Превосходство",
+    "above_and_beyond": "Выше ожиданий"
+  },
+  "surveyStatus": {
+    "draft": "Черновик",
+    "active": "Активный",
+    "closed": "Закрыт"
+  },
+  "surveyQuestionTypes": {
+    "multiple_choice": "Множественный выбор",
+    "text": "Текст",
+    "rating": "Оценка",
+    "yes_no": "Да/Нет",
+    "scale": "Шкала"
+  },
+  "documentCategories": {
+    "policy": "Политика",
+    "contract": "Контракт",
+    "report": "Отчет",
+    "template": "Шаблон",
+    "form": "Форма",
+    "certificate": "Сертификат",
+    "other": "Другое"
   },
   "reportsPageComplete": {
     "cumulativeLeaveDays": "Накопительные дни отпуска",
@@ -5423,7 +5604,26 @@
     "flagForDiscussion": "Обсудить",
     "approveDespiteConflict": "Утвердить несмотря на конфликт",
     "conflictType.required_employee": "Требуемый сотрудник",
-    "conflictType.required_department": "Требуемый департамент"
+    "conflictType.required_department": "Требуемый департамент",
+    "createdBy": "Создано {{name}}",
+    "created": "Создано",
+    "past": "Прошедшее",
+    "upcoming": "Предстоящее",
+    "ongoing": "Текущее",
+    "daysUntil": "дней до мероприятия",
+    "attendance": "Посещаемость",
+    "confirmed": "Подтверждено",
+    "invited": "Приглашено",
+    "datetime": "Дата и время",
+    "allDay": "Весь день",
+    "yes": "Да",
+    "requirements": "Требования",
+    "departments": "Департаменты",
+    "requiredEmployees": "Требуемые сотрудники",
+    "notifyBefore": "Уведомить за",
+    "days": "дней",
+    "conflicts": "Конфликты",
+    "typeLabel": "Тип"
   },
   "onboarding": {
     "title": "Онбординг",

@@ -1,0 +1,358 @@
+'use client';
+
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  User,
+  Flag,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Trash2,
+  Pencil,
+  Target,
+  TrendingUp,
+  BarChart3,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { hy } from 'date-fns/locale';
+import { Progress } from '@/components/ui/progress';
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const { t } = useTranslation();
+  const variant =
+    {
+      active: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+      completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+      at_risk: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+      on_hold: 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400',
+    }[status] ?? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+
+  const label =
+    {
+      active: t('goalStatus.active'),
+      completed: t('goalStatus.completed'),
+      at_risk: t('goalStatus.at_risk'),
+      on_hold: t('goalStatus.on_hold'),
+    }[status] ?? t('goalStatus.active');
+
+  return <Badge className={`${variant} border-0`}>{label}</Badge>;
+};
+
+const LevelBadge = ({ level }: { level: string }) => {
+  const { t } = useTranslation();
+  const variant =
+    {
+      company: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
+      team: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+      individual: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+    }[level] ?? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+
+  const label =
+    {
+      company: t('goalLevel.company'),
+      team: t('goalLevel.team'),
+      individual: t('goalLevel.individual'),
+    }[level] ?? level.charAt(0).toUpperCase() + level.slice(1);
+
+  return <Badge className={`${variant} border-0`}>{label}</Badge>;
+};
+
+export default function GoalDetailClient() {
+  const params = useParams();
+  const router = useRouter();
+  const { user } = useAuthStore();
+  const { t } = useTranslation();
+  const goalId = params.id as Id<'objectives'>;
+
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const goal = useQuery(api.goals.getObjective, { objectiveId: goalId });
+  const currentUser = useQuery(
+    api.users.queries.getUserById,
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
+  );
+
+  const completeGoal = useMutation(api.goals.completeObjective);
+  const deleteGoal = useMutation(api.goals.deleteObjective);
+
+  const handleComplete = async () => {
+    if (!currentUser) return;
+    setIsCompleting(true);
+    try {
+      await completeGoal({ objectiveId: goalId });
+      toast.success(t('goals.completed'));
+      router.push('/goals');
+    } catch {
+      toast.error(t('goals.errors.completeFailed'));
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!currentUser) return;
+    setIsDeleting(true);
+    try {
+      await deleteGoal({ objectiveId: goalId });
+      toast.success(t('goals.deleted'));
+      router.push('/goals');
+    } catch {
+      toast.error(t('goals.errors.deleteFailed'));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (!goal) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
+      </div>
+    );
+  }
+
+  const startDate = new Date(goal.periodStart);
+  const endDate = new Date(goal.periodEnd);
+  const now = Date.now();
+  const totalDuration = endDate.getTime() - startDate.getTime();
+  const elapsed = now - startDate.getTime();
+  const timeProgress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.push('/goals')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">{goal.title}</h1>
+            <p className="text-muted-foreground">
+              {t('goals.owner')}: {goal.ownerName}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {goal.status === 'active' && (
+            <Button variant="default" onClick={handleComplete} disabled={isCompleting}>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              {isCompleting ? t('common.saving') : t('goals.markComplete')}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.push(`/goals/${goalId}/edit`)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleDelete} disabled={isDeleting}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t('goals.stats.progress')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{goal.progress}%</div>
+            <Progress value={goal.progress} className="mt-2" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t('goals.stats.keyResults')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{goal.keyResults?.length || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">{t('goals.keyResults')}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t('goals.stats.timeProgress')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{Math.round(timeProgress)}%</div>
+            <Progress value={timeProgress} className="mt-2" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              {t('goals.details')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('goals.status')}</span>
+              <StatusBadge status={goal.status} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('goals.level')}</span>
+              <LevelBadge level={goal.level} />
+            </div>
+            {goal.department && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('goals.department')}</span>
+                <span className="font-medium">{goal.department}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('goals.period')}</span>
+              <span className="font-medium">
+                {goal.periodType} {goal.periodYear}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              {t('goals.timeline')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('goals.startDate')}</span>
+              <span className="font-medium">
+                {format(startDate, 'dd MMM yyyy', { locale: hy })}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('goals.endDate')}</span>
+              <span className="font-medium">{format(endDate, 'dd MMM yyyy', { locale: hy })}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('goals.created')}</span>
+              <span className="font-medium">
+                {format(new Date(goal._creationTime), 'dd MMM yyyy', { locale: hy })}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {goal.description && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5" />
+              {t('goals.description')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{goal.description}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {goal.keyResults && goal.keyResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              {t('goals.keyResults')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {goal.keyResults.map((kr: any) => (
+                <div key={kr._id} className="border rounded-lg p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">{kr.title}</h4>
+                    <Badge variant="outline">{kr.completionPercent}%</Badge>
+                  </div>
+                  <Progress value={kr.completionPercent} className="h-2" />
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span>
+                      {t('goals.start')}: {kr.startValue}
+                    </span>
+                    <span>
+                      {t('goals.target')}: {kr.targetValue}
+                    </span>
+                    <span>
+                      {t('goals.current')}: {kr.currentValue}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {goal.children && goal.children.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              {t('goals.alignedGoals')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {goal.children.map((child: any) => (
+                <div
+                  key={child._id}
+                  className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => router.push(`/goals/${child._id}`)}
+                >
+                  <div className="flex items-center gap-3">
+                    <Target className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{child.title}</p>
+                      <p className="text-sm text-muted-foreground">{child.ownerName}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Progress value={child.progress} className="w-24 h-2" />
+                    <span className="text-sm font-medium">{child.progress}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

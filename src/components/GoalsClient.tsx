@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import {
   Target,
@@ -940,6 +941,7 @@ function ObjectiveDetailDialog({
 
 export default function GoalsClient() {
   const { t } = useTranslation();
+  const router = useRouter();
   const user = useAuthUser();
   const selectedOrgId = useSelectedOrganization();
   const organizationId = (selectedOrgId ?? user?.organizationId ?? undefined) as
@@ -952,7 +954,6 @@ export default function GoalsClient() {
   const [selectedTab, setSelectedTab] = useState('my');
   const [filterPeriod, setFilterPeriod] = useState<PeriodType | 'all'>('all');
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
-  const [selectedObjective, setSelectedObjective] = useState<Id<'objectives'> | null>(null);
   const [checkinKR, setCheckinKR] = useState<{
     _id: Id<'keyResults'>;
     title: string;
@@ -1194,7 +1195,7 @@ export default function GoalsClient() {
                 <Card
                   key={obj._id}
                   className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => setSelectedObjective(obj._id)}
+                  onClick={() => router.push(`/goals/${obj._id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1255,19 +1256,6 @@ export default function GoalsClient() {
             userDepartment={user?.department}
             parentOptions={parentOptions}
             onClose={() => setShowWizard(false)}
-          />
-        )}
-      </Dialog>
-
-      <Dialog open={!!selectedObjective} onOpenChange={() => setSelectedObjective(null)}>
-        {selectedObjective && (
-          <ObjectiveDetailDialog
-            objectiveId={selectedObjective}
-            onClose={() => setSelectedObjective(null)}
-            onCheckin={(kr) => {
-              setSelectedObjective(null);
-              setCheckinKR(kr);
-            }}
           />
         )}
       </Dialog>

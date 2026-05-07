@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from '@/lib/cssMotion';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Plus, Search, CheckCircle, XCircle, Trash2, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { enUS, ru, hy } from 'date-fns/locale';
 import i18n from 'i18next';
@@ -88,6 +89,7 @@ function LeaveTypeBadge({ type }: { type: LeaveType }) {
 }
 
 export function LeavesClient() {
+  const router = useRouter();
   const { t } = useTranslation();
   const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
   const selectedOrgId = useSelectedOrganization();
@@ -346,48 +348,72 @@ export function LeavesClient() {
                   <tbody className="divide-y divide-(--border)">
                     {filtered.map((req, i) => (
                       <React.Fragment key={req._id}>
-                        <tr
-                          className="hover:bg-(--background-subtle) transition-colors cursor-pointer"
-                          onClick={() =>
-                            isAdmin &&
-                            req.status === 'pending' &&
-                            setExpandedRow(expandedRow === req._id ? null : req._id)
-                          }
-                        >
-                          <td className="px-6 py-3">
+                        <tr className="hover:bg-(--background-subtle) transition-colors">
+                          <td
+                            className="px-6 py-3 cursor-pointer"
+                            onClick={() => router.push(`/leaves/${req._id}`)}
+                          >
                             <div>
-                              <p className="text-sm font-medium text-(--text-primary)">
+                              <p className="text-sm font-medium text-(--text-primary) hover:text-[#2563eb] transition-colors">
                                 {req.userName}
                               </p>
                               <p className="text-xs text-(--text-muted)">{req.userDepartment}</p>
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => router.push(`/leaves/${req._id}`)}
+                          >
                             <LeaveTypeBadge type={req.type as LeaveType} />
                           </td>
-                          <td className="px-4 py-3 hidden md:table-cell">
+                          <td
+                            className="px-4 py-3 hidden md:table-cell cursor-pointer"
+                            onClick={() => router.push(`/leaves/${req._id}`)}
+                          >
                             <p className="text-xs text-(--text-secondary)">
                               {safeFormat(req.startDate, 'MMM d')} –{' '}
                               {safeFormat(req.endDate, 'MMM d, yyyy')}
                             </p>
                           </td>
-                          <td className="px-4 py-3 hidden sm:table-cell">
+                          <td
+                            className="px-4 py-3 hidden sm:table-cell cursor-pointer"
+                            onClick={() => router.push(`/leaves/${req._id}`)}
+                          >
                             <span className="text-sm font-medium text-(--text-primary)">
                               {req.days}
                               {t('leave.daysSuffix')}
                             </span>
                           </td>
-                          <td className="px-4 py-3 hidden lg:table-cell">
+                          <td
+                            className="px-4 py-3 hidden lg:table-cell cursor-pointer"
+                            onClick={() => router.push(`/leaves/${req._id}`)}
+                          >
                             <p className="text-xs text-(--text-muted) max-w-45 truncate">
                               {req.reason}
                             </p>
                           </td>
-                          <td className="px-4 py-3">
+                          <td
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => router.push(`/leaves/${req._id}`)}
+                          >
                             <StatusBadge status={req.status as LeaveStatus} />
                           </td>
                           {isAdmin && (
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-1">
+                                {req.status === 'pending' && (
+                                  <Button
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    className="text-(--text-muted) hover:text-(--text-primary)"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedRow(expandedRow === req._id ? null : req._id);
+                                    }}
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                )}
                                 {req.status === 'pending' && (
                                   <>
                                     <Button

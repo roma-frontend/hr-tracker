@@ -246,3 +246,21 @@ export const getLeavesPagederated = query({
     };
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET LEAVE BY ID — for detail page
+// ─────────────────────────────────────────────────────────────────────────────
+export const getLeaveById = query({
+  args: { leaveId: v.id('leaveRequests') },
+  handler: async (ctx, { leaveId }) => {
+    const leave = await ctx.db.get(leaveId);
+    if (!leave) return null;
+
+    const user = await ctx.db.get(leave.userId);
+    return {
+      ...leave,
+      userName: user?.name ?? 'Unknown',
+      userDepartment: user?.department ?? '',
+    };
+  },
+});

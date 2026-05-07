@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
@@ -48,6 +49,7 @@ type DocumentView = {
 
 export default function DocumentsClient() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { user } = useAuthStore();
   const selectedOrgId = useSelectedOrganization();
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
@@ -368,7 +370,11 @@ export default function DocumentsClient() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredDocuments.map((doc) => (
-                <Card key={doc._id} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={doc._id}
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/documents/${doc._id}`)}
+                >
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
                       {getCategoryIcon(doc.category)}
@@ -406,7 +412,10 @@ export default function DocumentsClient() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleViewDocument(doc)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewDocument(doc);
+                        }}
                         className="flex-1"
                       >
                         <Eye className="h-4 w-4 mr-1" />
@@ -416,7 +425,10 @@ export default function DocumentsClient() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handlePublishDocument(doc._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePublishDocument(doc._id);
+                          }}
                         >
                           {t('documents.publish', 'Publish')}
                         </Button>
@@ -425,7 +437,10 @@ export default function DocumentsClient() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDeleteDocument(doc._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDocument(doc._id);
+                          }}
                         >
                           {t('common.delete', 'Delete')}
                         </Button>

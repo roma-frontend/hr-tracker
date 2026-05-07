@@ -758,3 +758,57 @@ export const awardManualPoints = mutation({
     });
   },
 });
+
+/**
+ * Get a single kudo by ID for detail view
+ */
+export const getKudoById = query({
+  args: { kudoId: v.id('kudos') },
+  handler: async (ctx, { kudoId }) => {
+    const kudo = await ctx.db.get(kudoId);
+    if (!kudo) return null;
+
+    const sender = await ctx.db.get(kudo.senderId);
+    const receiver = await ctx.db.get(kudo.receiverId);
+
+    return {
+      ...kudo,
+      sender: sender
+        ? {
+            _id: sender._id,
+            name: sender.name,
+            avatarUrl: sender.avatarUrl ?? sender.faceImageUrl,
+            position: sender.position,
+            department: sender.department,
+          }
+        : null,
+      receiver: receiver
+        ? {
+            _id: receiver._id,
+            name: receiver.name,
+            avatarUrl: receiver.avatarUrl ?? receiver.faceImageUrl,
+            position: receiver.position,
+            department: receiver.department,
+          }
+        : null,
+    };
+  },
+});
+
+/**
+ * Get user points summary
+ */
+export const getUserPointsSummary = query({
+  args: {
+    organizationId: v.id('organizations'),
+    userId: v.id('users'),
+  },
+  handler: async (ctx, { organizationId, userId }) => {
+    const record = await ctx.db
+      .query('userPoints')
+      .withIndex('by_org_user', (q) => q.eq('organizationId', organizationId).eq('userId', userId))
+      .first();
+
+    return record ?? { balance: 0, totalEarned: 0, totalSpent: 0 };
+  },
+});

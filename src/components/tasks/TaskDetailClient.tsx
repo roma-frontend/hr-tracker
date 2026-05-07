@@ -1,0 +1,336 @@
+'use client';
+
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  User,
+  FileText,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Trash2,
+  Pencil,
+  Tag,
+  Paperclip,
+  MessageSquare,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { hy } from 'date-fns/locale';
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const { t } = useTranslation();
+  const variant = {
+    pending: {
+      bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+      text: 'text-yellow-700 dark:text-yellow-400',
+      Icon: Clock,
+    },
+    in_progress: {
+      bg: 'bg-blue-100 dark:bg-blue-900/30',
+      text: 'text-blue-700 dark:text-blue-400',
+      Icon: AlertCircle,
+    },
+    review: {
+      bg: 'bg-purple-100 dark:bg-purple-900/30',
+      text: 'text-purple-700 dark:text-purple-400',
+      Icon: FileText,
+    },
+    completed: {
+      bg: 'bg-green-100 dark:bg-green-900/30',
+      text: 'text-green-700 dark:text-green-400',
+      Icon: CheckCircle,
+    },
+    cancelled: {
+      bg: 'bg-gray-100 dark:bg-gray-900/30',
+      text: 'text-gray-700 dark:text-gray-400',
+      Icon: XCircle,
+    },
+  }[status] ?? {
+    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    text: 'text-yellow-700 dark:text-yellow-400',
+    Icon: Clock,
+  };
+
+  const label =
+    {
+      pending: t('taskStatus.pending'),
+      in_progress: t('taskStatus.inProgress'),
+      review: t('taskStatus.inReview'),
+      completed: t('taskStatus.completed'),
+      cancelled: t('taskStatus.cancelled'),
+    }[status] ?? t('taskStatus.pending');
+
+  return (
+    <Badge className={`${variant.bg} ${variant.text} border-0 flex items-center gap-1`}>
+      <variant.Icon className="h-3 w-3" />
+      {label}
+    </Badge>
+  );
+};
+
+const PriorityBadge = ({ priority }: { priority: string }) => {
+  const { t } = useTranslation();
+  const variant =
+    {
+      urgent: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+      high: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
+      medium: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+      low: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+    }[priority] ?? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+
+  const label =
+    {
+      urgent: t('taskPriority.urgent'),
+      high: t('taskPriority.high'),
+      medium: t('taskPriority.medium'),
+      low: t('taskPriority.low'),
+    }[priority] ?? priority.charAt(0).toUpperCase() + priority.slice(1);
+
+  return <Badge className={`${variant} border-0`}>{label}</Badge>;
+};
+
+export default function TaskDetailClient() {
+  const params = useParams();
+  const router = useRouter();
+  const { user } = useAuthStore();
+  const { t } = useTranslation();
+  const taskId = params.id as Id<'tasks'>;
+
+  const task = useQuery(api.tasks.getTask, { taskId });
+  const currentUser = useQuery(
+    api.users.queries.getUserById,
+    user?.id ? { userId: user.id as Id<'users'> } : 'skip',
+  );
+
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  if (!task) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
+      </div>
+    );
+  }
+
+  const isOverdue =
+    task.deadline && new Date(task.deadline) < new Date() && task.status !== 'completed';
+  const deadline = task.deadline ? new Date(task.deadline) : null;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.push('/tasks')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">{task.title}</h1>
+            <p className="text-muted-foreground">
+              {t('tasksClient.task')} #{task._id.slice(-6).toUpperCase()}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.push(`/tasks/${taskId}/edit`)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              // Delete logic here
+              router.push('/tasks');
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {t('tasksClient.task')} {t('common.details')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('common.status')}</span>
+              <StatusBadge status={task.status} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('tasksClient.priority')}</span>
+              <PriorityBadge priority={task.priority} />
+            </div>
+            {deadline && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('tasksClient.deadline')}</span>
+                <span className={`font-medium ${isOverdue ? 'text-red-500' : ''}`}>
+                  {format(deadline, 'dd MMM yyyy', { locale: hy })}
+                  {isOverdue && ` (${t('tasksClient.overdueTag')})`}
+                </span>
+              </div>
+            )}
+            {task.assignedToUser && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('tasksClient.assignee')}</span>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={task.assignedToUser.avatarUrl} />
+                    <AvatarFallback>{task.assignedToUser.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{task.assignedToUser.name}</span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              {t('tasksClient.timeline')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('tasksClient.created')}</span>
+              <span className="font-medium">
+                {format(new Date(task._creationTime), 'dd MMM yyyy', { locale: hy })}
+              </span>
+            </div>
+            {task.updatedAt && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('tasksClient.updated')}</span>
+                <span className="font-medium">
+                  {format(new Date(task.updatedAt), 'dd MMM yyyy', { locale: hy })}
+                </span>
+              </div>
+            )}
+            {deadline && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  {t('tasksClient.daysRemaining')}
+                </span>
+                <span className={`font-medium ${isOverdue ? 'text-red-500' : 'text-green-500'}`}>
+                  {isOverdue
+                    ? `${Math.ceil((Date.now() - deadline.getTime()) / (1000 * 60 * 60 * 24))} ${t('tasksClient.daysOverdue')}`
+                    : `${Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} ${t('tasksClient.daysLeft')}`}
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {task.description && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {t('tasksClient.description')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground whitespace-pre-wrap">{task.description}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {task.tags && task.tags.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="h-5 w-5" />
+              {t('tasksClient.tags')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {task.tags.map((tag: string, index: number) => (
+                <Badge key={index} variant="outline">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {task.attachments && task.attachments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Paperclip className="h-5 w-5" />
+              {t('tasksClient.attachments')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {task.attachments.map((attachment: any, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{attachment.name}</span>
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    {t('tasksClient.download')}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {task.commentCount !== undefined && task.commentCount > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              {t('tasksClient.comments')}
+            </CardTitle>
+            <CardDescription>
+              {task.commentCount}{' '}
+              {task.commentCount === 1 ? t('tasksClient.comment') : t('tasksClient.commentsCount')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" className="w-full">
+              {t('tasksClient.viewAllComments')}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
