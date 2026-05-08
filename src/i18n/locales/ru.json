@@ -335,9 +335,8 @@
     "edit": "Редактировать",
     "add": "Добавить",
     "search": "Поиск",
-    "noResults": "Ничего не найдено",
+    "noResults": "No Results",
     "details": "Детали",
-    "status": "Статус",
     "approve": "Одобрить",
     "reject": "Отклонить",
     "saving": "Сохранение..."
@@ -348,7 +347,11 @@
   "nav": {
     "home": "Главная",
     "dashboard": "Панель",
-    "employees": "Сотрудники",
+    "employees": {
+      "all": "All",
+      "departments": "Departments",
+      "positions": "Positions"
+    },
     "employees.all": "Все сотрудники",
     "employees.departments": "Отделы",
     "employees.positions": "Должности",
@@ -2676,7 +2679,23 @@
     "removeAdminTitle": "Удалить роль администратора?",
     "cancel": "Отмена",
     "processing": "Обработка...",
-    "backToPlans": "Назад к тарифам"
+    "backToPlans": "Назад к тарифам",
+    "approvalActions": "Approval Actions",
+    "approvalDescription": "Approval Description",
+    "approve": "Approve",
+    "confirmRejectUser": "Confirm Reject User",
+    "contactInformation": "Contact Information",
+    "employmentDetails": "Employment Details",
+    "failedToApproveUser": "Failed To Approve User",
+    "failedToRejectUser": "Failed To Reject User",
+    "pending": "Pending",
+    "pendingApproval": "Pending Approval",
+    "pleaseLoginAgain": "Please Login Again",
+    "reject": "Reject",
+    "status": "Status",
+    "userApprovalDetails": "User Approval Details",
+    "userApproved": "User Approved",
+    "userRejected": "User Rejected"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Отчеты и аналитика",
@@ -5623,7 +5642,8 @@
     "notifyBefore": "Уведомить за",
     "days": "дней",
     "conflicts": "Конфликты",
-    "typeLabel": "Тип"
+    "typeLabel": "Тип",
+    "status": "Status"
   },
   "onboarding": {
     "title": "Онбординг",
@@ -7146,17 +7166,17 @@
       "review": "Обзор"
     },
     "form": {
-      "title": "Название",
-      "titlePlaceholder": "напр. Удовлетворенность Q4",
-      "description": "Описание",
-      "descriptionPlaceholder": "О чем этот опрос?",
-      "anonymous": "Анонимные ответы (респонденты не будут идентифицированы)",
-      "addQuestion": "Добавить вопрос",
-      "questionTextPlaceholder": "Введите вопрос...",
-      "addOption": "Добавить вариант...",
-      "required": "Обязательный",
-      "addQuestionBtn": "Добавить вопрос",
-      "typePlaceholder": "Введите ваш ответ..."
+      "title": "Title",
+      "titlePlaceholder": "Title Placeholder",
+      "description": "Description",
+      "descriptionPlaceholder": "Description Placeholder",
+      "anonymous": "Anonymous",
+      "addQuestion": "Add Question",
+      "questionTextPlaceholder": "Question Text Placeholder",
+      "addOption": "Add Option",
+      "required": "Required",
+      "addQuestionBtn": "Add Question Btn",
+      "typePlaceholder": "Type Placeholder"
     },
     "questionType": {
       "rating": "Рейтинг",
@@ -7399,7 +7419,10 @@
       "total": "Всего целей",
       "avgProgress": "Средний прогресс",
       "onTrack": "В графике",
-      "atRisk": "Под угрозой"
+      "atRisk": "Под угрозой",
+      "keyResults": "Key Results",
+      "progress": "Progress",
+      "timeProgress": "Time Progress"
     },
     "tabs": {
       "my": "Мои цели",
@@ -7467,7 +7490,19 @@
       "success": "Чек-ин записан",
       "yes": "Да",
       "no": "Нет"
-    }
+    },
+    "created": "Created",
+    "current": "Current",
+    "department": "Department",
+    "description": "Description",
+    "details": "Details",
+    "endDate": "End Date",
+    "owner": "Owner",
+    "period": "Period",
+    "start": "Start",
+    "startDate": "Start Date",
+    "target": "Target",
+    "timeline": "Timeline"
   },
   "recruitment": {
     "title": "Рекрутинг",
@@ -8234,7 +8269,23 @@
     "expires": "Срок действия",
     "draft": "Черновик",
     "fileDataMissing": "Данные файла отсутствуют",
-    "exceedsLimit": "превышает лимит 10 МБ"
+    "exceedsLimit": "превышает лимит 10 МБ",
+    "days": "Days",
+    "daysUntilExpiry": "Days Until Expiry",
+    "documentDetails": "Document Details",
+    "expired": "Expired",
+    "expiredDocument": "Expired Document",
+    "expiredDocumentDescription": "Expired Document Description",
+    "fileSize": "File Size",
+    "fileType": "File Type",
+    "lastUpdated": "Last Updated",
+    "mandatoryDocument": "Mandatory Document",
+    "mandatoryDocumentDescription": "Mandatory Document Description",
+    "published": "Published",
+    "status": "Status",
+    "timeline": "Timeline",
+    "uploaded": "Uploaded",
+    "uploadedBy": "Uploaded By"
   },
   "compensation": {
     "title": "Компенсации",
@@ -8423,5 +8474,10 @@
       "periodDesc": "Определите период бонусной программы",
       "settingsDesc": "Настройте параметры цикла проверки"
     }
+  },
+  "leaveStatus": {
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected"
   }
 }

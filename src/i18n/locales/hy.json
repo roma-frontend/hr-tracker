@@ -330,10 +330,10 @@
     "add": "Ավելացնել",
     "search": "Որոնում",
     "details": "Մանրամասներ",
-    "status": "Կարգավիճակ",
     "approve": "Հաստատել",
     "reject": "Մերժել",
-    "saving": "Պահպանում..."
+    "saving": "Պահպանում...",
+    "noResults": "No Results"
   },
   "lessons": {
     "title": "Դասեր"
@@ -341,7 +341,11 @@
   "nav": {
     "home": "Գլխավոր",
     "dashboard": "Վահանակ",
-    "employees": "Աշխատակիցներ",
+    "employees": {
+      "all": "All",
+      "departments": "Departments",
+      "positions": "Positions"
+    },
     "employees.all": "Բոլոր աշխատակիցներ",
     "employees.departments": "Բաժիններ",
     "employees.positions": "Պաշտոններ",
@@ -2535,7 +2539,23 @@
     "removeAdminTitle": "Հեռացնել ադմինի դե՞րը:",
     "cancel": "Չեղարկել",
     "processing": "Մշակվում է...",
-    "backToPlans": "Վերադառնալ պլաններին"
+    "backToPlans": "Վերադառնալ պլաններին",
+    "approvalActions": "Approval Actions",
+    "approvalDescription": "Approval Description",
+    "approve": "Approve",
+    "confirmRejectUser": "Confirm Reject User",
+    "contactInformation": "Contact Information",
+    "employmentDetails": "Employment Details",
+    "failedToApproveUser": "Failed To Approve User",
+    "failedToRejectUser": "Failed To Reject User",
+    "pending": "Pending",
+    "pendingApproval": "Pending Approval",
+    "pleaseLoginAgain": "Please Login Again",
+    "reject": "Reject",
+    "status": "Status",
+    "userApprovalDetails": "User Approval Details",
+    "userApproved": "User Approved",
+    "userRejected": "User Rejected"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Հաշվետվություններ և վերլուծություն",
@@ -5372,7 +5392,8 @@
     "notifyBefore": "Ծանուցել նախքան",
     "days": "օր",
     "conflicts": "Հակասություններ",
-    "typeLabel": "Տեսակ"
+    "typeLabel": "Տեսակ",
+    "status": "Status"
   },
   "onboarding": {
     "title": "Նոր աշխատակիցների ինտեգրում",
@@ -6873,17 +6894,17 @@
       "review": "Վերանայում"
     },
     "form": {
-      "title": "Հակասությունների հայտնաբերում",
-      "titlePlaceholder": "օրինակ՝ Q4 Աշխատակիցների բավարարվածություն",
-      "description": "Նկարագրություն",
-      "descriptionPlaceholder": "Այս հարցումը ինչի մասին է?",
-      "anonymous": "Անանուն պատասխաններ (պատասխանողները չեն ճանաչվի)",
-      "addQuestion": "Ավելացնել հարց",
-      "questionTextPlaceholder": "Գրեք ձեր հարցը...",
-      "addOption": "Ավելացնել տարբերակ...",
-      "required": "Պարտադիր է",
-      "addQuestionBtn": "Ավելացնել հարց",
-      "typePlaceholder": "Գրեք ձեր պատասխանը..."
+      "title": "Title",
+      "titlePlaceholder": "Title Placeholder",
+      "description": "Description",
+      "descriptionPlaceholder": "Description Placeholder",
+      "anonymous": "Anonymous",
+      "addQuestion": "Add Question",
+      "questionTextPlaceholder": "Question Text Placeholder",
+      "addOption": "Add Option",
+      "required": "Required",
+      "addQuestionBtn": "Add Question Btn",
+      "typePlaceholder": "Type Placeholder"
     },
     "questionType": {
       "rating": "Գնահատում",
@@ -7126,7 +7147,10 @@
       "total": "Ընդհանուր նպատակներ",
       "avgProgress": "Միջին առաջընթաց",
       "onTrack": "Ժամանակին",
-      "atRisk": "Վտանգի տակ / Հետ է"
+      "atRisk": "Վտանգի տակ / Հետ է",
+      "keyResults": "Key Results",
+      "progress": "Progress",
+      "timeProgress": "Time Progress"
     },
     "tabs": {
       "my": "Իմ նպատակները",
@@ -7194,7 +7218,19 @@
       "success": "Check-in-ը գրանցվեց",
       "yes": "Այո",
       "no": "Ոչ"
-    }
+    },
+    "created": "Created",
+    "current": "Current",
+    "department": "Department",
+    "description": "Description",
+    "details": "Details",
+    "endDate": "End Date",
+    "owner": "Owner",
+    "period": "Period",
+    "start": "Start",
+    "startDate": "Start Date",
+    "target": "Target",
+    "timeline": "Timeline"
   },
   "recruitment": {
     "title": "Ռեկրուտինգ",
@@ -7966,7 +8002,23 @@
     "expires": "Ժամկետը",
     "draft": "Սևագիր",
     "fileDataMissing": "Ֆայլի տվյալները բացակայում են",
-    "exceedsLimit": "գերազանցում է 10 ՄԲ սահմանաչափը"
+    "exceedsLimit": "գերազանցում է 10 ՄԲ սահմանաչափը",
+    "days": "Days",
+    "daysUntilExpiry": "Days Until Expiry",
+    "documentDetails": "Document Details",
+    "expired": "Expired",
+    "expiredDocument": "Expired Document",
+    "expiredDocumentDescription": "Expired Document Description",
+    "fileSize": "File Size",
+    "fileType": "File Type",
+    "lastUpdated": "Last Updated",
+    "mandatoryDocument": "Mandatory Document",
+    "mandatoryDocumentDescription": "Mandatory Document Description",
+    "published": "Published",
+    "status": "Status",
+    "timeline": "Timeline",
+    "uploaded": "Uploaded",
+    "uploadedBy": "Uploaded By"
   },
   "compensation": {
     "title": "Փոխհատուցում",
@@ -8155,5 +8207,10 @@
       "periodDesc": "Սահմանեք բոնուսային ծրագրի ժամանակաշրջանը",
       "settingsDesc": "Կարգավորեք վերանայման ցիկլի պարամետրերը"
     }
+  },
+  "leaveStatus": {
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected"
   }
 }

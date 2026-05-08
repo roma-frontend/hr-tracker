@@ -338,10 +338,10 @@
     "nodes": "nodes",
     "edges": "edges",
     "details": "Details",
-    "status": "Status",
     "approve": "Approve",
     "reject": "Reject",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "noResults": "No Results"
   },
   "lessons": {
     "title": "Lessons"
@@ -349,7 +349,11 @@
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
-    "employees": "Employees",
+    "employees": {
+      "all": "All",
+      "departments": "Departments",
+      "positions": "Positions"
+    },
     "employees.all": "All Employees",
     "employees.departments": "Departments",
     "employees.positions": "Positions",
@@ -1199,13 +1203,9 @@
     }
   },
   "priority": {
-    "low": "Low",
-    "medium": "Medium",
     "high": "High",
-    "urgent": "Urgent",
-    "critical": "Critical",
-    "priority": "Priority",
-    "category": "Category"
+    "medium": "Medium",
+    "low": "Low"
   },
   "category": {
     "technical": "Technical",
@@ -2653,7 +2653,23 @@
     "removeAdminTitle": "Remove Admin Role?",
     "cancel": "Cancel",
     "processing": "Processing...",
-    "backToPlans": "Back to Plans"
+    "backToPlans": "Back to Plans",
+    "approvalActions": "Approval Actions",
+    "approvalDescription": "Approval Description",
+    "approve": "Approve",
+    "confirmRejectUser": "Confirm Reject User",
+    "contactInformation": "Contact Information",
+    "employmentDetails": "Employment Details",
+    "failedToApproveUser": "Failed To Approve User",
+    "failedToRejectUser": "Failed To Reject User",
+    "pending": "Pending",
+    "pendingApproval": "Pending Approval",
+    "pleaseLoginAgain": "Please Login Again",
+    "reject": "Reject",
+    "status": "Status",
+    "userApprovalDetails": "User Approval Details",
+    "userApproved": "User Approved",
+    "userRejected": "User Rejected"
   },
   "reportsAnalytics": {
     "reportsAnalytics": "Reports & Analytics",
@@ -2931,21 +2947,6 @@
     "mentorship": "Mentorship",
     "excellence": "Excellence",
     "above_and_beyond": "Above & Beyond"
-  },
-  "priority": {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low"
-  },
-  "priority": {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low"
-  },
-  "priority": {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low"
   },
   "surveyStatus": {
     "draft": "Draft",
@@ -5613,7 +5614,8 @@
     "notifyBefore": "Notify Before",
     "days": "days",
     "conflicts": "Conflicts",
-    "typeLabel": "Type"
+    "typeLabel": "Type",
+    "status": "Status"
   },
   "onboarding": {
     "title": "Onboarding",
@@ -7069,16 +7071,7 @@
       "year": "This Year",
       "all": "All Time"
     },
-    "category": {
-      "teamwork": "Teamwork",
-      "innovation": "Innovation",
-      "leadership": "Leadership",
-      "dedication": "Dedication",
-      "customerFocus": "Customer Focus",
-      "mentorship": "Mentorship",
-      "excellence": "Excellence",
-      "aboveAndBeyond": "Above & Beyond"
-    },
+    "category": "Category",
     "form": {
       "recipient": "Recipient",
       "selectRecipient": "Select a colleague...",
@@ -7105,7 +7098,6 @@
     "public": "Public",
     "private": "Private",
     "context": "Context",
-    "category": "Category",
     "visibility": "Visibility",
     "date": "Date",
     "time": "Time"
@@ -7152,17 +7144,18 @@
       "review": "Review"
     },
     "form": {
-      "title": "Title",
-      "titlePlaceholder": "e.g. Q4 Employee Satisfaction",
+      "optional": "Optional",
+      "addOption": "Add Option",
+      "addQuestion": "Add Question",
+      "addQuestionBtn": "Add Question Btn",
+      "anonymous": "Anonymous",
       "description": "Description",
-      "descriptionPlaceholder": "What is this survey about?",
-      "anonymous": "Anonymous responses (respondents won't be identified)",
-      "addQuestion": "Add a question",
-      "questionTextPlaceholder": "Type your question...",
-      "addOption": "Add option...",
+      "descriptionPlaceholder": "Description Placeholder",
+      "questionTextPlaceholder": "Question Text Placeholder",
       "required": "Required",
-      "addQuestionBtn": "Add Question",
-      "typePlaceholder": "Type your answer..."
+      "title": "Title",
+      "titlePlaceholder": "Title Placeholder",
+      "typePlaceholder": "Type Placeholder"
     },
     "questionType": {
       "rating": "Rating",
@@ -7180,10 +7173,7 @@
       "requiredFields": "Please answer all required questions"
     },
     "questions": "Questions",
-    "average": "Average",
-    "form": {
-      "optional": "Optional"
-    }
+    "average": "Average"
   },
   "performance": {
     "title": "Performance Reviews",
@@ -7410,7 +7400,10 @@
       "total": "Total Objectives",
       "avgProgress": "Avg Progress",
       "onTrack": "On Track",
-      "atRisk": "At Risk / Behind"
+      "atRisk": "At Risk / Behind",
+      "keyResults": "Key Results",
+      "progress": "Progress",
+      "timeProgress": "Time Progress"
     },
     "tabs": {
       "my": "My Goals",
@@ -7482,7 +7475,19 @@
     "errors": {
       "completeFailed": "Failed to complete objective",
       "deleteFailed": "Failed to delete objective"
-    }
+    },
+    "created": "Created",
+    "current": "Current",
+    "department": "Department",
+    "description": "Description",
+    "details": "Details",
+    "endDate": "End Date",
+    "owner": "Owner",
+    "period": "Period",
+    "start": "Start",
+    "startDate": "Start Date",
+    "target": "Target",
+    "timeline": "Timeline"
   },
   "recruitment": {
     "title": "Recruitment",
@@ -8180,7 +8185,7 @@
     "updateLesson": "Update Lesson"
   },
   "documents": {
-    "title": "Document Management",
+    "title": "Title",
     "subtitle": "Manage and organize your organization documents",
     "uploadDocument": "Upload Document",
     "allDocuments": "All Documents",
@@ -8240,11 +8245,6 @@
     "fileUploaded": "File uploaded successfully",
     "uploadFailed": "Failed to upload file",
     "createFailed": "Failed to create document",
-    "title": "Title",
-    "description": "Description",
-    "category": "Category",
-    "tags": "Tags",
-    "mandatory": "Mandatory",
     "file": "File",
     "details": "Details",
     "settings": "Settings",
@@ -8252,7 +8252,23 @@
     "expires": "Expires",
     "draft": "Draft",
     "fileDataMissing": "File data is missing",
-    "exceedsLimit": "exceeds 10MB limit"
+    "exceedsLimit": "exceeds 10MB limit",
+    "days": "Days",
+    "daysUntilExpiry": "Days Until Expiry",
+    "documentDetails": "Document Details",
+    "expired": "Expired",
+    "expiredDocument": "Expired Document",
+    "expiredDocumentDescription": "Expired Document Description",
+    "fileSize": "File Size",
+    "fileType": "File Type",
+    "lastUpdated": "Last Updated",
+    "mandatoryDocument": "Mandatory Document",
+    "mandatoryDocumentDescription": "Mandatory Document Description",
+    "published": "Published",
+    "status": "Status",
+    "timeline": "Timeline",
+    "uploaded": "Uploaded",
+    "uploadedBy": "Uploaded By"
   },
   "compensation": {
     "title": "Compensation",
@@ -8441,5 +8457,10 @@
       "periodDesc": "Define the bonus program period",
       "settingsDesc": "Configure review cycle settings"
     }
+  },
+  "leaveStatus": {
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected"
   }
 }
