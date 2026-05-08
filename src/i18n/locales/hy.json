@@ -333,7 +333,17 @@
     "approve": "Հաստատել",
     "reject": "Մերժել",
     "saving": "Պահպանում...",
-    "noResults": "No Results"
+    "noResults": "Ոչ մի արդյունք",
+    "confirmDelete": "Հաստատել ջնջումը",
+    "comingSoon": "Շուտով",
+    "sending": "Ուղարկում...",
+    "selectAll": "Ընտրել բոլորը",
+    "deleted": "Ջնջված",
+    "yes": "Այո",
+    "no": "Ոչ",
+    "exportSVG": "Արտահանել SVG",
+    "to": "մինչև",
+    "approved": "Հաստատված"
   },
   "lessons": {
     "title": "Դասեր"
@@ -341,11 +351,7 @@
   "nav": {
     "home": "Գլխավոր",
     "dashboard": "Վահանակ",
-    "employees": {
-      "all": "All",
-      "departments": "Departments",
-      "positions": "Positions"
-    },
+    "employees": "Աշխատակիցներ",
     "employees.all": "Բոլոր աշխատակիցներ",
     "employees.departments": "Բաժիններ",
     "employees.positions": "Պաշտոններ",
@@ -1544,6 +1550,7 @@
     "requestDetails": "Արձակուրդի հայտի մանրամասներ",
     "requestFrom": "Հայտ {{name}}-ից",
     "leaveDetails": "Արձակուրդի մանրամասներ",
+    "leaveType": "Արձակուրդի տեսակ",
     "startDate": "Սկզբի ամսաթիվ",
     "endDate": "Վերջի ամսաթիվ",
     "status": "Կարգավիճակ",
@@ -1623,7 +1630,13 @@
     "noSupervisor": "Վերահսկող չկա",
     "allRolesFilter": "Բոլոր դերերը",
     "allTypesFilter": "Բոլոր տեսակները",
-    "allStatusesFilter": "Բոլոր կարգավիճակները"
+    "allStatusesFilter": "Բոլոր կարգավիճակները",
+    "filter_all": "Բոլորը",
+    "noEmployees": "Աշխատակիցներ չկան",
+    "noEmployeesDesc": "Ավելացրեք ձեր առաջին աշխատակցին սկսելու համար",
+    "addFirstEmployee": "Ավելացնել առաջին աշխատակցին",
+    "noEmployeesAssigned": "Աշխատակիցներ չեն նշանակվել",
+    "noEmployeesFound": "Աշխատակիցներ չեն գտնվել"
   },
   "departmentWizard": {
     "steps": {
@@ -2266,7 +2279,10 @@
     "leaveBalances": "Остатки отпусков",
     "phone": "Հեռախոսահամար",
     "userId": "Օգտատիրոջ ID",
-    "email": "Էլ. փոստ"
+    "email": "Էլ. փոստ",
+    "to": "Ում",
+    "approved": "Հաստատված",
+    "dates": "Ամսաթվեր"
   },
   "forms": {
     "required": "Պարտադիր",
@@ -3286,7 +3302,20 @@
     "total": "Ընդամենը",
     "allPriorities": "Առաջնահերթությունները",
     "allStatuses": "Բոլոր կարգավիճակները",
-    "deleteTask": "Ջնջել առաջադրանքը"
+    "deleteTask": "Ջնջել առաջադրանքը",
+    "details": "Մանրամասներ",
+    "timeline": "Ժամանակացույց",
+    "created": "Ստեղծված",
+    "updated": "Թարմացված",
+    "daysRemaining": "Մնացել է օր",
+    "daysOverdue": "օր ուշացում",
+    "daysLeft": "օր մնացել է",
+    "download": "Ներբեռնել",
+    "comments": "Մեկնաբանություններ",
+    "comment": "Մեկնաբանություն",
+    "commentsCount": "մեկնաբանություններ",
+    "viewAllComments": "Դիտել բոլոր մեկնաբանությունները",
+    "attachments": "Կցորդներ"
   },
   "attendanceExtra": {
     "daysWorked": "Աշխատանքային օրեր",
@@ -4438,7 +4467,12 @@
       "medium": "Միջին",
       "high": "Բարձր",
       "urgent": "Արագ"
-    }
+    },
+    "today": "Այսօր",
+    "tomorrow": "Վաղը",
+    "overdue": "Ժամկետը լրացած",
+    "topPriority": "Բարձրագույն առաջնահերթություն",
+    "quickAccess": "Արագ մուտք"
   },
   "superadminSecurity": {
     "securityControl": "Անվտանգության կառավարման կենտրոն",
@@ -5348,6 +5382,7 @@
       "team_building": "Թիմբիլդինգ",
       "holiday": "Տոն",
       "deadline": "Ժամկետ",
+      "celebration": "Տոնակատարություն",
       "other": "Այլ"
     },
     "pendingConflictReviews": "Սպասում են ստուգման",
@@ -5612,7 +5647,8 @@
     "toast": {
       "success": "Հայտը ստեղծվեց!",
       "description": "Սպասում է մենեջերի հաստատմանը",
-      "error": "Չհաջողվեց ստեղծել հայտ"
+      "error": "Չհաջողվեց ստեղծել հայտ",
+      "waitingApproval": "Սպասում է հաստատման"
     }
   },
   "aiChat": {
@@ -6821,6 +6857,18 @@
       "sent": "Ուղարկված",
       "categories": "Կատեգորիաներ"
     },
+    "points": {
+      "label": "միավ.",
+      "balance": "Միավորների մնացորդ",
+      "notEnough": "Միավորները բավարար չեն (պետք է 3)",
+      "earned": "Վաստակված",
+      "spent": "Ծախսված",
+      "history": "Միավորների պատմություն",
+      "attendance": "Ներկայություն",
+      "review": "Դրական գնահատական",
+      "manual": "Ձեռքով սկզբնավորում",
+      "kudosSent": "Շնորհակալություն ուղարկված"
+    },
     "period": {
       "week": "Այս շաբաթ",
       "month": "Այս ամիս",
@@ -6846,11 +6894,27 @@
       "messagePlaceholder": "Գրեք ինչ-որ հաճելի բան...",
       "publicKudos": "Ցուցադրել հոսքում"
     },
+    "wizard": {
+      "selectRecipientHint": "Ում եք ցանկանում գնահատել?",
+      "selectCategoryHint": "Ինչո՞վ են նրանք գերազանցել:"
+    },
     "errors": {
       "fillAllFields": "Լրացրեք բոլոր դաշտերը",
       "sendFailed": "Չհաջողվեց ուղարկել",
       "reactFailed": "Չհաջողվեց արձագանքել"
-    }
+    },
+    "kudoDetails": "Շնորհակալության մանրամասներ",
+    "from": "Ումից",
+    "to": "Ում",
+    "sender": "Ուղարկող",
+    "receiver": "Ստացող",
+    "reactions": "Արձագանքներ",
+    "public": "Հանրային",
+    "private": "Մասնավոր",
+    "context": "Համատեքստ",
+    "visibility": "Տեսանելիություն",
+    "date": "Ամսաթիվ",
+    "time": "Ժամանակ"
   },
   "surveys": {
     "title": "Թիմի հարցումներ",
@@ -6867,6 +6931,7 @@
     "responses": "պատասխաններ",
     "results": "Արդյունքներ",
     "createdBy": "Ստեղծվել է",
+    "created": "Ստեղծված",
     "take": "Մասնակցել հարցմանը",
     "viewResults": "Դիտել արդյունքները",
     "publish": "Հրապարակել",
@@ -6877,6 +6942,8 @@
     "yes": "Այո",
     "no": "Ոչ",
     "submit": "Ուղարկել պատասխան",
+    "questions": "Հարցեր",
+    "average": "Միջին",
     "filter": {
       "all": "Բոլորը",
       "active": "Ակտիվ",
@@ -6894,17 +6961,19 @@
       "review": "Վերանայում"
     },
     "form": {
-      "title": "Title",
-      "titlePlaceholder": "Title Placeholder",
-      "description": "Description",
-      "descriptionPlaceholder": "Description Placeholder",
-      "anonymous": "Anonymous",
-      "addQuestion": "Add Question",
-      "questionTextPlaceholder": "Question Text Placeholder",
-      "addOption": "Add Option",
-      "required": "Required",
-      "addQuestionBtn": "Add Question Btn",
-      "typePlaceholder": "Type Placeholder"
+      "title": "Վերնագիր",
+      "titlePlaceholder": "Վերնագրի տեղապահ",
+      "description": "Նկարագրություն",
+      "descriptionPlaceholder": "Նկարագրության տեղապահ",
+      "anonymous": "Անանուն",
+      "addQuestion": "Ավելացնել հարց",
+      "questionTextPlaceholder": "Հարցի տեքստի տեղապահ",
+      "addOption": "Ավելացնել տարբերակ",
+      "required": "Պարտադիր",
+      "optional": "Ոչ պարտադիր",
+      "addQuestion": "Ավելացնել հարց",
+      "addQuestionBtn": "Ավելացնել հարցի կոճակ",
+      "typePlaceholder": "Տիպի տեղապահ"
     },
     "questionType": {
       "rating": "Գնահատում",
@@ -7148,9 +7217,10 @@
       "avgProgress": "Միջին առաջընթաց",
       "onTrack": "Ժամանակին",
       "atRisk": "Վտանգի տակ / Հետ է",
-      "keyResults": "Key Results",
-      "progress": "Progress",
-      "timeProgress": "Time Progress"
+      "keyResults": "Հիմնական արդյունքներ",
+      "progress": "Առաջընթաց",
+      "timeProgress": "Ժամանակի առաջընթաց",
+      "keyResult": "Հիմնական արդյունք"
     },
     "tabs": {
       "my": "Իմ նպատակները",
@@ -7219,18 +7289,22 @@
       "yes": "Այո",
       "no": "Ոչ"
     },
-    "created": "Created",
-    "current": "Current",
-    "department": "Department",
-    "description": "Description",
-    "details": "Details",
-    "endDate": "End Date",
-    "owner": "Owner",
-    "period": "Period",
-    "start": "Start",
-    "startDate": "Start Date",
-    "target": "Target",
-    "timeline": "Timeline"
+    "created": "Ստեղծված",
+    "current": "Ընթացիկ",
+    "department": "Բաժին",
+    "description": "Նկարագրություն",
+    "details": "Մանրամասներ",
+    "endDate": "Ավարտի ամսաթիվ",
+    "owner": "Պատասխանատու",
+    "period": "Ժամանակաշրջան",
+    "start": "Սկիզբ",
+    "startDate": "Սկզբի ամսաթիվ",
+    "target": "Նպատակ",
+    "timeline": "Ժամանակացույց",
+    "errors": {
+      "completeFailed": "Չհաջողվեց ավարտել նպատակը",
+      "deleteFailed": "Չհաջողվեց ջնջել նպատակը"
+    }
   },
   "recruitment": {
     "title": "Ռեկրուտինգ",
@@ -7417,7 +7491,7 @@
     "emailInvalid": "Սխալ էլ. փոստի հասցե",
     "joinOrg": "Միանալ այս կազմակերպությանը",
     "viewAll": "Դիտել բոլոր դիրքերը",
-    "positionsCount": "դիdelays"
+    "positionsCount": "{{count}} դիրք"
   },
   "offboarding": {
     "title": "Աշխատակիցների դուրսգրում",
@@ -8003,22 +8077,22 @@
     "draft": "Սևագիր",
     "fileDataMissing": "Ֆայլի տվյալները բացակայում են",
     "exceedsLimit": "գերազանցում է 10 ՄԲ սահմանաչափը",
-    "days": "Days",
-    "daysUntilExpiry": "Days Until Expiry",
-    "documentDetails": "Document Details",
-    "expired": "Expired",
-    "expiredDocument": "Expired Document",
-    "expiredDocumentDescription": "Expired Document Description",
-    "fileSize": "File Size",
-    "fileType": "File Type",
-    "lastUpdated": "Last Updated",
-    "mandatoryDocument": "Mandatory Document",
-    "mandatoryDocumentDescription": "Mandatory Document Description",
-    "published": "Published",
-    "status": "Status",
-    "timeline": "Timeline",
-    "uploaded": "Uploaded",
-    "uploadedBy": "Uploaded By"
+    "days": "օր",
+    "daysUntilExpiry": "Օրեր մինչև ժամկետի ավարտը",
+    "documentDetails": "Փաստաթղթի մանրամասներ",
+    "expired": "Ժամկետանց",
+    "expiredDocument": "Ժամկետանց փաստաթուղթ",
+    "expiredDocumentDescription": "Ժամկետանց փաստաթղթի նկարագրություն",
+    "fileSize": "Ֆայլի չափը",
+    "fileType": "Ֆայլի տեսակը",
+    "lastUpdated": "Վերջին թարմացում",
+    "mandatoryDocument": "Պարտադիր փաստաթուղթ",
+    "mandatoryDocumentDescription": "Պարտադիր փաստաթղթի նկարագրություն",
+    "published": "Հրապարակված",
+    "status": "Կարգավիճակ",
+    "timeline": "Ժամանակացույց",
+    "uploaded": "Վերբեռնված",
+    "uploadedBy": "Վերբեռնված է"
   },
   "compensation": {
     "title": "Փոխհատուցում",
@@ -8209,8 +8283,8 @@
     }
   },
   "leaveStatus": {
-    "approved": "Approved",
-    "pending": "Pending",
-    "rejected": "Rejected"
+    "approved": "Հաստատված",
+    "pending": "Սպասման մեջ",
+    "rejected": "Մերժված"
   }
 }

@@ -2,6 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { useAuthStoreShallow } from '@/store/useAuthStore';
 
 function ShieldIcon() {
   return (
@@ -21,8 +22,15 @@ function ShieldIcon() {
   );
 }
 
+function getHref(isAuthenticated: boolean, link: { href: string; authHref?: string }): string {
+  if (isAuthenticated && link.authHref) return link.authHref;
+  return link.href;
+}
+
 export default function Footer() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuthStoreShallow();
+
   const footerLinks = {
     product: [
       { nameKey: 'landing.features', href: '#features' },
@@ -31,18 +39,18 @@ export default function Footer() {
       { nameKey: 'landing.faq', href: '#faq' },
     ],
     platform: [
-      { nameKey: 'nav.dashboard', href: '/login' },
-      { nameKey: 'nav.attendance', href: '/login' },
-      { nameKey: 'nav.tasks', href: '/login' },
-      { nameKey: 'nav.employees', href: '/login' },
-      { nameKey: 'nav.analytics', href: '/login' },
-      { nameKey: 'nav.calendar', href: '/login' },
+      { nameKey: 'nav.dashboard', href: '/login', authHref: '/dashboard' },
+      { nameKey: 'nav.attendance', href: '/login', authHref: '/attendance' },
+      { nameKey: 'nav.tasks', href: '/login', authHref: '/tasks' },
+      { nameKey: 'nav.employees', href: '/login', authHref: '/employees' },
+      { nameKey: 'nav.analytics', href: '/login', authHref: '/analytics' },
+      { nameKey: 'nav.calendar', href: '/login', authHref: '/calendar' },
       { nameKey: 'nav.recruitment', href: '/careers' },
     ],
     account: [
       { nameKey: 'auth.signIn', href: '/login' },
       { nameKey: 'auth.register', href: '/register' },
-      { nameKey: 'nav.settings', href: '/login' },
+      { nameKey: 'nav.settings', href: '/login', authHref: '/settings' },
       { nameKey: 'nav.help', href: '#faq' },
     ],
     legal: [
@@ -113,7 +121,7 @@ export default function Footer() {
                 {links.map((link) => (
                   <li key={link.nameKey}>
                     <Link
-                      href={link.href}
+                      href={getHref(isAuthenticated, link)}
                       className="footer-link-animated text-sm transition-colors"
                       style={{ color: 'var(--landing-text-secondary)' }}
                       aria-label={

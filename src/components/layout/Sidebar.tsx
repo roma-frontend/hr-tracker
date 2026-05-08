@@ -454,7 +454,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 overflow-hidden py-4 px-2 relative">
+      <nav className="flex-1 overflow-hidden py-4 ps-2 relative">
         <div className="relative h-full">
           {/* Main navigation view */}
           <div

@@ -31,7 +31,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { hy } from 'date-fns/locale';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 const CategoryBadge = ({ category }: { category: string }) => {
   const { t } = useTranslation();
@@ -42,8 +42,10 @@ export default function DocumentDetailClient() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const documentId = params.id as Id<'documents'>;
+
+  const dateLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
   const document = useQuery(api.documents.getDocumentById, { documentId });
   const currentUser = useQuery(
@@ -207,20 +209,20 @@ export default function DocumentDetailClient() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('documents.uploaded')}</span>
               <span className="font-medium">
-                {format(new Date(document.createdAt), 'dd MMM yyyy', { locale: hy })}
+                {format(new Date(document.createdAt), 'dd MMM yyyy', { locale: dateLocale })}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('documents.lastUpdated')}</span>
               <span className="font-medium">
-                {format(new Date(document.updatedAt), 'dd MMM yyyy', { locale: hy })}
+                {format(new Date(document.updatedAt), 'dd MMM yyyy', { locale: dateLocale })}
               </span>
             </div>
             {document.expiresAt && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{t('documents.expires')}</span>
                 <span className={`font-medium ${isExpired ? 'text-red-500' : ''}`}>
-                  {format(new Date(document.expiresAt), 'dd MMM yyyy', { locale: hy })}
+                  {format(new Date(document.expiresAt), 'dd MMM yyyy', { locale: dateLocale })}
                   {isExpired && ` (${t('documents.expired')})`}
                 </span>
               </div>

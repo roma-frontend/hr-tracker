@@ -29,7 +29,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { hy } from 'date-fns/locale';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const { t } = useTranslation();
@@ -107,8 +107,10 @@ export default function TaskDetailClient() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const taskId = params.id as Id<'tasks'>;
+
+  const dateLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
   const task = useQuery(api.tasks.getTask, { taskId });
   const currentUser = useQuery(
@@ -191,7 +193,7 @@ export default function TaskDetailClient() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{t('tasksClient.deadline')}</span>
                 <span className={`font-medium ${isOverdue ? 'text-red-500' : ''}`}>
-                  {format(deadline, 'dd MMM yyyy', { locale: hy })}
+                  {format(deadline, 'dd MMM yyyy', { locale: dateLocale })}
                   {isOverdue && ` (${t('tasksClient.overdueTag')})`}
                 </span>
               </div>
@@ -222,14 +224,14 @@ export default function TaskDetailClient() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('tasksClient.created')}</span>
               <span className="font-medium">
-                {format(new Date(task._creationTime), 'dd MMM yyyy', { locale: hy })}
+                {format(new Date(task._creationTime), 'dd MMM yyyy', { locale: dateLocale })}
               </span>
             </div>
             {task.updatedAt && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{t('tasksClient.updated')}</span>
                 <span className="font-medium">
-                  {format(new Date(task.updatedAt), 'dd MMM yyyy', { locale: hy })}
+                  {format(new Date(task.updatedAt), 'dd MMM yyyy', { locale: dateLocale })}
                 </span>
               </div>
             )}

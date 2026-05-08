@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import HeroCTA from './HeroCTA';
 import { useTranslation } from 'react-i18next';
 import '@/i18n/config';
@@ -32,6 +33,11 @@ function SparklesIcon() {
 
 export default function HeroSection() {
   const { t } = useTranslation();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div
@@ -80,7 +86,7 @@ export default function HeroSection() {
           color: '#ffffff',
         }}
       >
-        {t('ui.skipToContent')}
+        {mounted ? t('ui.skipToContent') : 'Skip to content'}
       </a>
 
       {/* Badge — CSS shimmer, no JS */}

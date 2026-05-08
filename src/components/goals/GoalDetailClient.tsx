@@ -29,7 +29,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { hy } from 'date-fns/locale';
+import { enUS, ru, hy } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -76,8 +76,10 @@ export default function GoalDetailClient() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const goalId = params.id as Id<'objectives'>;
+
+  const dateLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -254,17 +256,19 @@ export default function GoalDetailClient() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('goals.startDate')}</span>
               <span className="font-medium">
-                {format(startDate, 'dd MMM yyyy', { locale: hy })}
+                {format(startDate, 'dd MMM yyyy', { locale: dateLocale })}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('goals.endDate')}</span>
-              <span className="font-medium">{format(endDate, 'dd MMM yyyy', { locale: hy })}</span>
+              <span className="font-medium">
+                {format(endDate, 'dd MMM yyyy', { locale: dateLocale })}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('goals.created')}</span>
               <span className="font-medium">
-                {format(new Date(goal._creationTime), 'dd MMM yyyy', { locale: hy })}
+                {format(new Date(goal._creationTime), 'dd MMM yyyy', { locale: dateLocale })}
               </span>
             </div>
           </CardContent>

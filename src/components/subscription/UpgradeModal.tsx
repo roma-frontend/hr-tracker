@@ -13,6 +13,7 @@ import { Check, Zap, Building2, Rocket, Sparkles, ArrowRight, Shield, Star } fro
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PLAN_LABELS, type PlanType } from '@/hooks/usePlanFeatures';
+import { useRouter } from 'next/navigation';
 
 // ── Plan definitions ──────────────────────────────────────────────────────────
 
@@ -110,11 +111,12 @@ function PlanCard({
   onClose: () => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleCheckout = async () => {
     if (isCurrent) return;
     if (!tier.checkoutPlan) {
-      window.location.href = '/contact';
+      router.push('/contact');
       onClose();
       return;
     }
@@ -180,9 +182,7 @@ function PlanCard({
             {tier.icon}
           </div>
           <div>
-            <p className="font-bold text-(--text-primary) leading-tight text-sm">
-              {tier.name}
-            </p>
+            <p className="font-bold text-(--text-primary) leading-tight text-sm">{tier.name}</p>
             <p className="text-[11px] text-(--text-muted)">{tier.description}</p>
           </div>
         </div>
@@ -193,9 +193,7 @@ function PlanCard({
             <span className="text-2xl font-black leading-none text-(--text-primary)">
               {tier.price}
             </span>
-            {tier.priceMonthly && (
-              <span className="text-xs text-(--text-muted) pb-0.5">/mo</span>
-            )}
+            {tier.priceMonthly && <span className="text-xs text-(--text-muted) pb-0.5">/mo</span>}
           </div>
           {tier.priceMonthly && (
             <p className="text-[11px] text-(--text-muted) mt-0.5 flex items-center gap-1">
@@ -312,7 +310,9 @@ export function UpgradeModal({
             </div>
             <div>
               <DialogTitle className="text-base font-bold leading-tight">
-                {featureTitle ? t('billing.unlockFeature', { feature: featureTitle }) : t('billing.upgradeYourPlan')}
+                {featureTitle
+                  ? t('billing.unlockFeature', { feature: featureTitle })
+                  : t('billing.upgradeYourPlan')}
               </DialogTitle>
               <DialogDescription className="text-xs mt-0.5">
                 {featureDescription ?? t('billing.upgradeDescription')}

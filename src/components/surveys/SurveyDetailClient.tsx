@@ -30,7 +30,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { hy } from 'date-fns/locale';
+import { enUS, ru, hy } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -76,8 +76,10 @@ export default function SurveyDetailClient() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const surveyId = params.id as Id<'surveys'>;
+
+  const dateLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
   const survey = useQuery(api.surveys.getSurveyWithQuestions, { surveyId });
   const results = useQuery(

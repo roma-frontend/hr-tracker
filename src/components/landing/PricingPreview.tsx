@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useRouter } from 'next/navigation';
 
 // Inline SVG icons to eliminate lucide-react import overhead
 function CheckIcon({
@@ -306,15 +307,16 @@ function PricingCard({
   const [loading, setLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
   const isCurrentPlan = currentPlan === tier.id;
+  const router = useRouter();
 
   const handleCheckout = async () => {
     if (tier.id === 'enterprise') {
-      window.location.href = '/contact';
+      router.push('/contact');
       return;
     }
     // If not logged in, redirect to login first
     if (!user) {
-      window.location.href = '/login?next=%23pricing';
+      router.push('/login?next=%23pricing');
       return;
     }
     setLoading(true);

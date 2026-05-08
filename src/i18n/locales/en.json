@@ -341,7 +341,9 @@
     "approve": "Approve",
     "reject": "Reject",
     "saving": "Saving...",
-    "noResults": "No Results"
+    "noResults": "No Results",
+    "to": "to",
+    "approved": "Approved"
   },
   "lessons": {
     "title": "Lessons"
@@ -349,11 +351,7 @@
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
-    "employees": {
-      "all": "All",
-      "departments": "Departments",
-      "positions": "Positions"
-    },
+    "employees": "Employees",
     "employees.all": "All Employees",
     "employees.departments": "Departments",
     "employees.positions": "Positions",
@@ -1205,7 +1203,8 @@
   "priority": {
     "high": "High",
     "medium": "Medium",
-    "low": "Low"
+    "low": "Low",
+    "urgent": "Urgent"
   },
   "category": {
     "technical": "Technical",
@@ -1552,6 +1551,7 @@
     "leaveDetails": "Leave Details",
     "startDate": "Start Date",
     "endDate": "End Date",
+    "leaveType": "Leave Type",
     "status": "Status",
     "timeline": "Timeline",
     "requestSubmitted": "Request Submitted",
@@ -1732,7 +1732,9 @@
     "allStatusesFilter": "All Statuses",
     "noEmployees": "No employees yet",
     "noEmployeesDesc": "Get started by adding your first team member",
-    "addFirstEmployee": "Add First Employee"
+    "addFirstEmployee": "Add First Employee",
+    "noEmployeesAssigned": "No employees assigned",
+    "noEmployeesFound": "No employees found"
   },
   "departmentWizard": {
     "steps": {
@@ -2380,7 +2382,10 @@
     "leaveBalances": "Leave Balances",
     "phone": "Phone",
     "userId": "User ID",
-    "email": "Email"
+    "email": "Email",
+    "to": "to",
+    "approved": "Approved",
+    "dates": "Dates"
   },
   "forms": {
     "required": "*",
@@ -5834,7 +5839,8 @@
     "toast": {
       "success": "Request created!",
       "description": "Waiting for manager approval",
-      "error": "Failed to create request"
+      "error": "Failed to create request",
+      "waitingApproval": "Request submitted, waiting for approval"
     }
   },
   "taskWizard": {
@@ -7401,6 +7407,7 @@
       "avgProgress": "Avg Progress",
       "onTrack": "On Track",
       "atRisk": "At Risk / Behind",
+      "keyResult": "Key Result",
       "keyResults": "Key Results",
       "progress": "Progress",
       "timeProgress": "Time Progress"

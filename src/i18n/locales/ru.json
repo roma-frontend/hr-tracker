@@ -335,11 +335,16 @@
     "edit": "Редактировать",
     "add": "Добавить",
     "search": "Поиск",
-    "noResults": "No Results",
+    "noResults": "Нет результатов",
     "details": "Детали",
     "approve": "Одобрить",
     "reject": "Отклонить",
-    "saving": "Сохранение..."
+    "saving": "Сохранение...",
+    "comingSoon": "Скоро",
+    "yes": "Да",
+    "no": "Нет",
+    "exportSVG": "Экспорт SVG",
+    "approved": "Одобрено"
   },
   "lessons": {
     "title": "Уроки"
@@ -347,11 +352,7 @@
   "nav": {
     "home": "Главная",
     "dashboard": "Панель",
-    "employees": {
-      "all": "All",
-      "departments": "Departments",
-      "positions": "Positions"
-    },
+    "employees": "Сотрудники",
     "employees.all": "Все сотрудники",
     "employees.departments": "Отделы",
     "employees.positions": "Должности",
@@ -1559,6 +1560,7 @@
     "requestDetails": "Детали заявки на отпуск",
     "requestFrom": "Заявка от {{name}}",
     "leaveDetails": "Детали отпуска",
+    "leaveType": "Тип отпуска",
     "startDate": "Дата начала",
     "endDate": "Дата окончания",
     "status": "Статус",
@@ -1736,7 +1738,13 @@
     "noSupervisor": "Нет руководителя",
     "allRolesFilter": "Все роли",
     "allTypesFilter": "Все типы",
-    "allStatusesFilter": "Все статусы"
+    "allStatusesFilter": "Все статусы",
+    "filter_all": "Все",
+    "noEmployees": "Сотрудников нет",
+    "noEmployeesDesc": "Добавьте своего первого сотрудника, чтобы начать",
+    "addFirstEmployee": "Добавить первого сотрудника",
+    "noEmployeesAssigned": "Сотрудники не назначены",
+    "noEmployeesFound": "Сотрудники не найдены"
   },
   "departmentWizard": {
     "steps": {
@@ -2383,7 +2391,9 @@
     "leaveBalances": "Остатки отпусков",
     "phone": "Телефон",
     "email": "Email",
-    "dates": "Даты"
+    "dates": "Даты",
+    "to": "Кому",
+    "approved": "Одобрено"
   },
   "forms": {
     "required": "Обязательно",
@@ -3550,7 +3560,20 @@
     "total": "Всего",
     "allPriorities": "Все приоритеты",
     "allStatuses": "Все статусы",
-    "deleteTask": "Удалить задачу"
+    "deleteTask": "Удалить задачу",
+    "details": "Детали",
+    "timeline": "Хронология",
+    "created": "Создано",
+    "updated": "Обновлено",
+    "daysRemaining": "Осталось дней",
+    "daysOverdue": "дней просрочено",
+    "daysLeft": "дней осталось",
+    "download": "Скачать",
+    "comments": "Комментарии",
+    "comment": "Комментарий",
+    "commentsCount": "комментариев",
+    "viewAllComments": "Посмотреть все комментарии",
+    "attachments": "Вложения"
   },
   "attendanceExtra": {
     "daysWorked": "Отработано дней",
@@ -7122,7 +7145,19 @@
       "fillAllFields": "Заполните все обязательные поля",
       "sendFailed": "Не удалось отправить благодарность",
       "reactFailed": "Не удалось добавить реакцию"
-    }
+    },
+    "kudoDetails": "Детали благодарности",
+    "from": "От",
+    "to": "Кому",
+    "sender": "Отправитель",
+    "receiver": "Получатель",
+    "reactions": "Реакции",
+    "public": "Публичный",
+    "private": "Приватный",
+    "context": "Контекст",
+    "visibility": "Видимость",
+    "date": "Дата",
+    "time": "Время"
   },
   "surveys": {
     "title": "Пульс-опросы",
@@ -7139,6 +7174,7 @@
     "responses": "ответов",
     "results": "Результаты",
     "createdBy": "Создал",
+    "created": "Создан",
     "take": "Пройти опрос",
     "viewResults": "Результаты",
     "publish": "Опубликовать",
@@ -7149,6 +7185,8 @@
     "yes": "Да",
     "no": "Нет",
     "submit": "Отправить ответ",
+    "questions": "Вопросы",
+    "average": "Среднее",
     "filter": {
       "all": "Все",
       "active": "Активные",
@@ -7166,17 +7204,18 @@
       "review": "Обзор"
     },
     "form": {
-      "title": "Title",
-      "titlePlaceholder": "Title Placeholder",
-      "description": "Description",
-      "descriptionPlaceholder": "Description Placeholder",
-      "anonymous": "Anonymous",
-      "addQuestion": "Add Question",
-      "questionTextPlaceholder": "Question Text Placeholder",
-      "addOption": "Add Option",
-      "required": "Required",
-      "addQuestionBtn": "Add Question Btn",
-      "typePlaceholder": "Type Placeholder"
+      "title": "Название",
+      "titlePlaceholder": "Введите название опроса",
+      "description": "Описание",
+      "descriptionPlaceholder": "Введите описание опроса",
+      "anonymous": "Анонимный",
+      "addQuestion": "Добавить вопрос",
+      "questionTextPlaceholder": "Введите текст вопроса",
+      "addOption": "Добавить вариант",
+      "required": "Обязательно",
+      "optional": "Необязательно",
+      "addQuestionBtn": "Добавить вопрос",
+      "typePlaceholder": "Выберите тип вопроса"
     },
     "questionType": {
       "rating": "Рейтинг",
@@ -7420,9 +7459,10 @@
       "avgProgress": "Средний прогресс",
       "onTrack": "В графике",
       "atRisk": "Под угрозой",
-      "keyResults": "Key Results",
-      "progress": "Progress",
-      "timeProgress": "Time Progress"
+      "keyResults": "Ключевые результаты",
+      "progress": "Прогресс",
+      "timeProgress": "Прогресс по времени",
+      "keyResult": "Ключевой результат"
     },
     "tabs": {
       "my": "Мои цели",
@@ -8270,22 +8310,22 @@
     "draft": "Черновик",
     "fileDataMissing": "Данные файла отсутствуют",
     "exceedsLimit": "превышает лимит 10 МБ",
-    "days": "Days",
-    "daysUntilExpiry": "Days Until Expiry",
-    "documentDetails": "Document Details",
-    "expired": "Expired",
-    "expiredDocument": "Expired Document",
-    "expiredDocumentDescription": "Expired Document Description",
-    "fileSize": "File Size",
-    "fileType": "File Type",
-    "lastUpdated": "Last Updated",
-    "mandatoryDocument": "Mandatory Document",
-    "mandatoryDocumentDescription": "Mandatory Document Description",
-    "published": "Published",
-    "status": "Status",
-    "timeline": "Timeline",
-    "uploaded": "Uploaded",
-    "uploadedBy": "Uploaded By"
+    "days": "{count} дней",
+    "daysUntilExpiry": "Дней до истечения",
+    "documentDetails": "Детали документа",
+    "expired": "Истекло",
+    "expiredDocument": "Истекший документ",
+    "expiredDocumentDescription": "Описание истекшего документа",
+    "fileSize": "Размер файла",
+    "fileType": "Тип файла",
+    "lastUpdated": "Последнее обновление",
+    "mandatoryDocument": "Обязательный документ",
+    "mandatoryDocumentDescription": "Описание обязательного документа",
+    "published": "Опубликовано",
+    "status": "Статус",
+    "timeline": "Хронология",
+    "uploaded": "Загружено",
+    "uploadedBy": "Загружено пользователем"
   },
   "compensation": {
     "title": "Компенсации",
@@ -8476,8 +8516,8 @@
     }
   },
   "leaveStatus": {
-    "approved": "Approved",
-    "pending": "Pending",
-    "rejected": "Rejected"
+    "approved": "Утверждено",
+    "pending": "В ожидании",
+    "rejected": "Отклонено"
   }
 }

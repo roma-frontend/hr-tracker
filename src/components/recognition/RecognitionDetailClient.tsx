@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Calendar, User, Heart, Star, Award, MessageSquare, Users } from 'lucide-react';
 import { format } from 'date-fns';
-import { hy } from 'date-fns/locale';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 const CategoryBadge = ({ category }: { category: string }) => {
   const { t } = useTranslation();
@@ -47,8 +47,10 @@ export default function RecognitionDetailClient() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const kudoId = params.id as Id<'kudos'>;
+
+  const dateLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
   const kudo = useQuery(api.recognition.getKudoById, { kudoId });
   const currentUser = useQuery(
@@ -97,7 +99,7 @@ export default function RecognitionDetailClient() {
             <div className="text-right">
               <CategoryBadge category={kudo.category} />
               <p className="text-xs text-muted-foreground mt-1">
-                {format(createdAt, 'dd MMM yyyy HH:mm', { locale: hy })}
+                {format(createdAt, 'dd MMM yyyy HH:mm', { locale: dateLocale })}
               </p>
             </div>
           </div>
@@ -171,11 +173,13 @@ export default function RecognitionDetailClient() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('recognition.date')}</p>
-              <p className="font-medium">{format(createdAt, 'dd MMM yyyy', { locale: hy })}</p>
+              <p className="font-medium">
+                {format(createdAt, 'dd MMM yyyy', { locale: dateLocale })}
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('recognition.time')}</p>
-              <p className="font-medium">{format(createdAt, 'HH:mm', { locale: hy })}</p>
+              <p className="font-medium">{format(createdAt, 'HH:mm', { locale: dateLocale })}</p>
             </div>
           </div>
         </CardContent>

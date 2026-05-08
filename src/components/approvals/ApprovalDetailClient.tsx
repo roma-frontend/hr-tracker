@@ -27,7 +27,7 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { hy } from 'date-fns/locale';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 const RoleBadge = ({ role }: { role: string }) => {
   const { t } = useTranslation();
@@ -62,8 +62,10 @@ export default function ApprovalDetailClient() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const userId = params.id as Id<'users'>;
+
+  const dateLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
   const pendingUser = useQuery(api.users.queries.getPendingUserById, { userId });
   const currentUser = useQuery(
@@ -182,7 +184,7 @@ export default function ApprovalDetailClient() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{t('labels.registered')}</span>
                 <span className="font-medium">
-                  {format(registeredAt, 'dd MMM yyyy HH:mm', { locale: hy })}
+                  {format(registeredAt, 'dd MMM yyyy HH:mm', { locale: dateLocale })}
                 </span>
               </div>
               <div className="flex items-center justify-between">

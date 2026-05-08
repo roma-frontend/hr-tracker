@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 
 const languages = {
   en: { name: 'English', flag: '🇬🇧' },
@@ -23,13 +24,11 @@ export function LanguageSwitcher() {
   const changeLanguage = async (lng: string) => {
     console.log('🔄 LanguageSwitcher: Changing language from', i18n.language, 'to', lng);
 
-    // Save to localStorage BEFORE changing language
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('i18nextLng', lng);
         console.log('💾 Saved to localStorage FIRST:', lng);
 
-        // Verify it was saved
         const saved = localStorage.getItem('i18nextLng');
         console.log('✅ Verification - localStorage now has:', saved);
       } catch (error) {
@@ -37,12 +36,10 @@ export function LanguageSwitcher() {
       }
     }
 
-    // Then change the language
     await i18n.changeLanguage(lng);
     console.log('✅ Language changed to:', i18n.language);
   };
 
-  // Фильтруем языки, исключая текущий выбранный
   const availableLanguages = Object.entries(languages).filter(([code]) => code !== currentLang);
 
   return (
@@ -53,30 +50,78 @@ export function LanguageSwitcher() {
           size="sm"
           className="gap-2"
           style={{ color: 'var(--text-primary)' }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-primary)'; }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--text-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--text-primary)';
+          }}
         >
           <Globe className="h-4 w-4" />
-          <span className="hidden sm:inline">
+          <motion.span
+            className="hidden sm:inline"
+            key={currentLang}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
             {languages[currentLang as keyof typeof languages]?.flag}{' '}
             {languages[currentLang as keyof typeof languages]?.name || 'English'}
-          </span>
-          <span className="sm:hidden">
+          </motion.span>
+          <motion.span
+            className="sm:hidden"
+            key={currentLang + '-mobile'}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
             {languages[currentLang as keyof typeof languages]?.flag || '🇬🇧'}
-          </span>
+          </motion.span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={5}>
-        {availableLanguages.map(([code, { name, flag }]) => (
-          <DropdownMenuItem
-            key={code}
-            onClick={() => changeLanguage(code)}
-            className="cursor-pointer transition-colors"
-          >
-            <span className="mr-2">{flag}</span>
-            {name}
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent align="end" sideOffset={5} asChild>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: -8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="z-[9999] min-w-[8rem] overflow-hidden rounded-xl border border-(--border) bg-(--card) p-1 text-(--text-primary) shadow-2xl"
+        >
+          <AnimatePresence mode="popLayout">
+            {availableLanguages.map(([code, { name, flag }], index) => (
+              <motion.div
+                key={code}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.2, delay: index * 0.05, ease: 'easeOut' }}
+              >
+                <DropdownMenuItem
+                  onClick={() => changeLanguage(code)}
+                  className="cursor-pointer transition-colors"
+                >
+                  <motion.span
+                    className="mr-2"
+                    whileHover={{ scale: 1.2, rotate: 5 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                  >
+                    {flag}
+                  </motion.span>
+                  <motion.span
+                    key={code + '-name'}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.15, delay: index * 0.05 + 0.1 }}
+                  >
+                    {name}
+                  </motion.span>
+                </DropdownMenuItem>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

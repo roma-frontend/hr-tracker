@@ -26,7 +26,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { hy } from 'date-fns/locale';
+import { enUS, ru, hy } from 'date-fns/locale';
 
 const LeaveStatusBadge = ({ status }: { status: string }) => {
   const { t } = useTranslation();
@@ -64,8 +64,10 @@ export default function LeaveDetailClient() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const leaveId = params.id as Id<'leaveRequests'>;
+
+  const dateLocale = i18n.language === 'ru' ? ru : i18n.language === 'hy' ? hy : enUS;
 
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
@@ -222,12 +224,14 @@ export default function LeaveDetailClient() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('leave.startDate')}</span>
               <span className="font-medium">
-                {format(startDate, 'dd MMM yyyy', { locale: hy })}
+                {format(startDate, 'dd MMM yyyy', { locale: dateLocale })}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('leave.endDate')}</span>
-              <span className="font-medium">{format(endDate, 'dd MMM yyyy', { locale: hy })}</span>
+              <span className="font-medium">
+                {format(endDate, 'dd MMM yyyy', { locale: dateLocale })}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('leave.days')}</span>
@@ -267,7 +271,9 @@ export default function LeaveDetailClient() {
               <div>
                 <p className="font-medium">{t('leave.requestSubmitted')}</p>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(leave._creationTime), 'dd MMM yyyy HH:mm', { locale: hy })}
+                  {format(new Date(leave._creationTime), 'dd MMM yyyy HH:mm', {
+                    locale: dateLocale,
+                  })}
                 </p>
               </div>
             </div>

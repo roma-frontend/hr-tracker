@@ -898,11 +898,7 @@ export default function LoginPage() {
                     </span>
                     <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
                   </div>
-                  <Link
-                    href="/register-org"
-                    id="create-org-btn"
-                    data-translate-id={t('auth.createOrgLink')}
-                  >
+                  <Link href="/register-org" id="create-org-btn">
                     <Button
                       variant="link"
                       className="text-xs font-semibold hover:underline"
