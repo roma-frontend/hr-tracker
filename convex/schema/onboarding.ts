@@ -31,7 +31,7 @@ export const onboarding = {
           v.literal('other'),
         ),
         dayOffset: v.number(),
-      })
+      }),
     ),
     createdBy: v.id('users'),
     createdAt: v.number(),
@@ -48,11 +48,7 @@ export const onboarding = {
     startDate: v.number(),
     buddyId: v.optional(v.id('users')),
     managerId: v.id('users'),
-    status: v.union(
-      v.literal('active'),
-      v.literal('completed'),
-      v.literal('cancelled'),
-    ),
+    status: v.union(v.literal('active'), v.literal('completed'), v.literal('cancelled')),
     createdBy: v.id('users'),
     createdAt: v.number(),
     completedAt: v.optional(v.number()),
@@ -68,6 +64,7 @@ export const onboarding = {
     organizationId: v.id('organizations'),
     programId: v.id('onboardingPrograms'),
     templateTaskKey: v.optional(v.string()),
+    taskId: v.optional(v.id('tasks')), // Link to main tasks table
     title: v.string(),
     description: v.optional(v.string()),
     assigneeType: v.union(
@@ -101,5 +98,6 @@ export const onboarding = {
     .index('by_program', ['programId'])
     .index('by_program_status', ['programId', 'status'])
     .index('by_assignee', ['assigneeId'])
-    .index('by_org_due', ['organizationId', 'dueDate']),
+    .index('by_org_due', ['organizationId', 'dueDate'])
+    .index('by_task', ['taskId']),
 };

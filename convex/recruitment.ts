@@ -1,5 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import { api } from './_generated/api';
+import type { Id } from './_generated/dataModel';
 
 // ============ QUERIES ============
 
@@ -644,5 +646,161 @@ export const updateCandidateNotes = mutation({
   },
   handler: async (ctx, { applicationId, notes }) => {
     await ctx.db.patch(applicationId, { notes, updatedAt: Date.now() });
+  },
+});
+
+export const hireCandidate = mutation({
+  args: {
+    applicationId: v.id('applications'),
+    userId: v.id('users'),
+    startDate: v.optional(v.number()),
+    position: v.optional(v.string()),
+    department: v.optional(v.string()),
+  },
+  handler: async (ctx, { applicationId, userId, startDate, position, department }) => {
+    const app = await ctx.db.get(applicationId);
+    if (!app) throw new Error('Application not found');
+    if (app.stage === 'hired') throw new Error('Candidate already hired');
+
+    const now = Date.now();
+
+    // Update application stage
+    await ctx.db.patch(applicationId, {
+      stage: 'hired',
+      updatedAt: now,
+    });
+
+    // Record event
+    await ctx.db.insert('applicationEvents', {
+      applicationId,
+      organizationId: app.organizationId,
+      fromStage: app.stage,
+      toStage: 'hired',
+      changedBy: userId,
+      createdAt: now,
+    });
+
+    // Notify org admins
+    const orgAdmins = await ctx.db
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', app.organizationId))
+      .filter((q) => q.or(q.eq(q.field('role'), 'admin'), q.eq(q.field('role'), 'superadmin')))
+      .collect();
+
+    const candidate = await ctx.db.get(app.candidateId);
+    const vacancy = await ctx.db.get(app.vacancyId);
+
+    for (const admin of orgAdmins) {
+      if (admin._id === userId) continue;
+      await ctx.db.insert('notifications', {
+        organizationId: app.organizationId,
+        userId: admin._id,
+        type: 'system',
+        title: '🎉 New Hire',
+        message: `${candidate?.name || 'Candidate'} was hired for "${vacancy?.title || 'position'}"`,
+        isRead: false,
+        relatedId: applicationId,
+        route: '/onboarding',
+        createdAt: now,
+      });
+    }
+
+    // Auto-trigger onboarding for the new hire
+    try {
+      const hireDate = startDate || now + 7 * 86400000; // Default: start in 7 days
+
+      // Find or create user account for the candidate
+      let employeeId: Id<'users'> | undefined;
+
+      if (candidate?.email) {
+        // Check if user already exists with this email
+        const existingUser = await ctx.db
+          .query('users')
+          .withIndex('by_email', (q) => q.eq('email', candidate.email))
+          .first();
+
+        if (existingUser) {
+          employeeId = existingUser._id;
+        } else {
+          // Create user account for the new hire
+          employeeId = await ctx.db.insert('users', {
+            organizationId: app.organizationId,
+            name: candidate.name,
+            email: candidate.email,
+            passwordHash: '', // Will be set via password reset flow
+            role: 'employee',
+            employeeType: 'staff',
+            department: department || vacancy?.department,
+            position: position || vacancy?.title,
+            phone: candidate.phone,
+            isActive: true,
+            isApproved: true,
+            approvedBy: userId,
+            approvedAt: now,
+            travelAllowance: 0,
+            paidLeaveBalance: 0,
+            sickLeaveBalance: 0,
+            familyLeaveBalance: 0,
+            createdAt: now,
+          });
+        }
+      }
+
+      // Only trigger onboarding if we have a valid employee user ID
+      if (employeeId) {
+        // Find a matching template by department
+        const templates = await ctx.db
+          .query('onboardingTemplates')
+          .withIndex('by_org', (q) => q.eq('organizationId', app.organizationId))
+          .filter((q) => q.eq(q.field('isActive'), true))
+          .collect();
+
+        let templateId: Id<'onboardingTemplates'> | undefined;
+        if (department) {
+          const deptTemplate = templates.find((t) => t.department === department);
+          if (deptTemplate) templateId = deptTemplate._id;
+        }
+        if (!templateId && templates.length > 0) {
+          templateId = templates[0]!._id; // Fallback to first active template
+        }
+
+        // Use vacancy's hiring manager as onboarding manager, or the user who triggered hire
+        const managerId = vacancy?.hiringManagerId || userId;
+
+        // Find a buddy (first available employee who isn't the manager or new hire)
+        const employees = await ctx.db
+          .query('users')
+          .withIndex('by_org', (q) => q.eq('organizationId', app.organizationId))
+          .filter((q) =>
+            q.and(
+              q.neq(q.field('_id'), managerId),
+              q.neq(q.field('_id'), employeeId),
+              q.neq(q.field('role'), 'superadmin'),
+            ),
+          )
+          .collect();
+
+        const buddyId = employees.length > 0 ? employees[0]!._id : undefined;
+
+        await ctx.runMutation(api.onboarding.startOnboarding, {
+          organizationId: app.organizationId,
+          employeeId,
+          templateId,
+          startDate: hireDate,
+          buddyId,
+          managerId,
+          createdBy: userId,
+        });
+      }
+    } catch (e: unknown) {
+      // Don't fail the hire if onboarding setup fails — log and continue
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      if (!errorMessage.includes('already has an active onboarding program')) {
+        // Only log non-duplicate errors
+        console.warn('Failed to auto-create onboarding program:', errorMessage);
+      }
+    }
+
+    return { applicationId, candidateId: app.candidateId };
   },
 });

@@ -132,7 +132,7 @@ const navItems: NavEntry[] = [
     href: '/performance',
     labelKey: 'nav.performance',
     icon: Target,
-    roles: ['superadmin', 'admin', 'supervisor', 'employee'],
+    roles: ['superadmin', 'admin', 'supervisor', 'employee', 'driver'],
     children: [
       { href: '/performance', labelKey: 'nav.performance', icon: Target },
       { href: '/goals', labelKey: 'nav.goals', icon: Crosshair },
@@ -342,10 +342,23 @@ export function Sidebar() {
       : 'skip',
   );
 
+  // Pending signature requests count
+  const pendingSignaturesCount = useQuery(
+    api.signatures.getMyPendingSignatures,
+    mounted && user?.id && user?.organizationId
+      ? {
+          userId: user.id as Id<'users'>,
+          organizationId: user.organizationId as Id<'organizations'>,
+        }
+      : 'skip',
+  );
+
   const taskUnreadCount = (notifications ?? []).filter(
     (n: any) =>
       !n.isRead && n.type === 'system' && (n.title?.includes('Task') || n.title?.includes('task')),
   ).length;
+
+  const signatureBadgeCount = (pendingSignaturesCount ?? []).length;
 
   // Update browser tab title with unread chat count
   React.useEffect(() => {
@@ -358,8 +371,12 @@ export function Sidebar() {
   // Get user role with fallback
   const userRole = user?.role ?? 'employee';
 
-  const visibleItems = navItems.filter((item) => {
-    if (isSeparator(item)) return true;
+  const visibleItems = navItems.filter((item, index, arr) => {
+    if (isSeparator(item)) {
+      // Only show separator if there's at least one visible nav item after it (before next separator or end)
+      const nextItems = arr.slice(index + 1);
+      return nextItems.some((n) => !isSeparator(n) && n.roles.includes(userRole));
+    }
     return item.roles.includes(userRole);
   }) as NavEntry[];
 
@@ -507,7 +524,9 @@ export function Sidebar() {
               const showLeaveBadge =
                 item.href === '/leaves' && leaveBadgeCount > 0 && user?.role === 'admin';
               const showChatBadge = item.href === '/chat' && chatBadgeCount > 0;
-              const showBadge = showTaskBadge || showLeaveBadge || showChatBadge;
+              const showSignatureBadge = item.href === '/performance' && signatureBadgeCount > 0;
+              const showBadge =
+                showTaskBadge || showLeaveBadge || showChatBadge || showSignatureBadge;
               const badgeCount =
                 item.href === '/leaves'
                   ? leaveBadgeCount
@@ -515,7 +534,9 @@ export function Sidebar() {
                     ? taskBadgeCount
                     : item.href === '/chat'
                       ? chatBadgeCount
-                      : 0;
+                      : item.href === '/performance'
+                        ? signatureBadgeCount
+                        : 0;
               const hasChildren = item.children && item.children.length > 0;
               const activeClass = isActive ? 'scale-110' : '';
 
@@ -772,6 +793,8 @@ export function Sidebar() {
                   const ChildIcon = (child.icon || activeSubNav.icon) as LucideIcon;
                   const isChildActive =
                     pathname === child.href || pathname.startsWith(child.href + '/');
+                  const isSignaturesChild = child.href === '/signatures';
+                  const showChildBadge = isSignaturesChild && signatureBadgeCount > 0;
 
                   return (
                     <Link
@@ -807,17 +830,28 @@ export function Sidebar() {
                           }}
                         />
                       )}
-                      <ChildIcon
-                        className={cn(
-                          'w-5 h-5 transition-all duration-200',
-                          isChildActive && 'scale-110',
+                      <div className="relative">
+                        <ChildIcon
+                          className={cn(
+                            'w-5 h-5 transition-all duration-200',
+                            isChildActive && 'scale-110',
+                          )}
+                          style={{
+                            color: isChildActive
+                              ? 'var(--sidebar-item-active-text)'
+                              : 'var(--text-disabled)',
+                          }}
+                        />
+                        {showChildBadge && (
+                          <span
+                            className={cn(
+                              'absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-lg bg-linear-to-r from-red-500 to-red-600 animate-pulse',
+                            )}
+                          >
+                            {signatureBadgeCount > 9 ? '9+' : signatureBadgeCount}
+                          </span>
                         )}
-                        style={{
-                          color: isChildActive
-                            ? 'var(--sidebar-item-active-text)'
-                            : 'var(--text-disabled)',
-                        }}
-                      />
+                      </div>
                       <span className="flex-1 text-sm font-medium truncate">
                         {t(child.labelKey)}
                       </span>
@@ -908,10 +942,23 @@ export function MobileSidebar() {
       : 'skip',
   );
 
+  // Mobile pending signature requests count
+  const mobilePendingSignaturesCount = useQuery(
+    api.signatures.getMyPendingSignatures,
+    mounted && user?.id && user?.organizationId
+      ? {
+          userId: user.id as Id<'users'>,
+          organizationId: user.organizationId as Id<'organizations'>,
+        }
+      : 'skip',
+  );
+
   const mobileTaskBadge = (mobileNotifications ?? []).filter(
     (n: any) =>
       !n.isRead && n.type === 'system' && (n.title?.includes('Task') || n.title?.includes('task')),
   ).length;
+
+  const mobileSignatureCount = (mobilePendingSignaturesCount ?? []).length;
 
   // Lock body scroll when mobile sidebar is open
   React.useEffect(() => {
@@ -941,9 +988,13 @@ export function MobileSidebar() {
   // Get user role with fallback
   const userRole = user?.role ?? 'employee';
 
-  const visibleItems = navItems.filter(
-    (item) => isSeparator(item) || item.roles.includes(userRole),
-  );
+  const visibleItems = navItems.filter((item, index, arr) => {
+    if (isSeparator(item)) {
+      const nextItems = arr.slice(index + 1);
+      return nextItems.some((n) => !isSeparator(n) && n.roles.includes(userRole));
+    }
+    return item.roles.includes(userRole);
+  });
 
   return (
     <>
@@ -1076,6 +1127,7 @@ export function MobileSidebar() {
                 const mobileTaskCount = mobileTaskBadge;
                 const mobileLeaveCount = mobileUnreadLeavesCount ?? 0;
                 const mobileChatCount = mobileChatUnreadCount ?? 0;
+                const mobileSignatureCount = (mobilePendingSignaturesCount ?? []).length;
                 const mobileBadge =
                   item.href === '/tasks'
                     ? mobileTaskCount
@@ -1083,7 +1135,9 @@ export function MobileSidebar() {
                       ? mobileLeaveCount
                       : item.href === '/chat'
                         ? mobileChatCount
-                        : 0;
+                        : item.href === '/performance'
+                          ? mobileSignatureCount
+                          : 0;
                 const hasChildren = item.children && item.children.length > 0;
 
                 return (
@@ -1247,6 +1301,8 @@ export function MobileSidebar() {
                   const ChildIcon = (child.icon || activeSubNav.icon) as LucideIcon;
                   const isChildActive =
                     pathname === child.href || pathname.startsWith(child.href + '/');
+                  const isSignaturesChild = child.href === '/signatures';
+                  const showChildBadge = isSignaturesChild && mobileSignatureCount > 0;
 
                   return (
                     <Link
@@ -1279,14 +1335,24 @@ export function MobileSidebar() {
                           }}
                         />
                       )}
-                      <ChildIcon
-                        className={cn('w-5 h-5 transition-transform', isChildActive && 'scale-110')}
-                        style={{
-                          color: isChildActive
-                            ? 'var(--sidebar-item-active-text)'
-                            : 'var(--text-disabled)',
-                        }}
-                      />
+                      <div className="relative">
+                        <ChildIcon
+                          className={cn(
+                            'w-5 h-5 transition-transform',
+                            isChildActive && 'scale-110',
+                          )}
+                          style={{
+                            color: isChildActive
+                              ? 'var(--sidebar-item-active-text)'
+                              : 'var(--text-disabled)',
+                          }}
+                        />
+                        {showChildBadge && (
+                          <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-linear-to-r from-red-500 to-red-600 text-white text-[9px] font-bold flex items-center justify-center shadow-lg animate-pulse">
+                            {mobileSignatureCount > 9 ? '9+' : mobileSignatureCount}
+                          </span>
+                        )}
+                      </div>
                       <span className="flex-1 text-sm font-medium">{t(child.labelKey)}</span>
                     </Link>
                   );

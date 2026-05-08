@@ -20,8 +20,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,8 +30,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
+import { Id } from '@/convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
 
 // ── Category Config ──────────────────────────────────────────────────────────
 

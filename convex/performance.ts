@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { mutation, query, internalMutation } from './_generated/server';
 import { Id } from './_generated/dataModel';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -708,5 +708,71 @@ export const getEligibleParticipants = query({
         avatarUrl: u.avatarUrl || u.faceImageUrl,
         supervisorId: u.supervisorId,
       }));
+  },
+});
+
+// ── Internal: Check for upcoming review deadlines (cron) ─────────────────────
+export const checkDeadlineNotifications = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const oneDayMs = 24 * 60 * 60 * 1000;
+
+    // Get all organizations
+    const orgs = await ctx.db.query('organizations').collect();
+
+    for (const org of orgs) {
+      // Find active cycles with deadlines approaching (within 3 days)
+      const activeCycles = await ctx.db
+        .query('reviewCycles')
+        .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
+        .collect();
+
+      for (const cycle of activeCycles) {
+        const timeUntilDeadline = cycle.endDate - now;
+
+        // Send reminders when deadline is 3 days or 1 day away
+        if (timeUntilDeadline <= threeDaysMs && timeUntilDeadline > 0) {
+          const pendingAssignments = await ctx.db
+            .query('reviewAssignments')
+            .withIndex('by_cycle', (q) => q.eq('cycleId', cycle._id))
+            .filter((q) =>
+              q.or(q.eq(q.field('status'), 'pending'), q.eq(q.field('status'), 'in_progress')),
+            )
+            .collect();
+
+          for (const assignment of pendingAssignments) {
+            // Check if we already sent a reminder for this assignment within the last 24 hours
+            const existingNotifications = await ctx.db
+              .query('notifications')
+              .withIndex('by_user', (q) => q.eq('userId', assignment.reviewerId))
+              .filter((q) =>
+                q.and(
+                  q.eq(q.field('type'), 'review_deadline'),
+                  q.eq(q.field('relatedId'), assignment._id),
+                  q.gt(q.field('createdAt'), now - oneDayMs),
+                ),
+              )
+              .first();
+
+            if (!existingNotifications) {
+              const daysLeft = Math.ceil(timeUntilDeadline / oneDayMs);
+              await ctx.db.insert('notifications', {
+                organizationId: org._id,
+                userId: assignment.reviewerId,
+                type: 'review_deadline',
+                title: `⏰ Review deadline in ${daysLeft} day${daysLeft > 1 ? 's' : ''}`,
+                message: `Your review for "${cycle.title}" is due soon. Please complete it before ${new Date(cycle.endDate).toLocaleDateString()}.`,
+                isRead: false,
+                relatedId: assignment._id,
+                route: '/performance',
+                createdAt: now,
+              });
+            }
+          }
+        }
+      }
+    }
   },
 });

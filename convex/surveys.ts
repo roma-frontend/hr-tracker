@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { mutation, query, internalMutation } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { MAX_PAGE_SIZE } from './pagination';
 
@@ -13,9 +13,7 @@ import { MAX_PAGE_SIZE } from './pagination';
 export const listSurveys = query({
   args: {
     organizationId: v.id('organizations'),
-    status: v.optional(
-      v.union(v.literal('draft'), v.literal('active'), v.literal('closed')),
-    ),
+    status: v.optional(v.union(v.literal('draft'), v.literal('active'), v.literal('closed'))),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { organizationId, status, limit }) => {
@@ -31,9 +29,7 @@ export const listSurveys = query({
     } else {
       surveyQuery = ctx.db
         .query('surveys')
-        .withIndex('by_org_created', (q) =>
-          q.eq('organizationId', organizationId),
-        );
+        .withIndex('by_org_created', (q) => q.eq('organizationId', organizationId));
     }
 
     const surveys = await surveyQuery.order('desc').take(pageSize);
@@ -41,9 +37,7 @@ export const listSurveys = query({
     // Batch load creators
     const creatorIds = [...new Set(surveys.map((s) => s.createdBy))];
     const creators = await Promise.all(creatorIds.map((id) => ctx.db.get(id)));
-    const creatorMap = new Map(
-      creators.filter(Boolean).map((u) => [u!._id, u!]),
-    );
+    const creatorMap = new Map(creators.filter(Boolean).map((u) => [u!._id, u!]));
 
     return surveys.map((survey) => ({
       ...survey,
@@ -78,9 +72,7 @@ export const getSurveyWithQuestions = query({
     return {
       ...survey,
       questions,
-      creator: creator
-        ? { name: creator.name, avatarUrl: (creator as any)?.avatarUrl }
-        : null,
+      creator: creator ? { name: creator.name, avatarUrl: (creator as any)?.avatarUrl } : null,
     };
   },
 });
@@ -114,11 +106,9 @@ export const getSurveyResults = query({
 
     // Aggregate answers per question
     const questionResults = questions.map((question) => {
-      const questionAnswers = answers.filter(
-        (a) => a.questionId === question._id,
-      );
+      const questionAnswers = answers.filter((a) => a.questionId === question._id);
 
-      let aggregation: any = { totalResponses: questionAnswers.length };
+      const aggregation: any = { totalResponses: questionAnswers.length };
 
       switch (question.type) {
         case 'rating':
@@ -127,9 +117,7 @@ export const getSurveyResults = query({
             .map((a) => a.ratingValue)
             .filter((v): v is number => v !== undefined);
           aggregation.average =
-            values.length > 0
-              ? values.reduce((sum, v) => sum + v, 0) / values.length
-              : 0;
+            values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : 0;
           aggregation.distribution = values.reduce(
             (acc, val) => {
               acc[val] = (acc[val] || 0) + 1;
@@ -150,20 +138,14 @@ export const getSurveyResults = query({
           break;
         }
         case 'yes_no': {
-          const yesCount = questionAnswers.filter(
-            (a) => a.booleanValue === true,
-          ).length;
-          const noCount = questionAnswers.filter(
-            (a) => a.booleanValue === false,
-          ).length;
+          const yesCount = questionAnswers.filter((a) => a.booleanValue === true).length;
+          const noCount = questionAnswers.filter((a) => a.booleanValue === false).length;
           aggregation.yesCount = yesCount;
           aggregation.noCount = noCount;
           break;
         }
         case 'text': {
-          aggregation.textResponses = questionAnswers
-            .map((a) => a.textValue)
-            .filter(Boolean);
+          aggregation.textResponses = questionAnswers.map((a) => a.textValue).filter(Boolean);
           break;
         }
       }
@@ -395,9 +377,7 @@ export const submitResponse = mutation({
       const existing = await ctx.db
         .query('surveyResponses')
         .withIndex('by_survey_respondent', (q) =>
-          q
-            .eq('surveyId', args.surveyId)
-            .eq('respondentId', args.respondentId!),
+          q.eq('surveyId', args.surveyId).eq('respondentId', args.respondentId!),
         )
         .first();
       if (existing) {
@@ -440,5 +420,86 @@ export const submitResponse = mutation({
     });
 
     return responseId;
+  },
+});
+
+// ── Internal: Auto-activate surveys when startsAt is reached (cron) ─────────
+export const activateScheduledSurveys = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    // Get all organizations
+    const orgs = await ctx.db.query('organizations').collect();
+
+    for (const org of orgs) {
+      // Find draft surveys that should be active now
+      const surveysToActivate = await ctx.db
+        .query('surveys')
+        .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'draft'))
+        .filter((q) => q.and(q.lt(q.field('startsAt'), now), q.neq(q.field('startsAt'), undefined)))
+        .collect();
+
+      for (const survey of surveysToActivate) {
+        await ctx.db.patch(survey._id, {
+          status: 'active',
+          updatedAt: now,
+        });
+
+        // Notify creators
+        await ctx.db.insert('notifications', {
+          organizationId: org._id,
+          userId: survey.createdBy,
+          type: 'survey_auto_activated',
+          title: '📢 Survey Auto-Activated',
+          message: `"${survey.title}" has been automatically activated as scheduled.`,
+          isRead: false,
+          relatedId: survey._id,
+          route: '/surveys',
+          createdAt: now,
+        });
+      }
+    }
+  },
+});
+
+// ── Internal: Auto-close surveys when endsAt is reached (cron) ─────────────
+export const closeExpiredSurveys = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    // Get all organizations
+    const orgs = await ctx.db.query('organizations').collect();
+
+    for (const org of orgs) {
+      // Find active surveys that should be closed now
+      const surveysToClose = await ctx.db
+        .query('surveys')
+        .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
+        .filter((q) => q.and(q.lt(q.field('endsAt'), now), q.neq(q.field('endsAt'), undefined)))
+        .collect();
+
+      for (const survey of surveysToClose) {
+        await ctx.db.patch(survey._id, {
+          status: 'closed',
+          endsAt: now,
+          updatedAt: now,
+        });
+
+        // Notify creators
+        await ctx.db.insert('notifications', {
+          organizationId: org._id,
+          userId: survey.createdBy,
+          type: 'survey_auto_closed',
+          title: '🔒 Survey Auto-Closed',
+          message: `"${survey.title}" has been automatically closed as the end date has passed.`,
+          isRead: false,
+          relatedId: survey._id,
+          route: '/surveys',
+          createdAt: now,
+        });
+      }
+    }
   },
 });

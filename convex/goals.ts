@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { query, mutation } from './_generated/server';
+import { query, mutation, internalMutation } from './_generated/server';
 
 // Helper: compute KR completion percentage respecting direction
 function computeKRProgress(
@@ -7,18 +7,14 @@ function computeKRProgress(
   targetValue: number,
   currentValue: number,
   direction: 'increase' | 'decrease',
-  metricType: string
+  metricType: string,
 ): number {
   if (metricType === 'boolean') {
     return currentValue >= 1 ? 100 : 0;
   }
-  const range = direction === 'increase'
-    ? targetValue - startValue
-    : startValue - targetValue;
+  const range = direction === 'increase' ? targetValue - startValue : startValue - targetValue;
   if (range === 0) return currentValue === targetValue ? 100 : 0;
-  const progress = direction === 'increase'
-    ? currentValue - startValue
-    : startValue - currentValue;
+  const progress = direction === 'increase' ? currentValue - startValue : startValue - currentValue;
   return Math.min(100, Math.max(0, Math.round((progress / range) * 100)));
 }
 
@@ -31,7 +27,7 @@ function computeObjectiveProgress(
     direction: 'increase' | 'decrease';
     metricType: string;
     weight: number;
-  }>
+  }>,
 ): number {
   if (keyResults.length === 0) return 0;
   const totalWeight = keyResults.reduce((sum, kr) => sum + kr.weight, 0);
@@ -42,7 +38,7 @@ function computeObjectiveProgress(
       kr.targetValue,
       kr.currentValue,
       kr.direction,
-      kr.metricType
+      kr.metricType,
     );
     return sum + krProgress * (kr.weight / totalWeight);
   }, 0);
@@ -87,7 +83,7 @@ export const listObjectives = query({
           keyResultsCount: krs.length,
           keyResults: krs,
         };
-      })
+      }),
     );
 
     return enriched.sort((a, b) => b.createdAt - a.createdAt);
@@ -122,10 +118,10 @@ export const getObjective = query({
             kr.targetValue,
             kr.currentValue,
             kr.direction,
-            kr.metricType
+            kr.metricType,
           ),
         };
-      })
+      }),
     );
 
     // Children (aligned objectives)
@@ -153,7 +149,7 @@ export const getMyObjectives = query({
     const objectives = await ctx.db
       .query('objectives')
       .withIndex('by_org_owner', (q) =>
-        q.eq('organizationId', organizationId).eq('ownerId', userId)
+        q.eq('organizationId', organizationId).eq('ownerId', userId),
       )
       .collect();
 
@@ -164,7 +160,7 @@ export const getMyObjectives = query({
           .withIndex('by_objective', (q) => q.eq('objectiveId', obj._id))
           .collect();
         return { ...obj, keyResults: krs, keyResultsCount: krs.length };
-      })
+      }),
     );
 
     return enriched.sort((a, b) => b.createdAt - a.createdAt);
@@ -181,7 +177,7 @@ export const getTeamProgress = query({
     let objectives = await ctx.db
       .query('objectives')
       .withIndex('by_org_period', (q) =>
-        q.eq('organizationId', organizationId).eq('periodYear', periodYear)
+        q.eq('organizationId', organizationId).eq('periodYear', periodYear),
       )
       .collect();
 
@@ -226,7 +222,7 @@ export const getCheckinHistory = query({
       checkins.map(async (c) => {
         const user = await ctx.db.get(c.userId);
         return { ...c, userName: user?.name ?? 'Unknown' };
-      })
+      }),
     );
 
     return enriched.sort((a, b) => b.createdAt - a.createdAt);
@@ -273,7 +269,7 @@ export const createObjective = mutation({
         unit: v.optional(v.string()),
         weight: v.number(),
         ownerId: v.optional(v.id('users')),
-      })
+      }),
     ),
   },
   handler: async (ctx, args) => {
@@ -339,7 +335,7 @@ export const updateObjective = mutation({
         v.literal('active'),
         v.literal('completed'),
         v.literal('cancelled'),
-      )
+      ),
     ),
   },
   handler: async (ctx, { objectiveId, ...updates }) => {
@@ -541,7 +537,7 @@ export const checkin = mutation({
       .collect();
     // Use updated value for this KR
     const krsForCalc = allKRs.map((k) =>
-      k._id === keyResultId ? { ...k, currentValue: newValue } : k
+      k._id === keyResultId ? { ...k, currentValue: newValue } : k,
     );
     const newProgress = computeObjectiveProgress(krsForCalc);
     await ctx.db.patch(kr.objectiveId, { progress: newProgress, updatedAt: now });
@@ -569,5 +565,71 @@ export const cancelObjective = mutation({
     if (obj.status === 'completed') throw new Error('Cannot cancel a completed objective');
 
     await ctx.db.patch(objectiveId, { status: 'cancelled', updatedAt: Date.now() });
+  },
+});
+
+// ── Internal: Send weekly check-in reminders (cron) ─────────────────────────
+export const sendWeeklyCheckinReminders = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+
+    // Get all organizations
+    const orgs = await ctx.db.query('organizations').collect();
+
+    for (const org of orgs) {
+      // Find all active objectives for this org
+      const activeObjectives = await ctx.db
+        .query('objectives')
+        .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
+        .collect();
+
+      for (const objective of activeObjectives) {
+        // Get all key results for this objective
+        const keyResults = await ctx.db
+          .query('keyResults')
+          .withIndex('by_objective', (q) => q.eq('objectiveId', objective._id))
+          .collect();
+
+        // Find KR owners who haven't checked in this week
+        for (const kr of keyResults) {
+          const recentCheckin = await ctx.db
+            .query('goalCheckins')
+            .withIndex('by_kr', (q) => q.eq('keyResultId', kr._id))
+            .filter((q) => q.gt(q.field('createdAt'), now - oneWeekMs))
+            .first();
+
+          if (!recentCheckin) {
+            // Check if we already sent a reminder this week
+            const existingReminder = await ctx.db
+              .query('notifications')
+              .withIndex('by_user', (q) => q.eq('userId', kr.ownerId))
+              .filter((q) =>
+                q.and(
+                  q.eq(q.field('type'), 'okr_checkin_reminder'),
+                  q.eq(q.field('relatedId'), kr._id),
+                  q.gt(q.field('createdAt'), now - oneWeekMs),
+                ),
+              )
+              .first();
+
+            if (!existingReminder) {
+              await ctx.db.insert('notifications', {
+                organizationId: org._id,
+                userId: kr.ownerId,
+                type: 'okr_checkin_reminder',
+                title: '📊 Weekly OKR Check-in Reminder',
+                message: `Don't forget to update "${kr.title}" for objective "${objective.title}"`,
+                isRead: false,
+                relatedId: kr._id,
+                route: '/goals',
+                createdAt: now,
+              });
+            }
+          }
+        }
+      }
+    }
   },
 });

@@ -55,6 +55,7 @@ import type * as employeeProfiles from "../employeeProfiles.js";
 import type * as events from "../events.js";
 import type * as faceRecognition from "../faceRecognition.js";
 import type * as goals from "../goals.js";
+import type * as hrCronJobs from "../hrCronJobs.js";
 import type * as http from "../http.js";
 import type * as learning from "../learning.js";
 import type * as leaves from "../leaves.js";
@@ -217,6 +218,7 @@ declare const fullApi: ApiFromModules<{
   events: typeof events;
   faceRecognition: typeof faceRecognition;
   goals: typeof goals;
+  hrCronJobs: typeof hrCronJobs;
   http: typeof http;
   learning: typeof learning;
   leaves: typeof leaves;

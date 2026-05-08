@@ -1,4 +1,4 @@
-import { RecognitionClient } from '@/components/RecognitionClient';
+import { RecognitionClient } from '@/components/recognition/RecognitionClient';
 
 export const dynamic = 'force-dynamic';
 

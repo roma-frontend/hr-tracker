@@ -7384,8 +7384,11 @@
       "cancelFailed": "Failed to cancel",
       "reminderFailed": "Failed to send reminder",
       "templateFailed": "Failed to create template",
-      "previousSigners": "Waiting for previous signers"
-    }
+      "previousSigners": "Waiting for previous signers",
+      "exportFailed": "Failed to export PDF"
+    },
+    "exportPdf": "Export PDF",
+    "pdfExported": "PDF exported successfully"
   },
   "goals": {
     "title": "OKR & Goals",

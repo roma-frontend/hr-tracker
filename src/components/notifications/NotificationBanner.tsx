@@ -35,6 +35,9 @@ const getRouteForType = (type: string): string => {
     corporate: '/corporate',
     kudos: '/recognition',
     badge_awarded: '/recognition',
+    signature_request: '/signatures',
+    signature_completed: '/signatures',
+    signature_declined: '/signatures',
   };
   return routes[type] || '/dashboard';
 };
@@ -64,7 +67,7 @@ export function NotificationBanner() {
   } | null>(null);
 
   useEffect(() => {
-    if (!isAdmin || !notifications) return;
+    if (!notifications) return;
 
     const unread = notifications.filter((n) => !n.isRead);
     const currentCount = unread.length;
@@ -75,7 +78,7 @@ export function NotificationBanner() {
       return;
     }
 
-    // If new unread appeared, show the banner with sound (admin only)
+    // If new unread appeared, show the banner
     if (currentCount > lastSeenCount && unread.length > 0) {
       const latest = unread[0]; // most recent
 
@@ -97,14 +100,12 @@ export function NotificationBanner() {
     }
 
     setLastSeenCount(currentCount);
-  }, [notifications, lastSeenCount, isAdmin]);
+  }, [notifications, lastSeenCount]);
 
   const handleDismiss = useCallback(() => {
     setNewNotification(null);
   }, []);
 
-  // Only admin users see the banner and hear the sound
-  if (!isAdmin) return null;
   if (!newNotification) return null;
 
   // Map notification type to banner type

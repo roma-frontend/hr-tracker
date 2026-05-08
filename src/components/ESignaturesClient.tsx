@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  Download,
   type LucideIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -47,6 +48,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useShallow } from 'zustand/shallow';
 import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
+import { exportSignatureToPDF } from '@/lib/exportSignatureToPDF';
 
 // ============ SIGNATURE PAD COMPONENT ============
 
@@ -721,6 +723,45 @@ function DocumentDetailDialog({ open, onClose, documentId, userId }: DocumentDet
     }
   };
 
+  const handleExportPDF = () => {
+    if (!doc) return;
+    try {
+      const signerInfo = (doc.requests || []).map((req) => ({
+        order: req.order,
+        name: req.signerName,
+        email: req.signerEmail || '',
+        status: req.status,
+        signedAt: req.signedAt,
+        signatureData: req.signatureData,
+        declineReason: req.declinedReason,
+      }));
+
+      const auditEntries = (auditLog || []).map((entry) => ({
+        action: entry.action,
+        actorName: entry.userId ? 'User' : 'System',
+        timestamp: entry.timestamp,
+      }));
+
+      exportSignatureToPDF(
+        {
+          title: doc.title,
+          content: doc.content,
+          status: doc.status,
+          createdAt: doc.createdAt,
+          completedAt: doc.completedAt,
+          expiresAt: doc.expiresAt,
+          contentHash: doc.contentHash || '',
+          signers: signerInfo,
+          auditLog: auditEntries,
+        },
+        `${doc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+      );
+      toast.success(t('signatures.pdfExported', 'PDF exported successfully'));
+    } catch {
+      toast.error(t('signatures.errors.exportFailed', 'Failed to export PDF'));
+    }
+  };
+
   if (!open || !documentId) return null;
 
   const statusColor: Record<string, string> = {
@@ -832,9 +873,17 @@ function DocumentDetailDialog({ open, onClose, documentId, userId }: DocumentDet
         </div>
 
         <div className="px-5 py-4 border-t bg-muted/30 flex items-center justify-between">
-          <Button variant="outline" size="sm" onClick={onClose}>
-            {t('common.close', 'Close')}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={onClose}>
+              {t('common.close', 'Close')}
+            </Button>
+            {doc && doc.status === 'completed' && (
+              <Button variant="outline" size="sm" onClick={handleExportPDF}>
+                <Download className="w-4 h-4 mr-1" />
+                {t('signatures.exportPdf', 'Export PDF')}
+              </Button>
+            )}
+          </div>
           {doc &&
             doc.createdBy === userId &&
             (doc.status === 'pending' || doc.status === 'partially_signed') && (

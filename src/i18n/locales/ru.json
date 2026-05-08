@@ -7426,8 +7426,11 @@
       "cancelFailed": "Не удалось отменить",
       "reminderFailed": "Не удалось отправить напоминание",
       "templateFailed": "Не удалось создать шаблон",
-      "previousSigners": "Ожидание предыдущих подписантов"
-    }
+      "previousSigners": "Ожидание предыдущих подписантов",
+      "exportFailed": "Не удалось экспортировать PDF"
+    },
+    "exportPdf": "Экспорт PDF",
+    "pdfExported": "PDF успешно экспортирован"
   },
   "goals": {
     "title": "OKR и Цели",

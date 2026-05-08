@@ -41,11 +41,12 @@ export const listPrograms = query({
           ...prog,
           progress: computeProgress(tasks),
           totalTasks: tasks.length,
-          completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped').length,
+          completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped')
+            .length,
           employeeName: employee?.name ?? 'Unknown',
           buddyName: buddy?.name,
         };
-      })
+      }),
     );
     return result;
   },
@@ -68,21 +69,24 @@ export const getProgram = query({
 
     // Resolve assignee names
     const tasksWithNames = await Promise.all(
-      tasks.sort((a, b) => a.order - b.order).map(async (task) => {
-        let assigneeName: string | undefined;
-        if (task.assigneeId) {
-          const assignee = await ctx.db.get(task.assigneeId);
-          assigneeName = assignee?.name;
-        }
-        return { ...task, assigneeName };
-      })
+      tasks
+        .sort((a, b) => a.order - b.order)
+        .map(async (task) => {
+          let assigneeName: string | undefined;
+          if (task.assigneeId) {
+            const assignee = await ctx.db.get(task.assigneeId);
+            assigneeName = assignee?.name;
+          }
+          return { ...task, assigneeName };
+        }),
     );
 
     return {
       ...program,
       progress: computeProgress(tasks),
       totalTasks: tasks.length,
-      completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped').length,
+      completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped')
+        .length,
       employeeName: employee?.name ?? 'Unknown',
       employeeEmail: employee?.email,
       buddyName: buddy?.name,
@@ -115,7 +119,8 @@ export const getMyOnboarding = query({
       ...program,
       progress: computeProgress(tasks),
       totalTasks: tasks.length,
-      completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped').length,
+      completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped')
+        .length,
       buddyName: buddy?.name,
       managerName: manager?.name ?? 'Unknown',
       tasks: tasks.sort((a, b) => a.order - b.order),
@@ -152,10 +157,11 @@ export const getMyMenteePrograms = query({
           ...prog,
           progress: computeProgress(tasks),
           totalTasks: tasks.length,
-          completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped').length,
+          completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped')
+            .length,
           employeeName: employee?.name ?? 'Unknown',
         };
-      })
+      }),
     );
   },
 });
@@ -190,7 +196,7 @@ export const createTemplate = mutation({
           v.literal('other'),
         ),
         dayOffset: v.number(),
-      })
+      }),
     ),
     createdBy: v.id('users'),
   },
@@ -240,8 +246,8 @@ export const updateTemplate = mutation({
             v.literal('other'),
           ),
           dayOffset: v.number(),
-        })
-      )
+        }),
+      ),
     ),
   },
   handler: async (ctx, { templateId, ...fields }) => {
@@ -309,10 +315,27 @@ export const startOnboarding = mutation({
           else if (t.assigneeType === 'manager') assigneeId = args.managerId;
 
           const dueDate = args.startDate + t.dayOffset * 86400000;
+
+          // Create task in main tasks table
+          const mainTaskId = await ctx.db.insert('tasks', {
+            organizationId: args.organizationId,
+            title: `[Onboarding] ${t.title}`,
+            description: t.description || undefined,
+            assignedTo: assigneeId || args.employeeId,
+            assignedBy: args.createdBy,
+            status: 'pending',
+            priority: t.category === 'documentation' ? 'high' : 'medium',
+            deadline: dueDate,
+            tags: [`onboarding`, t.category, t.assigneeType],
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+
           await ctx.db.insert('onboardingTasks', {
             organizationId: args.organizationId,
             programId,
             templateTaskKey: t.key,
+            taskId: mainTaskId,
             title: t.title,
             description: t.description,
             assigneeType: t.assigneeType,
@@ -390,17 +413,43 @@ export const completeTask = mutation({
       completedBy,
       completedAt: Date.now(),
     });
+
+    // Sync to main tasks table if linked
+    if (task.taskId) {
+      const mainTask = await ctx.db.get(task.taskId);
+      if (mainTask) {
+        await ctx.db.patch(task.taskId, {
+          status: 'completed',
+          completedAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+      }
+    }
   },
 });
 
 export const skipTask = mutation({
   args: { taskId: v.id('onboardingTasks'), completedBy: v.id('users') },
   handler: async (ctx, { taskId, completedBy }) => {
+    const task = await ctx.db.get(taskId);
+    if (!task) throw new Error('Task not found');
+
     await ctx.db.patch(taskId, {
       status: 'skipped',
       completedBy,
       completedAt: Date.now(),
     });
+
+    // Sync to main tasks table if linked
+    if (task.taskId) {
+      const mainTask = await ctx.db.get(task.taskId);
+      if (mainTask) {
+        await ctx.db.patch(task.taskId, {
+          status: 'cancelled',
+          updatedAt: Date.now(),
+        });
+      }
+    }
   },
 });
 
