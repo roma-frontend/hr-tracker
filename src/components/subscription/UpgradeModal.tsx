@@ -122,9 +122,17 @@ function PlanCard({
     }
     setLoading(true);
     try {
+      const csrfRes = await fetch('/api/csrf-token', { method: 'GET' });
+      if (!csrfRes.ok) throw new Error('Failed to get CSRF token');
+      const csrfData = await csrfRes.json();
+
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.token,
+          'X-CSRF-Token-Signature': csrfData.signature,
+        },
         body: JSON.stringify({ plan: tier.checkoutPlan }),
       });
       const data = await res.json();

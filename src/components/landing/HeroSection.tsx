@@ -110,7 +110,7 @@ export default function HeroSection() {
           className="relative text-xs font-bold tracking-[0.2em] uppercase"
           style={{ color: 'var(--landing-text-muted)' }}
         >
-          {t('landing.exclusiveHR')}
+          {mounted ? t('landing.exclusiveHR') : 'Exclusive HR'}
         </span>
         <SparklesIcon />
       </div>
@@ -124,7 +124,7 @@ export default function HeroSection() {
             textShadow: '0 2px 40px rgba(37, 99, 235, 0.15)',
           }}
         >
-          {t('landing.heroTitle')}
+          {mounted ? t('landing.heroTitle') : 'HR Office'}
         </span>
         <div
           className="hero-line absolute -bottom-4 left-1/2 -translate-x-1/2 h-[2px] w-32"
@@ -154,7 +154,9 @@ export default function HeroSection() {
           className="text-lg md:text-xl leading-loose font-light text-center"
           style={{ color: 'var(--landing-text-secondary)', opacity: 0.85 }}
         >
-          {t('landing.heroSubtitle')}
+          {mounted
+            ? t('landing.heroSubtitle')
+            : 'The ultimate platform for modern workforce management'}
         </p>
         <div className="flex items-center justify-center gap-2 mt-6">
           {[0, 1, 2, 1, 0].map((size, idx) => (
@@ -190,7 +192,7 @@ export default function HeroSection() {
             className="text-xs uppercase tracking-[0.3em] font-semibold"
             style={{ color: 'var(--landing-text-muted)' }}
           >
-            {t('landing.trustedByElite')}
+            {mounted ? t('landing.trustedByElite') : 'Trusted by elite companies'}
           </p>
           <div
             className="w-8 h-[1px]"
@@ -231,7 +233,7 @@ export default function HeroSection() {
           className="text-xs uppercase tracking-widest"
           style={{ color: 'var(--primary)', opacity: 0.6 }}
         >
-          {t('landing.scroll')}
+          {mounted ? t('landing.scroll') : 'Scroll'}
         </span>
         <div
           className="scroll-line w-px h-12"

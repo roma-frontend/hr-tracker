@@ -454,11 +454,11 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 overflow-hidden py-4 ps-2 relative">
+      <nav className="flex-1 overflow-hidden relative">
         <div className="relative h-full">
           {/* Main navigation view */}
           <div
-            className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] p-2"
             style={{
               transform: activeSubNav ? 'translateX(-100%) scale(0.95)' : 'translateX(0) scale(1)',
               opacity: activeSubNav ? 0 : 1,
@@ -666,7 +666,7 @@ export function Sidebar() {
 
           {/* Sub-navigation view */}
           <div
-            className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] p-2"
             style={{
               transform: activeSubNav ? 'translateX(0) scale(1)' : 'translateX(100%) scale(0.95)',
               opacity: activeSubNav ? 1 : 0,
@@ -687,7 +687,9 @@ export function Sidebar() {
               }}
             >
               <ChevronLeft className="w-4 h-4 transition-transform duration-300 group-hover/back:-translate-x-0.5" />
-              <span className="text-sm font-medium">{t(activeSubNav?.labelKey ?? '')}</span>
+              <span className="text-sm font-medium">
+                {activeSubNav ? t(activeSubNav.labelKey) : ''}
+              </span>
             </button>
 
             {/* Sub-nav items */}
@@ -947,11 +949,11 @@ export function MobileSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-hidden py-4 px-3 relative">
+        <nav className="flex-1 overflow-hidden py-4 ps-3 relative">
           <div className="relative h-full">
             {/* Main navigation view */}
             <div
-              className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] p-2"
               style={{
                 transform: activeSubNav
                   ? 'translateX(-100%) scale(0.95)'
@@ -1137,7 +1139,7 @@ export function MobileSidebar() {
 
             {/* Sub-navigation view */}
             <div
-              className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] p-2"
               style={{
                 transform: activeSubNav ? 'translateX(0) scale(1)' : 'translateX(100%) scale(0.95)',
                 opacity: activeSubNav ? 1 : 0,
@@ -1156,7 +1158,9 @@ export function MobileSidebar() {
                 }}
               >
                 <ChevronLeft className="w-4 h-4 transition-transform duration-300 group-hover/back:-translate-x-0.5" />
-                <span className="text-sm font-medium">{t(activeSubNav?.labelKey ?? '')}</span>
+                <span className="text-sm font-medium">
+                  {activeSubNav ? t(activeSubNav.labelKey) : ''}
+                </span>
               </button>
 
               {activeSubNav?.children
