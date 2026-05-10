@@ -198,7 +198,7 @@ const navItems: NavEntry[] = [
         labelKey: 'nav.events',
         icon: Calendar,
         roles: ['superadmin', 'admin'],
-    },
+      },
     ],
   },
 
@@ -406,7 +406,9 @@ export function Sidebar() {
         const next = visibleItems[idx + 1];
         if (next && !isSeparator(next)) {
           const label = t(next.labelKey).toLowerCase();
-          const childMatch = next.children?.some((c) => t(c.labelKey).toLowerCase().includes(query));
+          const childMatch = next.children?.some((c) =>
+            t(c.labelKey).toLowerCase().includes(query),
+          );
           if (label.includes(query) || childMatch) {
             result.push(entry);
           }
@@ -1085,7 +1087,9 @@ export function MobileSidebar() {
         const next = visibleItems[idx + 1];
         if (next && !isSeparator(next)) {
           const label = t(next.labelKey).toLowerCase();
-          const childMatch = next.children?.some((c) => t(c.labelKey).toLowerCase().includes(query));
+          const childMatch = next.children?.some((c) =>
+            t(c.labelKey).toLowerCase().includes(query),
+          );
           if (label.includes(query) || childMatch) {
             result.push(entry);
           }
@@ -1226,7 +1230,7 @@ export function MobileSidebar() {
                 pointerEvents: activeSubNav ? 'none' : 'auto',
               }}
             >
-            {mobileFilteredItems.map((entry, index) => {
+              {mobileFilteredItems.map((entry, index) => {
                 if (isSeparator(entry)) {
                   return (
                     <div
@@ -1235,7 +1239,7 @@ export function MobileSidebar() {
                       style={{
                         opacity: mobileOpen ? 1 : 0,
                         transform: mobileOpen ? 'translateX(0)' : 'translateX(-20px)',
-                        transition: `all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.04}s`,
+                        transition: `all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)`,
                       }}
                     >
                       {entry.labelKey && (
@@ -1282,7 +1286,7 @@ export function MobileSidebar() {
                       opacity: mobileOpen && !activeSubNav ? 1 : 0,
                       transform:
                         mobileOpen && !activeSubNav ? 'translateX(0)' : 'translateX(-20px)',
-                      transition: `all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.04}s`,
+                      transition: `all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)`,
                     }}
                   >
                     {hasChildren ? (
