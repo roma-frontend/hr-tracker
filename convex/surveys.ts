@@ -526,6 +526,117 @@ export const deleteQuestion = mutation({
   },
 });
 
+/**
+ * Update an existing survey (title, description, isAnonymous, target roles/departments, dates)
+ */
+export const updateSurvey = mutation({
+  args: {
+    surveyId: v.id('surveys'),
+    organizationId: v.id('organizations'),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    isAnonymous: v.optional(v.boolean()),
+    targetRoles: v.optional(
+      v.array(
+        v.union(
+          v.literal('admin'),
+          v.literal('supervisor'),
+          v.literal('employee'),
+          v.literal('driver'),
+        ),
+      ),
+    ),
+    targetDepartments: v.optional(v.array(v.string())),
+    startsAt: v.optional(v.number()),
+    endsAt: v.optional(v.number()),
+  },
+  handler: async (ctx, { surveyId, organizationId, ...updates }) => {
+    const survey = await ctx.db.get(surveyId);
+    if (!survey || survey.organizationId !== organizationId) {
+      throw new Error('Survey not found');
+    }
+    if (survey.status !== 'draft') {
+      throw new Error('Only draft surveys can be updated');
+    }
+
+    const patch: any = { updatedAt: Date.now() };
+    if (updates.title !== undefined) patch.title = updates.title;
+    if (updates.description !== undefined) patch.description = updates.description;
+    if (updates.isAnonymous !== undefined) patch.isAnonymous = updates.isAnonymous;
+    if (updates.targetRoles !== undefined) patch.targetRoles = updates.targetRoles;
+    if (updates.targetDepartments !== undefined)
+      patch.targetDepartments = updates.targetDepartments;
+    if (updates.startsAt !== undefined) patch.startsAt = updates.startsAt;
+    if (updates.endsAt !== undefined) patch.endsAt = updates.endsAt;
+
+    await ctx.db.patch(surveyId, patch);
+    return surveyId;
+  },
+});
+
+/**
+ * Update survey questions (replace all questions)
+ */
+export const updateSurveyQuestions = mutation({
+  args: {
+    surveyId: v.id('surveys'),
+    organizationId: v.id('organizations'),
+    questions: v.array(
+      v.object({
+        type: v.union(
+          v.literal('rating'),
+          v.literal('multiple_choice'),
+          v.literal('text'),
+          v.literal('yes_no'),
+          v.literal('nps'),
+        ),
+        text: v.string(),
+        description: v.optional(v.string()),
+        options: v.optional(v.array(v.string())),
+        isRequired: v.boolean(),
+      }),
+    ),
+  },
+  handler: async (ctx, { surveyId, organizationId, questions }) => {
+    const survey = await ctx.db.get(surveyId);
+    if (!survey || survey.organizationId !== organizationId) {
+      throw new Error('Survey not found');
+    }
+    if (survey.status !== 'draft') {
+      throw new Error('Only draft surveys can be updated');
+    }
+
+    // Delete existing questions
+    const existingQuestions = await ctx.db
+      .query('surveyQuestions')
+      .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
+      .collect();
+
+    for (const question of existingQuestions) {
+      await ctx.db.delete(question._id);
+    }
+
+    // Insert new questions
+    const now = Date.now();
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i]!;
+      await ctx.db.insert('surveyQuestions', {
+        organizationId,
+        surveyId,
+        type: q.type,
+        text: q.text,
+        description: q.description,
+        options: q.options,
+        isRequired: q.isRequired,
+        order: i,
+        createdAt: now,
+      });
+    }
+
+    return surveyId;
+  },
+});
+
 // ── Internal: Auto-activate surveys when startsAt is reached (cron) ─────────
 export const activateScheduledSurveys = internalMutation({
   args: {},

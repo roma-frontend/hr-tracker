@@ -1,15 +1,13 @@
 // Server Component — SSR renders the full landing page instantly.
-// HeroSection is now a Server Component (renders without JS).
-// Client islands handle interactivity (auth, theme, animations).
+// JSON-LD structured data for SEO.
+// Dynamic imports with ssr: false are handled in LandingPageClient to avoid hydration mismatch.
 
 import {
   SoftwareApplicationJsonLd,
   OrganizationJsonLd,
   FAQPageJsonLd,
 } from '@/components/seo/JsonLd';
-import HeroSection from '@/components/landing/HeroSection';
-import LandingBelowFold from '@/components/landing/LandingBelowFold';
-import NavbarWrapper from '@/components/landing/NavbarWrapper';
+import LandingPageClient from '@/components/landing/LandingPageClient';
 
 export default function RootPage() {
   return (
@@ -18,14 +16,8 @@ export default function RootPage() {
       <OrganizationJsonLd />
       <FAQPageJsonLd />
 
-      {/* Navigation — sticky at top */}
-      <NavbarWrapper />
-
-      {/* Hero renders immediately, no JS required */}
-      <HeroSection />
-
-      {/* Below-fold sections loaded with Suspense boundaries */}
-      <LandingBelowFold />
+      {/* All dynamic sections with ssr: false */}
+      <LandingPageClient />
     </div>
   );
 }

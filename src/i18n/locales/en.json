@@ -7225,6 +7225,8 @@
     "published": "Survey published!",
     "closed": "Survey closed",
     "deleted": "Survey deleted",
+    "updated": "Survey updated successfully!",
+    "edit": "Edit Survey",
     "responseSubmitted": "Response submitted! Thank you.",
     "anonymous": "Anonymous",
     "named": "Named",
@@ -7286,7 +7288,9 @@
       "closeFailed": "Failed to close survey",
       "deleteFailed": "Failed to delete survey",
       "submitFailed": "Failed to submit response",
-      "requiredFields": "Please answer all required questions"
+      "requiredFields": "Please answer all required questions",
+      "updateFailed": "Failed to update survey",
+      "cannotEditPublished": "You can only edit surveys that are in draft status. Published or closed surveys cannot be modified."
     },
     "questions": "Questions",
     "average": "Average"
