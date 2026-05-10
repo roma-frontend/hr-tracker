@@ -96,6 +96,7 @@ import type * as positions from "../positions.js";
 import type * as productivity from "../productivity.js";
 import type * as recognition from "../recognition.js";
 import type * as recruitment from "../recruitment.js";
+import type * as recruitmentEmails from "../recruitmentEmails.js";
 import type * as schema_ai from "../schema/ai.js";
 import type * as schema_analytics from "../schema/analytics.js";
 import type * as schema_automation from "../schema/automation.js";
@@ -261,6 +262,7 @@ declare const fullApi: ApiFromModules<{
   productivity: typeof productivity;
   recognition: typeof recognition;
   recruitment: typeof recruitment;
+  recruitmentEmails: typeof recruitmentEmails;
   "schema/ai": typeof schema_ai;
   "schema/analytics": typeof schema_analytics;
   "schema/automation": typeof schema_automation;

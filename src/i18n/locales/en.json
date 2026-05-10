@@ -2965,7 +2965,8 @@
     "text": "Text",
     "rating": "Rating",
     "yes_no": "Yes/No",
-    "scale": "Scale"
+    "scale": "Scale",
+    "nps": "NPS"
   },
   "documentCategories": {
     "policy": "Policy",
@@ -7248,6 +7249,7 @@
       "closed": "Closed"
     },
     "status": {
+      "label": "Status",
       "draft": "Draft",
       "active": "Active",
       "closed": "Closed"
@@ -7288,6 +7290,23 @@
     },
     "questions": "Questions",
     "average": "Average"
+  },
+  "surveyResults": {
+    "title": "Survey Results Dashboard",
+    "responseRate": "Response Rate",
+    "byDepartment": "By Department",
+    "trends": "Trends",
+    "overview": "Overview",
+    "individualResponses": "Individual Responses",
+    "exportCSV": "Export CSV",
+    "exporting": "Exporting...",
+    "noData": "No data available yet",
+    "anonymousSurvey": "This survey is anonymous — individual responses are not available",
+    "created": "Created",
+    "totalSurveys": "Total Surveys",
+    "avgResponseRate": "Avg Response Rate",
+    "departmentBreakdown": "Department Breakdown",
+    "responseTrends": "Response Trends"
   },
   "performance": {
     "title": "Performance Reviews",

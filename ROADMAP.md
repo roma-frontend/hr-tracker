@@ -170,7 +170,7 @@
 
 ### 1.6 E-Signatures
 
-**Status:** ⚠️ Mostly implemented
+**Status:** ✅ Fully implemented
 
 | Layer   | Status | Files                                     |
 | ------- | ------ | ----------------------------------------- |
@@ -178,29 +178,30 @@
 | Backend | ✅     | `convex/signatures.ts`                    |
 | UI      | ✅     | `src/components/ESignaturesClient.tsx`    |
 | Route   | ✅     | `src/app/(dashboard)/signatures/page.tsx` |
-| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                       |
+| i18n    | ✅     | EN ✅, RU ✅, HY ✅                       |
 
 **Features implemented:**
 
 - Document templates, signature documents, signature requests, audit log
 - 3-step CreateDocumentWizard
 - SignDocumentDialog (Canvas signature pad, mouse + touch)
-- DocumentDetailDialog (status, signers progress, audit log)
+- DocumentDetailDialog (status, signers progress, audit log, PDF export)
 - TemplateManager (CRUD with categories: NDA, Offer, Contract, Policy, Custom)
 - Immutable document snapshot on send (content hash)
 - Sequential signing order enforcement
 - Audit log (created, sent, viewed, signed, declined, cancelled, reminder_sent)
+- PDF generation of signed documents (pdfmake with signers table, audit trail, metadata)
 
 **TODO:**
 
-- [ ] HY nav key
-- [ ] PDF generation of signed document
+- [ ] Digital certificate integration (optional enhancement)
+- [ ] Watermark on PDF exports (optional enhancement)
 
 ---
 
 ### 1.7 Employee Engagement / Pulse Surveys
 
-**Status:** ⚠️ Mostly implemented
+**Status:** ✅ Fully implemented
 
 | Layer   | Status | Files                                  |
 | ------- | ------ | -------------------------------------- |
@@ -208,7 +209,7 @@
 | Backend | ✅     | `convex/surveys.ts`                    |
 | UI      | ✅     | `src/components/SurveysClient.tsx`     |
 | Route   | ✅     | `src/app/(dashboard)/surveys/page.tsx` |
-| i18n    | ✅     | EN, RU                                 |
+| i18n    | ✅     | EN, RU, HY                             |
 
 **Features implemented:**
 
@@ -216,15 +217,18 @@
 - Question types: rating, multiple_choice, text, yes_no, nps
 - Anonymous responses
 - eNPS (0-10 scale)
-- Create survey wizard
+- Create survey wizard with drag-and-drop question ordering
 - TakeSurveyDialog, ResultsDialog
+- Results Dashboard with trends (`/surveys/[id]/results`)
+- Department segmentation
+- CSV export
+- Individual response viewer (for named surveys)
+- Automatic pulse surveys (cron: hourly activation/closure)
 
 **TODO:**
 
-- [ ] Drag-and-drop survey builder (question ordering)
-- [ ] Automatic pulse surveys (cron: weekly/monthly)
-- [ ] Results dashboard with trends
-- [ ] Department segmentation
+- [ ] Quiz taking UI with timer (if needed for surveys)
+- [ ] Cross-survey trend analytics over time
 
 ---
 
@@ -847,13 +851,10 @@ PHASE 3 (Differentiation):
   3.9 Shift Scheduling ............... 🔲 ~4-5 days
 
 PHASE 1 (Remaining TODOs):
-  1.8 Recognition HY translations .... 🔲 ~1 day
-  1.7 Survey builder + cron .......... 🔲 ~3-4 days
-  1.6 E-Signatures PDF generation .... 🔲 ~2-3 days
-  1.2 OKR HY + reminders ............. 🔲 ~2-3 days
-  1.1 Performance notifications ........ 🔲 ~2-3 days
   1.4 Onboarding integrations ........ 🔲 ~2-3 days
   1.3 Recruitment email templates .... 🔲 ~2-3 days
+  1.1 Performance notifications ........ 🔲 ~2-3 days
+  1.2 OKR reminders ............. 🔲 ~2-3 days
 ```
 
 ---

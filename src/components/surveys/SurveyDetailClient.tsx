@@ -194,6 +194,10 @@ export default function SurveyDetailClient() {
           >
             <Pencil className="h-4 w-4" />
           </Button>
+          <Button variant="outline" onClick={() => router.push(`/surveys/${surveyId}/results`)}>
+            <BarChart3 className="h-4 w-4 mr-2" />
+            {t('surveys.results')}
+          </Button>
           <Button variant="outline" size="icon" onClick={handleDelete} disabled={isDeleting}>
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -204,7 +208,7 @@ export default function SurveyDetailClient() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('surveys.status')}
+              {t('surveys.status.label')}
             </CardTitle>
           </CardHeader>
           <CardContent>

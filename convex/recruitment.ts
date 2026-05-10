@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { query, mutation } from './_generated/server';
+import { query, mutation, action } from './_generated/server';
 import { api } from './_generated/api';
 import type { Id } from './_generated/dataModel';
 
@@ -492,6 +492,22 @@ export const addCandidate = mutation({
       });
     }
 
+    // 📧 Send application confirmation email
+    const candidate = await ctx.db.get(candidateId);
+    if (candidate?.email) {
+      const applicationDate = new Date(now).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      await ctx.scheduler.runAfter(0, api.recruitmentEmails.sendApplicationConfirmation, {
+        candidateEmail: candidate.email,
+        candidateName: candidate.name,
+        vacancyTitle: vacancy?.title || 'position',
+        applicationDate,
+      });
+    }
+
     return applicationId;
   },
 });
@@ -533,6 +549,48 @@ export const moveCandidate = mutation({
       reason,
       createdAt: now,
     });
+
+    // 📧 Send email notifications for stage changes
+    const candidate = await ctx.db.get(app.candidateId);
+    const vacancy = await ctx.db.get(app.vacancyId);
+
+    if (candidate?.email && vacancy) {
+      if (newStage === 'offer') {
+        await ctx.scheduler.runAfter(0, api.recruitmentEmails.sendOfferLetter, {
+          candidateEmail: candidate.email,
+          candidateName: candidate.name,
+          vacancyTitle: vacancy.title,
+          position: vacancy.title,
+          department: vacancy.department ?? 'General',
+          startDate: new Date(now + 14 * 86400000).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          salary: 'To be discussed',
+          offerExpiryDate: new Date(now + 7 * 86400000).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          contactEmail: 'hr@company.com',
+        });
+      } else if (newStage === 'rejected') {
+        const rejectionDate = new Date(now).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        await ctx.scheduler.runAfter(0, api.recruitmentEmails.sendRejectionNotice, {
+          candidateEmail: candidate.email,
+          candidateName: candidate.name,
+          vacancyTitle: vacancy.title,
+          rejectionDate,
+          feedback: reason,
+          encourageReapply: true,
+        });
+      }
+    }
   },
 });
 
@@ -562,6 +620,26 @@ export const rejectCandidate = mutation({
       reason,
       createdAt: now,
     });
+
+    // 📧 Send rejection email
+    const candidate = await ctx.db.get(app.candidateId);
+    const vacancy = await ctx.db.get(app.vacancyId);
+
+    if (candidate?.email && vacancy) {
+      const rejectionDate = new Date(now).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      await ctx.scheduler.runAfter(0, api.recruitmentEmails.sendRejectionNotice, {
+        candidateEmail: candidate.email,
+        candidateName: candidate.name,
+        vacancyTitle: vacancy.title,
+        rejectionDate,
+        feedback: reason,
+        encourageReapply: true,
+      });
+    }
   },
 });
 
@@ -580,13 +658,51 @@ export const scheduleInterview = mutation({
       v.literal('hr'),
     ),
     location: v.optional(v.string()),
+    meetingLink: v.optional(v.string()),
+    additionalNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert('interviews', {
+    const interviewId = await ctx.db.insert('interviews', {
       ...args,
       status: 'scheduled',
       createdAt: Date.now(),
     });
+
+    // 📧 Send interview invitation email
+    const app = await ctx.db.get(args.applicationId);
+    if (app) {
+      const candidate = await ctx.db.get(app.candidateId);
+      const vacancy = await ctx.db.get(app.vacancyId);
+      const interviewer = await ctx.db.get(args.interviewerId);
+
+      if (candidate?.email && vacancy) {
+        const interviewDate = new Date(args.scheduledAt).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        const interviewTime = new Date(args.scheduledAt).toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        await ctx.scheduler.runAfter(0, api.recruitmentEmails.sendInterviewInvitation, {
+          candidateEmail: candidate.email,
+          candidateName: candidate.name,
+          vacancyTitle: vacancy.title,
+          interviewDate,
+          interviewTime,
+          interviewType: args.type,
+          interviewerName: interviewer?.name ?? 'HR Team',
+          location: args.location,
+          meetingLink: args.meetingLink,
+          additionalNotes: args.additionalNotes,
+        });
+      }
+    }
+
+    return interviewId;
   },
 });
 

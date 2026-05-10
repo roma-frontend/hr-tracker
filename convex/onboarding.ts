@@ -1,4 +1,5 @@
-import { query, mutation } from './_generated/server';
+import { query, mutation, internalMutation } from './_generated/server';
+import { internal, api } from './_generated/api';
 import { v } from 'convex/values';
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -350,6 +351,16 @@ export const startOnboarding = mutation({
       }
     }
 
+    // Send notifications to employee, buddy, and manager
+    await ctx.scheduler.runAfter(0, internal.onboarding.sendOnboardingStartNotifications, {
+      programId,
+      organizationId: args.organizationId,
+      employeeId: args.employeeId,
+      buddyId: args.buddyId,
+      managerId: args.managerId,
+      createdBy: args.createdBy,
+    });
+
     return programId;
   },
 });
@@ -483,5 +494,213 @@ export const cancelProgram = mutation({
   args: { programId: v.id('onboardingPrograms') },
   handler: async (ctx, { programId }) => {
     await ctx.db.patch(programId, { status: 'cancelled' });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INTERNAL: Cron-triggered functions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Auto-activate onboarding tasks when their dueDate arrives
+ * Runs every hour to check for tasks that should now be visible/active
+ */
+export const activateOnboardingTasks = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const oneDayAgo = now - 86400000;
+
+    // Get all organizations
+    const orgs = await ctx.db.query('organizations').collect();
+
+    for (const org of orgs) {
+      // Find active programs
+      const programs = await ctx.db
+        .query('onboardingPrograms')
+        .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
+        .collect();
+
+      for (const program of programs) {
+        // Find tasks that should be activated now
+        const tasks = await ctx.db
+          .query('onboardingTasks')
+          .withIndex('by_program', (q) => q.eq('programId', program._id))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field('status'), 'pending'),
+              q.lte(q.field('dueDate'), now),
+              q.gt(q.field('dueDate'), oneDayAgo),
+            ),
+          )
+          .collect();
+
+        for (const task of tasks) {
+          // Task is already in 'pending' state and visible in main tasks table
+          // Send notification to assignee if not already sent
+          const existingNotif = await ctx.db
+            .query('notifications')
+            .withIndex('by_user', (q) => q.eq('userId', task.assigneeId ?? program.employeeId))
+            .filter((q) =>
+              q.and(
+                q.eq(q.field('type'), 'onboarding_task_due'),
+                q.eq(q.field('relatedId'), task._id),
+              ),
+            )
+            .first();
+
+          if (!existingNotif) {
+            const assignee = task.assigneeId ? await ctx.db.get(task.assigneeId) : null;
+            const employee = await ctx.db.get(program.employeeId);
+
+            await ctx.db.insert('notifications', {
+              organizationId: org._id,
+              userId: task.assigneeId ?? program.employeeId,
+              type: 'onboarding_task_due',
+              title: '📋 Onboarding Task Due',
+              message: `"${task.title}" is now due. ${assignee ? `Assigned to ${assignee.name}.` : ''}`,
+              isRead: false,
+              relatedId: task._id,
+              route: '/onboarding',
+              createdAt: now,
+            });
+          }
+        }
+      }
+    }
+  },
+});
+
+/**
+ * Send onboarding start notifications to employee, buddy, and manager
+ */
+export const sendOnboardingStartNotifications = internalMutation({
+  args: {
+    programId: v.id('onboardingPrograms'),
+    organizationId: v.id('organizations'),
+    employeeId: v.id('users'),
+    buddyId: v.optional(v.id('users')),
+    managerId: v.id('users'),
+    createdBy: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const org = await ctx.db.get(args.organizationId);
+    const employee = await ctx.db.get(args.employeeId);
+    const manager = await ctx.db.get(args.managerId);
+    const buddy = args.buddyId ? await ctx.db.get(args.buddyId) : null;
+    const creator = await ctx.db.get(args.createdBy);
+
+    const orgName = org?.name ?? 'your organization';
+    const creatorName = creator?.name ?? 'HR';
+
+    // Notify employee
+    if (employee) {
+      await ctx.db.insert('notifications', {
+        organizationId: args.organizationId,
+        userId: args.employeeId,
+        type: 'onboarding_started',
+        title: '🎉 Welcome to Onboarding!',
+        message: `Your onboarding program at ${orgName} has started. Check your tasks and get to know your team!`,
+        isRead: false,
+        relatedId: args.programId,
+        route: '/onboarding',
+        createdAt: now,
+      });
+    }
+
+    // Notify manager
+    if (manager) {
+      await ctx.db.insert('notifications', {
+        organizationId: args.organizationId,
+        userId: args.managerId,
+        type: 'onboarding_manager_assigned',
+        title: '👤 New Hire Onboarding Assigned',
+        message: `${employee?.name ?? 'A new employee'} has started onboarding. You are assigned as their manager.`,
+        isRead: false,
+        relatedId: args.programId,
+        route: '/onboarding',
+        createdAt: now,
+      });
+    }
+
+    // Notify buddy
+    if (buddy && args.buddyId) {
+      await ctx.db.insert('notifications', {
+        organizationId: args.organizationId,
+        userId: args.buddyId,
+        type: 'onboarding_buddy_assigned',
+        title: '🤝 You are assigned as a Buddy',
+        message: `${employee?.name ?? 'A new employee'} needs your guidance during onboarding. Help them get settled!`,
+        isRead: false,
+        relatedId: args.programId,
+        route: '/onboarding',
+        createdAt: now,
+      });
+    }
+  },
+});
+
+/**
+ * Send overdue task reminders for onboarding programs
+ * Runs daily to check for tasks past their due date
+ */
+export const sendOnboardingOverdueReminders = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const orgs = await ctx.db.query('organizations').collect();
+
+    for (const org of orgs) {
+      const programs = await ctx.db
+        .query('onboardingPrograms')
+        .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
+        .collect();
+
+      for (const program of programs) {
+        const overdueTasks = await ctx.db
+          .query('onboardingTasks')
+          .withIndex('by_program', (q) => q.eq('programId', program._id))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field('status'), 'pending'),
+              q.lt(q.field('dueDate'), now - 86400000), // More than 1 day overdue
+            ),
+          )
+          .collect();
+
+        for (const task of overdueTasks) {
+          const assigneeId = task.assigneeId ?? program.employeeId;
+
+          // Check if reminder already sent in last 24 hours
+          const recentReminder = await ctx.db
+            .query('notifications')
+            .withIndex('by_user', (q) => q.eq('userId', assigneeId))
+            .filter((q) =>
+              q.and(
+                q.eq(q.field('type'), 'onboarding_task_overdue'),
+                q.eq(q.field('relatedId'), task._id),
+                q.gt(q.field('createdAt'), now - 86400000),
+              ),
+            )
+            .first();
+
+          if (!recentReminder) {
+            const daysOverdue = Math.floor((now - task.dueDate) / 86400000);
+            await ctx.db.insert('notifications', {
+              organizationId: org._id,
+              userId: assigneeId,
+              type: 'onboarding_task_overdue',
+              title: '⚠️ Onboarding Task Overdue',
+              message: `"${task.title}" is ${daysOverdue} day(s) overdue. Please complete it as soon as possible.`,
+              isRead: false,
+              relatedId: task._id,
+              route: '/onboarding',
+              createdAt: now,
+            });
+          }
+        }
+      }
+    }
   },
 });

@@ -3,6 +3,7 @@
  * - Performance review deadline notifications
  * - OKR weekly check-in reminders
  * - Survey auto-activation/closure
+ * - Onboarding task activation & overdue reminders
  */
 
 import { cronJobs } from 'convex/server';
@@ -29,5 +30,19 @@ crons.interval('survey-auto-activation', { hours: 1 }, internal.surveys.activate
 
 // Survey auto-closure (every hour)
 crons.interval('survey-auto-closure', { hours: 1 }, internal.surveys.closeExpiredSurveys);
+
+// Onboarding task activation (every hour)
+crons.interval(
+  'onboarding-task-activation',
+  { hours: 1 },
+  internal.onboarding.activateOnboardingTasks,
+);
+
+// Onboarding overdue task reminders (daily at 9 AM)
+crons.daily(
+  'onboarding-overdue-reminders',
+  { hourUTC: 9, minuteUTC: 0 },
+  internal.onboarding.sendOnboardingOverdueReminders,
+);
 
 export default crons;

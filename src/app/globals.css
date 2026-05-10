@@ -18,7 +18,7 @@ body.scroll-locked {
 
 /* Prevent layout shift when scrollbar appears/disappears */
 html {
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: stable;
 }
 
 /* Override Radix UI scroll-lock compensation */

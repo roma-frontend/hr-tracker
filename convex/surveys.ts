@@ -572,11 +572,9 @@ export const closeExpiredSurveys = internalMutation({
   handler: async (ctx) => {
     const now = Date.now();
 
-    // Get all organizations
     const orgs = await ctx.db.query('organizations').collect();
 
     for (const org of orgs) {
-      // Find active surveys that should be closed now
       const surveysToClose = await ctx.db
         .query('surveys')
         .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
@@ -590,7 +588,6 @@ export const closeExpiredSurveys = internalMutation({
           updatedAt: now,
         });
 
-        // Notify creators
         await ctx.db.insert('notifications', {
           organizationId: org._id,
           userId: survey.createdBy,
@@ -604,5 +601,250 @@ export const closeExpiredSurveys = internalMutation({
         });
       }
     }
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESULTS DASHBOARD QUERIES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Get survey results with department segmentation
+ */
+export const getSurveyResultsByDepartment = query({
+  args: {
+    surveyId: v.id('surveys'),
+    organizationId: v.id('organizations'),
+  },
+  handler: async (ctx, { surveyId, organizationId }) => {
+    const survey = await ctx.db.get(surveyId);
+    if (!survey || survey.organizationId !== organizationId) return null;
+
+    const questions = await ctx.db
+      .query('surveyQuestions')
+      .withIndex('by_survey_order', (q) => q.eq('surveyId', surveyId))
+      .collect();
+
+    const responses = await ctx.db
+      .query('surveyResponses')
+      .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
+      .collect();
+
+    // Load respondent departments
+    const respondentIds = responses
+      .map((r) => r.respondentId)
+      .filter((id): id is Id<'users'> => id !== undefined);
+
+    const users = await Promise.all(respondentIds.map((id) => ctx.db.get(id)));
+    const userDepartmentMap = new Map<string, string>();
+    users.forEach((user) => {
+      if (user && user.department) {
+        userDepartmentMap.set(user._id, user.department);
+      }
+    });
+
+    // Group responses by department
+    const departmentGroups: Record<string, typeof responses> = {};
+    responses.forEach((resp) => {
+      const dept = userDepartmentMap.get(resp.respondentId ?? '') ?? 'Unknown';
+      if (!departmentGroups[dept]) departmentGroups[dept] = [];
+      departmentGroups[dept].push(resp);
+    });
+
+    // Load all answers for this survey upfront
+    const allAnswers = await ctx.db
+      .query('surveyAnswers')
+      .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
+      .collect();
+
+    // Aggregate per department per question
+    const departmentResults = Object.entries(departmentGroups).map(([dept, deptResponses]) => {
+      const deptResponseIds = new Set(deptResponses.map((r) => r._id));
+
+      const questionResults = questions.map((question) => {
+        const questionAnswers = allAnswers.filter(
+          (a) => a.questionId === question._id && deptResponseIds.has(a.responseId),
+        );
+
+        const aggregation: any = { totalResponses: questionAnswers.length };
+
+        switch (question.type) {
+          case 'rating':
+          case 'nps': {
+            const values = questionAnswers
+              .map((a) => a.ratingValue)
+              .filter((v): v is number => v !== undefined);
+            aggregation.average =
+              values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : 0;
+            break;
+          }
+          case 'yes_no': {
+            aggregation.yesCount = questionAnswers.filter((a) => a.booleanValue === true).length;
+            aggregation.noCount = questionAnswers.filter((a) => a.booleanValue === false).length;
+            break;
+          }
+        }
+
+        return { questionId: question._id, ...aggregation };
+      });
+
+      return {
+        department: dept,
+        responseCount: deptResponses.length,
+        questionResults,
+      };
+    });
+
+    return {
+      survey,
+      totalResponses: responses.length,
+      departmentResults,
+    };
+  },
+});
+
+/**
+ * Get survey trends across multiple surveys for an organization
+ */
+export const getSurveyTrends = query({
+  args: {
+    organizationId: v.id('organizations'),
+    months: v.optional(v.number()),
+  },
+  handler: async (ctx, { organizationId, months = 6 }) => {
+    const cutoffDate = Date.now() - months * 30 * 24 * 60 * 60 * 1000;
+
+    const surveys = await ctx.db
+      .query('surveys')
+      .withIndex('by_org_created', (q) => q.eq('organizationId', organizationId))
+      .filter((q) => q.gt(q.field('createdAt'), cutoffDate))
+      .collect();
+
+    const trends = surveys.map((survey) => ({
+      surveyId: survey._id,
+      title: survey.title,
+      status: survey.status,
+      responseCount: survey.responseCount,
+      createdAt: survey.createdAt,
+      isAnonymous: survey.isAnonymous,
+    }));
+
+    const totalResponses = trends.reduce((sum, t) => sum + t.responseCount, 0);
+    const avgResponseRate = trends.length > 0 ? totalResponses / trends.length : 0;
+
+    return {
+      trends,
+      totalSurveys: trends.length,
+      totalResponses,
+      avgResponseRate,
+    };
+  },
+});
+
+/**
+ * Get individual survey responses (for named surveys only)
+ */
+export const getSurveyResponses = query({
+  args: {
+    surveyId: v.id('surveys'),
+    organizationId: v.id('organizations'),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { surveyId, organizationId, limit = 50 }) => {
+    const survey = await ctx.db.get(surveyId);
+    if (!survey || survey.organizationId !== organizationId) return null;
+    if (survey.isAnonymous)
+      return { error: 'Anonymous survey - individual responses not available' };
+
+    const responses = await ctx.db
+      .query('surveyResponses')
+      .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
+      .order('desc')
+      .take(limit);
+
+    const responseDetails = await Promise.all(
+      responses.map(async (resp) => {
+        const user = resp.respondentId ? await ctx.db.get(resp.respondentId) : null;
+        const answers = await ctx.db
+          .query('surveyAnswers')
+          .withIndex('by_response', (q) => q.eq('responseId', resp._id))
+          .collect();
+
+        return {
+          responseId: resp._id,
+          respondent: user
+            ? { name: user.name, email: user.email, department: user.department }
+            : null,
+          submittedAt: resp.submittedAt,
+          answers,
+        };
+      }),
+    );
+
+    return {
+      survey,
+      responses: responseDetails,
+      totalResponses: responses.length,
+    };
+  },
+});
+
+/**
+ * Get CSV export data for a survey
+ */
+export const getSurveyExportData = query({
+  args: {
+    surveyId: v.id('surveys'),
+    organizationId: v.id('organizations'),
+  },
+  handler: async (ctx, { surveyId, organizationId }) => {
+    const survey = await ctx.db.get(surveyId);
+    if (!survey || survey.organizationId !== organizationId) return null;
+
+    const questions = await ctx.db
+      .query('surveyQuestions')
+      .withIndex('by_survey_order', (q) => q.eq('surveyId', surveyId))
+      .collect();
+
+    const responses = await ctx.db
+      .query('surveyResponses')
+      .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
+      .collect();
+
+    const exportData = await Promise.all(
+      responses.map(async (resp) => {
+        const user = resp.respondentId ? await ctx.db.get(resp.respondentId) : null;
+        const answers = await ctx.db
+          .query('surveyAnswers')
+          .withIndex('by_response', (q) => q.eq('responseId', resp._id))
+          .collect();
+
+        const answerMap: Record<string, any> = {};
+        answers.forEach((ans) => {
+          const question = questions.find((q) => q._id === ans.questionId);
+          if (question) {
+            if (ans.ratingValue !== undefined) answerMap[question.text] = ans.ratingValue;
+            else if (ans.textValue !== undefined) answerMap[question.text] = ans.textValue;
+            else if (ans.booleanValue !== undefined)
+              answerMap[question.text] = ans.booleanValue ? 'Yes' : 'No';
+            else if (ans.selectedOptions?.length)
+              answerMap[question.text] = ans.selectedOptions.join('; ');
+          }
+        });
+
+        return {
+          respondent: survey.isAnonymous ? 'Anonymous' : (user?.name ?? 'Unknown'),
+          department: user?.department ?? 'Unknown',
+          submittedAt: new Date(resp.submittedAt).toISOString(),
+          ...answerMap,
+        };
+      }),
+    );
+
+    return {
+      survey: { title: survey.title, status: survey.status, isAnonymous: survey.isAnonymous },
+      questions: questions.map((q) => q.text),
+      exportData,
+    };
   },
 });
