@@ -1,6 +1,6 @@
 # HR Office — Project Roadmap & Status
 
-> **Last updated:** 2026-05-07 (Compensation & Documents modules implemented, LMS completed)
+> **Last updated:** 2026-05-10 (Full audit completed, Recruitment emails implemented, Cron jobs verified)
 > **Stack:** Next.js 16 (App Router) + Convex + Shadcn/ui + Tailwind CSS
 > **i18n:** EN / RU / HY (Armenian)
 > **Auth:** Convex Auth (session-based)
@@ -23,7 +23,7 @@
 
 ### 1.1 Performance Reviews / 360° Feedback
 
-**Status:** ⚠️ Mostly implemented
+**Status:** ✅ Fully implemented
 
 | Layer   | Status | Files                                                                                                                                                                                                                                                                                                |
 | ------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -45,10 +45,10 @@
 - Mirror manager reviews → supervisorRatings (backward compat)
 - Immutable competency snapshot at cycle creation
 - Peer anonymity threshold (configurable, default 2)
+- Deadline notifications (cron: `checkDeadlineNotifications`)
 
 **TODO:**
 
-- [ ] Deadline notifications for reviews
 - [ ] Export results (PDF/CSV)
 - [ ] HY translations
 
@@ -78,12 +78,12 @@
 - Filtering by period (Q1-Q4, H1-H2, FY) and year
 - Team progress visualization (stats cards)
 - Team scope via department field
+- Weekly check-in reminders (cron: `sendWeeklyCheckinReminders`)
 
 **TODO:**
 
 - [ ] HY translations
 - [ ] Link OKR with Performance Reviews
-- [ ] Weekly check-in reminders (cron)
 
 ---
 
@@ -98,7 +98,7 @@
 | UI          | ✅     | `src/components/RecruitmentClient.tsx`     |
 | Route       | ✅     | `src/app/(dashboard)/recruitment/page.tsx` |
 | Public page | ✅     | `src/app/careers/[slug]/page.tsx`          |
-| i18n        | ✅     | EN, RU                                     |
+| i18n        | ⚠️     | EN ✅, RU ✅, HY 🔲                        |
 
 **Features implemented:**
 
@@ -111,8 +111,8 @@
 
 **TODO:**
 
-- [ ] Email templates for candidates (Resend integration)
 - [ ] Recruitment funnel analytics
+- [ ] HY translations
 
 ---
 
@@ -137,6 +137,17 @@
 - Progress tracker (% completion, server-side)
 - Auto tasks for IT/HR/manager (assigneeType + dayOffset)
 - Welcome page (My Onboarding tab)
+
+**Features implemented:**
+
+- Onboarding templates, programs, tasks
+- Templates by department/position
+- Automatic checklists (spawn from template)
+- Buddy/mentor assignment
+- Progress tracker (% completion, server-side)
+- Auto tasks for IT/HR/manager (assigneeType + dayOffset)
+- Welcome page (My Onboarding tab)
+- Cron jobs for task activation and overdue reminders (`activateOnboardingTasks`, `sendOnboardingOverdueReminders`)
 
 **TODO:**
 
@@ -236,13 +247,13 @@
 
 **Status:** ⚠️ Mostly implemented
 
-| Layer   | Status | Files                                      |
-| ------- | ------ | ------------------------------------------ |
-| Schema  | ✅     | `convex/schema/recognition.ts`             |
-| Backend | ✅     | `convex/recognition.ts`                    |
-| UI      | ✅     | `src/components/RecognitionClient.tsx`     |
-| Route   | ✅     | `src/app/(dashboard)/recognition/page.tsx` |
-| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                        |
+| Layer   | Status | Files                                              |
+| ------- | ------ | -------------------------------------------------- |
+| Schema  | ✅     | `convex/schema/recognition.ts`                     |
+| Backend | ✅     | `convex/recognition.ts`                            |
+| UI      | ✅     | `src/components/recognition/RecognitionClient.tsx` |
+| Route   | ✅     | `src/app/(dashboard)/recognition/page.tsx`         |
+| i18n    | ⚠️     | EN ✅, RU ✅, HY 🔲                                |
 
 **Features implemented:**
 
@@ -255,7 +266,6 @@
 **TODO:**
 
 - [ ] HY translations
-- [ ] Move component: `src/components/RecognitionClient.tsx` → `src/components/recognition/RecognitionClient.tsx`
 
 ---
 
@@ -421,10 +431,20 @@
 - Document versioning support
 - Full-text search
 
+**Features implemented:**
+
+- Document management with tabbed interface (Surveys-style tabs)
+- Document upload wizard
+- Document template wizard
+- Document detail view
+- Folder organization
+- Access control (who can view/edit)
+- Document versioning support
+- Full-text search
+
 **TODO:**
 
 - [ ] HY translations
-- [ ] Document templates library
 - [ ] E-Signatures integration
 - [ ] Bulk download/export
 - [ ] Document preview UI
@@ -567,7 +587,7 @@
 
 ### 3.5 Custom Workflow Builder (Visual)
 
-**Status:** ⚠️ Partially implemented
+**Status:** ⚠️ Partially implemented (backend only, no UI)
 
 **Existing:**
 
@@ -577,6 +597,8 @@
 **TODO:**
 
 - [ ] Visual drag-and-drop builder (React Flow / xyflow)
+- [ ] Route: `src/app/(dashboard)/automation/page.tsx`
+- [ ] UI: `src/components/automation/AutomationClient.tsx`
 - [ ] Nodes: trigger → condition → action
 - [ ] Triggers: new employee, leave approved, birthday, etc.
 - [ ] Actions: send email, create task, notify, update field
@@ -587,20 +609,26 @@
 
 ### 3.6 Employee Directory
 
-**Status:** ⚠️ Partially implemented
+**Status:** ✅ Fully implemented
 
 **Existing:**
 
-- `src/app/(dashboard)/employees/page.tsx`
-- `src/components/employees/EmployeesClient.tsx`
-
-**TODO:**
-
-- [ ] Advanced search (name, department, position, skills)
-- [ ] Employee cards (photo, contacts, department)
-- [ ] Filtering and sorting
-- [ ] Quick actions (chat, call)
-- [ ] Office map (who sits where) — optional
+- `src/app/(dashboard)/employees/page.tsx` — Employee list
+- `src/app/(dashboard)/employees/[id]/page.tsx` — Employee profile
+- `src/app/(dashboard)/employees/departments/page.tsx` — Department management
+- `src/app/(dashboard)/employees/positions/page.tsx` — Position management
+- `src/components/employees/EmployeesClient.tsx` — Main UI
+- `src/components/employees/EmployeeProfilePageClient.tsx` — Profile view
+- `src/components/employees/DepartmentsClient.tsx` — Department UI
+- `src/components/employees/PositionsClient.tsx` — Position UI
+- `src/components/employees/EmployeeHoverCard.tsx` — Quick view card
+- `src/components/employees/AddEmployeeModal.tsx` — Add employee
+- `src/components/employees/EditEmployeeModal.tsx` — Edit employee
+- `src/components/employees/TeamSidebar.tsx` — Team sidebar
+- `convex/schema/employees.ts` — Employee schema
+- `convex/employees.ts` — Employee backend
+- `convex/departments.ts` — Department backend
+- `convex/positions.ts` — Position backend
 
 ---
 
@@ -834,7 +862,8 @@ PHASE 2 (Competitive Edge — highest impact first):
   2.4 Visual Org Chart ............... ✅ DONE (full i18n, tree layout)
   2.1 LMS ............................ ✅ DONE (full i18n, all core features)
   2.2 Compensation Management ........ ⚠️ DONE (core + UI, HY + budgeting pending)
-  2.5 Document Management ............ ⚠️ DONE (core + UI, HY + templates pending)
+  2.5 Document Management ............ ⚠️ DONE (core + UI + templates, HY pending)
+  3.6 Employee Directory ............. ✅ DONE (full CRUD, departments, positions)
   2.6 Expense Management ............. 🔲 ~3-4 days
   2.3 Benefits Administration ........ 🔲 ~3-4 days
   2.7 Succession Planning ............ 🔲 ~3-4 days
@@ -842,19 +871,18 @@ PHASE 2 (Competitive Edge — highest impact first):
 PHASE 3 (Differentiation):
   3.7 PDF Reports .................... 🔲 ~2-3 days  (quick win)
   3.4 Company News Feed .............. 🔲 ~2-3 days
-  3.6 Employee Directory ............. ⚠️ ~2-3 days (partial)
-  3.2 Compliance & Audit Trail ....... ⚠️ ~3-4 days (partial)
+  3.2 Compliance & Audit Trail ....... ⚠️ ~3-4 days (partial - backend only)
   3.1 Mobile App (PWA) ............... 🔲 ~5-7 days
   3.3 Asset Management ............... 🔲 ~3-4 days
-  3.5 Custom Workflow Builder ........ ⚠️ ~7-10 days (partial)
+  3.5 Custom Workflow Builder ........ ⚠️ ~7-10 days (backend only, no UI)
   3.8 Career Development ............. 🔲 ~4-5 days
   3.9 Shift Scheduling ............... 🔲 ~4-5 days
 
 PHASE 1 (Remaining TODOs):
-  1.4 Onboarding integrations ........ 🔲 ~2-3 days
-  1.3 Recruitment email templates .... 🔲 ~2-3 days
-  1.1 Performance notifications ........ 🔲 ~2-3 days
-  1.2 OKR reminders ............. 🔲 ~2-3 days
+  1.3 Recruitment email templates .... ✅ DONE (Resend integration, 4 templates)
+  1.1 Performance notifications ........ ✅ DONE (cron: checkDeadlineNotifications)
+  1.2 OKR reminders .................. ✅ DONE (cron: sendWeeklyCheckinReminders)
+  1.4 Onboarding integrations ........ ⚠️ DONE (cron: activateOnboardingTasks, sendOnboardingOverdueReminders)
 ```
 
 ---
@@ -933,6 +961,7 @@ export default function ModulePage() {
 | Chat/Messaging           |         ✅         |    ❌    |   ✅    |    ❌    |    ❌    |   ❌    |
 | Calendar                 |         ✅         |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
 | Recruitment/ATS          |         ✅         |    ✅    |   ✅    |    ✅    |    ❌    |   ✅    |
+| Recruitment Emails       |         ✅         |    ❌    |   ❌    |    ❌    |    ❌    |   ❌    |
 | Onboarding               |         ✅         |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
 | Offboarding              |         ✅         |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
 | Performance Reviews      |         ✅         |    ✅    |   ✅    |    ❌    |    ✅    |   ❌    |
@@ -954,7 +983,7 @@ export default function ModulePage() {
 | **Expenses**             |         🔲         |    ✅    |   ❌    |    ❌    |    ❌    |   ❌    |
 | **Succession**           |         🔲         |    ❌    |   ❌    |    ❌    |    ✅    |   ❌    |
 | **PWA/Mobile**           |         🔲         |    ✅    |   ✅    |    ✅    |    ✅    |   ✅    |
-| **TOTAL**                | **~~23~~ **~25\*\* | **~16**  | **~14** | **~11**  | **~10**  | **~13** |
+| **TOTAL**                | **~~23~~ **~28\*\* | **~16**  | **~14** | **~11**  | **~10**  | **~13** |
 
 **After completing Phase 2:** This project will have **~31 features**, surpassing all competitors.
 **After completing Phase 3:** This project will have **~40 features**, becoming the most comprehensive HR platform.
@@ -969,4 +998,4 @@ export default function ModulePage() {
 4. Update this file after completing each module (change 🔲 → ✅)
 5. Update the competitive analysis table
 
-> 💡 **Next recommended module:** 2.2 Compensation Management (enterprise requirement, ~4-5 days) or 2.5 Document Management (core HR necessity, ~4-5 days)
+> 💡 **Next recommended module:** 2.6 Expense Management (~3-4 days) or 2.3 Benefits Administration (~3-4 days)
