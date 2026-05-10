@@ -47,6 +47,13 @@ export default function HeroCTA() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { t } = useTranslation();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const text = (key: string, fallback: string) => (mounted ? t(key) : fallback);
 
   if (user) {
     return (
@@ -56,10 +63,10 @@ export default function HeroCTA() {
           variant="cta"
           size="2xl"
           className="gap-3"
-          aria-label={t('landing.goToDashboard')}
+          aria-label={text('landing.goToDashboard', 'Go to Dashboard')}
         >
           <ActivityIcon />
-          {t('landing.goToDashboard')}
+          {text('landing.goToDashboard', 'Go to Dashboard')}
           <ArrowRightIcon />
         </Button>
         <Button
@@ -67,10 +74,10 @@ export default function HeroCTA() {
           variant="ctaSecondary"
           size="2xl"
           className="gap-3"
-          aria-label={t('landing.viewAnalytics')}
+          aria-label={text('landing.viewAnalytics', 'View Analytics')}
         >
           <BarChartIcon />
-          {t('landing.viewAnalytics')}
+          {text('landing.viewAnalytics', 'View Analytics')}
         </Button>
       </div>
     );
@@ -79,9 +86,9 @@ export default function HeroCTA() {
   return (
     <div className="hero-fade-2 flex flex-col sm:flex-row items-center gap-4 mb-16">
       <Link href="/register">
-        <Button variant="cta" size="2xl" className="gap-3" aria-label={t('landing.getStartedFree')}>
+        <Button variant="cta" size="2xl" className="gap-3" aria-label={text('landing.getStartedFree', 'Get Started Free')}>
           <ZapIcon />
-          {t('landing.getStartedFree')}
+          {text('landing.getStartedFree', 'Get Started Free')}
           <ArrowRightIcon />
         </Button>
       </Link>
@@ -90,9 +97,9 @@ export default function HeroCTA() {
           variant="ctaSecondary"
           size="2xl"
           className="gap-3"
-          aria-label={t('landing.signIn')}
+          aria-label={text('landing.signIn', 'Sign In')}
         >
-          {t('landing.signIn')}
+          {text('landing.signIn', 'Sign In')}
           <ArrowRightIcon />
         </Button>
       </Link>

@@ -7292,6 +7292,7 @@
       "closed": "Закрытые"
     },
     "status": {
+      "label": "Статус",
       "draft": "Черновик",
       "active": "Активный",
       "closed": "Закрыт"
@@ -7330,6 +7331,23 @@
       "submitFailed": "Не удалось отправить ответ",
       "requiredFields": "Ответьте на все обязательные вопросы"
     }
+  },
+  "surveyResults": {
+    "title": "Панель результатов опроса",
+    "responseRate": "Уровень ответов",
+    "byDepartment": "По отделам",
+    "trends": "Тренды",
+    "overview": "Обзор",
+    "individualResponses": "Индивидуальные ответы",
+    "exportCSV": "Экспорт CSV",
+    "exporting": "Экспорт...",
+    "noData": "Данных пока нет",
+    "anonymousSurvey": "Этот опрос анонимный — индивидуальные ответы недоступны",
+    "created": "Создан",
+    "totalSurveys": "Всего опросов",
+    "avgResponseRate": "Средний уровень ответов",
+    "departmentBreakdown": "Разбивка по отделам",
+    "responseTrends": "Тренды ответов"
   },
   "performance": {
     "title": "Оценка эффективности",
