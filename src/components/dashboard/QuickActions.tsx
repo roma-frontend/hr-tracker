@@ -11,6 +11,7 @@ import React, { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { motion } from '@/lib/cssMotion';
+import type { LucideIcon } from 'lucide-react';
 import {
   Plane,
   Fingerprint,
@@ -29,7 +30,7 @@ import { useAuthUser } from '@/store/useAuthStore';
 interface QuickAction {
   id: string;
   label: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   href: string;
   description: string;
   gradientClass: string;

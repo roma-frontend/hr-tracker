@@ -29,15 +29,10 @@ import {
   DollarSign,
   Clock,
   Settings,
-  Building,
   ClipboardList,
   GraduationCap,
   Briefcase,
-  Star,
-  ClipboardCheck,
   Activity,
-  PieChart,
-  Mail,
   Database,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
