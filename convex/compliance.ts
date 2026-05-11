@@ -1,12 +1,37 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
+import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
+
+/**
+ * Helper: requires caller to be admin or superadmin.
+ * Returns the admin user record and the orgId they should see:
+ * - superadmin: sees all orgs (returns undefined orgId filter)
+ * - admin: sees only their own org
+ */
+async function requireAdmin(ctx: any, adminId: Id<'users'>) {
+  const user = await ctx.db.get(adminId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const isAdmin =
+    user.role === 'admin' ||
+    user.role === 'superadmin' ||
+    user.email.toLowerCase() === SUPERADMIN_EMAIL;
+  if (!isAdmin) {
+    throw new Error('Only admins can access compliance features');
+  }
+
+  const isSuper = isSuperadmin(user);
+  return { user, orgId: isSuper ? undefined : user.organizationId };
+}
 
 // ── GDPR Requests ─────────────────────────────────────────────────────────────
 
 export const createGdprRequest = mutation({
   args: {
-    organizationId: v.id('organizations'),
+    adminId: v.id('users'),
     userId: v.id('users'),
     requestType: v.union(
       v.literal('data_access'),
@@ -19,19 +44,27 @@ export const createGdprRequest = mutation({
     details: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+
+    const targetUser = await ctx.db.get(args.userId);
+    if (!targetUser) throw new Error('User not found');
+    if (!orgId || targetUser.organizationId !== orgId) {
+      throw new Error('Can only create GDPR requests for users in your organization');
+    }
+
     const requestId = await ctx.db.insert('gdprRequests', {
-      organizationId: args.organizationId,
+      organizationId: orgId,
       userId: args.userId,
       requestType: args.requestType,
       status: 'pending',
       details: args.details,
-      requestedBy: args.userId,
+      requestedBy: user._id,
       requestedAt: Date.now(),
     });
 
     await ctx.db.insert('auditLogs', {
-      organizationId: args.organizationId,
-      userId: args.userId,
+      organizationId: orgId,
+      userId: user._id,
       action: `gdpr_request_${args.requestType}`,
       target: `gdpr_request_${requestId}`,
       details: args.details || `GDPR ${args.requestType} request created`,
@@ -44,6 +77,7 @@ export const createGdprRequest = mutation({
 
 export const updateGdprRequestStatus = mutation({
   args: {
+    adminId: v.id('users'),
     requestId: v.id('gdprRequests'),
     status: v.union(
       v.literal('pending'),
@@ -51,18 +85,22 @@ export const updateGdprRequestStatus = mutation({
       v.literal('completed'),
       v.literal('rejected'),
     ),
-    processedBy: v.id('users'),
     rejectionReason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+
     const request = await ctx.db.get(args.requestId);
     if (!request) {
       throw new Error('GDPR request not found');
     }
+    if (orgId && request.organizationId !== orgId) {
+      throw new Error('Can only update GDPR requests for your organization');
+    }
 
     const updates: any = {
       status: args.status,
-      processedBy: args.processedBy,
+      processedBy: user._id,
       processedAt: Date.now(),
     };
 
@@ -78,7 +116,7 @@ export const updateGdprRequestStatus = mutation({
 
     await ctx.db.insert('auditLogs', {
       organizationId: request.organizationId,
-      userId: args.processedBy,
+      userId: user._id,
       action: `gdpr_request_status_changed`,
       target: `gdpr_request_${args.requestId}`,
       details: `GDPR request status changed to ${args.status}${args.rejectionReason ? `: ${args.rejectionReason}` : ''}`,
@@ -91,16 +129,18 @@ export const updateGdprRequestStatus = mutation({
 
 export const getGdprRequests = query({
   args: {
-    organizationId: v.optional(v.id('organizations')),
+    adminId: v.id('users'),
     userId: v.optional(v.id('users')),
     status: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const { orgId } = await requireAdmin(ctx, args.adminId);
+
     let requests = await ctx.db.query('gdprRequests').order('desc').collect();
 
-    if (args.organizationId) {
-      requests = requests.filter((r) => r.organizationId === args.organizationId);
+    if (orgId) {
+      requests = requests.filter((r) => r.organizationId === orgId);
     }
 
     if (args.userId) {
@@ -147,7 +187,7 @@ export const getGdprRequests = query({
 
 export const grantConsent = mutation({
   args: {
-    organizationId: v.id('organizations'),
+    adminId: v.id('users'),
     userId: v.id('users'),
     consentType: v.string(),
     ipAddress: v.optional(v.string()),
@@ -156,6 +196,14 @@ export const grantConsent = mutation({
     metadata: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+
+    const targetUser = await ctx.db.get(args.userId);
+    if (!targetUser) throw new Error('User not found');
+    if (orgId && targetUser.organizationId !== orgId) {
+      throw new Error('Can only manage consent for users in your organization');
+    }
+
     const existing = await ctx.db
       .query('consentRecords')
       .withIndex('by_user_consent', (q) =>
@@ -177,7 +225,7 @@ export const grantConsent = mutation({
     }
 
     const consentId = await ctx.db.insert('consentRecords', {
-      organizationId: args.organizationId,
+      organizationId: orgId || targetUser.organizationId,
       userId: args.userId,
       consentType: args.consentType,
       granted: true,
@@ -189,11 +237,11 @@ export const grantConsent = mutation({
     });
 
     await ctx.db.insert('auditLogs', {
-      organizationId: args.organizationId,
-      userId: args.userId,
+      organizationId: orgId || targetUser.organizationId,
+      userId: user._id,
       action: 'consent_granted',
       target: `consent_${args.consentType}`,
-      details: `User granted consent for ${args.consentType}`,
+      details: `Admin granted consent for ${args.consentType} on behalf of ${targetUser.email}`,
       createdAt: Date.now(),
     });
 
@@ -203,10 +251,13 @@ export const grantConsent = mutation({
 
 export const withdrawConsent = mutation({
   args: {
+    adminId: v.id('users'),
     userId: v.id('users'),
     consentType: v.string(),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+
     const existing = await ctx.db
       .query('consentRecords')
       .withIndex('by_user_consent', (q) =>
@@ -218,6 +269,9 @@ export const withdrawConsent = mutation({
     if (!existing) {
       throw new Error('No active consent found to withdraw');
     }
+    if (orgId && existing.organizationId !== orgId) {
+      throw new Error('Can only withdraw consent for users in your organization');
+    }
 
     await ctx.db.patch(existing._id, {
       granted: false,
@@ -226,10 +280,10 @@ export const withdrawConsent = mutation({
 
     await ctx.db.insert('auditLogs', {
       organizationId: existing.organizationId,
-      userId: args.userId,
+      userId: user._id,
       action: 'consent_withdrawn',
       target: `consent_${args.consentType}`,
-      details: `User withdrew consent for ${args.consentType}`,
+      details: `Admin withdrew consent for ${args.consentType} on behalf of user`,
       createdAt: Date.now(),
     });
 
@@ -239,14 +293,21 @@ export const withdrawConsent = mutation({
 
 export const getUserConsents = query({
   args: {
-    userId: v.id('users'),
+    adminId: v.id('users'),
+    userId: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {
-    const consents = await ctx.db
-      .query('consentRecords')
-      .withIndex('by_user', (q) => q.eq('userId', args.userId))
-      .order('desc')
-      .collect();
+    const { orgId } = await requireAdmin(ctx, args.adminId);
+
+    let consents = await ctx.db.query('consentRecords').order('desc').collect();
+
+    if (orgId) {
+      consents = consents.filter((c) => c.organizationId === orgId);
+    }
+
+    if (args.userId) {
+      consents = consents.filter((c) => c.userId === args.userId);
+    }
 
     return consents;
   },
@@ -254,12 +315,15 @@ export const getUserConsents = query({
 
 export const getOrgConsentStats = query({
   args: {
-    organizationId: v.id('organizations'),
+    adminId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const { orgId } = await requireAdmin(ctx, args.adminId);
+    if (!orgId) throw new Error('Admin must belong to an organization');
+
     const allConsents = await ctx.db
       .query('consentRecords')
-      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .withIndex('by_org', (q) => q.eq('organizationId', orgId))
       .collect();
 
     const consentTypes = new Set(allConsents.map((c) => c.consentType));
@@ -281,9 +345,8 @@ export const getOrgConsentStats = query({
 
 export const logDataAccess = mutation({
   args: {
-    organizationId: v.id('organizations'),
+    adminId: v.id('users'),
     userId: v.id('users'),
-    accessedBy: v.id('users'),
     accessType: v.union(
       v.literal('view'),
       v.literal('export'),
@@ -296,17 +359,32 @@ export const logDataAccess = mutation({
     ipAddress: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+
+    const targetUser = await ctx.db.get(args.userId);
+    if (!targetUser) throw new Error('User not found');
+    if (orgId && targetUser.organizationId !== orgId) {
+      throw new Error('Can only log data access for users in your organization');
+    }
+
     await ctx.db.insert('dataAccessLogs', {
-      ...args,
+      organizationId: orgId || targetUser.organizationId,
+      userId: args.userId,
+      accessedBy: user._id,
+      accessType: args.accessType,
+      dataType: args.dataType,
+      recordId: args.recordId,
+      reason: args.reason,
+      ipAddress: args.ipAddress,
       createdAt: Date.now(),
     });
 
     await ctx.db.insert('auditLogs', {
-      organizationId: args.organizationId,
-      userId: args.accessedBy,
+      organizationId: orgId || targetUser.organizationId,
+      userId: user._id,
       action: `data_access_${args.accessType}`,
       target: `${args.dataType}${args.recordId ? ` (${args.recordId})` : ''}`,
-      details: `Accessed ${args.dataType} for user ${args.userId}${args.reason ? ` - Reason: ${args.reason}` : ''}`,
+      details: `Admin accessed ${args.dataType} for user ${targetUser.email}${args.reason ? ` - Reason: ${args.reason}` : ''}`,
       createdAt: Date.now(),
     });
 
@@ -316,15 +394,17 @@ export const logDataAccess = mutation({
 
 export const getDataAccessLogs = query({
   args: {
-    organizationId: v.optional(v.id('organizations')),
+    adminId: v.id('users'),
     userId: v.optional(v.id('users')),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const { orgId } = await requireAdmin(ctx, args.adminId);
+
     let logs = await ctx.db.query('dataAccessLogs').order('desc').collect();
 
-    if (args.organizationId) {
-      logs = logs.filter((l) => l.organizationId === args.organizationId);
+    if (orgId) {
+      logs = logs.filter((l) => l.organizationId === orgId);
     }
 
     if (args.userId) {
@@ -362,7 +442,7 @@ export const getDataAccessLogs = query({
 
 export const createPolicy = mutation({
   args: {
-    organizationId: v.id('organizations'),
+    adminId: v.id('users'),
     title: v.string(),
     description: v.optional(v.string()),
     policyType: v.union(
@@ -374,11 +454,13 @@ export const createPolicy = mutation({
     ),
     content: v.string(),
     version: v.string(),
-    createdBy: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+    if (!orgId) throw new Error('Admin must belong to an organization');
+
     const policyId = await ctx.db.insert('compliancePolicies', {
-      organizationId: args.organizationId,
+      organizationId: orgId,
       title: args.title,
       description: args.description,
       policyType: args.policyType,
@@ -386,15 +468,15 @@ export const createPolicy = mutation({
       version: args.version,
       isActive: true,
       effectiveFrom: Date.now(),
-      createdBy: args.createdBy,
-      updatedBy: args.createdBy,
+      createdBy: user._id,
+      updatedBy: user._id,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
 
     await ctx.db.insert('auditLogs', {
-      organizationId: args.organizationId,
-      userId: args.createdBy,
+      organizationId: orgId,
+      userId: user._id,
       action: 'policy_created',
       target: `policy_${policyId}`,
       details: `Compliance policy "${args.title}" created`,
@@ -407,6 +489,7 @@ export const createPolicy = mutation({
 
 export const updatePolicy = mutation({
   args: {
+    adminId: v.id('users'),
     policyId: v.id('compliancePolicies'),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
@@ -414,12 +497,16 @@ export const updatePolicy = mutation({
     version: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
     effectiveUntil: v.optional(v.number()),
-    updatedBy: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+
     const policy = await ctx.db.get(args.policyId);
     if (!policy) {
       throw new Error('Policy not found');
+    }
+    if (orgId && policy.organizationId !== orgId) {
+      throw new Error('Can only update policies for your organization');
     }
 
     await ctx.db.patch(args.policyId, {
@@ -429,13 +516,13 @@ export const updatePolicy = mutation({
       ...(args.version && { version: args.version }),
       ...(args.isActive !== undefined && { isActive: args.isActive }),
       ...(args.effectiveUntil !== undefined && { effectiveUntil: args.effectiveUntil }),
-      updatedBy: args.updatedBy,
+      updatedBy: user._id,
       updatedAt: Date.now(),
     });
 
     await ctx.db.insert('auditLogs', {
       organizationId: policy.organizationId,
-      userId: args.updatedBy,
+      userId: user._id,
       action: 'policy_updated',
       target: `policy_${args.policyId}`,
       details: `Compliance policy "${policy.title}" updated`,
@@ -448,14 +535,16 @@ export const updatePolicy = mutation({
 
 export const getPolicies = query({
   args: {
-    organizationId: v.optional(v.id('organizations')),
+    adminId: v.id('users'),
     policyType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { orgId } = await requireAdmin(ctx, args.adminId);
+
     let policies = await ctx.db.query('compliancePolicies').order('desc').collect();
 
-    if (args.organizationId) {
-      policies = policies.filter((p) => p.organizationId === args.organizationId);
+    if (orgId) {
+      policies = policies.filter((p) => p.organizationId === orgId);
     }
 
     if (args.policyType) {
@@ -487,20 +576,25 @@ export const getPolicies = query({
 
 export const deletePolicy = mutation({
   args: {
+    adminId: v.id('users'),
     policyId: v.id('compliancePolicies'),
-    deletedBy: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const { user, orgId } = await requireAdmin(ctx, args.adminId);
+
     const policy = await ctx.db.get(args.policyId);
     if (!policy) {
       throw new Error('Policy not found');
+    }
+    if (orgId && policy.organizationId !== orgId) {
+      throw new Error('Can only delete policies for your organization');
     }
 
     await ctx.db.delete(args.policyId);
 
     await ctx.db.insert('auditLogs', {
       organizationId: policy.organizationId,
-      userId: args.deletedBy,
+      userId: user._id,
       action: 'policy_deleted',
       target: `policy_${args.policyId}`,
       details: `Compliance policy "${policy.title}" deleted`,
@@ -515,19 +609,21 @@ export const deletePolicy = mutation({
 
 export const getComplianceStats = query({
   args: {
-    organizationId: v.optional(v.id('organizations')),
+    adminId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const { orgId } = await requireAdmin(ctx, args.adminId);
+
     let gdprRequests = await ctx.db.query('gdprRequests').collect();
     let dataAccessLogs = await ctx.db.query('dataAccessLogs').collect();
     let consentRecords = await ctx.db.query('consentRecords').collect();
     let policies = await ctx.db.query('compliancePolicies').collect();
 
-    if (args.organizationId) {
-      gdprRequests = gdprRequests.filter((r) => r.organizationId === args.organizationId);
-      dataAccessLogs = dataAccessLogs.filter((l) => l.organizationId === args.organizationId);
-      consentRecords = consentRecords.filter((c) => c.organizationId === args.organizationId);
-      policies = policies.filter((p) => p.organizationId === args.organizationId);
+    if (orgId) {
+      gdprRequests = gdprRequests.filter((r) => r.organizationId === orgId);
+      dataAccessLogs = dataAccessLogs.filter((l) => l.organizationId === orgId);
+      consentRecords = consentRecords.filter((c) => c.organizationId === orgId);
+      policies = policies.filter((p) => p.organizationId === orgId);
     }
 
     const gdprByStatus = {

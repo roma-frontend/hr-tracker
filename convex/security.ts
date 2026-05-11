@@ -1,5 +1,31 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
+import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
+
+/**
+ * Helper: requires caller to be admin or superadmin.
+ * Returns the admin user record and the orgId they should see:
+ * - superadmin: sees all orgs (returns undefined orgId filter)
+ * - admin: sees only their own org
+ */
+async function requireAdmin(ctx: any, adminId: Id<'users'>) {
+  const user = await ctx.db.get(adminId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const isAdmin =
+    user.role === 'admin' ||
+    user.role === 'superadmin' ||
+    user.email.toLowerCase() === SUPERADMIN_EMAIL;
+  if (!isAdmin) {
+    throw new Error('Only admins can access compliance features');
+  }
+
+  const isSuper = isSuperadmin(user);
+  return { user, orgId: isSuper ? undefined : user.organizationId };
+}
 
 // ── Default security settings ─────────────────────────────────────────────────
 export const SECURITY_FEATURES = [
@@ -347,15 +373,17 @@ export const getLoginStats = query({
 // ── Get recent audit logs ─────────────────────────────────────────────────────
 export const getRecentAuditLogs = query({
   args: {
-    organizationId: v.optional(v.id('organizations')),
+    adminId: v.id('users'),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { organizationId, limit = 50 }) => {
+  handler: async (ctx, { adminId, limit = 50 }) => {
+    const { orgId } = await requireAdmin(ctx, adminId);
+
     let logs;
-    if (organizationId) {
+    if (orgId) {
       logs = await ctx.db
         .query('auditLogs')
-        .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+        .withIndex('by_org', (q) => q.eq('organizationId', orgId))
         .order('desc')
         .take(limit);
     } else {
@@ -410,7 +438,6 @@ export const unlockAccount = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 // NOTIFY SUPERADMIN about suspicious activity with quick action
 // ─────────────────────────────────────────────────────────────────────────────
-const SUPERADMIN_EMAIL = 'romangulanyan@gmail.com';
 const AUTO_BLOCK_THRESHOLD = 80; // Auto-block if risk score >= 80
 const AUTO_BLOCK_DURATION = 24; // 24 hours
 

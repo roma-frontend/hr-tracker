@@ -59,7 +59,10 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className="px-2 py-0.5 rounded text-xs font-medium"
-      style={{ background: bgMap[status] || 'var(--muted)', color: colorMap[status] || 'var(--text-muted)' }}
+      style={{
+        background: bgMap[status] || 'var(--muted)',
+        color: colorMap[status] || 'var(--text-muted)',
+      }}
     >
       {t(key)}
     </span>
@@ -78,7 +81,10 @@ function AccessTypeBadge({ accessType }: { accessType: string }) {
   return (
     <span
       className="px-2 py-0.5 rounded text-xs font-mono font-medium"
-      style={{ background: `${colorMap[accessType] || 'var(--text-muted)'}22`, color: colorMap[accessType] || 'var(--text-muted)' }}
+      style={{
+        background: `${colorMap[accessType] || 'var(--text-muted)'}22`,
+        color: colorMap[accessType] || 'var(--text-muted)',
+      }}
     >
       {t(key)}
     </span>
@@ -115,14 +121,23 @@ export default function ComplianceClient() {
     el.scrollBy({ left: dir === 'left' ? -150 : 150, behavior: 'smooth' });
   };
 
-  const orgId = user?.organizationId as Id<'organizations'> | undefined;
+  const adminId = user?.id as Id<'users'> | undefined;
 
-  const stats = useQuery(api.compliance.getComplianceStats, orgId ? { organizationId: orgId } : 'skip');
-  const auditLogs = useQuery(api.security.getRecentAuditLogs, orgId ? { organizationId: orgId, limit: 100 } : 'skip');
-  const gdprRequests = useQuery(api.compliance.getGdprRequests, orgId ? { organizationId: orgId, limit: 100 } : 'skip');
-  const consents = useQuery(api.compliance.getUserConsents, user?.id ? { userId: user.id as Id<'users'> } : 'skip');
-  const dataAccessLogs = useQuery(api.compliance.getDataAccessLogs, orgId ? { organizationId: orgId, limit: 100 } : 'skip');
-  const policies = useQuery(api.compliance.getPolicies, orgId ? { organizationId: orgId } : 'skip');
+  const stats = useQuery(api.compliance.getComplianceStats, adminId ? { adminId } : 'skip');
+  const auditLogs = useQuery(
+    api.security.getRecentAuditLogs,
+    adminId ? { adminId, limit: 100 } : 'skip',
+  );
+  const gdprRequests = useQuery(
+    api.compliance.getGdprRequests,
+    adminId ? { adminId, limit: 100 } : 'skip',
+  );
+  const consents = useQuery(api.compliance.getUserConsents, adminId ? { adminId } : 'skip');
+  const dataAccessLogs = useQuery(
+    api.compliance.getDataAccessLogs,
+    adminId ? { adminId, limit: 100 } : 'skip',
+  );
+  const policies = useQuery(api.compliance.getPolicies, adminId ? { adminId } : 'skip');
 
   if (!user) {
     return (
@@ -185,15 +200,24 @@ export default function ComplianceClient() {
               <Shield className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: 'var(--primary)' }} />
             </div>
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h1
+                className="text-lg sm:text-2xl font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {t('compliance.title')}
               </h1>
-              <p className="text-xs sm:text-sm hidden sm:block" style={{ color: 'var(--text-muted)' }}>
+              <p
+                className="text-xs sm:text-sm hidden sm:block"
+                style={{ color: 'var(--text-muted)' }}
+              >
                 {t('compliance.stats')}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: 'var(--text-muted)' }}>
+          <div
+            className="flex items-center gap-2 text-xs sm:text-sm"
+            style={{ color: 'var(--text-muted)' }}
+          >
             <Activity className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: 'var(--success)' }} />
             {t('compliance.active')}
           </div>
@@ -202,7 +226,10 @@ export default function ComplianceClient() {
         {/* Search and Filter */}
         <div className="flex gap-2 mb-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+              style={{ color: 'var(--text-muted)' }}
+            />
             <input
               type="text"
               value={searchQuery}
@@ -213,7 +240,10 @@ export default function ComplianceClient() {
           </div>
           {activeTab === 'gdpr' && (
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+              <Filter
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                style={{ color: 'var(--text-muted)' }}
+              />
               <select
                 value={gdprFilter}
                 onChange={(e) => setGdprFilter(e.target.value)}
@@ -234,11 +264,31 @@ export default function ComplianceClient() {
       {activeTab === 'stats' && stats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 mb-6 sm:mb-8">
           {[
-            { label: t('compliance.statsTotal'), value: stats.gdprRequests, color: 'var(--text-primary)' },
-            { label: t('compliance.statsPending'), value: stats.gdprByStatus.pending, color: 'var(--warning)' },
-            { label: t('compliance.statsInProgress'), value: stats.gdprByStatus.in_progress, color: 'var(--primary)' },
-            { label: t('compliance.statsCompleted'), value: stats.gdprByStatus.completed, color: 'var(--success)' },
-            { label: t('compliance.statsRejected'), value: stats.gdprByStatus.rejected, color: 'var(--destructive)' },
+            {
+              label: t('compliance.statsTotal'),
+              value: stats.gdprRequests,
+              color: 'var(--text-primary)',
+            },
+            {
+              label: t('compliance.statsPending'),
+              value: stats.gdprByStatus.pending,
+              color: 'var(--warning)',
+            },
+            {
+              label: t('compliance.statsInProgress'),
+              value: stats.gdprByStatus.in_progress,
+              color: 'var(--primary)',
+            },
+            {
+              label: t('compliance.statsCompleted'),
+              value: stats.gdprByStatus.completed,
+              color: 'var(--success)',
+            },
+            {
+              label: t('compliance.statsRejected'),
+              value: stats.gdprByStatus.rejected,
+              color: 'var(--destructive)',
+            },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -248,7 +298,10 @@ export default function ComplianceClient() {
               <div className="text-lg sm:text-2xl font-bold truncate" style={{ color: stat.color }}>
                 {stat.value}
               </div>
-              <div className="text-[9px] sm:text-xs mt-0.5 sm:mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
+              <div
+                className="text-[9px] sm:text-xs mt-0.5 sm:mt-1 truncate"
+                style={{ color: 'var(--text-muted)' }}
+              >
                 {stat.label}
               </div>
             </div>
@@ -289,8 +342,10 @@ export default function ComplianceClient() {
                 style={{
                   background: activeTab === tab.id ? '#3b82f6' : 'transparent',
                   color: activeTab === tab.id ? 'white' : 'var(--text-muted)',
-                  border: activeTab === tab.id ? '1px solid var(--border)' : '1px solid transparent',
-                  borderBottom: activeTab === tab.id ? '1px solid var(--card)' : '1px solid transparent',
+                  border:
+                    activeTab === tab.id ? '1px solid var(--border)' : '1px solid transparent',
+                  borderBottom:
+                    activeTab === tab.id ? '1px solid var(--card)' : '1px solid transparent',
                   marginBottom: activeTab === tab.id ? '-1px' : '0',
                 }}
               >
@@ -316,46 +371,73 @@ export default function ComplianceClient() {
       {activeTab === 'stats' && stats && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl p-5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+            <div
+              className="rounded-xl p-5 border"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+            >
               <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
                 {t('compliance.consentManagement')}
               </h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span style={{ color: 'var(--text-muted)' }}>{t('compliance.statsTotal')}</span>
-                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{stats.consentStats.total}</span>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {stats.consentStats.total}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-muted)' }}>{t('compliance.statsActiveConsents')}</span>
-                  <span className="font-medium" style={{ color: 'var(--success)' }}>{stats.consentStats.active}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    {t('compliance.statsActiveConsents')}
+                  </span>
+                  <span className="font-medium" style={{ color: 'var(--success)' }}>
+                    {stats.consentStats.active}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-muted)' }}>{t('compliance.statsWithdrawnConsents')}</span>
-                  <span className="font-medium" style={{ color: 'var(--destructive)' }}>{stats.consentStats.withdrawn}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    {t('compliance.statsWithdrawnConsents')}
+                  </span>
+                  <span className="font-medium" style={{ color: 'var(--destructive)' }}>
+                    {stats.consentStats.withdrawn}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="rounded-xl p-5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+            <div
+              className="rounded-xl p-5 border"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+            >
               <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
                 {t('compliance.policies')}
               </h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span style={{ color: 'var(--text-muted)' }}>{t('compliance.statsTotal')}</span>
-                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{stats.policyStats.total}</span>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {stats.policyStats.total}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-muted)' }}>{t('compliance.statsActivePolicies')}</span>
-                  <span className="font-medium" style={{ color: 'var(--success)' }}>{stats.policyStats.active}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    {t('compliance.statsActivePolicies')}
+                  </span>
+                  <span className="font-medium" style={{ color: 'var(--success)' }}>
+                    {stats.policyStats.active}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span style={{ color: 'var(--text-muted)' }}>{t('compliance.inactive')}</span>
-                  <span className="font-medium" style={{ color: 'var(--text-muted)' }}>{stats.policyStats.inactive}</span>
+                  <span className="font-medium" style={{ color: 'var(--text-muted)' }}>
+                    {stats.policyStats.inactive}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-          <div className="rounded-xl p-5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+          <div
+            className="rounded-xl p-5 border"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+          >
             <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               {t('compliance.dataAccessLogs')}
             </h3>
@@ -385,10 +467,16 @@ export default function ComplianceClient() {
                   className="rounded-lg p-4 flex items-center gap-4 border"
                   style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
                 >
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--primary)' }} />
+                  <div
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ background: 'var(--primary)' }}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                      <span
+                        className="font-medium text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
                         {log.userName}
                       </span>
                       <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -425,7 +513,10 @@ export default function ComplianceClient() {
         <div>
           {!filteredGdprRequests?.length ? (
             <div className="text-center py-16" style={{ color: 'var(--text-muted)' }}>
-              <FileText className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-disabled)' }} />
+              <FileText
+                className="w-12 h-12 mx-auto mb-3"
+                style={{ color: 'var(--text-disabled)' }}
+              />
               {t('compliance.noGdprRequests')}
             </div>
           ) : (
@@ -445,7 +536,10 @@ export default function ComplianceClient() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                          <span
+                            className="font-medium text-sm truncate"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
                             {req.userName}
                           </span>
                           <StatusBadge status={req.status} />
@@ -461,20 +555,37 @@ export default function ComplianceClient() {
                             {req.details}
                           </p>
                         )}
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-[10px] sm:text-xs" style={{ color: 'var(--text-disabled)' }}>
-                          <span>{t('compliance.requestedBy')}: {req.requestedByName}</span>
-                          <span>{t('compliance.requestedAt')}: {new Date(req.requestedAt).toLocaleDateString()}</span>
+                        <div
+                          className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-[10px] sm:text-xs"
+                          style={{ color: 'var(--text-disabled)' }}
+                        >
+                          <span>
+                            {t('compliance.requestedBy')}: {req.requestedByName}
+                          </span>
+                          <span>
+                            {t('compliance.requestedAt')}:{' '}
+                            {new Date(req.requestedAt).toLocaleDateString()}
+                          </span>
                           {req.processedAt && (
-                            <span>{t('compliance.processedAt')}: {new Date(req.processedAt).toLocaleDateString()}</span>
+                            <span>
+                              {t('compliance.processedAt')}:{' '}
+                              {new Date(req.processedAt).toLocaleDateString()}
+                            </span>
                           )}
                           {req.completedAt && (
-                            <span>{t('compliance.completedAt')}: {new Date(req.completedAt).toLocaleDateString()}</span>
+                            <span>
+                              {t('compliance.completedAt')}:{' '}
+                              {new Date(req.completedAt).toLocaleDateString()}
+                            </span>
                           )}
                         </div>
                       </div>
                     </div>
                     {req.rejectionReason && (
-                      <div className="text-xs px-2 py-1 rounded" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--destructive)' }}>
+                      <div
+                        className="text-xs px-2 py-1 rounded"
+                        style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--destructive)' }}
+                      >
                         <AlertTriangle className="w-3 h-3 inline mr-1" />
                         {req.rejectionReason}
                       </div>
@@ -492,7 +603,10 @@ export default function ComplianceClient() {
         <div>
           {!consents?.length ? (
             <div className="text-center py-16" style={{ color: 'var(--text-muted)' }}>
-              <ShieldCheck className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-disabled)' }} />
+              <ShieldCheck
+                className="w-12 h-12 mx-auto mb-3"
+                style={{ color: 'var(--text-disabled)' }}
+              />
               {t('compliance.noConsents')}
             </div>
           ) : (
@@ -512,26 +626,41 @@ export default function ComplianceClient() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                      <span
+                        className="font-medium text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
                         {consent.consentType}
                       </span>
                       <span
                         className="text-xs px-2 py-0.5 rounded"
                         style={{
-                          background: consent.granted && !consent.withdrawnAt ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                          color: consent.granted && !consent.withdrawnAt ? 'var(--success)' : 'var(--destructive)',
+                          background:
+                            consent.granted && !consent.withdrawnAt
+                              ? 'rgba(16,185,129,0.1)'
+                              : 'rgba(239,68,68,0.1)',
+                          color:
+                            consent.granted && !consent.withdrawnAt
+                              ? 'var(--success)'
+                              : 'var(--destructive)',
                         }}
                       >
-                        {consent.granted && !consent.withdrawnAt ? t('compliance.granted') : t('compliance.withdrawn')}
+                        {consent.granted && !consent.withdrawnAt
+                          ? t('compliance.granted')
+                          : t('compliance.withdrawn')}
                       </span>
                     </div>
                     <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
                       {t('compliance.grantedAt')}: {new Date(consent.grantedAt).toLocaleString()}
-                      {consent.withdrawnAt && ` | ${t('compliance.withdrawnAt')}: ${new Date(consent.withdrawnAt).toLocaleString()}`}
+                      {consent.withdrawnAt &&
+                        ` | ${t('compliance.withdrawnAt')}: ${new Date(consent.withdrawnAt).toLocaleString()}`}
                     </div>
                   </div>
                   {consent.version && (
-                    <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--muted)', color: 'var(--text-muted)' }}>
+                    <span
+                      className="text-xs px-2 py-1 rounded"
+                      style={{ background: 'var(--muted)', color: 'var(--text-muted)' }}
+                    >
                       v{consent.version}
                     </span>
                   )}
@@ -561,11 +690,17 @@ export default function ComplianceClient() {
                   <AccessTypeBadge accessType={log.accessType} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                      <span
+                        className="font-medium text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
                         {log.dataType}
                       </span>
                       {log.recordId && (
-                        <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'var(--muted)', color: 'var(--text-muted)' }}>
+                        <span
+                          className="text-xs font-mono px-1.5 py-0.5 rounded"
+                          style={{ background: 'var(--muted)', color: 'var(--text-muted)' }}
+                        >
                           {log.recordId}
                         </span>
                       )}
@@ -594,7 +729,10 @@ export default function ComplianceClient() {
         <div>
           {!policies?.length ? (
             <div className="text-center py-16" style={{ color: 'var(--text-muted)' }}>
-              <ClipboardList className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-disabled)' }} />
+              <ClipboardList
+                className="w-12 h-12 mx-auto mb-3"
+                style={{ color: 'var(--text-disabled)' }}
+              />
               {t('compliance.noPolicies')}
             </div>
           ) : (
@@ -608,7 +746,10 @@ export default function ComplianceClient() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                        <span
+                          className="font-medium text-sm"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
                           {policy.title}
                         </span>
                         <span
@@ -632,11 +773,23 @@ export default function ComplianceClient() {
                           {policy.description}
                         </p>
                       )}
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] sm:text-xs" style={{ color: 'var(--text-disabled)' }}>
-                        <span>{t('compliance.policyVersion')}: {policy.version}</span>
-                        <span>{t('compliance.effectiveFrom')}: {new Date(policy.effectiveFrom).toLocaleDateString()}</span>
-                        <span>{t('compliance.createdBy')}: {policy.createdByName}</span>
-                        <span>{t('compliance.updatedBy')}: {policy.updatedByName}</span>
+                      <div
+                        className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] sm:text-xs"
+                        style={{ color: 'var(--text-disabled)' }}
+                      >
+                        <span>
+                          {t('compliance.policyVersion')}: {policy.version}
+                        </span>
+                        <span>
+                          {t('compliance.effectiveFrom')}:{' '}
+                          {new Date(policy.effectiveFrom).toLocaleDateString()}
+                        </span>
+                        <span>
+                          {t('compliance.createdBy')}: {policy.createdByName}
+                        </span>
+                        <span>
+                          {t('compliance.updatedBy')}: {policy.updatedByName}
+                        </span>
                       </div>
                     </div>
                   </div>
