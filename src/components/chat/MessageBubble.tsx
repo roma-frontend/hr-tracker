@@ -1212,10 +1212,7 @@ export const MessageBubble = React.memo(function MessageBubble({
           setShowActions(true);
         }}
         onMouseLeave={() => {
-          hoverTimeoutRef.current = setTimeout(() => {
-            setShowActions(false);
-            setShowMenu(false);
-          }, 50);
+          setShowMenu(false);
         }}
       >
         <div ref={menuRef}>
