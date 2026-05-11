@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useMainRef } from '@/hooks/useMainRef';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { useTranslation } from 'react-i18next';
@@ -369,7 +369,14 @@ export const CalendarClient = React.memo(function CalendarClient() {
         }
       };
     }
-  }, [selectedLeave, selectedDriverEvent, selectedGoogleEvent, showLeaveModal, showDriverModal]);
+  }, [
+    selectedLeave,
+    selectedDriverEvent,
+    selectedGoogleEvent,
+    showLeaveModal,
+    showDriverModal,
+    mainRef,
+  ]);
 
   // Debug: Log whenever selectedOrgId changes
   useEffect(() => {
