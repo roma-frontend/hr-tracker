@@ -414,10 +414,10 @@ function TypeStep({ value, onChange }: { value?: LeaveType; onChange: (v: LeaveT
   ];
 
   const colorMap: Record<string, string> = {
-    yellow: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
-    red: 'bg-red-500/10 text-red-600 dark:text-red-400',
-    purple: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-    gray: 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
+    yellow: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400',
+    red: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+    purple: 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400',
+    gray: 'bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-400',
   };
 
   return (
