@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useTranslation } from 'react-i18next';
-import { motion } from '@/lib/cssMotion';
+import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { toast } from 'sonner';
 import {
   DndContext,
@@ -478,43 +478,77 @@ function StepConfigDialog({
 
 function StepPalette({ onAddStep }: { onAddStep: (type: StepType) => void }) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(true);
+  const [visible, setVisible] = useState(true);
 
   return (
-    <Card className="w-full md:w-64 shrink-0">
-      <CardHeader className="pb-3">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-between w-full"
+    <AnimatePresence mode="wait">
+      {visible ? (
+        <motion.div
+          key="palette"
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: 'auto', opacity: 1 }}
+          exit={{ width: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="shrink-0 overflow-hidden"
         >
-          <CardTitle className="text-sm font-medium">
-            {t('automation.builder.stepPalette')}
-          </CardTitle>
-          {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        </button>
-      </CardHeader>
-      {expanded && (
-        <CardContent className="space-y-2">
-          {STEP_PALETTE.map((item) => (
-            <button
-              key={item.type}
-              onClick={() => onAddStep(item.type)}
-              className="w-full text-left p-3 rounded-lg border border-(--border) hover:border-(--border-strong) hover:bg-(--background-subtle) transition-all group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-(--background-subtle) group-hover:bg-(--background)">
-                  {item.icon}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-(--text-primary)">{t(item.label)}</p>
-                  <p className="text-xs text-(--text-muted)">{t(item.description)}</p>
-                </div>
+          <Card className="w-full md:w-64">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">
+                  {t('automation.builder.stepPalette')}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setVisible(false)}
+                  className="h-6 w-6 p-0"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
               </div>
-            </button>
-          ))}
-        </CardContent>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {STEP_PALETTE.map((item) => (
+                <button
+                  key={item.type}
+                  onClick={() => onAddStep(item.type)}
+                  className="w-full text-left p-3 rounded-lg border border-(--border) hover:border-(--border-strong) hover:bg-(--background-subtle) transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-md bg-(--background-subtle) group-hover:bg-(--background)">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-(--text-primary)">{t(item.label)}</p>
+                      <p className="text-xs text-(--text-muted)">{t(item.description)}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="collapsed"
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: 'auto', opacity: 1 }}
+          exit={{ width: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="shrink-0 overflow-hidden"
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setVisible(true)}
+            className="w-full md:w-auto"
+          >
+            <ChevronRight className="w-4 h-4 mr-2" />
+            {t('automation.builder.stepPalette')}
+          </Button>
+        </motion.div>
       )}
-    </Card>
+    </AnimatePresence>
   );
 }
 

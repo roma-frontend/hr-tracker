@@ -709,7 +709,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="space-y-4"
+          className="space-y-4 scrollbar-hide"
         >
           {/* Selected day details */}
           <Card>
@@ -720,7 +720,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                   : t('calendar.selectADay')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-4">
+            <CardContent className="px-4 pb-4 scrollbar-hide">
               <AnimatePresence mode="wait">
                 {selectedDayLeaves.length === 0 &&
                 selectedDayGoogle.length === 0 &&
@@ -743,7 +743,7 @@ export const CalendarClient = React.memo(function CalendarClient() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="space-y-2 max-h-80 overflow-y-auto"
+                    className="space-y-2 max-h-80 overflow-y-auto scrollbar-hide"
                   >
                     {/* Leave requests */}
                     {selectedDayLeaves.map((leave, i) => (

@@ -143,7 +143,7 @@ export default function LeaveDetailClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.push('/leaves')}>
             <ArrowLeft className="h-5 w-5" />

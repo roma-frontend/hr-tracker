@@ -1544,7 +1544,9 @@
       "family": "Family Leave",
       "familyDesc": "Family circumstances",
       "unpaid": "Unpaid Leave",
-      "unpaidDesc": "Leave without pay"
+      "unpaidDesc": "Leave without pay",
+      "doctor": "Doctor Leave",
+      "doctorDesc": "Medical appointment or checkup"
     },
     "reason": "Reason",
     "requestDetails": "Leave Request Details",
@@ -1556,7 +1558,11 @@
     "status": "Status",
     "timeline": "Timeline",
     "requestSubmitted": "Request Submitted",
-    "byAdmin": "Reviewed by Admin"
+    "byAdmin": "Reviewed by Admin",
+    "edit": "Edit Leave Request",
+    "updatedSuccess": "Leave request updated successfully",
+    "updateFailed": "Failed to update leave request",
+    "cannotEditStatus": "Only pending leave requests can be edited"
   },
   "leaveRequest": {
     "newLeaveRequest": "New Leave Request",
