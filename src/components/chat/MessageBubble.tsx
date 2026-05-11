@@ -642,7 +642,8 @@ export const MessageBubble = React.memo(function MessageBubble({
           if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         }}
         onMouseLeave={() => {
-          // Delay closing to allow moving to the menu
+          // Don't hide if menu is open — let the menu's own handlers control visibility
+          if (showMenu) return;
           hoverTimeoutRef.current = setTimeout(() => {
             setShowActions(false);
           }, 100);
