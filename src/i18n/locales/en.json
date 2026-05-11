@@ -6349,7 +6349,13 @@
     "noConflicts": "No conflicts detected",
     "leaveConflicts": "Leave conflicts",
     "noConflictsDesc": "This leave request does not conflict with events or department coverage.",
-    "eligibilityScore": "Eligibility Score"
+    "eligibilityScore": "Eligibility Score",
+    "analyzing": "AI analyzing request...",
+    "keyFactors": "Key Factors",
+    "performance": "Performance",
+    "attendance": "Attendance",
+    "behavior": "Behavior",
+    "workload": "Workload"
   },
   "drivers": {
     "notRegistered": "Not Registered",

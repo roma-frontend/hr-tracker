@@ -6395,7 +6395,13 @@
     "noConflicts": "Конфликты не обнаружены",
     "leaveConflicts": "Конфликты отпусков",
     "noConflictsDesc": "Этот запрос на отпуск не конфликтует с событиями или покрытием отдела.",
-    "eligibilityScore": "Оценка соответствия"
+    "eligibilityScore": "Оценка соответствия",
+    "analyzing": "ИИ анализирует запрос...",
+    "keyFactors": "Ключевые факторы",
+    "performance": "Производительность",
+    "attendance": "Посещаемость",
+    "behavior": "Поведение",
+    "workload": "Загрузка"
   },
   "drivers": {
     "notRegistered": "Не зарегистрирован",

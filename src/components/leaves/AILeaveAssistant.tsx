@@ -59,7 +59,9 @@ export default function AILeaveAssistant({
         <CardContent className="p-6">
           <div className="flex items-center gap-3">
             <Brain className="w-5 h-5 text-(--text-muted) animate-pulse" />
-            <p className="text-sm text-(--text-muted)">AI analyzing request...</p>
+            <p className="text-sm text-(--text-muted)">
+              {t('aiLeave.analyzing', 'AI analyzing request...')}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -210,7 +212,7 @@ export default function AILeaveAssistant({
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-(--text-muted)">Performance</span>
+              <span className="text-(--text-muted)">{t('aiLeave.performance', 'Performance')}</span>
               <span className={`font-medium ${getScoreColor(breakdown.performance.score)}`}>
                 {breakdown.performance.score}%
               </span>
@@ -219,9 +221,7 @@ export default function AILeaveAssistant({
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-(--text-muted)">
-                {t('employeeInfo.attendance')}Attendance
-              </span>
+              <span className="text-(--text-muted)">{t('aiLeave.attendance', 'Attendance')}</span>
               <span className={`font-medium ${getScoreColor(breakdown.attendance.score)}`}>
                 {breakdown.attendance.score}%
               </span>
@@ -230,7 +230,7 @@ export default function AILeaveAssistant({
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-(--text-muted)">Behavior</span>
+              <span className="text-(--text-muted)">{t('aiLeave.behavior', 'Behavior')}</span>
               <span className={`font-medium ${getScoreColor(breakdown.behavior.score)}`}>
                 {breakdown.behavior.score}%
               </span>
@@ -239,7 +239,7 @@ export default function AILeaveAssistant({
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-(--text-muted)">Workload</span>
+              <span className="text-(--text-muted)">{t('aiLeave.workload', 'Workload')}</span>
               <span className={`font-medium ${getScoreColor(breakdown.workload.score)}`}>
                 {breakdown.workload.score}%
               </span>
@@ -259,7 +259,7 @@ export default function AILeaveAssistant({
 
         {/* Key Factors */}
         <div className="space-y-2">
-          <h4 className="text-sm font-medium">Key Factors</h4>
+          <h4 className="text-sm font-medium">{t('aiLeave.keyFactors', 'Key Factors')}</h4>
           <div className="space-y-1.5">
             {breakdown.performance.factors.slice(0, 2).map((factor: any, i: any) => (
               <div key={i} className="flex items-start gap-2 text-xs">
