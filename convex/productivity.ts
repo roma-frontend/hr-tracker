@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET TODAY'S STATS FOR USER
@@ -33,13 +34,12 @@ export const getTodayStats = query({
       hoursWorkedToday = todayTracking.totalWorkedMinutes / 60;
     }
 
-    // Get week's time tracking for weekly hours
+    // Get week's time tracking for weekly hours (S refactor: use by_user index)
     const weekTracking = await ctx.db
       .query('timeTracking')
-      .filter((q) =>
-        q.and(q.eq(q.field('userId'), userId), q.gte(q.field('checkInTime'), weekStartMs)),
-      )
-      .collect();
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .filter((q) => q.gte(q.field('checkInTime'), weekStartMs))
+      .take(DEFAULT_LIST_CAP);
 
     let hoursWorkedWeek = 0;
     weekTracking.forEach((tt) => {
@@ -48,11 +48,11 @@ export const getTodayStats = query({
       }
     });
 
-    // Get tasks
+    // Get tasks (S refactor: use by_assigned_to index)
     const allTasks = await ctx.db
       .query('tasks')
-      .filter((q) => q.eq(q.field('assignedTo'), userId))
-      .collect();
+      .withIndex('by_assigned_to', (q) => q.eq('assignedTo', userId))
+      .take(DEFAULT_LIST_CAP);
 
     const completedTasksToday = allTasks.filter(
       (t) => t.status === 'completed' && t.updatedAt && t.updatedAt >= todayStartMs,
@@ -99,10 +99,9 @@ export const getTodayTasks = query({
   handler: async (ctx, { userId }) => {
     const tasks = await ctx.db
       .query('tasks')
-      .filter((q) =>
-        q.and(q.eq(q.field('assignedTo'), userId), q.neq(q.field('status'), 'completed')),
-      )
-      .collect();
+      .withIndex('by_assigned_to', (q) => q.eq('assignedTo', userId))
+      .filter((q) => q.neq(q.field('status'), 'completed'))
+      .take(DEFAULT_LIST_CAP);
 
     // Sort by priority and deadline
     const priorityMap: Record<string, number> = { urgent: 4, high: 3, medium: 2, low: 1 };
@@ -131,7 +130,14 @@ export const getTeamPresence = query({
 
     const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
 
-    let users = await ctx.db.query('users').collect();
+    // S refactor: scope by org via by_org index when not superadmin; XLARGE fallback.
+    let users =
+      !isSuperadmin && requester.organizationId
+        ? await ctx.db
+            .query('users')
+            .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId!))
+            .take(DEFAULT_LIST_CAP)
+        : await ctx.db.query('users').take(XLARGE_LIST_CAP);
 
     // Filter by organization if not superadmin
     if (!isSuperadmin) {
@@ -156,7 +162,7 @@ export const getTeamPresence = query({
             .query('leaveRequests')
             .withIndex('by_user', (q) => q.eq('userId', u._id))
             .filter((q) => q.eq(q.field('status'), 'approved'))
-            .collect();
+            .take(DEFAULT_LIST_CAP);
 
           const hasActiveLeave = approvedLeaves.some((leave) => {
             return leave.startDate <= today && today <= leave.endDate;

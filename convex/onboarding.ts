@@ -1,6 +1,7 @@
 import { query, mutation, internalMutation } from './_generated/server';
 import { internal, api } from './_generated/api';
 import { v } from 'convex/values';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─── Helpers ─────────────────────────────────────────────────
 function computeProgress(tasks: { status: string }[]): number {
@@ -17,7 +18,7 @@ export const listTemplates = query({
     return await ctx.db
       .query('onboardingTemplates')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
   },
 });
 
@@ -28,7 +29,7 @@ export const listPrograms = query({
       .query('onboardingPrograms')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .order('desc')
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const result = await Promise.all(
       programs.map(async (prog) => {
@@ -394,7 +395,7 @@ export const addTask = mutation({
     const tasks = await ctx.db
       .query('onboardingTasks')
       .withIndex('by_program', (q) => q.eq('programId', args.programId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     await ctx.db.insert('onboardingTasks', {
       organizationId: args.organizationId,
@@ -473,7 +474,7 @@ export const assignBuddy = mutation({
       .query('onboardingTasks')
       .withIndex('by_program', (q) => q.eq('programId', programId))
       .filter((q) => q.eq(q.field('assigneeType'), 'buddy'))
-      .collect();
+      .take(SMALL_LIST_CAP);
     for (const task of tasks) {
       await ctx.db.patch(task._id, { assigneeId: buddyId });
     }
@@ -512,14 +513,14 @@ export const activateOnboardingTasks = internalMutation({
     const oneDayAgo = now - 86400000;
 
     // Get all organizations
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
 
     for (const org of orgs) {
       // Find active programs
       const programs = await ctx.db
         .query('onboardingPrograms')
         .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       for (const program of programs) {
         // Find tasks that should be activated now
@@ -533,7 +534,7 @@ export const activateOnboardingTasks = internalMutation({
               q.gt(q.field('dueDate'), oneDayAgo),
             ),
           )
-          .collect();
+          .take(SMALL_LIST_CAP);
 
         for (const task of tasks) {
           // Task is already in 'pending' state and visible in main tasks table
@@ -649,13 +650,13 @@ export const sendOnboardingOverdueReminders = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
 
     for (const org of orgs) {
       const programs = await ctx.db
         .query('onboardingPrograms')
         .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       for (const program of programs) {
         const overdueTasks = await ctx.db
@@ -667,7 +668,7 @@ export const sendOnboardingOverdueReminders = internalMutation({
               q.lt(q.field('dueDate'), now - 86400000), // More than 1 day overdue
             ),
           )
-          .collect();
+          .take(SMALL_LIST_CAP);
 
         for (const task of overdueTasks) {
           const assigneeId = task.assigneeId ?? program.employeeId;

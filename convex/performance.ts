@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query, internalMutation } from './_generated/server';
 import { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ export const listCycles = query({
       .query('reviewCycles')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId));
 
-    const cycles = await q.order('desc').collect();
+    const cycles = await q.order('desc').take(DEFAULT_LIST_CAP);
 
     if (args.status) {
       return cycles.filter((c) => c.status === args.status);
@@ -78,7 +79,7 @@ export const getCycleDetails = query({
     const assignments = await ctx.db
       .query('reviewAssignments')
       .withIndex('by_cycle', (q) => q.eq('cycleId', args.cycleId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const total = assignments.length;
     const submitted = assignments.filter((a) => a.status === 'submitted').length;
@@ -249,7 +250,7 @@ export const getCycleSummary = query({
     const responses = await ctx.db
       .query('reviewResponses')
       .withIndex('by_cycle_reviewee', (q) => q.eq('cycleId', args.cycleId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Group by reviewee
     const byReviewee: Record<string, { scores: number[]; types: string[] }> = {};
@@ -325,7 +326,7 @@ export const createTemplate = mutation({
       const existing = await ctx.db
         .query('reviewTemplates')
         .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-        .collect();
+        .take(SMALL_LIST_CAP);
       for (const t of existing) {
         if (t.isDefault) {
           await ctx.db.patch(t._id, { isDefault: false });
@@ -512,7 +513,7 @@ export const addPeerAssignment = mutation({
       .withIndex('by_cycle_reviewer', (q) =>
         q.eq('cycleId', args.cycleId).eq('reviewerId', args.reviewerId),
       )
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const duplicate = existing.find((a) => a.revieweeId === args.revieweeId && a.type === 'peer');
     if (duplicate) throw new Error('Assignment already exists');
@@ -638,7 +639,7 @@ export const closeCycle = mutation({
     const pending = await ctx.db
       .query('reviewAssignments')
       .withIndex('by_cycle', (q) => q.eq('cycleId', args.cycleId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const a of pending) {
       if (a.status === 'pending' || a.status === 'in_progress') {
@@ -663,7 +664,7 @@ export const cancelCycle = mutation({
     const assignments = await ctx.db
       .query('reviewAssignments')
       .withIndex('by_cycle', (q) => q.eq('cycleId', args.cycleId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const a of assignments) {
       if (a.status !== 'submitted') {
@@ -694,11 +695,13 @@ export const deleteCycle = mutation({
 export const getEligibleParticipants = query({
   args: { organizationId: v.id('organizations') },
   handler: async (ctx, args) => {
-    const users = await ctx.db.query('users').collect();
+    // Scope by org via by_org index (avoids scanning the global users table).
+    const users = await ctx.db
+      .query('users')
+      .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
+      .take(DEFAULT_LIST_CAP);
     return users
-      .filter(
-        (u) => u.organizationId === args.organizationId && u.isActive && u.role !== 'superadmin',
-      )
+      .filter((u) => u.isActive && u.role !== 'superadmin')
       .map((u) => ({
         _id: u._id,
         name: u.name,
@@ -720,14 +723,14 @@ export const checkDeadlineNotifications = internalMutation({
     const oneDayMs = 24 * 60 * 60 * 1000;
 
     // Get all organizations
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
 
     for (const org of orgs) {
       // Find active cycles with deadlines approaching (within 3 days)
       const activeCycles = await ctx.db
         .query('reviewCycles')
         .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       for (const cycle of activeCycles) {
         const timeUntilDeadline = cycle.endDate - now;
@@ -740,7 +743,7 @@ export const checkDeadlineNotifications = internalMutation({
             .filter((q) =>
               q.or(q.eq(q.field('status'), 'pending'), q.eq(q.field('status'), 'in_progress')),
             )
-            .collect();
+            .take(DEFAULT_LIST_CAP);
 
           for (const assignment of pendingAssignments) {
             // Check if we already sent a reminder for this assignment within the last 24 hours

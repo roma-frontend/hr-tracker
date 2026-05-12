@@ -12,6 +12,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MANAGER APPROVAL WORKFLOW
@@ -72,7 +73,7 @@ export const approveRequest = mutation({
     const drivers = await ctx.db
       .query('drivers')
       .withIndex('by_org', (q) => q.eq('organizationId', request.organizationId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     // Sort by priority and availability
     const availableDrivers = drivers
@@ -238,7 +239,7 @@ export const calculateDriverKPI = query({
       .filter((q) =>
         q.and(q.eq(q.field('status'), 'completed'), q.gte(q.field('updatedAt'), startDate)),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Calculate metrics
     const totalTrips = schedules.length;
@@ -266,7 +267,7 @@ export const calculateDriverKPI = query({
       .query('driverSchedules')
       .withIndex('by_driver', (q) => q.eq('driverId', driverId))
       .filter((q) => q.gte(q.field('updatedAt'), startDate))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const completedSchedules = allSchedules.filter((s) => s.status === 'completed').length;
     const completionRate =
@@ -304,7 +305,7 @@ export const updateDriverKPI = mutation({
       .filter((q) =>
         q.and(q.eq(q.field('status'), 'completed'), q.gte(q.field('updatedAt'), startDate)),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const totalTrips = schedules.length;
     const onTimeTrips = schedules.filter((s) => {
@@ -355,7 +356,7 @@ export const autoAssignDriver = mutation({
     const drivers = await ctx.db
       .query('drivers')
       .withIndex('by_org', (q) => q.eq('organizationId', request.organizationId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     // Filter available and on shift
     const availableDrivers = drivers.filter((d) => d.isAvailable && d.isOnShift);

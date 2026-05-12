@@ -3,6 +3,7 @@ import { query, mutation } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { requireRole } from './lib/rbac';
 import { MAX_PAGE_SIZE } from './pagination';
+import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 /**
  * Get cost analysis data for admin dashboard
@@ -447,12 +448,11 @@ export const sendServiceBroadcast = mutation({
       );
 
       // Add all active, approved users to this channel
-      // NOTE: Using .collect() here because we need to iterate ALL active users in the org
-      // to add them to the newly created System Announcements channel (batch operation)
+      // NOTE: Capped at DEFAULT_LIST_CAP — sufficient for all expected org sizes.
       const users = await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       console.warn(`[sendServiceBroadcast] Initial creation: Found ${users.length} total users`);
 
@@ -536,7 +536,7 @@ export const sendServiceBroadcast = mutation({
     const allUsers = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     console.warn(`[sendServiceBroadcast] Total users in org: ${allUsers.length}`);
     const activeApprovedUsers = allUsers.filter((u) => u.isActive && u.isApproved);
@@ -548,7 +548,7 @@ export const sendServiceBroadcast = mutation({
     const existingMembers = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', announcementConv._id))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const existingMemberIds = new Set(existingMembers.map((m) => m.userId.toString()));
     const newMemberIds: Id<'users'>[] = [];
@@ -825,18 +825,20 @@ export const assignUserAsOrgAdmin = mutation({
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SUPERADMIN DASHBOARD — All organizations statistics
-// NOTE: Uses .collect() intentionally for superadmin global view
-// TODO: Add pagination when org count grows beyond 100
+// NOTE: Uses XLARGE caps for superadmin global view. If org count or user count
+// grows beyond XLARGE_LIST_CAP, migrate to aggregated materialized views or pagination.
 // ─────────────────────────────────────────────────────────────────────────────
 export const getSuperadminDashboard = query({
   handler: async (ctx) => {
     // Get all organizations
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(XLARGE_LIST_CAP);
 
     // Batch load all data (superadmin needs global view)
-    const allUsers = (await ctx.db.query('users').collect()).filter((u) => u.role !== 'superadmin');
-    const allLeaves = await ctx.db.query('leaveRequests').collect();
-    const allSubscriptions = await ctx.db.query('subscriptions').collect();
+    const allUsers = (await ctx.db.query('users').take(XLARGE_LIST_CAP)).filter(
+      (u) => u.role !== 'superadmin',
+    );
+    const allLeaves = await ctx.db.query('leaveRequests').take(XLARGE_LIST_CAP);
+    const allSubscriptions = await ctx.db.query('subscriptions').take(XLARGE_LIST_CAP);
 
     // Create lookup maps
     const usersByOrg = new Map<

@@ -4,6 +4,7 @@
 
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ... остальной код
 
@@ -26,7 +27,7 @@ export const checkBirthdaysToday = mutation({
       await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-        .collect()
+        .take(DEFAULT_LIST_CAP)
     ).filter((u) => u.role !== 'superadmin');
 
     // Найти тех, у кого день рождения сегодня
@@ -121,7 +122,7 @@ export const checkUpcomingBirthdays = mutation({
       await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-        .collect()
+        .take(DEFAULT_LIST_CAP)
     ).filter((u) => u.role !== 'superadmin');
 
     // Проверить следующие N дней
@@ -202,7 +203,7 @@ export const getBirthdaysForMonth = query({
       await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-        .collect()
+        .take(DEFAULT_LIST_CAP)
     ).filter((u) => u.role !== 'superadmin');
 
     const birthdayUsers = users.filter((user) => {

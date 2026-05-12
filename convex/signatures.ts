@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ============ QUERIES ============
 
@@ -10,7 +11,7 @@ export const listTemplates = query({
       .query('documentTemplates')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .filter((q) => q.neq(q.field('isArchived'), true))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
   },
 });
 
@@ -24,8 +25,8 @@ export const listDocuments = query({
         v.literal('partially_signed'),
         v.literal('completed'),
         v.literal('cancelled'),
-        v.literal('expired')
-      )
+        v.literal('expired'),
+      ),
     ),
   },
   handler: async (ctx, { organizationId, status }) => {
@@ -33,16 +34,16 @@ export const listDocuments = query({
       return await ctx.db
         .query('signatureDocuments')
         .withIndex('by_org_status', (q) =>
-          q.eq('organizationId', organizationId).eq('status', status)
+          q.eq('organizationId', organizationId).eq('status', status),
         )
         .order('desc')
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     }
     return await ctx.db
       .query('signatureDocuments')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .order('desc')
-      .collect();
+      .take(DEFAULT_LIST_CAP);
   },
 });
 
@@ -69,9 +70,7 @@ export const getMyPendingSignatures = query({
   handler: async (ctx, { userId }) => {
     const requests = await ctx.db
       .query('signatureRequests')
-      .withIndex('by_signer_status', (q) =>
-        q.eq('signerId', userId).eq('status', 'pending')
-      )
+      .withIndex('by_signer_status', (q) => q.eq('signerId', userId).eq('status', 'pending'))
       .collect();
 
     // Enrich with document info
@@ -79,7 +78,7 @@ export const getMyPendingSignatures = query({
       requests.map(async (req) => {
         const doc = await ctx.db.get(req.documentId);
         return { ...req, document: doc };
-      })
+      }),
     );
 
     return enriched.filter((r) => r.document && r.document.status !== 'cancelled');
@@ -105,19 +104,17 @@ export const getStats = query({
   handler: async (ctx, { organizationId, userId }) => {
     const pending = await ctx.db
       .query('signatureRequests')
-      .withIndex('by_signer_status', (q) =>
-        q.eq('signerId', userId).eq('status', 'pending')
-      )
+      .withIndex('by_signer_status', (q) => q.eq('signerId', userId).eq('status', 'pending'))
       .collect();
 
     const allDocs = await ctx.db
       .query('signatureDocuments')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const completed = allDocs.filter((d) => d.status === 'completed').length;
     const awaitingOthers = allDocs.filter(
-      (d) => d.status === 'pending' || d.status === 'partially_signed'
+      (d) => d.status === 'pending' || d.status === 'partially_signed',
     ).length;
 
     return {
@@ -140,7 +137,7 @@ export const createTemplate = mutation({
       v.literal('offer'),
       v.literal('contract'),
       v.literal('policy'),
-      v.literal('custom')
+      v.literal('custom'),
     ),
     content: v.string(),
     fields: v.array(
@@ -150,7 +147,7 @@ export const createTemplate = mutation({
         type: v.union(v.literal('text'), v.literal('date'), v.literal('signature')),
         required: v.boolean(),
         placeholder: v.optional(v.string()),
-      })
+      }),
     ),
     createdBy: v.id('users'),
   },
@@ -182,15 +179,15 @@ export const createDocument = mutation({
         type: v.union(v.literal('text'), v.literal('date'), v.literal('signature')),
         required: v.boolean(),
         placeholder: v.optional(v.string()),
-      })
+      }),
     ),
     fieldValues: v.optional(
       v.array(
         v.object({
           fieldId: v.string(),
           value: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     signers: v.array(
       v.object({
@@ -198,7 +195,7 @@ export const createDocument = mutation({
         name: v.string(),
         email: v.string(),
         order: v.number(),
-      })
+      }),
     ),
     expiresAt: v.optional(v.number()),
     createdBy: v.id('users'),
@@ -276,7 +273,7 @@ export const signDocument = mutation({
       .collect();
 
     const previousUnsigned = allRequests.filter(
-      (r) => r.order < request.order && r.status === 'pending'
+      (r) => r.order < request.order && r.status === 'pending',
     );
     if (previousUnsigned.length > 0) {
       throw new Error('Previous signers have not yet signed');
@@ -294,7 +291,7 @@ export const signDocument = mutation({
 
     // Check if all requests are now signed
     const remainingPending = allRequests.filter(
-      (r) => r._id !== requestId && r.status === 'pending'
+      (r) => r._id !== requestId && r.status === 'pending',
     );
 
     if (remainingPending.length === 0) {
@@ -372,7 +369,7 @@ export const cancelDocument = mutation({
     const requests = await ctx.db
       .query('signatureRequests')
       .withIndex('by_document', (q) => q.eq('documentId', documentId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const req of requests) {
       if (req.status === 'pending') {

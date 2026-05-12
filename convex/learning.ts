@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { MAX_PAGE_SIZE } from './pagination';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─── Helper: Check permissions ───────────────────────────────────────────────
 async function checkAccess(ctx: any, organizationId: any, requesterId: any) {
@@ -197,7 +198,7 @@ export const deleteCourse = mutation({
       .withIndex('by_course', (q) =>
         q.eq('organizationId', course.organizationId).eq('courseId', course._id),
       )
-      .collect();
+      .take(SMALL_LIST_CAP);
     for (const lesson of lessons) await ctx.db.delete(lesson._id);
 
     const enrollments = await ctx.db
@@ -205,7 +206,7 @@ export const deleteCourse = mutation({
       .withIndex('by_course', (q) =>
         q.eq('organizationId', course.organizationId).eq('courseId', course._id),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
     for (const enrollment of enrollments) await ctx.db.delete(enrollment._id);
 
     await ctx.db.delete(args.courseId);
@@ -305,7 +306,7 @@ export const deleteLesson = mutation({
       .query('lessonProgress')
       .withIndex('by_user_course', (q) => q.eq('organizationId', lesson.organizationId))
       .filter((q) => q.eq(q.field('lessonId'), lesson._id))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
     for (const p of progress) await ctx.db.delete(p._id);
 
     await ctx.db.delete(args.lessonId);
@@ -352,7 +353,7 @@ export const getCourseEnrollments = query({
       .withIndex('by_course', (q) =>
         q.eq('organizationId', args.organizationId).eq('courseId', args.courseId),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const enriched = await Promise.all(
       enrollments.map(async (enrollment) => {
@@ -725,7 +726,7 @@ export const submitQuizAttempt = mutation({
       .withIndex('by_quiz', (q) =>
         q.eq('organizationId', args.organizationId).eq('quizId', quiz._id),
       )
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     if (questions.length === 0) throw new Error('Quiz has no questions');
 
@@ -755,7 +756,7 @@ export const submitQuizAttempt = mutation({
           .eq('userId', args.requesterId)
           .eq('quizId', quiz._id),
       )
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const attemptNumber = attemptCount.length + 1;
 
@@ -911,12 +912,12 @@ export const getTeamLearningOverview = query({
     const enrollments = await ctx.db
       .query('enrollments')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const courses = await ctx.db
       .query('courses')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const totalEnrollments = enrollments.length;
     const completedEnrollments = enrollments.filter((e) => e.status === 'completed').length;

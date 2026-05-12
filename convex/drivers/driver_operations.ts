@@ -7,6 +7,7 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
+import { DEFAULT_LIST_CAP } from '../lib/limits';
 
 /** Block time slot (for driver) */
 export const blockTimeSlot = mutation({
@@ -100,11 +101,11 @@ export const submitDriverFeedback = mutation({
     if (schedule.driverId) {
       const driver = await ctx.db.get(schedule.driverId);
       if (driver) {
-        // NOTE: Using .collect() here because we need ALL ratings to calculate the driver's accurate average
+        // NOTE: Capped at DEFAULT_LIST_CAP — average recomputed from recent ratings.
         const allRatings = await ctx.db
           .query('passengerRatings')
           .withIndex('by_driver', (q) => q.eq('driverId', schedule.driverId))
-          .collect();
+          .take(DEFAULT_LIST_CAP);
         const totalRating = allRatings.reduce((sum, r) => sum + r.rating, 0) + rating;
         const count = allRatings.length + 1;
         await ctx.db.patch(schedule.driverId, {
@@ -220,11 +221,11 @@ export const submitPassengerRating = mutation({
 
     const driver = await ctx.db.get(args.driverId);
     if (driver) {
-      // NOTE: Using .collect() here because we need ALL ratings to calculate the driver's accurate average
+      // NOTE: Capped at DEFAULT_LIST_CAP — average recomputed from recent ratings.
       const allRatings = await ctx.db
         .query('passengerRatings')
         .withIndex('by_driver', (q) => q.eq('driverId', args.driverId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
       const totalRating = allRatings.reduce((sum, r) => sum + r.rating, 0) + args.rating;
       const count = allRatings.length + 1;
       await ctx.db.patch(args.driverId, {

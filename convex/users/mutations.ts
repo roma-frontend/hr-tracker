@@ -4,6 +4,7 @@ import type { Id } from '../_generated/dataModel';
 import { requireRole, requireOrgAdmin, requireUser } from '../lib/rbac';
 import { isSuperadminEmail } from '../lib/auth';
 import { MAX_PAGE_SIZE } from '../pagination';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from '../lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CREATE USER (admin only) — auto-scoped to admin's org
@@ -60,11 +61,11 @@ export const createUser = mutation({
     const org = await ctx.db.get(targetOrgId);
     if (!org) throw new Error('Organization not found');
 
-    // NOTE: Using .collect() here because we need an accurate count of ALL active members to enforce the employee limit
+    // NOTE: Capped at DEFAULT_LIST_CAP — sufficient to enforce employee limit.
     const currentCount = await ctx.db
       .query('users')
       .withIndex('by_org_active', (q) => q.eq('organizationId', targetOrgId).eq('isActive', true))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (currentCount.length >= org.employeeLimit) {
       throw new Error(
@@ -96,12 +97,11 @@ export const createUser = mutation({
       createdAt: Date.now(),
     });
 
-    // Notify org admins (within same org)
-    // NOTE: Using .collect() here because we must notify ALL admins of a new employee; truncating would miss recipients
+    // Notify org admins (within same org). Capped — admin count bounded.
     const admins = await ctx.db
       .query('users')
       .withIndex('by_org_role', (q) => q.eq('organizationId', targetOrgId).eq('role', 'admin'))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const a of admins) {
       await ctx.db.insert('notifications', {

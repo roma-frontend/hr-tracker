@@ -1,5 +1,6 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // Public query: list ALL open vacancies across all organizations (for global /careers page)
 export const listAllOpenVacancies = query({
@@ -8,7 +9,7 @@ export const listAllOpenVacancies = query({
     const vacancies = await ctx.db
       .query('vacancies')
       .withIndex('by_status', (q) => q.eq('status', 'open'))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Get unique org IDs
     const orgIds = [...new Set(vacancies.map((v) => v.organizationId))];
@@ -47,7 +48,7 @@ export const listAllOpenVacancies = query({
 export const listActiveOrganizations = query({
   args: {},
   handler: async (ctx) => {
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
     return orgs
       .filter((o) => o.isActive)
       .map((o) => ({
@@ -74,7 +75,7 @@ export const listOpenVacancies = query({
     const vacancies = await ctx.db
       .query('vacancies')
       .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'open'))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     return {
       org: {
@@ -207,7 +208,7 @@ export const applyToVacancy = mutation({
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', orgId))
       .filter((q) => q.or(q.eq(q.field('role'), 'admin'), q.eq(q.field('role'), 'superadmin')))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const now = Date.now();
     for (const admin of orgAdmins) {

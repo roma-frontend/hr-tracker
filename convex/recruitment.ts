@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { query, mutation, action } from './_generated/server';
 import { api } from './_generated/api';
 import type { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ============ QUERIES ============
 
@@ -21,13 +22,13 @@ export const listVacancies = query({
             .eq('status', status as 'draft' | 'open' | 'paused' | 'closed'),
         )
         .order('desc')
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     } else {
       vacancies = await ctx.db
         .query('vacancies')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
         .order('desc')
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     }
 
     const enriched = await Promise.all(
@@ -223,7 +224,7 @@ export const getPipelineStats = query({
     const allApps = await ctx.db
       .query('applications')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     return {
       openVacancies: openVacancies.length,
@@ -325,14 +326,15 @@ export const deleteVacancy = mutation({
     const applications = await ctx.db
       .query('applications')
       .withIndex('by_vacancy', (q) => q.eq('vacancyId', vacancyId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const app of applications) {
-      // Delete application events
+      // Delete application events (no by_application index — inline filter;
+      // TODO: add index for cleaner cascade).
       const events = await ctx.db
         .query('applicationEvents')
         .filter((q) => q.eq(q.field('applicationId'), app._id))
-        .collect();
+        .take(SMALL_LIST_CAP);
       for (const ev of events) {
         await ctx.db.delete(ev._id);
       }
@@ -344,7 +346,7 @@ export const deleteVacancy = mutation({
       const interviews = await ctx.db
         .query('interviews')
         .withIndex('by_application', (q) => q.eq('applicationId', app._id))
-        .collect();
+        .take(SMALL_LIST_CAP);
       for (const interview of interviews) {
         await ctx.db.delete(interview._id);
       }
@@ -364,7 +366,7 @@ export const deleteCandidate = mutation({
     const events = await ctx.db
       .query('applicationEvents')
       .filter((q) => q.eq(q.field('applicationId'), applicationId))
-      .collect();
+      .take(SMALL_LIST_CAP);
     for (const ev of events) {
       await ctx.db.delete(ev._id);
     }
@@ -373,7 +375,7 @@ export const deleteCandidate = mutation({
     const interviews = await ctx.db
       .query('interviews')
       .filter((q) => q.eq(q.field('applicationId'), applicationId))
-      .collect();
+      .take(SMALL_LIST_CAP);
     for (const interview of interviews) {
       await ctx.db.delete(interview._id);
     }
@@ -474,7 +476,7 @@ export const addCandidate = mutation({
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .filter((q) => q.or(q.eq(q.field('role'), 'admin'), q.eq(q.field('role'), 'superadmin')))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const vacancy = await ctx.db.get(vacancyId);
     for (const admin of orgAdmins) {
@@ -801,7 +803,7 @@ export const hireCandidate = mutation({
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', app.organizationId))
       .filter((q) => q.or(q.eq(q.field('role'), 'admin'), q.eq(q.field('role'), 'superadmin')))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const candidate = await ctx.db.get(app.candidateId);
     const vacancy = await ctx.db.get(app.vacancyId);
@@ -869,7 +871,7 @@ export const hireCandidate = mutation({
           .query('onboardingTemplates')
           .withIndex('by_org', (q) => q.eq('organizationId', app.organizationId))
           .filter((q) => q.eq(q.field('isActive'), true))
-          .collect();
+          .take(SMALL_LIST_CAP);
 
         let templateId: Id<'onboardingTemplates'> | undefined;
         if (department) {
@@ -883,7 +885,8 @@ export const hireCandidate = mutation({
         // Use vacancy's hiring manager as onboarding manager, or the user who triggered hire
         const managerId = vacancy?.hiringManagerId || userId;
 
-        // Find a buddy (first available employee who isn't the manager or new hire)
+        // Find a buddy (first available employee who isn't the manager or new hire).
+        // Cap small: we only need the first match.
         const employees = await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', app.organizationId))
@@ -894,7 +897,7 @@ export const hireCandidate = mutation({
               q.neq(q.field('role'), 'superadmin'),
             ),
           )
-          .collect();
+          .take(SMALL_LIST_CAP);
 
         const buddyId = employees.length > 0 ? employees[0]!._id : undefined;
 

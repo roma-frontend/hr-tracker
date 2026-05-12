@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 export const list = query({
   args: {
@@ -15,17 +16,23 @@ export const list = query({
       positions = await ctx.db
         .query('positions')
         .withIndex('by_department', (q: any) => q.eq('departmentId', args.departmentId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     } else if (orgId) {
       positions = await ctx.db
         .query('positions')
         .withIndex('by_org', (q: any) => q.eq('organizationId', orgId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     } else {
-      positions = await ctx.db.query('positions').collect();
+      positions = await ctx.db.query('positions').take(XLARGE_LIST_CAP);
     }
 
-    const users = await ctx.db.query('users').collect();
+    // S refactor: scope users by_org if orgId given; else full-table capped.
+    const users = orgId
+      ? await ctx.db
+          .query('users')
+          .withIndex('by_org', (q: any) => q.eq('organizationId', orgId))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('users').take(XLARGE_LIST_CAP);
 
     return positions.map((pos: any) => {
       const employeeCount = users.filter(

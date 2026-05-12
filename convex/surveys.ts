@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query, internalMutation } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { MAX_PAGE_SIZE } from './pagination';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUERIES
@@ -97,12 +98,12 @@ export const getSurveyResults = query({
     const responses = await ctx.db
       .query('surveyResponses')
       .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const answers = await ctx.db
       .query('surveyAnswers')
       .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Aggregate answers per question
     const questionResults = questions.map((question) => {
@@ -336,7 +337,7 @@ export const deleteSurvey = mutation({
     const questions = await ctx.db
       .query('surveyQuestions')
       .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
-      .collect();
+      .take(SMALL_LIST_CAP);
     for (const question of questions) {
       await ctx.db.delete(question._id);
     }
@@ -610,7 +611,7 @@ export const updateSurveyQuestions = mutation({
     const existingQuestions = await ctx.db
       .query('surveyQuestions')
       .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const question of existingQuestions) {
       await ctx.db.delete(question._id);
@@ -644,7 +645,7 @@ export const activateScheduledSurveys = internalMutation({
     const now = Date.now();
 
     // Get all organizations
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
 
     for (const org of orgs) {
       // Find draft surveys that should be active now
@@ -652,7 +653,7 @@ export const activateScheduledSurveys = internalMutation({
         .query('surveys')
         .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'draft'))
         .filter((q) => q.and(q.lt(q.field('startsAt'), now), q.neq(q.field('startsAt'), undefined)))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       for (const survey of surveysToActivate) {
         await ctx.db.patch(survey._id, {
@@ -683,14 +684,14 @@ export const closeExpiredSurveys = internalMutation({
   handler: async (ctx) => {
     const now = Date.now();
 
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
 
     for (const org of orgs) {
       const surveysToClose = await ctx.db
         .query('surveys')
         .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
         .filter((q) => q.and(q.lt(q.field('endsAt'), now), q.neq(q.field('endsAt'), undefined)))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       for (const survey of surveysToClose) {
         await ctx.db.patch(survey._id, {
@@ -739,7 +740,7 @@ export const getSurveyResultsByDepartment = query({
     const responses = await ctx.db
       .query('surveyResponses')
       .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Load respondent departments
     const respondentIds = responses
@@ -766,7 +767,7 @@ export const getSurveyResultsByDepartment = query({
     const allAnswers = await ctx.db
       .query('surveyAnswers')
       .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Aggregate per department per question
     const departmentResults = Object.entries(departmentGroups).map(([dept, deptResponses]) => {
@@ -829,7 +830,7 @@ export const getSurveyTrends = query({
       .query('surveys')
       .withIndex('by_org_created', (q) => q.eq('organizationId', organizationId))
       .filter((q) => q.gt(q.field('createdAt'), cutoffDate))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const trends = surveys.map((survey) => ({
       surveyId: survey._id,
@@ -920,7 +921,7 @@ export const getSurveyExportData = query({
     const responses = await ctx.db
       .query('surveyResponses')
       .withIndex('by_survey', (q) => q.eq('surveyId', surveyId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const exportData = await Promise.all(
       responses.map(async (resp) => {

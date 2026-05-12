@@ -15,6 +15,7 @@ import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 const BACKUP_RETENTION_HOURS = 48;
 
@@ -114,7 +115,7 @@ export const createOrgBackups = mutation({
     const employees = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     let backedUp = 0;
     let failed = 0;
@@ -148,7 +149,7 @@ export const getOrgBackups = query({
     const backups = await ctx.db
       .query('employeeBackups')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const activeBackups = backups.filter((b) => b.expiresAt > now);
 
@@ -284,7 +285,7 @@ export const cleanupExpiredBackups = mutation({
     const expiredBackups = await ctx.db
       .query('employeeBackups')
       .withIndex('by_expires', (q) => q.lte('expiresAt', now))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     let deleted = 0;
     for (const backup of expiredBackups) {
@@ -304,7 +305,7 @@ export const backupAllEnterpriseOrgs = internalMutation({
     const orgs = await ctx.db
       .query('organizations')
       .withIndex('by_plan', (q) => q.eq('plan', 'enterprise'))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     let totalBackedUp = 0;
     let totalFailed = 0;
@@ -338,7 +339,7 @@ export const createOrgBackupsInternal = internalMutation({
     const employees = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const employee of employees) {
       try {
@@ -363,7 +364,7 @@ export const cleanupExpiredBackupsInternal = internalMutation({
     const expiredBackups = await ctx.db
       .query('employeeBackups')
       .withIndex('by_expires', (q) => q.lte('expiresAt', now))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     let deleted = 0;
     for (const backup of expiredBackups) {
@@ -394,7 +395,9 @@ export const getBackupStats = query({
     }
 
     const now = Date.now();
-    const allBackups = await ctx.db.query('employeeBackups').collect();
+    // Admin-only superadmin dashboard: cap with XLARGE cap. Proper fix would
+    // be to aggregate per-org counts via a materialized view.
+    const allBackups = await ctx.db.query('employeeBackups').take(XLARGE_LIST_CAP);
 
     const activeBackups = allBackups.filter((b) => b.expiresAt > now);
     const totalSize = activeBackups.reduce((sum, b) => sum + b.snapshotSize, 0);
@@ -440,48 +443,52 @@ async function buildEmployeeSnapshot(
   const leaves = await ctx.db
     .query('leaveRequests')
     .withIndex('by_user', (q: any) => q.eq('userId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const tasks = await ctx.db
     .query('tasks')
     .withIndex('by_assigned_to', (q: any) => q.eq('assignedTo', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const createdTasks = await ctx.db
     .query('tasks')
     .withIndex('by_assigned_by', (q: any) => q.eq('assignedBy', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
+  // TODO: companyEvents has no by_creator index; currently scoped to org then
+  // filtered in-memory. Acceptable for backup job — cap bounds memory usage.
   const events = await ctx.db
     .query('companyEvents')
     .withIndex('by_org', (q: any) => q.eq('organizationId', organizationId))
-    .collect()
+    .take(DEFAULT_LIST_CAP)
     .then((all: any[]) => all.filter((e: any) => e.createdBy === userId));
 
   const reviewCycles = await ctx.db
     .query('reviewCycles')
     .withIndex('by_org', (q: any) => q.eq('organizationId', organizationId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const reviewAssignments = await ctx.db
     .query('reviewAssignments')
     .withIndex('by_reviewer', (q: any) => q.eq('reviewerId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
+  // TODO: reviewResponses has no by_reviewee index; inline filter forces full
+  // table scan. Add index when refactoring performance module.
   const reviewResponses = await ctx.db
     .query('reviewResponses')
     .filter((q: any) => q.eq(q.field('revieweeId'), userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const kudos = await ctx.db
     .query('kudos')
     .withIndex('by_receiver', (q: any) => q.eq('receiverId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const sentKudos = await ctx.db
     .query('kudos')
     .withIndex('by_sender', (q: any) => q.eq('senderId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const userPoints = await ctx.db
     .query('userPoints')
@@ -491,47 +498,47 @@ async function buildEmployeeSnapshot(
   const pointTransactions = await ctx.db
     .query('pointTransactions')
     .withIndex('by_user', (q: any) => q.eq('userId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const objectives = await ctx.db
     .query('objectives')
     .withIndex('by_owner', (q: any) => q.eq('ownerId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const documents = await ctx.db
     .query('employeeDocuments')
     .withIndex('by_user', (q: any) => q.eq('userId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const notes = await ctx.db
     .query('employeeNotes')
     .withIndex('by_employee', (q: any) => q.eq('employeeId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const performanceMetrics = await ctx.db
     .query('performanceMetrics')
     .withIndex('by_user', (q: any) => q.eq('userId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const timeTracking = await ctx.db
     .query('timeTracking')
     .withIndex('by_user', (q: any) => q.eq('userId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const ratings = await ctx.db
     .query('supervisorRatings')
     .withIndex('by_employee', (q: any) => q.eq('employeeId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const signatureDocs = await ctx.db
     .query('signatureDocuments')
     .withIndex('by_creator', (q: any) => q.eq('createdBy', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const signatureRequests = await ctx.db
     .query('signatureRequests')
     .withIndex('by_signer', (q: any) => q.eq('signerId', userId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   const sanitizedUser = user
     ? {

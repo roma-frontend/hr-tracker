@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 /**
  * Helper: requires caller to be admin or superadmin.
@@ -63,7 +64,7 @@ export const SECURITY_FEATURES = [
 export const getAllSettings = query({
   args: {},
   handler: async (ctx) => {
-    const settings = await ctx.db.query('securitySettings').collect();
+    const settings = await ctx.db.query('securitySettings').take(SMALL_LIST_CAP);
 
     // Merge with defaults so all features are always present
     return SECURITY_FEATURES.map((feature) => {
@@ -169,7 +170,7 @@ export const logLoginAttempt = mutation({
         .filter((q) =>
           q.and(q.eq(q.field('success'), false), q.gte(q.field('createdAt'), fifteenMinAgo)),
         )
-        .collect();
+        .take(SMALL_LIST_CAP);
 
       if (recentFails.length >= 5) {
         // Check if lockout feature is enabled
@@ -191,7 +192,7 @@ export const logLoginAttempt = mutation({
               .withIndex('by_org_role', (q) =>
                 q.eq('organizationId', user.organizationId!).eq('role', 'admin'),
               )
-              .collect();
+              .take(SMALL_LIST_CAP);
             for (const admin of admins) {
               await ctx.db.insert('notifications', {
                 organizationId: user.organizationId,
@@ -275,7 +276,7 @@ export const getUserDevices = query({
       .query('deviceFingerprints')
       .withIndex('by_user', (q) => q.eq('userId', userId))
       .order('desc')
-      .collect();
+      .take(SMALL_LIST_CAP);
   },
 });
 
@@ -342,7 +343,7 @@ export const getLoginStats = query({
     let attempts = await ctx.db
       .query('loginAttempts')
       .withIndex('by_created', (q) => q.gte('createdAt', since))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (organizationId) {
       attempts = attempts.filter((a) => a.organizationId === organizationId);
@@ -591,7 +592,9 @@ export const getLoginAttemptsByUser = query({
 export const getSuspendedUsers = query({
   args: {},
   handler: async (ctx) => {
-    const allUsers = (await ctx.db.query('users').collect()).filter((u) => u.role !== 'superadmin');
+    const allUsers = (await ctx.db.query('users').take(XLARGE_LIST_CAP)).filter(
+      (u) => u.role !== 'superadmin',
+    );
 
     // Filter only suspended users
     const suspendedUsers = allUsers.filter(

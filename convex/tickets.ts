@@ -7,6 +7,7 @@ import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { Id } from './_generated/dataModel';
 import { getTranslation, getUserLocale } from './translations';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // ─── CREATE TICKET ───────────────────────────────────────────────────────────
 export const createTicket = mutation({
@@ -42,7 +43,7 @@ export const createTicket = mutation({
       .query('supportTickets')
       .withIndex('by_created')
       .filter((q) => q.gte(q.field('createdAt'), new Date(datePart).getTime()))
-      .collect();
+      .take(SMALL_LIST_CAP);
     const seqNum = String(ticketsToday.length + 1).padStart(4, '0');
     const ticketNumber = `SUP-${datePart}-${seqNum}`;
 
@@ -93,7 +94,7 @@ export const createTicket = mutation({
     const superadmins = await ctx.db
       .query('users')
       .withIndex('by_role', (q) => q.eq('role', 'superadmin'))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const admin of superadmins) {
       await ctx.db.insert('notifications', {
@@ -149,7 +150,8 @@ export const getAllTickets = query({
     cursor: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let tickets = await ctx.db.query('supportTickets').collect();
+    // Superadmin cross-tenant view — capped at XLARGE.
+    let tickets = await ctx.db.query('supportTickets').take(XLARGE_LIST_CAP);
 
     // Apply filters
     if (args.status) {
@@ -257,7 +259,8 @@ export const getTicketById = query({
 export const getTicketStats = query({
   args: {},
   handler: async (ctx) => {
-    const tickets = await ctx.db.query('supportTickets').collect();
+    // Superadmin stats aggregation — capped at XLARGE.
+    const tickets = await ctx.db.query('supportTickets').take(XLARGE_LIST_CAP);
     const now = Date.now();
 
     const stats = {
@@ -596,7 +599,8 @@ export const bulkUpdateTickets = mutation({
 export const getMyTickets = query({
   args: { userId: v.id('users') },
   handler: async (ctx, args) => {
-    const tickets = await ctx.db.query('supportTickets').collect();
+    // Capped at XLARGE. TODO: add by_creator/by_assignee index for proper scoped query.
+    const tickets = await ctx.db.query('supportTickets').take(XLARGE_LIST_CAP);
 
     // Filter tickets where user is creator or assignee
     const myTickets = tickets.filter(

@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { Id } from './_generated/dataModel';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // Armenia timezone offset: UTC+4
 const ARMENIA_OFFSET_MS = 4 * 60 * 60 * 1000;
@@ -277,7 +278,7 @@ export const getCurrentlyAtWork = query({
     const records = await ctx.db
       .query('timeTracking')
       .withIndex('by_date', (q) => q.eq('date', today))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const atWork = records.filter((r) => r.status === 'checked_in');
 
@@ -342,7 +343,7 @@ export const getTodayAllAttendance = query({
     const records = await ctx.db
       .query('timeTracking')
       .withIndex('by_date', (q) => q.eq('date', today))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Filter by organization if admin (not superadmin)
     const isSuperadmin = admin.email?.toLowerCase() === SUPERADMIN_EMAIL;
@@ -396,13 +397,19 @@ export const getTodayAttendanceSummary = query({
     const records = await ctx.db
       .query('timeTracking')
       .withIndex('by_date', (q) => q.eq('date', today))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Filter by organization if admin (not superadmin)
     const isSuperadmin = admin.email?.toLowerCase() === SUPERADMIN_EMAIL;
     const orgToFilter = isSuperadmin ? null : admin.organizationId;
 
-    const totalEmployees = await ctx.db.query('users').collect();
+    // Scope user list by org when possible; else capped full-table read.
+    const totalEmployees = orgToFilter
+      ? await ctx.db
+          .query('users')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgToFilter))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('users').take(XLARGE_LIST_CAP);
     // Exclude superadmins from employee counts
     let activeEmployees = totalEmployees.filter((u) => u.isActive && u.role !== 'superadmin');
 
@@ -496,7 +503,12 @@ export const getAllEmployeesAttendanceOverview = query({
     const isSuperadmin = admin.email?.toLowerCase() === SUPERADMIN_EMAIL;
     const orgToFilter = isSuperadmin ? null : admin.organizationId;
 
-    const users = await ctx.db.query('users').collect();
+    const users = orgToFilter
+      ? await ctx.db
+          .query('users')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgToFilter))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('users').take(XLARGE_LIST_CAP);
     // Only include regular employees (not admins, superadmins, supervisors)
     let activeUsers = users.filter((u) => u.isActive && u.role === 'employee');
 

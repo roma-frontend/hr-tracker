@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ============ QUERIES ============
 
@@ -14,7 +15,7 @@ export const listCompensationRecords = query({
     let records = await ctx.db
       .query('compensationRecords')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (userId) records = records.filter((r) => r.userId === userId);
     if (type) records = records.filter((r) => r.type === type);
@@ -65,7 +66,7 @@ export const listCompensationBands = query({
     let bands = await ctx.db
       .query('compensationBands')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (level) bands = bands.filter((b) => b.level === level);
     if (department) bands = bands.filter((b) => b.department === department);
@@ -83,7 +84,7 @@ export const listBonusPrograms = query({
     let programs = await ctx.db
       .query('bonusPrograms')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (status) programs = programs.filter((p) => p.status === status);
 
@@ -101,7 +102,7 @@ export const listReviewCycles = query({
     let cycles = await ctx.db
       .query('compensationReviewCycles')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (year) cycles = cycles.filter((c) => c.year === year);
     if (status) cycles = cycles.filter((c) => c.status === status);
@@ -155,7 +156,7 @@ export const getCompensationSummary = query({
     const records = await ctx.db
       .query('compensationRecords')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const baseRecords = records.filter((r) => r.type === 'base');
     const totalBase = baseRecords.reduce((sum, r) => sum + r.amount, 0);

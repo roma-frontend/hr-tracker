@@ -1,16 +1,57 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─── Default offboarding tasks ───────────────────────────────
 const DEFAULT_TASKS = [
-  { title: 'Revoke system access (email, VPN, tools)', assigneeType: 'it' as const, category: 'access_revoke' as const, order: 0 },
-  { title: 'Return laptop and equipment', assigneeType: 'employee' as const, category: 'equipment_return' as const, order: 1 },
-  { title: 'Transfer project knowledge', assigneeType: 'employee' as const, category: 'knowledge_transfer' as const, order: 2 },
-  { title: 'Hand over documents and files', assigneeType: 'employee' as const, category: 'documentation' as const, order: 3 },
-  { title: 'Conduct exit interview', assigneeType: 'hr' as const, category: 'exit_interview' as const, order: 4 },
-  { title: 'Process final payroll', assigneeType: 'finance' as const, category: 'payroll' as const, order: 5 },
-  { title: 'Remove from org chart and teams', assigneeType: 'hr' as const, category: 'access_revoke' as const, order: 6 },
-  { title: 'Collect badge and keys', assigneeType: 'manager' as const, category: 'equipment_return' as const, order: 7 },
+  {
+    title: 'Revoke system access (email, VPN, tools)',
+    assigneeType: 'it' as const,
+    category: 'access_revoke' as const,
+    order: 0,
+  },
+  {
+    title: 'Return laptop and equipment',
+    assigneeType: 'employee' as const,
+    category: 'equipment_return' as const,
+    order: 1,
+  },
+  {
+    title: 'Transfer project knowledge',
+    assigneeType: 'employee' as const,
+    category: 'knowledge_transfer' as const,
+    order: 2,
+  },
+  {
+    title: 'Hand over documents and files',
+    assigneeType: 'employee' as const,
+    category: 'documentation' as const,
+    order: 3,
+  },
+  {
+    title: 'Conduct exit interview',
+    assigneeType: 'hr' as const,
+    category: 'exit_interview' as const,
+    order: 4,
+  },
+  {
+    title: 'Process final payroll',
+    assigneeType: 'finance' as const,
+    category: 'payroll' as const,
+    order: 5,
+  },
+  {
+    title: 'Remove from org chart and teams',
+    assigneeType: 'hr' as const,
+    category: 'access_revoke' as const,
+    order: 6,
+  },
+  {
+    title: 'Collect badge and keys',
+    assigneeType: 'manager' as const,
+    category: 'equipment_return' as const,
+    order: 7,
+  },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -29,23 +70,24 @@ export const listPrograms = query({
       .query('offboardingPrograms')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .order('desc')
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     return await Promise.all(
       programs.map(async (prog) => {
         const tasks = await ctx.db
           .query('offboardingTasks')
           .withIndex('by_program', (q) => q.eq('programId', prog._id))
-          .collect();
+          .take(SMALL_LIST_CAP);
         const employee = await ctx.db.get(prog.employeeId);
         return {
           ...prog,
           progress: computeProgress(tasks),
           totalTasks: tasks.length,
-          completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped').length,
+          completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped')
+            .length,
           employeeName: employee?.name ?? 'Unknown',
         };
-      })
+      }),
     );
   },
 });
@@ -59,7 +101,7 @@ export const getProgram = query({
     const tasks = await ctx.db
       .query('offboardingTasks')
       .withIndex('by_program', (q) => q.eq('programId', programId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const employee = await ctx.db.get(program.employeeId);
     const manager = await ctx.db.get(program.managerId);
@@ -70,21 +112,24 @@ export const getProgram = query({
       .first();
 
     const tasksWithNames = await Promise.all(
-      tasks.sort((a, b) => a.order - b.order).map(async (task) => {
-        let assigneeName: string | undefined;
-        if (task.assigneeId) {
-          const assignee = await ctx.db.get(task.assigneeId);
-          assigneeName = assignee?.name;
-        }
-        return { ...task, assigneeName };
-      })
+      tasks
+        .sort((a, b) => a.order - b.order)
+        .map(async (task) => {
+          let assigneeName: string | undefined;
+          if (task.assigneeId) {
+            const assignee = await ctx.db.get(task.assigneeId);
+            assigneeName = assignee?.name;
+          }
+          return { ...task, assigneeName };
+        }),
     );
 
     return {
       ...program,
       progress: computeProgress(tasks),
       totalTasks: tasks.length,
-      completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped').length,
+      completedTasks: tasks.filter((t) => t.status === 'completed' || t.status === 'skipped')
+        .length,
       employeeName: employee?.name ?? 'Unknown',
       employeeEmail: employee?.email,
       managerName: manager?.name ?? 'Unknown',
@@ -99,14 +144,16 @@ export const getRetentionInsights = query({
   handler: async (ctx, { organizationId }) => {
     const programs = await ctx.db
       .query('offboardingPrograms')
-      .withIndex('by_org_status', (q) => q.eq('organizationId', organizationId).eq('status', 'completed'))
-      .collect();
+      .withIndex('by_org_status', (q) =>
+        q.eq('organizationId', organizationId).eq('status', 'completed'),
+      )
+      .take(DEFAULT_LIST_CAP);
 
     const exits = await ctx.db
       .query('exitInterviews')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
       .filter((q) => q.eq(q.field('status'), 'completed'))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Reason breakdown
     const reasons: Record<string, number> = {};
@@ -115,14 +162,17 @@ export const getRetentionInsights = query({
     }
 
     // Average experience
-    const scores = exits.filter((e) => e.overallExperience != null).map((e) => e.overallExperience!);
+    const scores = exits
+      .filter((e) => e.overallExperience != null)
+      .map((e) => e.overallExperience!);
     const avgExperience = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
 
     // Would recommend %
     const recommends = exits.filter((e) => e.wouldRecommend != null);
-    const recommendRate = recommends.length > 0
-      ? Math.round((recommends.filter((e) => e.wouldRecommend).length / recommends.length) * 100)
-      : 0;
+    const recommendRate =
+      recommends.length > 0
+        ? Math.round((recommends.filter((e) => e.wouldRecommend).length / recommends.length) * 100)
+        : 0;
 
     return {
       totalExits: programs.length,
@@ -258,7 +308,7 @@ export const addTask = mutation({
     const tasks = await ctx.db
       .query('offboardingTasks')
       .withIndex('by_program', (q) => q.eq('programId', args.programId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     await ctx.db.insert('offboardingTasks', {
       organizationId: args.organizationId,

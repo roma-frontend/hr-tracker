@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // ── Helper: Calculate response time in hours ──────────────────────────────
 function calculateResponseTime(
@@ -108,7 +109,7 @@ export const getSLAConfig = query({
 export const getOrCreateSLAConfig = query({
   args: {},
   handler: async (ctx) => {
-    const configs = await ctx.db.query('slaConfig').collect();
+    const configs = await ctx.db.query('slaConfig').take(SMALL_LIST_CAP);
 
     if (configs.length > 0) {
       return configs[0];
@@ -240,7 +241,7 @@ export const getSLAStats = query({
     organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, { startDate, endDate, organizationId }) => {
-    let metrics = await ctx.db.query('slaMetrics').collect();
+    let metrics = await ctx.db.query('slaMetrics').take(XLARGE_LIST_CAP);
 
     // Filter by organization if provided
     if (organizationId) {
@@ -318,7 +319,7 @@ export const getPendingWithSLA = query({
     let pendingLeaves = await ctx.db
       .query('leaveRequests')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Filter by organization if provided
     if (organizationId) {
@@ -336,7 +337,7 @@ export const getPendingWithSLA = query({
     );
 
     // Batch-load all SLA metrics for the pending leaves
-    const allMetrics = await ctx.db.query('slaMetrics').collect();
+    const allMetrics = await ctx.db.query('slaMetrics').take(XLARGE_LIST_CAP);
     const metricsByLeave = new Map(allMetrics.map((m) => [m.leaveRequestId, m]));
 
     return pendingLeaves.map((leave) => {
@@ -389,7 +390,7 @@ export const getSLATrend = query({
       .query('slaMetrics')
       .withIndex('by_submitted')
       .filter((q) => q.gte(q.field('submittedAt'), startDate))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Filter by organization if provided
     if (organizationId) {

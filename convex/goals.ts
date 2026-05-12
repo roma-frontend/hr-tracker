@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation, internalMutation } from './_generated/server';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // Helper: compute KR completion percentage respecting direction
 function computeKRProgress(
@@ -60,7 +61,7 @@ export const listObjectives = query({
     let objectives = await ctx.db
       .query('objectives')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (periodYear) objectives = objectives.filter((o) => o.periodYear === periodYear);
     if (periodType) objectives = objectives.filter((o) => o.periodType === periodType);
@@ -179,7 +180,7 @@ export const getTeamProgress = query({
       .withIndex('by_org_period', (q) =>
         q.eq('organizationId', organizationId).eq('periodYear', periodYear),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (periodType) objectives = objectives.filter((o) => o.periodType === periodType);
 
@@ -370,13 +371,13 @@ export const deleteObjective = mutation({
     const krs = await ctx.db
       .query('keyResults')
       .withIndex('by_objective', (q) => q.eq('objectiveId', objectiveId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const kr of krs) {
       const checkins = await ctx.db
         .query('goalCheckins')
         .withIndex('by_kr', (q) => q.eq('keyResultId', kr._id))
-        .collect();
+        .take(SMALL_LIST_CAP);
       for (const c of checkins) {
         await ctx.db.delete(c._id);
       }
@@ -412,11 +413,11 @@ export const addKeyResult = mutation({
       throw new Error('Cannot add KR to closed objective');
     }
 
-    // Get next order
+    // Get next order (capped — used only for length counting)
     const existing = await ctx.db
       .query('keyResults')
       .withIndex('by_objective', (q) => q.eq('objectiveId', objectiveId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const now = Date.now();
     const krId = await ctx.db.insert('keyResults', {
@@ -462,11 +463,11 @@ export const deleteKeyResult = mutation({
     const kr = await ctx.db.get(keyResultId);
     if (!kr) throw new Error('Key Result not found');
 
-    // Delete check-ins
+    // Delete check-ins (cascade)
     const checkins = await ctx.db
       .query('goalCheckins')
       .withIndex('by_kr', (q) => q.eq('keyResultId', keyResultId))
-      .collect();
+      .take(SMALL_LIST_CAP);
     for (const c of checkins) {
       await ctx.db.delete(c._id);
     }
@@ -477,7 +478,7 @@ export const deleteKeyResult = mutation({
     const remainingKRs = await ctx.db
       .query('keyResults')
       .withIndex('by_objective', (q) => q.eq('objectiveId', kr.objectiveId))
-      .collect();
+      .take(SMALL_LIST_CAP);
     const newProgress = computeObjectiveProgress(remainingKRs);
     await ctx.db.patch(kr.objectiveId, { progress: newProgress, updatedAt: Date.now() });
   },
@@ -534,7 +535,7 @@ export const checkin = mutation({
     const allKRs = await ctx.db
       .query('keyResults')
       .withIndex('by_objective', (q) => q.eq('objectiveId', kr.objectiveId))
-      .collect();
+      .take(SMALL_LIST_CAP);
     // Use updated value for this KR
     const krsForCalc = allKRs.map((k) =>
       k._id === keyResultId ? { ...k, currentValue: newValue } : k,
@@ -576,21 +577,21 @@ export const sendWeeklyCheckinReminders = internalMutation({
     const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
 
     // Get all organizations
-    const orgs = await ctx.db.query('organizations').collect();
+    const orgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
 
     for (const org of orgs) {
       // Find all active objectives for this org
       const activeObjectives = await ctx.db
         .query('objectives')
         .withIndex('by_org_status', (q) => q.eq('organizationId', org._id).eq('status', 'active'))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       for (const objective of activeObjectives) {
         // Get all key results for this objective
         const keyResults = await ctx.db
           .query('keyResults')
           .withIndex('by_objective', (q) => q.eq('objectiveId', objective._id))
-          .collect();
+          .take(SMALL_LIST_CAP);
 
         // Find KR owners who haven't checked in this week
         for (const kr of keyResults) {

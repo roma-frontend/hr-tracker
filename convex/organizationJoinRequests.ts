@@ -8,6 +8,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUERIES
@@ -20,7 +21,7 @@ export const getActiveOrganizations = query({
     const organizations = await ctx.db
       .query('organizations')
       .filter((q) => q.eq(q.field('isActive'), true))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     return organizations.map((org) => ({
       _id: org._id,
@@ -48,7 +49,7 @@ export const getMyJoinRequests = query({
       .query('organizationInvites')
       .withIndex('by_email', (q) => q.eq('requestedByEmail', user.email))
       .filter((q) => q.eq(q.field('status'), 'pending'))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     // Return requests without organizationName to avoid Promise issues
     return requests.map((req) => ({
@@ -69,7 +70,7 @@ export const getOrgJoinRequests = query({
       .withIndex('by_org_status', (q) =>
         q.eq('organizationId', organizationId).eq('status', 'pending'),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Enrich with requester info - batch load all unique user IDs
     const uniqueUserIds = [
@@ -145,7 +146,7 @@ export const requestJoinOrganization = mutation({
     const admins = await ctx.db
       .query('users')
       .withIndex('by_org_role', (q) => q.eq('organizationId', organizationId).eq('role', 'admin'))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const admin of admins) {
       await ctx.db.insert('notifications', {

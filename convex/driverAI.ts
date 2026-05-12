@@ -9,6 +9,7 @@
 
 import { v } from 'convex/values';
 import { query } from './_generated/server';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 import type { Id, Doc } from './_generated/dataModel';
 import type { QueryCtx } from './_generated/server';
 
@@ -66,7 +67,7 @@ export const queryDriverAvailability = query({
       .withIndex('by_org_available', (q) =>
         q.eq('organizationId', organizationId).eq('isAvailable', true),
       )
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     // Filter by driver name if mentioned
     const targetDrivers = drivers;
@@ -145,7 +146,7 @@ export const getDriverScheduleWithSummary = query({
       .filter((q) =>
         q.and(q.gte(q.field('startTime'), startTime), q.lte(q.field('startTime'), endTime)),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Filter based on access level
     let visibleSchedules = schedules;
@@ -254,7 +255,7 @@ async function checkDriverAvailability(
         ),
       ),
     )
-    .collect();
+    .take(SMALL_LIST_CAP);
 
   if (overlapping.length > 0) {
     return {

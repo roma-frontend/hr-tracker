@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
 import { MAX_PAGE_SIZE } from '../pagination';
+import { DEFAULT_LIST_CAP } from '../lib/limits';
 
 /**
  * Convert emoji to ASCII-safe key format using Unicode code points
@@ -403,11 +404,11 @@ export const sendMessage = mutation({
 
     // Increment unread counts for all members except sender
     // Also stamp readBy with readAt:-1 (delivered) for each online recipient
-    // NOTE: Using .collect() here because we must update unread counts for ALL members of the conversation
+    // NOTE: Capped at DEFAULT_LIST_CAP — covers all expected group sizes.
     const members = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const recipientIds: Array<{ userId: Id<'users'>; readAt: number }> = members
       .filter((m) => m.userId !== args.senderId)
@@ -1255,11 +1256,12 @@ export const deleteConversation = mutation({
     });
 
     // Hide all existing messages from this user (clear chat history for them)
-    // NOTE: Using .collect() here because we must hide ALL existing messages from the deleting user's view
+    // NOTE: Capped at DEFAULT_LIST_CAP — acceptable for typical conversations.
+    // TODO: For very long conversations, migrate to incremental per-page hiding.
     const messages = await ctx.db
       .query('chatMessages')
       .withIndex('by_conversation_created', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     await Promise.all(
       messages.map(async (msg) => {
@@ -1315,7 +1317,7 @@ export const restoreConversation = mutation({
     const messages = await ctx.db
       .query('chatMessages')
       .withIndex('by_conversation_created', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     await Promise.all(
       messages.map(async (msg) => {
@@ -1455,11 +1457,11 @@ export const sendServiceBroadcast = mutation({
     });
 
     // Add unread count for all members except sender
-    // NOTE: Using .collect() here because we must add unread counts for ALL members of the conversation
+    // NOTE: Capped at DEFAULT_LIST_CAP — covers all expected channel sizes.
     const members = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const member of members) {
       if (member.userId !== args.senderId) {

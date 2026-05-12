@@ -340,20 +340,45 @@ const { results, status, loadMore } = usePaginatedQuery(
 
 ## 6. Чек-лист прогресса (обновляй после каждого шага)
 
-- [ ] 4.1. Классификатор написан + CSV с разметкой
-- [ ] 4.2. `convex/lib/limits.ts` создан
-- [ ] 4.3. Pilot `tasks.ts` смигрирован, build зелёный
-- [ ] 4.4a. Hi-priority: `backups.ts`
-- [ ] 4.4a. Hi-priority: `recruitment.ts`
-- [ ] 4.4a. Hi-priority: `surveys.ts`
-- [ ] 4.4a. Hi-priority: `goals.ts`
-- [ ] 4.4a. Hi-priority: `learning.ts`
-- [ ] 4.4a. Hi-priority: `onboarding.ts`
-- [ ] 4.4a. Hi-priority: `performance.ts`
-- [ ] 4.4b. Mid-priority (13 файлов)
-- [ ] 4.4c. Low-priority (35 файлов)
+- [ ] 4.1. Классификатор написан + CSV с разметкой (пропущено — план уже размечен по файлам)
+- [x] 4.2. `convex/lib/limits.ts` создан
+- [x] 4.3. Pilot `tasks.ts` смигрирован, build зелёный (14: 3 S refactor / 3 U cap / 1 M cap / 7 L keep)
+- [x] 4.4a. Hi-priority: `backups.ts` (26 → 25 .take + 1 L; TODO for by_creator/by_reviewee indexes)
+- [x] 4.4a. Hi-priority: `recruitment.ts` (21 → 12 .take + 9 L; TODO for by_application index)
+- [x] 4.4a. Hi-priority: `surveys.ts` (20 → 12 .take + 8 L)
+- [x] 4.4a. Hi-priority: `goals.ts` (18 → 11 .take + 7 L)
+- [x] 4.4a. Hi-priority: `learning.ts` (16 → 8 .take + 8 L)
+- [x] 4.4a. Hi-priority: `onboarding.ts` (16 → 10 .take + 6 L)
+- [x] 4.4a. Hi-priority: `performance.ts` (15 → 11 .take + 4 L; refactored getEligibleParticipants full-scan → by_org)
+- [x] 4.4b. Mid-priority: `analytics.ts` (11 → 11 .take; 2 S refactor by_user/by_status)
+- [x] 4.4b. Mid-priority: `expenses.ts` (10 → 8 .take + 2 L; 5 S refactor for org-scoped reads)
+- [x] 4.4b. Mid-priority: `signatures.ts` (10 → 5 .take + 5 L)
+- [x] 4.4b. Mid-priority: `admin.ts` (7 actual → 7 .take; getSuperadminDashboard 4×XLARGE)
+- [x] 4.4b. Mid-priority: `compliance.ts` (9 → 12 .take; all S refactored to by_org)
+- [x] 4.4b. Mid-priority: `events.ts` (9 → 8 .take + 1 L)
+- [x] 4.4b. Mid-priority: `payroll/queries.ts` (9 → 7 .take + 2 L)
+- [x] 4.4b. Mid-priority: `timeTracking.ts` (8 → 5 .take + 3 L; 2 S refactor)
+- [x] 4.4b. Mid-priority: `auth_module/main.ts` (7 → 7 .take)
+- [x] 4.4b. Mid-priority: `chat/mutations.ts` (4 actual → 4 .take)
+- [x] 4.4b. Mid-priority: `compensation.ts` (7 → 5 .take + 2 L)
+- [x] 4.4b. Mid-priority: `tickets.ts` (7 → 5 .take + 2 L)
+- [x] 4.4c. Low-priority (partial, 19 of 35 files):
+  - [x] aiChat.ts (6), documents.ts (6), offboarding.ts (6), payroll/mutations.ts (6), security.ts (6), sla.ts (6) — 6 × 6-collect
+  - [x] aiEvaluator.ts (5), corporate.ts (5), productivity.ts (5), recognition.ts (5) — 4 × 5-collect
+  - [x] careers.ts (4), drivers/driver_operations.ts (4), organizationJoinRequests.ts (4), positions.ts (4), users/mutations.ts (4) — 5 × 4-collect
+  - [x] automation.ts (3), birthdays.ts (3), driverAI.ts (3), drivers/requests_mutations.ts (3) — 4 × 3-collect
+- [ ] 4.4c. Low-priority remaining (16 files, ~35 collects):
+  - 3-collect: `departments.ts`, `employeeProfiles.ts`, `organizationRequests.ts`, `supervisorRatings.ts`
+  - 2-collect: `drivers/recurring_trips.ts`, `drivers/requests_queries.ts`, `employeeNotes.ts`, `leaves/mutations.ts`, `messenger/messages.ts`, `notifications.ts`, `superadmin/emergency.ts`, `users/admin.ts`, `users/auth.ts`
+  - 1-collect: `aiChatMutations.ts`, `aiSiteEditor.ts`, `messenger/conversations.ts`, `migrations.ts`, `sharepointSync.ts`, `subscriptions.ts`, `subscriptions_admin.ts`, `userPreferences.ts`
 - [ ] 4.5. True-paginate proход (notifications/chat/audit)
 - [ ] 4.6. Удалить `convex/pagination.ts`, финальный build + test
+
+**Current status (check before resuming):**
+
+- `npx tsc --noEmit` = 0 errors throughout
+- Remaining `.collect()` across convex/: ~106 (mostly L-keep in already-migrated files + 16 untouched low-priority files)
+- All hi-priority (7) and all mid-priority (12) done. 19 of 35 low-priority done.
 
 ---
 

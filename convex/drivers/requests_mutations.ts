@@ -7,6 +7,7 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
+import { SMALL_LIST_CAP } from '../lib/limits';
 import { SUPERADMIN_EMAIL } from '../lib/auth';
 import { requireUser } from '../lib/rbac';
 
@@ -84,7 +85,7 @@ export const requestDriver = mutation({
             q.gte(q.field('endDate'), startDateStr),
           ),
         )
-        .collect();
+        .take(SMALL_LIST_CAP);
 
       if (leaveRequests.length > 0) {
         const leave = leaveRequests[0]!;
@@ -173,13 +174,13 @@ export const requestDriver = mutation({
 
     // If requires approval, notify managers
     if (args.requiresApproval) {
-      // NOTE: Using .collect() here because we need to notify ALL admins of a trip request requiring approval
+      // Capped at SMALL_LIST_CAP — admin count bounded.
       const admins = await ctx.db
         .query('users')
         .withIndex('by_org_role', (q) =>
           q.eq('organizationId', args.organizationId).eq('role', 'admin'),
         )
-        .collect();
+        .take(SMALL_LIST_CAP);
 
       for (const admin of admins) {
         await ctx.db.insert('notifications', {

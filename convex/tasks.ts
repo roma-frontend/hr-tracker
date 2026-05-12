@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 /**
  * Helper to batch load users and enrich task data
@@ -19,14 +20,20 @@ async function enrichTasksWithUserData(ctx: any, tasks: any[]) {
   const users = await Promise.all(allUserIds.map((id: Id<'users'>) => ctx.db.get(id)));
   const userMap = new Map(users.map((u) => [u?._id, u]));
 
-  // Batch load all comments
-  const allComments = await ctx.db.query('taskComments').collect();
+  // Batch load comments per-task via by_task index (avoids scanning the whole
+  // taskComments table just to filter by taskId). Caps at SMALL_LIST_CAP per task.
+  const commentsPerTask: any[][] = await Promise.all(
+    tasks.map((t) =>
+      ctx.db
+        .query('taskComments')
+        .withIndex('by_task', (q: any) => q.eq('taskId', t._id))
+        .take(SMALL_LIST_CAP),
+    ),
+  );
+  const allComments: any[] = commentsPerTask.flat();
   const commentsByTask = new Map<Id<'tasks'>, any[]>();
-  tasks.forEach((t) => {
-    commentsByTask.set(
-      t._id,
-      allComments.filter((c: any) => c.taskId === t._id),
-    );
+  tasks.forEach((t, i) => {
+    commentsByTask.set(t._id, commentsPerTask[i] ?? []);
   });
 
   // Collect all comment author IDs
@@ -243,11 +250,12 @@ export const deleteTask = mutation({
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error('Task not found');
 
-    // Delete comments first
+    // Delete comments first (capped: if a task has >SMALL_LIST_CAP comments,
+    // cascade is partial — acceptable trade-off per migration plan §3.4).
     const comments = await ctx.db
       .query('taskComments')
       .withIndex('by_task', (q) => q.eq('taskId', args.taskId))
-      .collect();
+      .take(SMALL_LIST_CAP);
     for (const c of comments) await ctx.db.delete(c._id);
     await ctx.db.delete(args.taskId);
 
@@ -333,7 +341,7 @@ export const getTasksForEmployee = query({
       .query('tasks')
       .withIndex('by_assigned_to', (q) => q.eq('assignedTo', args.userId))
       .order('desc')
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Filter by organization (skip for superadmin)
     let orgTasks = tasks;
@@ -361,7 +369,7 @@ export const getTasksAssignedBy = query({
       .query('tasks')
       .withIndex('by_assigned_by', (q) => q.eq('assignedBy', args.supervisorId))
       .order('desc')
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Filter by organization (skip for superadmin)
     let orgTasks = tasks;
@@ -395,7 +403,7 @@ export const getAllTasks = query({
       throw new Error('Admin must belong to an organization');
     }
 
-    const tasks = await ctx.db.query('tasks').order('desc').collect();
+    const tasks = await ctx.db.query('tasks').order('desc').take(DEFAULT_LIST_CAP);
 
     // Filter tasks by organization
     let orgTasks = tasks;
@@ -427,9 +435,17 @@ export const getTeamTasks = query({
 
     const employeeIds = employees.map((e) => e._id);
 
-    // Get all tasks and filter by employee IDs
-    const allTasks = await ctx.db.query('tasks').collect();
-    const teamTasks = allTasks.filter((t) => employeeIds.includes(t.assignedTo));
+    // Fetch tasks per employee via by_assigned_to index (no full-table scan).
+    // Caps at SMALL_LIST_CAP per employee; team size is bounded by supervisor.
+    const tasksPerEmployee = await Promise.all(
+      employeeIds.map((id) =>
+        ctx.db
+          .query('tasks')
+          .withIndex('by_assigned_to', (q) => q.eq('assignedTo', id))
+          .take(SMALL_LIST_CAP),
+      ),
+    );
+    const teamTasks = tasksPerEmployee.flat();
 
     return enrichTasksWithUserData(ctx, teamTasks);
   },
@@ -454,15 +470,24 @@ export const getMyEmployees = query({
 export const getUsersForAssignment = query({
   args: { requesterId: v.optional(v.id('users')) },
   handler: async (ctx, args) => {
-    // If requesterId provided, filter by organization
-    let users = (await ctx.db.query('users').collect()).filter((u) => u.role !== 'superadmin');
-
+    // Scope reads to the requester's organization via by_org index (avoids
+    // scanning the global users table). Fallback to a capped full-table read
+    // only when requester has no org (superadmin) or no requester was given.
+    let users: any[] = [];
     if (args.requesterId) {
       const requester = await ctx.db.get(args.requesterId);
-      if (requester && requester.organizationId) {
-        users = users.filter((u) => u.organizationId === requester.organizationId);
+      if (requester?.organizationId) {
+        users = await ctx.db
+          .query('users')
+          .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
+          .take(DEFAULT_LIST_CAP);
+      } else {
+        users = await ctx.db.query('users').take(DEFAULT_LIST_CAP);
       }
+    } else {
+      users = await ctx.db.query('users').take(DEFAULT_LIST_CAP);
     }
+    users = users.filter((u) => u.role !== 'superadmin');
 
     // Return all active users (employees, supervisors, admins, AND drivers)
     // Anyone in the organization can be assigned a task

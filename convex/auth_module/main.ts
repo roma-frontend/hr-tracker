@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import bcrypt from 'bcryptjs';
 import { SUPERADMIN_EMAIL, isSuperadminEmail } from '../lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from '../lib/limits';
 
 // ── Password Hashing Helpers ─────────────────────────────────────────────────
 const BCRYPT_ROUNDS = 12;
@@ -167,7 +168,7 @@ export const register = mutation({
         isApproved = true;
 
         // Superadmin must have an org (even a virtual one) — find or create
-        const allOrgs = await ctx.db.query('organizations').collect();
+        const allOrgs = await ctx.db.query('organizations').take(DEFAULT_LIST_CAP);
         if (allOrgs.length === 0) {
           // Bootstrap: create the first platform organization
           if (!args.createOrgName || !args.createOrgSlug) {
@@ -244,7 +245,7 @@ export const register = mutation({
           .withIndex('by_org_active', (q) =>
             q.eq('organizationId', organizationId!).eq('isActive', true),
           )
-          .collect();
+          .take(DEFAULT_LIST_CAP);
         if (isApproved && currentMembers.length >= org.employeeLimit) {
           throw new Error(
             `This organization has reached its employee limit (${org.employeeLimit}). Contact your administrator.`,
@@ -255,7 +256,7 @@ export const register = mutation({
         const orgMembers = await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', organizationId!))
-          .collect();
+          .take(DEFAULT_LIST_CAP);
 
         if (orgMembers.length === 0) {
           // First person in org → auto-admin, auto-approved
@@ -298,7 +299,7 @@ export const register = mutation({
           .withIndex('by_org_role', (q) =>
             q.eq('organizationId', organizationId!).eq('role', 'admin'),
           )
-          .collect();
+          .take(SMALL_LIST_CAP);
 
         for (const admin of admins) {
           await ctx.db.insert('notifications', {
@@ -344,10 +345,23 @@ export const login = mutation({
      * when `isFaceLogin` is true. Must match user._id + recent timestamp.
      */
     faceVerificationToken: v.optional(v.string()),
+    /**
+     * When true, skips both password and face verification. Used exclusively
+     * by the OAuth session exchange (Google → Convex user → JWT).
+     */
+    isOAuthLogin: v.optional(v.boolean()),
   },
   handler: async (
     ctx,
-    { email, password, sessionToken, sessionExpiry, isFaceLogin, faceVerificationToken },
+    {
+      email,
+      password,
+      sessionToken,
+      sessionExpiry,
+      isFaceLogin,
+      faceVerificationToken,
+      isOAuthLogin,
+    },
   ) => {
     return wrapConvexError(async () => {
       const user = await ctx.db
@@ -368,7 +382,9 @@ export const login = mutation({
       // ═══════════════════════════════════════════════════════════════
       // CREDENTIAL VERIFICATION — the core auth gate
       // ═══════════════════════════════════════════════════════════════
-      if (isFaceLogin) {
+      if (isOAuthLogin) {
+        // OAuth path: Google already verified identity, skip credential check
+      } else if (isFaceLogin) {
         // Face-login path: require server-verified token
         if (!faceVerificationToken) {
           throw new Error('Face verification token is required for Face ID login');
@@ -803,7 +819,7 @@ export const googleOAuthLogin = mutation({
     const allOrgs = await ctx.db
       .query('organizations')
       .filter((q) => q.eq(q.field('isActive'), true))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
     if (allOrgs.length === 0) {
       throw new Error('No active organizations found. Please contact administrator.');
     }
@@ -818,7 +834,7 @@ export const googleOAuthLogin = mutation({
     const orgMembers = await ctx.db
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const isFirstMember = orgMembers.length === 0;
     const role = isFirstMember ? 'admin' : 'employee';
@@ -850,7 +866,7 @@ export const googleOAuthLogin = mutation({
       const admins = await ctx.db
         .query('users')
         .withIndex('by_org_role', (q) => q.eq('organizationId', organizationId).eq('role', 'admin'))
-        .collect();
+        .take(SMALL_LIST_CAP);
 
       for (const admin of admins) {
         await ctx.db.insert('notifications', {

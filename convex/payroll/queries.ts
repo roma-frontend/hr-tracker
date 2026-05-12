@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import { requireOrgAdmin, requireOrgSupervisor, requireUser } from '../lib/rbac';
 import { isSuperadminEmail } from '../lib/auth';
+import { DEFAULT_LIST_CAP } from '../lib/limits';
 
 export const getDashboardStats = query({
   args: {
@@ -29,12 +30,12 @@ export const getDashboardStats = query({
     const runs = await ctx.db
       .query('payrollRuns')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const records = await ctx.db
       .query('payrollRecords')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const totalGross = records.reduce((sum, r) => sum + r.grossSalary, 0);
     const totalNet = records.reduce((sum, r) => sum + r.netSalary, 0);
@@ -86,7 +87,7 @@ export const getPayrollRecords = query({
     let records = await ctx.db
       .query('payrollRecords')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (status) {
       records = records.filter((r) => r.status === status);
@@ -152,7 +153,7 @@ export const getPayrollRuns = query({
     let runs = await ctx.db
       .query('payrollRuns')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (status) {
       runs = runs.filter((r) => r.status === status);
@@ -255,12 +256,12 @@ export const getPayslips = query({
       payslips = await ctx.db
         .query('payslips')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     } else if (userId) {
       payslips = await ctx.db
         .query('payslips')
         .withIndex('by_user', (q) => q.eq('userId', userId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     } else {
       return [];
     }
@@ -368,7 +369,7 @@ export const getAuditLog = query({
     let logs = await ctx.db
       .query('payrollAuditLog')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     if (payrollRunId) {
       logs = logs.filter((l) => l.payrollRunId === payrollRunId);

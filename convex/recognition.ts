@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { MAX_PAGE_SIZE } from './pagination';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUERIES
@@ -161,7 +162,7 @@ export const getLeaderboard = query({
       .query('kudos')
       .withIndex('by_org_created', (q) => q.eq('organizationId', organizationId))
       .order('desc')
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const filteredKudos =
       startDate > 0 ? allKudos.filter((k) => k.createdAt >= startDate) : allKudos;
@@ -206,14 +207,14 @@ export const getUserKudosStats = query({
       .withIndex('by_org_receiver', (q) =>
         q.eq('organizationId', organizationId).eq('receiverId', userId),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const sent = await ctx.db
       .query('kudos')
       .withIndex('by_org_sender', (q) =>
         q.eq('organizationId', organizationId).eq('senderId', userId),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Category breakdown for received kudos
     const categoryBreakdown: Record<string, number> = {};
@@ -242,7 +243,7 @@ export const getBadges = query({
       .withIndex('by_org_active', (q) =>
         q.eq('organizationId', organizationId).eq('isActive', true),
       )
-      .collect();
+      .take(SMALL_LIST_CAP);
   },
 });
 
@@ -258,7 +259,7 @@ export const getUserBadges = query({
     const awards = await ctx.db
       .query('kudosBadgeAwards')
       .withIndex('by_org_user', (q) => q.eq('organizationId', organizationId).eq('userId', userId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     if (awards.length === 0) return [];
 

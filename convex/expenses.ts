@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // ============ QUERIES ============
 
@@ -13,11 +14,15 @@ export const listExpenses = query({
     periodEnd: v.optional(v.number()),
   },
   handler: async (ctx, { organizationId, userId, category, status, periodStart, periodEnd }) => {
-    let expenses = await ctx.db.query('expenses').order('desc').collect();
+    // Scope by org via by_org index when possible; else capped full-table read.
+    let expenses = organizationId
+      ? await ctx.db
+          .query('expenses')
+          .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('expenses').order('desc').take(XLARGE_LIST_CAP);
 
-    if (organizationId) {
-      expenses = expenses.filter((e) => e.organizationId === organizationId);
-    }
     if (userId) expenses = expenses.filter((e) => e.userId === userId);
     if (category) expenses = expenses.filter((e) => e.category === category);
     if (status) expenses = expenses.filter((e) => e.status === status);
@@ -87,11 +92,14 @@ export const listExpenseCategories = query({
     activeOnly: v.optional(v.boolean()),
   },
   handler: async (ctx, { organizationId, activeOnly }) => {
-    let categories = await ctx.db.query('expenseCategories').order('desc').collect();
-
-    if (organizationId) {
-      categories = categories.filter((c) => c.organizationId === organizationId);
-    }
+    // Scope by org via by_org index when possible; else capped full-table read.
+    let categories = organizationId
+      ? await ctx.db
+          .query('expenseCategories')
+          .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('expenseCategories').order('desc').take(XLARGE_LIST_CAP);
 
     if (activeOnly) categories = categories.filter((c) => c.isActive);
 
@@ -104,13 +112,18 @@ export const getExpensePolicy = query({
     organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, { organizationId }) => {
-    let policies = await ctx.db.query('expensePolicies').order('desc').collect();
-
-    if (organizationId) {
-      policies = policies.filter((p) => p.organizationId === organizationId && p.isActive);
-    } else {
-      policies = policies.filter((p) => p.isActive);
-    }
+    // Scope by org via by_org_active index when possible.
+    const policies = organizationId
+      ? await ctx.db
+          .query('expensePolicies')
+          .withIndex('by_org_active', (q) =>
+            q.eq('organizationId', organizationId).eq('isActive', true),
+          )
+          .order('desc')
+          .take(SMALL_LIST_CAP)
+      : (await ctx.db.query('expensePolicies').order('desc').take(XLARGE_LIST_CAP)).filter(
+          (p) => p.isActive,
+        );
 
     return policies[0] ?? null;
   },
@@ -123,11 +136,14 @@ export const listExpenseReports = query({
     status: v.optional(v.string()),
   },
   handler: async (ctx, { organizationId, userId, status }) => {
-    let reports = await ctx.db.query('expenseReports').order('desc').collect();
-
-    if (organizationId) {
-      reports = reports.filter((r) => r.organizationId === organizationId);
-    }
+    // Scope by org via by_org index when possible; else capped full-table read.
+    let reports = organizationId
+      ? await ctx.db
+          .query('expenseReports')
+          .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('expenseReports').order('desc').take(XLARGE_LIST_CAP);
 
     if (userId) reports = reports.filter((r) => r.userId === userId);
     if (status) reports = reports.filter((r) => r.status === status);
@@ -190,11 +206,14 @@ export const getExpenseSummary = query({
     periodEnd: v.optional(v.number()),
   },
   handler: async (ctx, { organizationId, periodStart, periodEnd }) => {
-    let expenses = await ctx.db.query('expenses').order('desc').collect();
-
-    if (organizationId) {
-      expenses = expenses.filter((e) => e.organizationId === organizationId);
-    }
+    // Scope by org via by_org index when possible; else capped full-table read.
+    let expenses = organizationId
+      ? await ctx.db
+          .query('expenses')
+          .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('expenses').order('desc').take(XLARGE_LIST_CAP);
 
     if (periodStart) expenses = expenses.filter((e) => e.expenseDate >= periodStart);
     if (periodEnd) expenses = expenses.filter((e) => e.expenseDate <= periodEnd);
@@ -628,7 +647,7 @@ export const addExpenseToReport = mutation({
     const items = await ctx.db
       .query('expenseReportItems')
       .withIndex('by_report', (q) => q.eq('reportId', reportId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     let totalAmount = 0;
     for (const item of items) {
@@ -653,7 +672,7 @@ export const removeExpenseFromReport = mutation({
     const items = await ctx.db
       .query('expenseReportItems')
       .withIndex('by_report', (q) => q.eq('reportId', reportId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     const itemToRemove = items.find((i) => i.expenseId === expenseId);
     if (!itemToRemove) throw new Error('Expense not found in report');
@@ -664,7 +683,7 @@ export const removeExpenseFromReport = mutation({
     const remainingItems = await ctx.db
       .query('expenseReportItems')
       .withIndex('by_report', (q) => q.eq('reportId', reportId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     let totalAmount = 0;
     for (const item of remainingItems) {

@@ -1,6 +1,7 @@
 import { query } from './_generated/server';
 import { v } from 'convex/values';
 import { isSuperadminEmail } from './lib/auth';
+import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // ── Get analytics overview ─────────────────────────────────────────────────
 export const getAnalyticsOverview = query({
@@ -12,17 +13,16 @@ export const getAnalyticsOverview = query({
       users = await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       leaves = await ctx.db
         .query('leaveRequests')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     } else {
-      // Superadmin: load with indexes where available
-      users = await ctx.db.query('users').collect();
-      // For leaves, use status index if possible
-      leaves = await ctx.db.query('leaveRequests').collect();
+      // Superadmin: full-table reads capped at XLARGE.
+      users = await ctx.db.query('users').take(XLARGE_LIST_CAP);
+      leaves = await ctx.db.query('leaveRequests').take(XLARGE_LIST_CAP);
     }
 
     // Exclude superadmin from employee count
@@ -75,7 +75,7 @@ export const getAnalyticsOverview = query({
 export const getDepartmentStats = query({
   args: { requesterId: v.optional(v.id('users')) },
   handler: async (ctx, { requesterId }) => {
-    let users = await ctx.db.query('users').collect();
+    let users = await ctx.db.query('users').take(XLARGE_LIST_CAP);
 
     if (requesterId) {
       const requester = await ctx.db.get(requesterId);
@@ -89,7 +89,7 @@ export const getDepartmentStats = query({
         users = await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
-          .collect();
+          .take(DEFAULT_LIST_CAP);
       }
     }
 
@@ -162,13 +162,13 @@ export const getLeaveTrends = query({
         leaves = await ctx.db
           .query('leaveRequests')
           .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
-          .collect();
+          .take(DEFAULT_LIST_CAP);
       } else {
-        // Superadmin: collect all leaves
-        leaves = await ctx.db.query('leaveRequests').collect();
+        // Superadmin: capped full-table read
+        leaves = await ctx.db.query('leaveRequests').take(XLARGE_LIST_CAP);
       }
     } else {
-      leaves = await ctx.db.query('leaveRequests').collect();
+      leaves = await ctx.db.query('leaveRequests').take(XLARGE_LIST_CAP);
     }
 
     const now = Date.now();
@@ -189,8 +189,8 @@ export const getUserAnalytics = query({
 
     const userLeaves = await ctx.db
       .query('leaveRequests')
-      .filter((q) => q.eq(q.field('userId'), userId))
-      .collect();
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .take(DEFAULT_LIST_CAP);
 
     const totalDaysTaken = userLeaves
       .filter((l) => l.status === 'approved')
@@ -227,10 +227,11 @@ export const getUserAnalytics = query({
 export const getTeamCalendar = query({
   args: { requesterId: v.optional(v.id('users')) },
   handler: async (ctx, { requesterId }) => {
+    // Use by_status index to avoid full-table scan.
     let leaves = await ctx.db
       .query('leaveRequests')
-      .filter((q) => q.eq(q.field('status'), 'approved'))
-      .collect();
+      .withIndex('by_status', (q) => q.eq('status', 'approved'))
+      .take(XLARGE_LIST_CAP);
 
     if (requesterId) {
       const requester = await ctx.db.get(requesterId);

@@ -3,6 +3,7 @@ import { mutation } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
 import { calculatePayroll } from '../lib/payrollCalculator';
 import { requireOrgAdmin } from '../lib/rbac';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from '../lib/limits';
 
 type RunTotals = {
   totalGross: number;
@@ -16,7 +17,7 @@ async function recomputeRunTotals(ctx: any, payrollRunId: Id<'payrollRuns'>): Pr
   const records = await ctx.db
     .query('payrollRecords')
     .withIndex('by_payroll_run', (q: any) => q.eq('payrollRunId', payrollRunId))
-    .collect();
+    .take(DEFAULT_LIST_CAP);
 
   let totalGross = 0;
   let totalNet = 0;
@@ -139,7 +140,7 @@ export const calculatePayrollRun = mutation({
     const employees = await ctx.db
       .query('employeeProfiles')
       .withIndex('by_org', (q) => q.eq('organizationId', run.organizationId!))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const settings = await ctx.db
       .query('salarySettings')
@@ -297,7 +298,7 @@ export const approvePayrollRun = mutation({
     const records = await ctx.db
       .query('payrollRecords')
       .withIndex('by_payroll_run', (q) => q.eq('payrollRunId', args.payrollRunId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const record of records) {
       await ctx.db.patch(record._id, {
@@ -347,7 +348,7 @@ export const markPayrollRunAsPaid = mutation({
     const records = await ctx.db
       .query('payrollRecords')
       .withIndex('by_payroll_run', (q) => q.eq('payrollRunId', args.payrollRunId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const record of records) {
       await ctx.db.patch(record._id, {
@@ -396,7 +397,7 @@ export const cancelPayrollRun = mutation({
     const records = await ctx.db
       .query('payrollRecords')
       .withIndex('by_payroll_run', (q) => q.eq('payrollRunId', args.payrollRunId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     for (const record of records) {
       await ctx.db.patch(record._id, {
@@ -655,7 +656,7 @@ export const deletePayrollRecord = mutation({
     const payslips = await ctx.db
       .query('payslips')
       .withIndex('by_payroll_record', (q) => q.eq('payrollRecordId', args.payrollRecordId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const payslip of payslips) {
       await ctx.db.delete(payslip._id);

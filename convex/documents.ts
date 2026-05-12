@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { MAX_PAGE_SIZE } from './pagination';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─── Helper: Check permissions ───────────────────────────────────────────────
 async function checkAccess(ctx: any, organizationId: any, requesterId: any) {
@@ -192,7 +193,7 @@ export const deleteDocument = mutation({
       .withIndex('by_document', (q) =>
         q.eq('organizationId', doc.organizationId).eq('documentId', doc._id),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
     for (const view of views) await ctx.db.delete(view._id);
 
     await ctx.db.delete(args.documentId);
@@ -250,7 +251,7 @@ export const getMyDocumentViews = query({
       .withIndex('by_user', (q) =>
         q.eq('organizationId', args.organizationId).eq('userId', args.requesterId),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
   },
 });
 
@@ -267,7 +268,7 @@ export const getDocumentViews = query({
       .withIndex('by_document', (q) =>
         q.eq('organizationId', args.organizationId).eq('documentId', args.documentId),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const enriched = await Promise.all(
       views.map(async (view) => {
@@ -293,7 +294,7 @@ export const getDocumentCategories = query({
       .query('documentCategories')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .order('asc')
-      .collect();
+      .take(SMALL_LIST_CAP);
   },
 });
 
@@ -339,12 +340,12 @@ export const getTeamDocumentOverview = query({
     const docs = await ctx.db
       .query('documents')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const views = await ctx.db
       .query('documentViews')
       .withIndex('by_user', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const totalDocuments = docs.length;
     const publishedDocuments = docs.filter((d) => d.isPublished).length;

@@ -9,6 +9,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPANY EVENTS MANAGEMENT
@@ -73,7 +74,7 @@ export const createCompanyEvent = mutation({
       .withIndex('by_org_role', (q) =>
         q.eq('organizationId', args.organizationId).eq('role', 'admin'),
       )
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const admin of admins) {
       await ctx.db.insert('notifications', {
@@ -138,7 +139,7 @@ export const updateCompanyEvent = mutation({
     await ctx.db
       .query('leaveConflictAlerts')
       .withIndex('by_event', (q) => q.eq('eventId', args.eventId))
-      .collect()
+      .take(SMALL_LIST_CAP)
       .then((alerts) => {
         for (const alert of alerts) {
           ctx.db.patch(alert._id, { isReviewed: false });
@@ -173,7 +174,7 @@ export const deleteCompanyEvent = mutation({
     const alerts = await ctx.db
       .query('leaveConflictAlerts')
       .withIndex('by_event', (q) => q.eq('eventId', eventId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     for (const alert of alerts) {
       await ctx.db.delete(alert._id);
@@ -201,7 +202,7 @@ export const getCompanyEvents = query({
       const allEvents = await ctx.db
         .query('companyEvents')
         .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-        .collect();
+        .take(DEFAULT_LIST_CAP);
 
       events = allEvents.filter(
         (e) =>
@@ -264,7 +265,7 @@ export const checkLeaveConflictsManual = mutation({
     const events = await ctx.db
       .query('companyEvents')
       .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const overlappingEvents = events.filter((event) => {
       // Check if leave overlaps with event
@@ -332,7 +333,7 @@ export const checkLeaveConflicts = mutation({
     const events = await ctx.db
       .query('companyEvents')
       .withIndex('by_org', (q) => q.eq('organizationId', user.organizationId!))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const overlappingEvents = events.filter((event) => {
       // Check if leave overlaps with event
@@ -375,7 +376,7 @@ export const checkLeaveConflicts = mutation({
             .withIndex('by_org_role', (q) =>
               q.eq('organizationId', user.organizationId!).eq('role', 'admin'),
             )
-            .collect();
+            .take(SMALL_LIST_CAP);
 
           for (const admin of admins) {
             await ctx.db.insert('notifications', {
@@ -526,7 +527,7 @@ export const getEventAttendanceStatus = query({
       await ctx.db
         .query('users')
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
-        .collect()
+        .take(DEFAULT_LIST_CAP)
     ).filter((u) => u.role !== 'superadmin');
 
     const requiredUsers = users.filter(

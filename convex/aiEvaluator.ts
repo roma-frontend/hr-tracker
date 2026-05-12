@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ── Calculate Employee Score ──────────────────────────────────────────────
 export const calculateEmployeeScore = query({
@@ -20,13 +21,13 @@ export const calculateEmployeeScore = query({
     const leaves = await ctx.db
       .query('leaveRequests')
       .withIndex('by_user', (q) => q.eq('userId', args.userId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Get manager notes
     const notes = await ctx.db
       .query('employeeNotes')
       .withIndex('by_employee', (q) => q.eq('employeeId', args.userId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     // Get real time tracking data (last 60 days)
     const timeRecords = await ctx.db
@@ -104,20 +105,19 @@ export const evaluateLeaveRequest = query({
     const allLeaves = await ctx.db
       .query('leaveRequests')
       .withIndex('by_user', (q) => q.eq('userId', leave.userId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const notes = await ctx.db
       .query('employeeNotes')
       .withIndex('by_employee', (q) => q.eq('employeeId', leave.userId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
-    // Check team coverage
+    // Check team coverage (S refactor: use by_status index)
     const teamLeaves = await ctx.db
       .query('leaveRequests')
-      .filter((q) =>
-        q.and(q.eq(q.field('status'), 'approved'), q.neq(q.field('userId'), leave.userId)),
-      )
-      .collect();
+      .withIndex('by_status', (q) => q.eq('status', 'approved'))
+      .filter((q) => q.neq(q.field('userId'), leave.userId))
+      .take(DEFAULT_LIST_CAP);
 
     const overlappingLeaves = teamLeaves.filter(
       (tl) => tl.startDate <= leave.endDate && tl.endDate >= leave.startDate,

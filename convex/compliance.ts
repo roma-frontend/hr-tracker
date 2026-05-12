@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
 import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 /**
  * Helper: requires caller to be admin or superadmin.
@@ -137,11 +138,14 @@ export const getGdprRequests = query({
   handler: async (ctx, args) => {
     const { orgId } = await requireAdmin(ctx, args.adminId);
 
-    let requests = await ctx.db.query('gdprRequests').order('desc').collect();
-
-    if (orgId) {
-      requests = requests.filter((r) => r.organizationId === orgId);
-    }
+    // Scope by org via by_org index when admin is non-superadmin; else capped full-table.
+    let requests = orgId
+      ? await ctx.db
+          .query('gdprRequests')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('gdprRequests').order('desc').take(XLARGE_LIST_CAP);
 
     if (args.userId) {
       requests = requests.filter((r) => r.userId === args.userId);
@@ -299,11 +303,14 @@ export const getUserConsents = query({
   handler: async (ctx, args) => {
     const { orgId } = await requireAdmin(ctx, args.adminId);
 
-    let consents = await ctx.db.query('consentRecords').order('desc').collect();
-
-    if (orgId) {
-      consents = consents.filter((c) => c.organizationId === orgId);
-    }
+    // Scope by org via by_org index when admin is non-superadmin; else capped full-table.
+    let consents = orgId
+      ? await ctx.db
+          .query('consentRecords')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('consentRecords').order('desc').take(XLARGE_LIST_CAP);
 
     if (args.userId) {
       consents = consents.filter((c) => c.userId === args.userId);
@@ -324,7 +331,7 @@ export const getOrgConsentStats = query({
     const allConsents = await ctx.db
       .query('consentRecords')
       .withIndex('by_org', (q) => q.eq('organizationId', orgId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     const consentTypes = new Set(allConsents.map((c) => c.consentType));
     const stats: Record<string, { granted: number; withdrawn: number }> = {};
@@ -401,11 +408,14 @@ export const getDataAccessLogs = query({
   handler: async (ctx, args) => {
     const { orgId } = await requireAdmin(ctx, args.adminId);
 
-    let logs = await ctx.db.query('dataAccessLogs').order('desc').collect();
-
-    if (orgId) {
-      logs = logs.filter((l) => l.organizationId === orgId);
-    }
+    // Scope by org via by_org index when admin is non-superadmin; else capped full-table.
+    let logs = orgId
+      ? await ctx.db
+          .query('dataAccessLogs')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('dataAccessLogs').order('desc').take(XLARGE_LIST_CAP);
 
     if (args.userId) {
       logs = logs.filter((l) => l.userId === args.userId);
@@ -541,11 +551,14 @@ export const getPolicies = query({
   handler: async (ctx, args) => {
     const { orgId } = await requireAdmin(ctx, args.adminId);
 
-    let policies = await ctx.db.query('compliancePolicies').order('desc').collect();
-
-    if (orgId) {
-      policies = policies.filter((p) => p.organizationId === orgId);
-    }
+    // Scope by org via by_org index when admin is non-superadmin; else capped full-table.
+    let policies = orgId
+      ? await ctx.db
+          .query('compliancePolicies')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .order('desc')
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('compliancePolicies').order('desc').take(XLARGE_LIST_CAP);
 
     if (args.policyType) {
       policies = policies.filter((p) => p.policyType === args.policyType);
@@ -614,17 +627,32 @@ export const getComplianceStats = query({
   handler: async (ctx, args) => {
     const { orgId } = await requireAdmin(ctx, args.adminId);
 
-    let gdprRequests = await ctx.db.query('gdprRequests').collect();
-    let dataAccessLogs = await ctx.db.query('dataAccessLogs').collect();
-    let consentRecords = await ctx.db.query('consentRecords').collect();
-    let policies = await ctx.db.query('compliancePolicies').collect();
-
-    if (orgId) {
-      gdprRequests = gdprRequests.filter((r) => r.organizationId === orgId);
-      dataAccessLogs = dataAccessLogs.filter((l) => l.organizationId === orgId);
-      consentRecords = consentRecords.filter((c) => c.organizationId === orgId);
-      policies = policies.filter((p) => p.organizationId === orgId);
-    }
+    // Scope all counts by org via by_org indexes when admin is non-superadmin;
+    // else capped full-table reads at XLARGE.
+    const gdprRequests = orgId
+      ? await ctx.db
+          .query('gdprRequests')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('gdprRequests').take(XLARGE_LIST_CAP);
+    const dataAccessLogs = orgId
+      ? await ctx.db
+          .query('dataAccessLogs')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('dataAccessLogs').take(XLARGE_LIST_CAP);
+    const consentRecords = orgId
+      ? await ctx.db
+          .query('consentRecords')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('consentRecords').take(XLARGE_LIST_CAP);
+    const policies = orgId
+      ? await ctx.db
+          .query('compliancePolicies')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('compliancePolicies').take(XLARGE_LIST_CAP);
 
     const gdprByStatus = {
       pending: gdprRequests.filter((r) => r.status === 'pending').length,
