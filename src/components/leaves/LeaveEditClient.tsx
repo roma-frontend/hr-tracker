@@ -211,7 +211,7 @@ export default function LeaveEditClient() {
                         className={cn(
                           'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0',
                           isCompleted
-                            ? 'bg-(--primary) border-(--primary) text-white'
+                            ? 'bg-blue-500 border-(--primary) text-white'
                             : isCurrent
                               ? 'border-(--primary) bg-(--background) text-(--primary) scale-110'
                               : 'border-(--border) bg-(--background) text-(--text-muted)',
@@ -395,7 +395,7 @@ function TypeStep({ value, onChange }: { value: LeaveType; onChange: (v: LeaveTy
               className={cn(
                 'p-2.5 rounded-full',
                 isSelected
-                  ? 'bg-(--primary) text-white shadow-lg shadow-(--primary)/30'
+                  ? 'bg-blue-500 text-white shadow-lg shadow-(--primary)/30'
                   : colorMap[type.color],
               )}
             >
@@ -415,7 +415,7 @@ function TypeStep({ value, onChange }: { value: LeaveType; onChange: (v: LeaveTy
               </p>
             </div>
             {isSelected && (
-              <Badge className="bg-gradient-to-r from-(--primary) to-(--primary)/80 text-white text-[10px] px-2 py-0.5 mt-1 shadow-sm">
+              <Badge className="bg-blue-500 text-white text-[10px] px-2 py-0.5 mt-1 shadow-sm">
                 ✓{' '}
                 {i18n.language === 'ru'
                   ? 'Выбрано'
