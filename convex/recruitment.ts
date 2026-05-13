@@ -1,8 +1,10 @@
 import { v } from 'convex/values';
 import { query, mutation, action } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
+import type { MutationCtx } from './_generated/server';
 import { api } from './_generated/api';
 import type { Id } from './_generated/dataModel';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ============ QUERIES ============
@@ -944,4 +946,36 @@ export const hireCandidate = mutation({
 
     return { applicationId, candidateId: app.candidateId };
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED MUTATIONS — verified identity via ctx.auth
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const secureDeleteVacancy = mutation({
+  args: { vacancyId: v.id('vacancies') },
+  handler: withAuth<MutationCtx, { vacancyId: Id<'vacancies'> }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { vacancyId }, caller) => {
+      const vacancy = (await ctx.db.get(vacancyId)) as any;
+      if (!vacancy) throw new Error('Vacancy not found');
+      if (caller.role !== 'superadmin' && caller.organizationId !== vacancy.organizationId) {
+        throw new Error('Access denied');
+      }
+      await ctx.db.delete(vacancyId);
+    },
+  ),
+});
+
+export const secureDeleteCandidate = mutation({
+  args: { applicationId: v.id('applications') },
+  handler: withAuth<MutationCtx, { applicationId: Id<'applications'> }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { applicationId }, caller) => {
+      const app = (await ctx.db.get(applicationId)) as any;
+      if (!app) throw new Error('Application not found');
+      if (app.candidateId) await ctx.db.delete(app.candidateId);
+      await ctx.db.delete(applicationId);
+    },
+  ),
 });

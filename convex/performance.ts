@@ -1,6 +1,8 @@
 import { v } from 'convex/values';
 import { mutation, query, internalMutation } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
 import { Id } from './_generated/dataModel';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -778,4 +780,30 @@ export const checkDeadlineNotifications = internalMutation({
       }
     }
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED: Delete review cycle — verified identity
+// ═══════════════════════════════════════════════════════════════════════════════
+export const secureDeleteCycle = mutation({
+  args: { cycleId: v.id('reviewCycles') },
+  handler: withAuth<MutationCtx, { cycleId: Id<'reviewCycles'> }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { cycleId }, caller) => {
+      const cycle = (await ctx.db.get(cycleId)) as any;
+      if (!cycle) throw new Error('Review cycle not found');
+      if (caller.role !== 'superadmin' && caller.organizationId !== cycle.organizationId) {
+        throw new Error('Access denied');
+      }
+      await ctx.db.delete(cycleId);
+      await ctx.db.insert('auditLogs', {
+        organizationId: cycle.organizationId,
+        userId: caller._id,
+        action: 'review_cycle_deleted',
+        target: cycleId,
+        details: JSON.stringify({ name: cycle.name }),
+        createdAt: Date.now(),
+      });
+    },
+  ),
 });

@@ -1,6 +1,9 @@
 import { query, mutation, internalMutation } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 import { internal, api } from './_generated/api';
 import { v } from 'convex/values';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -704,4 +707,22 @@ export const sendOnboardingOverdueReminders = internalMutation({
       }
     }
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED: Delete onboarding template — verified identity
+// ═══════════════════════════════════════════════════════════════════════════════
+export const secureDeleteTemplate = mutation({
+  args: { templateId: v.id('onboardingTemplates') },
+  handler: withAuth<MutationCtx, { templateId: Id<'onboardingTemplates'> }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { templateId }, caller) => {
+      const template = (await ctx.db.get(templateId)) as any;
+      if (!template) throw new Error('Template not found');
+      if (caller.role !== 'superadmin' && caller.organizationId !== template.organizationId) {
+        throw new Error('Access denied');
+      }
+      await ctx.db.delete(templateId);
+    },
+  ),
 });
