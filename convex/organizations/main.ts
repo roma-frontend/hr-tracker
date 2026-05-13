@@ -132,8 +132,6 @@ export const getAllOrganizations = query({
         throw new Error('Superadmin only');
       }
     }
-      throw new Error('Superadmin only');
-    }
 
     const orgs = await ctx.db.query('organizations').order('desc').take(MAX_PAGE_SIZE);
 
