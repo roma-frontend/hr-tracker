@@ -1,9 +1,44 @@
 # Plan: устранение unbounded `.collect()` в Convex
 
-**Статус:** DRAFT / не начато. Контекст потерян, этот документ — source of truth.
+**Статус:** ✅ ЗАВЕРШЁН (paginate миграция). Следующий этап — RBAC через ctx.auth.
 **Baseline на момент составления:** `npx tsc --noEmit` = 0 ошибок, clean.
-**Ветка:** текущая (создадим отдельную при старте).
-**Дата:** 2026-05-12.
+**Ветка:** main.
+**Дата:** 2026-05-12 → обновлено 2026-05-13.
+
+---
+
+## ТЕКУЩИЙ СТАТУС (13 мая 2026)
+
+### Завершено:
+1. ✅ **Paginate миграция** — все 375 `.collect()` обработаны (`.take(N)` cap / refactor / paginate)
+2. ✅ **isSuperadmin() миграция** — все runtime-проверки `SUPERADMIN_EMAIL` заменены на `isSuperadmin(user)` (проверяет role в БД). 25 файлов.
+3. ✅ **Convex Auth инфраструктура установлена:**
+   - `convex/auth.config.ts` — OIDC provider (self-issued)
+   - `convex/http.ts` — `/.well-known/openid-configuration` + `/.well-known/jwks.json`
+   - `src/app/api/auth/[...nextauth]/route.ts` — JWT signing в session callback (RS256)
+   - `src/lib/convex.tsx` — `ConvexProviderWithAuth` с `fetchAccessToken`
+   - `convex/lib/auth.ts` — `requireAuthUser()` и `getAuthUser()` helpers
+   - JWKS настроен в Convex dashboard
+   - Private key в `.env.local`
+
+### НЕ завершено (отложено):
+4. ❌ **Миграция endpoints на ctx.auth** — попытка 13 мая провалилась:
+   - JWT не доходил до Convex (пользователь не перелогинился → session без convexToken)
+   - Все queries падали с "Not authenticated"
+   - Откатили к рабочему состоянию с `superadminUserId`/`requesterId` args
+
+### Следующие шаги (при возобновлении):
+1. **Проверить JWT:** перезапустить dev server, перелогиниться, проверить в DevTools что session содержит `convexToken`
+2. **Тест:** вызвать `ctx.auth.getUserIdentity()` в одном тестовом query и убедиться что возвращает email
+3. **Мигрировать по одному endpoint** с fallback-паттерном (ctx.auth → arg)
+4. **Только после подтверждения** что JWT работает — массовая миграция 497 endpoints
+
+### Техдолг (вне скоупа paginate):
+- [ ] RSC-миграция 62 страниц
+- [ ] i18n dynamic namespaces
+- [ ] Split `users` таблицы
+- [ ] RBAC через `ctx.auth.getUserIdentity()` (инфраструктура готова, endpoints нет)
+- [ ] Типизация `chatMessages.reactions`
 
 ---
 
