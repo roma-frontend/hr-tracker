@@ -1,73 +1,72 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import HttpBackend from 'i18next-http-backend';
+import commonEn from './locales/en/common.json';
+import commonRu from './locales/ru/common.json';
+import commonHy from './locales/hy/common.json';
 
-import enTranslations from './locales/en.json';
-import hyTranslations from './locales/hy.json';
-import ruTranslations from './locales/ru.json';
+// Namespaces available in the app
+export const allNamespaces = [
+  'common',
+  'landing',
+  'auth',
+  'dashboard',
+  'leaves',
+  'tasks',
+  'employees',
+  'chat',
+  'admin',
+  'drivers',
+  'settings',
+  'modules',
+] as const;
 
-export const defaultNS = 'translation';
+export type AppNamespace = (typeof allNamespaces)[number];
+export const defaultNS: AppNamespace = 'common';
 
+// Bundled common namespace for instant SSR hydration (only ~30KB per language)
 export const resources = {
-  en: {
-    translation: enTranslations,
-  },
-  hy: {
-    translation: hyTranslations,
-  },
-  ru: {
-    translation: ruTranslations,
-  },
+  en: { common: commonEn },
+  ru: { common: commonRu },
+  hy: { common: commonHy },
 } as const;
 
-// Only use LanguageDetector on client side
-if (typeof window !== 'undefined') {
-  i18n.use(LanguageDetector);
-}
-
-// Get language from cookie (SSR-compatible) or fallback to 'en'
+// Get language from cookie (SSR-compatible)
 const getInitialLanguage = () => {
-  // Check for cookie first (works on both server and client)
   if (typeof document !== 'undefined') {
     const match = document.cookie.match(/i18nextLng=(en|hy|ru)/);
-    if (match && match[1] && ['en', 'hy', 'ru'].includes(match[1])) {
-      return match[1];
-    }
+    if (match?.[1]) return match[1];
   }
   return 'en';
 };
 
 if (!i18n.isInitialized) {
-  i18n
-    .use(initReactI18next) // Pass i18n to react-i18next
-    .init({
-      resources,
-      defaultNS,
-      fallbackLng: 'en',
-      lng: getInitialLanguage(), // Use saved language or default to 'en'
-      supportedLngs: ['en', 'hy', 'ru'], // Explicitly define supported languages
-      nonExplicitSupportedLngs: false, // Only use exact matches
-      debug: process.env.NODE_ENV === 'development', // Enable debug mode only in development
+  if (typeof window !== 'undefined') {
+    i18n.use(HttpBackend);
+    i18n.use(LanguageDetector);
+  }
 
-      interpolation: {
-        escapeValue: false, // React already escapes
-      },
-
-      // Client-side language detection
-      detection: {
-        order: ['cookie', 'localStorage', 'navigator', 'htmlTag'],
-        lookupCookie: 'i18nextLng',
-        lookupLocalStorage: 'i18nextLng',
-        caches: ['localStorage', 'cookie'],
-        // Custom detection function
-        lookupQuerystring: 'lng',
-      },
-
-      // SSR support
-      react: {
-        useSuspense: false, // Disable Suspense for SSR compatibility
-      },
-    });
+  i18n.use(initReactI18next).init({
+    defaultNS,
+    ns: allNamespaces as unknown as string[],
+    fallbackLng: 'en',
+    lng: getInitialLanguage(),
+    supportedLngs: ['en', 'hy', 'ru'],
+    nonExplicitSupportedLngs: false,
+    debug: false,
+    interpolation: { escapeValue: false },
+    resources,
+    partialBundledLanguages: true,
+    backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
+    detection: {
+      order: ['cookie', 'localStorage', 'navigator'],
+      lookupCookie: 'i18nextLng',
+      lookupLocalStorage: 'i18nextLng',
+      caches: ['localStorage', 'cookie'],
+    },
+    react: { useSuspense: false },
+  });
 }
 
 export default i18n;
