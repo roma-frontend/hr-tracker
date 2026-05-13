@@ -348,7 +348,7 @@ export function FaceLogin() {
         lastDescriptorRef.current = detection!.descriptor;
 
         // progress via ref (не через prev => prev+..)
-        const nextProgress = Math.min(progressRef.current + 20, 100);
+        const nextProgress = Math.min(progressRef.current + 34, 100);
         progressRef.current = nextProgress;
         setScanningProgress(nextProgress);
 
@@ -371,7 +371,7 @@ export function FaceLogin() {
           progressRef.current >= 100 &&
           !autoTriggeredRef.current &&
           !processingRef.current &&
-          now - lastAttemptRef.current >= 5000;
+          now - lastAttemptRef.current >= 2000;
 
         if (shouldTrigger) {
           // Server-side matching: we only need the user's email to be entered.
@@ -400,7 +400,7 @@ export function FaceLogin() {
         console.error('❌ Error in face detection loop:', e);
         detectionInProgressRef.current = false;
       }
-    }, 500);
+    }, 300);
   };
 
   // ===== Login =====
