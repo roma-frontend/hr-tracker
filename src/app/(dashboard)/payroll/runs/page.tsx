@@ -1,22 +1,5 @@
-'use client';
-
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
-
-const PayrollRecordsTable = dynamic(
-  () =>
-    import('@/components/payroll/PayrollRecordsTable').then((m) => ({
-      default: (props: any) => (
-        <WidgetErrorBoundary name="PayrollRecordsTable">
-          <m.default {...props} />
-        </WidgetErrorBoundary>
-      ),
-    })),
-  {
-    ssr: false,
-    loading: () => <RecordsSkeleton />,
-  },
-);
 
 function RecordsSkeleton() {
   return (
@@ -30,10 +13,18 @@ function RecordsSkeleton() {
   );
 }
 
+const PayrollRecordsTable = nextDynamic(
+  () =>
+    import('@/components/payroll/PayrollRecordsTable').then((m) => ({
+      default: (props: any) => (
+        <WidgetErrorBoundary name="PayrollRecordsTable">
+          <m.default {...props} />
+        </WidgetErrorBoundary>
+      ),
+    })),
+  { loading: () => <RecordsSkeleton /> },
+);
+
 export default function PayrollRunsPage() {
-  return (
-    <>
-      <PayrollRecordsTable />
-    </>
-  );
+  return <PayrollRecordsTable />;
 }

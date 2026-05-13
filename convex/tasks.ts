@@ -2,7 +2,9 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
 import type { Id } from './_generated/dataModel';
+import type { MutationCtx } from './_generated/server';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 /**
@@ -734,4 +736,80 @@ export const getTask = query({
       commentCount: comments.length,
     };
   },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECURED: DELETE TASK — verified identity via ctx.auth
+// ─────────────────────────────────────────────────────────────────────────────
+export const secureDeleteTask = mutation({
+  args: { taskId: v.id('tasks') },
+  handler: withAuth<MutationCtx, { taskId: Id<'tasks'> }, void>(
+    { minimumRole: 'supervisor' },
+    async (ctx, { taskId }, caller) => {
+      const task = await ctx.db.get(taskId);
+      if (!task) throw new Error('Task not found');
+
+      // Cross-org protection
+      if (caller.role !== 'superadmin' && caller.organizationId !== task.organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+
+      const comments = await ctx.db
+        .query('taskComments')
+        .withIndex('by_task', (q) => q.eq('taskId', taskId))
+        .take(SMALL_LIST_CAP);
+      for (const c of comments) await ctx.db.delete(c._id);
+      await ctx.db.delete(taskId);
+
+      await ctx.db.insert('auditLogs', {
+        organizationId: task.organizationId,
+        userId: caller._id,
+        action: 'task_deleted',
+        target: taskId,
+        details: JSON.stringify({ title: task.title }),
+        createdAt: Date.now(),
+      });
+    },
+  ),
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECURED: REASSIGN TASK — verified identity via ctx.auth
+// ─────────────────────────────────────────────────────────────────────────────
+export const secureReassignTask = mutation({
+  args: { taskId: v.id('tasks'), newAssigneeId: v.id('users') },
+  handler: withAuth<MutationCtx, { taskId: Id<'tasks'>; newAssigneeId: Id<'users'> }, void>(
+    { minimumRole: 'supervisor' },
+    async (ctx, { taskId, newAssigneeId }, caller) => {
+      const task = await ctx.db.get(taskId);
+      if (!task) throw new Error('Task not found');
+
+      if (caller.role !== 'superadmin' && caller.organizationId !== task.organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+
+      await ctx.db.patch(taskId, { assignedTo: newAssigneeId, updatedAt: Date.now() });
+
+      await ctx.db.insert('notifications', {
+        organizationId: task.organizationId,
+        userId: newAssigneeId,
+        type: 'system',
+        title: '📋 Task Assigned',
+        message: `${caller.name} assigned you: "${task.title}"`,
+        isRead: false,
+        relatedId: taskId,
+        route: '/tasks',
+        createdAt: Date.now(),
+      });
+
+      await ctx.db.insert('auditLogs', {
+        organizationId: task.organizationId,
+        userId: caller._id,
+        action: 'task_reassigned',
+        target: taskId,
+        details: JSON.stringify({ title: task.title, newAssigneeId }),
+        createdAt: Date.now(),
+      });
+    },
+  ),
 });

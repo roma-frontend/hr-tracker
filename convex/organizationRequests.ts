@@ -1,7 +1,10 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -352,4 +355,95 @@ export const getPendingRequestCount = query({
 
     return pending.length;
   },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECURED: APPROVE ORG REQUEST — verified identity via ctx.auth
+// ─────────────────────────────────────────────────────────────────────────────
+export const secureApproveOrgRequest = mutation({
+  args: { requestId: v.id('organizationRequests') },
+  handler: withAuth<
+    MutationCtx,
+    { requestId: Id<'organizationRequests'> },
+    { organizationId: Id<'organizations'>; userId: Id<'users'> }
+  >({ minimumRole: 'superadmin' }, async (ctx, { requestId }, caller) => {
+    const request = (await ctx.db.get(requestId)) as any;
+    if (!request) throw new Error('Request not found');
+    if (request.status !== 'pending') throw new Error('Already reviewed');
+
+    const existingOrg = await ctx.db
+      .query('organizations')
+      .withIndex('by_slug', (q) => q.eq('slug', request.requestedSlug))
+      .unique();
+    if (existingOrg) throw new Error('Organization slug is already taken');
+
+    const employeeLimit = request.requestedPlan === 'professional' ? 50 : 999999;
+
+    const orgId = await ctx.db.insert('organizations', {
+      name: request.requestedName,
+      slug: request.requestedSlug,
+      plan: request.requestedPlan,
+      isActive: true,
+      createdBySuperadmin: true,
+      timezone: 'UTC',
+      country: request.country,
+      industry: request.industry,
+      employeeLimit,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    const userId = await ctx.db.insert('users', {
+      organizationId: orgId,
+      name: request.requesterName,
+      email: request.requesterEmail,
+      passwordHash: request.requesterPassword,
+      role: 'admin',
+      employeeType: 'staff',
+      department: 'Management',
+      position: 'Administrator',
+      phone: request.requesterPhone,
+      isActive: true,
+      isApproved: true,
+      approvedBy: caller._id,
+      approvedAt: Date.now(),
+      travelAllowance: 20000,
+      paidLeaveBalance: 24,
+      sickLeaveBalance: 10,
+      familyLeaveBalance: 5,
+      createdAt: Date.now(),
+    });
+
+    await ctx.db.patch(requestId, {
+      status: 'approved',
+      reviewedBy: caller._id,
+      reviewedAt: Date.now(),
+      organizationId: orgId,
+      userId,
+    });
+
+    return { organizationId: orgId, userId };
+  }),
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECURED: REJECT ORG REQUEST — verified identity via ctx.auth
+// ─────────────────────────────────────────────────────────────────────────────
+export const secureRejectOrgRequest = mutation({
+  args: { requestId: v.id('organizationRequests'), reason: v.optional(v.string()) },
+  handler: withAuth<MutationCtx, { requestId: Id<'organizationRequests'>; reason?: string }, void>(
+    { minimumRole: 'superadmin' },
+    async (ctx, { requestId, reason }, caller) => {
+      const request = (await ctx.db.get(requestId)) as any;
+      if (!request) throw new Error('Request not found');
+      if (request.status !== 'pending') throw new Error('Already reviewed');
+
+      await ctx.db.patch(requestId, {
+        status: 'rejected',
+        reviewedBy: caller._id,
+        reviewedAt: Date.now(),
+        rejectionReason: reason,
+      });
+    },
+  ),
 });
