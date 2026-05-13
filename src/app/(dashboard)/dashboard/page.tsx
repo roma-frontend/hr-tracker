@@ -1,6 +1,7 @@
-import nextDynamic from 'next/dynamic';
-import { getServerUser } from '@/lib/server-auth';
-import { redirect } from 'next/navigation';
+'use client';
+
+import dynamic from 'next/dynamic';
+import { useAuthStore } from '@/store/useAuthStore';
 import { WidgetErrorBoundary } from '@/components/error/WidgetErrorBoundary';
 
 function DashboardSkeleton() {
@@ -20,7 +21,7 @@ function DashboardSkeleton() {
   );
 }
 
-const DashboardClient = nextDynamic(
+const DashboardClient = dynamic(
   () =>
     import('@/components/dashboard/DashboardClient').then((m) => ({
       default: (props: any) => (
@@ -29,10 +30,10 @@ const DashboardClient = nextDynamic(
         </WidgetErrorBoundary>
       ),
     })),
-  { loading: () => <DashboardSkeleton /> },
+  { ssr: false, loading: () => <DashboardSkeleton /> },
 );
 
-const EmployeeDashboard = nextDynamic(
+const EmployeeDashboard = dynamic(
   () =>
     import('@/components/dashboard/EmployeeDashboard').then((m) => ({
       default: (props: any) => (
@@ -41,16 +42,19 @@ const EmployeeDashboard = nextDynamic(
         </WidgetErrorBoundary>
       ),
     })),
-  { loading: () => <DashboardSkeleton /> },
+  { ssr: false, loading: () => <DashboardSkeleton /> },
 );
 
-export default async function DashboardPage() {
-  const user = await getServerUser();
-  if (!user) redirect('/login');
-  if (!user.organizationId) return null;
+export default function DashboardPage() {
+  const { user } = useAuthStore();
 
-  if (user.role === 'employee') {
+  if (user && !user.organizationId && user.role !== 'superadmin') {
+    return null;
+  }
+
+  if (user?.role === 'employee') {
     return <EmployeeDashboard />;
   }
+
   return <DashboardClient />;
 }
