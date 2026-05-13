@@ -116,7 +116,7 @@ typecheck-output.txt
 setup-hr-testing.sh
 
 # Reports and analysis directories
-reports/
+/reports/
 tests/
 
 # Audit/debug scripts (temporary)
