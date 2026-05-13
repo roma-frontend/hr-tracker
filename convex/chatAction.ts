@@ -138,7 +138,9 @@ ${
         : organizationId
           ? await ctx.runQuery(leavesApi.getAllLeaves, { organizationId })
           : [];
-      const allUsers = requesterId ? await ctx.runQuery(usersApi.queries.getAllUsers, {}) : [];
+      const allUsers = requesterId
+        ? await ctx.runQuery(usersApi.queries.getAllUsers, { requesterId })
+        : [];
 
       const leavesArr = Array.isArray(allLeaves) ? allLeaves : [];
       const usersArr = Array.isArray(allUsers) ? allUsers : [];

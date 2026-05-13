@@ -48,7 +48,7 @@ export default function BackupsManagementPage() {
   const backupStats = useQuery(api.backups.getBackupStats);
   const allOrganizations = useQuery(
     api.organizations.getAllOrganizations,
-    user?.id ? { superadminUserId: user.id as any } : 'skip',
+    user?.id ? { superadminUserId: user.id as Id<'users'> } : 'skip',
   );
 
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
@@ -555,6 +555,7 @@ function OrgBackups({
     api.users.queries.getUsersByOrganizationId,
     isExpanded
       ? {
+          requesterId: superadminUserId as Id<'users'>,
           organizationId: org._id as Id<'organizations'>,
         }
       : 'skip',

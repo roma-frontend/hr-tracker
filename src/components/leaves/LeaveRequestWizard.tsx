@@ -82,8 +82,9 @@ export function LeaveRequestWizard({
       ? useOrgFilter
         ? {
             organizationId: selectedOrgId as Id<'organizations'>,
+            superadminUserId: userId as Id<'users'>,
           }
-        : {}
+        : { requesterId: userId as Id<'users'> }
       : 'skip',
   );
   const currentUser = useQuery(api.users.queries.getUserById, { userId });

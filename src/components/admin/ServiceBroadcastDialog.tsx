@@ -91,7 +91,7 @@ export function ServiceBroadcastDialog({
 
   const organizations = useQuery(
     api.organizations.getAllOrganizations,
-    userId ? { superadminUserId: userId as any } : 'skip',
+    userId ? { superadminUserId: userId as Id<'users'> } : 'skip',
   );
 
   const sendBroadcast = useMutation(api.admin.sendServiceBroadcast);

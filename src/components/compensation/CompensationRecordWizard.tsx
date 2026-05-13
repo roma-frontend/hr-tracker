@@ -74,6 +74,7 @@ export default function CompensationRecordWizard({
     effectiveOrgId && user?.id
       ? {
           organizationId: effectiveOrgId as Id<'organizations'>,
+          requesterId: user.id as Id<'users'>,
         }
       : 'skip',
   );

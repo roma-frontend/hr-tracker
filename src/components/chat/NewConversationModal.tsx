@@ -58,7 +58,10 @@ export function NewConversationModal({
   const isAllOrgs = selectedOrgId === null;
 
   // For superadmin we can fetch all organizations to power the inline org picker.
-  const organizations = useQuery(api.organizations.getAllOrganizations, isSuperadmin ? {} : 'skip');
+  const organizations = useQuery(
+    api.organizations.getAllOrganizations,
+    isSuperadmin ? ({} as { superadminUserId?: Id<'users'> }) : 'skip',
+  );
 
   // For a specific organization we keep using the lightweight chat.getOrgUsers query.
   const orgScopedUsers = useQuery(
@@ -70,7 +73,10 @@ export function NewConversationModal({
 
   // In "All orgs" mode we load users via users.getAllUsers which,
   // for superadmin, returns employees from every organization.
-  const allOrgUsers = useQuery(api.users.queries.getAllUsers, isAllOrgs ? {} : 'skip');
+  const allOrgUsers = useQuery(
+    api.users.queries.getAllUsers,
+    isAllOrgs ? { requesterId: currentUserId } : 'skip',
+  );
 
   // Normalized users list used by the UI (always has organizationId attached).
   const users = React.useMemo(() => {

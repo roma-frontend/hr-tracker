@@ -63,7 +63,7 @@ export default function OrganizationsPage() {
 
   const organizations = useQuery(
     api.organizations.getAllOrganizations,
-    user?.id ? { superadminUserId: user.id as any } : 'skip',
+    user?.id ? { superadminUserId: user.id as Id<'users'> } : 'skip',
   ) as Organization[] | undefined;
 
   // Filter organizations

@@ -56,13 +56,13 @@ export default function ReportsPage() {
     user?.id && leavesQueryParams !== 'skip' ? leavesQueryParams : 'skip',
   );
   const usersQueryParams = shouldUseOrgQuery
-    ? { organizationId: selectedOrgId as Id<'organizations'> }
+    ? { requesterId: user.id as Id<'users'>, organizationId: selectedOrgId as Id<'organizations'> }
     : user?.id
-      ? {}
+      ? { requesterId: user.id as Id<'users'> }
       : ('skip' as const);
   const users = useQuery(
     shouldUseOrgQuery ? api.users.queries.getUsersByOrganizationId : api.users.queries.getAllUsers,
-    user?.id && usersQueryParams !== 'skip' ? (usersQueryParams as any) : 'skip',
+    user?.id && usersQueryParams !== 'skip' ? usersQueryParams : 'skip',
   );
 
   const isLoading = leaves === undefined || users === undefined;

@@ -121,7 +121,9 @@ export async function GET(req: NextRequest) {
     // Fetch core system data first (needed to get orgId)
     const [users, leaves, todayAttendance, allTasks, allTickets, automationWorkflows] =
       await Promise.all([
-        fetchQuery(api.users.queries.getAllUsers, {}),
+        fetchQuery(api.users.queries.getAllUsers, {
+          requesterId: requesterId as Id<'users'>,
+        }),
         fetchQuery(api.leaves.getAllLeaves, {
           requesterId: requesterId as Id<'users'>,
         }),

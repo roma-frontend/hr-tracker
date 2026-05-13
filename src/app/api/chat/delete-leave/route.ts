@@ -22,7 +22,9 @@ export const POST = withCsrfProtection(async (req: Request) => {
     const allLeaves = await fetchQuery(api.leaves.getAllLeaves, {
       requesterId: requesterId as any,
     });
-    const allUsers = await fetchQuery(api.users.queries.getAllUsers, {});
+    const allUsers = await fetchQuery(api.users.queries.getAllUsers, {
+      requesterId: requesterId as any,
+    });
 
     // Find leave by ID first
     let targetLeave = (allLeaves as any[]).find((l: any) => l._id === leaveId);

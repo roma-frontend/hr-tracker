@@ -198,7 +198,10 @@ export function TeamSidebar({ userId, onToggle }: TeamSidebarProps) {
   };
 
   // ===== Data =====
-  const allUsers = useQuery(api.users.queries.getAllUsers, userId ? {} : 'skip');
+  const allUsers = useQuery(
+    api.users.queries.getAllUsers,
+    userId ? { requesterId: userId } : 'skip',
+  );
 
   const stats = allUsers?.reduce(
     (acc, user) => {

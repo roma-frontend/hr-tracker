@@ -115,6 +115,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
     api.users.queries.getSupervisors,
     user?.id && targetOrgId
       ? {
+          requesterId: user.id as Id<'users'>,
           organizationId: targetOrgId as Id<'organizations'>,
         }
       : 'skip',

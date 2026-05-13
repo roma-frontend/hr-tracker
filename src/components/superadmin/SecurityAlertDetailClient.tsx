@@ -34,7 +34,7 @@ export default function SecurityAlertDetailClient() {
 
   const suspiciousUser = useQuery(
     api.users.queries.getUserById,
-    user?.id ? { userId: userId as Id<'users'> } : 'skip',
+    user?.id ? { userId: userId as Id<'users'>, requesterId: user.id as Id<'users'> } : 'skip',
   );
 
   const recentAttempts = useQuery(
@@ -92,6 +92,7 @@ export default function SecurityAlertDetailClient() {
     setIsProcessing(true);
     try {
       await suspendUserMutation({
+        adminId: user!.id as Id<'users'>,
         userId: userId as Id<'users'>,
         reason: suspendReason,
         duration: suspendDuration,
@@ -111,6 +112,7 @@ export default function SecurityAlertDetailClient() {
     setIsProcessing(true);
     try {
       await unsuspendUserMutation({
+        adminId: user!.id as Id<'users'>,
         userId: userId as Id<'users'>,
       });
 

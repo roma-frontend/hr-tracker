@@ -24,7 +24,9 @@ export const POST = withCsrfProtection(async (req: Request) => {
     }
 
     // Get requester
-    const users = await fetchQuery(api.users.queries.getAllUsers, {});
+    const users = await fetchQuery(api.users.queries.getAllUsers, {
+      requesterId: requesterId as any,
+    });
     const requester = (users as any[]).find((u: any) => u._id === requesterId);
 
     if (!requester) {
