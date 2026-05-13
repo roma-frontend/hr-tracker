@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -128,11 +128,11 @@ export const getTeamPresence = query({
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
 
     // S refactor: scope by org via by_org index when not superadmin; XLARGE fallback.
     let users =
-      !isSuperadmin && requester.organizationId
+      !userIsSuperadmin && requester.organizationId
         ? await ctx.db
             .query('users')
             .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId!))
@@ -140,7 +140,7 @@ export const getTeamPresence = query({
         : await ctx.db.query('users').take(XLARGE_LIST_CAP);
 
     // Filter by organization if not superadmin
-    if (!isSuperadmin) {
+    if (!userIsSuperadmin) {
       if (!requester.organizationId) {
         throw new Error('User does not belong to an organization');
       }

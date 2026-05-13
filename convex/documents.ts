@@ -1,18 +1,18 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { MAX_PAGE_SIZE } from './pagination';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─── Helper: Check permissions ───────────────────────────────────────────────
 async function checkAccess(ctx: any, organizationId: any, requesterId: any) {
   const requester = await ctx.db.get(requesterId);
   if (!requester) throw new Error('Requester not found');
-  const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-  if (!isSuperadmin && requester.organizationId !== organizationId) {
+  const userIsSuperadmin = isSuperadmin(requester);
+  if (!userIsSuperadmin && requester.organizationId !== organizationId) {
     throw new Error('Access denied');
   }
-  return { requester, isSuperadmin: isSuperadmin || requester.role === 'admin' };
+  return { requester, isSuperadmin: userIsSuperadmin || requester.role === 'admin' };
 }
 
 // ─── DOCUMENTS ────────────────────────────────────────────────────────────────
@@ -334,8 +334,22 @@ export const getTeamDocumentOverview = query({
     requesterId: v.id('users'),
   },
   handler: async (ctx, args) => {
-    const { isSuperadmin } = await checkAccess(ctx, args.organizationId, args.requesterId);
-    if (!isSuperadmin) throw new Error('Only admins can view team overview');
+    // Resolve the requester without throwing — a stale client cache may call
+    // this query for a user whose DB role no longer qualifies as admin. In
+    // that case we return `null` so the UI (which already guards on
+    // `teamOverview` being truthy) degrades gracefully instead of crashing
+    // the whole page render.
+    const requester = await ctx.db.get(args.requesterId);
+    if (!requester) return null;
+
+    const isPlatformSuperadmin = isSuperadmin(requester);
+
+    const isAdmin = isPlatformSuperadmin || requester.role === 'admin';
+    if (!isAdmin) return null;
+
+    if (!isPlatformSuperadmin && requester.organizationId !== args.organizationId) {
+      return null;
+    }
 
     const docs = await ctx.db
       .query('documents')

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import bcrypt from 'bcryptjs';
-import { SUPERADMIN_EMAIL, isSuperadminEmail } from '../lib/auth';
+import { SUPERADMIN_EMAIL, isSuperadminEmail, isSuperadmin } from '../lib/auth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from '../lib/limits';
 
 // ── Password Hashing Helpers ─────────────────────────────────────────────────
@@ -61,22 +61,9 @@ function wrapConvexError<T>(fn: () => T, operation: string): T {
 // SUPERADMIN_EMAIL is re-exported from lib/auth (env-driven).
 
 /**
- * Check if a user is a superadmin.
- * Primary check: user.role === "superadmin"
- * Fallback: env-pinned bootstrap email (register flow only)
+ * Check if a user is a superadmin (local re-export for backward compat).
  */
-export function isSuperadmin(
-  user:
-    | {
-        role?: string;
-        email?: string;
-      }
-    | null
-    | undefined,
-): boolean {
-  if (!user) return false;
-  return user.role === 'superadmin' || isSuperadminEmail(user.email);
-}
+export { isSuperadmin } from '../lib/auth';
 
 /**
  * Assert that a user is a superadmin, throw otherwise.
@@ -148,7 +135,7 @@ export const register = mutation({
   handler: async (ctx, args) => {
     return wrapConvexError(async () => {
       const email = args.email.toLowerCase().trim();
-      const isSuperadmin = email === SUPERADMIN_EMAIL;
+      const userIsSuperadmin = email === SUPERADMIN_EMAIL;
 
       // ── 1. Check email not already registered ──────────────────────────────
       const existing = await ctx.db
@@ -162,7 +149,7 @@ export const register = mutation({
       let isApproved = false;
       let role: 'superadmin' | 'admin' | 'employee' | 'supervisor' = 'employee';
 
-      if (isSuperadmin) {
+      if (userIsSuperadmin) {
         // Superadmin path: create a special "platform" org or join first org
         role = 'superadmin';
         isApproved = true;
@@ -279,8 +266,8 @@ export const register = mutation({
         phone: args.phone,
         role,
         employeeType: 'staff',
-        department: role === 'admin' || isSuperadmin ? 'Management' : undefined,
-        position: role === 'admin' || isSuperadmin ? 'Administrator' : undefined,
+        department: role === 'admin' || userIsSuperadmin ? 'Management' : undefined,
+        position: role === 'admin' || userIsSuperadmin ? 'Administrator' : undefined,
         isActive: true,
         isApproved,
         approvedAt: isApproved ? Date.now() : undefined,

@@ -3,7 +3,7 @@ import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { SUPERADMIN_EMAIL, isSuperadmin } from './lib/auth';
 import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
@@ -197,7 +197,7 @@ export const getOrganizationRequests = query({
   },
   handler: async (ctx, { superadminUserId, status }) => {
     const superadmin = await ctx.db.get(superadminUserId);
-    if (!superadmin || superadmin.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+    if (!superadmin || !isSuperadmin(superadmin)) {
       throw new Error('Superadmin only');
     }
 
@@ -226,7 +226,7 @@ export const approveOrganizationRequest = mutation({
   },
   handler: async (ctx, { superadminUserId, requestId }) => {
     const superadmin = await ctx.db.get(superadminUserId);
-    if (!superadmin || superadmin.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+    if (!superadmin || !isSuperadmin(superadmin)) {
       throw new Error('Only superadmin can approve organization requests');
     }
 
@@ -318,7 +318,7 @@ export const rejectOrganizationRequest = mutation({
   },
   handler: async (ctx, { superadminUserId, requestId, reason }) => {
     const superadmin = await ctx.db.get(superadminUserId);
-    if (!superadmin || superadmin.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+    if (!superadmin || !isSuperadmin(superadmin)) {
       throw new Error('Only superadmin can reject organization requests');
     }
 
@@ -344,7 +344,7 @@ export const getPendingRequestCount = query({
   args: { superadminUserId: v.id('users') },
   handler: async (ctx, { superadminUserId }) => {
     const superadmin = await ctx.db.get(superadminUserId);
-    if (!superadmin || superadmin.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+    if (!superadmin || !isSuperadmin(superadmin)) {
       return 0;
     }
 

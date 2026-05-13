@@ -1,6 +1,6 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ── Upsert subscription after checkout.session.completed ─────────────────────
@@ -184,7 +184,7 @@ export const listAll = query({
       .withIndex('by_email', (q) => q.eq('email', identity.email!))
       .first();
 
-    const isSuperAdmin = currentUser?.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const isSuperAdmin = isSuperadmin(currentUser);
 
     if (!currentUser || !isSuperAdmin) return [];
 

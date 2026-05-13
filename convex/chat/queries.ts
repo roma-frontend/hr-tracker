@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import { paginationOptsValidator } from 'convex/server';
 import type { Id, Doc } from '../_generated/dataModel';
-import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { isSuperadmin } from '../lib/auth';
 import { MAX_PAGE_SIZE } from '../pagination';
 
 // ─── CONVERSATIONS ────────────────────────────────────────────────────────────
@@ -29,9 +29,7 @@ export const getMyConversations = query({
 
     // Step 2: Check if user is a superadmin
     const user = await ctx.db.get(args.userId);
-    const isSuperadmin = user
-      ? user.role === 'superadmin' || user.email === SUPERADMIN_EMAIL
-      : false;
+    const userIsSuperadmin = user ? isSuperadmin(user) : false;
 
     // Step 3: Batch load all conversations
     const conversationIds = memberships.map((m) => m.conversationId);
@@ -46,12 +44,12 @@ export const getMyConversations = query({
       if (membership?.isDeleted) return;
 
       // If superadmin AND organization is selected, filter by that org
-      if (isSuperadmin && args.organizationId) {
+      if (userIsSuperadmin && args.organizationId) {
         if (conv.organizationId !== args.organizationId) return;
       }
 
       // Superadmins see all conversations they are members of (when no org selected)
-      if (isSuperadmin) {
+      if (userIsSuperadmin) {
         validConvs.push({ conv, membership });
         return;
       }
@@ -614,7 +612,7 @@ export const getOrgUsers = query({
             u._id !== args.currentUserId &&
             u.isActive &&
             u.isApproved &&
-            u.email !== SUPERADMIN_EMAIL &&
+            !isSuperadmin(u) &&
             u.role !== 'superadmin',
         )
         .map(async (u) => {

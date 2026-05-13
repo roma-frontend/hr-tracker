@@ -9,7 +9,8 @@ import {
   encodeCursor,
   MAX_PAGE_SIZE,
 } from '../pagination';
-import { enrichLeavesWithUserData, SUPERADMIN_EMAIL } from './helpers';
+import { enrichLeavesWithUserData } from './helpers';
+import { isSuperadmin } from '../lib/auth';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET ALL LEAVES — scoped to caller's organization
@@ -40,7 +41,7 @@ export const getAllLeaves = query({
 
     // Superadmin sees all leaves across all organizations
     let leaves;
-    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+    if (isSuperadmin(requester)) {
       leaves = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
     } else {
       // User without organization — return empty array (needs onboarding)
@@ -69,7 +70,7 @@ export const listLeavesPaginated = query({
     const requester = await ctx.db.get(requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
 
     let result;
     if (organizationId) {
@@ -78,7 +79,7 @@ export const listLeavesPaginated = query({
         .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
         .order('desc')
         .paginate(paginationOpts);
-    } else if (isSuperadmin) {
+    } else if (userIsSuperadmin) {
       result = await ctx.db.query('leaveRequests').order('desc').paginate(paginationOpts);
     } else if (requester.organizationId) {
       result = await ctx.db
@@ -138,7 +139,7 @@ export const getPendingLeaves = query({
 
     // Superadmin sees all pending leaves — use status filter
     let leaves;
-    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+    if (isSuperadmin(requester)) {
       leaves = await ctx.db
         .query('leaveRequests')
         .filter((q) => q.eq(q.field('status'), 'pending'))
@@ -169,7 +170,7 @@ export const getLeaveStats = query({
 
     // Superadmin sees stats across all organizations
     let all;
-    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+    if (isSuperadmin(requester)) {
       all = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
     } else {
       if (!requester.organizationId) throw new Error('User does not belong to an organization');
@@ -202,7 +203,7 @@ export const getUnreadCount = query({
 
     // Superadmin sees all unread across all organizations
     let unread: number;
-    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+    if (isSuperadmin(requester)) {
       const allLeaves = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
       // Treat missing isRead as false (old records before field was added)
       unread = allLeaves.filter(
@@ -241,7 +242,7 @@ export const getLeavesPagederated = query({
     // Get user's leaves based on role
     let items: any[] = [];
 
-    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+    if (isSuperadmin(requester)) {
       // Superadmin sees all
       const query = ctx.db.query('leaveRequests').order('desc');
       if (cursor) {

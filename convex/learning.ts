@@ -1,18 +1,18 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { MAX_PAGE_SIZE } from './pagination';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─── Helper: Check permissions ───────────────────────────────────────────────
 async function checkAccess(ctx: any, organizationId: any, requesterId: any) {
   const requester = await ctx.db.get(requesterId);
   if (!requester) throw new Error('Requester not found');
-  const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-  if (!isSuperadmin && requester.organizationId !== organizationId) {
+  const userIsSuperadmin = isSuperadmin(requester);
+  if (!userIsSuperadmin && requester.organizationId !== organizationId) {
     throw new Error('Access denied');
   }
-  return { requester, isSuperadmin: isSuperadmin || requester.role === 'admin' };
+  return { requester, isSuperadmin: userIsSuperadmin || requester.role === 'admin' };
 }
 
 // ─── COURSES ─────────────────────────────────────────────────────────────────

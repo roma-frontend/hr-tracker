@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id, Doc } from './_generated/dataModel';
 import { MAX_PAGE_SIZE } from './pagination';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET ORG CHART — full tree for an organization
@@ -16,8 +16,8 @@ export const getOrgChart = query({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-    if (!isSuperadmin && requester.organizationId !== args.organizationId) {
+    const userIsSuperadmin = isSuperadmin(requester);
+    if (!userIsSuperadmin && requester.organizationId !== args.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -72,8 +72,8 @@ export const getOrgChartTree = query({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-    if (!isSuperadmin && requester.organizationId !== args.organizationId) {
+    const userIsSuperadmin = isSuperadmin(requester);
+    if (!userIsSuperadmin && requester.organizationId !== args.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -125,13 +125,13 @@ export const generateOrgChartFromUsers = mutation({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
     const isAdmin = requester.role === 'admin';
-    if (!isSuperadmin && !isAdmin) {
+    if (!userIsSuperadmin && !isAdmin) {
       throw new Error('Access denied: only admins can generate org chart');
     }
 
-    if (!isSuperadmin && requester.organizationId !== args.organizationId) {
+    if (!userIsSuperadmin && requester.organizationId !== args.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -233,13 +233,13 @@ export const createNode = mutation({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
     const isAdmin = requester.role === 'admin';
-    if (!isSuperadmin && !isAdmin) {
+    if (!userIsSuperadmin && !isAdmin) {
       throw new Error('Access denied');
     }
 
-    if (!isSuperadmin && requester.organizationId !== args.organizationId) {
+    if (!userIsSuperadmin && requester.organizationId !== args.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -276,16 +276,16 @@ export const updateNode = mutation({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
     const isAdmin = requester.role === 'admin';
-    if (!isSuperadmin && !isAdmin) {
+    if (!userIsSuperadmin && !isAdmin) {
       throw new Error('Access denied');
     }
 
     const node = await ctx.db.get(args.nodeId);
     if (!node) throw new Error('Node not found');
 
-    if (!isSuperadmin && requester.organizationId !== node.organizationId) {
+    if (!userIsSuperadmin && requester.organizationId !== node.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -317,16 +317,16 @@ export const deleteNode = mutation({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
     const isAdmin = requester.role === 'admin';
-    if (!isSuperadmin && !isAdmin) {
+    if (!userIsSuperadmin && !isAdmin) {
       throw new Error('Access denied');
     }
 
     const node = await ctx.db.get(args.nodeId);
     if (!node) throw new Error('Node not found');
 
-    if (!isSuperadmin && requester.organizationId !== node.organizationId) {
+    if (!userIsSuperadmin && requester.organizationId !== node.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -361,16 +361,16 @@ export const moveNode = mutation({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
     const isAdmin = requester.role === 'admin';
-    if (!isSuperadmin && !isAdmin) {
+    if (!userIsSuperadmin && !isAdmin) {
       throw new Error('Access denied');
     }
 
     const node = await ctx.db.get(args.nodeId);
     if (!node) throw new Error('Node not found');
 
-    if (!isSuperadmin && requester.organizationId !== node.organizationId) {
+    if (!userIsSuperadmin && requester.organizationId !== node.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -443,8 +443,8 @@ export const saveLayout = mutation({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-    if (!isSuperadmin && requester.organizationId !== args.organizationId) {
+    const userIsSuperadmin = isSuperadmin(requester);
+    if (!userIsSuperadmin && requester.organizationId !== args.organizationId) {
       throw new Error('Access denied');
     }
 
@@ -489,9 +489,9 @@ export const fixOrgChartDepartments = mutation({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
     const isAdmin = requester.role === 'admin';
-    if (!isSuperadmin && !isAdmin) {
+    if (!userIsSuperadmin && !isAdmin) {
       throw new Error('Access denied');
     }
 
@@ -616,9 +616,9 @@ export const debugOrgChart = query({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
     const isAdmin = requester.role === 'admin';
-    if (!isSuperadmin && !isAdmin) {
+    if (!userIsSuperadmin && !isAdmin) {
       throw new Error('Access denied');
     }
 
@@ -688,8 +688,8 @@ export const getLayouts = query({
     const requester = await ctx.db.get(args.requesterId);
     if (!requester) throw new Error('Requester not found');
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
-    if (!isSuperadmin && requester.organizationId !== args.organizationId) {
+    const userIsSuperadmin = isSuperadmin(requester);
+    if (!userIsSuperadmin && requester.organizationId !== args.organizationId) {
       throw new Error('Access denied');
     }
 

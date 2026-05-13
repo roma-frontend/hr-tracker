@@ -3,7 +3,7 @@ import { mutation, query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
@@ -338,7 +338,7 @@ export const getTasksForEmployee = query({
     const employee = await ctx.db.get(args.userId);
     if (!employee) throw new Error('Employee not found');
 
-    const isSuperadmin = employee.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(employee);
 
     const tasks = await ctx.db
       .query('tasks')
@@ -348,7 +348,7 @@ export const getTasksForEmployee = query({
 
     // Filter by organization (skip for superadmin)
     let orgTasks = tasks;
-    if (!isSuperadmin) {
+    if (!userIsSuperadmin) {
       orgTasks = tasks.filter(
         (task) => !employee.organizationId || task.organizationId === employee.organizationId,
       );
@@ -366,7 +366,7 @@ export const getTasksAssignedBy = query({
     const supervisor = await ctx.db.get(args.supervisorId);
     if (!supervisor) throw new Error('Supervisor not found');
 
-    const isSuperadmin = supervisor.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(supervisor);
 
     const tasks = await ctx.db
       .query('tasks')
@@ -376,7 +376,7 @@ export const getTasksAssignedBy = query({
 
     // Filter by organization (skip for superadmin)
     let orgTasks = tasks;
-    if (!isSuperadmin) {
+    if (!userIsSuperadmin) {
       orgTasks = tasks.filter(
         (task) => !supervisor.organizationId || task.organizationId === supervisor.organizationId,
       );
@@ -399,10 +399,10 @@ export const getAllTasks = query({
       throw new Error('Only admins can access all tasks');
     }
 
-    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(requester);
 
     // Superadmin without org can still access (but will see nothing if no tasks exist)
-    if (!isSuperadmin && !requester.organizationId) {
+    if (!userIsSuperadmin && !requester.organizationId) {
       throw new Error('Admin must belong to an organization');
     }
 
@@ -410,7 +410,7 @@ export const getAllTasks = query({
 
     // Filter tasks by organization
     let orgTasks = tasks;
-    if (isSuperadmin) {
+    if (userIsSuperadmin) {
       // For superadmin: filter by selectedOrganizationId if provided
       if (args.selectedOrganizationId) {
         orgTasks = tasks.filter((task) => task.organizationId === args.selectedOrganizationId);

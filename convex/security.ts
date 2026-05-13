@@ -19,10 +19,7 @@ async function requireAdmin(ctx: any, adminId: Id<'users'>) {
     throw new Error('User not found');
   }
 
-  const isAdmin =
-    user.role === 'admin' ||
-    user.role === 'superadmin' ||
-    user.email.toLowerCase() === SUPERADMIN_EMAIL;
+  const isAdmin = user.role === 'admin' || user.role === 'superadmin' || isSuperadmin(user);
   if (!isAdmin) {
     throw new Error('Only admins can access compliance features');
   }
