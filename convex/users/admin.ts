@@ -4,7 +4,7 @@ import type { MutationCtx } from '../_generated/server';
 import type { Id, Doc } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
-import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { SUPERADMIN_EMAIL, isSuperadmin } from '../lib/auth';
 import { withAuth } from '../lib/withAuth';
 
 // ── Security helpers ──────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ export const suspendUser = mutation({
     // Verify same organization (unless superadmin)
     if (
       (admin as Doc<'users'>).organizationId !== user.organizationId &&
-      (admin as Doc<'users'>).email.toLowerCase() !== SUPERADMIN_EMAIL
+      !isSuperadmin(admin as Doc<'users'>)
     ) {
       throw new Error('Access denied: cannot suspend users from another organization');
     }
@@ -162,7 +162,7 @@ export const unsuspendUser = mutation({
     // Verify same organization (unless superadmin)
     if (
       (admin as Doc<'users'>).organizationId !== user.organizationId &&
-      (admin as Doc<'users'>).email.toLowerCase() !== SUPERADMIN_EMAIL
+      !isSuperadmin(admin as Doc<'users'>)
     ) {
       throw new Error('Access denied: cannot unsuspend users from another organization');
     }

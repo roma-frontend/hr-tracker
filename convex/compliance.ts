@@ -3,7 +3,7 @@ import { mutation, query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
 import type { MutationCtx } from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
-import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
@@ -19,10 +19,7 @@ async function requireAdmin(ctx: any, adminId: Id<'users'>) {
     throw new Error('User not found');
   }
 
-  const isAdmin =
-    user.role === 'admin' ||
-    user.role === 'superadmin' ||
-    user.email.toLowerCase() === SUPERADMIN_EMAIL;
+  const isAdmin = user.role === 'admin' || user.role === 'superadmin' || isSuperadmin(user);
   if (!isAdmin) {
     throw new Error('Only admins can access compliance features');
   }

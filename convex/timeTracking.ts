@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { Id } from './_generated/dataModel';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // Armenia timezone offset: UTC+4
@@ -265,12 +265,7 @@ export const getCurrentlyAtWork = query({
   },
   handler: async (ctx, args) => {
     const admin = await ctx.db.get(args.adminId);
-    if (
-      !admin ||
-      (admin.role !== 'admin' &&
-        admin.role !== 'supervisor' &&
-        admin.email?.toLowerCase() !== SUPERADMIN_EMAIL)
-    ) {
+    if (!admin || (admin.role !== 'admin' && admin.role !== 'supervisor' && !isSuperadmin(admin))) {
       throw new Error('Only admins/supervisors can view attendance');
     }
 
@@ -283,8 +278,8 @@ export const getCurrentlyAtWork = query({
     const atWork = records.filter((r) => r.status === 'checked_in');
 
     // Filter by organization if admin (not superadmin)
-    const isSuperadmin = admin.email?.toLowerCase() === SUPERADMIN_EMAIL;
-    const orgToFilter = isSuperadmin ? null : admin.organizationId;
+    const callerIsSuperadmin = isSuperadmin(admin);
+    const orgToFilter = callerIsSuperadmin ? null : admin.organizationId;
 
     const withUsers = await Promise.all(
       atWork.map(async (record) => {
@@ -330,12 +325,7 @@ export const getTodayAllAttendance = query({
   },
   handler: async (ctx, args) => {
     const admin = await ctx.db.get(args.adminId);
-    if (
-      !admin ||
-      (admin.role !== 'admin' &&
-        admin.role !== 'supervisor' &&
-        admin.email?.toLowerCase() !== SUPERADMIN_EMAIL)
-    ) {
+    if (!admin || (admin.role !== 'admin' && admin.role !== 'supervisor' && !isSuperadmin(admin))) {
       throw new Error('Only admins/supervisors can view attendance');
     }
 
@@ -346,8 +336,8 @@ export const getTodayAllAttendance = query({
       .take(DEFAULT_LIST_CAP);
 
     // Filter by organization if admin (not superadmin)
-    const isSuperadmin = admin.email?.toLowerCase() === SUPERADMIN_EMAIL;
-    const orgToFilter = isSuperadmin ? null : admin.organizationId;
+    const callerIsSuperadmin = isSuperadmin(admin);
+    const orgToFilter = callerIsSuperadmin ? null : admin.organizationId;
 
     const withUsers = await Promise.all(
       records.map(async (record) => {
@@ -384,12 +374,7 @@ export const getTodayAttendanceSummary = query({
   },
   handler: async (ctx, args) => {
     const admin = await ctx.db.get(args.adminId);
-    if (
-      !admin ||
-      (admin.role !== 'admin' &&
-        admin.role !== 'supervisor' &&
-        admin.email?.toLowerCase() !== SUPERADMIN_EMAIL)
-    ) {
+    if (!admin || (admin.role !== 'admin' && admin.role !== 'supervisor' && !isSuperadmin(admin))) {
       throw new Error('Only admins/supervisors can view attendance');
     }
 
@@ -400,8 +385,8 @@ export const getTodayAttendanceSummary = query({
       .take(DEFAULT_LIST_CAP);
 
     // Filter by organization if admin (not superadmin)
-    const isSuperadmin = admin.email?.toLowerCase() === SUPERADMIN_EMAIL;
-    const orgToFilter = isSuperadmin ? null : admin.organizationId;
+    const callerIsSuperadmin = isSuperadmin(admin);
+    const orgToFilter = callerIsSuperadmin ? null : admin.organizationId;
 
     // Scope user list by org when possible; else capped full-table read.
     const totalEmployees = orgToFilter
@@ -491,17 +476,12 @@ export const getAllEmployeesAttendanceOverview = query({
   },
   handler: async (ctx, args) => {
     const admin = await ctx.db.get(args.adminId);
-    if (
-      !admin ||
-      (admin.role !== 'admin' &&
-        admin.role !== 'supervisor' &&
-        admin.email?.toLowerCase() !== SUPERADMIN_EMAIL)
-    ) {
+    if (!admin || (admin.role !== 'admin' && admin.role !== 'supervisor' && !isSuperadmin(admin))) {
       throw new Error('Only admins/supervisors can view attendance');
     }
 
-    const isSuperadmin = admin.email?.toLowerCase() === SUPERADMIN_EMAIL;
-    const orgToFilter = isSuperadmin ? null : admin.organizationId;
+    const callerIsSuperadmin = isSuperadmin(admin);
+    const orgToFilter = callerIsSuperadmin ? null : admin.organizationId;
 
     const users = orgToFilter
       ? await ctx.db

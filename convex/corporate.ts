@@ -11,7 +11,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { SUPERADMIN_EMAIL } from './lib/auth';
+import { isSuperadmin } from './lib/auth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,16 +34,16 @@ export const approveRequest = mutation({
     if (!manager) throw new Error('Manager not found');
 
     // Verify manager has approval rights
-    const isSuperadmin = manager.email?.toLowerCase() === SUPERADMIN_EMAIL;
+    const managerIsSuperadmin = isSuperadmin(manager);
     const isAdmin = manager.role === 'admin';
     const isSupervisor = manager.role === 'supervisor';
 
     // Check if manager is in same organization (unless superadmin)
-    if (!isSuperadmin && manager.organizationId !== request.organizationId) {
+    if (!managerIsSuperadmin && manager.organizationId !== request.organizationId) {
       throw new Error('Access denied: cannot approve requests from other organizations');
     }
 
-    if (!isSuperadmin && !isAdmin && !isSupervisor) {
+    if (!managerIsSuperadmin && !isAdmin && !isSupervisor) {
       throw new Error('Only managers, supervisors, or admins can approve requests');
     }
 
@@ -123,11 +123,11 @@ export const rejectRequest = mutation({
     const manager = await ctx.db.get(managerId);
     if (!manager) throw new Error('Manager not found');
 
-    const isSuperadmin = manager.email?.toLowerCase() === SUPERADMIN_EMAIL;
+    const managerIsSuperadmin = isSuperadmin(manager);
     const isAdmin = manager.role === 'admin';
     const isSupervisor = manager.role === 'supervisor';
 
-    if (!isSuperadmin && !isAdmin && !isSupervisor) {
+    if (!managerIsSuperadmin && !isAdmin && !isSupervisor) {
       throw new Error('Only managers, supervisors, or admins can reject requests');
     }
 
@@ -167,11 +167,11 @@ export const getPendingApprovals = query({
     const manager = await ctx.db.get(managerId);
     if (!manager) throw new Error('Manager not found');
 
-    const isSuperadmin = manager.email?.toLowerCase() === SUPERADMIN_EMAIL;
+    const managerIsSuperadmin = isSuperadmin(manager);
     const isAdmin = manager.role === 'admin';
     const isSupervisor = manager.role === 'supervisor';
 
-    if (!isSuperadmin && !isAdmin && !isSupervisor) {
+    if (!managerIsSuperadmin && !isAdmin && !isSupervisor) {
       return []; // Only managers can see pending approvals
     }
 

@@ -1,4 +1,4 @@
-export { enrichLeavesWithUserData, SUPERADMIN_EMAIL } from './helpers';
+export { enrichLeavesWithUserData } from './helpers';
 export {
   getAllLeaves,
   getLeavesForOrganization,

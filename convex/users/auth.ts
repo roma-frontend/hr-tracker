@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
-import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { isSuperadmin, SUPERADMIN_EMAIL } from '../lib/auth';
 import { SMALL_LIST_CAP } from '../lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -276,10 +276,7 @@ export const unblockFaceId = mutation({
     }
 
     // Verify same organization (unless superadmin)
-    if (
-      admin.organizationId !== user.organizationId &&
-      admin.email.toLowerCase() !== SUPERADMIN_EMAIL
-    ) {
+    if (admin.organizationId !== user.organizationId && !isSuperadmin(admin)) {
       throw new Error('Access denied: cannot unblock users from another organization');
     }
 

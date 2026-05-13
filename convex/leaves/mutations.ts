@@ -2,8 +2,7 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { MutationCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
-import { SUPERADMIN_EMAIL } from './helpers';
-import { isSuperadminEmail } from '../lib/auth';
+import { isSuperadmin, isSuperadminEmail } from '../lib/auth';
 import { withAuth } from '../lib/withAuth';
 import { MAX_PAGE_SIZE } from '../pagination';
 
@@ -511,7 +510,7 @@ export const forceDeleteLeave = mutation({
     if (!requester) throw new Error('Requester not found');
 
     // Only superadmin can force delete
-    if (requester.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+    if (!isSuperadmin(requester)) {
       throw new Error('Only superadmin can force delete leaves');
     }
 
@@ -574,7 +573,7 @@ export const markAllLeavesAsRead = mutation({
 
     // Superadmin can mark all as read
     let unreadLeaves;
-    if (requester.email.toLowerCase() === SUPERADMIN_EMAIL) {
+    if (isSuperadmin(requester)) {
       const allLeaves = await ctx.db.query('leaveRequests').order('desc').take(MAX_PAGE_SIZE);
       unreadLeaves = allLeaves.filter((l) => l.isRead === false || l.isRead === undefined);
     } else {

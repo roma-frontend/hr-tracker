@@ -8,7 +8,7 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
 import { SMALL_LIST_CAP } from '../lib/limits';
-import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { isSuperadmin } from '../lib/auth';
 import { requireUser } from '../lib/rbac';
 
 /** Request a driver for a trip */
@@ -309,10 +309,10 @@ export const updateDriverRequest = mutation({
 
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error('User not found');
-    const isSuperadmin = user.email?.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(user);
     const isAdmin = user.role === 'admin';
 
-    if (request.requesterId !== args.userId && !isSuperadmin && !isAdmin) {
+    if (request.requesterId !== args.userId && !userIsSuperadmin && !isAdmin) {
       throw new Error('Only the requester can edit this booking');
     }
 
@@ -447,10 +447,10 @@ export const deleteDriverRequest = mutation({
 
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error('User not found');
-    const isSuperadmin = user.email?.toLowerCase() === SUPERADMIN_EMAIL;
+    const userIsSuperadmin = isSuperadmin(user);
     const isAdmin = user.role === 'admin';
 
-    if (request.requesterId !== args.userId && !isSuperadmin && !isAdmin) {
+    if (request.requesterId !== args.userId && !userIsSuperadmin && !isAdmin) {
       throw new Error('Only the requester can delete this booking');
     }
 
