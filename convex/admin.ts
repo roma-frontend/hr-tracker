@@ -1,7 +1,9 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { requireRole } from './lib/rbac';
+import { withAuth } from './lib/withAuth';
 import { MAX_PAGE_SIZE } from './pagination';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
@@ -973,4 +975,67 @@ export const getSuperadminDashboard = query({
       totalStats,
     };
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED MUTATIONS — use ctx.auth.getUserIdentity() (no client userId trust)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const secureAssignUserAsOrgAdmin = mutation({
+  args: { userEmail: v.string(), organizationId: v.id('organizations') },
+  handler: withAuth<
+    MutationCtx,
+    { userEmail: string; organizationId: Id<'organizations'> },
+    Id<'users'>
+  >({ minimumRole: 'superadmin' }, async (ctx, { userEmail, organizationId }) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', userEmail.toLowerCase()))
+      .unique();
+    if (!user) throw new Error(`User with email ${userEmail} not found`);
+
+    const org = await ctx.db.get(organizationId);
+    if (!org) throw new Error('Organization not found');
+
+    await ctx.db.patch(user._id, { organizationId, role: 'admin', updatedAt: Date.now() });
+    return user._id;
+  }),
+});
+
+export const secureEnableMaintenanceMode = mutation({
+  args: { organizationId: v.id('organizations'), reason: v.optional(v.string()) },
+  handler: withAuth<MutationCtx, { organizationId: Id<'organizations'>; reason?: string }, void>(
+    { minimumRole: 'superadmin' },
+    async (ctx, { organizationId, reason }, caller) => {
+      const now = Date.now();
+      await ctx.db.insert('maintenanceMode', {
+        organizationId,
+        isActive: true,
+        title: 'Scheduled Maintenance',
+        message: reason ?? 'System maintenance in progress',
+        startTime: now,
+        enabledBy: caller._id,
+        createdAt: now,
+        updatedAt: now,
+      });
+    },
+  ),
+});
+
+export const secureDisableMaintenanceMode = mutation({
+  args: { organizationId: v.id('organizations') },
+  handler: withAuth<MutationCtx, { organizationId: Id<'organizations'> }, void>(
+    { minimumRole: 'superadmin' },
+    async (ctx, { organizationId }) => {
+      const active = await ctx.db
+        .query('maintenanceMode')
+        .filter((q) =>
+          q.and(q.eq(q.field('organizationId'), organizationId), q.eq(q.field('isActive'), true)),
+        )
+        .first();
+      if (active) {
+        await ctx.db.patch(active._id, { isActive: false, updatedAt: Date.now() });
+      }
+    },
+  ),
 });

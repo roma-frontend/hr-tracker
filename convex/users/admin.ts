@@ -1,9 +1,11 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
+import type { MutationCtx } from '../_generated/server';
 import type { Id, Doc } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
 import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { withAuth } from '../lib/withAuth';
 
 // ── Security helpers ──────────────────────────────────────────────────────────
 /** Verify caller has admin/superadmin role and return their organizationId */
@@ -287,4 +289,78 @@ export const migrateFaceToAvatar = mutation({
     }
     return { migrated: count };
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED MUTATIONS — verified identity via ctx.auth
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const secureSuspendUser = mutation({
+  args: { userId: v.id('users'), reason: v.string(), duration: v.optional(v.number()) },
+  handler: withAuth<
+    MutationCtx,
+    { userId: Id<'users'>; reason: string; duration?: number },
+    { userId: Id<'users'>; suspendedUntil: number }
+  >({ minimumRole: 'admin' }, async (ctx, { userId, reason, duration = 24 }, caller) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error('User not found');
+
+    if (caller.role !== 'superadmin' && caller.organizationId !== user.organizationId) {
+      throw new Error('Access denied: cross-organization operation');
+    }
+
+    const suspendedUntil = Date.now() + duration * 60 * 60 * 1000;
+    await ctx.db.patch(userId, {
+      isSuspended: true,
+      suspendedUntil,
+      suspendedReason: reason,
+      suspendedBy: caller._id,
+      suspendedAt: Date.now(),
+    });
+
+    await ctx.db.insert('auditLogs', {
+      organizationId: user.organizationId,
+      userId: caller._id,
+      action: 'user_suspended',
+      target: user.email,
+      details: `Suspended for ${duration}h. Reason: ${reason}`,
+      createdAt: Date.now(),
+    });
+
+    return { userId, suspendedUntil };
+  }),
+});
+
+export const secureUnsuspendUser = mutation({
+  args: { userId: v.id('users') },
+  handler: withAuth<MutationCtx, { userId: Id<'users'> }, Id<'users'>>(
+    { minimumRole: 'admin' },
+    async (ctx, { userId }, caller) => {
+      const user = await ctx.db.get(userId);
+      if (!user) throw new Error('User not found');
+
+      if (caller.role !== 'superadmin' && caller.organizationId !== user.organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+
+      await ctx.db.patch(userId, {
+        isSuspended: false,
+        suspendedUntil: undefined,
+        suspendedReason: undefined,
+        suspendedBy: undefined,
+        suspendedAt: undefined,
+      });
+
+      await ctx.db.insert('auditLogs', {
+        organizationId: user.organizationId,
+        userId: caller._id,
+        action: 'user_unsuspended',
+        target: user.email,
+        details: `Unsuspended by ${caller.name}`,
+        createdAt: Date.now(),
+      });
+
+      return userId;
+    },
+  ),
 });

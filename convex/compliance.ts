@@ -1,8 +1,10 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
+import type { MutationCtx } from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
 import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 /**
@@ -756,4 +758,66 @@ export const getComplianceStats = query({
       policyStats,
     };
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED MUTATIONS — verified identity via ctx.auth
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const secureUpdateGdprStatus = mutation({
+  args: {
+    requestId: v.id('gdprRequests'),
+    status: v.union(v.literal('in_progress'), v.literal('completed'), v.literal('rejected')),
+    notes: v.optional(v.string()),
+  },
+  handler: withAuth<
+    MutationCtx,
+    {
+      requestId: Id<'gdprRequests'>;
+      status: 'in_progress' | 'completed' | 'rejected';
+      notes?: string;
+    },
+    void
+  >({ minimumRole: 'admin' }, async (ctx, { requestId, status, notes }, caller) => {
+    const request = (await ctx.db.get(requestId)) as any;
+    if (!request) throw new Error('Request not found');
+
+    if (caller.role !== 'superadmin' && caller.organizationId !== request.organizationId) {
+      throw new Error('Access denied: cross-organization operation');
+    }
+
+    await ctx.db.patch(requestId, {
+      status,
+      processedBy: caller._id,
+      processedAt: Date.now(),
+      ...(notes ? { rejectionReason: notes } : {}),
+      updatedAt: Date.now(),
+    } as any);
+  }),
+});
+
+export const secureDeletePolicy = mutation({
+  args: { policyId: v.id('compliancePolicies') },
+  handler: withAuth<MutationCtx, { policyId: Id<'compliancePolicies'> }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { policyId }, caller) => {
+      const policy = (await ctx.db.get(policyId)) as any;
+      if (!policy) throw new Error('Policy not found');
+
+      if (caller.role !== 'superadmin' && caller.organizationId !== policy.organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+
+      await ctx.db.delete(policyId);
+
+      await ctx.db.insert('auditLogs', {
+        organizationId: policy.organizationId,
+        userId: caller._id,
+        action: 'policy_deleted',
+        target: policyId,
+        details: JSON.stringify({ title: policy.title }),
+        createdAt: Date.now(),
+      });
+    },
+  ),
 });

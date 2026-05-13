@@ -1,8 +1,10 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
+import type { MutationCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 /**
@@ -639,4 +641,64 @@ export const getSuspendedUsers = query({
     // Sort by most recently suspended
     return suspendedUsers.sort((a, b) => (b.suspendedAt || 0) - (a.suspendedAt || 0));
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED MUTATIONS — verified identity via ctx.auth
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const secureUnlockAccount = mutation({
+  args: { userId: v.id('users') },
+  handler: withAuth<MutationCtx, { userId: Id<'users'> }, { success: boolean }>(
+    { minimumRole: 'admin' },
+    async (ctx, { userId }, caller) => {
+      const user = await ctx.db.get(userId);
+      if (!user) throw new Error('User not found');
+
+      if (caller.role !== 'superadmin' && caller.organizationId !== user.organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+
+      await ctx.db.patch(userId, {
+        faceIdBlocked: false,
+        faceIdBlockedAt: undefined,
+        faceIdFailedAttempts: 0,
+      });
+
+      await ctx.db.insert('auditLogs', {
+        organizationId: user.organizationId,
+        userId: caller._id,
+        action: 'account_unlocked',
+        target: userId,
+        details: `Account of ${user.name} unlocked by ${caller.name}`,
+        createdAt: Date.now(),
+      });
+
+      return { success: true };
+    },
+  ),
+});
+
+export const secureToggleSetting = mutation({
+  args: { settingKey: v.string(), enabled: v.boolean() },
+  handler: withAuth<MutationCtx, { settingKey: string; enabled: boolean }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { settingKey, enabled }, caller) => {
+      const existing = await ctx.db
+        .query('securitySettings')
+        .withIndex('by_key', (q) => q.eq('key', settingKey))
+        .first();
+
+      if (existing) {
+        await ctx.db.patch(existing._id, { enabled, updatedBy: caller._id, updatedAt: Date.now() });
+      } else {
+        await ctx.db.insert('securitySettings', {
+          key: settingKey,
+          enabled,
+          updatedBy: caller._id,
+          updatedAt: Date.now(),
+        });
+      }
+    },
+  ),
 });

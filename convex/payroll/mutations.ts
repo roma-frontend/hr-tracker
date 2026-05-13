@@ -1,8 +1,10 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
+import type { MutationCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
 import { calculatePayroll } from '../lib/payrollCalculator';
 import { requireOrgAdmin } from '../lib/rbac';
+import { withAuth } from '../lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from '../lib/limits';
 
 type RunTotals = {
@@ -741,4 +743,65 @@ export const saveSalarySettings = mutation({
       updatedAt: now,
     });
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED MUTATIONS — verified identity via ctx.auth
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const secureApprovePayrollRun = mutation({
+  args: { runId: v.id('payrollRuns') },
+  handler: withAuth<MutationCtx, { runId: Id<'payrollRuns'> }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { runId }, caller) => {
+      const run = (await ctx.db.get(runId)) as any;
+      if (!run) throw new Error('Payroll run not found');
+      if (run.status !== 'calculated') throw new Error('Run must be calculated first');
+
+      if (caller.role !== 'superadmin' && caller.organizationId !== run.organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+
+      await ctx.db.patch(runId, {
+        status: 'approved',
+        approvedBy: caller._id,
+        approvedAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      await ctx.db.insert('auditLogs', {
+        organizationId: run.organizationId,
+        userId: caller._id,
+        action: 'payroll_approved',
+        target: runId,
+        details: JSON.stringify({ period: run.period, totalNet: run.totalNet }),
+        createdAt: Date.now(),
+      });
+    },
+  ),
+});
+
+export const secureDeletePayrollRecord = mutation({
+  args: { recordId: v.id('payrollRecords') },
+  handler: withAuth<MutationCtx, { recordId: Id<'payrollRecords'> }, void>(
+    { minimumRole: 'admin' },
+    async (ctx, { recordId }, caller) => {
+      const record = (await ctx.db.get(recordId)) as any;
+      if (!record) throw new Error('Record not found');
+
+      if (caller.role !== 'superadmin' && caller.organizationId !== record.organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+
+      await ctx.db.delete(recordId);
+
+      await ctx.db.insert('auditLogs', {
+        organizationId: record.organizationId,
+        userId: caller._id,
+        action: 'payroll_record_deleted',
+        target: recordId,
+        createdAt: Date.now(),
+      });
+    },
+  ),
 });

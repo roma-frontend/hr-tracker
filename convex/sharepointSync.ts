@@ -1,5 +1,8 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
+import type { Id } from './_generated/dataModel';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -190,4 +193,81 @@ export const getLastSync = query({
 
     return logs[0] || null;
   },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED: Upsert SharePoint User — verified identity
+// ═══════════════════════════════════════════════════════════════════════════════
+export const secureUpsertSharePointUser = mutation({
+  args: {
+    organizationId: v.id('organizations'),
+    email: v.string(),
+    name: v.string(),
+    department: v.optional(v.string()),
+    position: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
+    employeeType: v.union(v.literal('staff'), v.literal('contractor')),
+  },
+  handler: withAuth<
+    MutationCtx,
+    {
+      organizationId: Id<'organizations'>;
+      email: string;
+      name: string;
+      department?: string;
+      position?: string;
+      phone?: string;
+      location?: string;
+      employeeType: 'staff' | 'contractor';
+    },
+    { action: 'created' | 'updated'; userId: Id<'users'> }
+  >({ minimumRole: 'admin' }, async (ctx, args, caller) => {
+    await verifyRestrictedOrg(ctx, args.organizationId as any);
+
+    if (caller.role !== 'superadmin' && caller.organizationId !== args.organizationId) {
+      throw new Error('Access denied: cross-organization operation');
+    }
+
+    const emailLower = args.email.toLowerCase().trim();
+    const existing = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', emailLower))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        name: args.name,
+        department: args.department,
+        position: args.position,
+        phone: args.phone,
+        location: args.location,
+        employeeType: args.employeeType,
+        isActive: true,
+      });
+      return { action: 'updated' as const, userId: existing._id };
+    }
+
+    const userId = await ctx.db.insert('users', {
+      organizationId: args.organizationId,
+      name: args.name,
+      email: emailLower,
+      passwordHash: `sharepoint_sync_${Date.now()}`,
+      role: 'employee',
+      employeeType: args.employeeType,
+      department: args.department,
+      position: args.position,
+      phone: args.phone,
+      location: args.location,
+      isActive: true,
+      isApproved: true,
+      travelAllowance: args.employeeType === 'staff' ? 20000 : 12000,
+      paidLeaveBalance: 20,
+      sickLeaveBalance: 10,
+      familyLeaveBalance: 5,
+      createdAt: Date.now(),
+    });
+
+    return { action: 'created' as const, userId };
+  }),
 });

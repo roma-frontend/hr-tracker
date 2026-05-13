@@ -12,9 +12,11 @@
  */
 
 import { mutation, query, internalMutation } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
+import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 const BACKUP_RETENTION_HOURS = 48;
@@ -604,3 +606,33 @@ async function restoreEmployeeData(ctx: any, userId: Id<'users'>, snapshot: any)
     }
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECURED: Create org backups — verified identity
+// ═══════════════════════════════════════════════════════════════════════════════
+export const secureCreateOrgBackups = mutation({
+  args: { organizationId: v.id('organizations') },
+  handler: withAuth<MutationCtx, { organizationId: Id<'organizations'> }, { success: boolean }>(
+    { minimumRole: 'admin' },
+    async (ctx, { organizationId }, caller) => {
+      if (caller.role !== 'superadmin' && caller.organizationId !== organizationId) {
+        throw new Error('Access denied: cross-organization operation');
+      }
+      const org = await ctx.db.get(organizationId);
+      if (!org) return { success: false };
+
+      const employees = await ctx.db
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+        .take(DEFAULT_LIST_CAP);
+
+      for (const employee of employees) {
+        await ctx.scheduler.runAfter(0, internal.backups.createEmployeeBackupInternal, {
+          organizationId,
+          userId: employee._id,
+        });
+      }
+      return { success: true };
+    },
+  ),
+});
