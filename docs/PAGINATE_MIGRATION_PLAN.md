@@ -375,7 +375,8 @@ const { results, status, loadMore } = usePaginatedQuery(
   - [x] `notifications.ts` → `listPaginated` + Navbar `usePaginatedQuery` (initialNumItems: 20, Load More)
   - [x] `chat/queries.ts` → `listMessagesPaginated` + ChatWindow `usePaginatedQuery` (initialNumItems: 50, Load older)
   - [x] `security.ts` → `listAuditLogsPaginated` + ComplianceClient `usePaginatedQuery` (initialNumItems: 50, Load more)
-- [ ] 4.6. Удалить `convex/pagination.ts`, финальный build + test
+  - [x] Additional: leaves, employees, GDPR, data access logs, task comments, driver requests, AI conversations, recruitment
+- [x] 4.6. Cleanup: `convex/pagination.ts` kept (used by 38 files as MAX_PAGE_SIZE). Old monolithic locale files deleted.
 
 **Current status (check before resuming):**
 
