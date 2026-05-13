@@ -249,7 +249,7 @@ export const toggleReaction = mutation({
     if (!msg) throw new Error('Message not found');
 
     const emojiKey = emojiToKey(args.emoji);
-    const reactions: Record<string, string[]> = (msg.reactions as any) ?? {};
+    const reactions: Record<string, Id<'users'>[]> = msg.reactions ?? {};
     const users = reactions[emojiKey] ?? [];
     const idx = users.indexOf(args.userId);
 

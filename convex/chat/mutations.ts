@@ -803,7 +803,7 @@ export const toggleReaction = mutation({
         }
 
         if (safeKey && Array.isArray(value) && value.length > 0) {
-          reactions[safeKey] = value as Id<'users'>[];
+          reactions[safeKey] = value;
         }
       }
     }

@@ -74,10 +74,8 @@ export const chat = {
     replyToId: v.optional(v.id('chatMessages')),
     replyToContent: v.optional(v.string()),
     replyToSenderName: v.optional(v.string()),
-    // TODO(convex-schema): reactions is currently Record<emoji, userId[]>; migrate
-    // to v.array(v.object({emoji, userId, createdAt})) after writing a data migration
-    // and updating chat/mutations.ts + messenger/messages.ts.
-    reactions: v.optional(v.any()),
+    // reactions: Record<emojiKey, userId[]> where emojiKey is ASCII-safe codepoint string
+    reactions: v.optional(v.record(v.string(), v.array(v.id('users')))),
     mentionedUserIds: v.optional(v.array(v.id('users'))),
     readBy: v.optional(
       v.array(
