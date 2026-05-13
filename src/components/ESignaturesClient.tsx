@@ -194,7 +194,7 @@ function CreateDocumentWizard({
   const templates = useQuery(api.signatures.listTemplates, { organizationId });
   const employees = useQuery(
     api.users.getUsersByOrganizationId as never,
-    organizationId ? ({ organizationId, requesterId: userId } as never) : 'skip',
+    organizationId ? ({ organizationId } as never) : 'skip',
   );
   const createDocument = useMutation(api.signatures.createDocument);
 

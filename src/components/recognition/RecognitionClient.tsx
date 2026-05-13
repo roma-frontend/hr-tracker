@@ -118,7 +118,7 @@ function SendKudosModal({ open, onClose, organizationId, senderId }: SendKudosMo
   // Load org users for recipient selection
   const orgUsers = useQuery(
     api.users.getUsersByOrganizationId,
-    organizationId && senderId ? { organizationId, requesterId: senderId } : 'skip',
+    organizationId && senderId ? { organizationId } : 'skip',
   );
 
   const availableRecipients = useMemo(() => {

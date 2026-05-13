@@ -65,7 +65,7 @@ export default function ManageAdminsPage() {
 
   const orgMembers = useQuery(
     api.organizations.getOrgMembers,
-    user?.id && orgId ? { superadminUserId: user.id as any, organizationId: orgId as any } : 'skip',
+    user?.id && orgId ? { organizationId: orgId as any } : 'skip',
   );
 
   const assignAdminMutation = useMutation(api.organizations.assignOrgAdmin);
@@ -94,7 +94,6 @@ export default function ManageAdminsPage() {
     setIsLoading(true);
     try {
       await assignAdminMutation({
-        superadminUserId: user?.id as any,
         userId: selectedMemberId as any,
         organizationId: orgId as any,
       });
@@ -117,7 +116,6 @@ export default function ManageAdminsPage() {
     setIsLoading(true);
     try {
       await removeAdminMutation({
-        superadminUserId: user?.id as any,
         userId: selectedMemberId as any,
       });
 

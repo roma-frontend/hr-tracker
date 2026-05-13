@@ -69,7 +69,6 @@ export default function SuperadminCreateOrgPage() {
       toast.info(`Creating ${formData.name} organization...`);
 
       await createOrg({
-        superadminUserId: user.id as never,
         name: formData.name,
         slug: formData.slug,
         plan: formData.plan,

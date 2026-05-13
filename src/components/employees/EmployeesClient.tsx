@@ -107,7 +107,6 @@ export function EmployeesClient() {
   const paginatedArgs =
     mounted && user?.id
       ? {
-          requesterId: user.id as Id<'users'>,
           ...(selectedOrgId ? { organizationId: selectedOrgId as Id<'organizations'> } : {}),
         }
       : 'skip';

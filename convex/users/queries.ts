@@ -4,7 +4,7 @@ import { paginationOptsValidator } from 'convex/server';
 import type { Id, Doc } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
-import { isSuperadmin } from '../lib/auth';
+import { isSuperadmin, requireAuthUser } from '../lib/auth';
 
 // ── Helper: Get user ID from email or userId ────────────────────────────────
 async function getUserIdIdentityOrEmail(
@@ -42,17 +42,15 @@ async function getUserIdIdentityOrEmail(
 // ─────────────────────────────────────────────────────────────────────────────
 export const getAllUsers = query({
   args: {
-    requesterId: v.id('users'),
     cursor: v.optional(v.id('users')),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { requesterId, cursor, limit }) => {
+  handler: async (ctx, { cursor, limit }) => {
     const DEFAULT_LIMIT = 50;
     const MAX_LIMIT = 100;
     const effectiveLimit = Math.min(limit || DEFAULT_LIMIT, MAX_LIMIT);
 
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Requester not found');
+    const requester = await requireAuthUser(ctx);
 
     // Superadmin sees all users across all orgs (with org info)
     if (isSuperadmin(requester)) {
@@ -87,13 +85,11 @@ export const getAllUsers = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const listUsersPaginated = query({
   args: {
-    requesterId: v.id('users'),
     organizationId: v.optional(v.id('organizations')),
     paginationOpts: paginationOptsValidator,
   },
-  handler: async (ctx, { requesterId, organizationId, paginationOpts }) => {
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Requester not found');
+  handler: async (ctx, { organizationId, paginationOpts }) => {
+    const requester = await requireAuthUser(ctx);
 
     const isSuperadminUser = isSuperadmin(requester);
 
@@ -121,18 +117,16 @@ export const listUsersPaginated = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const getUsersByOrganizationId = query({
   args: {
-    requesterId: v.id('users'),
     organizationId: v.id('organizations'),
     cursor: v.optional(v.id('users')),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { requesterId, organizationId, cursor, limit }) => {
+  handler: async (ctx, { organizationId, cursor, limit }) => {
     const DEFAULT_LIMIT = 50;
     const MAX_LIMIT = 100;
     const effectiveLimit = Math.min(limit || DEFAULT_LIMIT, MAX_LIMIT);
 
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Requester not found');
+    const requester = await requireAuthUser(ctx);
 
     // Superadmin can query any org; regular users can only query their own
     if (!isSuperadmin(requester) && requester.organizationId !== organizationId) {
@@ -207,8 +201,8 @@ export const getCurrentUser = query({
 // GET USER BY EMAIL — only within same org
 // ─────────────────────────────────────────────────────────────────────────────
 export const getUserByEmail = query({
-  args: { email: v.string(), requesterId: v.optional(v.id('users')) },
-  handler: async (ctx, { email, requesterId }) => {
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
     const user = await ctx.db
       .query('users')
       .withIndex('by_email', (q) => q.eq('email', email.toLowerCase()))
@@ -216,9 +210,13 @@ export const getUserByEmail = query({
 
     if (!user) return null;
 
-    // If requester provided, verify same org
-    if (requesterId) {
-      const requester = await ctx.db.get(requesterId);
+    // If caller is authenticated, verify same org
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity) {
+      const requester = await ctx.db
+        .query('users')
+        .withIndex('by_email', (q) => q.eq('email', identity.email!.toLowerCase()))
+        .unique();
       if (
         requester &&
         requester.organizationId !== user.organizationId &&
@@ -236,13 +234,18 @@ export const getUserByEmail = query({
 // GET USER BY ID — only within same org
 // ─────────────────────────────────────────────────────────────────────────────
 export const getUserById = query({
-  args: { userId: v.id('users'), requesterId: v.optional(v.id('users')) },
-  handler: async (ctx, { userId, requesterId }) => {
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
     const user = await ctx.db.get(userId);
     if (!user) return null;
 
-    if (requesterId) {
-      const requester = await ctx.db.get(requesterId);
+    // If caller is authenticated, verify same org
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity) {
+      const requester = await ctx.db
+        .query('users')
+        .withIndex('by_email', (q) => q.eq('email', identity.email!.toLowerCase()))
+        .unique();
       if (
         requester &&
         requester.organizationId !== user.organizationId &&
@@ -261,12 +264,10 @@ export const getUserById = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const getSupervisors = query({
   args: {
-    requesterId: v.id('users'),
     organizationId: v.optional(v.id('organizations')),
   },
-  handler: async (ctx, { requesterId, organizationId }) => {
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Not found');
+  handler: async (ctx, { organizationId }) => {
+    const requester = await requireAuthUser(ctx);
 
     // Determine target org: explicit param > requester's own org
     const targetOrgId = organizationId ?? requester.organizationId;
@@ -335,10 +336,10 @@ export const getUsersByRole = query({
 // GET PENDING APPROVAL USERS — scoped to org
 // ─────────────────────────────────────────────────────────────────────────────
 export const getPendingApprovalUsers = query({
-  args: { adminId: v.id('users') },
-  handler: async (ctx, { adminId }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && !isSuperadmin(admin))) {
+  args: {},
+  handler: async (ctx) => {
+    const admin = await requireAuthUser(ctx);
+    if (admin.role !== 'admin' && !isSuperadmin(admin)) {
       throw new Error('Only org admins can view pending users');
     }
 
@@ -363,10 +364,10 @@ export const getPendingApprovalUsers = query({
 // GET AUDIT LOGS — scoped to org
 // ─────────────────────────────────────────────────────────────────────────────
 export const getAuditLogs = query({
-  args: { adminId: v.id('users') },
-  handler: async (ctx, { adminId }) => {
-    const admin = await ctx.db.get(adminId);
-    if (!admin || (admin.role !== 'admin' && !isSuperadmin(admin))) {
+  args: {},
+  handler: async (ctx) => {
+    const admin = await requireAuthUser(ctx);
+    if (admin.role !== 'admin' && !isSuperadmin(admin)) {
       throw new Error('Only org admins can view audit logs');
     }
 
